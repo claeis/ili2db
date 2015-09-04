@@ -1,0 +1,8 @@
+.svn/
+build/
+dist/
+support/
+.settings/
+.project
+.classpath
+*~

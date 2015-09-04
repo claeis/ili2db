@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project basedir="." default="jar" name="ili2pg">
+
+  <!-- set global properties for this build -->
+  <property name="src" value="${basedir}/src"/>
+  <property name="build" value="${basedir}/build"/>
+  <property name="dist" value="${basedir}/dist"/>
+
+  <target name="init">
+    <!-- Create the time stamp -->
+    <tstamp/>
+    <property name="projectjar" value="${build}/jar/${ant.project.name}.jar"/>
+    <!-- Create the build directory structure used by compile -->
+    <mkdir dir="${build}"/>
+    <mkdir dir="${build}/jar"/>
+    <mkdir dir="${dist}"/>
+  </target>
+
+  <target depends="init" name="compile">
+    <!-- Compile the java code from ${src} into ${build}/classes -->
+    <mkdir dir="${build}/classes"/>
+    <javac destdir="${build}/classes" includes="**/*.java" excludes="**/test/*.java"  source="1.6" target="1.6">
+      <classpath>
+        <pathelement location="lib/ehisqlgen.jar"/>
+        <pathelement location="lib/ili2c.jar"/>
+        <pathelement location="lib/jts-1.13.jar"/>
+        <pathelement location="lib/jdbm-2.4.jar"/>
+	<pathelement location="lib/postgresql-9.1-901.jdbc4.jar"/>
+      </classpath>
+    	<src path="${src}" />
+    	<src path="ili2pg/src"/>
+    </javac>
+  </target>
+
+
+  <target depends="init" name="javadocs">
+    <mkdir dir="${build}/javadoc/api"/>
+    <javadoc Public="true" Windowtitle="${ant.project.name}" destdir="${build}/javadoc/api">
+    	<sourcepath path="${src}"/>
+    </javadoc>
+  </target>
+
+
+  <target depends="init,compile" name="jar">
+    <propertyfile file="ili2pg/src/ch/ehi/ili2pg/Version.properties">
+	<!-- <entry  key="versionMicro" type="int" value="1" operation="+"/> -->
+	<entry  key="versionDate" type="date" value="now" pattern="yyyyMMdd"/>
+    </propertyfile>
+
+    <delete file="${projectjar}" quiet="true"/>
+
+    <jar jarfile="${projectjar}" manifest="other/manifest-ili2pg">
+	<fileset dir="${build}/classes" includes="**/*.class"/>
+    	<fileset dir="${src}" includes="**/*.properties"/>
+    	<fileset dir="ili2pg/src" includes="**/*.properties"/>
+    	<!-- <fileset dir="resources/de" includes="**/*.properties"/>
+    	<fileset dir="resources/fr" includes="**/*.properties"/>
+	<fileset dir="resources/it" includes="**/*.properties"/> -->
+    	<fileset dir="${src}" includes="**/*.gif"/>
+    	<fileset dir="${src}" includes="**/*.jpg"/>
+    	<fileset dir="${src}" includes="**/*.png"/>
+    	<zipfileset src="lib/ehisqlgen.jar"/>
+    	<zipfileset src="lib/jts-1.13.jar"/>
+    	<zipfileset src="lib/jdbm-2.4.jar"/>
+    </jar>
+  </target>
+  
+  <target depends="init" name="buildnr">
+    <property file="ili2pg/src/ch/ehi/ili2pg/Version.properties" prefix="buildnr."/>
+    <property name="buildnr" value="${buildnr.versionMajor}.${buildnr.versionMinor}.${buildnr.versionMicro}"/>
+    <!-- <property name="buildnr" value="${DSTAMP}"/> -->
+  </target>
+
+  <target depends="init,buildnr" name="bindist">
+    <delete file="${dist}/${ant.project.name}-${buildnr}.zip" quiet="true"/>
+    <zip zipfile="${dist}/${ant.project.name}-${buildnr}.zip">
+    	<zipfileset dir="${build}/jar" prefix="${ant.project.name}-${buildnr}">
+	    	<patternset includes="${ant.project.name}.jar"/>
+    	</zipfileset>
+    	<zipfileset dir="${basedir}/lib" prefix="${ant.project.name}-${buildnr}">
+	    	<patternset includes="ili2c.jar"/>
+	    	<patternset includes="postgresql-9.1-901.jdbc4.jar"/>
+    	</zipfileset>
+    	<zipfileset dir="${basedir}/other" prefix="${ant.project.name}-${buildnr}">
+	    	<patternset includes="ili2pg.bat"/>
+    	</zipfileset>
+    	<zipfileset dir="." prefix="${ant.project.name}-${buildnr}">
+	    	<patternset includes="docs/ili2pg.docx"/>
+	</zipfileset>	    	
+    	<!-- <zipfileset dir="." prefix="${ant.project.name}-${buildnr}">
+	    	<patternset includes="lib/**"/> 
+	    	<patternset includes="docs/LICENSE.*"/>
+	    	<patternset includes="docs/README.txt"/>
+	    	<patternset includes="docs/CHANGELOG.txt"/>
+	    	<patternset includes="docs/ili2ora/ili2ora05.ili"/>
+	    	<patternset includes="docs/ili2ora/MappingConfig.jpeg"/>
+	    	<patternset includes="sample/zpl/**"/>
+    	</zipfileset> -->
+    </zip>
+  </target>
+  <target depends="init,buildnr" name="srcdist">
+    <delete file="${dist}/${ant.project.name}-${buildnr}.src.zip" quiet="true"/>
+    <zip zipfile="${dist}/${ant.project.name}-${buildnr}.src.zip">
+    	<zipfileset dir="." prefix="${ant.project.name}-${buildnr}">
+	    	<patternset includes="build-ili2pg.xml"/>
+	    	<!-- <patternset includes="lib/**"/> -->
+	    	<patternset includes="other/manifest-ili2pg"/>
+	    	<patternset includes="other/ili2pg.bat"/>
+	    	<patternset includes="sample/zpl/**"/>
+	    	<patternset includes="src/**" excludes="**/CVS/*;**/bak~/*"/>
+	    	<patternset includes="ili2pg/src/**" excludes="**/CVS/*;**/bak~/*"/>
+		<patternset includes="resources/de/**/*.properties"/>
+		<patternset includes="resources/fr/**/*.properties"/>
+		<patternset includes="resources/it/**/*.properties"/>
+	    	<patternset includes="lib/ili2c.jar"/>
+		<patternset includes="lib/ehisqlgen.jar"/>
+		<patternset includes="lib/jts-1.13.jar"/>
+		<patternset includes="lib/jdbm-2.4.jar"/>
+		<patternset includes="lib/postgresql-9.1-901.jdbc4.jar"/>
+    	</zipfileset>
+    </zip>
+  </target>
+  <target name="clean">
+    <delete dir="${build}"/>
+  </target>
+
+</project>

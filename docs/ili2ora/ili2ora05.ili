@@ -1,0 +1,42 @@
+INTERLIS 2.2;
+
+MODEL Ili2ora05 (de) =
+
+  TOPIC MappingConfig =
+
+    DOMAIN
+
+      /** Model.Topic.Class (3*255+2)
+       */
+      IliName= TEXT*757;
+
+      SqlName= TEXT*30;
+
+    STRUCTURE Definition(ABSTRACT) =
+      iliName : MANDATORY IliName;
+      sqlName : SqlName;
+    END Definition;
+
+    STRUCTURE AttributeDef
+    EXTENDS Definition =
+    END AttributeDef;
+
+    CLASS ModelDef =
+      iliName : MANDATORY IliName;
+      sqlName : SqlName;
+      definition : BAG {0..*} OF Definition;
+    END ModelDef;
+
+    STRUCTURE TopicDef
+    EXTENDS Definition =
+      definition : BAG {0..*} OF Definition;
+    END TopicDef;
+
+    STRUCTURE ClassDef
+    EXTENDS Definition =
+      attribute : BAG {0..*} OF AttributeDef;
+    END ClassDef;
+
+  END MappingConfig;
+
+END Ili2ora05.

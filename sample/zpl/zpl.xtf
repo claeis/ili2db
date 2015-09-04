@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TRANSFER xmlns="http://www.interlis.ch/INTERLIS2.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<HEADERSECTION VERSION="2.2" SENDER="ceis">
+		<ALIAS/>
+	</HEADERSECTION>
+	<DATASECTION>
+	<Fallbeispiel.Einzelobjekte BID="x1">
+		<Fallbeispiel.Einzelobjekte.Gebaeude TID="x2">
+			<Geometrie>
+				<SURFACE>
+				<BOUNDARY>
+				<POLYLINE>
+					<COORD><C1>624731.600000</C1><C2>255787.270000</C2></COORD> 
+					<COORD><C1>624729.730000</C1><C2>255789.630000</C2></COORD>
+					<COORD><C1>624730.980000</C1><C2>255790.620000</C2></COORD>
+					<COORD><C1>624730.280000</C1><C2>255791.500000</C2></COORD>
+					<COORD><C1>624727.070000</C1><C2>255788.940000</C2></COORD>
+					<COORD><C1>624729.640000</C1><C2>255785.720000</C2></COORD>
+					<COORD><C1>624731.600000</C1><C2>255787.270000</C2></COORD>
+				</POLYLINE>
+				</BOUNDARY>
+				</SURFACE>
+			</Geometrie>
+			<RegNrBaubewilligung>10000</RegNrBaubewilligung>
+			<DatumBaubewilligung>19970422</DatumBaubewilligung>
+			<Statusinfo>gueltig</Statusinfo>
+			<istUnterirdisch>false</istUnterirdisch>
+		</Fallbeispiel.Einzelobjekte.Gebaeude>
+		<Fallbeispiel.Einzelobjekte.Polizeinummer TID="x3">
+			<PolNummer>1001</PolNummer>
+			<NumPos>
+				<Fallbeispiel.Einzelobjekte.TextPos>
+					<Pos><COORD><C1>624730.110000</C1><C2>255787.150000</C2></COORD></Pos>
+					<Ori>100.0</Ori>
+				</Fallbeispiel.Einzelobjekte.TextPos>
+				<Fallbeispiel.Einzelobjekte.TextPos>
+					<Pos><COORD><C1>624730.120000</C1><C2>255787.160000</C2></COORD></Pos>
+					<Ori>110.0</Ori>
+				</Fallbeispiel.Einzelobjekte.TextPos>
+			</NumPos>
+			<Objekt REF="x2"/>
+		</Fallbeispiel.Einzelobjekte.Polizeinummer>
+	</Fallbeispiel.Einzelobjekte>
+	</DATASECTION>
+</TRANSFER>

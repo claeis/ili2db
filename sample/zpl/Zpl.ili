@@ -1,0 +1,80 @@
+INTERLIS 2.2;
+
+
+MODEL Fallbeispiel =
+
+  DOMAIN
+    LKoord = COORD 623000.00 .. 626000.00, 254000.00 .. 257000.00,
+      ROTATION 2 -> 1;
+
+  UNIT
+    Grads = 200.0 / PI [INTERLIS.rad];
+    SquareMeters [m2] = (INTERLIS.m * INTERLIS.m);
+
+
+  DOMAIN
+    SchriftOri = 0.0 .. 399.9 [Grads];
+    Status = (
+      gueltig,
+      projektiert);
+
+
+  TOPIC Raumplanung =
+
+    CLASS Bauzone =
+      ATTRIBUTE
+        Zonentyp: MANDATORY (
+          Kernzone_K1,
+          Kernzone_K2,
+          Wohnzone_W1,
+          Wohnzone_WG2,
+          Oeffentliche_Werke_Anlagen,
+          Sport_Erholung);
+        Flaeche: MANDATORY 1 .. 999999999 [m2];
+        Geometrie: MANDATORY AREA WITH (STRAIGHTS, ARCS) VERTEX LKoord
+          WITHOUT OVERLAPS > 0.05;
+        GenGemeinde: MANDATORY INTERLIS.INTERLIS_1_DATE;
+        GenKanton: MANDATORY INTERLIS.INTERLIS_1_DATE;
+    END Bauzone;
+
+  END Raumplanung;
+
+
+  TOPIC Einzelobjekte =
+
+    CLASS Gebaeude =
+      ATTRIBUTE
+        Geometrie: MANDATORY SURFACE WITH (STRAIGHTS, ARCS) VERTEX LKoord
+          WITHOUT OVERLAPS > 0.00;
+        RegNrBaubewilligung: MANDATORY TEXT*9;
+        DatumBaubewilligung: MANDATORY INTERLIS.INTERLIS_1_DATE;
+        Statusinfo: MANDATORY Status;
+	istUnterirdisch : MANDATORY BOOLEAN;
+    END Gebaeude;
+    
+    STRUCTURE BasisTextPos =
+        Pos: MANDATORY LKoord;
+    END BasisTextPos;
+
+    STRUCTURE TextPos EXTENDS BasisTextPos=
+        Ori: MANDATORY SchriftOri;
+        HAli: HALIGNMENT;
+        VAli: VALIGNMENT;
+    END TextPos;
+    
+    CLASS Polizeinummer =
+      ATTRIBUTE
+        PolNummer: MANDATORY TEXT*4;
+	NumPos: BAG {1..*} OF TextPos;
+    END Polizeinummer;
+
+    ASSOCIATION PolizeinummerObjekt =
+        Polizeinummer -- {*} Polizeinummer;
+        Objekt -- {1} Gebaeude;
+    END PolizeinummerObjekt;
+
+  END Einzelobjekte;
+
+END Fallbeispiel.
+
+

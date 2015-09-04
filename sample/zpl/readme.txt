@@ -1,0 +1,1 @@
+This sample shows the usage of a mapping configuration file zpl.ora to map qualified Interlis names to Oracle names.

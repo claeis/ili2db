@@ -1,0 +1,195 @@
+ideas/open issues/questions
+----------------------------
+- gui: button 'create tables'
+- gui: button 'drop tables'
+- gui: button 'create scripts'
+- ordered assocs
+- create referential constraints
+- attributes of 1:n associations
+- * export --topics, --baskets
+- make use of quoted identifiers
+- * support geopackage
+- smart inheritance mapping
+- smart chbase.multilingual mapping
+- smart chbase.multisurface mapping
+- * smart chbase.catalogue mapping
+- * support ili2 EXTERNAL
+- support ili2 views
+- --initNameMapping
+- * handle t_ili_tid on export (incl. forward references)
+- * serial als t_id
+- * export GML
+- --logValidOverlaps
+
+ili2pg 2.1.7 (2015-09-04)
+----------------------------
+- send top level exception also to --log file
+- fixed eye handling in overlap remover
+- ili2c-4.5.16
+- iox-ili 1.10.6
+
+ili2pg 2.1.6 (2015-08-14) BETA
+----------------------------
+- ili2c-4.5.15
+- Arc/Arc overlap remover added
+- Ili2db.run(), Ili2db.runImport(), Ili2db.runExport(), Ili2db.runSchemaImport() throw Ili2dbException on error, normal return only on success
+
+ili2pg 2.1.5 (2015-08-10) BETA
+----------------------------
+- ili2c-4.5.14
+- Arc/Straight overlap remover added
+
+ili2pg 2.1.4 (2015-06-16) BETA
+----------------------------
+- gml export: added (pre-public eCH-0118 version)
+- itf export: export from polygons to linetables
+- itf import: ignore valid overlpas (result polygons might be invalid)
+- bug xtfexport: use no dbschema qualifier in t_type query criteria
+
+ili2pg 2.1.3 (2015-04-30) BETA
+----------------------------
+- itf import: import polygons with arcs 
+- bug iliimport --createSingleEnumTab: handle ViewDef attrs without type (type is derived from base)
+- bug iliimport --createEnumTabs: handle ViewDef attrs without type (type is derived from base)
+- bug gui iliimport: set %XTF_DIR to folder of selected ili-file so that imports resolve
+
+ili2pg 2.1.2 (2015-04-21) BETA
+----------------------------
+- improved ilidir logging
+- bugfix: use always semicolon as modeldir and modelname separator
+- add %ILI_FROM_DB to default modeldir
+- bug import: handle reference attrs 
+- bug export: handle EXTENDED attrs 
+- bug iliimport: handle ViewDef attrs without type (type is derived from base)
+
+ili2pg 2.1.1 (2015-04-09) BETA
+----------------------------
+- support xtf-surface
+- build polygons out of itf line tables
+- bug import: fixed polygon building; use external/file based cache
+- bug export: read ili from database
+- bug export: differentiate ili-cache location on database and dbschema
+- ili2c 4.5.12
+
+ili2pg 2.0.3 (2012-08-17) BETA
+----------------------------
+- added comments on tables and columns
+- metatables renamed (T_ILI2DB_BASKET, T_ILI2DB_MODEL, T_ILI2DB_IMPORT, ...)
+- added T_ILI2DB_DATASET
+- added T_ILI2DB_IMPORT_BASKET
+- added T_ILI2DB_BASKET/dataset
+- define primary key on T_ILI2DB_ATTRNAME
+- define primary key on T_ILI2DB_CLASSNAME
+- define primary key on T_ILI2DB_INHERITANCE
+- define primary key on T_KEY_OBJECT
+- define primary key on T_ILI2DB_MODELS
+- use system dependent path-separator to seperate modeldirs and models
+- import T_ILI2DB_IMPORT/importfile with absolute path
+- bug: fixed creation of column name based on qualified ili attribute name
+- bug: fixed join syntax if MS-ACCESS
+- bug: fixed NullPointerException with structele export
+- bug: read ili-model only from db if table with models exists
+- bug: fixed export of boolean
+- bug: multi import of same MODEL
+
+ili2pg 2.0.2 (2012-03-05) BETA
+----------------------------
+- schema support
+- log db version info
+- bug GUI: NullPointerException if schema import
+- attribute renaming
+- table renaming
+- INTERLIS_DATE/XMLDate/XMLDateTime/XMLTime
+- line attributes
+
+ili2pg 2.0.1 (2012-02-10) BETA
+----------------------------
+- enum with itf-code
+- Enum_txt
+- single commit
+- ordering of itf-attributes
+- delete existing data at import
+- collect statistics per class
+- logfile
+- customize max sql-name length
+- avoid superfluous tables from MODEL INTERLIS
+
+ili2ora 1.4.1 (2008-01-29)
+----------------------------
+- bug: missing JTS in distribution
+
+ili2ora 1.4.0 (2008-01-28)
+----------------------------
+- added support to store geometry as OGC WKB (-geomwkb switch) for use without oracle locator/spatial
+- added support to store geometry as OGC WKT (-geomwkt switch) for use without oracle locator/spatial
+- create primary key
+
+ili2ora 1.3.3 (2007-11-21)
+----------------------------
+- recompiled with java 1.4 as target
+- Bug: IndexOutOfBoundsException if 3D COORD
+- Bug: failed to parse all oracle specific cmdline arguments
+- Bug: NullPointerException if filename without path on cmdline
+- changed default CRS back to EPSG:21781 (="CH1903 / LV03" on ora 10.2; seems to be different on different ora versions) 
+
+ili2ora 1.3.2 (2007-11-13)
+----------------------------
+- changed default CRS authority to NULL
+
+ili2ora 1.3.1 (2007-11-12)
+----------------------------
+- ili2c 3.5.5
+- new GUI
+- new commandline option to select default SRS
+
+ili2ora 1.1.1 (2005-08-10)
+----------------------------
+- remove flag -trace in startup script (improve speed)
+- Bug: jvm crash (iom_java.dll uses wrong C runtime library)
+
+ili2ora 1.1.0 (2005-07-05)
+----------------------------
+- T_Seq is mandatory for structs
+- report unknown types on import
+- export structs
+- handle structs of other models
+- Bug: incorrect encoding of non-ansi characters
+- Bug: incorrect schema generation for decimals
+- Bug: insert/query-statement incorrect if name of attribute/role mapped
+- Bug: incorrect schema generation for boolean
+- Bug: incorrect export if embedded link undefined
+- Bug: use sql name of attribute to link from struct value to parent
+
+ili2ora 1.0.0 (2005-05-09)
+----------------------------
+- add columns T_ParentAttr,T_Seq to tables that represent structures
+- use T_ILI2ORA_CLASSNAME (instead of mapping config file) at export
+- ordered structs
+- unload data
+
+
+ili2ora 0.3.0 (2005-04-05)
+----------------------------
+- read mapping config from an xml file 
+- insert mapping into table T_ILI2ORA_CLASSNAME
+- insert inheritance tree into table T_ILI2ORA_INHERITANCE
+- update gui during workload
+- handle structs
+- handle boolean datatype
+- create createscript
+- add sample zpl
+- add ili2ora model
+- replace debug dlls with release dlls in distribution
+- upgrade xerces-c to 2.6.0
+
+ili2ora 0.2.0 (2005-02-21)
+----------------------------
+- load data
+- info about progress
+- button 'check models'
+- Bug: returned immediately after option -trace
+
+ili2ora 0.1.0 (2005-02-10)
+----------------------------
+- initial release
+- translates INTERLIS 2 data model definitions to an oracle schema.

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- edited with XMLSPY v2004 rel. 3 U (http://www.xmlspy.com) by Claude Eisenhut (Eisenhut Informatik AG) -->
+<TRANSFER xmlns="http://www.interlis.ch/INTERLIS2.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<HEADERSECTION VERSION="2.2" SENDER="ceis">
+		<ALIAS/>
+	</HEADERSECTION>
+	<DATASECTION>
+		<Ili2ora05.MappingConfig BID="x1">
+			<Ili2ora05.MappingConfig.ModelDef TID="x2">
+				<iliName>Fallbeispiel</iliName>
+				<sqlName>Zpl</sqlName>
+				<definition>
+					<Ili2ora05.MappingConfig.TopicDef>
+						<iliName>Raumplanung</iliName>
+						<sqlName>RaumPlg</sqlName>
+					</Ili2ora05.MappingConfig.TopicDef>
+				</definition>
+			</Ili2ora05.MappingConfig.ModelDef>
+		</Ili2ora05.MappingConfig>
+	</DATASECTION>
+</TRANSFER>
