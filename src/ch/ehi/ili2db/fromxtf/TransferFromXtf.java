@@ -260,7 +260,14 @@ public class TransferFromXtf {
 		 // is it an object?
 		 if(structEle==null){
 				// map oid of transfer file to a sql id
-				sqlId=getObjSqlId(iomObj.getobjectoid());
+			 	String tid=iomObj.getobjectoid();
+			 	if(tid!=null && tid.length()>0){
+					sqlId=getObjSqlId(tid);
+			 	}else{
+					 // it is an assoc without tid
+					 // get a new sql id
+					 sqlId=newObjSqlId();
+			 	}
 		 }else{
 			 // it is a struct value
 			 // get a new sql id
