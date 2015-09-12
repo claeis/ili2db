@@ -18,8 +18,13 @@ ideas/open issues/questions
 - --initNameMapping
 - * handle t_ili_tid on export (incl. forward references)
 - * serial als t_id
-- * export GML
 - --logValidOverlaps
+
+ili2pg 2.2.0 (2015-09-10)
+----------------------------
+- gml export: adjusted to approved eCH-0118-1.0
+- ili2c-4.5.17
+- iox-ili 1.11.0
 
 ili2pg 2.1.7 (2015-09-04)
 ----------------------------
