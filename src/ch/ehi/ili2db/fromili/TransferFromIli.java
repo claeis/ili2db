@@ -443,6 +443,18 @@ public class TransferFromIli {
 		return false;
 		
 	}
+	static public boolean isIliUuid(TransferDescription td,AttributeDef attr){
+		if (attr.getDomain() instanceof TypeAlias){
+			Type type=attr.getDomain();
+			while(type instanceof TypeAlias) {
+				if (((TypeAlias) type).getAliasing() == td.INTERLIS.UUIDOID) {
+					return true;
+				}
+				type=((TypeAlias) type).getAliasing().getType();
+			}
+		}
+		return false;
+	}
 	static public boolean isIli1Date(TransferDescription td,AttributeDef attr){
 		if (attr.getDomain() instanceof TypeAlias){
 			Type type=attr.getDomain();
@@ -532,6 +544,10 @@ public class TransferFromIli {
 			dbCol= new DbColBoolean();
 		}else if (isIli1Date(td,attr)) {
 			dbCol= new DbColDate();
+		}else if (isIliUuid(td,attr)) {
+			dbCol= new DbColUuid();
+			// CREATE EXTENSION "uuid-ossp";
+			// dbCol.setDefaultValue("uuid_generate_v4()");
 		}else if (isIli2Date(td,attr)) {
 			dbCol= new DbColDate();
 		}else if (isIli2DateTime(td,attr)) {
