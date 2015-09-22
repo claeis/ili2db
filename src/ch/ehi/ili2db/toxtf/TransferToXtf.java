@@ -64,6 +64,7 @@ public class TransferToXtf {
 	private boolean doItfLineTables=false;
 	private boolean createItfLineTables=false;
 	private boolean createItfAreaRef=false;
+	private boolean createEnumColAsItfCode=false;
 	private EnumCodeMapper enumMapper=new EnumCodeMapper();
 	private SqlGeometryConverter geomConv=null;
 	private boolean isMsAccess=false;
@@ -93,6 +94,7 @@ public class TransferToXtf {
 		doItfLineTables=config.isItfTransferfile();
 		createItfLineTables=doItfLineTables && config.getDoItfLineTables();
 		createItfAreaRef=doItfLineTables &&  config.AREA_REF_KEEP.equals(config.getAreaRef());
+		createEnumColAsItfCode=config.CREATE_ENUMCOL_AS_ITFCODE_YES.equals(config.getCreateEnumColAsItfCode());
 		this.geomConv=geomConv;
 		try {
 			if(conn.getMetaData().getURL().startsWith("jdbc:odbc:DRIVER={Microsoft Access Driver (*.mdb)}")){
@@ -683,10 +685,19 @@ public class TransferToXtf {
 						}
 					}
 				}else if(type instanceof EnumerationType){
-					int value=rs.getInt(valuei);
-					valuei++;
-					if(!rs.wasNull()){
-						iomObj.setattrvalue(attrName,mapItfCode2XtfCode((EnumerationType)type, value));
+					if(createEnumColAsItfCode){
+						int value=rs.getInt(valuei);
+						valuei++;
+						if(!rs.wasNull()){
+							iomObj.setattrvalue(attrName,mapItfCode2XtfCode((EnumerationType)type, value));
+						}
+					}else{
+						String value=rs.getString(valuei);
+						valuei++;
+						if(!rs.wasNull()){
+							iomObj.setattrvalue(attrName,value);
+						}
+						
 					}
 				}else if(type instanceof ReferenceType){
 					int value=rs.getInt(valuei);
@@ -700,9 +711,6 @@ public class TransferToXtf {
 					valuei++;
 					if(!rs.wasNull()){
 						iomObj.setattrvalue(attrName,value);
-						//if(attrName.equals("plainText") && value.startsWith("Office")){
-						//	EhiLogger.debug("plainText "+iomObj.getattrvalue(attrName));
-						//}
 					}
 				}
 			   }

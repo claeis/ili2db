@@ -7,6 +7,8 @@ public class Config extends Settings {
 	public static final String SENDER=PREFIX+".sender";
 	private static final String DEFAULT_SRS_AUTHORITY=PREFIX+".defaultSrsAuthority";
 	private static final String DEFAULT_SRS_CODE=PREFIX+".defaultSrsCode";
+	private static final String CREATE_ENUMCOL_AS_ITFCODE=PREFIX+".createEnumColAsItfCode";
+	public static final String CREATE_ENUMCOL_AS_ITFCODE_YES="yes";
 	private static final String CREATE_ENUM_DEFS=PREFIX+".createEnumDefs";
 	public static final String CREATE_ENUM_DEFS_NO="no";
 	public static final String CREATE_ENUM_DEFS_SINGLE="singleTable";
@@ -191,6 +193,12 @@ public class Config extends Settings {
 	}
 	public void setCreateEnumDefs(String value) {
 		setValue(CREATE_ENUM_DEFS,value);
+	}
+	public String getCreateEnumColAsItfCode() {
+		return getValue(CREATE_ENUMCOL_AS_ITFCODE);
+	}
+	public void setCreateEnumColAsItfCode(String value) {
+		setValue(CREATE_ENUMCOL_AS_ITFCODE,value);
 	}
 	public String getCreateEnumCols() {
 		return getValue(CREATE_ENUM_COLS);

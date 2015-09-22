@@ -67,6 +67,7 @@ public class TransferFromIli {
 	private String createEnumTable=null;
 	private boolean createStdCols=false;
 	private boolean createEnumTxtCol=false;
+	private boolean createEnumColAsItfCode=false;
 	private boolean createIliTidCol=false;
 	private boolean createTypeDiscriminator=false;
 	private boolean createGenericStructRef=false;
@@ -88,6 +89,7 @@ public class TransferFromIli {
 		this.defaultSrcCode=config.getDefaultSrsCode();
 		this.ili2sqlName=ili2sqlName;
 		createEnumTable=config.getCreateEnumDefs();
+		createEnumColAsItfCode=config.CREATE_ENUMCOL_AS_ITFCODE_YES.equals(config.getCreateEnumColAsItfCode());
 		createStdCols=config.CREATE_STD_COLS_ALL.equals(config.getCreateStdCols());
 		createEnumTxtCol=config.CREATE_ENUM_TXT_COL.equals(config.getCreateEnumCols());
 		colT_ID=config.getColT_ID();
@@ -301,7 +303,7 @@ public class TransferFromIli {
 				  }else{
 					  if(isBoolean(td,attr)){
 						  
-					  }else if(attr.getDomainResolvingAll() instanceof EnumerationType){
+					  }else if(createEnumColAsItfCode && attr.getDomainResolvingAll() instanceof EnumerationType){
 						  throw new Ili2dbException("EXTENDED attributes with type enumeration not supported");
 					  }
 				  }
@@ -615,8 +617,14 @@ public class TransferFromIli {
 			// skip it; type no longer exists in ili 2.3
 			dbCol=null;
 		}else if(type instanceof EnumerationType){
-			DbColId ret=new DbColId();
-			dbCol=ret;
+			if(createEnumColAsItfCode){
+				DbColId ret=new DbColId();
+				dbCol=ret;
+			}else{
+				DbColVarchar ret=new DbColVarchar();
+				ret.setSize(255);
+				dbCol=ret;				
+			}
 		}else if(type instanceof NumericType){
 			if(type.isAbstract()){
 			}else{

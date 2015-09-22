@@ -152,6 +152,9 @@ public abstract class AbstractMain {
 			}else if(arg.equals("--createEnumTxtCol")){
 				argi++;
 				config.setCreateEnumCols(config.CREATE_ENUM_TXT_COL);
+			}else if(arg.equals("--createEnumColAsItfCode")){
+				argi++;
+				config.setCreateEnumColAsItfCode(config.CREATE_ENUMCOL_AS_ITFCODE_YES);
 			}else if(arg.equals("--createStdCols")){
 				argi++;
 				config.setCreateStdCols(config.CREATE_STD_COLS_ALL);
@@ -221,6 +224,7 @@ public abstract class AbstractMain {
 					System.err.println("--dropscript filename  Generate a sql script that drops the generated db schema.");
 					System.err.println("--mapconfig filename   Name of config file, that controls the schema mapping.");
 					System.err.println("--createGeomIdx        create a spatial index on geometry columns.");
+					System.err.println("--createEnumColAsItfCode create enum type column with value according to ITF (instead of XTF).");
 					System.err.println("--createEnumTxtCol     create an additional column with the text of the enumeration value.");
 					System.err.println("--createEnumTabs       generate tables with enum definitions.");
 					System.err.println("--createSingleEnumTab  generate all enum definitions in a single table.");

@@ -20,6 +20,12 @@ ideas/open issues/questions
 - * serial als t_id
 - --logValidOverlaps
 
+ili2pg 2.2.1 (2015-09-xx)
+----------------------------
+- switch back to enum with xtf-code (to handle extended enums)
+- new option --createEnumColAsItfCode
+- imp: fix handle assoc without TID 
+
 ili2pg 2.2.0 (2015-09-10)
 ----------------------------
 - gml export: adjusted to approved eCH-0118-1.0

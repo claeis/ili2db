@@ -68,6 +68,7 @@ public class TransferFromXtf {
 	private int defaultSrsid=0;
 	private boolean createStdCols=false;
 	private boolean createEnumTxtCol=false;
+	private boolean createEnumColAsItfCode=false;
 	private boolean createTypeDiscriminator=false;
 	private boolean createGenericStructRef=false;
 	private boolean readIliTid=false;
@@ -104,6 +105,7 @@ public class TransferFromXtf {
 		idGen=new ch.ehi.ili2db.base.DbIdGen(conn,dbusr);
 		createStdCols=config.CREATE_STD_COLS_ALL.equals(config.getCreateStdCols());
 		createEnumTxtCol=config.CREATE_ENUM_TXT_COL.equals(config.getCreateEnumCols());
+		createEnumColAsItfCode=config.CREATE_ENUMCOL_AS_ITFCODE_YES.equals(config.getCreateEnumColAsItfCode());
 		colT_ID=config.getColT_ID();
 		if(colT_ID==null){
 			colT_ID=TransferFromIli.T_ID;
@@ -558,11 +560,19 @@ public class TransferFromXtf {
 					}
 				}else if(type instanceof EnumerationType){
 					String value=iomObj.getattrvalue(attrName);
-					if(value!=null){
-						int itfCode=mapXtfCode2ItfCode((EnumerationType)type, value);
-						ps.setInt(valuei, itfCode);
+					if(createEnumColAsItfCode){
+						if(value!=null){
+							int itfCode=mapXtfCode2ItfCode((EnumerationType)type, value);
+							ps.setInt(valuei, itfCode);
+						}else{
+							ps.setNull(valuei,Types.INTEGER);
+						}
 					}else{
-						ps.setNull(valuei,Types.INTEGER);
+						if(value!=null){
+							ps.setString(valuei, value);
+						}else{
+							ps.setNull(valuei,Types.VARCHAR);
+						}
 					}
 					valuei++;
 					if(createEnumTxtCol){
