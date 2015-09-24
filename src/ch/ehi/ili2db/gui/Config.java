@@ -15,6 +15,8 @@ public class Config extends Settings {
 	public static final String CREATE_ENUM_DEFS_MULTI="multiTable";
 	public static final String CREATE_ENUM_COLS=PREFIX+".createEnumCols";
 	public static final String CREATE_ENUM_TXT_COL="addTxtCol";
+	private static final String CREATE_FK=PREFIX+".createForeignKey";
+	public static final String CREATE_FK_YES="yes";
 	private static final String CREATE_STD_COLS=PREFIX+".createStdCols";
 	public static final String CREATE_STD_COLS_ALL="all";
 	private static final String CREATE_TYPE_DISCRIMINATOR=PREFIX+".typeDiscriminator";
@@ -205,6 +207,12 @@ public class Config extends Settings {
 	}
 	public void setCreateEnumCols(String value) {
 		setValue(CREATE_ENUM_COLS,value);
+	}
+	public String getCreateFk() {
+		return getValue(CREATE_FK);
+	}
+	public void setCreateFk(String value) {
+		setValue(CREATE_FK,value);
 	}
 	public String getCreateStdCols() {
 		return getValue(CREATE_STD_COLS);

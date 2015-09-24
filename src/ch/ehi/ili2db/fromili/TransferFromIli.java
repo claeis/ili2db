@@ -77,6 +77,7 @@ public class TransferFromIli {
 	private CustomMapping customMapping=null;
 	private boolean createItfLineTables=false;
 	private boolean createItfAreaRef=false;
+	private boolean createFk=false;
 	private boolean isIli1Model=false;
 	private boolean deleteExistingData=false;
 	private String colT_ID=null;
@@ -92,6 +93,7 @@ public class TransferFromIli {
 		createEnumColAsItfCode=config.CREATE_ENUMCOL_AS_ITFCODE_YES.equals(config.getCreateEnumColAsItfCode());
 		createStdCols=config.CREATE_STD_COLS_ALL.equals(config.getCreateStdCols());
 		createEnumTxtCol=config.CREATE_ENUM_TXT_COL.equals(config.getCreateEnumCols());
+		createFk=config.CREATE_FK_YES.equals(config.getCreateFk());
 		colT_ID=config.getColT_ID();
 		if(colT_ID==null){
 			colT_ID=T_ID;
@@ -224,6 +226,9 @@ public class TransferFromIli {
 		DbColId dbColId=addKeyCol(dbTable);
 		if(base!=null){
 		  dbColId.setScriptComment("REFERENCES "+base.getScopedName(null));
+		  if(createFk){
+			  dbColId.setReferencedTable(getSqlTableName(base));
+		  }
 		}
 		  if(createBasketCol){
 			  // add basketCol
@@ -231,6 +236,9 @@ public class TransferFromIli {
 				t_basket.setName(T_BASKET);
 				t_basket.setNotNull(true);
 				t_basket.setScriptComment("REFERENCES "+BASKETS_TAB);
+				if(createFk){
+					t_basket.setReferencedTable(new DbTableName(schema.getName(),BASKETS_TAB));
+				}
 				dbTable.addColumn(t_basket);
 		  }
 		DbColumn dbCol;
@@ -317,6 +325,9 @@ public class TransferFromIli {
 						  dbColId.setName(getSqlRoleName(role));
 						  dbColId.setNotNull(true);
 						  dbColId.setPrimaryKey(false);
+						  if(createFk){
+							  dbColId.setReferencedTable(getSqlTableName(role.getDestination()));
+						  }
 						  dbTable.addColumn(dbColId);
 						  // handle ordered
 						  if(role.isOrdered()){
@@ -339,6 +350,9 @@ public class TransferFromIli {
 							  boolean notNull=false;
 							  dbColId.setNotNull(notNull);
 							  dbColId.setPrimaryKey(false);
+							  if(createFk){
+								  dbColId.setReferencedTable(getSqlTableName(role.getDestination()));
+							  }
 							  customMapping.fixupEmbeddedLink(dbTable,dbColId,roleOwner,role,getSqlTableName(role.getDestination()),colT_ID);
 							  dbTable.addColumn(dbColId);
 							  // handle ordered
@@ -399,6 +413,9 @@ public class TransferFromIli {
 				t_basket.setName(T_BASKET);
 				t_basket.setNotNull(true);
 				t_basket.setScriptComment("REFERENCES "+BASKETS_TAB);
+				if(createFk){
+					t_basket.setReferencedTable(new DbTableName(schema.getName(),BASKETS_TAB));
+				}
 				dbTable.addColumn(t_basket);
 		  }
 			SurfaceOrAreaType type = (SurfaceOrAreaType)attr.getDomainResolvingAll();
@@ -414,6 +431,9 @@ public class TransferFromIli {
 				  dbColId.setNotNull(true);
 				  dbColId.setPrimaryKey(false);
 				  dbColId.setScriptComment("REFERENCES "+getSqlTableName((Viewable)attr.getContainer()));
+				  if(createFk){
+					  dbColId.setReferencedTable(getSqlTableName((Viewable)attr.getContainer()));
+				  }
 				  dbTable.addColumn(dbColId);
 			}
 			
@@ -612,6 +632,9 @@ public class TransferFromIli {
 			DbColId ret=new DbColId();
 			ret.setNotNull(false);
 			ret.setPrimaryKey(false);
+			if(createFk){
+				ret.setReferencedTable(getSqlTableName(((ReferenceType)type).getReferred()));
+			}
 			dbCol=ret;
 		}else if (type instanceof BasketType){
 			// skip it; type no longer exists in ili 2.3
@@ -765,6 +788,9 @@ public class TransferFromIli {
 		cmtSep=nl;
 		if(cmt.length()>0){
 			dbParentId.setComment(cmt.toString());
+		}
+		if(createFk){
+			dbParentId.setReferencedTable(getSqlTableName((Viewable)attr.getContainer()));
 		}
 		dbTable.addColumn(dbParentId);
 	}
@@ -1207,6 +1233,9 @@ public class TransferFromIli {
 			dbColDataset.setName(BASKETS_TAB_DATASET);
 			dbColDataset.setNotNull(false);
 			dbColDataset.setPrimaryKey(false);
+			if(createFk){
+				dbColDataset.setReferencedTable(new DbTableName(schema.getName(),DATASETS_TAB));
+			}
 			tab.addColumn(dbColDataset);
 			
 			// qualified name of ili topic
@@ -1265,6 +1294,9 @@ public class TransferFromIli {
 			dbColBasket.setName(IMPORTS_TAB_DATASET);
 			dbColBasket.setNotNull(true);
 			dbColBasket.setScriptComment("REFERENCES "+DATASETS_TAB);
+			if(createFk){
+				dbColBasket.setReferencedTable(new DbTableName(schema.getName(),DATASETS_TAB));
+			}
 			tab.addColumn(dbColBasket);
 			
 			DbColDateTime dbColImpDate=new DbColDateTime();
@@ -1296,12 +1328,18 @@ public class TransferFromIli {
 			dbColImport.setName(IMPORTS_BASKETS_TAB_IMPORT);
 			dbColImport.setNotNull(true);
 			dbColImport.setScriptComment("REFERENCES "+IMPORTS_TAB);
+			if(createFk){
+				dbColImport.setReferencedTable(new DbTableName(schema.getName(),IMPORTS_TAB));
+			}
 			tab.addColumn(dbColImport);
 			
 			DbColId dbColBasket=new DbColId();
 			dbColBasket.setName(IMPORTS_BASKETS_TAB_BASKET);
 			dbColBasket.setNotNull(true);
 			dbColBasket.setScriptComment("REFERENCES "+BASKETS_TAB);
+			if(createFk){
+				dbColBasket.setReferencedTable(new DbTableName(schema.getName(),BASKETS_TAB));
+			}
 			tab.addColumn(dbColBasket);
 						
 			DbColNumber dbColObjc=new DbColNumber();

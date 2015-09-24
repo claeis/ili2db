@@ -24,6 +24,7 @@ ili2pg 2.2.1 (2015-09-xx)
 ----------------------------
 - switch back to enum with xtf-code (to handle extended enums)
 - new option --createEnumColAsItfCode
+- new option --createFk
 - imp: fix handle assoc without TID 
 
 ili2pg 2.2.0 (2015-09-10)
