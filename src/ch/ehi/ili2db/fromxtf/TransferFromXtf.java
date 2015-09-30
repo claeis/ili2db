@@ -303,10 +303,12 @@ public class TransferFromXtf {
 					}
 					// if class
 					if(structEle==null){
-						if(readIliTid){
-							// import TID from transfer file
-							ps.setString(valuei, iomObj.getobjectoid());
-							valuei++;
+						if((aclass instanceof Table) && ((Table)aclass).isIdentifiable()){
+							if(readIliTid){
+								// import TID from transfer file
+								ps.setString(valuei, iomObj.getobjectoid());
+								valuei++;
+							}
 						}
 					}
 					// if struct, add ref to parent
