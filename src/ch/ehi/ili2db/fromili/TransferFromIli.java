@@ -78,6 +78,7 @@ public class TransferFromIli {
 	private boolean createItfLineTables=false;
 	private boolean createItfAreaRef=false;
 	private boolean createFk=false;
+	private boolean createFkIdx=false;
 	private boolean isIli1Model=false;
 	private boolean deleteExistingData=false;
 	private String colT_ID=null;
@@ -94,6 +95,7 @@ public class TransferFromIli {
 		createStdCols=config.CREATE_STD_COLS_ALL.equals(config.getCreateStdCols());
 		createEnumTxtCol=config.CREATE_ENUM_TXT_COL.equals(config.getCreateEnumCols());
 		createFk=config.CREATE_FK_YES.equals(config.getCreateFk());
+		createFkIdx=config.CREATE_FKIDX_YES.equals(config.getCreateFkIdx());
 		colT_ID=config.getColT_ID();
 		if(colT_ID==null){
 			colT_ID=T_ID;
@@ -239,6 +241,9 @@ public class TransferFromIli {
 				if(createFk){
 					t_basket.setReferencedTable(new DbTableName(schema.getName(),BASKETS_TAB));
 				}
+				if(createFkIdx){
+					t_basket.setIndex(true);
+				}
 				dbTable.addColumn(t_basket);
 		  }
 		DbColumn dbCol;
@@ -328,6 +333,9 @@ public class TransferFromIli {
 						  if(createFk){
 							  dbColId.setReferencedTable(getSqlTableName(role.getDestination()));
 						  }
+							if(createFkIdx){
+								dbColId.setIndex(true);
+							}
 						  dbTable.addColumn(dbColId);
 						  // handle ordered
 						  if(role.isOrdered()){
@@ -353,6 +361,9 @@ public class TransferFromIli {
 							  if(createFk){
 								  dbColId.setReferencedTable(getSqlTableName(role.getDestination()));
 							  }
+								if(createFkIdx){
+									dbColId.setIndex(true);
+								}
 							  customMapping.fixupEmbeddedLink(dbTable,dbColId,roleOwner,role,getSqlTableName(role.getDestination()),colT_ID);
 							  dbTable.addColumn(dbColId);
 							  // handle ordered
@@ -416,6 +427,9 @@ public class TransferFromIli {
 				if(createFk){
 					t_basket.setReferencedTable(new DbTableName(schema.getName(),BASKETS_TAB));
 				}
+				if(createFkIdx){
+					t_basket.setIndex(true);
+				}
 				dbTable.addColumn(t_basket);
 		  }
 			SurfaceOrAreaType type = (SurfaceOrAreaType)attr.getDomainResolvingAll();
@@ -434,6 +448,9 @@ public class TransferFromIli {
 				  if(createFk){
 					  dbColId.setReferencedTable(getSqlTableName((Viewable)attr.getContainer()));
 				  }
+					if(createFkIdx){
+						dbColId.setIndex(true);
+					}
 				  dbTable.addColumn(dbColId);
 			}
 			
@@ -635,6 +652,9 @@ public class TransferFromIli {
 			if(createFk){
 				ret.setReferencedTable(getSqlTableName(((ReferenceType)type).getReferred()));
 			}
+			if(createFkIdx){
+				ret.setIndex(true);
+			}
 			dbCol=ret;
 		}else if (type instanceof BasketType){
 			// skip it; type no longer exists in ili 2.3
@@ -791,6 +811,9 @@ public class TransferFromIli {
 		}
 		if(createFk){
 			dbParentId.setReferencedTable(getSqlTableName((Viewable)attr.getContainer()));
+		}
+		if(createFkIdx){
+			dbParentId.setIndex(true);
 		}
 		dbTable.addColumn(dbParentId);
 	}
@@ -1236,6 +1259,9 @@ public class TransferFromIli {
 			if(createFk){
 				dbColDataset.setReferencedTable(new DbTableName(schema.getName(),DATASETS_TAB));
 			}
+			if(createFkIdx){
+				dbColDataset.setIndex(true);
+			}
 			tab.addColumn(dbColDataset);
 			
 			// qualified name of ili topic
@@ -1297,6 +1323,9 @@ public class TransferFromIli {
 			if(createFk){
 				dbColBasket.setReferencedTable(new DbTableName(schema.getName(),DATASETS_TAB));
 			}
+			if(createFkIdx){
+				dbColBasket.setIndex(true);
+			}
 			tab.addColumn(dbColBasket);
 			
 			DbColDateTime dbColImpDate=new DbColDateTime();
@@ -1331,6 +1360,9 @@ public class TransferFromIli {
 			if(createFk){
 				dbColImport.setReferencedTable(new DbTableName(schema.getName(),IMPORTS_TAB));
 			}
+			if(createFkIdx){
+				dbColImport.setIndex(true);
+			}
 			tab.addColumn(dbColImport);
 			
 			DbColId dbColBasket=new DbColId();
@@ -1339,6 +1371,9 @@ public class TransferFromIli {
 			dbColBasket.setScriptComment("REFERENCES "+BASKETS_TAB);
 			if(createFk){
 				dbColBasket.setReferencedTable(new DbTableName(schema.getName(),BASKETS_TAB));
+			}
+			if(createFkIdx){
+				dbColBasket.setIndex(true);
 			}
 			tab.addColumn(dbColBasket);
 						

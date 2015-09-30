@@ -17,6 +17,8 @@ public class Config extends Settings {
 	public static final String CREATE_ENUM_TXT_COL="addTxtCol";
 	private static final String CREATE_FK=PREFIX+".createForeignKey";
 	public static final String CREATE_FK_YES="yes";
+	private static final String CREATE_FKIDX=PREFIX+".createForeignKeyIndex";
+	public static final String CREATE_FKIDX_YES="yes";
 	private static final String CREATE_STD_COLS=PREFIX+".createStdCols";
 	public static final String CREATE_STD_COLS_ALL="all";
 	private static final String CREATE_TYPE_DISCRIMINATOR=PREFIX+".typeDiscriminator";
@@ -213,6 +215,12 @@ public class Config extends Settings {
 	}
 	public void setCreateFk(String value) {
 		setValue(CREATE_FK,value);
+	}
+	public String getCreateFkIdx() {
+		return getValue(CREATE_FKIDX);
+	}
+	public void setCreateFkIdx(String value) {
+		setValue(CREATE_FKIDX,value);
 	}
 	public String getCreateStdCols() {
 		return getValue(CREATE_STD_COLS);
