@@ -28,6 +28,11 @@ public class StructWrapper {
 	private int parentSqlId;
 	private IomObject parent;
 	private AttributeDef parentAttr;
+	/** creates a StructWrapper.
+	 * @param parentSqlId1 sqlid of the parent object/structele.
+	 * @param parentAttr1 Structure attribute in the parent CLASS/STRUCTURE.
+	 * @param parent1 parent object/structele.
+	 */
 	public StructWrapper(int parentSqlId1,AttributeDef parentAttr1,IomObject parent1){
 		parentSqlId=parentSqlId1;
 		parentAttr=parentAttr1;
