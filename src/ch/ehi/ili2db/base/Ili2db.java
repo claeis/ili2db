@@ -332,7 +332,14 @@ public class Ili2db {
 					mapping.readDeprecatedConfig(mappingConfig);
 				}
 				ModelElementSelector ms=new ModelElementSelector();
-				java.util.List<Element> eles=ms.getModelElements(td, td.getIli1Format()!=null && config.getDoItfLineTables(),Config.CREATE_ENUM_DEFS_MULTI.equals(config.getCreateEnumDefs()));
+				ArrayList<String> modelNames=new ArrayList<String>();
+				for(int modeli=0;modeli<modelv.getSizeFileEntry();modeli++){
+					if(modelv.getFileEntry(modeli).getKind()==ch.interlis.ili2c.config.FileEntryKind.ILIMODELFILE){
+						String m=modelv.getFileEntry(modeli).getFilename();
+						modelNames.add(m);				
+					}
+				}
+				java.util.List<Element> eles=ms.getModelElements(modelNames,td, td.getIli1Format()!=null && config.getDoItfLineTables(),Config.CREATE_ENUM_DEFS_MULTI.equals(config.getCreateEnumDefs()));
 				optimizeSqlNames(config,mapping,eles);
 
 				Generator gen=null;
@@ -772,7 +779,21 @@ public class Ili2db {
 				mapping.readDeprecatedConfig(mappingConfigFilename);
 			}
 			ModelElementSelector ms=new ModelElementSelector();
-			java.util.List<Element> eles=ms.getModelElements(td, td.getIli1Format()!=null && config.getDoItfLineTables(),Config.CREATE_ENUM_DEFS_MULTI.equals(config.getCreateEnumDefs()));
+			ArrayList<String> modelNames=new ArrayList<String>();
+			if(models!=null){
+				String modelnames[]=models.split(";");
+				for(int modeli=0;modeli<modelnames.length;modeli++){
+					String m=modelnames[modeli];
+					if(m!=null){
+						if(m.equals(XTF)){
+							// ignore it
+						}else{
+							modelNames.add(m);				
+						}
+					}
+				}
+			}
+			java.util.List<Element> eles=ms.getModelElements(modelNames,td, td.getIli1Format()!=null && config.getDoItfLineTables(),Config.CREATE_ENUM_DEFS_MULTI.equals(config.getCreateEnumDefs()));
 			optimizeSqlNames(config,mapping,eles);
 
 			SqlGeometryConverter geomConverter=null;

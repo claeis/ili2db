@@ -11,15 +11,28 @@ public class ModelElementSelector {
 	private TransferDescription td=null;
 	private boolean createItfLineTables=false;
 	private boolean includeEnums=false;
-	public List<Element> getModelElements(TransferDescription td,boolean createItfLineTables,boolean includeEnums)
+	public List<Element> getModelElements(List<String> modelNames,TransferDescription td,boolean createItfLineTables,boolean includeEnums)
 	{
 		this.td=td;
 		this.createItfLineTables=createItfLineTables;
 		this.includeEnums=includeEnums;
-		ch.interlis.ili2c.metamodel.Model model=td.getLastModel();
+		List<Model> models=new ArrayList<Model>();
+		if(modelNames==null || modelNames.isEmpty()){
+			models.add(td.getLastModel());
+		}else{
+			for(String modelName:modelNames){
+				Model model=(Model)td.getElement(Model.class, modelName);
+				if(model==null){
+					throw new IllegalArgumentException("unknown model <"+modelName+">");
+				}
+				models.add(model);
+			}
+		}
 		HashSet<Element> accu=new HashSet<Element>();
 		HashSet<Model> accuScope=new HashSet<Model>();
-		visitModel(accu,accuScope,model);
+		for(Model model:models){
+			visitModel(accu,accuScope,model);
+		}
 		visitStructsInScope(accu,accuScope);
 		
 		ArrayList<Element> ret=new ArrayList<Element>(accu);

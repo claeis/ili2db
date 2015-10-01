@@ -7,12 +7,18 @@ public class Config extends Settings {
 	public static final String SENDER=PREFIX+".sender";
 	private static final String DEFAULT_SRS_AUTHORITY=PREFIX+".defaultSrsAuthority";
 	private static final String DEFAULT_SRS_CODE=PREFIX+".defaultSrsCode";
+	private static final String CREATE_ENUMCOL_AS_ITFCODE=PREFIX+".createEnumColAsItfCode";
+	public static final String CREATE_ENUMCOL_AS_ITFCODE_YES="yes";
 	private static final String CREATE_ENUM_DEFS=PREFIX+".createEnumDefs";
 	public static final String CREATE_ENUM_DEFS_NO="no";
 	public static final String CREATE_ENUM_DEFS_SINGLE="singleTable";
 	public static final String CREATE_ENUM_DEFS_MULTI="multiTable";
 	public static final String CREATE_ENUM_COLS=PREFIX+".createEnumCols";
 	public static final String CREATE_ENUM_TXT_COL="addTxtCol";
+	private static final String CREATE_FK=PREFIX+".createForeignKey";
+	public static final String CREATE_FK_YES="yes";
+	private static final String CREATE_FKIDX=PREFIX+".createForeignKeyIndex";
+	public static final String CREATE_FKIDX_YES="yes";
 	private static final String CREATE_STD_COLS=PREFIX+".createStdCols";
 	public static final String CREATE_STD_COLS_ALL="all";
 	private static final String CREATE_TYPE_DISCRIMINATOR=PREFIX+".typeDiscriminator";
@@ -192,11 +198,29 @@ public class Config extends Settings {
 	public void setCreateEnumDefs(String value) {
 		setValue(CREATE_ENUM_DEFS,value);
 	}
+	public String getCreateEnumColAsItfCode() {
+		return getValue(CREATE_ENUMCOL_AS_ITFCODE);
+	}
+	public void setCreateEnumColAsItfCode(String value) {
+		setValue(CREATE_ENUMCOL_AS_ITFCODE,value);
+	}
 	public String getCreateEnumCols() {
 		return getValue(CREATE_ENUM_COLS);
 	}
 	public void setCreateEnumCols(String value) {
 		setValue(CREATE_ENUM_COLS,value);
+	}
+	public String getCreateFk() {
+		return getValue(CREATE_FK);
+	}
+	public void setCreateFk(String value) {
+		setValue(CREATE_FK,value);
+	}
+	public String getCreateFkIdx() {
+		return getValue(CREATE_FKIDX);
+	}
+	public void setCreateFkIdx(String value) {
+		setValue(CREATE_FKIDX,value);
 	}
 	public String getCreateStdCols() {
 		return getValue(CREATE_STD_COLS);

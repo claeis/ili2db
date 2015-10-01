@@ -16,10 +16,25 @@ ideas/open issues/questions
 - * support ili2 EXTERNAL
 - support ili2 views
 - --initNameMapping
-- * handle t_ili_tid on export (incl. forward references)
 - * serial als t_id
-- * export GML
 - --logValidOverlaps
+
+ili2pg 2.3.0 (2015-10-01)
+----------------------------
+- switch back to enum with xtf-code (to handle extended enums)
+- new option --createEnumColAsItfCode
+- new option --createFk
+- new option --createFkIdx
+- handle t_ili_tid on export (incl. forward references)
+- imp: fix use --models to create db schema
+- imp: fix handle assoc without TID 
+
+
+ili2pg 2.2.0 (2015-09-10)
+----------------------------
+- gml export: adjusted to approved eCH-0118-1.0
+- ili2c-4.5.17
+- iox-ili 1.11.0
 
 ili2pg 2.1.7 (2015-09-04)
 ----------------------------

@@ -152,6 +152,15 @@ public abstract class AbstractMain {
 			}else if(arg.equals("--createEnumTxtCol")){
 				argi++;
 				config.setCreateEnumCols(config.CREATE_ENUM_TXT_COL);
+			}else if(arg.equals("--createEnumColAsItfCode")){
+				argi++;
+				config.setCreateEnumColAsItfCode(config.CREATE_ENUMCOL_AS_ITFCODE_YES);
+			}else if(arg.equals("--createFk")){
+				argi++;
+				config.setCreateFk(config.CREATE_FK_YES);
+			}else if(arg.equals("--createFkIdx")){
+				argi++;
+				config.setCreateFkIdx(config.CREATE_FKIDX_YES);
 			}else if(arg.equals("--createStdCols")){
 				argi++;
 				config.setCreateStdCols(config.CREATE_STD_COLS_ALL);
@@ -221,6 +230,7 @@ public abstract class AbstractMain {
 					System.err.println("--dropscript filename  Generate a sql script that drops the generated db schema.");
 					System.err.println("--mapconfig filename   Name of config file, that controls the schema mapping.");
 					System.err.println("--createGeomIdx        create a spatial index on geometry columns.");
+					System.err.println("--createEnumColAsItfCode create enum type column with value according to ITF (instead of XTF).");
 					System.err.println("--createEnumTxtCol     create an additional column with the text of the enumeration value.");
 					System.err.println("--createEnumTabs       generate tables with enum definitions.");
 					System.err.println("--createSingleEnumTab  generate all enum definitions in a single table.");
@@ -237,6 +247,8 @@ public abstract class AbstractMain {
 					System.err.println("--keepAreaRef          keep arreaRef as additional column on import.");
 					System.err.println("--importTid            read TID into additional column "+TransferFromIli.T_ILI_TID);
 					System.err.println("--createBasketCol      generate "+TransferFromIli.T_BASKET+" column.");
+					System.err.println("--createFk             generate foreign key constraints.");
+					System.err.println("--createFkIdx          create an index on foreign key columns.");
 					printSpecificOptions();
 					System.err.println("--log filename         log message to given file.");
 					System.err.println("--gui                  start GUI.");

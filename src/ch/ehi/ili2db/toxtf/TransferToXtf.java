@@ -28,6 +28,7 @@ import java.sql.SQLException;
 import ch.ehi.basics.logging.EhiLogger;
 import ch.ehi.ili2db.base.DbUtility;
 import ch.ehi.ili2db.base.Ili2cUtility;
+import ch.ehi.ili2db.base.Ili2dbException;
 import ch.ehi.ili2db.converter.*;
 import ch.ehi.ili2db.fromili.TransferFromIli;
 import ch.ehi.ili2db.fromxtf.BasketStat;
@@ -38,6 +39,7 @@ import ch.ehi.sqlgen.repository.DbTableName;
 import ch.interlis.ili2c.metamodel.*;
 import ch.interlis.iom.IomObject;
 import ch.interlis.iom_j.Iom_jObject;
+import ch.interlis.iox.IoxException;
 import ch.interlis.iox.IoxWriter;
 import ch.interlis.iox_j.*;
 import ch.interlis.iom_j.itf.EnumCodeMapper;
@@ -64,17 +66,17 @@ public class TransferToXtf {
 	private boolean doItfLineTables=false;
 	private boolean createItfLineTables=false;
 	private boolean createItfAreaRef=false;
+	private boolean createEnumColAsItfCode=false;
 	private EnumCodeMapper enumMapper=new EnumCodeMapper();
 	private SqlGeometryConverter geomConv=null;
 	private boolean isMsAccess=false;
 
-	/** list of not yet processed struct attrs
-	 */
-	private ArrayList structQueue=null;
 	/** map of xml-elementnames to interlis classdefs.
 	 *  Used to map typenames read from the T_TYPE column to the classdef.
 	 */
 	private HashMap tag2class=null; // map<String tag, Viewable classDef>
+	private HashMap<Integer,String> sqlid2xtfid=new HashMap<Integer,String>();
+	private ArrayList<FixIomObjectRefs> delayedObjects=null;
 	private ch.interlis.ili2c.generator.IndentPrintWriter expgen=null;
 	public TransferToXtf(Mapping ili2sqlName1,TransferDescription td1,Connection conn1,SqlGeometryConverter geomConv,Config config){
 		ili2sqlName=ili2sqlName1;
@@ -93,6 +95,7 @@ public class TransferToXtf {
 		doItfLineTables=config.isItfTransferfile();
 		createItfLineTables=doItfLineTables && config.getDoItfLineTables();
 		createItfAreaRef=doItfLineTables &&  config.AREA_REF_KEEP.equals(config.getAreaRef());
+		createEnumColAsItfCode=config.CREATE_ENUMCOL_AS_ITFCODE_YES.equals(config.getCreateEnumColAsItfCode());
 		this.geomConv=geomConv;
 		try {
 			if(conn.getMetaData().getURL().startsWith("jdbc:odbc:DRIVER={Microsoft Access Driver (*.mdb)}")){
@@ -106,10 +109,10 @@ public class TransferToXtf {
 	throws ch.interlis.iox.IoxException
 	{
 		this.basketStat=stat;
+		boolean referrs=false;
 		StartTransferEvent startEvent=new StartTransferEvent();
 		startEvent.setSender(sender);
 		iomFile.write(startEvent);
-		structQueue=new ArrayList();
 		// for all MODELs
 		Iterator modeli = td.iterator ();
 		while (modeli.hasNext ())
@@ -125,6 +128,7 @@ public class TransferToXtf {
 				if (tObj instanceof Topic && !(suppressTopic((Topic)tObj))){
 						Topic topic=(Topic)tObj;
 						StartBasketEvent iomBasket=null;
+						delayedObjects=new ArrayList<FixIomObjectRefs>();
 						// for all Viewables
 						Iterator iter = null;
 						if(iomFile instanceof ItfWriter){
@@ -180,6 +184,35 @@ public class TransferToXtf {
 						  }
 						}
 						if(iomBasket!=null){
+							// fix forward references
+							for(FixIomObjectRefs fixref : delayedObjects){
+								boolean skipObj=false;
+								for(IomObject ref:fixref.getRefs()){
+									int sqlid=fixref.getTargetSqlid(ref);
+									if(sqlid2xtfid.containsKey(sqlid)){
+										// fix it
+										ref.setobjectrefoid(sqlid2xtfid.get(sqlid));
+									}else{
+										// object in another basket
+										Viewable aclass=fixref.getTargetClass(ref);
+										// read object
+										String tid=readObjectTid(aclass,sqlid);
+										if(tid==null){
+											EhiLogger.logError("unknown referenced object "+aclass.getScopedName(null)+" sqlid "+fixref.getTargetSqlid(ref)+" referenced from "+fixref.getRoot().getobjecttag()+" TID "+fixref.getRoot().getobjectoid());
+											referrs=true;
+											skipObj=true;
+										}else{
+											// fix reference
+											ref.setobjectrefoid(tid);
+										}
+									}
+									
+								}
+								if(!skipObj){
+									iomFile.write(new ObjectEvent(fixref.getRoot()));
+								}
+							}
+							
 							iomFile.write(new EndBasketEvent());
 							saveObjStat(iomBasket.getBid(),filename,iomBasket.getType());
 						}
@@ -187,7 +220,46 @@ public class TransferToXtf {
 			}
 		  }
 		}
+		if(referrs){
+			throw new IoxException("dangling references");
+		}
 		iomFile.write(new EndTransferEvent());
+	}
+	private String readObjectTid(Viewable aclass, int sqlid) {
+		String sqlIliTid = null;
+		if (!writeIliTid) {
+			sqlIliTid = Integer.toString(sqlid);
+			sqlid2xtfid.put(sqlid, sqlIliTid);
+		}else{
+			String stmt = createQueryStmt4xtfid(aclass);
+			EhiLogger.traceBackendCmd(stmt);
+			java.sql.PreparedStatement dbstmt = null;
+			try {
+
+				dbstmt = conn.prepareStatement(stmt);
+				dbstmt.clearParameters();
+				dbstmt.setInt(1, sqlid);
+				java.sql.ResultSet rs = dbstmt.executeQuery();
+				if(rs.next()) {
+					sqlIliTid = rs.getString(2);
+					sqlid2xtfid.put(sqlid, sqlIliTid);
+				}else{
+					// unknown object
+					return null;
+				}
+			} catch (java.sql.SQLException ex) {
+				EhiLogger.logError("failed to query " + aclass.getScopedName(null),	ex);
+			} finally {
+				if (dbstmt != null) {
+					try {
+						dbstmt.close();
+					} catch (java.sql.SQLException ex) {
+						EhiLogger.logError("failed to close query of "+ aclass.getScopedName(null), ex);
+					}
+				}
+			}
+		}
+		return sqlIliTid;
 	}
 	public void doitJava()
 	{
@@ -235,7 +307,6 @@ public class TransferToXtf {
 			EhiLogger.logError("failed to open file for java output",ex);
 		}
 		try{
-			structQueue=null;
 			// for all MODELs
 			Iterator modeli = td.iterator ();
 			while (modeli.hasNext ())
@@ -333,7 +404,7 @@ public class TransferToXtf {
 	}
 	/** dumps all struct values of a given struct attr.
 	 */
-	private void dumpStructs(StructWrapper wrapper)
+	private void dumpStructs(StructWrapper wrapper,FixIomObjectRefs fixref)
 	{
 		Viewable baseClass=((CompositionType)wrapper.getParentAttr().getDomain()).getComponentType();
 
@@ -377,7 +448,7 @@ public class TransferToXtf {
 		Iterator classi=structClassv.iterator();
 		while(classi.hasNext()){
 			Viewable aclass=(Viewable)classi.next();
-			dumpObjHelper(null,aclass,wrapper,structelev);
+			dumpObjHelper(null,aclass,fixref,wrapper,structelev);
 		}
 	}
 	private void dumpItfTableObject(IoxWriter out,AttributeDef attr)
@@ -441,7 +512,7 @@ public class TransferToXtf {
 				    Iterator attri = lineAttrTable.getAttributes ();
 				    while(attri.hasNext()){
 						AttributeDef lineattr=(AttributeDef)attri.next();
-						valuei = addAttrValue(rs, valuei, sqlid, iomObj, lineattr);
+						valuei = addAttrValue(rs, valuei, sqlid, iomObj, lineattr,null,null);
 				    }
 				}
 				
@@ -468,11 +539,11 @@ public class TransferToXtf {
 	 */
 	private void dumpObject(IoxWriter out,Viewable aclass)
 	{
-		dumpObjHelper(out,aclass,null,null);
+		dumpObjHelper(out,aclass,null,null,null);
 	}
 	/** helper to dump all objects/structvalues of a given class/structure.
 	 */
-	private void dumpObjHelper(IoxWriter out,Viewable aclass,StructWrapper structWrapper,HashMap structelev)
+	private void dumpObjHelper(IoxWriter out,Viewable aclass,FixIomObjectRefs fixref,StructWrapper structWrapper,HashMap structelev)
 	{
 		String stmt=createQueryStmt(aclass,structWrapper);
 		EhiLogger.traceBackendCmd(stmt);
@@ -486,9 +557,15 @@ public class TransferToXtf {
 				if(createGenericStructRef){
 					dbstmt.setString(2,ili2sqlName.mapIliAttributeDef(structWrapper.getParentAttr()));
 				}
+			}else{
+				if(fixref!=null){
+					throw new IllegalArgumentException("fixref!=null");
+				}
 			}
 			java.sql.ResultSet rs=dbstmt.executeQuery();
 			while(rs.next()){
+				// list of not yet processed struct attrs
+				ArrayList<StructWrapper> structQueue=new ArrayList<StructWrapper>();
 				int valuei=1;
 				int sqlid=rs.getInt(valuei);
 				valuei++;
@@ -496,15 +573,28 @@ public class TransferToXtf {
 					//String t_type=rs.getString(valuei);
 					valuei++;
 				}
-				if(writeIliTid && structWrapper==null){
-					// String sqlIliTid=rs.getString(valuei);
-					// TODO (forward) references need mapping from t_id to t_ili_tid
-					valuei++;
+				String sqlIliTid=null;
+				if(structWrapper==null){
+					if(writeIliTid){
+						if((aclass instanceof Table) && ((Table)aclass).isIdentifiable()){
+							sqlIliTid=rs.getString(valuei);
+							sqlid2xtfid.put(sqlid, sqlIliTid);
+							valuei++;
+						}
+					}else{
+						sqlIliTid=Integer.toString(sqlid);
+						sqlid2xtfid.put(sqlid, sqlIliTid);
+					}
 				}
 				Iom_jObject iomObj;
 				if(structWrapper==null){
-					iomObj=new Iom_jObject(aclass.getScopedName(null),Integer.toString(sqlid));
+					if((aclass instanceof Table) && ((Table)aclass).isIdentifiable()){
+						iomObj=new Iom_jObject(aclass.getScopedName(null),sqlIliTid);
+					}else{
+						iomObj=new Iom_jObject(aclass.getScopedName(null),null);
+					}
 					iomObj.setattrvalue(ItfWriter2.INTERNAL_T_ID, Integer.toString(sqlid));
+					fixref=new FixIomObjectRefs(iomObj);
 				}else{
 					iomObj=(Iom_jObject)structelev.get(Integer.toString(sqlid));
 					if(createGenericStructRef){
@@ -527,15 +617,15 @@ public class TransferToXtf {
 						   }
 						   baseAttr=baseAttr1;
 					   }
-					   valuei = addAttrValue(rs, valuei, sqlid, iomObj, baseAttr);
+					   valuei = addAttrValue(rs, valuei, sqlid, iomObj, baseAttr,structQueue,fixref);
 				   }
 				   if(obj.obj instanceof RoleDef){
 					   RoleDef role = (RoleDef) obj.obj;
 					   if(role.getExtending()==null){
-						String roleName=role.getName();
-						String sqlRoleName=ili2sqlName.mapIliRoleDef(role);
-						// a role of an embedded association?
-						if(obj.embedded){
+						 String roleName=role.getName();
+						 String sqlRoleName=ili2sqlName.mapIliRoleDef(role);
+						 // a role of an embedded association?
+						 if(obj.embedded){
 							AssociationDef roleOwner = (AssociationDef) role.getContainer();
 							if(roleOwner.getDerivedFrom()==null){
 								 // TODO if(orderPos!=0){
@@ -543,13 +633,13 @@ public class TransferToXtf {
 								valuei++;
 								if(!rs.wasNull()){
 									IomObject ref=iomObj.addattrobj(roleName,roleOwner.getScopedName(null));
-									ref.setobjectrefoid(Integer.toString(value));
+									mapSqlid2Xtfid(fixref,value,ref,role.getDestination());
 								}
 							}
 						 }else{
 							 // TODO if(orderPos!=0){
 							IomObject ref=iomObj.addattrobj(roleName,"REF");
-							ref.setobjectrefoid(Integer.toString(rs.getInt(valuei)));
+							mapSqlid2Xtfid(fixref,rs.getInt(valuei),ref,role.getDestination());
 							valuei++;
 						 }
 					   }
@@ -560,10 +650,16 @@ public class TransferToXtf {
 					// collect structvalues
 					while(!structQueue.isEmpty()){
 						StructWrapper wrapper=(StructWrapper)structQueue.remove(0);
-						dumpStructs(wrapper);
+						dumpStructs(wrapper,fixref);
 					}
-					// write object
-					out.write(new ObjectEvent(iomObj));
+					if(structWrapper==null){
+						if(fixref.needsFixing()){
+							delayedObjects.add(fixref);
+						}else{
+							// write object
+							out.write(new ObjectEvent(iomObj));
+						}
+					}
 				}
 			} // while rs
 		}catch(java.sql.SQLException ex){		
@@ -580,8 +676,16 @@ public class TransferToXtf {
 			}
 		}
 	}
+	private String mapSqlid2Xtfid(FixIomObjectRefs fixref, int sqlid,IomObject refobj,Viewable targetClass) {
+		if(sqlid2xtfid.containsKey(sqlid)){
+			refobj.setobjectrefoid(sqlid2xtfid.get(sqlid));
+		}else{
+			fixref.addFix(refobj,sqlid,targetClass);
+		}
+		return null;
+	}
 	private int addAttrValue(java.sql.ResultSet rs, int valuei, int sqlid,
-			Iom_jObject iomObj, AttributeDef attr) throws SQLException {
+			Iom_jObject iomObj, AttributeDef attr,ArrayList<StructWrapper> structQueue,FixIomObjectRefs fixref) throws SQLException {
 		if(attr.getExtending()==null){
 			String attrName=attr.getName();
 			String sqlAttrName=ili2sqlName.mapIliAttributeDef(attr);
@@ -627,7 +731,7 @@ public class TransferToXtf {
 				Type type = attr.getDomainResolvingAliases();
 				if (type instanceof CompositionType){
 					// enque iomObj as parent
-					enqueueStructAttr(new StructWrapper(sqlid,attr,iomObj));
+					structQueue.add(new StructWrapper(sqlid,attr,iomObj));
 				}else if (type instanceof PolylineType){
 					Object geomobj=rs.getObject(valuei);
 					valuei++;
@@ -683,26 +787,32 @@ public class TransferToXtf {
 						}
 					}
 				}else if(type instanceof EnumerationType){
-					int value=rs.getInt(valuei);
-					valuei++;
-					if(!rs.wasNull()){
-						iomObj.setattrvalue(attrName,mapItfCode2XtfCode((EnumerationType)type, value));
+					if(createEnumColAsItfCode){
+						int value=rs.getInt(valuei);
+						valuei++;
+						if(!rs.wasNull()){
+							iomObj.setattrvalue(attrName,mapItfCode2XtfCode((EnumerationType)type, value));
+						}
+					}else{
+						String value=rs.getString(valuei);
+						valuei++;
+						if(!rs.wasNull()){
+							iomObj.setattrvalue(attrName,value);
+						}
+						
 					}
 				}else if(type instanceof ReferenceType){
 					int value=rs.getInt(valuei);
 					valuei++;
 					if(!rs.wasNull()){
 						IomObject ref=iomObj.addattrobj(attrName,"REF");
-						ref.setobjectrefoid(Integer.toString(value));
+						mapSqlid2Xtfid(fixref,value,ref,((ReferenceType)type).getReferred());
 					}
 				}else{
 					String value=rs.getString(valuei);
 					valuei++;
 					if(!rs.wasNull()){
 						iomObj.setattrvalue(attrName,value);
-						//if(attrName.equals("plainText") && value.startsWith("Office")){
-						//	EhiLogger.debug("plainText "+iomObj.getattrvalue(attrName));
-						//}
 					}
 				}
 			   }
@@ -1014,6 +1124,22 @@ public class TransferToXtf {
 
 		return ret.toString();
 	}
+	private String createQueryStmt4xtfid(Viewable aclass){
+		StringBuffer ret = new StringBuffer();
+		ret.append("SELECT r0."+colT_ID);
+		ret.append(", r0."+TransferFromIli.T_ILI_TID);
+		ret.append(" FROM ");
+		ArrayList tablev=new ArrayList(10);
+		tablev.add(aclass);
+		Viewable base=(Viewable)aclass.getRootExtending();
+		if(base==null){
+			base=aclass;
+		}
+		ret.append(getSqlTableName(base));
+		ret.append(" r0");
+		ret.append(" WHERE r0."+colT_ID+"=?");
+		return ret.toString();
+	}
 	/** creates sql query statement for a class.
 	 * @param aclass type of objects to build query for
 	 * @param wrapper not null, if building query for struct values
@@ -1026,7 +1152,9 @@ public class TransferToXtf {
 			ret.append(", r0."+TransferFromIli.T_TYPE);
 		}
 		if(writeIliTid && structWrapper==null){
-			ret.append(", r0."+TransferFromIli.T_ILI_TID);
+			if((aclass instanceof Table) && ((Table)aclass).isIdentifiable()){
+				ret.append(", r0."+TransferFromIli.T_ILI_TID);
+			}
 		}
 		if(structWrapper!=null){
 			if(createGenericStructRef){
@@ -1212,13 +1340,6 @@ public class TransferToXtf {
 			}
 		}
 		return ret.toString();
-	}
-	/** add an entry to list of not yet processed struct attributes
-	 * @param wrapper wrapper around a struct attribute
-	 */
-	private void enqueueStructAttr(StructWrapper wrapper)
-	{
-		structQueue.add(wrapper);
 	}
 	private String mapItfCode2XtfCode(EnumerationType type,int itfCode)
 	{

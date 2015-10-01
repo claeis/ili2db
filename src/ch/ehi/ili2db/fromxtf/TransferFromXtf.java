@@ -68,6 +68,7 @@ public class TransferFromXtf {
 	private int defaultSrsid=0;
 	private boolean createStdCols=false;
 	private boolean createEnumTxtCol=false;
+	private boolean createEnumColAsItfCode=false;
 	private boolean createTypeDiscriminator=false;
 	private boolean createGenericStructRef=false;
 	private boolean readIliTid=false;
@@ -104,6 +105,7 @@ public class TransferFromXtf {
 		idGen=new ch.ehi.ili2db.base.DbIdGen(conn,dbusr);
 		createStdCols=config.CREATE_STD_COLS_ALL.equals(config.getCreateStdCols());
 		createEnumTxtCol=config.CREATE_ENUM_TXT_COL.equals(config.getCreateEnumCols());
+		createEnumColAsItfCode=config.CREATE_ENUMCOL_AS_ITFCODE_YES.equals(config.getCreateEnumColAsItfCode());
 		colT_ID=config.getColT_ID();
 		if(colT_ID==null){
 			colT_ID=TransferFromIli.T_ID;
@@ -260,7 +262,14 @@ public class TransferFromXtf {
 		 // is it an object?
 		 if(structEle==null){
 				// map oid of transfer file to a sql id
-				sqlId=getObjSqlId(iomObj.getobjectoid());
+			 	String tid=iomObj.getobjectoid();
+			 	if(tid!=null && tid.length()>0){
+					sqlId=getObjSqlId(tid);
+			 	}else{
+					 // it is an assoc without tid
+					 // get a new sql id
+					 sqlId=newObjSqlId();
+			 	}
 		 }else{
 			 // it is a struct value
 			 // get a new sql id
@@ -294,10 +303,12 @@ public class TransferFromXtf {
 					}
 					// if class
 					if(structEle==null){
-						if(readIliTid){
-							// import TID from transfer file
-							ps.setString(valuei, iomObj.getobjectoid());
-							valuei++;
+						if((aclass instanceof Table) && ((Table)aclass).isIdentifiable()){
+							if(readIliTid){
+								// import TID from transfer file
+								ps.setString(valuei, iomObj.getobjectoid());
+								valuei++;
+							}
 						}
 					}
 					// if struct, add ref to parent
@@ -551,11 +562,19 @@ public class TransferFromXtf {
 					}
 				}else if(type instanceof EnumerationType){
 					String value=iomObj.getattrvalue(attrName);
-					if(value!=null){
-						int itfCode=mapXtfCode2ItfCode((EnumerationType)type, value);
-						ps.setInt(valuei, itfCode);
+					if(createEnumColAsItfCode){
+						if(value!=null){
+							int itfCode=mapXtfCode2ItfCode((EnumerationType)type, value);
+							ps.setInt(valuei, itfCode);
+						}else{
+							ps.setNull(valuei,Types.INTEGER);
+						}
 					}else{
-						ps.setNull(valuei,Types.INTEGER);
+						if(value!=null){
+							ps.setString(valuei, value);
+						}else{
+							ps.setNull(valuei,Types.VARCHAR);
+						}
 					}
 					valuei++;
 					if(createEnumTxtCol){
