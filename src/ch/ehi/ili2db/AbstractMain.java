@@ -259,13 +259,16 @@ public abstract class AbstractMain {
 					return;
 				
 			}else if(arg.startsWith("-")){
-				EhiLogger.logAdaption(arg+": unknown option; ignored");
-				argi++;
+				EhiLogger.logError(arg+": unknown option");
+				return;
+			}else if(argi+1<args.length){
+				EhiLogger.logError(arg+": invalid placed argument");
+				return;
 			}else{
 				break;
 			}
 		}
-		if(argi<args.length){
+		if(argi+1==args.length){
 			String xtfFilename=args[argi];
 			config.setXtffile(xtfFilename);
 			if(Ili2db.isItfFilename(xtfFilename)){

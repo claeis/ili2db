@@ -19,6 +19,10 @@ ideas/open issues/questions
 - * serial als t_id
 - --logValidOverlaps
 
+ili2pg 2.3.1 (2015-10-xx)
+----------------------------
+- check for invalid placed arguments (options without "--" prefix)
+
 ili2pg 2.3.0 (2015-10-01)
 ----------------------------
 - switch back to enum with xtf-code (to handle extended enums)
