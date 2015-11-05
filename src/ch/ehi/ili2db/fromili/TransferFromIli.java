@@ -101,6 +101,9 @@ public class TransferFromIli {
 			colT_ID=T_ID;
 		}
 		deleteExistingData=config.DELETE_DATA.equals(config.getDeleteMode());
+		if(deleteExistingData){
+			EhiLogger.logState("delete existing data...");
+		}
 		
 		createTypeDiscriminator=config.CREATE_TYPE_DISCRIMINATOR_ALWAYS.equals(config.getCreateTypeDiscriminator());
 		createGenericStructRef=config.STRUCT_MAPPING_GENERICREF.equals(config.getStructMapping());
