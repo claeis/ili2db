@@ -40,9 +40,11 @@ import ch.interlis.ili2c.metamodel.*;
 import ch.interlis.iom.IomConstants;
 import ch.interlis.iom.IomObject;
 import ch.interlis.iom_j.itf.EnumCodeMapper;
+import ch.interlis.iom_j.itf.ItfReader;
 import ch.interlis.iom_j.itf.ItfReader2;
 import ch.interlis.iom_j.xtf.XtfReader;
 import ch.interlis.iox.*;
+import ch.interlis.iox_j.IoxInvalidDataException;
 import ch.interlis.iox_j.jts.Iox2jts;
 import ch.interlis.iox_j.jts.Iox2jtsException;
 
@@ -77,6 +79,7 @@ public class TransferFromXtf {
 	private String attachmentKey=null;
 	private boolean doItfLineTables=false;
 	private boolean createItfLineTables=false;
+	private boolean isItfReader=false;
 	private boolean createItfAreaRef=false;
 	private boolean deleteExistingData=false;
 	private String colT_ID=null;
@@ -143,6 +146,7 @@ public class TransferFromXtf {
 		}else{
 			tag2class=ch.interlis.ili2c.generator.XSDGenerator.getTagMap(td);
 		}
+		isItfReader=reader instanceof ItfReader;
 		unknownTypev=new HashSet();
 		structQueue=new ArrayList();
 		boolean surfaceAsPolyline=true;
@@ -188,6 +192,15 @@ public class TransferFromXtf {
 				startTid=getLastSqlId();
 				objCount=0;
 			}else if(event instanceof EndBasketEvent){
+				if(reader instanceof ItfReader2){
+		        	ArrayList<IoxInvalidDataException> dataerrs = ((ItfReader2) reader).getDataErrs();
+		        	if(dataerrs.size()>0){
+		        		for(IoxInvalidDataException dataerr:dataerrs){
+		        			EhiLogger.logError(dataerr);
+		        		}
+		        		((ItfReader2) reader).clearDataErrs();
+		        	}
+				}
 				// TODO update import counters
 				endTid=getLastSqlId();
 				try {
@@ -511,7 +524,12 @@ public class TransferFromXtf {
 					 }
 					 if(createItfAreaRef){
 						 if(type instanceof AreaType){
-							 IomObject value=iomObj.getattrobj(ItfReader2.SAVED_GEOREF_PREFIX+attrName,0);
+							 IomObject value=null;
+							 if(isItfReader){
+								 value=iomObj.getattrobj(attrName,0);
+							 }else{
+								 value=iomObj.getattrobj(ItfReader2.SAVED_GEOREF_PREFIX+attrName,0);
+							 }
 							 if(value!=null){
 								boolean is3D=false;
 								ps.setObject(valuei,geomConv.fromIomCoord(value,getSrsid(type),is3D));
