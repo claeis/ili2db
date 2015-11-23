@@ -505,7 +505,8 @@ public class TransferFromXtf {
 				}else if (type instanceof PolylineType){
 					 IomObject value=iomObj.getattrobj(attrName,0);
 					 if(value!=null){
-						ps.setObject(valuei,geomConv.fromIomPolyline(value,getSrsid(type),false,getP((PolylineType)type)));
+						boolean is3D=((CoordType)((PolylineType)type).getControlPointDomain().getType()).getDimensions().length==3;
+						ps.setObject(valuei,geomConv.fromIomPolyline(value,getSrsid(type),is3D,getP((PolylineType)type)));
 					 }else{
 						geomConv.setPolylineNull(ps,valuei);
 					 }
@@ -515,7 +516,8 @@ public class TransferFromXtf {
 					 }else{
 						 IomObject value=iomObj.getattrobj(attrName,0);
 						 if(value!=null){
-							 Object geomObj = geomConv.fromIomSurface(value,getSrsid(type),((SurfaceOrAreaType)type).getLineAttributeStructure()!=null,false,getP((SurfaceOrAreaType)type));
+								boolean is3D=((CoordType)((SurfaceOrAreaType)type).getControlPointDomain().getType()).getDimensions().length==3;
+							 Object geomObj = geomConv.fromIomSurface(value,getSrsid(type),((SurfaceOrAreaType)type).getLineAttributeStructure()!=null,is3D,getP((SurfaceOrAreaType)type));
 							ps.setObject(valuei,geomObj);
 						 }else{
 							geomConv.setSurfaceNull(ps,valuei);
@@ -531,7 +533,7 @@ public class TransferFromXtf {
 								 value=iomObj.getattrobj(ItfReader2.SAVED_GEOREF_PREFIX+attrName,0);
 							 }
 							 if(value!=null){
-								boolean is3D=false;
+								boolean is3D=((CoordType)((SurfaceOrAreaType)type).getControlPointDomain().getType()).getDimensions().length==3;
 								ps.setObject(valuei,geomConv.fromIomCoord(value,getSrsid(type),is3D));
 							 }else{
 								geomConv.setCoordNull(ps,valuei);
@@ -684,8 +686,9 @@ public class TransferFromXtf {
 
 			IomObject value = iomObj.getattrobj(geomAttrName, 0);
 			if (value != null) {
+				boolean is3D=((CoordType)(type).getControlPointDomain().getType()).getDimensions().length==3;
 				ps.setObject(valuei,
-						geomConv.fromIomPolyline(value, getSrsid(type), false,getP(type)));
+						geomConv.fromIomPolyline(value, getSrsid(type), is3D,getP(type)));
 			} else {
 				geomConv.setPolylineNull(ps, valuei);
 			}
