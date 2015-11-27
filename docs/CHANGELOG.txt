@@ -19,6 +19,15 @@ ideas/open issues/questions
 - * serial als t_id
 - --logValidOverlaps
 
+ili2pg 2.3.1 (2015-11-23)
+----------------------------
+- check for invalid placed arguments (options without "--" prefix)
+- fixed loss of arearef if --skipPolygonBuilding
+- fixed conversion of 3d-xtf to wkb (polyline/surface/area)
+- tag errors in logfile
+- iox-ili-1.11.1
+- ili2c-4.5.18
+
 ili2pg 2.3.0 (2015-10-01)
 ----------------------------
 - switch back to enum with xtf-code (to handle extended enums)

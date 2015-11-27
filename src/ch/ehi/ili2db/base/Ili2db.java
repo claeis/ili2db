@@ -171,7 +171,7 @@ public class Ili2db {
 		{
 		ch.ehi.basics.logging.FileListener logfile=null;
 		if(config.getLogfile()!=null){
-			logfile=new ch.ehi.basics.logging.FileListener(new java.io.File(config.getLogfile()),true);
+			logfile=new Ili2dbLogger(new java.io.File(config.getLogfile()),true);
 			EhiLogger.getInstance().addListener(logfile);
 		}
 		try{
