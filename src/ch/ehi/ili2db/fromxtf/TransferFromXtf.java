@@ -316,7 +316,7 @@ public class TransferFromXtf {
 					}
 					// if class
 					if(structEle==null){
-						if((aclass instanceof Table) && ((Table)aclass).isIdentifiable()){
+						if((aclass instanceof View) || (aclass instanceof Table) && ((Table)aclass).isIdentifiable()){
 							if(readIliTid){
 								// import TID from transfer file
 								ps.setString(valuei, iomObj.getobjectoid());
@@ -346,8 +346,15 @@ public class TransferFromXtf {
 					ViewableTransferElement obj = (ViewableTransferElement)iter.next();
 					if (obj.obj instanceof AttributeDef) {
 						AttributeDef attr = (AttributeDef) obj.obj;
-						valuei = addAttrValue(iomObj, sqlType, sqlId, ps,
-								valuei, attr);
+						if(!attr.isTransient()){
+							Type proxyType=attr.getDomain();
+							if(proxyType!=null && (proxyType instanceof ObjectType)){
+								// skip implicit particles (base-viewables) of views
+							}else{
+								valuei = addAttrValue(iomObj, sqlType, sqlId, ps,
+										valuei, attr);
+							}
+						}
 					}
 					if(obj.obj instanceof RoleDef){
 						RoleDef role = (RoleDef) obj.obj;
@@ -1028,7 +1035,7 @@ public class TransferFromXtf {
 				values.append(",?");				
 			}
 			// if Class
-			if((aclass instanceof Table) && ((Table)aclass).isIdentifiable()){
+			if((aclass instanceof View) || (aclass instanceof Table) && ((Table)aclass).isIdentifiable()){
 				if(readIliTid){
 					ret.append(sep);
 					sep=",";
@@ -1071,7 +1078,14 @@ public class TransferFromXtf {
 		   ViewableTransferElement obj = (ViewableTransferElement)iter.next();
 		   if (obj.obj instanceof AttributeDef) {
 			   AttributeDef attr = (AttributeDef) obj.obj;
-			   sep = addAttrToInsertStmt(ret, values, sep, attr);
+				if(!attr.isTransient()){
+					Type proxyType=attr.getDomain();
+					if(proxyType!=null && (proxyType instanceof ObjectType)){
+						// skip implicit particles (base-viewables) of views
+					}else{
+						   sep = addAttrToInsertStmt(ret, values, sep, attr);
+					}
+				}
 		   }
 		   if(obj.obj instanceof RoleDef){
 			   RoleDef role = (RoleDef) obj.obj;

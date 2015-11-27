@@ -256,7 +256,7 @@ public class TransferFromIli {
 				  dbTable.addColumn(dbCol);
 			}
 			// if CLASS
-			  if((def instanceof Table) && ((Table)def).isIdentifiable()){
+			  if((def instanceof View) || (def instanceof Table) && ((Table)def).isIdentifiable()){
 				  if(createIliTidCol){
 						addIliTidCol(dbTable);
 				  }

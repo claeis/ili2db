@@ -617,7 +617,14 @@ public class TransferToXtf {
 						   }
 						   baseAttr=baseAttr1;
 					   }
-					   valuei = addAttrValue(rs, valuei, sqlid, iomObj, baseAttr,structQueue,fixref);
+						if(!baseAttr.isTransient()){
+							Type proxyType=baseAttr.getDomain();
+							if(proxyType!=null && (proxyType instanceof ObjectType)){
+								// skip implicit particles (base-viewables) of views
+							}else{
+								   valuei = addAttrValue(rs, valuei, sqlid, iomObj, baseAttr,structQueue,fixref);
+							}
+						}
 				   }
 				   if(obj.obj instanceof RoleDef){
 					   RoleDef role = (RoleDef) obj.obj;
@@ -1180,7 +1187,14 @@ public class TransferToXtf {
 				   }
 				   baseAttr=baseAttr1;
 			   }
-			   sep = addAttrToQueryStmt(ret, sep, baseAttr);
+				if(!baseAttr.isTransient()){
+					Type proxyType=baseAttr.getDomain();
+					if(proxyType!=null && (proxyType instanceof ObjectType)){
+						// skip implicit particles (base-viewables) of views
+					}else{
+						 sep = addAttrToQueryStmt(ret, sep, baseAttr);
+					}
+				}
 		   }
 		   if(obj.obj instanceof RoleDef){
 			   RoleDef role = (RoleDef) obj.obj;
