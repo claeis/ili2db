@@ -141,7 +141,9 @@ public class TransferToXtf {
 						{
 						  Object obj = iter.next();
 						  if(obj instanceof Viewable){
-							  if (!suppressViewable ((Viewable)obj))
+							  if((obj instanceof View) && !TransferFromIli.isTransferableView(obj)){
+								  // skip it
+							  }else if (!suppressViewable ((Viewable)obj))
 							  {
 								Viewable aclass=(Viewable)obj;
 								// get sql name
@@ -576,7 +578,7 @@ public class TransferToXtf {
 				String sqlIliTid=null;
 				if(structWrapper==null){
 					if(writeIliTid){
-						if((aclass instanceof Table) && ((Table)aclass).isIdentifiable()){
+						if((aclass instanceof View) || (aclass instanceof Table) && ((Table)aclass).isIdentifiable()){
 							sqlIliTid=rs.getString(valuei);
 							sqlid2xtfid.put(sqlid, sqlIliTid);
 							valuei++;
@@ -588,7 +590,7 @@ public class TransferToXtf {
 				}
 				Iom_jObject iomObj;
 				if(structWrapper==null){
-					if((aclass instanceof Table) && ((Table)aclass).isIdentifiable()){
+					if((aclass instanceof View) || (aclass instanceof Table) && ((Table)aclass).isIdentifiable()){
 						iomObj=new Iom_jObject(aclass.getScopedName(null),sqlIliTid);
 					}else{
 						iomObj=new Iom_jObject(aclass.getScopedName(null),null);
@@ -1159,7 +1161,7 @@ public class TransferToXtf {
 			ret.append(", r0."+TransferFromIli.T_TYPE);
 		}
 		if(writeIliTid && structWrapper==null){
-			if((aclass instanceof Table) && ((Table)aclass).isIdentifiable()){
+			if((aclass instanceof View) || (aclass instanceof Table) && ((Table)aclass).isIdentifiable()){
 				ret.append(", r0."+TransferFromIli.T_ILI_TID);
 			}
 		}

@@ -137,6 +137,8 @@ public class TransferFromIli {
 			}else if (modelo instanceof Viewable){
 				if(modelo instanceof Table && ((Table)modelo).isIli1LineAttrStruct()){
 					// skip it
+				}else if((modelo instanceof View) && !isTransferableView(modelo)){
+					// skip it
 				}else{
 					try{
 						generateViewable((Viewable)modelo);
@@ -164,6 +166,20 @@ public class TransferFromIli {
 		customMapping.end(config);
 		return schema;		
 
+	}
+	public static boolean isTransferableView(Object modelo) {
+		if(!(modelo instanceof View)){
+			return false;
+		}
+		View view=(View) modelo;
+		Topic parent=(Topic)view.getContainer();
+		if(!parent.isViewTopic()){
+			return false;
+		}
+		if(view.isTransient()){
+			return false;
+		}
+		return true;
 	}
 	private CustomMapping getCustomMappingStrategy(ch.ehi.ili2db.gui.Config config)
 	throws Ili2dbException
