@@ -4,7 +4,6 @@ ideas/open issues/questions
 - gui: button 'drop tables'
 - gui: button 'create scripts'
 - ordered assocs
-- create referential constraints
 - attributes of 1:n associations
 - * export --topics, --baskets
 - make use of quoted identifiers
@@ -13,7 +12,6 @@ ideas/open issues/questions
 - smart chbase.multilingual mapping
 - smart chbase.multisurface mapping
 - * smart chbase.catalogue mapping
-- * support ili2 EXTERNAL
 - support ili2 views
 - --initNameMapping
 - * serial als t_id
@@ -24,6 +22,7 @@ ili2pg 2.4.0 (2015-11-xx)
 - fixed export of VIEWs 
 - fixed import/export of TIDs of VIEWs
 - skip TRANSIENT VIEWs
+- support ili2 EXTERNAL
 
 ili2pg 2.3.1 (2015-11-23)
 ----------------------------

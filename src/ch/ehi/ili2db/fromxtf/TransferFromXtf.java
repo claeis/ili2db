@@ -45,6 +45,7 @@ import ch.interlis.iom_j.itf.ItfReader2;
 import ch.interlis.iom_j.xtf.XtfReader;
 import ch.interlis.iox.*;
 import ch.interlis.iox_j.IoxInvalidDataException;
+import ch.interlis.iox_j.ObjectEvent;
 import ch.interlis.iox_j.jts.Iox2jts;
 import ch.interlis.iox_j.jts.Iox2jtsException;
 
@@ -86,7 +87,9 @@ public class TransferFromXtf {
 	private EnumCodeMapper enumTypes=new EnumCodeMapper();
 	//private int sqlIdGen=1;
 	private ch.ehi.ili2db.base.DbIdGen idGen=null;
-	private HashMap xtfId2sqlId=new HashMap();
+	private HashMap<String,Integer> xtfId2sqlId=new HashMap<String,Integer>();
+	private ArrayList<FixIomObjectExtRefs> delayedObjects=null;
+
 	/** list of not yet processed struct values
 	 */
 	private ArrayList structQueue=null;
@@ -156,7 +159,7 @@ public class TransferFromXtf {
 		int startTid=0;
 		int endTid=0;
 		int objCount=0;
-
+		boolean referrs=false;
 		try {
 			writeDataset(datasetSqlId);
 			importSqlId=writeImportStat(datasetSqlId,xtffilename,today,dbusr);
@@ -184,6 +187,7 @@ public class TransferFromXtf {
 						config.setAttachmentKey(attachmentKey);
 					}
 					writeBasket(datasetSqlId,basket,basketSqlId,attachmentKey);
+					delayedObjects=new ArrayList<FixIomObjectExtRefs>();
 				} catch (SQLException ex) {
 					EhiLogger.logError("Basket "+basket.getType()+"(oid "+basket.getBid()+")",ex);
 				} catch (ConverterException ex) {
@@ -201,6 +205,34 @@ public class TransferFromXtf {
 		        		((ItfReader2) reader).clearDataErrs();
 		        	}
 				}
+				// fix external references
+				for(FixIomObjectExtRefs fixref : delayedObjects){
+					boolean skipObj=false;
+					for(IomObject ref:fixref.getRefs()){
+						String xtfid=ref.getobjectrefoid();
+						if(xtfId2sqlId.containsKey(xtfid)){
+							// skip it; now resolvable
+						}else{
+							// object in another basket
+							Viewable aclass=fixref.getTargetClass(ref);
+							// read object
+							Integer sqlid=readObjectSqlid(aclass,xtfid);
+							if(sqlid==null){
+								EhiLogger.logError("unknown referenced object "+aclass.getScopedName(null)+" TID "+xtfid+" referenced from "+fixref.getRoot().getobjecttag()+" TID "+fixref.getRoot().getobjectoid());
+								referrs=true;
+								skipObj=true;
+							}else{
+								// remember found sqlid
+								xtfId2sqlId.put(xtfid, sqlid);
+							}
+						}
+						
+					}
+					if(!skipObj){
+						doObject(basketSqlId,fixref.getRoot());
+					}
+				}
+				
 				// TODO update import counters
 				endTid=getLastSqlId();
 				try {
@@ -218,37 +250,215 @@ public class TransferFromXtf {
 			}else if(event instanceof ObjectEvent){
 				objCount++;
 				IomObject iomObj=((ObjectEvent)event).getIomObject();
-				// translate object
-				try{
-					//EhiLogger.debug(iomObj.toString());
-					writeObject(basketSqlId,iomObj,null);
-				}catch(ConverterException ex){
-					EhiLogger.debug(iomObj.toString());
-					EhiLogger.logError("Object "+iomObj.getobjectoid()+" at (line "+iomObj.getobjectline()+",col "+iomObj.getobjectcol()+")",ex);
-				}catch(java.sql.SQLException ex){
-					EhiLogger.debug(iomObj.toString());
-					EhiLogger.logError("Object "+iomObj.getobjectoid()+" at (line "+iomObj.getobjectline()+",col "+iomObj.getobjectcol()+")",ex);
-				}catch(java.lang.RuntimeException ex){
-					EhiLogger.traceState(iomObj.toString());
-					throw ex;
-				}
-				while(!structQueue.isEmpty()){
-					StructWrapper struct=(StructWrapper)structQueue.remove(0); // get front
-					try{
-						writeObject(basketSqlId,struct.getStruct(),struct);
-					}catch(ConverterException ex){
-						EhiLogger.logError("Object "+iomObj.getobjectoid()+"; Struct at (line "+struct.getStruct().getobjectline()+",col "+struct.getStruct().getobjectcol()+")",ex);
-					}catch(java.sql.SQLException ex){
-						EhiLogger.logError("Object "+iomObj.getobjectoid()+"; Struct at (line "+struct.getStruct().getobjectline()+",col "+struct.getStruct().getobjectcol()+")",ex);
-					}
+				if(allReferencesKnown(iomObj)){
+					// translate object
+					doObject(basketSqlId, iomObj);
 				}
 			}else if(event instanceof EndTransferEvent){
 				break;
 			}
 			event=reader.read();
 		}
+		if(referrs){
+			throw new IoxException("dangling references");
+		}
 		
 	}
+
+	private void doObject(int basketSqlId, IomObject iomObj) {
+		try{
+			//EhiLogger.debug(iomObj.toString());
+			writeObject(basketSqlId,iomObj,null);
+		}catch(ConverterException ex){
+			EhiLogger.debug(iomObj.toString());
+			EhiLogger.logError("Object "+iomObj.getobjectoid()+" at (line "+iomObj.getobjectline()+",col "+iomObj.getobjectcol()+")",ex);
+		}catch(java.sql.SQLException ex){
+			EhiLogger.debug(iomObj.toString());
+			EhiLogger.logError("Object "+iomObj.getobjectoid()+" at (line "+iomObj.getobjectline()+",col "+iomObj.getobjectcol()+")",ex);
+		}catch(java.lang.RuntimeException ex){
+			EhiLogger.traceState(iomObj.toString());
+			throw ex;
+		}
+		while(!structQueue.isEmpty()){
+			StructWrapper struct=(StructWrapper)structQueue.remove(0); // get front
+			try{
+				writeObject(basketSqlId,struct.getStruct(),struct);
+			}catch(ConverterException ex){
+				EhiLogger.logError("Object "+iomObj.getobjectoid()+"; Struct at (line "+struct.getStruct().getobjectline()+",col "+struct.getStruct().getobjectcol()+")",ex);
+			}catch(java.sql.SQLException ex){
+				EhiLogger.logError("Object "+iomObj.getobjectoid()+"; Struct at (line "+struct.getStruct().getobjectline()+",col "+struct.getStruct().getobjectcol()+")",ex);
+			}
+		}
+	}
+	private boolean allReferencesKnown(IomObject iomObj) {
+		String tag=iomObj.getobjecttag();
+		//EhiLogger.debug("tag "+tag);
+		Object modelele=tag2class.get(tag);
+		if(modelele==null){
+			return true;
+		}
+		// is it a SURFACE or AREA line table?
+		if(createItfLineTables && modelele instanceof AttributeDef){
+			return true;
+		}
+	 	String tid=iomObj.getobjectoid();
+	 	if(tid!=null && tid.length()>0){
+			getObjSqlId(tid);
+	 	}
+		FixIomObjectExtRefs extref=new FixIomObjectExtRefs(iomObj);
+		allReferencesKnownHelper(iomObj, extref);
+		if(!extref.needsFixing()){
+			return true;
+		}
+		//EhiLogger.debug("needs fixing "+iomObj.getobjectoid());
+		delayedObjects.add(extref);
+		return false;
+	}
+	private void allReferencesKnownHelper(IomObject iomObj,FixIomObjectExtRefs extref) {
+		
+		String tag=iomObj.getobjecttag();
+		//EhiLogger.debug("tag "+tag);
+		Object modelele=tag2class.get(tag);
+		if(modelele==null){
+			return;
+		}
+		// ASSERT: an ordinary class/table
+		Viewable aclass=(Viewable)modelele;		
+				Iterator iter = aclass.getAttributesAndRoles2();
+				while (iter.hasNext()) {
+					ViewableTransferElement obj = (ViewableTransferElement)iter.next();
+					if (obj.obj instanceof AttributeDef) {
+						AttributeDef attr = (AttributeDef) obj.obj;
+						if(!attr.isTransient()){
+							Type proxyType=attr.getDomain();
+							if(proxyType!=null && (proxyType instanceof ObjectType)){
+								// skip implicit particles (base-viewables) of views
+							}else{
+								allReferencesKnownHelper(iomObj, attr, extref);
+							}
+						}
+					}
+					if(obj.obj instanceof RoleDef){
+						RoleDef role = (RoleDef) obj.obj;
+						if(role.getExtending()==null){
+							String roleName=role.getName();
+							// a role of an embedded association?
+							if(obj.embedded){
+								AssociationDef roleOwner = (AssociationDef) role.getContainer();
+								if(roleOwner.getDerivedFrom()==null){
+									// not just a link?
+									 IomObject structvalue=iomObj.getattrobj(roleName,0);
+									if (roleOwner.getAttributes().hasNext()
+										|| roleOwner.getLightweightAssociations().iterator().hasNext()) {
+										 // TODO handle attributes of link
+									}
+									if(structvalue!=null){
+										String refoid=structvalue.getobjectrefoid();
+										if(!xtfId2sqlId.containsKey(refoid)){
+											extref.addFix(structvalue, role.getDestination());
+										}
+									}
+								}
+							 }else{
+								 IomObject structvalue=iomObj.getattrobj(roleName,0);
+								 String refoid=structvalue.getobjectrefoid();
+								if(!xtfId2sqlId.containsKey(refoid)){
+									extref.addFix(structvalue, role.getDestination());
+								}
+								
+							 }
+						}
+					 }
+				}
+	}
+	private void allReferencesKnownHelper(IomObject iomObj, AttributeDef attr,FixIomObjectExtRefs extref)
+	{
+		if(attr.getExtending()==null){
+			 String attrName=attr.getName();
+			if( TransferFromIli.isBoolean(td,attr)) {
+			}else if( TransferFromIli.isIli1Date(td,attr)) {
+			}else if( TransferFromIli.isIli2Date(td,attr)) {
+			}else if( TransferFromIli.isIli2Time(td,attr)) {
+			}else if( TransferFromIli.isIli2DateTime(td,attr)) {
+			}else{
+				Type type = attr.getDomainResolvingAliases();
+			 
+				if (type instanceof CompositionType){
+					 // enqueue struct values
+					 int structc=iomObj.getattrvaluecount(attrName);
+					 for(int structi=0;structi<structc;structi++){
+					 	IomObject struct=iomObj.getattrobj(attrName,structi);
+					 	allReferencesKnownHelper(struct, extref);
+					 }
+				}else if (type instanceof PolylineType){
+				 }else if(type instanceof SurfaceOrAreaType){
+				 }else if(type instanceof CoordType){
+				}else if(type instanceof NumericType){
+				}else if(type instanceof EnumerationType){
+				}else if(type instanceof ReferenceType){
+					 IomObject structvalue=iomObj.getattrobj(attrName,0);
+					 String refoid=null;
+					 if(structvalue!=null){
+						 refoid=structvalue.getobjectrefoid();
+					 }
+					 if(refoid!=null){
+							if(!xtfId2sqlId.containsKey(refoid)){
+								extref.addFix(structvalue, ((ReferenceType)type).getReferred());
+							}
+					 }
+				}else{
+				}
+			}
+		}
+	}
+
+	private Integer readObjectSqlid(Viewable aclass, String xtfid) {
+		String stmt = createQueryStmt4sqlid(aclass);
+		EhiLogger.traceBackendCmd(stmt);
+		java.sql.PreparedStatement dbstmt = null;
+		int sqlid=0;
+		try {
+
+			dbstmt = conn.prepareStatement(stmt);
+			dbstmt.clearParameters();
+			dbstmt.setString(1, xtfid);
+			java.sql.ResultSet rs = dbstmt.executeQuery();
+			if(rs.next()) {
+				sqlid = rs.getInt(1);
+			}else{
+				// unknown object
+				return null;
+			}
+		} catch (java.sql.SQLException ex) {
+			EhiLogger.logError("failed to query " + aclass.getScopedName(null),	ex);
+		} finally {
+			if (dbstmt != null) {
+				try {
+					dbstmt.close();
+				} catch (java.sql.SQLException ex) {
+					EhiLogger.logError("failed to close query of "+ aclass.getScopedName(null), ex);
+				}
+			}
+		}
+		return sqlid;
+	}
+	private String createQueryStmt4sqlid(Viewable aclass){
+		StringBuffer ret = new StringBuffer();
+		ret.append("SELECT r0."+colT_ID);
+		ret.append(", r0."+TransferFromIli.T_ILI_TID);
+		ret.append(" FROM ");
+		ArrayList tablev=new ArrayList(10);
+		tablev.add(aclass);
+		Viewable base=(Viewable)aclass.getRootExtending();
+		if(base==null){
+			base=aclass;
+		}
+		ret.append(getSqlTableName(base));
+		ret.append(" r0");
+		ret.append(" WHERE r0."+TransferFromIli.T_ILI_TID+"=?");
+		return ret.toString();
+	}
+
 	/** if structEle==null, iomObj is an object. If structEle!=null iomObj is a struct value.
 	 */
 	private void writeObject(int basketSqlId,IomObject iomObj,StructWrapper structEle)
@@ -291,10 +501,7 @@ public class TransferFromXtf {
 		 updateObjStat(tag,sqlId);
 		 // loop over all classes; start with leaf, end with the base of the inheritance hierarchy
 		 while(aclass!=null){
-			String sqlname=(String)ili2sqlName.mapIliClassDef(aclass);
-			if(schema!=null){
-				sqlname=schema+"."+sqlname;
-			}
+			String sqlname = getSqlTableName(aclass);
 			String insert = getInsertStmt(sqlname,aclass,structEle);
 			EhiLogger.traceBackendCmd(insert);
 			PreparedStatement ps = conn.prepareStatement(insert);
@@ -424,6 +631,14 @@ public class TransferFromXtf {
 			}
 			aclass=(Viewable)aclass.getExtending();
 		 }
+	}
+
+	private String getSqlTableName(Viewable aclass) {
+		String sqlname=(String)ili2sqlName.mapIliClassDef(aclass);
+		if(schema!=null){
+			sqlname=schema+"."+sqlname;
+		}
+		return sqlname;
 	}
 
 	private int addAttrValue(IomObject iomObj, String sqlType, int sqlId,
@@ -973,7 +1188,7 @@ public class TransferFromXtf {
 	 */
 	private int getObjSqlId(String xtfId){
 		if(xtfId2sqlId.containsKey(xtfId)){
-			return ((Integer)xtfId2sqlId.get(xtfId)).intValue();
+			return xtfId2sqlId.get(xtfId).intValue();
 		}
 		int ret=newObjSqlId();
 		xtfId2sqlId.put(xtfId,new Integer(ret));
