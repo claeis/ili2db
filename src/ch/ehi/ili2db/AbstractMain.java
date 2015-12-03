@@ -41,7 +41,7 @@ public abstract class AbstractMain {
 	protected abstract void printConnectOptions();
 	protected abstract void printSpecificOptions();
 	protected abstract int doArgs(String args[],int argi,Config config);
-	protected void initConfig(Config config)
+	public void initConfig(Config config)
 	{
 		config.setSender(getAPP_NAME()+"-"+getVersion());
 		config.setModeldir(Ili2db.ILI_FROM_DB+ch.interlis.ili2c.Main.ILIDIR_SEPARATOR+Ili2db.XTF_DIR+ch.interlis.ili2c.Main.ILIDIR_SEPARATOR+ch.interlis.ili2c.Main.ILI_REPOSITORY+ch.interlis.ili2c.Main.ILIDIR_SEPARATOR+Ili2db.JAR_DIR);

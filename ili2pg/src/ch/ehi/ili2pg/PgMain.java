@@ -31,7 +31,7 @@ import ch.ehi.ili2db.gui.AbstractDbPanelDescriptor;
 public class PgMain extends ch.ehi.ili2db.AbstractMain {
 
 	@Override
-	protected void initConfig(Config config) {
+	public void initConfig(Config config) {
 		super.initConfig(config);
 		config.setGeometryConverter(ch.ehi.ili2pg.converter.PostgisGeometryConverter.class.getName());
 		config.setDdlGenerator(ch.ehi.sqlgen.generator_impl.jdbc.GeneratorPostgresql.class.getName());

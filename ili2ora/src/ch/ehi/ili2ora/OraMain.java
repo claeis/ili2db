@@ -31,7 +31,8 @@ import ch.ehi.ili2db.gui.AbstractDbPanelDescriptor;
 public class OraMain extends ch.ehi.ili2db.AbstractMain {
 	private final String DB_PORT="1521";
 	private final String DB_HOST="localhost";
-	protected void initConfig(Config config) {
+	@Override
+	public void initConfig(Config config) {
 		super.initConfig(config);
 		config.setGeometryConverter(ch.ehi.ili2ora.converter.OracleGeometryConverter.class.getName());
 		config.setDdlGenerator(ch.ehi.sqlgen.generator_impl.jdbc.GeneratorOracle.class.getName());

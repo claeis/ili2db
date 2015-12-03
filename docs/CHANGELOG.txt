@@ -22,7 +22,8 @@ ili2pg 2.4.0 (2015-12-xx)
 - fixed import/export of TIDs of VIEWs
 - skip TRANSIENT VIEWs
 - support ili2 EXTERNAL
-- serial als t_id
+- ili2pg: t_id with default value
+- Main.initConfig() made public, so that it can bes used by code clients
 
 ili2pg 2.3.1 (2015-11-23)
 ----------------------------
