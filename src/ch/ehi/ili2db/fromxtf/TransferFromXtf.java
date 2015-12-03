@@ -527,7 +527,7 @@ public class TransferFromXtf {
 					// if class
 					if(structEle==null){
 						if((aclass instanceof View) || (aclass instanceof Table) && ((Table)aclass).isIdentifiable()){
-							if(readIliTid){
+							if(readIliTid || TransferFromIli.isViewableWithOid(aclass)){
 								// import TID from transfer file
 								ps.setString(valuei, iomObj.getobjectoid());
 								valuei++;
@@ -1242,7 +1242,7 @@ public class TransferFromXtf {
 			}
 			// if Class
 			if((aclass instanceof View) || (aclass instanceof Table) && ((Table)aclass).isIdentifiable()){
-				if(readIliTid){
+				if(readIliTid || TransferFromIli.isViewableWithOid(aclass)){
 					ret.append(sep);
 					sep=",";
 					ret.append(TransferFromIli.T_ILI_TID);

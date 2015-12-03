@@ -23,7 +23,8 @@ ili2pg 2.4.0 (2015-12-xx)
 - skip TRANSIENT VIEWs
 - support ili2 EXTERNAL
 - ili2pg: t_id with default value
-- Main.initConfig() made public, so that it can bes used by code clients
+- Main.initConfig() made public, so that it can be used by code clients
+- create T_Ili_Tid column if class has OID (without explicit --importTid)
 
 ili2pg 2.3.1 (2015-11-23)
 ----------------------------

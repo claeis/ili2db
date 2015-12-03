@@ -229,10 +229,7 @@ public class TransferToXtf {
 	}
 	private String readObjectTid(Viewable aclass, int sqlid) {
 		String sqlIliTid = null;
-		if (!writeIliTid) {
-			sqlIliTid = Integer.toString(sqlid);
-			sqlid2xtfid.put(sqlid, sqlIliTid);
-		}else{
+		if (writeIliTid || TransferFromIli.isViewableWithOid(aclass)) {
 			String stmt = createQueryStmt4xtfid(aclass);
 			EhiLogger.traceBackendCmd(stmt);
 			java.sql.PreparedStatement dbstmt = null;
@@ -260,6 +257,9 @@ public class TransferToXtf {
 					}
 				}
 			}
+		}else{
+			sqlIliTid = Integer.toString(sqlid);
+			sqlid2xtfid.put(sqlid, sqlIliTid);
 		}
 		return sqlIliTid;
 	}
@@ -577,8 +577,8 @@ public class TransferToXtf {
 				}
 				String sqlIliTid=null;
 				if(structWrapper==null){
-					if(writeIliTid){
-						if((aclass instanceof View) || (aclass instanceof Table) && ((Table)aclass).isIdentifiable()){
+					if((aclass instanceof View) || (aclass instanceof Table) && ((Table)aclass).isIdentifiable()){
+						if(writeIliTid || TransferFromIli.isViewableWithOid(aclass)){
 							sqlIliTid=rs.getString(valuei);
 							sqlid2xtfid.put(sqlid, sqlIliTid);
 							valuei++;
@@ -1160,8 +1160,8 @@ public class TransferToXtf {
 		if(createTypeDiscriminator || Ili2cUtility.isViewableWithExtension(aclass)){
 			ret.append(", r0."+TransferFromIli.T_TYPE);
 		}
-		if(writeIliTid && structWrapper==null){
-			if((aclass instanceof View) || (aclass instanceof Table) && ((Table)aclass).isIdentifiable()){
+		if((aclass instanceof View) || (aclass instanceof Table) && ((Table)aclass).isIdentifiable()){
+			if(writeIliTid && structWrapper==null || TransferFromIli.isViewableWithOid(aclass)){
 				ret.append(", r0."+TransferFromIli.T_ILI_TID);
 			}
 		}

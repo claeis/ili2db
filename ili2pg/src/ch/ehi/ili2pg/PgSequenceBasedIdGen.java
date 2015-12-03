@@ -15,12 +15,13 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
-package ch.ehi.ili2db.base;
+package ch.ehi.ili2pg;
 
 import java.io.IOException;
 import java.sql.Connection;
 
 import ch.ehi.basics.logging.EhiLogger;
+import ch.ehi.ili2db.base.DbIdGen;
 import ch.ehi.sqlgen.repository.DbTableName;
 
 
@@ -29,7 +30,7 @@ import ch.ehi.sqlgen.repository.DbTableName;
  * @version $Revision: 1.0 $ $Date: 15.03.2007 $
  */
 public class PgSequenceBasedIdGen implements DbIdGen {
-	public final static String SQL_ILI2DB_SEQ_NAME="ili2db";
+	public final static String SQL_ILI2DB_SEQ_NAME="t_ili2db_seq";
 	java.sql.Connection conn=null;
 	String dbusr=null;
 	String schema=null;

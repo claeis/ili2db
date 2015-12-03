@@ -83,6 +83,7 @@ public class TransferFromIli {
 	private boolean isIli1Model=false;
 	private boolean deleteExistingData=false;
 	private String colT_ID=null;
+	private String uuid_default_value=null;
 	private String nl=System.getProperty("line.separator");
 	private DbIdGen idGen=null;
 
@@ -102,6 +103,7 @@ public class TransferFromIli {
 		if(colT_ID==null){
 			colT_ID=T_ID;
 		}
+		uuid_default_value=config.getUuidDefaultValue();
 		this.idGen=idGen;
 
 		deleteExistingData=config.DELETE_DATA.equals(config.getDeleteMode());
@@ -277,8 +279,8 @@ public class TransferFromIli {
 			}
 			// if CLASS
 			  if((def instanceof View) || (def instanceof Table) && ((Table)def).isIdentifiable()){
-				  if(createIliTidCol){
-						addIliTidCol(dbTable);
+				  if(createIliTidCol || isViewableWithOid(def)){
+						addIliTidCol(dbTable,def);
 				  }
 			  }
 		  // if STRUCTURE, add ref to parent
@@ -415,6 +417,25 @@ public class TransferFromIli {
 	  		}
 	  	}
 	}
+	public static boolean isViewableWithOid(Viewable def) {
+		if(!(def instanceof AbstractClassDef)){
+			return false;
+		}
+		if((def instanceof Table) && !((Table)def).isIdentifiable()){
+			return false;
+		}
+		AbstractClassDef aclass=(AbstractClassDef) def;
+		if(aclass.getOid()!=null){
+			return true;
+		}
+		for(Object exto : aclass.getExtensions()){
+			AbstractClassDef ext=(AbstractClassDef) exto;
+			if(ext.getOid()!=null){
+				return true;
+			}
+		}
+		return false;
+	}
 	private void generateItfLineTable(AttributeDef attr)
 	throws Ili2dbException
 	{
@@ -439,7 +460,7 @@ public class TransferFromIli {
 		  dbTable.setRequiresSequence(true);
 		DbColId dbColId=addKeyCol(dbTable);
 		  if(createIliTidCol){
-				addIliTidCol(dbTable);
+				addIliTidCol(dbTable,null);
 		  }
 		  if(createBasketCol){
 			  // add basketCol
@@ -491,12 +512,29 @@ public class TransferFromIli {
 			  }
 		  	schema.addTable(dbTable);
 	}
-	private void addIliTidCol(DbTable dbTable) {
-		DbColVarchar dbColIliTid=new DbColVarchar();
-		dbColIliTid.setName(T_ILI_TID);
-		dbColIliTid.setNotNull(false); // enable later inserts without TID
-		dbColIliTid.setSize(200);
-		dbTable.addColumn(dbColIliTid);
+	private void addIliTidCol(DbTable dbTable,Viewable aclass) {
+		if(isUuidOid(aclass)){
+			DbColUuid dbColIliTid= new DbColUuid();
+			dbColIliTid.setName(T_ILI_TID);
+			// CREATE EXTENSION "uuid-ossp";
+			dbColIliTid.setDefaultValue(uuid_default_value);
+			dbTable.addColumn(dbColIliTid);
+		}else{
+			DbColVarchar dbColIliTid=new DbColVarchar();
+			dbColIliTid.setName(T_ILI_TID);
+			dbColIliTid.setSize(200);
+			dbTable.addColumn(dbColIliTid);
+		}
+	}
+	
+	private boolean isUuidOid(Viewable aclass) {
+		if(aclass instanceof AbstractClassDef){
+			Domain oid=((AbstractClassDef<AbstractLeafElement>) aclass).getOid();
+			if(oid==td.INTERLIS.UUIDOID){
+				return true;
+			}
+		}
+		return false;
 	}
 	static public boolean isBoolean(TransferDescription td,AttributeDef attr){
 		if (attr.getDomain() instanceof TypeAlias && isBoolean(td,attr.getDomain())) {
@@ -608,8 +646,6 @@ public class TransferFromIli {
 			dbCol= new DbColDate();
 		}else if (isIliUuid(td,attr)) {
 			dbCol= new DbColUuid();
-			// CREATE EXTENSION "uuid-ossp";
-			// dbCol.setDefaultValue("uuid_generate_v4()");
 		}else if (isIli2Date(td,attr)) {
 			dbCol= new DbColDate();
 		}else if (isIli2DateTime(td,attr)) {
@@ -1296,7 +1332,7 @@ public class TransferFromIli {
 			tab.addColumn(thisClass);
 
 			// basket id as read from xtf
-			addIliTidCol(tab); 
+			addIliTidCol(tab,null); 
 			
 			// name of subdirectory in attachments folder
 			DbColVarchar attkey=new DbColVarchar();
