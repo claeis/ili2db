@@ -5,24 +5,24 @@ ideas/open issues/questions
 - gui: button 'create scripts'
 - ordered assocs
 - attributes of 1:n associations
-- * export --topics, --baskets
 - make use of quoted identifiers
-- * support geopackage
+- --logValidOverlaps
+- support ili2 views
+- --initNameMapping
+- support geopackage
 - smart inheritance mapping
 - smart chbase.multilingual mapping
 - smart chbase.multisurface mapping
-- * smart chbase.catalogue mapping
-- support ili2 views
-- --initNameMapping
-- * serial als t_id
-- --logValidOverlaps
+- smart chbase.catalogue mapping
+- export --topics, --baskets
 
-ili2pg 2.4.0 (2015-11-xx)
+ili2pg 2.4.0 (2015-12-xx)
 ----------------------------
 - fixed export of VIEWs 
 - fixed import/export of TIDs of VIEWs
 - skip TRANSIENT VIEWs
 - support ili2 EXTERNAL
+- serial als t_id
 
 ili2pg 2.3.1 (2015-11-23)
 ----------------------------

@@ -62,6 +62,7 @@ public class Config extends Settings {
 	private String dropscript;
 	private String xtffile;
 	private String mappingConfig;
+	private String idGenerator=null;
 	private String geometryConverter;
 	private String jdbcDriver=null;
 	private String ddlGenerator=null;
@@ -72,6 +73,12 @@ public class Config extends Settings {
 	static public final int FC_IMPORT=0;
 	static public final int FC_SCHEMAIMPORT=1;
 	static public final int FC_EXPORT=2;
+	public String getIdGenerator() {
+		return idGenerator;
+	}
+	public void setIdGenerator(String idGeneratorClassName) {
+		this.idGenerator = idGeneratorClassName;
+	}
 	public String getGeometryConverter() {
 		return geometryConverter;
 	}

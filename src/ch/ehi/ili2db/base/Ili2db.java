@@ -267,11 +267,15 @@ public class Ili2db {
 			if(ddlGenerator==null){
 				throw new Ili2dbException("no DDL generator given");
 			}
+			String idGenerator=config.getIdGenerator();
+			if(idGenerator==null){
+				throw new Ili2dbException("no ID generator given");
+			}
 			String jdbcDriver=config.getJdbcDriver();
 			if(jdbcDriver==null){
 				throw new Ili2dbException("no JDBC driver given");
 			}
-					
+			
 			// open db connection
 			try{
 				Class.forName(jdbcDriver);
@@ -348,6 +352,13 @@ public class Ili2db {
 				}catch(Exception ex){
 					throw new Ili2dbException("failed to load/create DDL generator",ex);
 				}
+				DbIdGen idGen=null;
+				try{
+					idGen=(DbIdGen)Class.forName(idGenerator).newInstance();
+				}catch(Exception ex){
+					throw new Ili2dbException("failed to load/create ID generator",ex);
+				}
+				idGen.init(config.getDbschema());
 				SqlGeometryConverter geomConverter=null;
 				try{
 					geomConverter=(SqlGeometryConverter)Class.forName(geometryConverter).newInstance();
@@ -364,7 +375,7 @@ public class Ili2db {
 					// map ili-classes to sql-tables
 					DbSchema schema;
 					try {
-						schema = trsfFromIli.doit(td,eles,mapping,config);
+						schema = trsfFromIli.doit(td,eles,mapping,config,idGen);
 					} catch (Ili2dbException e) {
 						throw new Ili2dbException("mapping of ili-classes to sql-tables failed",e);
 					}
@@ -381,10 +392,13 @@ public class Ili2db {
 					trsfFromIli.addEnumTable(schema);
 					Mapping.addTableMappingTable(schema);
 					Mapping.addAttrMappingTable(schema);
-					DbIdGen.addMappingTable(schema);
+					idGen.addMappingTable(schema);
 								
 					GeneratorDriver drv=new GeneratorDriver(gen);
 					config.setJdbcConnection(conn);
+					idGen.initDb(conn,dbusr);
+					idGen.initDbDefs();
+					
 					drv.visitSchema(config,schema);
 					// create script requested by user?
 					String createscript=config.getCreatescript();
@@ -433,7 +447,7 @@ public class Ili2db {
 						}else{
 							ioxReader=new XtfReader(in);
 						}
-						transferFromXtf(conn,ioxReader,mapping,td,dbusr,geomConverter,config,stat);
+						transferFromXtf(conn,ioxReader,mapping,td,dbusr,geomConverter,idGen,config,stat);
 					} catch (IOException ex) {
 						throw new Ili2dbException(ex);
 					} catch (IoxException ex) {
@@ -497,7 +511,7 @@ public class Ili2db {
 						}else{
 							ioxReader=new XtfReader(new java.io.File(inputFilename));
 						}
-						transferFromXtf(conn,ioxReader,mapping,td,dbusr,geomConverter,config,stat);
+						transferFromXtf(conn,ioxReader,mapping,td,dbusr,geomConverter,idGen,config,stat);
 					} catch (IoxException e) {
 						throw new Ili2dbException(e);
 					}finally{
@@ -703,6 +717,10 @@ public class Ili2db {
 			if(ddlGenerator==null){
 				throw new Ili2dbException("no DDL generator given");
 			}
+			String idGenerator=config.getIdGenerator();
+			if(idGenerator==null){
+				throw new Ili2dbException("no ID generator given");
+			}
 			String jdbcDriver=config.getJdbcDriver();
 			if(jdbcDriver==null){
 				throw new Ili2dbException("no JDBC driver given");
@@ -754,13 +772,19 @@ public class Ili2db {
 			}catch(Exception ex){
 				throw new Ili2dbException("failed to load/create DDL generator",ex);
 			}
-			
 			  // create db schema
 		  	if(config.getDbschema()!=null){
 		  		if(!DbUtility.schemaExists(conn, config.getDbschema())){
 			  		DbUtility.createSchema(conn, config.getDbschema());
 		  		}
 		  	}
+			DbIdGen idGen=null;
+			try{
+				idGen=(DbIdGen)Class.forName(idGenerator).newInstance();
+			}catch(Exception ex){
+				throw new Ili2dbException("failed to load/create ID generator",ex);
+			}
+		  	idGen.init(config.getDbschema());
 
 			// read mapping file
 			String mappingConfigFilename=config.getMappingConfigFilename();
@@ -813,7 +837,7 @@ public class Ili2db {
 				// TODO move default SRS to config
 				DbSchema schema;
 				try {
-					schema = trsfFromIli.doit(td,eles,mapping,config);
+					schema = trsfFromIli.doit(td,eles,mapping,config,idGen);
 				} catch (Ili2dbException e) {
 					throw new Ili2dbException("mapping of ili-classes to sql-tables failed",e);
 				}
@@ -830,7 +854,7 @@ public class Ili2db {
 					trsfFromIli.addEnumTable(schema);
 					Mapping.addTableMappingTable(schema);
 					Mapping.addAttrMappingTable(schema);
-					DbIdGen.addMappingTable(schema);
+					idGen.addMappingTable(schema);
 				}
 				
 				// TODO create geodb domains
@@ -840,6 +864,9 @@ public class Ili2db {
 							
 				GeneratorDriver drv=new GeneratorDriver(gen);
 				config.setJdbcConnection(conn);
+				idGen.initDb(conn,dbusr);
+				idGen.initDbDefs();
+				
 				drv.visitSchema(config,schema);
 				// is a create script requested by user?
 				String createscript=config.getCreatescript();
@@ -1228,10 +1255,11 @@ public class Ili2db {
 	static private void transferFromXtf(Connection conn,IoxReader reader,Mapping ili2sqlName,TransferDescription td,
 			String dbusr,
 			SqlGeometryConverter geomConv,
+			DbIdGen idGen,
 			Config config,
 			HashSet<BasketStat> stat){	
 		try{
-			TransferFromXtf trsfr=new TransferFromXtf(ili2sqlName,td,conn,dbusr,geomConv,config);
+			TransferFromXtf trsfr=new TransferFromXtf(ili2sqlName,td,conn,dbusr,geomConv,idGen,config);
 			trsfr.doit(reader,config,stat);
 		}catch(ch.interlis.iox.IoxException ex){
 			EhiLogger.logError("failed to read data file",ex);

@@ -49,6 +49,7 @@ public abstract class AbstractMain {
 		config.setDefaultSrsAuthority("EPSG");
 		config.setDefaultSrsCode("21781");
 		config.setMaxSqlNameLength(Integer.toString(Mapping.DEFAULT_NAME_LENGTH));
+		config.setIdGenerator(ch.ehi.ili2db.base.TableBasedIdGen.class.getName());
 	}
 	protected abstract DbUrlConverter getDbUrlConverter();
 

@@ -31,6 +31,7 @@ import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.XMLGregorianCalendar;
 
 import ch.ehi.basics.logging.EhiLogger;
+import ch.ehi.ili2db.base.DbIdGen;
 import ch.ehi.ili2db.base.Ili2cUtility;
 import ch.ehi.ili2db.converter.*;
 import ch.ehi.ili2db.fromili.TransferFromIli;
@@ -98,6 +99,7 @@ public class TransferFromXtf {
 			Connection conn1,
 			String dbusr1,
 			SqlGeometryConverter geomConv,
+			DbIdGen idGen,
 			Config config){
 		ili2sqlName=ili2sqlName1;
 		td=td1;
@@ -108,7 +110,7 @@ public class TransferFromXtf {
 		}
 		schema=config.getDbschema();
 		this.geomConv=geomConv;
-		idGen=new ch.ehi.ili2db.base.DbIdGen(conn,dbusr);
+		this.idGen=idGen;
 		createStdCols=config.CREATE_STD_COLS_ALL.equals(config.getCreateStdCols());
 		createEnumTxtCol=config.CREATE_ENUM_TXT_COL.equals(config.getCreateEnumCols());
 		createEnumColAsItfCode=config.CREATE_ENUMCOL_AS_ITFCODE_YES.equals(config.getCreateEnumColAsItfCode());
@@ -153,6 +155,7 @@ public class TransferFromXtf {
 		unknownTypev=new HashSet();
 		structQueue=new ArrayList();
 		boolean surfaceAsPolyline=true;
+		
 		int datasetSqlId=newObjSqlId();
 		int importSqlId=0;
 		int basketSqlId=0;
@@ -1196,24 +1199,12 @@ public class TransferFromXtf {
 	}
 	/** gets a new obj id.
 	 */
-	int idBlockStart=0;
-	int lastLocalId=0;
 	private int newObjSqlId(){
-		int ret;
-		final int BLOCK_SIZE=20;
-		if(lastLocalId!=0 && lastLocalId<BLOCK_SIZE){
-			lastLocalId++;
-			ret=idBlockStart+lastLocalId;
-		}else{
-			lastLocalId=1;
-			ret=idBlockStart=idGen.getLastId("T_Id",schema)+lastLocalId;
-			idGen.setLastId(idBlockStart+BLOCK_SIZE,"T_Id",schema);
-		}
-		return ret;
+		return idGen.newObjSqlId();
 	}
 	private int getLastSqlId()
 	{
-		return idBlockStart+lastLocalId;
+		return idGen.getLastSqlId();
 	}
 	/** creates an insert statement for a given viewable.
 	 * @param sqlname table name of viewable

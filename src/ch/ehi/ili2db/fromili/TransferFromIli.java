@@ -31,6 +31,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 
 import ch.ehi.sqlgen.repository.*;
+import ch.ehi.ili2db.base.DbIdGen;
 import ch.ehi.ili2db.base.DbUtility;
 import ch.ehi.ili2db.base.Ili2cUtility;
 import ch.ehi.ili2db.base.Ili2dbException;
@@ -83,8 +84,9 @@ public class TransferFromIli {
 	private boolean deleteExistingData=false;
 	private String colT_ID=null;
 	private String nl=System.getProperty("line.separator");
+	private DbIdGen idGen=null;
 
-	public DbSchema doit(TransferDescription td1,java.util.List<Element> modelEles,ch.ehi.ili2db.mapping.Mapping ili2sqlName,ch.ehi.ili2db.gui.Config config)
+	public DbSchema doit(TransferDescription td1,java.util.List<Element> modelEles,ch.ehi.ili2db.mapping.Mapping ili2sqlName,ch.ehi.ili2db.gui.Config config,DbIdGen idGen)
 	throws Ili2dbException
 	{
 		this.defaultCrsAuthority=config.getDefaultSrsAuthority();
@@ -100,6 +102,8 @@ public class TransferFromIli {
 		if(colT_ID==null){
 			colT_ID=T_ID;
 		}
+		this.idGen=idGen;
+
 		deleteExistingData=config.DELETE_DATA.equals(config.getDeleteMode());
 		if(deleteExistingData){
 			EhiLogger.logState("delete existing data...");
@@ -929,6 +933,7 @@ public class TransferFromIli {
 		  dbColId.setName(colT_ID);
 		  dbColId.setNotNull(true);
 		  dbColId.setPrimaryKey(true);
+		  dbColId.setDefaultValue(idGen.getDefaultValueSql());
 		  table.addColumn(dbColId);
 		  return dbColId;
 	}
