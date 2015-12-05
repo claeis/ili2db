@@ -1041,9 +1041,10 @@ public class Ili2db {
 			}
 			
 			String baskets=config.getBaskets();
+			String topics=config.getTopics();
 			String models=config.getModels();
-			if(models==null && baskets==null){
-				throw new Ili2dbException("no models or baskets given");
+			if(models==null && baskets==null && topics==null){
+				throw new Ili2dbException("no models, baskets or topics given");
 			}
 			
 			// open db connection
@@ -1071,7 +1072,12 @@ public class Ili2db {
 				// BIDs
 				String basketids[]=baskets.split(ch.interlis.ili2c.Main.MODELS_SEPARATOR);
 				// map BID to sqlBasketId and modelnames
-				basketSqlIds=getBasketSqlIds(basketids,modelv,conn,config);
+				basketSqlIds=getBasketSqlIdsFromBID(basketids,modelv,conn,config);
+			}else if(topics!=null){
+				// TOPICs
+				String topicv[]=topics.split(ch.interlis.ili2c.Main.MODELS_SEPARATOR);
+				// map BID to sqlBasketId and modelnames
+				basketSqlIds=getBasketSqlIdsFromTopic(topicv,modelv,conn,config);
 			}else{
 				String modelnames[]=models.split(ch.interlis.ili2c.Main.MODELS_SEPARATOR);
 				for(int modeli=0;modeli<modelnames.length;modeli++){
@@ -1170,7 +1176,7 @@ public class Ili2db {
 			}
 		}
 	}
-	private static int[] getBasketSqlIds(String[] basketids,
+	private static int[] getBasketSqlIdsFromBID(String[] basketids,
 			Configuration modelv,Connection conn,Config config) throws Ili2dbException {
 		int ret[]=new int[basketids.length];
 		int retidx=0;
@@ -1213,15 +1219,12 @@ public class Ili2db {
 				}
 			}
 			if(topicQName!=null){
-				String modelName=null;
-				int endModelName=topicQName.indexOf('.');
-				if(endModelName<=0){
+				String topicName[]=splitIliQName(topicQName);
+				if(topicName[0]==null){
 					// just a topicname
 					throw new Ili2dbException("unexpected unqualified name "+topicQName+" in table "+sqlName);
-				}else{
-					// qualified topicname; get model name
-					modelName=topicQName.substring(0,endModelName);
 				}
+				String modelName=topicName[0];
 				if(!models.contains(modelName)){
 					modelv.addFileEntry(new ch.interlis.ili2c.config.FileEntry(modelName,ch.interlis.ili2c.config.FileEntryKind.ILIMODELFILE));				
 					models.add(modelName);
@@ -1230,6 +1233,98 @@ public class Ili2db {
 			}
 			
 		}
+		return ret;
+	}
+	private static int[] getBasketSqlIdsFromTopic(String[] topics,
+			Configuration modelv,Connection conn,Config config) throws Ili2dbException {
+		String schema=config.getDbschema();
+		String colT_ID=config.getColT_ID();
+		if(colT_ID==null){
+			colT_ID=TransferFromIli.T_ID;
+		}
+
+		String qryTopics[][]=new String[topics.length][];
+		int idx=0;
+		for(String topic:topics){
+			qryTopics[idx++]=splitIliQName(topic);
+		}
+		String sqlName=TransferFromIli.BASKETS_TAB;
+		if(schema!=null){
+			sqlName=schema+"."+sqlName;
+		}
+		HashSet<String> models=new HashSet<String>();
+		HashSet<Integer> bids=new HashSet<Integer>();
+		String topicQName=null;
+		int sqlId=0;
+		java.sql.PreparedStatement getstmt=null;
+		try{
+			String stmt="SELECT "+colT_ID+","+TransferFromIli.BASKETS_TAB_TOPIC+" FROM "+sqlName;
+			EhiLogger.traceBackendCmd(stmt);
+			getstmt=conn.prepareStatement(stmt);
+			java.sql.ResultSet res=getstmt.executeQuery();
+			while(res.next()){
+				sqlId=res.getInt(1);
+				topicQName=res.getString(2);
+				String dbTopic[]=splitIliQName(topicQName);
+				String modelName=null;
+				for(String qryTopic[]:qryTopics){
+					if(qryTopic[0]==null && qryTopic[1].equals(dbTopic[1])){
+						// found one
+						modelName=dbTopic[0];
+						break;
+					}else if(qryTopic[0]!=null && qryTopic[0].equals(dbTopic[0]) && qryTopic[1].equals(dbTopic[1])){
+						// found one
+						modelName=dbTopic[0];
+						break;
+					}
+				}
+				// found a basket with given topicName?
+				if(modelName!=null){
+					if(!models.contains(modelName)){
+						modelv.addFileEntry(new ch.interlis.ili2c.config.FileEntry(modelName,ch.interlis.ili2c.config.FileEntryKind.ILIMODELFILE));				
+						models.add(modelName);
+					}
+					if(!bids.contains(sqlId)){
+						bids.add(sqlId);
+					}
+				}
+			}
+		}catch(java.sql.SQLException ex){
+			throw new Ili2dbException("failed to query "+sqlName,ex);
+		}finally{
+			if(getstmt!=null){
+				try{
+					getstmt.close();
+				}catch(java.sql.SQLException ex){
+					EhiLogger.logError(ex);
+				}
+			}
+		}
+		if(bids.size()==0){
+			throw new Ili2dbException("no baskets with given topic names in table "+sqlName);
+		}
+		int ret[]=new int[bids.size()];
+		idx=0;
+		for(int bid:bids){
+			ret[idx++]=bid;
+		}
+		return ret;
+	}
+	private static String[] splitIliQName(String topicQName){
+		String modelName=null;
+		String topicName=null;
+		int endModelName=topicQName.indexOf('.');
+		if(endModelName<=0){
+			// just a topicname
+			topicName=topicQName;
+		}else{
+			// qualified topicname; get model name
+			modelName=topicQName.substring(0,endModelName);
+			topicName=topicQName.substring(endModelName+1);
+		}
+		String ret[]=new String[2];
+		ret[0]=modelName;
+		ret[1]=topicName;
 		return ret;
 	}
 	public static String getModelFromXtf(String filename)

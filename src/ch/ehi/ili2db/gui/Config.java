@@ -60,6 +60,7 @@ public class Config extends Settings {
 	private String modeldir;
 	private String models=null;
 	private String baskets=null;
+	private String topics=null;
 	private String createscript;
 	private String dropscript;
 	private String xtffile;
@@ -140,6 +141,12 @@ public class Config extends Settings {
 	}
 	public void setBaskets(String baskets) {
 		this.baskets = baskets;
+	}
+	public String getTopics() {
+		return topics;
+	}
+	public void setTopics(String topics) {
+		this.topics = topics;
 	}
 	public String getXtffile() {
 		return xtffile;
