@@ -94,6 +94,10 @@ public abstract class AbstractMain {
 				argi++;
 				config.setModels(args[argi]);
 				argi++;
+			}else if(arg.equals("--baskets")){
+				argi++;
+				config.setBaskets(args[argi]);
+				argi++;
 			}else if(arg.equals("--gui")){
 				doGui=true;
 				argi++;
@@ -227,6 +231,7 @@ public abstract class AbstractMain {
 					System.err.println("--defaultSrsCode  code Default SRS code "+config.getDefaultSrsCode());
 					System.err.println("--modeldir  path       Path(s) of directories containing ili-files.");
 					System.err.println("--models modelname     Name(s) of ili-models to generate an db schema for.");
+					System.err.println("--baskets BID          Basket-Id(s) of ili-baskets to export.");
 					System.err.println("--createscript filename  Generate a sql script that creates the db schema.");
 					System.err.println("--dropscript filename  Generate a sql script that drops the generated db schema.");
 					System.err.println("--mapconfig filename   Name of config file, that controls the schema mapping.");

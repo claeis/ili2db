@@ -59,6 +59,7 @@ public class Config extends Settings {
 	private String dbschema=null;
 	private String modeldir;
 	private String models=null;
+	private String baskets=null;
 	private String createscript;
 	private String dropscript;
 	private String xtffile;
@@ -133,6 +134,12 @@ public class Config extends Settings {
 	}
 	public void setModels(String models) {
 		this.models = models;
+	}
+	public String getBaskets() {
+		return baskets;
+	}
+	public void setBaskets(String baskets) {
+		this.baskets = baskets;
 	}
 	public String getXtffile() {
 		return xtffile;
