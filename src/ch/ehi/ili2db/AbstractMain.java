@@ -41,7 +41,7 @@ public abstract class AbstractMain {
 	protected abstract void printConnectOptions();
 	protected abstract void printSpecificOptions();
 	protected abstract int doArgs(String args[],int argi,Config config);
-	protected void initConfig(Config config)
+	public void initConfig(Config config)
 	{
 		config.setSender(getAPP_NAME()+"-"+getVersion());
 		config.setModeldir(Ili2db.ILI_FROM_DB+ch.interlis.ili2c.Main.ILIDIR_SEPARATOR+Ili2db.XTF_DIR+ch.interlis.ili2c.Main.ILIDIR_SEPARATOR+ch.interlis.ili2c.Main.ILI_REPOSITORY+ch.interlis.ili2c.Main.ILIDIR_SEPARATOR+Ili2db.JAR_DIR);
@@ -49,6 +49,7 @@ public abstract class AbstractMain {
 		config.setDefaultSrsAuthority("EPSG");
 		config.setDefaultSrsCode("21781");
 		config.setMaxSqlNameLength(Integer.toString(Mapping.DEFAULT_NAME_LENGTH));
+		config.setIdGenerator(ch.ehi.ili2db.base.TableBasedIdGen.class.getName());
 	}
 	protected abstract DbUrlConverter getDbUrlConverter();
 
@@ -93,11 +94,22 @@ public abstract class AbstractMain {
 				argi++;
 				config.setModels(args[argi]);
 				argi++;
+			}else if(arg.equals("--baskets")){
+				argi++;
+				config.setBaskets(args[argi]);
+				argi++;
+			}else if(arg.equals("--topics")){
+				argi++;
+				config.setTopics(args[argi]);
+				argi++;
 			}else if(arg.equals("--gui")){
 				doGui=true;
 				argi++;
 			}else if(arg.equals("--import")){
 				config.setFunction(Config.FC_IMPORT);
+				argi++;
+			}else if(arg.equals("--update")){
+				config.setFunction(Config.FC_UPDATE);
 				argi++;
 			}else if(arg.equals("--export")){
 				config.setFunction(Config.FC_EXPORT);
@@ -218,6 +230,7 @@ public abstract class AbstractMain {
 					System.err.println("OPTIONS");
 					System.err.println();
 					System.err.println("--import               do an import.");
+					System.err.println("--update               do an update.");
 					System.err.println("--export               do an export.");
 					System.err.println("--schemaimport         do an schema import.");
 					printConnectOptions();
@@ -226,6 +239,8 @@ public abstract class AbstractMain {
 					System.err.println("--defaultSrsCode  code Default SRS code "+config.getDefaultSrsCode());
 					System.err.println("--modeldir  path       Path(s) of directories containing ili-files.");
 					System.err.println("--models modelname     Name(s) of ili-models to generate an db schema for.");
+					System.err.println("--baskets BID          Basket-Id(s) of ili-baskets to export.");
+					System.err.println("--topics topicname     Name(s) of ili-topics to export.");
 					System.err.println("--createscript filename  Generate a sql script that creates the db schema.");
 					System.err.println("--dropscript filename  Generate a sql script that drops the generated db schema.");
 					System.err.println("--mapconfig filename   Name of config file, that controls the schema mapping.");

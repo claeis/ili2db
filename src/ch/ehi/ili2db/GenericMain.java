@@ -37,6 +37,7 @@ public class GenericMain extends AbstractMain {
 		new GenericMain().domain(args);
 	}
 
+	@Override
 	protected DbUrlConverter getDbUrlConverter() {
 		return new DbUrlConverter(){
 			public String makeUrl(Config config) {
@@ -44,23 +45,28 @@ public class GenericMain extends AbstractMain {
 			}
 		};
 	}
+	@Override
 	public String getAPP_NAME() {
 		return "ili2db";
 	}
 
+	@Override
 	public String getDB_PRODUCT_NAME() {
 		return "generic OGC database";
 	}
 
+	@Override
 	public String getJAR_NAME() {
 		return "ili2db.jar";
 	}
+	@Override
 	protected void printConnectOptions() {
 		System.err.println("-dburl  url           URL to access database.");
 		System.err.println("-dbusr  username      User name to access database.");
 		System.err.println("-dbpwd  password      Password of user used to access database.");
 		System.err.println("-adapter classname    qualified name of java class, that implements the DB specifics.");
 	}
+	@Override
 	protected int doArgs(String args[],int argi,Config config)
 	{
 		String arg=args[argi];

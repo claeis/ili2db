@@ -7,6 +7,7 @@ public class Config extends Settings {
 	public static final String SENDER=PREFIX+".sender";
 	private static final String DEFAULT_SRS_AUTHORITY=PREFIX+".defaultSrsAuthority";
 	private static final String DEFAULT_SRS_CODE=PREFIX+".defaultSrsCode";
+	private static final String UUID_DEFAULT_VALUE=PREFIX+".uuidDefaultValue";
 	private static final String CREATE_ENUMCOL_AS_ITFCODE=PREFIX+".createEnumColAsItfCode";
 	public static final String CREATE_ENUMCOL_AS_ITFCODE_YES="yes";
 	private static final String CREATE_ENUM_DEFS=PREFIX+".createEnumDefs";
@@ -58,10 +59,13 @@ public class Config extends Settings {
 	private String dbschema=null;
 	private String modeldir;
 	private String models=null;
+	private String baskets=null;
+	private String topics=null;
 	private String createscript;
 	private String dropscript;
 	private String xtffile;
 	private String mappingConfig;
+	private String idGenerator=null;
 	private String geometryConverter;
 	private String jdbcDriver=null;
 	private String ddlGenerator=null;
@@ -72,6 +76,13 @@ public class Config extends Settings {
 	static public final int FC_IMPORT=0;
 	static public final int FC_SCHEMAIMPORT=1;
 	static public final int FC_EXPORT=2;
+	static public final int FC_UPDATE=3;
+	public String getIdGenerator() {
+		return idGenerator;
+	}
+	public void setIdGenerator(String idGeneratorClassName) {
+		this.idGenerator = idGeneratorClassName;
+	}
 	public String getGeometryConverter() {
 		return geometryConverter;
 	}
@@ -125,6 +136,18 @@ public class Config extends Settings {
 	}
 	public void setModels(String models) {
 		this.models = models;
+	}
+	public String getBaskets() {
+		return baskets;
+	}
+	public void setBaskets(String baskets) {
+		this.baskets = baskets;
+	}
+	public String getTopics() {
+		return topics;
+	}
+	public void setTopics(String topics) {
+		this.topics = topics;
 	}
 	public String getXtffile() {
 		return xtffile;
@@ -191,6 +214,12 @@ public class Config extends Settings {
 	}
 	public void setDefaultSrsCode(String value) {
 		setValue(DEFAULT_SRS_CODE,value);
+	}
+	public String getUuidDefaultValue() {
+		return getValue(UUID_DEFAULT_VALUE);
+	}
+	public void setUuidDefaultValue(String value) {
+		setValue(UUID_DEFAULT_VALUE,value);
 	}
 	public String getCreateEnumDefs() {
 		return getValue(CREATE_ENUM_DEFS);

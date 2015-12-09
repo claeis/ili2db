@@ -21,9 +21,11 @@ import ch.ehi.basics.logging.EhiLogger;
 import ch.ehi.basics.logging.LogEvent;
 import ch.ehi.basics.logging.StdLogEvent;
 import ch.ehi.basics.settings.Settings;
+import ch.interlis.ili2c.config.Configuration;
 import ch.interlis.ili2c.metamodel.AttributeDef;
 import ch.interlis.ili2c.metamodel.Element;
 import ch.interlis.ili2c.metamodel.SurfaceOrAreaType;
+import ch.interlis.ili2c.metamodel.Topic;
 import ch.interlis.ili2c.metamodel.TransferDescription;
 import ch.interlis.ili2c.metamodel.Type;
 import ch.interlis.ili2c.metamodel.Viewable;
@@ -62,6 +64,8 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+
+import com.sun.org.apache.bcel.internal.generic.GETSTATIC;
 
 import ch.ehi.ili2db.gui.Config;
 
@@ -156,6 +160,8 @@ public class Ili2db {
 	{
 		if(config.getFunction()==Config.FC_IMPORT){
 			runImport(config,appHome);
+		}else if(config.getFunction()==Config.FC_UPDATE){
+			runUpdate(config,appHome,false);
 		}else if(config.getFunction()==Config.FC_EXPORT){
 			runExport(config,appHome);
 		}else if(config.getFunction()==Config.FC_SCHEMAIMPORT){
@@ -167,6 +173,11 @@ public class Ili2db {
 		
 	}
 	public static void runImport(Config config,String appHome) 
+	throws Ili2dbException
+	{
+		runUpdate(config,appHome,true);
+	}
+	public static void runUpdate(Config config,String appHome,boolean importOnly) 
 	throws Ili2dbException
 		{
 		ch.ehi.basics.logging.FileListener logfile=null;
@@ -267,11 +278,15 @@ public class Ili2db {
 			if(ddlGenerator==null){
 				throw new Ili2dbException("no DDL generator given");
 			}
+			String idGenerator=config.getIdGenerator();
+			if(idGenerator==null){
+				throw new Ili2dbException("no ID generator given");
+			}
 			String jdbcDriver=config.getJdbcDriver();
 			if(jdbcDriver==null){
 				throw new Ili2dbException("no JDBC driver given");
 			}
-					
+			
 			// open db connection
 			try{
 				Class.forName(jdbcDriver);
@@ -300,11 +315,13 @@ public class Ili2db {
 			}
 			  
 			  // create db schema
-			  	if(config.getDbschema()!=null){
-			  		if(!DbUtility.schemaExists(conn, config.getDbschema())){
-				  		DbUtility.createSchema(conn, config.getDbschema());
-			  		}
-			  	}
+				if(importOnly){
+				  	if(config.getDbschema()!=null){
+				  		if(!DbUtility.schemaExists(conn, config.getDbschema())){
+					  		DbUtility.createSchema(conn, config.getDbschema());
+				  		}
+				  	}
+				}
 			  	
 				// compile required ili files
 				setupIli2cPathmap(config, appHome, inputFilename,conn);
@@ -348,6 +365,13 @@ public class Ili2db {
 				}catch(Exception ex){
 					throw new Ili2dbException("failed to load/create DDL generator",ex);
 				}
+				DbIdGen idGen=null;
+				try{
+					idGen=(DbIdGen)Class.forName(idGenerator).newInstance();
+				}catch(Exception ex){
+					throw new Ili2dbException("failed to load/create ID generator",ex);
+				}
+				idGen.init(config.getDbschema());
 				SqlGeometryConverter geomConverter=null;
 				try{
 					geomConverter=(SqlGeometryConverter)Class.forName(geometryConverter).newInstance();
@@ -356,59 +380,64 @@ public class Ili2db {
 				}
 				geomConverter.setup(conn, config);
 
+				config.setJdbcConnection(conn);
+				idGen.initDb(conn,dbusr);
+				idGen.initDbDefs();
+				
 				// create table structure
-				EhiLogger.logState("create table structure...");
-				try{
-					TransferFromIli trsfFromIli=new TransferFromIli();
-					
-					// map ili-classes to sql-tables
-					DbSchema schema;
-					try {
-						schema = trsfFromIli.doit(td,eles,mapping,config);
-					} catch (Ili2dbException e) {
-						throw new Ili2dbException("mapping of ili-classes to sql-tables failed",e);
-					}
-					if(schema==null){
-						return;
-					}
-
-					trsfFromIli.addBasketsTable(schema);
-					trsfFromIli.addImportsTable(schema);
-
-					TransferFromIli.addInheritanceTable(schema,Integer.parseInt(config.getMaxSqlNameLength()));
-					TransferFromIli.addSettingsTable(schema);
-					TransferFromIli.addModelsTable(schema);
-					trsfFromIli.addEnumTable(schema);
-					Mapping.addTableMappingTable(schema);
-					Mapping.addAttrMappingTable(schema);
-					DbIdGen.addMappingTable(schema);
-								
-					GeneratorDriver drv=new GeneratorDriver(gen);
-					config.setJdbcConnection(conn);
-					drv.visitSchema(config,schema);
-					// create script requested by user?
-					String createscript=config.getCreatescript();
-					if(createscript!=null && (gen instanceof GeneratorJdbc)){
-						writeScript(createscript,((GeneratorJdbc)gen).iteratorCreateLines());
-					}
-					// drop script requested by user?
-					String dropscript=config.getDropscript();
-					if(dropscript!=null && (gen instanceof GeneratorJdbc)){
-						writeScript(dropscript,((GeneratorJdbc)gen).iteratorDropLines());
-					}
-						// update mapping table
-						mapping.updateTableMappingTable(conn,config.getDbschema());
-						mapping.updateAttrMappingTable(conn,config.getDbschema());
-						// update inheritance table
-						trsfFromIli.updateInheritanceTable(conn,config.getDbschema());
-						// update enumerations table
-						trsfFromIli.updateEnumTable(conn);
-						TransferFromIli.addModels(conn,td,config.getDbschema());
-						if(!config.isConfigReadFromDb()){
-							TransferFromIli.updateSettings(conn,config,config.getDbschema());
+				if(importOnly){
+					EhiLogger.logState("create table structure...");
+					try{
+						TransferFromIli trsfFromIli=new TransferFromIli();
+						
+						// map ili-classes to sql-tables
+						DbSchema schema;
+						try {
+							schema = trsfFromIli.doit(td,eles,mapping,config,idGen);
+						} catch (Ili2dbException e) {
+							throw new Ili2dbException("mapping of ili-classes to sql-tables failed",e);
 						}
-				}catch(java.io.IOException ex){
-					throw new Ili2dbException(ex);
+						if(schema==null){
+							return;
+						}
+
+						trsfFromIli.addBasketsTable(schema);
+						trsfFromIli.addImportsTable(schema);
+
+						TransferFromIli.addInheritanceTable(schema,Integer.parseInt(config.getMaxSqlNameLength()));
+						TransferFromIli.addSettingsTable(schema);
+						TransferFromIli.addModelsTable(schema);
+						trsfFromIli.addEnumTable(schema);
+						Mapping.addTableMappingTable(schema);
+						Mapping.addAttrMappingTable(schema);
+						idGen.addMappingTable(schema);
+						
+						GeneratorDriver drv=new GeneratorDriver(gen);
+						drv.visitSchema(config,schema);
+						// create script requested by user?
+						String createscript=config.getCreatescript();
+						if(createscript!=null && (gen instanceof GeneratorJdbc)){
+							writeScript(createscript,((GeneratorJdbc)gen).iteratorCreateLines());
+						}
+						// drop script requested by user?
+						String dropscript=config.getDropscript();
+						if(dropscript!=null && (gen instanceof GeneratorJdbc)){
+							writeScript(dropscript,((GeneratorJdbc)gen).iteratorDropLines());
+						}
+							// update mapping table
+							mapping.updateTableMappingTable(conn,config.getDbschema());
+							mapping.updateAttrMappingTable(conn,config.getDbschema());
+							// update inheritance table
+							trsfFromIli.updateInheritanceTable(conn,config.getDbschema());
+							// update enumerations table
+							trsfFromIli.updateEnumTable(conn);
+							TransferFromIli.addModels(conn,td,config.getDbschema());
+							if(!config.isConfigReadFromDb()){
+								TransferFromIli.updateSettings(conn,config,config.getDbschema());
+							}
+					}catch(java.io.IOException ex){
+						throw new Ili2dbException(ex);
+					}
 				}
 				
 				// process xtf files
@@ -433,7 +462,7 @@ public class Ili2db {
 						}else{
 							ioxReader=new XtfReader(in);
 						}
-						transferFromXtf(conn,ioxReader,mapping,td,dbusr,geomConverter,config,stat);
+						transferFromXtf(conn,ioxReader,importOnly,mapping,td,dbusr,geomConverter,idGen,config,stat);
 					} catch (IOException ex) {
 						throw new Ili2dbException(ex);
 					} catch (IoxException ex) {
@@ -497,7 +526,7 @@ public class Ili2db {
 						}else{
 							ioxReader=new XtfReader(new java.io.File(inputFilename));
 						}
-						transferFromXtf(conn,ioxReader,mapping,td,dbusr,geomConverter,config,stat);
+						transferFromXtf(conn,ioxReader,importOnly,mapping,td,dbusr,geomConverter,idGen,config,stat);
 					} catch (IoxException e) {
 						throw new Ili2dbException(e);
 					}finally{
@@ -703,6 +732,10 @@ public class Ili2db {
 			if(ddlGenerator==null){
 				throw new Ili2dbException("no DDL generator given");
 			}
+			String idGenerator=config.getIdGenerator();
+			if(idGenerator==null){
+				throw new Ili2dbException("no ID generator given");
+			}
 			String jdbcDriver=config.getJdbcDriver();
 			if(jdbcDriver==null){
 				throw new Ili2dbException("no JDBC driver given");
@@ -754,13 +787,19 @@ public class Ili2db {
 			}catch(Exception ex){
 				throw new Ili2dbException("failed to load/create DDL generator",ex);
 			}
-			
 			  // create db schema
 		  	if(config.getDbschema()!=null){
 		  		if(!DbUtility.schemaExists(conn, config.getDbschema())){
 			  		DbUtility.createSchema(conn, config.getDbschema());
 		  		}
 		  	}
+			DbIdGen idGen=null;
+			try{
+				idGen=(DbIdGen)Class.forName(idGenerator).newInstance();
+			}catch(Exception ex){
+				throw new Ili2dbException("failed to load/create ID generator",ex);
+			}
+		  	idGen.init(config.getDbschema());
 
 			// read mapping file
 			String mappingConfigFilename=config.getMappingConfigFilename();
@@ -813,7 +852,7 @@ public class Ili2db {
 				// TODO move default SRS to config
 				DbSchema schema;
 				try {
-					schema = trsfFromIli.doit(td,eles,mapping,config);
+					schema = trsfFromIli.doit(td,eles,mapping,config,idGen);
 				} catch (Ili2dbException e) {
 					throw new Ili2dbException("mapping of ili-classes to sql-tables failed",e);
 				}
@@ -830,7 +869,7 @@ public class Ili2db {
 					trsfFromIli.addEnumTable(schema);
 					Mapping.addTableMappingTable(schema);
 					Mapping.addAttrMappingTable(schema);
-					DbIdGen.addMappingTable(schema);
+					idGen.addMappingTable(schema);
 				}
 				
 				// TODO create geodb domains
@@ -840,6 +879,9 @@ public class Ili2db {
 							
 				GeneratorDriver drv=new GeneratorDriver(gen);
 				config.setJdbcConnection(conn);
+				idGen.initDb(conn,dbusr);
+				idGen.initDbDefs();
+				
 				drv.visitSchema(config,schema);
 				// is a create script requested by user?
 				String createscript=config.getCreatescript();
@@ -1011,34 +1053,11 @@ public class Ili2db {
 				throw new Ili2dbException("no JDBC driver given");
 			}
 			
+			String baskets=config.getBaskets();
+			String topics=config.getTopics();
 			String models=config.getModels();
-			if(models==null){
-				throw new Ili2dbException("no models given");
-			}
-			String modelnames[]=models.split(ch.interlis.ili2c.Main.MODELS_SEPARATOR);
-			ch.interlis.ili2c.config.Configuration modelv=new ch.interlis.ili2c.config.Configuration();
-			for(int modeli=0;modeli<modelnames.length;modeli++){
-				String m=modelnames[modeli];
-				if(m.equals(XTF)){
-					// TODO read modelname from db
-				}
-				modelv.addFileEntry(new ch.interlis.ili2c.config.FileEntry(m,ch.interlis.ili2c.config.FileEntryKind.ILIMODELFILE));				
-			}
-			if(modelv.getSizeFileEntry()==0){
-				throw new Ili2dbException("no models given");
-			}
-
-			String adapterClassName=config.getGeometryConverter();
-			if(adapterClassName==null){
-				throw new Ili2dbException("no adapter given");
-			}
-			
-
-			SqlGeometryConverter geomConverter=null;
-			try{
-				geomConverter=(SqlGeometryConverter)Class.forName(geometryConverter).newInstance();
-			}catch(Exception ex){
-				throw new Ili2dbException("failed to load/create geometry converter",ex);
+			if(models==null && baskets==null && topics==null){
+				throw new Ili2dbException("no models, baskets or topics given");
 			}
 			
 			// open db connection
@@ -1059,6 +1078,58 @@ public class Ili2db {
 				throw new Ili2dbException("failed to get db connection",e);
 			}
 			  logDBVersion(conn);
+			
+			ch.interlis.ili2c.config.Configuration modelv=new ch.interlis.ili2c.config.Configuration();
+			boolean createBasketCol=config.BASKET_HANDLING_READWRITE.equals(config.getBasketHandling());
+			int basketSqlIds[]=null;
+			if(baskets!=null){
+				if(!createBasketCol){
+					throw new Ili2dbException("basket wise export requires column "+TransferFromIli.T_BASKET);
+				}
+				// BIDs
+				String basketids[]=baskets.split(ch.interlis.ili2c.Main.MODELS_SEPARATOR);
+				// map BID to sqlBasketId and modelnames
+				basketSqlIds=getBasketSqlIdsFromBID(basketids,modelv,conn,config);
+			}else if(topics!=null){
+				if(!createBasketCol){
+					throw new Ili2dbException("topic wise export requires column "+TransferFromIli.T_BASKET);
+				}
+				// TOPICs
+				String topicv[]=topics.split(ch.interlis.ili2c.Main.MODELS_SEPARATOR);
+				// map BID to sqlBasketId and modelnames
+				basketSqlIds=getBasketSqlIdsFromTopic(topicv,modelv,conn,config);
+			}else{
+				if(createBasketCol){
+					String modelnames[]=models.split(ch.interlis.ili2c.Main.MODELS_SEPARATOR);
+					basketSqlIds=getBasketSqlIdsFromModel(modelnames,modelv,conn,config);
+				}else{
+					String modelnames[]=models.split(ch.interlis.ili2c.Main.MODELS_SEPARATOR);
+					for(int modeli=0;modeli<modelnames.length;modeli++){
+						String m=modelnames[modeli];
+						if(m.equals(XTF)){
+							// TODO read modelname from db
+						}
+						modelv.addFileEntry(new ch.interlis.ili2c.config.FileEntry(m,ch.interlis.ili2c.config.FileEntryKind.ILIMODELFILE));				
+					}
+				}
+			}
+			if(modelv.getSizeFileEntry()==0){
+				throw new Ili2dbException("no models given");
+			}
+
+			String adapterClassName=config.getGeometryConverter();
+			if(adapterClassName==null){
+				throw new Ili2dbException("no adapter given");
+			}
+			
+
+			SqlGeometryConverter geomConverter=null;
+			try{
+				geomConverter=(SqlGeometryConverter)Class.forName(geometryConverter).newInstance();
+			}catch(Exception ex){
+				throw new Ili2dbException("failed to load/create geometry converter",ex);
+			}
+			
 
 				// compile required ili files
 				setupIli2cPathmap(config, appHome, xtffile,conn);
@@ -1095,7 +1166,7 @@ public class Ili2db {
 				HashSet<BasketStat> stat=new HashSet<BasketStat>();
 				ch.ehi.basics.logging.ErrorTracker errs=new ch.ehi.basics.logging.ErrorTracker();
 				EhiLogger.getInstance().addListener(errs);
-				transferToXtf(conn,xtffile,mapping,td,geomConverter,config.getSender(),config,stat);
+				transferToXtf(conn,xtffile,mapping,td,geomConverter,config.getSender(),config,basketSqlIds,stat);
 				if (errs.hasSeenErrors()) {
 					throw new Ili2dbException("...export failed");
 				} else {
@@ -1129,6 +1200,232 @@ public class Ili2db {
 				logfile=null;
 			}
 		}
+	}
+	private static int[] getBasketSqlIdsFromBID(String[] basketids,
+			Configuration modelv,Connection conn,Config config) throws Ili2dbException {
+		int ret[]=new int[basketids.length];
+		int retidx=0;
+		String schema=config.getDbschema();
+		String colT_ID=config.getColT_ID();
+		if(colT_ID==null){
+			colT_ID=TransferFromIli.T_ID;
+		}
+
+		String sqlName=TransferFromIli.BASKETS_TAB;
+		if(schema!=null){
+			sqlName=schema+"."+sqlName;
+		}
+		HashSet<String> models=new HashSet<String>();
+		for(String basketid:basketids){
+			StringBuilder topicQName=new StringBuilder();
+			Integer sqlId=getBasketSqlIdFromBID(basketid, conn, schema,colT_ID, topicQName);
+			if(sqlId==null){
+				throw new Ili2dbException("no basket with BID "+basketid+" in table "+sqlName);
+			}
+			String topicName[]=splitIliQName(topicQName.toString());
+			if(topicName[0]==null){
+				// just a topicname
+				throw new Ili2dbException("unexpected unqualified name "+topicQName+" in table "+sqlName);
+			}
+			String modelName=topicName[0];
+			if(!models.contains(modelName)){
+				modelv.addFileEntry(new ch.interlis.ili2c.config.FileEntry(modelName,ch.interlis.ili2c.config.FileEntryKind.ILIMODELFILE));				
+				models.add(modelName);
+			}
+			ret[retidx++]=sqlId;
+		}
+		return ret;
+	}
+	public static Integer getBasketSqlIdFromBID(String basketid,Connection conn,String schema, String colT_ID,StringBuilder topicName) throws Ili2dbException {
+
+		String sqlName=TransferFromIli.BASKETS_TAB;
+		if(schema!=null){
+			sqlName=schema+"."+sqlName;
+		}
+		int sqlId=0;
+		java.sql.PreparedStatement getstmt=null;
+		try{
+			String stmt="SELECT "+colT_ID+","+TransferFromIli.BASKETS_TAB_TOPIC+" FROM "+sqlName+" WHERE "+TransferFromIli.T_ILI_TID+"= ?";
+			EhiLogger.traceBackendCmd(stmt);
+			getstmt=conn.prepareStatement(stmt);
+			getstmt.setString(1,basketid);
+			java.sql.ResultSet res=getstmt.executeQuery();
+			if(res.next()){
+				sqlId=res.getInt(1);
+				topicName.append(res.getString(2));
+				return sqlId;
+			}
+		}catch(java.sql.SQLException ex){
+			throw new Ili2dbException("failed to query "+sqlName,ex);
+		}finally{
+			if(getstmt!=null){
+				try{
+					getstmt.close();
+				}catch(java.sql.SQLException ex){
+					EhiLogger.logError(ex);
+				}
+			}
+		}
+		return null;
+	}
+	private static int[] getBasketSqlIdsFromTopic(String[] topics,
+			Configuration modelv,Connection conn,Config config) throws Ili2dbException {
+		String schema=config.getDbschema();
+		String colT_ID=config.getColT_ID();
+		if(colT_ID==null){
+			colT_ID=TransferFromIli.T_ID;
+		}
+
+		String qryTopics[][]=new String[topics.length][];
+		int idx=0;
+		for(String topic:topics){
+			qryTopics[idx++]=splitIliQName(topic);
+		}
+		String sqlName=TransferFromIli.BASKETS_TAB;
+		if(schema!=null){
+			sqlName=schema+"."+sqlName;
+		}
+		HashSet<String> models=new HashSet<String>();
+		HashSet<Integer> bids=new HashSet<Integer>();
+		String topicQName=null;
+		int sqlId=0;
+		java.sql.PreparedStatement getstmt=null;
+		try{
+			String stmt="SELECT "+colT_ID+","+TransferFromIli.BASKETS_TAB_TOPIC+" FROM "+sqlName;
+			EhiLogger.traceBackendCmd(stmt);
+			getstmt=conn.prepareStatement(stmt);
+			java.sql.ResultSet res=getstmt.executeQuery();
+			while(res.next()){
+				sqlId=res.getInt(1);
+				topicQName=res.getString(2);
+				String dbTopic[]=splitIliQName(topicQName);
+				String modelName=null;
+				for(String qryTopic[]:qryTopics){
+					if(qryTopic[0]==null && qryTopic[1].equals(dbTopic[1])){
+						// found one
+						modelName=dbTopic[0];
+						break;
+					}else if(qryTopic[0]!=null && qryTopic[0].equals(dbTopic[0]) && qryTopic[1].equals(dbTopic[1])){
+						// found one
+						modelName=dbTopic[0];
+						break;
+					}
+				}
+				// found a basket with given topicName?
+				if(modelName!=null){
+					if(!models.contains(modelName)){
+						modelv.addFileEntry(new ch.interlis.ili2c.config.FileEntry(modelName,ch.interlis.ili2c.config.FileEntryKind.ILIMODELFILE));				
+						models.add(modelName);
+					}
+					if(!bids.contains(sqlId)){
+						bids.add(sqlId);
+					}
+				}
+			}
+		}catch(java.sql.SQLException ex){
+			throw new Ili2dbException("failed to query "+sqlName,ex);
+		}finally{
+			if(getstmt!=null){
+				try{
+					getstmt.close();
+				}catch(java.sql.SQLException ex){
+					EhiLogger.logError(ex);
+				}
+			}
+		}
+		if(bids.size()==0){
+			throw new Ili2dbException("no baskets with given topic names in table "+sqlName);
+		}
+		int ret[]=new int[bids.size()];
+		idx=0;
+		for(int bid:bids){
+			ret[idx++]=bid;
+		}
+		return ret;
+	}
+	private static int[] getBasketSqlIdsFromModel(String[] qryModels,
+			Configuration modelv,Connection conn,Config config) throws Ili2dbException {
+		String schema=config.getDbschema();
+		String colT_ID=config.getColT_ID();
+		if(colT_ID==null){
+			colT_ID=TransferFromIli.T_ID;
+		}
+
+		int idx=0;
+		String sqlName=TransferFromIli.BASKETS_TAB;
+		if(schema!=null){
+			sqlName=schema+"."+sqlName;
+		}
+		HashSet<String> models=new HashSet<String>();
+		HashSet<Integer> bids=new HashSet<Integer>();
+		String topicQName=null;
+		int sqlId=0;
+		java.sql.PreparedStatement getstmt=null;
+		try{
+			String stmt="SELECT "+colT_ID+","+TransferFromIli.BASKETS_TAB_TOPIC+" FROM "+sqlName;
+			EhiLogger.traceBackendCmd(stmt);
+			getstmt=conn.prepareStatement(stmt);
+			java.sql.ResultSet res=getstmt.executeQuery();
+			while(res.next()){
+				sqlId=res.getInt(1);
+				topicQName=res.getString(2);
+				String dbTopic[]=splitIliQName(topicQName);
+				String modelName=null;
+				for(String qryModel:qryModels){
+					if(qryModel.equals(dbTopic[0])){
+						// found one
+						modelName=qryModel;
+						break;
+					}
+				}
+				// found a basket with given topicName?
+				if(modelName!=null){
+					if(!models.contains(modelName)){
+						modelv.addFileEntry(new ch.interlis.ili2c.config.FileEntry(modelName,ch.interlis.ili2c.config.FileEntryKind.ILIMODELFILE));				
+						models.add(modelName);
+					}
+					if(!bids.contains(sqlId)){
+						bids.add(sqlId);
+					}
+				}
+			}
+		}catch(java.sql.SQLException ex){
+			throw new Ili2dbException("failed to query "+sqlName,ex);
+		}finally{
+			if(getstmt!=null){
+				try{
+					getstmt.close();
+				}catch(java.sql.SQLException ex){
+					EhiLogger.logError(ex);
+				}
+			}
+		}
+		if(bids.size()==0){
+			throw new Ili2dbException("no baskets with given topic names in table "+sqlName);
+		}
+		int ret[]=new int[bids.size()];
+		idx=0;
+		for(int bid:bids){
+			ret[idx++]=bid;
+		}
+		return ret;
+	}
+	private static String[] splitIliQName(String topicQName){
+		String modelName=null;
+		String topicName=null;
+		int endModelName=topicQName.indexOf('.');
+		if(endModelName<=0){
+			// just a topicname
+			topicName=topicQName;
+		}else{
+			// qualified topicname; get model name
+			modelName=topicQName.substring(0,endModelName);
+			topicName=topicQName.substring(endModelName+1);
+		}
+		String ret[]=new String[2];
+		ret[0]=modelName;
+		ret[1]=topicName;
+		return ret;
 	}
 	public static String getModelFromXtf(String filename)
 	{
@@ -1225,15 +1522,18 @@ public class Ili2db {
 		return modeldirv;
 	}
 
-	static private void transferFromXtf(Connection conn,IoxReader reader,Mapping ili2sqlName,TransferDescription td,
+	static private void transferFromXtf(Connection conn,IoxReader reader,boolean importOnly,Mapping ili2sqlName,TransferDescription td,
 			String dbusr,
 			SqlGeometryConverter geomConv,
+			DbIdGen idGen,
 			Config config,
 			HashSet<BasketStat> stat){	
 		try{
-			TransferFromXtf trsfr=new TransferFromXtf(ili2sqlName,td,conn,dbusr,geomConv,config);
+			TransferFromXtf trsfr=new TransferFromXtf(importOnly,ili2sqlName,td,conn,dbusr,geomConv,idGen,config);
 			trsfr.doit(reader,config,stat);
 		}catch(ch.interlis.iox.IoxException ex){
+			EhiLogger.logError("failed to read data file",ex);
+		} catch (Ili2dbException ex) {
 			EhiLogger.logError("failed to read data file",ex);
 		}
 	}
@@ -1243,6 +1543,7 @@ public class Ili2db {
 			,SqlGeometryConverter geomConv
 			,String sender
 			,Config config
+			,int basketSqlIds[]
 			,HashSet<BasketStat> stat){	
 
 		java.io.File outfile=new java.io.File(xtffile);
@@ -1261,7 +1562,7 @@ public class Ili2db {
 				ioxWriter=new XtfWriter(outfile,td);
 			}
 			TransferToXtf trsfr=new TransferToXtf(ili2sqlName,td,conn,geomConv,config);
-			trsfr.doit(outfile.getName(),ioxWriter,sender,stat);
+			trsfr.doit(outfile.getName(),ioxWriter,sender,basketSqlIds,stat);
 			//trsfr.doitJava();
 			ioxWriter.flush();
 		}catch(ch.interlis.iox.IoxException ex){

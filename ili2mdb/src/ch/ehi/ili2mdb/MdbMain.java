@@ -31,12 +31,14 @@ import ch.ehi.ili2db.gui.AbstractDbPanelDescriptor;
 public class MdbMain extends ch.ehi.ili2db.AbstractMain {
 
 
-	protected void initConfig(Config config) {
+	@Override
+	public void initConfig(Config config) {
 		super.initConfig(config);
 		config.setJdbcDriver("sun.jdbc.odbc.JdbcOdbcDriver");
 		config.setGeometryConverter(ch.ehi.ili2mdb.converter.AccessGeometryConverter.class.getName());
 		config.setDdlGenerator(ch.ehi.sqlgen.generator_impl.jdbc.GeneratorMdb.class.getName());
 	}
+	@Override
 	protected DbUrlConverter getDbUrlConverter() {
 		return new DbUrlConverter(){
 			public String makeUrl(Config config) {
@@ -49,6 +51,7 @@ public class MdbMain extends ch.ehi.ili2db.AbstractMain {
 		};
 	}
 
+	@Override
 	public AbstractDbPanelDescriptor getDbPanelDescriptor() {
 		return new MdbDbPanelDescriptor();
 	}

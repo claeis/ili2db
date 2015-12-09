@@ -35,7 +35,7 @@ import java.net.URLClassLoader;
 public class GeodbMain extends ch.ehi.ili2db.AbstractMain {
 
 	@Override
-	protected void initConfig(Config config) {
+	public void initConfig(Config config) {
 		super.initConfig(config);
 		config.setGeometryConverter(NullGeometryConverter.class.getName());
 		config.setDdlGenerator(ch.ehi.ili2geodb.sqlgen.GeodbGenerator.class.getName());

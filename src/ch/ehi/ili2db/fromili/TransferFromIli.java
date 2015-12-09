@@ -31,6 +31,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 
 import ch.ehi.sqlgen.repository.*;
+import ch.ehi.ili2db.base.DbIdGen;
 import ch.ehi.ili2db.base.DbUtility;
 import ch.ehi.ili2db.base.Ili2cUtility;
 import ch.ehi.ili2db.base.Ili2dbException;
@@ -82,9 +83,11 @@ public class TransferFromIli {
 	private boolean isIli1Model=false;
 	private boolean deleteExistingData=false;
 	private String colT_ID=null;
+	private String uuid_default_value=null;
 	private String nl=System.getProperty("line.separator");
+	private DbIdGen idGen=null;
 
-	public DbSchema doit(TransferDescription td1,java.util.List<Element> modelEles,ch.ehi.ili2db.mapping.Mapping ili2sqlName,ch.ehi.ili2db.gui.Config config)
+	public DbSchema doit(TransferDescription td1,java.util.List<Element> modelEles,ch.ehi.ili2db.mapping.Mapping ili2sqlName,ch.ehi.ili2db.gui.Config config,DbIdGen idGen)
 	throws Ili2dbException
 	{
 		this.defaultCrsAuthority=config.getDefaultSrsAuthority();
@@ -100,6 +103,9 @@ public class TransferFromIli {
 		if(colT_ID==null){
 			colT_ID=T_ID;
 		}
+		uuid_default_value=config.getUuidDefaultValue();
+		this.idGen=idGen;
+
 		deleteExistingData=config.DELETE_DATA.equals(config.getDeleteMode());
 		if(deleteExistingData){
 			EhiLogger.logState("delete existing data...");
@@ -137,6 +143,8 @@ public class TransferFromIli {
 			}else if (modelo instanceof Viewable){
 				if(modelo instanceof Table && ((Table)modelo).isIli1LineAttrStruct()){
 					// skip it
+				}else if((modelo instanceof View) && !isTransferableView(modelo)){
+					// skip it
 				}else{
 					try{
 						generateViewable((Viewable)modelo);
@@ -164,6 +172,20 @@ public class TransferFromIli {
 		customMapping.end(config);
 		return schema;		
 
+	}
+	public static boolean isTransferableView(Object modelo) {
+		if(!(modelo instanceof View)){
+			return false;
+		}
+		View view=(View) modelo;
+		Topic parent=(Topic)view.getContainer();
+		if(!parent.isViewTopic()){
+			return false;
+		}
+		if(view.isTransient()){
+			return false;
+		}
+		return true;
 	}
 	private CustomMapping getCustomMappingStrategy(ch.ehi.ili2db.gui.Config config)
 	throws Ili2dbException
@@ -256,9 +278,9 @@ public class TransferFromIli {
 				  dbTable.addColumn(dbCol);
 			}
 			// if CLASS
-			  if((def instanceof Table) && ((Table)def).isIdentifiable()){
-				  if(createIliTidCol){
-						addIliTidCol(dbTable);
+			  if((def instanceof View) || (def instanceof Table) && ((Table)def).isIdentifiable()){
+				  if(createIliTidCol || isViewableWithOid(def)){
+						addIliTidCol(dbTable,def);
 				  }
 			  }
 		  // if STRUCTURE, add ref to parent
@@ -395,6 +417,25 @@ public class TransferFromIli {
 	  		}
 	  	}
 	}
+	public static boolean isViewableWithOid(Viewable def) {
+		if(!(def instanceof AbstractClassDef)){
+			return false;
+		}
+		if((def instanceof Table) && !((Table)def).isIdentifiable()){
+			return false;
+		}
+		AbstractClassDef aclass=(AbstractClassDef) def;
+		if(aclass.getOid()!=null){
+			return true;
+		}
+		for(Object exto : aclass.getExtensions()){
+			AbstractClassDef ext=(AbstractClassDef) exto;
+			if(ext.getOid()!=null){
+				return true;
+			}
+		}
+		return false;
+	}
 	private void generateItfLineTable(AttributeDef attr)
 	throws Ili2dbException
 	{
@@ -419,7 +460,7 @@ public class TransferFromIli {
 		  dbTable.setRequiresSequence(true);
 		DbColId dbColId=addKeyCol(dbTable);
 		  if(createIliTidCol){
-				addIliTidCol(dbTable);
+				addIliTidCol(dbTable,null);
 		  }
 		  if(createBasketCol){
 			  // add basketCol
@@ -471,12 +512,29 @@ public class TransferFromIli {
 			  }
 		  	schema.addTable(dbTable);
 	}
-	private void addIliTidCol(DbTable dbTable) {
-		DbColVarchar dbColIliTid=new DbColVarchar();
-		dbColIliTid.setName(T_ILI_TID);
-		dbColIliTid.setNotNull(false); // enable later inserts without TID
-		dbColIliTid.setSize(200);
-		dbTable.addColumn(dbColIliTid);
+	private void addIliTidCol(DbTable dbTable,Viewable aclass) {
+		if(isUuidOid(td,aclass)){
+			DbColUuid dbColIliTid= new DbColUuid();
+			dbColIliTid.setName(T_ILI_TID);
+			// CREATE EXTENSION "uuid-ossp";
+			dbColIliTid.setDefaultValue(uuid_default_value);
+			dbTable.addColumn(dbColIliTid);
+		}else{
+			DbColVarchar dbColIliTid=new DbColVarchar();
+			dbColIliTid.setName(T_ILI_TID);
+			dbColIliTid.setSize(200);
+			dbTable.addColumn(dbColIliTid);
+		}
+	}
+	
+	public static boolean isUuidOid(TransferDescription td,Viewable aclass) {
+		if(aclass instanceof AbstractClassDef){
+			Domain oid=((AbstractClassDef<AbstractLeafElement>) aclass).getOid();
+			if(oid==td.INTERLIS.UUIDOID){
+				return true;
+			}
+		}
+		return false;
 	}
 	static public boolean isBoolean(TransferDescription td,AttributeDef attr){
 		if (attr.getDomain() instanceof TypeAlias && isBoolean(td,attr.getDomain())) {
@@ -588,8 +646,6 @@ public class TransferFromIli {
 			dbCol= new DbColDate();
 		}else if (isIliUuid(td,attr)) {
 			dbCol= new DbColUuid();
-			// CREATE EXTENSION "uuid-ossp";
-			// dbCol.setDefaultValue("uuid_generate_v4()");
 		}else if (isIli2Date(td,attr)) {
 			dbCol= new DbColDate();
 		}else if (isIli2DateTime(td,attr)) {
@@ -913,6 +969,7 @@ public class TransferFromIli {
 		  dbColId.setName(colT_ID);
 		  dbColId.setNotNull(true);
 		  dbColId.setPrimaryKey(true);
+		  dbColId.setDefaultValue(idGen.getDefaultValueSql());
 		  table.addColumn(dbColId);
 		  return dbColId;
 	}
@@ -1275,7 +1332,7 @@ public class TransferFromIli {
 			tab.addColumn(thisClass);
 
 			// basket id as read from xtf
-			addIliTidCol(tab); 
+			addIliTidCol(tab,null); 
 			
 			// name of subdirectory in attachments folder
 			DbColVarchar attkey=new DbColVarchar();
