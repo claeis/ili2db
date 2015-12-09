@@ -76,6 +76,7 @@ public class Config extends Settings {
 	static public final int FC_IMPORT=0;
 	static public final int FC_SCHEMAIMPORT=1;
 	static public final int FC_EXPORT=2;
+	static public final int FC_UPDATE=3;
 	public String getIdGenerator() {
 		return idGenerator;
 	}

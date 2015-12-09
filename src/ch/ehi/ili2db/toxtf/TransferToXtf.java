@@ -115,11 +115,12 @@ public class TransferToXtf {
 		iomFile.write(startEvent);
 		if(basketSqlIds!=null){
 			for(int basketSqlId : basketSqlIds){
-				Topic topic=getTopicByBasketId(basketSqlId);
+				StringBuilder basketXtfId=new StringBuilder();
+				Topic topic=getTopicByBasketId(basketSqlId,basketXtfId);
 				if(topic==null){
 					throw new IoxException("no basketId "+basketSqlId+" in db");
 				}else{
-					referrs = referrs || doBasket(filename, iomFile, topic,basketSqlId);				
+					referrs = referrs || doBasket(filename, iomFile, topic,basketSqlId,basketXtfId.toString());				
 				}
 			}
 			
@@ -138,7 +139,7 @@ public class TransferToXtf {
 					Object tObj=topici.next();
 					if (tObj instanceof Topic && !(suppressTopic((Topic)tObj))){
 							Topic topic=(Topic)tObj;
-							referrs = referrs || doBasket(filename, iomFile, topic,null);
+							referrs = referrs || doBasket(filename, iomFile, topic,null,topic.getScopedName(null));
 					}
 				}
 			  }
@@ -149,22 +150,24 @@ public class TransferToXtf {
 		}
 		iomFile.write(new EndTransferEvent());
 	}
-	private Topic getTopicByBasketId(int basketSqlId) throws IoxException {
+	private Topic getTopicByBasketId(int basketSqlId, StringBuilder basketXtfId) throws IoxException {
 		
 		String sqlName=TransferFromIli.BASKETS_TAB;
 		if(schema!=null){
 			sqlName=schema+"."+sqlName;
 		}
 		String topicName=null;
+		String bid=null;
 		java.sql.PreparedStatement getstmt=null;
 		try{
-			String stmt="SELECT "+TransferFromIli.BASKETS_TAB_TOPIC+" FROM "+sqlName+" WHERE "+colT_ID+"= ?";
+			String stmt="SELECT "+TransferFromIli.BASKETS_TAB_TOPIC+","+TransferFromIli.T_ILI_TID+" FROM "+sqlName+" WHERE "+colT_ID+"= ?";
 			EhiLogger.traceBackendCmd(stmt);
 			getstmt=conn.prepareStatement(stmt);
 			getstmt.setInt(1,basketSqlId);
 			java.sql.ResultSet res=getstmt.executeQuery();
 			if(res.next()){
 				topicName=res.getString(1);
+				bid=res.getString(2);
 			}
 		}catch(java.sql.SQLException ex){
 			EhiLogger.logError("failed to query "+sqlName,ex);
@@ -178,15 +181,16 @@ public class TransferToXtf {
 			}
 		}
 		if(topicName!=null){
-			Topic topic=getTopicDef(topicName);
+			Topic topic=getTopicDef(td,topicName);
 			if(topic==null){
 				throw new IoxException("unkonw Topic "+topicName+" in table "+sqlName);
 			}
+			basketXtfId.append(bid);
 			return topic;
 		}
 		return null;
 	}
-	private Topic getTopicDef(String topicQName) {
+	public static Topic getTopicDef(TransferDescription td,String topicQName) {
 		String modelName=null;
 		String topicName=null;
 		int endModelName=topicQName.indexOf('.');
@@ -220,7 +224,7 @@ public class TransferToXtf {
 			  }
 		return null;
 	}
-	private boolean doBasket(String filename, IoxWriter iomFile,Topic topic,Integer basketSqlId) throws IoxException {
+	private boolean doBasket(String filename, IoxWriter iomFile,Topic topic,Integer basketSqlId,String basketXtfId) throws IoxException {
 		Model model=(Model) topic.getContainer();
 		boolean referrs=false;
 		StartBasketEvent iomBasket=null;
@@ -249,7 +253,7 @@ public class TransferToXtf {
 					// dump it
 					EhiLogger.logState(aclass.getScopedName(null)+"...");
 					if(iomBasket==null){
-						iomBasket=new StartBasketEvent(topic.getScopedName(null),topic.getScopedName(null));
+						iomBasket=new StartBasketEvent(topic.getScopedName(null),basketXtfId);
 						iomFile.write(iomBasket);
 					}
 					dumpObject(iomFile,aclass,basketSqlId);
@@ -1118,7 +1122,7 @@ public class TransferToXtf {
 
 	  return false;
 	}
-	protected boolean suppressViewable (Viewable v)
+	public static boolean suppressViewable (Viewable v)
 	{
 	  if (v == null)
 		return true;

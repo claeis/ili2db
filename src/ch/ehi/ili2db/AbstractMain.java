@@ -108,6 +108,9 @@ public abstract class AbstractMain {
 			}else if(arg.equals("--import")){
 				config.setFunction(Config.FC_IMPORT);
 				argi++;
+			}else if(arg.equals("--update")){
+				config.setFunction(Config.FC_UPDATE);
+				argi++;
 			}else if(arg.equals("--export")){
 				config.setFunction(Config.FC_EXPORT);
 				argi++;
@@ -227,6 +230,7 @@ public abstract class AbstractMain {
 					System.err.println("OPTIONS");
 					System.err.println();
 					System.err.println("--import               do an import.");
+					System.err.println("--update               do an update.");
 					System.err.println("--export               do an export.");
 					System.err.println("--schemaimport         do an schema import.");
 					printConnectOptions();

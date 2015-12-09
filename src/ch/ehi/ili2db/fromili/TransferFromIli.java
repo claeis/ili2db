@@ -513,7 +513,7 @@ public class TransferFromIli {
 		  	schema.addTable(dbTable);
 	}
 	private void addIliTidCol(DbTable dbTable,Viewable aclass) {
-		if(isUuidOid(aclass)){
+		if(isUuidOid(td,aclass)){
 			DbColUuid dbColIliTid= new DbColUuid();
 			dbColIliTid.setName(T_ILI_TID);
 			// CREATE EXTENSION "uuid-ossp";
@@ -527,7 +527,7 @@ public class TransferFromIli {
 		}
 	}
 	
-	private boolean isUuidOid(Viewable aclass) {
+	public static boolean isUuidOid(TransferDescription td,Viewable aclass) {
 		if(aclass instanceof AbstractClassDef){
 			Domain oid=((AbstractClassDef<AbstractLeafElement>) aclass).getOid();
 			if(oid==td.INTERLIS.UUIDOID){
