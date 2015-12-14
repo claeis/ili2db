@@ -1084,7 +1084,7 @@ public class Ili2db {
 			int basketSqlIds[]=null;
 			if(baskets!=null){
 				if(!createBasketCol){
-					throw new Ili2dbException("basket wise export requires column "+TransferFromIli.T_BASKET);
+					throw new Ili2dbException("basket wise export requires column "+DbNames.T_BASKET_COL);
 				}
 				// BIDs
 				String basketids[]=baskets.split(ch.interlis.ili2c.Main.MODELS_SEPARATOR);
@@ -1092,7 +1092,7 @@ public class Ili2db {
 				basketSqlIds=getBasketSqlIdsFromBID(basketids,modelv,conn,config);
 			}else if(topics!=null){
 				if(!createBasketCol){
-					throw new Ili2dbException("topic wise export requires column "+TransferFromIli.T_BASKET);
+					throw new Ili2dbException("topic wise export requires column "+DbNames.T_BASKET_COL);
 				}
 				// TOPICs
 				String topicv[]=topics.split(ch.interlis.ili2c.Main.MODELS_SEPARATOR);
@@ -1208,10 +1208,10 @@ public class Ili2db {
 		String schema=config.getDbschema();
 		String colT_ID=config.getColT_ID();
 		if(colT_ID==null){
-			colT_ID=TransferFromIli.T_ID;
+			colT_ID=DbNames.T_ID_COL;
 		}
 
-		String sqlName=TransferFromIli.BASKETS_TAB;
+		String sqlName=DbNames.BASKETS_TAB;
 		if(schema!=null){
 			sqlName=schema+"."+sqlName;
 		}
@@ -1238,14 +1238,14 @@ public class Ili2db {
 	}
 	public static Integer getBasketSqlIdFromBID(String basketid,Connection conn,String schema, String colT_ID,StringBuilder topicName) throws Ili2dbException {
 
-		String sqlName=TransferFromIli.BASKETS_TAB;
+		String sqlName=DbNames.BASKETS_TAB;
 		if(schema!=null){
 			sqlName=schema+"."+sqlName;
 		}
 		int sqlId=0;
 		java.sql.PreparedStatement getstmt=null;
 		try{
-			String stmt="SELECT "+colT_ID+","+TransferFromIli.BASKETS_TAB_TOPIC+" FROM "+sqlName+" WHERE "+TransferFromIli.T_ILI_TID+"= ?";
+			String stmt="SELECT "+colT_ID+","+DbNames.BASKETS_TAB_TOPIC_COL+" FROM "+sqlName+" WHERE "+DbNames.T_ILI_TID_COL+"= ?";
 			EhiLogger.traceBackendCmd(stmt);
 			getstmt=conn.prepareStatement(stmt);
 			getstmt.setString(1,basketid);
@@ -1273,7 +1273,7 @@ public class Ili2db {
 		String schema=config.getDbschema();
 		String colT_ID=config.getColT_ID();
 		if(colT_ID==null){
-			colT_ID=TransferFromIli.T_ID;
+			colT_ID=DbNames.T_ID_COL;
 		}
 
 		String qryTopics[][]=new String[topics.length][];
@@ -1281,7 +1281,7 @@ public class Ili2db {
 		for(String topic:topics){
 			qryTopics[idx++]=splitIliQName(topic);
 		}
-		String sqlName=TransferFromIli.BASKETS_TAB;
+		String sqlName=DbNames.BASKETS_TAB;
 		if(schema!=null){
 			sqlName=schema+"."+sqlName;
 		}
@@ -1291,7 +1291,7 @@ public class Ili2db {
 		int sqlId=0;
 		java.sql.PreparedStatement getstmt=null;
 		try{
-			String stmt="SELECT "+colT_ID+","+TransferFromIli.BASKETS_TAB_TOPIC+" FROM "+sqlName;
+			String stmt="SELECT "+colT_ID+","+DbNames.BASKETS_TAB_TOPIC_COL+" FROM "+sqlName;
 			EhiLogger.traceBackendCmd(stmt);
 			getstmt=conn.prepareStatement(stmt);
 			java.sql.ResultSet res=getstmt.executeQuery();
@@ -1348,11 +1348,11 @@ public class Ili2db {
 		String schema=config.getDbschema();
 		String colT_ID=config.getColT_ID();
 		if(colT_ID==null){
-			colT_ID=TransferFromIli.T_ID;
+			colT_ID=DbNames.T_ID_COL;
 		}
 
 		int idx=0;
-		String sqlName=TransferFromIli.BASKETS_TAB;
+		String sqlName=DbNames.BASKETS_TAB;
 		if(schema!=null){
 			sqlName=schema+"."+sqlName;
 		}
@@ -1362,7 +1362,7 @@ public class Ili2db {
 		int sqlId=0;
 		java.sql.PreparedStatement getstmt=null;
 		try{
-			String stmt="SELECT "+colT_ID+","+TransferFromIli.BASKETS_TAB_TOPIC+" FROM "+sqlName;
+			String stmt="SELECT "+colT_ID+","+DbNames.BASKETS_TAB_TOPIC_COL+" FROM "+sqlName;
 			EhiLogger.traceBackendCmd(stmt);
 			getstmt=conn.prepareStatement(stmt);
 			java.sql.ResultSet res=getstmt.executeQuery();

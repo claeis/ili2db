@@ -32,6 +32,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
 
 import ch.ehi.basics.logging.EhiLogger;
 import ch.ehi.ili2db.base.DbIdGen;
+import ch.ehi.ili2db.base.DbNames;
 import ch.ehi.ili2db.base.DbUtility;
 import ch.ehi.ili2db.base.Ili2cUtility;
 import ch.ehi.ili2db.base.Ili2db;
@@ -126,7 +127,7 @@ public class TransferFromXtf {
 		createEnumColAsItfCode=config.CREATE_ENUMCOL_AS_ITFCODE_YES.equals(config.getCreateEnumColAsItfCode());
 		colT_ID=config.getColT_ID();
 		if(colT_ID==null){
-			colT_ID=TransferFromIli.T_ID;
+			colT_ID=DbNames.T_ID_COL;
 		}
 		createTypeDiscriminator=config.CREATE_TYPE_DISCRIMINATOR_ALWAYS.equals(config.getCreateTypeDiscriminator());
 		createGenericStructRef=config.STRUCT_MAPPING_GENERICREF.equals(config.getStructMapping());
@@ -397,7 +398,7 @@ public class TransferFromXtf {
 
 	private void dropStructEles(DbTableName sqlTableName, int basketSqlId) {
 		// DELETE FROM products WHERE t_id in (10,20);
-		String stmt = "DELETE FROM "+sqlTableName.getQName()+" WHERE "+TransferFromIli.T_BASKET+"="+basketSqlId;
+		String stmt = "DELETE FROM "+sqlTableName.getQName()+" WHERE "+DbNames.T_BASKET_COL+"="+basketSqlId;
 		EhiLogger.traceBackendCmd(stmt);
 		java.sql.PreparedStatement dbstmt = null;
 		try {
@@ -721,7 +722,7 @@ public class TransferFromXtf {
 	private String createQueryStmt4sqlid(Viewable aclass){
 		StringBuffer ret = new StringBuffer();
 		ret.append("SELECT r0."+colT_ID);
-		ret.append(", r0."+TransferFromIli.T_ILI_TID);
+		ret.append(", r0."+DbNames.T_ILI_TID_COL);
 		ret.append(" FROM ");
 		ArrayList tablev=new ArrayList(10);
 		tablev.add(aclass);
@@ -731,7 +732,7 @@ public class TransferFromXtf {
 		}
 		ret.append(getSqlTableName(base));
 		ret.append(" r0");
-		ret.append(" WHERE r0."+TransferFromIli.T_ILI_TID+"=?");
+		ret.append(" WHERE r0."+DbNames.T_ILI_TID_COL+"=?");
 		return ret.toString();
 	}
 	private void readObjectSqlIds(boolean isItf,String sqltablename, int basketsqlid) {
@@ -797,14 +798,14 @@ public class TransferFromXtf {
 	private String createQueryStmt4sqlids(boolean isItf,String sqltablename){
 		StringBuffer ret = new StringBuffer();
 		ret.append("SELECT r0."+colT_ID);
-		ret.append(", r0."+TransferFromIli.T_ILI_TID);
+		ret.append(", r0."+DbNames.T_ILI_TID_COL);
 		if(!isItf){
-			ret.append(", r0."+TransferFromIli.T_TYPE);
+			ret.append(", r0."+DbNames.T_TYPE_COL);
 		}
 		ret.append(" FROM ");
 		ret.append(sqltablename);
 		ret.append(" r0");
-		ret.append(" WHERE r0."+TransferFromIli.T_BASKET+"=?");
+		ret.append(" WHERE r0."+DbNames.T_BASKET_COL+"=?");
 		return ret.toString();
 	}
 
@@ -1360,16 +1361,16 @@ public class TransferFromXtf {
 	private int writeImportStat(int datasetSqlId,String importFile,java.sql.Timestamp importDate,String importUsr)
 	throws java.sql.SQLException,ConverterException
 	{
-		String sqlname=TransferFromIli.IMPORTS_TAB;
+		String sqlname=DbNames.IMPORTS_TAB;
 		if(schema!=null){
 			sqlname=schema+"."+sqlname;
 		}
 		String insert = "INSERT INTO "+sqlname
 			+"("+colT_ID 
-			+", "+TransferFromIli.IMPORTS_TAB_DATASET
-			+", "+TransferFromIli.IMPORTS_TAB_IMPORTDATE
-			+", "+TransferFromIli.IMPORTS_TAB_IMPORTUSER
-			+", "+TransferFromIli.IMPORTS_TAB_IMPORTFILE
+			+", "+DbNames.IMPORTS_TAB_DATASET_COL
+			+", "+DbNames.IMPORTS_TAB_IMPORTDATE_COL
+			+", "+DbNames.IMPORTS_TAB_IMPORTUSER_COL
+			+", "+DbNames.IMPORTS_TAB_IMPORTFILE_COL
 			+") VALUES (?,?,?,?,?)";
 		EhiLogger.traceBackendCmd(insert);
 		PreparedStatement ps = conn.prepareStatement(insert);
@@ -1403,17 +1404,17 @@ public class TransferFromXtf {
 	private int writeImportBasketStat(int importSqlId,int basketSqlId,int startTid,int endTid,int objCount)
 	throws java.sql.SQLException,ConverterException
 	{
-		String sqlname=TransferFromIli.IMPORTS_BASKETS_TAB;
+		String sqlname=DbNames.IMPORTS_BASKETS_TAB;
 		if(schema!=null){
 			sqlname=schema+"."+sqlname;
 		}
 		String insert = "INSERT INTO "+sqlname
 			+"("+colT_ID 
-			+", "+TransferFromIli.IMPORTS_BASKETS_TAB_IMPORT
-			+", "+TransferFromIli.IMPORTS_BASKETS_TAB_BASKET
-			+", "+TransferFromIli.IMPORTS_TAB_OBJECTCOUNT
-			+", "+TransferFromIli.IMPORTS_TAB_STARTTID
-			+", "+TransferFromIli.IMPORTS_TAB_ENDTID
+			+", "+DbNames.IMPORTS_BASKETS_TAB_IMPORT_COL
+			+", "+DbNames.IMPORTS_BASKETS_TAB_BASKET_COL
+			+", "+DbNames.IMPORTS_TAB_OBJECTCOUNT_COL
+			+", "+DbNames.IMPORTS_TAB_STARTTID_COL
+			+", "+DbNames.IMPORTS_TAB_ENDTID_COL
 			+") VALUES (?,?,?,?,?,?)";
 		EhiLogger.traceBackendCmd(insert);
 		PreparedStatement ps = conn.prepareStatement(insert);
@@ -1451,17 +1452,17 @@ public class TransferFromXtf {
 	private void writeImportStatDetail(int importSqlId,int startTid,int endTid,int objCount,String importClassName)
 	throws java.sql.SQLException
 	{
-		String sqlname=TransferFromIli.IMPORTS_OBJECTS_TAB;
+		String sqlname=DbNames.IMPORTS_OBJECTS_TAB;
 		if(schema!=null){
 			sqlname=schema+"."+sqlname;
 		}
 		String insert = "INSERT INTO "+sqlname
 			+"("+colT_ID 
-			+", "+TransferFromIli.IMPORTS_OBJECTS_TAB_IMPORT
-			+", "+TransferFromIli.IMPORTS_OBJECTS_TAB_CLASS
-			+", "+TransferFromIli.IMPORTS_TAB_OBJECTCOUNT
-			+", "+TransferFromIli.IMPORTS_TAB_STARTTID
-			+", "+TransferFromIli.IMPORTS_TAB_ENDTID
+			+", "+DbNames.IMPORTS_OBJECTS_TAB_IMPORT_COL
+			+", "+DbNames.IMPORTS_OBJECTS_TAB_CLASS_COL
+			+", "+DbNames.IMPORTS_TAB_OBJECTCOUNT_COL
+			+", "+DbNames.IMPORTS_TAB_STARTTID_COL
+			+", "+DbNames.IMPORTS_TAB_ENDTID_COL
 			+") VALUES (?,?,?,?,?,?)";
 		EhiLogger.traceBackendCmd(insert);
 		PreparedStatement ps = conn.prepareStatement(insert);
@@ -1500,16 +1501,16 @@ public class TransferFromXtf {
 		String bid=iomBasket.getBid();
 		String tag=iomBasket.getType();
 
-		String sqlname=TransferFromIli.BASKETS_TAB;
+		String sqlname=DbNames.BASKETS_TAB;
 		if(schema!=null){
 			sqlname=schema+"."+sqlname;
 		}
 		String insert = "INSERT INTO "+sqlname
 			+"("+colT_ID 
-			+", "+TransferFromIli.BASKETS_TAB_TOPIC
-			+", "+TransferFromIli.T_ILI_TID
-			+", "+TransferFromIli.BASKETS_TAB_ATTACHMENT_KEY
-			+", "+TransferFromIli.BASKETS_TAB_DATASET
+			+", "+DbNames.BASKETS_TAB_TOPIC_COL
+			+", "+DbNames.T_ILI_TID_COL
+			+", "+DbNames.BASKETS_TAB_ATTACHMENT_KEY_COL
+			+", "+DbNames.BASKETS_TAB_DATASET_COL
 			+") VALUES (?,?,?,?,?)";
 		EhiLogger.traceBackendCmd(insert);
 		PreparedStatement ps = conn.prepareStatement(insert);
@@ -1541,7 +1542,7 @@ public class TransferFromXtf {
 
 	{
 
-		String sqlname=TransferFromIli.DATASETS_TAB;
+		String sqlname=DbNames.DATASETS_TAB;
 		if(schema!=null){
 			sqlname=schema+"."+sqlname;
 		}
@@ -1623,7 +1624,7 @@ public class TransferFromXtf {
 		// add T_basket
 		if(createBasketCol){
 			ret.append(sep);
-			ret.append(TransferFromIli.T_BASKET);
+			ret.append(DbNames.T_BASKET_COL);
 			if(isUpdate){
 				ret.append("=?");
 			}else{
@@ -1636,7 +1637,7 @@ public class TransferFromXtf {
 		if(aclass.getExtending()==null){
 			if(createTypeDiscriminator || Ili2cUtility.isViewableWithExtension(aclass)){
 				ret.append(sep);
-				ret.append(TransferFromIli.T_TYPE);
+				ret.append(DbNames.T_TYPE_COL);
 				if(isUpdate){
 					ret.append("=?");
 				}else{
@@ -1649,7 +1650,7 @@ public class TransferFromXtf {
 				if(!isUpdate){
 					if(readIliTid || TransferFromIli.isViewableWithOid(aclass)){
 						ret.append(sep);
-						ret.append(TransferFromIli.T_ILI_TID);
+						ret.append(DbNames.T_ILI_TID_COL);
 						values.append(",?");
 						sep=",";
 					}
@@ -1659,7 +1660,7 @@ public class TransferFromXtf {
 			if((aclass instanceof Table) && !((Table)aclass).isIdentifiable()){
 				if(createGenericStructRef){
 					ret.append(sep);
-					ret.append(TransferFromIli.T_PARENT_ID);
+					ret.append(DbNames.T_PARENT_ID_COL);
 					if(isUpdate){
 						ret.append("=?");
 					}else{
@@ -1667,7 +1668,7 @@ public class TransferFromXtf {
 					}
 					sep=",";
 					ret.append(sep);
-					ret.append(TransferFromIli.T_PARENT_TYPE);
+					ret.append(DbNames.T_PARENT_TYPE_COL);
 					if(isUpdate){
 						ret.append("=?");
 					}else{
@@ -1676,7 +1677,7 @@ public class TransferFromXtf {
 					sep=",";
 					// attribute name in parent class
 					ret.append(sep);
-					ret.append(TransferFromIli.T_PARENT_ATTR);
+					ret.append(DbNames.T_PARENT_ATTR_COL);
 					if(isUpdate){
 						ret.append("=?");
 					}else{
@@ -1695,7 +1696,7 @@ public class TransferFromXtf {
 				}
 				// seqeunce (not null if LIST)
 				ret.append(sep);
-				ret.append(TransferFromIli.T_SEQ);
+				ret.append(DbNames.T_SEQ_COL);
 				if(isUpdate){
 					ret.append("=?");
 				}else{
@@ -1754,7 +1755,7 @@ public class TransferFromXtf {
 		// stdcols
 		if(createStdCols){
 			ret.append(sep);
-			ret.append(TransferFromIli.T_LAST_CHANGE);
+			ret.append(DbNames.T_LAST_CHANGE_COL);
 			if(isUpdate){
 				ret.append("=?");
 			}else{
@@ -1764,13 +1765,13 @@ public class TransferFromXtf {
 			
 			if(!isUpdate){
 				ret.append(sep);
-				ret.append(TransferFromIli.T_CREATE_DATE);
+				ret.append(DbNames.T_CREATE_DATE_COL);
 				values.append(",?");
 				sep=",";
 			}
 			
 			ret.append(sep);
-			ret.append(TransferFromIli.T_USER);
+			ret.append(DbNames.T_USER_COL);
 			if(isUpdate){
 				ret.append("=?");
 			}else{
@@ -1833,7 +1834,7 @@ public class TransferFromXtf {
 				 if(createItfAreaRef){
 					 if(type instanceof AreaType){
 						 ret.append(sep);
-						 ret.append(attrSqlName+TransferFromIli.ITF_MAINTABLE_GEOTABLEREF_SUFFIX);
+						 ret.append(attrSqlName+DbNames.ITF_MAINTABLE_GEOTABLEREF_COL_SUFFIX);
 							if(isUpdate){
 								ret.append("="+geomConv.getInsertValueWrapperCoord("?",getSrsid(type)));
 							}else{
@@ -1862,7 +1863,7 @@ public class TransferFromXtf {
 				sep=",";
 				if(createEnumTxtCol){
 					ret.append(sep);
-					ret.append(attrSqlName+TransferFromIli.ENUM_TXT_COL_SUFFIX);
+					ret.append(attrSqlName+DbNames.ENUM_TXT_COL_SUFFIX);
 					if(isUpdate){
 						ret.append("=?");
 					}else{
@@ -1903,28 +1904,28 @@ public class TransferFromXtf {
 		if(createBasketCol){
 			stmt.append(sep);
 			sep=",";
-			stmt.append(TransferFromIli.T_BASKET);
+			stmt.append(DbNames.T_BASKET_COL);
 			values.append(",?");
 		}
 		
 		if(readIliTid){
 			stmt.append(sep);
 			sep=",";
-			stmt.append(TransferFromIli.T_ILI_TID);
+			stmt.append(DbNames.T_ILI_TID_COL);
 			values.append(",?");				
 		}
 		
 		// POLYLINE
 		 stmt.append(sep);
 		 sep=",";
-		 stmt.append(ili2sqlName.mapIliAttrName(attrDef,TransferFromIli.ITF_LINETABLE_GEOMATTR));
+		 stmt.append(ili2sqlName.mapIliAttrName(attrDef,DbNames.ITF_LINETABLE_GEOMATTR_ILI_SUFFIX));
 		values.append(","+geomConv.getInsertValueWrapperPolyline("?",getSrsid(type)));
 
 		// -> mainTable
 		if(type instanceof SurfaceType){
 			stmt.append(sep);
 			sep=",";
-			stmt.append(ili2sqlName.mapIliAttrName(attrDef,TransferFromIli.ITF_LINETABLE_MAINTABLEREF));
+			stmt.append(ili2sqlName.mapIliAttrName(attrDef,DbNames.ITF_LINETABLE_MAINTABLEREF_ILI_SUFFIX));
 			values.append(",?");
 		}
 		
@@ -1941,15 +1942,15 @@ public class TransferFromXtf {
 		if(createStdCols){
 			stmt.append(sep);
 			sep=",";
-			stmt.append(TransferFromIli.T_LAST_CHANGE);
+			stmt.append(DbNames.T_LAST_CHANGE_COL);
 			values.append(",?");
 			stmt.append(sep);
 			sep=",";
-			stmt.append(TransferFromIli.T_CREATE_DATE);
+			stmt.append(DbNames.T_CREATE_DATE_COL);
 			values.append(",?");
 			stmt.append(sep);
 			sep=",";
-			stmt.append(TransferFromIli.T_USER);
+			stmt.append(DbNames.T_USER_COL);
 			values.append(",?");
 		}
 

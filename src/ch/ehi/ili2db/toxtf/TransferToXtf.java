@@ -26,6 +26,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 
 import ch.ehi.basics.logging.EhiLogger;
+import ch.ehi.ili2db.base.DbNames;
 import ch.ehi.ili2db.base.DbUtility;
 import ch.ehi.ili2db.base.Ili2cUtility;
 import ch.ehi.ili2db.base.Ili2dbException;
@@ -87,7 +88,7 @@ public class TransferToXtf {
 		createStdCols=config.CREATE_STD_COLS_ALL.equals(config.getCreateStdCols());
 		colT_ID=config.getColT_ID();
 		if(colT_ID==null){
-			colT_ID=TransferFromIli.T_ID;
+			colT_ID=DbNames.T_ID_COL;
 		}
 		createTypeDiscriminator=config.CREATE_TYPE_DISCRIMINATOR_ALWAYS.equals(config.getCreateTypeDiscriminator());
 		createGenericStructRef=config.STRUCT_MAPPING_GENERICREF.equals(config.getStructMapping());
@@ -152,7 +153,7 @@ public class TransferToXtf {
 	}
 	private Topic getTopicByBasketId(int basketSqlId, StringBuilder basketXtfId) throws IoxException {
 		
-		String sqlName=TransferFromIli.BASKETS_TAB;
+		String sqlName=DbNames.BASKETS_TAB;
 		if(schema!=null){
 			sqlName=schema+"."+sqlName;
 		}
@@ -160,7 +161,7 @@ public class TransferToXtf {
 		String bid=null;
 		java.sql.PreparedStatement getstmt=null;
 		try{
-			String stmt="SELECT "+TransferFromIli.BASKETS_TAB_TOPIC+","+TransferFromIli.T_ILI_TID+" FROM "+sqlName+" WHERE "+colT_ID+"= ?";
+			String stmt="SELECT "+DbNames.BASKETS_TAB_TOPIC_COL+","+DbNames.T_ILI_TID_COL+" FROM "+sqlName+" WHERE "+colT_ID+"= ?";
 			EhiLogger.traceBackendCmd(stmt);
 			getstmt=conn.prepareStatement(stmt);
 			getstmt.setInt(1,basketSqlId);
@@ -518,7 +519,7 @@ public class TransferToXtf {
 				String structEleClass=null;
 				Viewable structClass=null;
 				if(createTypeDiscriminator || Ili2cUtility.isViewableWithExtension(baseClass)){
-					structEleClass=ili2sqlName.mapSqlTableName(rs.getString(TransferFromIli.T_TYPE));
+					structEleClass=ili2sqlName.mapSqlTableName(rs.getString(DbNames.T_TYPE_COL));
 					structClass=(Viewable)tag2class.get(structEleClass);
 				}else{
 					structEleClass=baseClass.getScopedName(null);
@@ -590,7 +591,7 @@ public class TransferToXtf {
 				if(!rs.wasNull()){
 					try{
 					boolean is3D=false;
-					IomObject polyline=geomConv.toIomPolyline(geomobj,ili2sqlName.mapIliAttrName(attr,TransferFromIli.ITF_LINETABLE_GEOMATTR),is3D);
+					IomObject polyline=geomConv.toIomPolyline(geomobj,ili2sqlName.mapIliAttrName(attr,DbNames.ITF_LINETABLE_GEOMATTR_ILI_SUFFIX),is3D);
 					iomObj.addattrobj(geomAttrName,polyline);
 					}catch(ConverterException ex){
 						EhiLogger.logError("Object "+sqlid+": failed to convert polyline",ex);
@@ -1195,7 +1196,7 @@ public class TransferToXtf {
 		StringBuffer ret = new StringBuffer();
 		ret.append("SELECT r0."+colT_ID);
 		if(writeIliTid){
-			ret.append(", r0."+TransferFromIli.T_ILI_TID);
+			ret.append(", r0."+DbNames.T_ILI_TID_COL);
 		}
 		String sep=",";
 		
@@ -1204,7 +1205,7 @@ public class TransferToXtf {
 		// geomAttr
 		 ret.append(sep);
 		 sep=",";
-		 ret.append(conv.getSelectValueWrapperPolyline(ili2sqlName.mapIliAttrName(attr,TransferFromIli.ITF_LINETABLE_GEOMATTR)));
+		 ret.append(conv.getSelectValueWrapperPolyline(ili2sqlName.mapIliAttrName(attr,DbNames.ITF_LINETABLE_GEOMATTR_ILI_SUFFIX)));
 		 //ret.append(ili2sqlName.mapIliAttrName(geomAttrName));
 
 		 // is it of type SURFACE?
@@ -1212,7 +1213,7 @@ public class TransferToXtf {
 			 // -> mainTable
 			 ret.append(sep);
 			 sep=",";
-			 ret.append(ili2sqlName.mapIliAttrName(attr,TransferFromIli.ITF_LINETABLE_MAINTABLEREF));
+			 ret.append(ili2sqlName.mapIliAttrName(attr,DbNames.ITF_LINETABLE_MAINTABLEREF_ILI_SUFFIX));
 		 }
 
 			Table lineAttrTable=type.getLineAttributeStructure();
@@ -1232,7 +1233,7 @@ public class TransferToXtf {
 		ret.append(sqlTabName);
 		ret.append(" r0");
 		if(basketSqlId!=null){
-			ret.append(" WHERE r0."+TransferFromIli.T_BASKET+"=?");
+			ret.append(" WHERE r0."+DbNames.T_BASKET_COL+"=?");
 		}
 
 		return ret.toString();
@@ -1240,7 +1241,7 @@ public class TransferToXtf {
 	private String createQueryStmt4xtfid(Viewable aclass){
 		StringBuffer ret = new StringBuffer();
 		ret.append("SELECT r0."+colT_ID);
-		ret.append(", r0."+TransferFromIli.T_ILI_TID);
+		ret.append(", r0."+DbNames.T_ILI_TID_COL);
 		ret.append(" FROM ");
 		ArrayList tablev=new ArrayList(10);
 		tablev.add(aclass);
@@ -1262,22 +1263,22 @@ public class TransferToXtf {
 		StringBuffer ret = new StringBuffer();
 		ret.append("SELECT r0."+colT_ID);
 		if(createTypeDiscriminator || Ili2cUtility.isViewableWithExtension(aclass)){
-			ret.append(", r0."+TransferFromIli.T_TYPE);
+			ret.append(", r0."+DbNames.T_TYPE_COL);
 		}
 		if((aclass instanceof View) || (aclass instanceof Table) && ((Table)aclass).isIdentifiable()){
 			if(writeIliTid && structWrapper==null || TransferFromIli.isViewableWithOid(aclass)){
-				ret.append(", r0."+TransferFromIli.T_ILI_TID);
+				ret.append(", r0."+DbNames.T_ILI_TID_COL);
 			}
 		}
 		if(structWrapper!=null){
 			if(createGenericStructRef){
-				ret.append(", r0."+TransferFromIli.T_PARENT_ID);
-				ret.append(", r0."+TransferFromIli.T_PARENT_TYPE);
-				ret.append(", r0."+TransferFromIli.T_PARENT_ATTR);
+				ret.append(", r0."+DbNames.T_PARENT_ID_COL);
+				ret.append(", r0."+DbNames.T_PARENT_TYPE_COL);
+				ret.append(", r0."+DbNames.T_PARENT_ATTR_COL);
 			}else{
 				ret.append(", r0."+ili2sqlName.mapIliAttributeDefQualified(structWrapper.getParentAttr()));
 			}
-			ret.append(", r0."+TransferFromIli.T_SEQ);
+			ret.append(", r0."+DbNames.T_SEQ_COL);
 		}
 		String sep=",";
 		Iterator iter = aclass.getAttributesAndRoles2();
@@ -1328,13 +1329,13 @@ public class TransferToXtf {
 		if(createStdCols){
 			ret.append(sep);
 			sep=",";
-			ret.append("r0."+TransferFromIli.T_LAST_CHANGE);
+			ret.append("r0."+DbNames.T_LAST_CHANGE_COL);
 			ret.append(sep);
 			sep=",";
-			ret.append("r0."+TransferFromIli.T_CREATE_DATE);
+			ret.append("r0."+DbNames.T_CREATE_DATE_COL);
 			ret.append(sep);
 			sep=",";
-			ret.append("r0."+TransferFromIli.T_USER);
+			ret.append("r0."+DbNames.T_USER_COL);
 		}
 
 		ret.append(" FROM ");
@@ -1366,22 +1367,22 @@ public class TransferToXtf {
 		}
 		sep=" WHERE";
 		if(createTypeDiscriminator || Ili2cUtility.isViewableWithExtension(aclass)){
-			ret.append(sep+" r0."+TransferFromIli.T_TYPE+"='"+getSqlTableName(aclass).getName()+"'");
+			ret.append(sep+" r0."+DbNames.T_TYPE_COL+"='"+getSqlTableName(aclass).getName()+"'");
 			sep=" AND";
 		}
 		if(structWrapper!=null){
 			if(createGenericStructRef){
-				ret.append(sep+" r0."+TransferFromIli.T_PARENT_ID+"=? AND r0."+TransferFromIli.T_PARENT_ATTR+"=?");
+				ret.append(sep+" r0."+DbNames.T_PARENT_ID_COL+"=? AND r0."+DbNames.T_PARENT_ATTR_COL+"=?");
 			}else{
 				ret.append(sep+" r0."+ili2sqlName.mapIliAttributeDefQualified(structWrapper.getParentAttr())+"=?");
 			}
 			sep=" AND";
 		}
 		if(basketSqlId!=null){
-			ret.append(sep+" r0."+TransferFromIli.T_BASKET+"=?");
+			ret.append(sep+" r0."+DbNames.T_BASKET_COL+"=?");
 		}
 		if(structWrapper!=null){
-			ret.append(" ORDER BY r0."+TransferFromIli.T_SEQ+" ASC");
+			ret.append(" ORDER BY r0."+DbNames.T_SEQ_COL+" ASC");
 		}
 		return ret.toString();
 	}
@@ -1405,7 +1406,7 @@ public class TransferToXtf {
 					 if(type instanceof AreaType){
 						 ret.append(sep);
 						 sep=",";
-						 ret.append(geomConv.getSelectValueWrapperCoord(attrName+TransferFromIli.ITF_MAINTABLE_GEOTABLEREF_SUFFIX));
+						 ret.append(geomConv.getSelectValueWrapperCoord(attrName+DbNames.ITF_MAINTABLE_GEOTABLEREF_COL_SUFFIX));
 					 }
 				 }
 			 }else if(type instanceof CoordType){
@@ -1447,7 +1448,7 @@ public class TransferToXtf {
 		StringBuffer ret = new StringBuffer();
 		ret.append("SELECT r0."+colT_ID);
 		if(createTypeDiscriminator || Ili2cUtility.isViewableWithExtension(aclass)){
-			ret.append(", r0."+TransferFromIli.T_TYPE);
+			ret.append(", r0."+DbNames.T_TYPE_COL);
 		}
 		ret.append(" FROM ");
 		Viewable rootClass=(Viewable)aclass.getRootExtending();
@@ -1458,12 +1459,12 @@ public class TransferToXtf {
 		ret.append(" r0");
 		if(wrapper!=null){
 			if(createGenericStructRef){
-				ret.append(" WHERE r0."+TransferFromIli.T_PARENT_ID+"="+wrapper.getParentSqlId()+" AND r0."+TransferFromIli.T_PARENT_ATTR+"='"
+				ret.append(" WHERE r0."+DbNames.T_PARENT_ID_COL+"="+wrapper.getParentSqlId()+" AND r0."+DbNames.T_PARENT_ATTR_COL+"='"
 						+ili2sqlName.mapIliAttributeDef(wrapper.getParentAttr())
-						+"' ORDER BY r0."+TransferFromIli.T_SEQ+" ASC");
+						+"' ORDER BY r0."+DbNames.T_SEQ_COL+" ASC");
 			}else{
 				ret.append(" WHERE r0."+ili2sqlName.mapIliAttributeDefQualified(wrapper.getParentAttr())+"="+wrapper.getParentSqlId()
-						+" ORDER BY r0."+TransferFromIli.T_SEQ+" ASC");
+						+" ORDER BY r0."+DbNames.T_SEQ_COL+" ASC");
 			}
 		}
 		return ret.toString();
