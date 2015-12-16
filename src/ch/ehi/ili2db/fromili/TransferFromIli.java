@@ -36,6 +36,7 @@ import ch.ehi.ili2db.base.DbNames;
 import ch.ehi.ili2db.base.DbUtility;
 import ch.ehi.ili2db.base.Ili2cUtility;
 import ch.ehi.ili2db.base.Ili2dbException;
+import ch.ehi.ili2db.converter.AbstractRecordConverter;
 import ch.ehi.ili2db.gui.Config;
 import ch.ehi.ili2db.mapping.Mapping;
 
@@ -49,64 +50,42 @@ public class TransferFromIli {
 	private HashSet visitedEnums=null;
 	private TransferDescription td=null;
 	private ch.ehi.ili2db.mapping.Mapping ili2sqlName=null;
-	private String defaultCrsAuthority=null;
-	private String defaultSrcCode=null;
 	private String createEnumTable=null;
 	private boolean createStdCols=false;
-	private boolean createEnumTxtCol=false;
-	private boolean createEnumColAsItfCode=false;
 	private boolean createIliTidCol=false;
-	private boolean createTypeDiscriminator=false;
-	private boolean createGenericStructRef=false;
-	private boolean sqlEnableNull=true;
-	private boolean strokeArcs=true;
 	private boolean createBasketCol=false;
 	private CustomMapping customMapping=null;
 	private boolean createItfLineTables=false;
-	private boolean createItfAreaRef=false;
 	private boolean createFk=false;
 	private boolean createFkIdx=false;
 	private boolean isIli1Model=false;
 	private boolean deleteExistingData=false;
 	private String colT_ID=null;
-	private String uuid_default_value=null;
 	private String nl=System.getProperty("line.separator");
-	private DbIdGen idGen=null;
-
+	private FromIliRecordConverter recConv=null;
+	
 	public DbSchema doit(TransferDescription td1,java.util.List<Element> modelEles,ch.ehi.ili2db.mapping.Mapping ili2sqlName,ch.ehi.ili2db.gui.Config config,DbIdGen idGen)
 	throws Ili2dbException
 	{
-		this.defaultCrsAuthority=config.getDefaultSrsAuthority();
-		this.defaultSrcCode=config.getDefaultSrsCode();
 		this.ili2sqlName=ili2sqlName;
 		createEnumTable=config.getCreateEnumDefs();
-		createEnumColAsItfCode=config.CREATE_ENUMCOL_AS_ITFCODE_YES.equals(config.getCreateEnumColAsItfCode());
 		createStdCols=config.CREATE_STD_COLS_ALL.equals(config.getCreateStdCols());
-		createEnumTxtCol=config.CREATE_ENUM_TXT_COL.equals(config.getCreateEnumCols());
 		createFk=config.CREATE_FK_YES.equals(config.getCreateFk());
 		createFkIdx=config.CREATE_FKIDX_YES.equals(config.getCreateFkIdx());
 		colT_ID=config.getColT_ID();
 		if(colT_ID==null){
 			colT_ID=DbNames.T_ID_COL;
 		}
-		uuid_default_value=config.getUuidDefaultValue();
-		this.idGen=idGen;
-
 		deleteExistingData=config.DELETE_DATA.equals(config.getDeleteMode());
 		if(deleteExistingData){
 			EhiLogger.logState("delete existing data...");
 		}
 		
-		createTypeDiscriminator=config.CREATE_TYPE_DISCRIMINATOR_ALWAYS.equals(config.getCreateTypeDiscriminator());
-		createGenericStructRef=config.STRUCT_MAPPING_GENERICREF.equals(config.getStructMapping());
-		sqlEnableNull=config.SQL_NULL_ENABLE.equals(config.getSqlNull());
-		strokeArcs=config.STROKE_ARCS_ENABLE.equals(config.getStrokeArcs());
 		createIliTidCol=config.TID_HANDLING_PROPERTY.equals(config.getTidHandling());
 		createBasketCol=config.BASKET_HANDLING_READWRITE.equals(config.getBasketHandling());
 		
 		isIli1Model=td1.getIli1Format()!=null;
 		createItfLineTables=isIli1Model && config.getDoItfLineTables();
-		createItfAreaRef=isIli1Model && config.AREA_REF_KEEP.equals(config.getAreaRef());
 		
 		customMapping=getCustomMappingStrategy(config);
 		customMapping.init(config);
@@ -116,6 +95,8 @@ public class TransferFromIli {
 		visitedElements=new HashSet();
 		visitedEnums=new HashSet();
 		td=td1;
+		recConv=new FromIliRecordConverter(td,ili2sqlName,config,schema,customMapping,idGen,visitedEnums);
+
 		Iterator modeli=modelEles.iterator();
 		while(modeli.hasNext()){
 			Object modelo=modeli.next();
@@ -212,215 +193,13 @@ public class TransferFromIli {
 			}
 		}
 		//EhiLogger.debug("viewable "+def);
-		DbTableName sqlName=getSqlTableName(def);
-		Viewable base=(Viewable)def.getExtending();
-		DbTable dbTable=new DbTable();
-		dbTable.setName(sqlName);
-		dbTable.setIliName(def.getScopedName(null));
-		StringBuffer cmt=new StringBuffer();
-		String cmtSep="";
-		if(def.getDocumentation()!=null){
-			cmt.append(cmtSep+def.getDocumentation());
-			cmtSep=nl;
-		}
-		cmt.append(cmtSep+"@iliname "+def.getScopedName(null));
-		cmtSep=nl;
-		if(cmt.length()>0){
-			dbTable.setComment(cmt.toString());
-		}
-		
-		if(deleteExistingData){
-			dbTable.setDeleteDataIfTableExists(true);
-		}
-		if(base==null){
-		  dbTable.setRequiresSequence(true);
-		}
-		String baseRef="";
-		DbColId dbColId=addKeyCol(dbTable);
-		if(base!=null){
-		  dbColId.setScriptComment("REFERENCES "+base.getScopedName(null));
-		  if(createFk){
-			  dbColId.setReferencedTable(getSqlTableName(base));
-		  }
-		}
-		  if(createBasketCol){
-			  // add basketCol
-				DbColId t_basket=new DbColId();
-				t_basket.setName(DbNames.T_BASKET_COL);
-				t_basket.setNotNull(true);
-				t_basket.setScriptComment("REFERENCES "+DbNames.BASKETS_TAB);
-				if(createFk){
-					t_basket.setReferencedTable(new DbTableName(schema.getName(),DbNames.BASKETS_TAB));
-				}
-				if(createFkIdx){
-					t_basket.setIndex(true);
-				}
-				dbTable.addColumn(t_basket);
-		  }
-		DbColumn dbCol;
-		if(base==null){
-			if(createTypeDiscriminator || Ili2cUtility.isViewableWithExtension(def)){
-				  dbCol=createSqlTypeCol(DbNames.T_TYPE_COL);
-				  dbTable.addColumn(dbCol);
-			}
-			// if CLASS
-			  if((def instanceof View) || (def instanceof Table) && ((Table)def).isIdentifiable()){
-				  if(createIliTidCol || isViewableWithOid(def)){
-						addIliTidCol(dbTable,def);
-				  }
-			  }
-		  // if STRUCTURE, add ref to parent
-		  if((def instanceof Table) && !((Table)def).isIdentifiable()){
-			  if(createGenericStructRef){
-				  // add parentid
-					DbColId dbParentId=new DbColId();
-					dbParentId.setName(DbNames.T_PARENT_ID_COL);
-					dbParentId.setNotNull(true);
-					dbParentId.setPrimaryKey(false);
-					dbTable.addColumn(dbParentId);
-					  // add parent_type
-					dbCol=createSqlTypeCol(DbNames.T_PARENT_TYPE_COL);
-					dbTable.addColumn(dbCol);
-					// add parent_attr
-					dbCol=createSqlTypeCol(DbNames.T_PARENT_ATTR_COL);
-					dbTable.addColumn(dbCol);
-			  }else{
-				  // add reference to parent for each structAttr when generating structAttr
-			  }
-			// add seqeunce attr
-			DbColId dbSeq=new DbColId();
-			dbSeq.setName(DbNames.T_SEQ_COL);
-			dbSeq.setNotNull(true);
-			dbSeq.setPrimaryKey(false);
-			dbTable.addColumn(dbSeq);
-		  }
-		}
-
-		// body
-		ArrayList<AttributeDef> surfaceAttrs=new ArrayList<AttributeDef>(); 
-		Iterator iter=null;
-		if(isIli1Model){
-			iter=ModelUtilities.getIli1AttrList((AbstractClassDef)def).iterator();
-		}else{
-			iter=def.getDefinedAttributesAndRoles2();
-		}
-		  while (iter.hasNext()) {
-			  ViewableTransferElement obj = (ViewableTransferElement)iter.next();
-			  if (obj.obj instanceof AttributeDef) {
-				  AttributeDef attr = (AttributeDef) obj.obj;
-				  if(attr.getExtending()==null){
-					try{
-						if(createItfLineTables && attr.getDomainResolvingAll() instanceof SurfaceOrAreaType){
-							surfaceAttrs.add(attr);
-						}
-						if(!attr.isTransient()){
-							Type proxyType=attr.getDomain();
-							if(proxyType!=null && (proxyType instanceof ObjectType)){
-								// skip implicit particles (base-viewables) of views
-							}else{
-								generateAttr(dbTable,attr);
-							}
-						}
-					}catch(Exception ex){
-						throw new Ili2dbException(attr.getContainer().getScopedName(null)+"."+attr.getName(),ex);
-					}
-				  }else{
-					  if(isBoolean(td,attr)){
-						  
-					  }else if(createEnumColAsItfCode && attr.getDomainResolvingAll() instanceof EnumerationType){
-						  throw new Ili2dbException("EXTENDED attributes with type enumeration not supported");
-					  }
-				  }
-			  }
-			  if(obj.obj instanceof RoleDef){
-				  RoleDef role = (RoleDef) obj.obj;
-					if(role.getExtending()==null){
-						// not an embedded role and roledef not defined in a lightweight association?
-						if (!obj.embedded && !((AssociationDef)def).isLightweight()){
-						  dbColId=new DbColId();
-						  dbColId.setName(getSqlRoleName(role));
-						  dbColId.setNotNull(true);
-						  dbColId.setPrimaryKey(false);
-						  if(createFk){
-							  dbColId.setReferencedTable(getSqlTableName(role.getDestination()));
-						  }
-							if(createFkIdx){
-								dbColId.setIndex(true);
-							}
-						  dbTable.addColumn(dbColId);
-						  // handle ordered
-						  if(role.isOrdered()){
-								// add seqeunce attr
-								DbColId dbSeq=new DbColId();
-								dbSeq.setName(getSqlRoleName(role)+"_"+DbNames.T_SEQ_COL);
-								dbSeq.setNotNull(true);
-								dbSeq.setPrimaryKey(false);
-								dbTable.addColumn(dbSeq);
-						  }
-						}
-						// a role of an embedded association?
-						if(obj.embedded){
-							AssociationDef roleOwner = (AssociationDef) role.getContainer();
-							if(roleOwner.getDerivedFrom()==null){
-								// role is oppend;
-							  dbColId=new DbColId();
-							  String fkName=getSqlRoleName(role);
-							  dbColId.setName(fkName);
-							  boolean notNull=false;
-							  dbColId.setNotNull(notNull);
-							  dbColId.setPrimaryKey(false);
-							  if(createFk){
-								  dbColId.setReferencedTable(getSqlTableName(role.getDestination()));
-							  }
-								if(createFkIdx){
-									dbColId.setIndex(true);
-								}
-							  customMapping.fixupEmbeddedLink(dbTable,dbColId,roleOwner,role,getSqlTableName(role.getDestination()),colT_ID);
-							  dbTable.addColumn(dbColId);
-							  // handle ordered
-							  if(role.getOppEnd().isOrdered()){
-									// add seqeunce attr
-									DbColId dbSeq=new DbColId();
-									dbSeq.setName(getSqlRoleName(role)+"_"+DbNames.T_SEQ_COL);
-									dbSeq.setNotNull(notNull);
-									dbSeq.setPrimaryKey(false);
-									dbTable.addColumn(dbSeq);
-							  }
-							}
-						}
-					}
-			  }
-		}
-		  if(createStdCols){
-				addStdCol(dbTable);
-		  }
-		  customMapping.fixupViewable(dbTable,def);
-	  	schema.addTable(dbTable);
+		recConv.generateViewable(def);
 	  	
-	  	if(createItfLineTables && surfaceAttrs.size()>0){
-	  		for(AttributeDef attr : surfaceAttrs){
+	  	if(createItfLineTables){
+	  		for(AttributeDef attr : recConv.getSurfaceAttrs()){
 	  			generateItfLineTable(attr);
 	  		}
 	  	}
-	}
-	public static boolean isViewableWithOid(Viewable def) {
-		if(!(def instanceof AbstractClassDef)){
-			return false;
-		}
-		if((def instanceof Table) && !((Table)def).isIdentifiable()){
-			return false;
-		}
-		AbstractClassDef aclass=(AbstractClassDef) def;
-		if(aclass.getOid()!=null){
-			return true;
-		}
-		for(Object exto : aclass.getExtensions()){
-			AbstractClassDef ext=(AbstractClassDef) exto;
-			if(ext.getOid()!=null){
-				return true;
-			}
-		}
-		return false;
 	}
 	private void generateItfLineTable(AttributeDef attr)
 	throws Ili2dbException
@@ -444,9 +223,9 @@ public class TransferFromIli {
 			dbTable.setDeleteDataIfTableExists(true);
 		}
 		  dbTable.setRequiresSequence(true);
-		DbColId dbColId=addKeyCol(dbTable);
+		DbColId dbColId=recConv.addKeyCol(dbTable);
 		  if(createIliTidCol){
-				addIliTidCol(dbTable,null);
+				recConv.addIliTidCol(dbTable,null);
 		  }
 		  if(createBasketCol){
 			  // add basketCol
@@ -464,7 +243,7 @@ public class TransferFromIli {
 		  }
 			SurfaceOrAreaType type = (SurfaceOrAreaType)attr.getDomainResolvingAll();
 			
-			DbColGeometry dbCol = generatePolylineType(type, attr.getContainer().getScopedName(null)+"."+attr.getName());
+			DbColGeometry dbCol = recConv.generatePolylineType(type, attr.getContainer().getScopedName(null)+"."+attr.getName());
 			  dbCol.setName(getSqlColNameItfLineTableGeomAttr(attr,DbNames.ITF_LINETABLE_GEOMATTR_ILI_SUFFIX));
 			  dbCol.setNotNull(true);
 			  dbTable.addColumn(dbCol);
@@ -474,9 +253,9 @@ public class TransferFromIli {
 				  dbColId.setName(getSqlColNameItfLineTableRefAttr(attr,DbNames.ITF_LINETABLE_MAINTABLEREF_ILI_SUFFIX));
 				  dbColId.setNotNull(true);
 				  dbColId.setPrimaryKey(false);
-				  dbColId.setScriptComment("REFERENCES "+getSqlTableName((Viewable)attr.getContainer()));
+				  dbColId.setScriptComment("REFERENCES "+recConv.getSqlTableName((Viewable)attr.getContainer()));
 				  if(createFk){
-					  dbColId.setReferencedTable(getSqlTableName((Viewable)attr.getContainer()));
+					  dbColId.setReferencedTable(recConv.getSqlTableName((Viewable)attr.getContainer()));
 				  }
 					if(createFkIdx){
 						dbColId.setIndex(true);
@@ -489,405 +268,14 @@ public class TransferFromIli {
 			    Iterator attri = lineAttrTable.getAttributes ();
 			    while(attri.hasNext()){
 			    	AttributeDef lineattr=(AttributeDef)attri.next();
-			    	generateAttr(dbTable,lineattr);
+			    	recConv.generateAttr(dbTable,lineattr);
 			    }
 			}
 		
 			  if(createStdCols){
-					addStdCol(dbTable);
+					AbstractRecordConverter.addStdCol(dbTable);
 			  }
 		  	schema.addTable(dbTable);
-	}
-	private void addIliTidCol(DbTable dbTable,Viewable aclass) {
-		if(isUuidOid(td,aclass)){
-			DbColUuid dbColIliTid= new DbColUuid();
-			dbColIliTid.setName(DbNames.T_ILI_TID_COL);
-			// CREATE EXTENSION "uuid-ossp";
-			dbColIliTid.setDefaultValue(uuid_default_value);
-			dbTable.addColumn(dbColIliTid);
-		}else{
-			DbColVarchar dbColIliTid=new DbColVarchar();
-			dbColIliTid.setName(DbNames.T_ILI_TID_COL);
-			dbColIliTid.setSize(200);
-			dbTable.addColumn(dbColIliTid);
-		}
-	}
-	
-	public static boolean isUuidOid(TransferDescription td,Viewable aclass) {
-		if(aclass instanceof AbstractClassDef){
-			Domain oid=((AbstractClassDef<AbstractLeafElement>) aclass).getOid();
-			if(oid==td.INTERLIS.UUIDOID){
-				return true;
-			}
-		}
-		return false;
-	}
-	static public boolean isBoolean(TransferDescription td,AttributeDef attr){
-		if (attr.getDomain() instanceof TypeAlias && isBoolean(td,attr.getDomain())) {
-			return true;
-		}
-		return false;
-		
-	}
-	static public boolean isIliUuid(TransferDescription td,AttributeDef attr){
-		if (attr.getDomain() instanceof TypeAlias){
-			Type type=attr.getDomain();
-			while(type instanceof TypeAlias) {
-				if (((TypeAlias) type).getAliasing() == td.INTERLIS.UUIDOID) {
-					return true;
-				}
-				type=((TypeAlias) type).getAliasing().getType();
-			}
-		}
-		return false;
-	}
-	static public boolean isIli1Date(TransferDescription td,AttributeDef attr){
-		if (attr.getDomain() instanceof TypeAlias){
-			Type type=attr.getDomain();
-			while(type instanceof TypeAlias) {
-				if (((TypeAlias) type).getAliasing() == td.INTERLIS.INTERLIS_1_DATE) {
-					return true;
-				}
-				type=((TypeAlias) type).getAliasing().getType();
-			}
-		}
-		return false;
-	}
-	static public boolean isIli2Date(TransferDescription td,AttributeDef attr){
-		Type type=attr.getDomain();
-		if (type instanceof TypeAlias){
-			while(type instanceof TypeAlias) {
-				if (((TypeAlias) type).getAliasing() == td.INTERLIS.XmlDate) {
-					return true;
-				}
-				type=((TypeAlias) type).getAliasing().getType();
-			}
-		}
-		if(type instanceof FormattedType){
-			FormattedType ft=(FormattedType)type;
-			if(ft.getDefinedBaseDomain()== td.INTERLIS.XmlDate){
-				return true;
-			}
-		}
-		return false;
-	}
-	static public boolean isIli2Time(TransferDescription td,AttributeDef attr){
-		Type type=attr.getDomain();
-		if (type instanceof TypeAlias){
-			while(type instanceof TypeAlias) {
-				if (((TypeAlias) type).getAliasing() == td.INTERLIS.XmlTime) {
-					return true;
-				}
-				type=((TypeAlias) type).getAliasing().getType();
-			}
-		}
-		if(type instanceof FormattedType){
-			FormattedType ft=(FormattedType)type;
-			if(ft.getDefinedBaseDomain()== td.INTERLIS.XmlTime){
-				return true;
-			}
-		}
-		return false;
-	}
-	static public boolean isIli2DateTime(TransferDescription td,AttributeDef attr){
-		Type type=attr.getDomain();
-		if (type instanceof TypeAlias){
-			while(type instanceof TypeAlias) {
-				if (((TypeAlias) type).getAliasing() == td.INTERLIS.XmlDateTime) {
-					return true;
-				}
-				type=((TypeAlias) type).getAliasing().getType();
-			}
-		}
-		if(type instanceof FormattedType){
-			FormattedType ft=(FormattedType)type;
-			if(ft.getDefinedBaseDomain()== td.INTERLIS.XmlDateTime){
-				return true;
-			}
-		}
-		return false;
-	}
-	static public boolean isBoolean(TransferDescription td,Type type){
-		while(type instanceof TypeAlias) {
-			if (((TypeAlias) type).getAliasing() == td.INTERLIS.BOOLEAN) {
-				return true;
-			}
-			type=((TypeAlias) type).getAliasing().getType();
-		}
-		
-		return false;
-	}
-	private void generateAttr(DbTable dbTable,AttributeDef attr)
-	throws Ili2dbException
-	{
-		if(attr.getDomain() instanceof EnumerationType){
-			visitedEnums.add(attr);
-		}
-		DbColumn dbCol=null;
-		DbColumn dbCol_georef=null;
-		Type type = attr.getDomainResolvingAll();
-		if (isBoolean(td,attr)) {
-			dbCol= new DbColBoolean();
-		}else if (isIli1Date(td,attr)) {
-			dbCol= new DbColDate();
-		}else if (isIliUuid(td,attr)) {
-			dbCol= new DbColUuid();
-		}else if (isIli2Date(td,attr)) {
-			dbCol= new DbColDate();
-		}else if (isIli2DateTime(td,attr)) {
-			dbCol= new DbColDateTime();
-		}else if (isIli2Time(td,attr)) {
-			dbCol= new DbColTime();
-		}else if (type instanceof PolylineType){
-			String attrName=attr.getContainer().getScopedName(null)+"."+attr.getName();
-			DbColGeometry ret = generatePolylineType((PolylineType)type, attrName);
-			dbCol=ret;
-		}else if (type instanceof SurfaceOrAreaType){
-			if(createItfLineTables){
-				dbCol=null;
-			}else{
-				DbColGeometry ret=new DbColGeometry();
-				boolean curvePolygon=false;
-				if(!strokeArcs){
-					curvePolygon=true;
-				}
-				ret.setType(curvePolygon ? DbColGeometry.CURVEPOLYGON : DbColGeometry.POLYGON);
-				// TODO get crs from ili
-				ret.setSrsAuth(defaultCrsAuthority);
-				ret.setSrsId(defaultSrcCode);
-				CoordType coord=(CoordType)((SurfaceOrAreaType)type).getControlPointDomain().getType();
-				ret.setDimension(coord.getDimensions().length);
-				setBB(ret, coord,attr.getContainer().getScopedName(null)+"."+attr.getName());
-				dbCol=ret;
-			}
-			if(createItfAreaRef){
-				if(type instanceof AreaType){
-					DbColGeometry ret=new DbColGeometry();
-					ret.setType(DbColGeometry.POINT);
-					// TODO get crs from ili
-					ret.setSrsAuth(defaultCrsAuthority);
-					ret.setSrsId(defaultSrcCode);
-					ret.setDimension(2); // always 2 (even if defined as 3d in ili)
-					CoordType coord=(CoordType)((SurfaceOrAreaType)type).getControlPointDomain().getType();
-					setBB(ret, coord,attr.getContainer().getScopedName(null)+"."+attr.getName());
-					dbCol_georef=ret;
-				}
-			}
-		}else if (type instanceof CoordType){
-			DbColGeometry ret=new DbColGeometry();
-			ret.setType(DbColGeometry.POINT);
-			// TODO get crs from ili
-			ret.setSrsAuth(defaultCrsAuthority);
-			ret.setSrsId(defaultSrcCode);
-			CoordType coord=(CoordType)type;
-			ret.setDimension(coord.getDimensions().length);
-			setBB(ret, coord,attr.getContainer().getScopedName(null)+"."+attr.getName());
-			dbCol=ret;
-		}else if (type instanceof CompositionType){
-			// skip it
-			if(!createGenericStructRef){
-				// add reference to struct table
-				addParentRef(attr);
-			}
-			dbCol=null;
-		}else if (type instanceof ReferenceType){
-			DbColId ret=new DbColId();
-			ret.setNotNull(false);
-			ret.setPrimaryKey(false);
-			if(createFk){
-				ret.setReferencedTable(getSqlTableName(((ReferenceType)type).getReferred()));
-			}
-			if(createFkIdx){
-				ret.setIndex(true);
-			}
-			dbCol=ret;
-		}else if (type instanceof BasketType){
-			// skip it; type no longer exists in ili 2.3
-			dbCol=null;
-		}else if(type instanceof EnumerationType){
-			if(createEnumColAsItfCode){
-				DbColId ret=new DbColId();
-				dbCol=ret;
-			}else{
-				DbColVarchar ret=new DbColVarchar();
-				ret.setSize(255);
-				dbCol=ret;				
-			}
-		}else if(type instanceof NumericType){
-			if(type.isAbstract()){
-			}else{
-				PrecisionDecimal min=((NumericType)type).getMinimum();
-				PrecisionDecimal max=((NumericType)type).getMaximum();
-				if(min.getAccuracy()>0){
-					DbColDecimal ret=new DbColDecimal();
-					int size=Math.max(min.toString().length(),max.toString().length());
-					int precision=min.getAccuracy();
-					//EhiLogger.debug("attr "+ attr.getName()+", maxStr <"+maxStr+">, size "+Integer.toString(size)+", precision "+Integer.toString(precision));
-					ret.setSize(size);
-					ret.setPrecision(precision);
-					dbCol=ret;
-				}else{
-					DbColNumber ret=new DbColNumber();
-					int size=Math.max(min.toString().length(),max.toString().length());
-					ret.setSize(size);
-					dbCol=ret;
-				}
-			}
-		}else if(type instanceof TextType){
-			DbColVarchar ret=new DbColVarchar();
-			if(((TextType)type).getMaxLength()>0){
-				ret.setSize(((TextType)type).getMaxLength());
-			}else{
-				ret.setSize(255);
-			}
-			dbCol=ret;
-		}else{
-			DbColVarchar ret=new DbColVarchar();
-			ret.setSize(255);
-			dbCol=ret;
-		}
-
-		if (dbCol != null) {
-			String sqlName=getSqlAttrName(attr);
-			setAttrDbColProps(attr, dbCol, sqlName);
-			customMapping.fixupAttribute(dbTable, dbCol, attr);
-			dbTable.addColumn(dbCol);
-			if (createEnumTxtCol && type instanceof EnumerationType) {
-				DbColVarchar ret = new DbColVarchar();
-				ret.setSize(255);
-				dbCol=ret;
-				dbCol.setName(sqlName+DbNames.ENUM_TXT_COL_SUFFIX);
-				if (sqlEnableNull) {
-					dbCol.setNotNull(false);
-				} else {
-					if (attr.getDomain().isMandatoryConsideringAliases()) {
-						dbCol.setNotNull(true);
-					}
-				}
-				customMapping.fixupAttribute(dbTable, dbCol, attr);
-				dbTable.addColumn(dbCol);
-			}
-		} else {
-			customMapping.fixupAttribute(dbTable, null, attr);
-		}
-		if (dbCol_georef != null) {
-			String sqlName=getSqlAttrName(attr)+DbNames.ITF_MAINTABLE_GEOTABLEREF_COL_SUFFIX;
-			setAttrDbColProps(attr, dbCol_georef, sqlName);
-			//customMapping.fixupAttribute(dbTable, dbCol_georef, attr);
-			dbTable.addColumn(dbCol_georef);
-		}
-	}
-	private void setAttrDbColProps(AttributeDef attr, DbColumn dbCol,
-			String sqlName) {
-		dbCol.setName(sqlName);
-		StringBuffer cmt=new StringBuffer();
-		String cmtSep="";
-		if(attr.getDocumentation()!=null){
-			cmt.append(cmtSep+attr.getDocumentation());
-			cmtSep=nl;
-		}
-		if(sqlName!=attr.getName()){
-			cmt.append(cmtSep+"@iliname "+attr.getName());
-			cmtSep=nl;
-		}
-		if(cmt.length()>0){
-			dbCol.setComment(cmt.toString());
-		}
-		if (sqlEnableNull) {
-			dbCol.setNotNull(false);
-		} else {
-			Type type=attr.getDomain();
-			if(type==null){
-				Evaluable[] ev = (((LocalAttribute)attr).getBasePaths());
-				type=((ObjectPath)ev[0]).getType();
-			}
-			if (type.isMandatoryConsideringAliases()) {
-				dbCol.setNotNull(true);
-			}
-		}
-	}
-
-	private DbColGeometry generatePolylineType(LineType type, String attrName) {
-		DbColGeometry ret=new DbColGeometry();
-		boolean compoundCurve=false;
-		if(!strokeArcs){
-			compoundCurve=true;
-		}
-		ret.setType(compoundCurve ? DbColGeometry.COMPOUNDCURVE : DbColGeometry.LINESTRING);
-		// TODO get crs from ili
-		ret.setSrsAuth(defaultCrsAuthority);
-		ret.setSrsId(defaultSrcCode);
-		Domain coordDomain=type.getControlPointDomain();
-		if(coordDomain!=null){
-			CoordType coord=(CoordType)coordDomain.getType();
-			ret.setDimension(coord.getDimensions().length);
-			setBB(ret, coord,attrName);
-		}
-		return ret;
-	}
-	private void addParentRef(AttributeDef attr){
-		CompositionType type = (CompositionType)attr.getDomainResolvingAll();
-		Table structClass=type.getComponentType();
-		Table root=(Table)structClass.getRootExtending();
-		if(root!=null){
-			structClass=root;
-		}
-		DbTableName structClassSqlName=getSqlTableName(structClass);
-		
-		// find struct table
-		DbTable dbTable=findTable(structClassSqlName);
-		
-		// add ref attr
-		String refAttrSqlName=ili2sqlName.mapIliAttributeDefQualified(attr);
-		DbColId dbParentId=new DbColId();
-		dbParentId.setName(refAttrSqlName);
-		dbParentId.setNotNull(false); // values of other struct attrs will have NULL
-		dbParentId.setPrimaryKey(false);
-		StringBuffer cmt=new StringBuffer();
-		String cmtSep="";
-		if(attr.getDocumentation()!=null){
-			cmt.append(cmtSep+attr.getDocumentation());
-			cmtSep=nl;
-		}
-		cmt.append(cmtSep+"@iliname "+attr.getContainer().getScopedName(null)+"."+attr.getName());
-		cmtSep=nl;
-		if(cmt.length()>0){
-			dbParentId.setComment(cmt.toString());
-		}
-		if(createFk){
-			dbParentId.setReferencedTable(getSqlTableName((Viewable)attr.getContainer()));
-		}
-		if(createFkIdx){
-			dbParentId.setIndex(true);
-		}
-		dbTable.addColumn(dbParentId);
-	}
-	private DbTable findTable(DbTableName structClassSqlName) {
-		Iterator tabi=schema.iteratorTable();
-		while(tabi.hasNext()){
-			DbTable tab=(DbTable)tabi.next();
-			if(tab.getName().equals(structClassSqlName)){
-				return tab;
-			}
-		}
-		return null;
-	}
-	private void setBB(DbColGeometry ret, CoordType coord,String scopedAttrName) {
-		NumericalType dimv[]=coord.getDimensions();
-		if(!(dimv[0] instanceof NumericType) || !(dimv[1] instanceof NumericType)){
-			EhiLogger.logError("Attribute "+scopedAttrName+": COORD type not supported ("+dimv[0].getClass().getName()+")");
-			return;
-		}
-		if(((NumericType)dimv[0]).getMinimum()!=null){
-			ret.setMin1(((NumericType)dimv[0]).getMinimum().doubleValue());
-			ret.setMax1(((NumericType)dimv[0]).getMaximum().doubleValue());
-			ret.setMin2(((NumericType)dimv[1]).getMinimum().doubleValue());
-			ret.setMax2(((NumericType)dimv[1]).getMaximum().doubleValue());
-			if(dimv.length==3){
-				ret.setMin3(((NumericType)dimv[2]).getMinimum().doubleValue());
-				ret.setMax3(((NumericType)dimv[2]).getMaximum().doubleValue());
-			}
-		}
 	}
 	/** setup a mapping from a qualified model or topic name
 	 * to the corresponding java object.
@@ -921,16 +309,6 @@ public class TransferFromIli {
 	{
 		return ili2sqlName.mapIliAttrName(attr,ioxName);
 	}
-	private String getSqlRoleName(RoleDef def){
-		return ili2sqlName.mapIliRoleDef(def);
-	}
-	private String getSqlAttrName(AttributeDef def){
-		return ili2sqlName.mapIliAttributeDef(def);
-	}
-	private DbTableName getSqlTableName(Viewable def){
-		String sqlname=ili2sqlName.mapIliClassDef(def);
-		return new DbTableName(schema.getName(),sqlname);
-	}
 	private DbTableName getSqlTableName(Domain def){
 		String sqlname=ili2sqlName.mapIliDomainDef(def);
 		return new DbTableName(schema.getName(),sqlname);
@@ -942,39 +320,6 @@ public class TransferFromIli {
 	private DbTableName getSqlTableNameItfLineTable(AttributeDef def){
 		String sqlname=ili2sqlName.mapItfLineTableAsTable(def);
 		return new DbTableName(schema.getName(),sqlname);
-	}
-	private DbColumn createSqlTypeCol(String name){
-	  DbColVarchar dbCol=new DbColVarchar();
-	  dbCol.setName(name);
-	  dbCol.setNotNull(true);
-	  dbCol.setSize(ili2sqlName.getMaxSqlNameLength());
-	  return dbCol;
-	}
-	private DbColId addKeyCol(DbTable table) {
-		  DbColId dbColId=new DbColId();
-		  dbColId.setName(colT_ID);
-		  dbColId.setNotNull(true);
-		  dbColId.setPrimaryKey(true);
-		  dbColId.setDefaultValue(idGen.getDefaultValueSql());
-		  table.addColumn(dbColId);
-		  return dbColId;
-	}
-	public static void addStdCol(DbTable table) {
-		DbColumn dbCol=new DbColDateTime();
-		dbCol.setName(DbNames.T_LAST_CHANGE_COL);
-		dbCol.setNotNull(true);
-		table.addColumn(dbCol);
-	
-		dbCol=new DbColDateTime();
-		dbCol.setName(DbNames.T_CREATE_DATE_COL);
-		dbCol.setNotNull(true);
-		table.addColumn(dbCol);
-	
-		DbColVarchar dbColUsr=new DbColVarchar();
-		dbColUsr.setName(DbNames.T_USER_COL);
-		dbColUsr.setNotNull(true);
-		dbColUsr.setSize(40);
-		table.addColumn(dbColUsr);
 	}
 	static public void addModelsTable(DbSchema schema)
 	{
@@ -1276,7 +621,7 @@ public class TransferFromIli {
 			tab.setName(new DbTableName(schema.getName(),DbNames.BASKETS_TAB));
 			
 			// primary key
-			addKeyCol(tab);
+			recConv.addKeyCol(tab);
 			
 			// optional reference to dataset table
 			DbColId dbColDataset=new DbColId();
@@ -1299,7 +644,7 @@ public class TransferFromIli {
 			tab.addColumn(thisClass);
 
 			// basket id as read from xtf
-			addIliTidCol(tab,null); 
+			recConv.addIliTidCol(tab,null); 
 			
 			// name of subdirectory in attachments folder
 			DbColVarchar attkey=new DbColVarchar();
@@ -1315,7 +660,7 @@ public class TransferFromIli {
 			tab.setName(new DbTableName(schema.getName(),DbNames.DATASETS_TAB));
 			
 			// primary key
-			addKeyCol(tab);
+			recConv.addKeyCol(tab);
 			
 			schema.addTable(tab);
 			
@@ -1327,7 +672,7 @@ public class TransferFromIli {
 			DbTable tab=new DbTable();
 			tab.setName(new DbTableName(schema.getName(),DbNames.IMPORTS_TAB));
 			
-			addKeyCol(tab);
+			recConv.addKeyCol(tab);
 			
 			DbColId dbColBasket=new DbColId();
 			dbColBasket.setName(DbNames.IMPORTS_TAB_DATASET_COL);
@@ -1364,7 +709,7 @@ public class TransferFromIli {
 			DbTable tab=new DbTable();
 			tab.setName(new DbTableName(schema.getName(),DbNames.IMPORTS_BASKETS_TAB));
 			
-			addKeyCol(tab);
+			recConv.addKeyCol(tab);
 			
 			DbColId dbColImport=new DbColId();
 			dbColImport.setName(DbNames.IMPORTS_BASKETS_TAB_IMPORT_COL);
@@ -1411,7 +756,7 @@ public class TransferFromIli {
 		{
 			DbTable tab=new DbTable();
 			tab.setName(new DbTableName(schema.getName(),DbNames.IMPORTS_OBJECTS_TAB));
-			addKeyCol(tab);
+			recConv.addKeyCol(tab);
 			DbColId dbColBasket=new DbColId();
 			dbColBasket.setName(DbNames.IMPORTS_OBJECTS_TAB_IMPORT_COL);
 			dbColBasket.setNotNull(true);
@@ -1486,13 +831,13 @@ public class TransferFromIli {
 				DbTableName thisSqlName=null;
 				if(entro instanceof AttributeDef){
 					AttributeDef attr=(AttributeDef)entro;
-					EnumerationType type=(EnumerationType)attr.getDomain();
+					attr.getDomain();
 					
 					thisSqlName=getSqlTableNameEnum(attr);
 					
 				}else if(entro instanceof Domain){
 					Domain domain=(Domain)entro;
-					EnumerationType type=(EnumerationType)domain.getType();
+					domain.getType();
 					
 					thisSqlName=getSqlTableName(domain);
 				}
@@ -1575,12 +920,12 @@ public class TransferFromIli {
 					Object entro=entri.next();
 					if(entro instanceof Viewable){
 						Viewable aclass=(Viewable)entro;
-						thisClass=getSqlTableName(aclass);
+						thisClass=recConv.getSqlTableName(aclass);
 						if(!exstEntries.contains(thisClass)){
 							Viewable base=(Viewable)aclass.getExtending();
 							ps.setString(1, thisClass.getName());
 							if(base!=null){
-								DbTableName baseClass=getSqlTableName(base);
+								DbTableName baseClass=recConv.getSqlTableName(base);
 								ps.setString(2, baseClass.getName());
 							}else{
 								ps.setNull(2,java.sql.Types.VARCHAR);
