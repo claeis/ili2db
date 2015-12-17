@@ -11,7 +11,6 @@ ideas/open issues/questions
 - --initNameMapping
 - support geopackage
 - smart inheritance mapping
-- smart chbase.multilingual mapping
 - smart chbase.multisurface mapping
 
 ili2pg 2.5.0 (2015-12-xx)
@@ -19,6 +18,7 @@ ili2pg 2.5.0 (2015-12-xx)
 - ili-obj/sql-record conversion refactored 
 - new option --noSmartMapping
 - new option --coalesceCatalogueRef
+- new option --expandMultilingual
 
 ili2pg 2.4.0 (2015-12-09)
 ----------------------------

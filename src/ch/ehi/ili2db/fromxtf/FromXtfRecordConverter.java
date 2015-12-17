@@ -461,6 +461,17 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 						values.append(",?");
 					}
 					sep=",";
+				}else if(Config.MULTILINGUAL_TRAFO_EXPAND.equals(trafoConfig.getAttrConfig(attr, Config.MULTILINGUAL_TRAFO))){
+					for(String sfx:DbNames.MULTILINGUAL_TXT_COL_SUFFIXS){
+						ret.append(sep);
+						ret.append(attrSqlName+sfx);
+						if(isUpdate){
+							ret.append("=?");
+						}else{
+							values.append(",?");
+						}
+						sep=",";
+					}
 				}
 			}else if (type instanceof PolylineType){
 				 ret.append(sep);
@@ -629,6 +640,21 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 								ps.setNull(valuei,Types.INTEGER);
 						 }
 						valuei++;
+					}else if(Config.MULTILINGUAL_TRAFO_EXPAND.equals(trafoConfig.getAttrConfig(attr, Config.MULTILINGUAL_TRAFO))){
+						 IomObject iomMulti=iomObj.getattrobj(attrName,0);
+						for(String sfx:DbNames.MULTILINGUAL_TXT_COL_SUFFIXS){
+							 if(iomMulti!=null){
+								 	String value=getMultilingualText(iomMulti,sfx);
+									if(value!=null){
+										ps.setString(valuei, value);
+									}else{
+										ps.setNull(valuei,Types.VARCHAR);
+									}
+							 }else{
+									ps.setNull(valuei,Types.VARCHAR);
+							 }
+							valuei++;
+						}
 					}else{
 						 // enqueue struct values
 						 for(int structi=0;structi<structc;structi++){
@@ -765,6 +791,22 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 			}
 		}
 		return valuei;
+	}
+	private String getMultilingualText(IomObject iomMulti, String sfx) {
+		if(sfx.length()>0){
+			// remove leading '_'
+			sfx=sfx.substring(1);
+		}
+	 	int txtc=iomMulti.getattrvaluecount("LocalisedText");
+	 	for(int txti=0;txti<txtc;txti++){
+			IomObject iomTxt=iomMulti.getattrobj("LocalisedText",txti);
+			String lang=iomTxt.getattrvalue("Language");
+			if(lang==null)lang="";
+			if(lang.equals(sfx)){
+				return iomTxt.getattrvalue("Text");
+			}
+	 	}
+		return null;
 	}
 	public int getSrsid(Type type){
 		return defaultSrsid;

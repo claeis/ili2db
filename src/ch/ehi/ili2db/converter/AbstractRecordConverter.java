@@ -85,6 +85,7 @@ public class AbstractRecordConverter {
 	private DbIdGen idGen=null;
 	protected TrafoConfig trafoConfig=null;
 	public AbstractRecordConverter(TransferDescription td1,ch.ehi.ili2db.mapping.NameMapping ili2sqlName,ch.ehi.ili2db.gui.Config config,DbIdGen idGen1, TrafoConfig trafoConfig1){
+		td=td1;
 		this.defaultCrsAuthority=config.getDefaultSrsAuthority();
 		this.defaultCrsCode=config.getDefaultSrsCode();
 		this.ili2sqlName=ili2sqlName;

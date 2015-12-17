@@ -60,6 +60,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 	private String nl=System.getProperty("line.separator");
 	private ArrayList<AttributeDef> surfaceAttrs=null; 
 	private boolean coalesceCatalogueRef=true;
+	private boolean expandMultilingual=true;
 
 	public FromIliRecordConverter(TransferDescription td1, NameMapping ili2sqlName,
 			Config config, DbSchema schema1, CustomMapping customMapping1,
@@ -69,6 +70,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 		customMapping=customMapping1;
 		schema=schema1;
 		coalesceCatalogueRef=Config.CATALOGUE_REF_TRAFO_COALESCE.equals(config.getCatalogueRefTrafo());
+		expandMultilingual=Config.MULTILINGUAL_TRAFO_EXPAND.equals(config.getMultilingualTrafo());
 	}
 
 	public void generateViewable(Viewable def)
@@ -268,7 +270,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 			visitedEnums.add(attr);
 		}
 		DbColumn dbCol=null;
-		DbColumn dbCol_georef=null;
+		ArrayList<DbColumn> dbColExts=new ArrayList<DbColumn>();
 		Type type = attr.getDomainResolvingAll();
 		if (Ili2cUtility.isBoolean(td,attr)) {
 			dbCol= new DbColBoolean();
@@ -307,14 +309,17 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 			if(createItfAreaRef){
 				if(type instanceof AreaType){
 					DbColGeometry ret=new DbColGeometry();
+					String sqlName=getSqlAttrName(attr)+DbNames.ITF_MAINTABLE_GEOTABLEREF_COL_SUFFIX;
+					ret.setName(sqlName);
 					ret.setType(DbColGeometry.POINT);
+					setNullable(attr, ret);
 					// TODO get crs from ili
 					ret.setSrsAuth(defaultCrsAuthority);
 					ret.setSrsId(defaultCrsCode);
 					ret.setDimension(2); // always 2 (even if defined as 3d in ili)
 					CoordType coord=(CoordType)((SurfaceOrAreaType)type).getControlPointDomain().getType();
 					setBB(ret, coord,attr.getContainer().getScopedName(null)+"."+attr.getName());
-					dbCol_georef=ret;
+					dbColExts.add(ret);
 				}
 			}
 		}else if (type instanceof CoordType){
@@ -344,6 +349,17 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 					}
 					trafoConfig.setAttrConfig(attr, Config.CATALOGUE_REF_TRAFO,Config.CATALOGUE_REF_TRAFO_COALESCE);
 					dbCol=ret;
+				}else if(isChbaseMultilingual(td, attr) && (expandMultilingual 
+							|| Config.MULTILINGUAL_TRAFO_EXPAND.equals(trafoConfig.getAttrConfig(attr,Config.MULTILINGUAL_TRAFO)))){
+					for(String sfx:DbNames.MULTILINGUAL_TXT_COL_SUFFIXS){
+						DbColVarchar ret=new DbColVarchar();
+						ret.setName(getSqlAttrName(attr)+sfx);
+						ret.setSize(255);
+						ret.setNotNull(false);
+						ret.setPrimaryKey(false);
+						dbColExts.add(ret);
+					}
+					trafoConfig.setAttrConfig(attr, Config.MULTILINGUAL_TRAFO,Config.MULTILINGUAL_TRAFO_EXPAND);
 				}else{
 					// add reference to struct table
 					addParentRef(attr);
@@ -374,6 +390,13 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 				DbColVarchar ret=new DbColVarchar();
 				ret.setSize(255);
 				dbCol=ret;				
+			}
+			if (createEnumTxtCol) {
+				DbColVarchar ret = new DbColVarchar();
+				ret.setSize(255);
+				ret.setName(getSqlAttrName(attr)+DbNames.ENUM_TXT_COL_SUFFIX);
+				setNullable(attr, ret);
+				dbColExts.add(ret);
 			}
 		}else if(type instanceof NumericType){
 			if(type.isAbstract()){
@@ -414,31 +437,26 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 			setAttrDbColProps(attr, dbCol, sqlName);
 			customMapping.fixupAttribute(dbTable, dbCol, attr);
 			dbTable.addColumn(dbCol);
-			if (createEnumTxtCol && type instanceof EnumerationType) {
-				DbColVarchar ret = new DbColVarchar();
-				ret.setSize(255);
-				dbCol=ret;
-				dbCol.setName(sqlName+DbNames.ENUM_TXT_COL_SUFFIX);
-				if (sqlEnableNull) {
-					dbCol.setNotNull(false);
-				} else {
-					if (attr.getDomain().isMandatoryConsideringAliases()) {
-						dbCol.setNotNull(true);
-					}
-				}
-				customMapping.fixupAttribute(dbTable, dbCol, attr);
-				dbTable.addColumn(dbCol);
-			}
-		} else {
+		}
+		for(DbColumn dbColExt:dbColExts) {
+			customMapping.fixupAttribute(dbTable, dbColExt, attr);
+			dbTable.addColumn(dbColExt);
+		}
+		if(dbCol==null && dbColExts.size()==0){
 			customMapping.fixupAttribute(dbTable, null, attr);
 		}
-		if (dbCol_georef != null) {
-			String sqlName=getSqlAttrName(attr)+DbNames.ITF_MAINTABLE_GEOTABLEREF_COL_SUFFIX;
-			setAttrDbColProps(attr, dbCol_georef, sqlName);
-			//customMapping.fixupAttribute(dbTable, dbCol_georef, attr);
-			dbTable.addColumn(dbCol_georef);
-		}
 	}
+	private boolean isChbaseMultilingual(TransferDescription td,
+			AttributeDef attr) {
+		if(Ili2cUtility.isPureChbaseMultilingualText(td, attr) || Ili2cUtility.isPureChbaseMultilingualMText(td, attr)){
+			CompositionType type=(CompositionType)attr.getDomain();
+			if(type.getCardinality().getMaximum()==1){
+				return true;
+			}
+		}
+		return false;
+	}
+
 	private boolean isChbaseCatalogueRef(TransferDescription td,
 			AttributeDef attr) {
 		if(Ili2cUtility.isPureChbaseCatalogueRef(td, attr)){
@@ -503,6 +521,10 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 		if(cmt.length()>0){
 			dbCol.setComment(cmt.toString());
 		}
+		setNullable(attr, dbCol);
+	}
+
+	public void setNullable(AttributeDef attr, DbColumn dbCol) {
 		if (sqlEnableNull) {
 			dbCol.setNotNull(false);
 		} else {

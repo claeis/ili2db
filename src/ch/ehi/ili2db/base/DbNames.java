@@ -14,6 +14,20 @@ public class DbNames {
 	public static final String ENUM_TAB_ITFCODE_COL="itfCode";
 	public static final String ENUM_TAB_DISPNAME_COL="dispName";
 	public static final String ENUM_TXT_COL_SUFFIX="_txt";
+	public static final String MULTILINGUAL_TXT_COL_SUFFIX="";
+	public static final String MULTILINGUAL_TXT_DE_COL_SUFFIX="_de";
+	public static final String MULTILINGUAL_TXT_FR_COL_SUFFIX="_fr";
+	public static final String MULTILINGUAL_TXT_RM_COL_SUFFIX="_rm";
+	public static final String MULTILINGUAL_TXT_IT_COL_SUFFIX="_it";
+	public static final String MULTILINGUAL_TXT_EN_COL_SUFFIX="_en";
+	public static final String MULTILINGUAL_TXT_COL_SUFFIXS[]=new String[]{
+			MULTILINGUAL_TXT_COL_SUFFIX,
+			MULTILINGUAL_TXT_DE_COL_SUFFIX,
+			MULTILINGUAL_TXT_FR_COL_SUFFIX,
+			MULTILINGUAL_TXT_RM_COL_SUFFIX,
+			MULTILINGUAL_TXT_IT_COL_SUFFIX,
+			MULTILINGUAL_TXT_EN_COL_SUFFIX
+			};
 	public static final String ITF_MAINTABLE_GEOTABLEREF_COL_SUFFIX="_ref";
 	public static final String ITF_LINETABLE_MAINTABLEREF_ILI_SUFFIX="_ref";
 	public static final String ITF_LINETABLE_GEOMATTR_ILI_SUFFIX="_geom";

@@ -51,6 +51,7 @@ public abstract class AbstractMain {
 		config.setMaxSqlNameLength(Integer.toString(NameMapping.DEFAULT_NAME_LENGTH));
 		config.setIdGenerator(ch.ehi.ili2db.base.TableBasedIdGen.class.getName());
 		config.setCatalogueRefTrafo(Config.CATALOGUE_REF_TRAFO_COALESCE);
+		config.setMultilingualTrafo(Config.MULTILINGUAL_TRAFO_EXPAND);
 	}
 	protected abstract DbUrlConverter getDbUrlConverter();
 
@@ -171,9 +172,13 @@ public abstract class AbstractMain {
 			}else if(arg.equals("--noSmartMapping")){
 				argi++;
 				config.setCatalogueRefTrafo(null);
+				config.setMultilingualTrafo(null);
 			}else if(arg.equals("--coalesceCatalogueRef")){
 				argi++;
 				config.setCatalogueRefTrafo(config.CATALOGUE_REF_TRAFO_COALESCE);
+			}else if(arg.equals("--expandMultilingual")){
+				argi++;
+				config.setMultilingualTrafo(config.MULTILINGUAL_TRAFO_EXPAND);
 			}else if(arg.equals("--createFk")){
 				argi++;
 				config.setCreateFk(config.CREATE_FK_YES);
@@ -253,6 +258,7 @@ public abstract class AbstractMain {
 					System.err.println("--mapconfig filename   Name of config file, that controls the schema mapping.");
 					System.err.println("--noSmartMapping       disable all smart mappings");
 					System.err.println("--coalesceCatalogueRef enable smart mapping of CHBase:CatalogueReference");
+					System.err.println("--expandMultilingual   enable smart mapping of CHBase:MultilingualText");
 					System.err.println("--createGeomIdx        create a spatial index on geometry columns.");
 					System.err.println("--createEnumColAsItfCode create enum type column with value according to ITF (instead of XTF).");
 					System.err.println("--createEnumTxtCol     create an additional column with the text of the enumeration value.");

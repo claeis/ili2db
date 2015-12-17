@@ -197,6 +197,12 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 					 ret.append(sep);
 					 sep=",";
 					 ret.append(attrName);
+				}else if(Config.MULTILINGUAL_TRAFO_EXPAND.equals(trafoConfig.getAttrConfig(attr, Config.MULTILINGUAL_TRAFO))){
+					for(String sfx:DbNames.MULTILINGUAL_TXT_COL_SUFFIXS){
+						 ret.append(sep);
+						 sep=",";
+						 ret.append(attrName+sfx);
+					}
 				}
 			}else if (type instanceof PolylineType){
 				 ret.append(sep);
@@ -397,6 +403,26 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 							mapSqlid2Xtfid(fixref,value,ref,((ReferenceType) ((AttributeDef)((CompositionType)type).getComponentType().getAttributes().next()).getDomain()).getReferred());
 						}
 						
+					}else if(Config.MULTILINGUAL_TRAFO_EXPAND.equals(trafoConfig.getAttrConfig(attr, Config.MULTILINGUAL_TRAFO))){
+						IomObject iomMulti=null;
+						String multilingualTextType=((CompositionType)type).getComponentType().getScopedName(null);
+						String localizedTextType=((CompositionType) ((AttributeDef) ((CompositionType)type).getComponentType().getAttributes().next()).getDomain()).getComponentType().getScopedName(null);
+						for(String sfx:DbNames.MULTILINGUAL_TXT_COL_SUFFIXS){
+							String value=rs.getString(valuei);
+							valuei++;
+							if(!rs.wasNull()){
+								if(iomMulti==null){
+									iomMulti=new Iom_jObject(multilingualTextType, null);
+								}
+								IomObject iomTxt=iomMulti.addattrobj("LocalisedText",localizedTextType);
+								
+								iomTxt.setattrvalue("Language",sfx.length()==0?null:sfx.substring(1));
+								iomTxt.setattrvalue("Text",value);
+							}
+						}
+						if(iomMulti!=null){
+							iomObj.addattrobj(attrName, iomMulti);
+						}
 					}else{
 						// enque iomObj as parent
 						structQueue.add(new StructWrapper(sqlid,attr,iomObj));
