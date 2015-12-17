@@ -25,7 +25,7 @@ import ch.ehi.ili2db.base.Ili2db;
 import ch.ehi.ili2db.base.Ili2dbException;
 import ch.ehi.ili2db.gui.Config;
 import ch.ehi.ili2db.gui.AbstractDbPanelDescriptor;
-import ch.ehi.ili2db.mapping.Mapping;
+import ch.ehi.ili2db.mapping.NameMapping;
 import ch.ehi.ili2db.base.DbUrlConverter;
 import ch.ehi.sqlgen.generator.SqlConfiguration;
 
@@ -48,8 +48,9 @@ public abstract class AbstractMain {
 		config.setModels(Ili2db.XTF);
 		config.setDefaultSrsAuthority("EPSG");
 		config.setDefaultSrsCode("21781");
-		config.setMaxSqlNameLength(Integer.toString(Mapping.DEFAULT_NAME_LENGTH));
+		config.setMaxSqlNameLength(Integer.toString(NameMapping.DEFAULT_NAME_LENGTH));
 		config.setIdGenerator(ch.ehi.ili2db.base.TableBasedIdGen.class.getName());
+		config.setCatalogueRefTrafo(Config.CATALOGUE_REF_TRAFO_COALESCE);
 	}
 	protected abstract DbUrlConverter getDbUrlConverter();
 
@@ -167,6 +168,12 @@ public abstract class AbstractMain {
 			}else if(arg.equals("--createEnumColAsItfCode")){
 				argi++;
 				config.setCreateEnumColAsItfCode(config.CREATE_ENUMCOL_AS_ITFCODE_YES);
+			}else if(arg.equals("--noSmartMapping")){
+				argi++;
+				config.setCatalogueRefTrafo(null);
+			}else if(arg.equals("--coalesceCatalogueRef")){
+				argi++;
+				config.setCatalogueRefTrafo(config.CATALOGUE_REF_TRAFO_COALESCE);
 			}else if(arg.equals("--createFk")){
 				argi++;
 				config.setCreateFk(config.CREATE_FK_YES);
@@ -244,6 +251,8 @@ public abstract class AbstractMain {
 					System.err.println("--createscript filename  Generate a sql script that creates the db schema.");
 					System.err.println("--dropscript filename  Generate a sql script that drops the generated db schema.");
 					System.err.println("--mapconfig filename   Name of config file, that controls the schema mapping.");
+					System.err.println("--noSmartMapping       disable all smart mappings");
+					System.err.println("--coalesceCatalogueRef enable smart mapping of CHBase:CatalogueReference");
 					System.err.println("--createGeomIdx        create a spatial index on geometry columns.");
 					System.err.println("--createEnumColAsItfCode create enum type column with value according to ITF (instead of XTF).");
 					System.err.println("--createEnumTxtCol     create an additional column with the text of the enumeration value.");

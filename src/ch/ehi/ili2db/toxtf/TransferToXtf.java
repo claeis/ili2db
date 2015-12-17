@@ -34,7 +34,8 @@ import ch.ehi.ili2db.converter.*;
 import ch.ehi.ili2db.fromili.TransferFromIli;
 import ch.ehi.ili2db.fromxtf.BasketStat;
 import ch.ehi.ili2db.fromxtf.ClassStat;
-import ch.ehi.ili2db.mapping.Mapping;
+import ch.ehi.ili2db.mapping.NameMapping;
+import ch.ehi.ili2db.mapping.TrafoConfig;
 import ch.ehi.ili2db.gui.Config;
 import ch.ehi.sqlgen.repository.DbTableName;
 import ch.interlis.ili2c.metamodel.*;
@@ -55,7 +56,7 @@ import ch.interlis.iom_j.xtf.XtfWriter;
  * @version $Revision: 1.0 $ $Date: 06.05.2005 $
  */
 public class TransferToXtf {
-	private Mapping ili2sqlName=null;
+	private NameMapping ili2sqlName=null;
 	private TransferDescription td=null;
 	private Connection conn=null;
 	private String schema=null; // name of db schema or null
@@ -73,7 +74,7 @@ public class TransferToXtf {
 	private SqlidPool sqlidPool=new SqlidPool();
 	private ArrayList<FixIomObjectRefs> delayedObjects=null;
 	private ch.interlis.ili2c.generator.IndentPrintWriter expgen=null;
-	public TransferToXtf(Mapping ili2sqlName1,TransferDescription td1,Connection conn1,SqlGeometryConverter geomConv,Config config){
+	public TransferToXtf(NameMapping ili2sqlName1,TransferDescription td1,Connection conn1,SqlGeometryConverter geomConv,Config config,TrafoConfig trafoConfig){
 		ili2sqlName=ili2sqlName1;
 		td=td1;
 		tag2class=ch.interlis.ili2c.generator.XSDGenerator.getTagMap(td);
@@ -87,7 +88,7 @@ public class TransferToXtf {
 		createGenericStructRef=config.STRUCT_MAPPING_GENERICREF.equals(config.getStructMapping());
 		writeIliTid=config.TID_HANDLING_PROPERTY.equals(config.getTidHandling());
 		this.geomConv=geomConv;
-		recConv=new ToXtfRecordConverter(td,ili2sqlName,config,null,geomConv,conn,sqlidPool);
+		recConv=new ToXtfRecordConverter(td,ili2sqlName,config,null,geomConv,conn,sqlidPool,trafoConfig);
 
 	}
 	public void doit(String filename,IoxWriter iomFile,String sender,int basketSqlIds[],HashSet<BasketStat> stat)

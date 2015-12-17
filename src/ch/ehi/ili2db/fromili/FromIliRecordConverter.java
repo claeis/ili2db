@@ -10,7 +10,8 @@ import ch.ehi.ili2db.base.Ili2cUtility;
 import ch.ehi.ili2db.base.Ili2dbException;
 import ch.ehi.ili2db.converter.AbstractRecordConverter;
 import ch.ehi.ili2db.gui.Config;
-import ch.ehi.ili2db.mapping.Mapping;
+import ch.ehi.ili2db.mapping.NameMapping;
+import ch.ehi.ili2db.mapping.TrafoConfig;
 import ch.ehi.sqlgen.repository.DbColBoolean;
 import ch.ehi.sqlgen.repository.DbColDate;
 import ch.ehi.sqlgen.repository.DbColDateTime;
@@ -58,14 +59,16 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 	private HashSet visitedEnums=null;
 	private String nl=System.getProperty("line.separator");
 	private ArrayList<AttributeDef> surfaceAttrs=null; 
+	private boolean coalesceCatalogueRef=true;
 
-	public FromIliRecordConverter(TransferDescription td1, Mapping ili2sqlName,
+	public FromIliRecordConverter(TransferDescription td1, NameMapping ili2sqlName,
 			Config config, DbSchema schema1, CustomMapping customMapping1,
-			DbIdGen idGen1, HashSet visitedEnums1) {
-		super(td1, ili2sqlName, config, idGen1);
+			DbIdGen idGen1, HashSet visitedEnums1, TrafoConfig trafoConfig) {
+		super(td1, ili2sqlName, config, idGen1,trafoConfig);
 		visitedEnums=visitedEnums1;
 		customMapping=customMapping1;
 		schema=schema1;
+		coalesceCatalogueRef=Config.CATALOGUE_REF_TRAFO_COALESCE.equals(config.getCatalogueRefTrafo());
 	}
 
 	public void generateViewable(Viewable def)
@@ -327,10 +330,28 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 		}else if (type instanceof CompositionType){
 			// skip it
 			if(!createGenericStructRef){
-				// add reference to struct table
-				addParentRef(attr);
+				if(isChbaseCatalogueRef(td, attr) && (coalesceCatalogueRef 
+						|| Config.CATALOGUE_REF_TRAFO_COALESCE.equals(trafoConfig.getAttrConfig(attr,Config.CATALOGUE_REF_TRAFO)))){
+					
+					DbColId ret=new DbColId();
+					ret.setNotNull(false);
+					ret.setPrimaryKey(false);
+					if(createFk){
+						ret.setReferencedTable(getSqlTableName(((ReferenceType) ((AttributeDef)((CompositionType)type).getComponentType().getAttributes().next()).getDomain()).getReferred()));
+					}
+					if(createFkIdx){
+						ret.setIndex(true);
+					}
+					trafoConfig.setAttrConfig(attr, Config.CATALOGUE_REF_TRAFO,Config.CATALOGUE_REF_TRAFO_COALESCE);
+					dbCol=ret;
+				}else{
+					// add reference to struct table
+					addParentRef(attr);
+					dbCol=null;
+				}
+			}else{
+				dbCol=null;
 			}
-			dbCol=null;
 		}else if (type instanceof ReferenceType){
 			DbColId ret=new DbColId();
 			ret.setNotNull(false);
@@ -418,6 +439,17 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 			dbTable.addColumn(dbCol_georef);
 		}
 	}
+	private boolean isChbaseCatalogueRef(TransferDescription td,
+			AttributeDef attr) {
+		if(Ili2cUtility.isPureChbaseCatalogueRef(td, attr)){
+			CompositionType type=(CompositionType)attr.getDomain();
+			if(type.getCardinality().getMaximum()==1){
+				return true;
+			}
+		}
+		return false;
+	}
+
 	private void addParentRef(AttributeDef attr){
 		CompositionType type = (CompositionType)attr.getDomainResolvingAll();
 		Table structClass=type.getComponentType();

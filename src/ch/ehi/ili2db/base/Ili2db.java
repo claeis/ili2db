@@ -336,18 +336,21 @@ public class Ili2db {
 			  	
 				// read mapping file
 				String mappingConfig=config.getMappingConfigFilename();
-				Mapping mapping=new Mapping(config);
-				  if(DbUtility.tableExists(conn,new DbTableName(config.getDbschema(),Mapping.SQL_T_ILI2DB_CLASSNAME))){
+				NameMapping mapping=new NameMapping(config);
+				  if(DbUtility.tableExists(conn,new DbTableName(config.getDbschema(),DbNames.CLASSNAME_TAB))){
 					  // read mapping from db
 					  mapping.readTableMappingTable(conn,config.getDbschema());
 				  }
-				  if(DbUtility.tableExists(conn,new DbTableName(config.getDbschema(),Mapping.SQL_T_ILI2DB_ATTRNAME))){
+				  if(DbUtility.tableExists(conn,new DbTableName(config.getDbschema(),DbNames.ATTRNAME_TAB))){
 					  // read mapping from db
 					  mapping.readAttrMappingTable(conn,config.getDbschema());
 				  }
 				if(mappingConfig!=null){
 					mapping.readDeprecatedConfig(mappingConfig);
 				}
+				  TrafoConfig trafoConfig=new TrafoConfig();
+				  trafoConfig.readTrafoConfig(conn, config.getDbschema());
+
 				ModelElementSelector ms=new ModelElementSelector();
 				ArrayList<String> modelNames=new ArrayList<String>();
 				for(int modeli=0;modeli<modelv.getSizeFileEntry();modeli++){
@@ -393,7 +396,7 @@ public class Ili2db {
 						// map ili-classes to sql-tables
 						DbSchema schema;
 						try {
-							schema = trsfFromIli.doit(td,eles,mapping,config,idGen);
+							schema = trsfFromIli.doit(td,eles,mapping,config,idGen,trafoConfig);
 						} catch (Ili2dbException e) {
 							throw new Ili2dbException("mapping of ili-classes to sql-tables failed",e);
 						}
@@ -406,10 +409,11 @@ public class Ili2db {
 
 						TransferFromIli.addInheritanceTable(schema,Integer.parseInt(config.getMaxSqlNameLength()));
 						TransferFromIli.addSettingsTable(schema);
+						TransferFromIli.addTrafoConfigTable(schema);
 						TransferFromIli.addModelsTable(schema);
 						trsfFromIli.addEnumTable(schema);
-						Mapping.addTableMappingTable(schema);
-						Mapping.addAttrMappingTable(schema);
+						TransferFromIli.addTableMappingTable(schema);
+						TransferFromIli.addAttrMappingTable(schema);
 						idGen.addMappingTable(schema);
 						
 						GeneratorDriver drv=new GeneratorDriver(gen);
@@ -427,6 +431,7 @@ public class Ili2db {
 							// update mapping table
 							mapping.updateTableMappingTable(conn,config.getDbschema());
 							mapping.updateAttrMappingTable(conn,config.getDbschema());
+							trafoConfig.updateTrafoConfig(conn, config.getDbschema());
 							// update inheritance table
 							trsfFromIli.updateInheritanceTable(conn,config.getDbschema());
 							// update enumerations table
@@ -462,7 +467,7 @@ public class Ili2db {
 						}else{
 							ioxReader=new XtfReader(in);
 						}
-						transferFromXtf(conn,ioxReader,importOnly,mapping,td,dbusr,geomConverter,idGen,config,stat);
+						transferFromXtf(conn,ioxReader,importOnly,mapping,td,dbusr,geomConverter,idGen,config,stat,trafoConfig);
 					} catch (IOException ex) {
 						throw new Ili2dbException(ex);
 					} catch (IoxException ex) {
@@ -526,7 +531,7 @@ public class Ili2db {
 						}else{
 							ioxReader=new XtfReader(new java.io.File(inputFilename));
 						}
-						transferFromXtf(conn,ioxReader,importOnly,mapping,td,dbusr,geomConverter,idGen,config,stat);
+						transferFromXtf(conn,ioxReader,importOnly,mapping,td,dbusr,geomConverter,idGen,config,stat,trafoConfig);
 					} catch (IoxException e) {
 						throw new Ili2dbException(e);
 					}finally{
@@ -803,13 +808,13 @@ public class Ili2db {
 
 			// read mapping file
 			String mappingConfigFilename=config.getMappingConfigFilename();
-			Mapping mapping=new Mapping(config);
+			NameMapping mapping=new NameMapping(config);
 			if(!(conn instanceof GeodbConnection)){
-				  if(DbUtility.tableExists(conn,new DbTableName(config.getDbschema(),Mapping.SQL_T_ILI2DB_CLASSNAME))){
+				  if(DbUtility.tableExists(conn,new DbTableName(config.getDbschema(),DbNames.CLASSNAME_TAB))){
 					  // read mapping from db
 					  mapping.readTableMappingTable(conn,config.getDbschema());
 				  }
-				  if(DbUtility.tableExists(conn,new DbTableName(config.getDbschema(),Mapping.SQL_T_ILI2DB_ATTRNAME))){
+				  if(DbUtility.tableExists(conn,new DbTableName(config.getDbschema(),DbNames.ATTRNAME_TAB))){
 					  // read mapping from db
 					  mapping.readAttrMappingTable(conn,config.getDbschema());
 				  }
@@ -817,6 +822,9 @@ public class Ili2db {
 			if(mappingConfigFilename!=null){
 				mapping.readDeprecatedConfig(mappingConfigFilename);
 			}
+			  TrafoConfig trafoConfig=new TrafoConfig();
+			  trafoConfig.readTrafoConfig(conn, config.getDbschema());
+
 			ModelElementSelector ms=new ModelElementSelector();
 			ArrayList<String> modelNames=new ArrayList<String>();
 			if(models!=null){
@@ -852,7 +860,7 @@ public class Ili2db {
 				// TODO move default SRS to config
 				DbSchema schema;
 				try {
-					schema = trsfFromIli.doit(td,eles,mapping,config,idGen);
+					schema = trsfFromIli.doit(td,eles,mapping,config,idGen,trafoConfig);
 				} catch (Ili2dbException e) {
 					throw new Ili2dbException("mapping of ili-classes to sql-tables failed",e);
 				}
@@ -865,10 +873,11 @@ public class Ili2db {
 					trsfFromIli.addImportsTable(schema);
 					TransferFromIli.addInheritanceTable(schema,Integer.parseInt(config.getMaxSqlNameLength()));
 					TransferFromIli.addSettingsTable(schema);
+					TransferFromIli.addTrafoConfigTable(schema);
 					TransferFromIli.addModelsTable(schema);
 					trsfFromIli.addEnumTable(schema);
-					Mapping.addTableMappingTable(schema);
-					Mapping.addAttrMappingTable(schema);
+					TransferFromIli.addTableMappingTable(schema);
+					TransferFromIli.addAttrMappingTable(schema);
 					idGen.addMappingTable(schema);
 				}
 				
@@ -897,6 +906,8 @@ public class Ili2db {
 					// update mapping table
 					mapping.updateTableMappingTable(conn,config.getDbschema());
 					mapping.updateAttrMappingTable(conn,config.getDbschema());
+					trafoConfig.updateTrafoConfig(conn, config.getDbschema());
+					
 					// update inheritance table
 					trsfFromIli.updateInheritanceTable(conn,config.getDbschema());
 					// update enum table
@@ -1147,18 +1158,20 @@ public class Ili2db {
 			  
 			  // get mapping definition
 			  String mappingConfigFilename=config.getMappingConfigFilename();
-			  Mapping mapping=new Mapping(config);
-			  if(DbUtility.tableExists(conn,new DbTableName(config.getDbschema(),Mapping.SQL_T_ILI2DB_CLASSNAME))){
+			  NameMapping mapping=new NameMapping(config);
+			  if(DbUtility.tableExists(conn,new DbTableName(config.getDbschema(),DbNames.CLASSNAME_TAB))){
 				  // read mapping from db
 				  mapping.readTableMappingTable(conn,config.getDbschema());
 			  }else if(mappingConfigFilename!=null){
 				  // read mapping from config file if it doesn't exist in the db
 				  mapping.readDeprecatedConfig(mappingConfigFilename);
 			  }
-			  if(DbUtility.tableExists(conn,new DbTableName(config.getDbschema(),Mapping.SQL_T_ILI2DB_ATTRNAME))){
+			  if(DbUtility.tableExists(conn,new DbTableName(config.getDbschema(),DbNames.ATTRNAME_TAB))){
 				  // read mapping from db
 				  mapping.readAttrMappingTable(conn,config.getDbschema());
 			  }
+			  TrafoConfig trafoConfig=new TrafoConfig();
+			  trafoConfig.readTrafoConfig(conn, config.getDbschema());
 			
 			  // process xtf files
 			  EhiLogger.logState("process data...");
@@ -1166,7 +1179,7 @@ public class Ili2db {
 				HashSet<BasketStat> stat=new HashSet<BasketStat>();
 				ch.ehi.basics.logging.ErrorTracker errs=new ch.ehi.basics.logging.ErrorTracker();
 				EhiLogger.getInstance().addListener(errs);
-				transferToXtf(conn,xtffile,mapping,td,geomConverter,config.getSender(),config,basketSqlIds,stat);
+				transferToXtf(conn,xtffile,mapping,td,geomConverter,config.getSender(),config,basketSqlIds,stat,trafoConfig);
 				if (errs.hasSeenErrors()) {
 					throw new Ili2dbException("...export failed");
 				} else {
@@ -1522,14 +1535,15 @@ public class Ili2db {
 		return modeldirv;
 	}
 
-	static private void transferFromXtf(Connection conn,IoxReader reader,boolean importOnly,Mapping ili2sqlName,TransferDescription td,
+	static private void transferFromXtf(Connection conn,IoxReader reader,boolean importOnly,NameMapping ili2sqlName,TransferDescription td,
 			String dbusr,
 			SqlGeometryConverter geomConv,
 			DbIdGen idGen,
 			Config config,
-			HashSet<BasketStat> stat){	
+			HashSet<BasketStat> stat,
+			TrafoConfig trafoConfig){	
 		try{
-			TransferFromXtf trsfr=new TransferFromXtf(importOnly,ili2sqlName,td,conn,dbusr,geomConv,idGen,config);
+			TransferFromXtf trsfr=new TransferFromXtf(importOnly,ili2sqlName,td,conn,dbusr,geomConv,idGen,config,trafoConfig);
 			trsfr.doit(reader,config,stat);
 		}catch(ch.interlis.iox.IoxException ex){
 			EhiLogger.logError("failed to read data file",ex);
@@ -1539,12 +1553,13 @@ public class Ili2db {
 	}
 	/** transfer data from database to xml file
 	*/
-	static private void transferToXtf(Connection conn,String xtffile,Mapping ili2sqlName,TransferDescription td
+	static private void transferToXtf(Connection conn,String xtffile,NameMapping ili2sqlName,TransferDescription td
 			,SqlGeometryConverter geomConv
 			,String sender
 			,Config config
 			,int basketSqlIds[]
-			,HashSet<BasketStat> stat){	
+			,HashSet<BasketStat> stat
+			,TrafoConfig trafoConfig){	
 
 		java.io.File outfile=new java.io.File(xtffile);
 		IoxWriter ioxWriter=null;
@@ -1561,7 +1576,7 @@ public class Ili2db {
 			}else{
 				ioxWriter=new XtfWriter(outfile,td);
 			}
-			TransferToXtf trsfr=new TransferToXtf(ili2sqlName,td,conn,geomConv,config);
+			TransferToXtf trsfr=new TransferToXtf(ili2sqlName,td,conn,geomConv,config,trafoConfig);
 			trsfr.doit(outfile.getName(),ioxWriter,sender,basketSqlIds,stat);
 			//trsfr.doitJava();
 			ioxWriter.flush();
@@ -1578,7 +1593,7 @@ public class Ili2db {
 			ioxWriter=null;
 		}
 	}
-	static public void optimizeSqlNames(Config config,Mapping mapping,java.util.List<Element> eles)
+	static public void optimizeSqlNames(Config config,NameMapping mapping,java.util.List<Element> eles)
 	{
 		if(config.NAME_OPTIMIZATION_DISABLE.equals(config.getNameOptimization())){
 			return;

@@ -14,7 +14,8 @@ import ch.ehi.ili2db.converter.AbstractRecordConverter;
 import ch.ehi.ili2db.converter.ConverterException;
 import ch.ehi.ili2db.converter.SqlGeometryConverter;
 import ch.ehi.ili2db.gui.Config;
-import ch.ehi.ili2db.mapping.Mapping;
+import ch.ehi.ili2db.mapping.NameMapping;
+import ch.ehi.ili2db.mapping.TrafoConfig;
 import ch.interlis.ili2c.metamodel.AreaType;
 import ch.interlis.ili2c.metamodel.AssociationDef;
 import ch.interlis.ili2c.metamodel.AttributeDef;
@@ -41,9 +42,9 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 	private Connection conn=null;
 	private SqlGeometryConverter geomConv=null;
 	private SqlidPool sqlid2xtfid=null;
-	public ToXtfRecordConverter(TransferDescription td1, Mapping ili2sqlName,
-			Config config, DbIdGen idGen1,SqlGeometryConverter geomConv1,Connection conn1,SqlidPool sqlidPool) {
-		super(td1, ili2sqlName, config, idGen1);
+	public ToXtfRecordConverter(TransferDescription td1, NameMapping ili2sqlName,
+			Config config, DbIdGen idGen1,SqlGeometryConverter geomConv1,Connection conn1,SqlidPool sqlidPool,TrafoConfig trafoConfig) {
+		super(td1, ili2sqlName, config, idGen1,trafoConfig);
 		conn=conn1;
 		geomConv=geomConv1;
 		sqlid2xtfid=sqlidPool;
@@ -192,6 +193,11 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 			Type type = attr.getDomainResolvingAliases();
 			 String attrName=ili2sqlName.mapIliAttributeDef(attr);
 			if (type instanceof CompositionType){
+				if(Config.CATALOGUE_REF_TRAFO_COALESCE.equals(trafoConfig.getAttrConfig(attr, Config.CATALOGUE_REF_TRAFO))){
+					 ret.append(sep);
+					 sep=",";
+					 ret.append(attrName);
+				}
 			}else if (type instanceof PolylineType){
 				 ret.append(sep);
 				 sep=",";
@@ -382,8 +388,19 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 			}else{
 				Type type = attr.getDomainResolvingAliases();
 				if (type instanceof CompositionType){
-					// enque iomObj as parent
-					structQueue.add(new StructWrapper(sqlid,attr,iomObj));
+					if(Config.CATALOGUE_REF_TRAFO_COALESCE.equals(trafoConfig.getAttrConfig(attr, Config.CATALOGUE_REF_TRAFO))){
+						int value=rs.getInt(valuei);
+						valuei++;
+						if(!rs.wasNull()){
+							IomObject catref=iomObj.addattrobj(attrName,((CompositionType) type).getComponentType().getScopedName(null));
+							IomObject ref=catref.addattrobj("Reference","REF");
+							mapSqlid2Xtfid(fixref,value,ref,((ReferenceType) ((AttributeDef)((CompositionType)type).getComponentType().getAttributes().next()).getDomain()).getReferred());
+						}
+						
+					}else{
+						// enque iomObj as parent
+						structQueue.add(new StructWrapper(sqlid,attr,iomObj));
+					}
 				}else if (type instanceof PolylineType){
 					Object geomobj=rs.getObject(valuei);
 					valuei++;

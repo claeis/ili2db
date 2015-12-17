@@ -26,6 +26,8 @@ public class Config extends Settings {
 	public static final String CREATE_TYPE_DISCRIMINATOR_ALWAYS="always";
 	private static final String STRUCT_MAPPING=PREFIX+".structMapping";
 	public static final String STRUCT_MAPPING_GENERICREF="genericRef";
+	public static final String CATALOGUE_REF_TRAFO=PREFIX+".catalogueRefTrafo";
+	public static final String CATALOGUE_REF_TRAFO_COALESCE="coalesce";
 	private static final String NAME_OPTIMIZATION=PREFIX+".nameOptimization";
 	public static final String NAME_OPTIMIZATION_DISABLE="disable";
 	public static final String NAME_OPTIMIZATION_TOPIC="topic";
@@ -280,6 +282,12 @@ public class Config extends Settings {
 	}
 	public void setStructMapping(String value) {
 		setValue(STRUCT_MAPPING,value);
+	}
+	public String getCatalogueRefTrafo() {
+		return getValue(CATALOGUE_REF_TRAFO);
+	}
+	public void setCatalogueRefTrafo(String value) {
+		setValue(CATALOGUE_REF_TRAFO,value);
 	}
 	public String getNameOptimization() {
 		return getValue(NAME_OPTIMIZATION);

@@ -38,7 +38,8 @@ import ch.ehi.ili2db.base.Ili2cUtility;
 import ch.ehi.ili2db.base.Ili2dbException;
 import ch.ehi.ili2db.converter.AbstractRecordConverter;
 import ch.ehi.ili2db.gui.Config;
-import ch.ehi.ili2db.mapping.Mapping;
+import ch.ehi.ili2db.mapping.NameMapping;
+import ch.ehi.ili2db.mapping.TrafoConfig;
 
 /**
  * @author ce
@@ -49,7 +50,7 @@ public class TransferFromIli {
 	private HashSet visitedElements=null;
 	private HashSet visitedEnums=null;
 	private TransferDescription td=null;
-	private ch.ehi.ili2db.mapping.Mapping ili2sqlName=null;
+	private ch.ehi.ili2db.mapping.NameMapping ili2sqlName=null;
 	private String createEnumTable=null;
 	private boolean createStdCols=false;
 	private boolean createIliTidCol=false;
@@ -63,8 +64,7 @@ public class TransferFromIli {
 	private String colT_ID=null;
 	private String nl=System.getProperty("line.separator");
 	private FromIliRecordConverter recConv=null;
-	
-	public DbSchema doit(TransferDescription td1,java.util.List<Element> modelEles,ch.ehi.ili2db.mapping.Mapping ili2sqlName,ch.ehi.ili2db.gui.Config config,DbIdGen idGen)
+	public DbSchema doit(TransferDescription td1,java.util.List<Element> modelEles,ch.ehi.ili2db.mapping.NameMapping ili2sqlName,ch.ehi.ili2db.gui.Config config,DbIdGen idGen,TrafoConfig trafoConfig)
 	throws Ili2dbException
 	{
 		this.ili2sqlName=ili2sqlName;
@@ -95,7 +95,7 @@ public class TransferFromIli {
 		visitedElements=new HashSet();
 		visitedEnums=new HashSet();
 		td=td1;
-		recConv=new FromIliRecordConverter(td,ili2sqlName,config,schema,customMapping,idGen,visitedEnums);
+		recConv=new FromIliRecordConverter(td,ili2sqlName,config,schema,customMapping,idGen,visitedEnums,trafoConfig);
 
 		Iterator modeli=modelEles.iterator();
 		while(modeli.hasNext()){
@@ -510,6 +510,28 @@ public class TransferFromIli {
 	    }
 	}
 
+	static public void addTrafoConfigTable(ch.ehi.sqlgen.repository.DbSchema schema)
+	{
+		ch.ehi.sqlgen.repository.DbTable tab=new ch.ehi.sqlgen.repository.DbTable();
+		tab.setName(new DbTableName(schema.getName(),DbNames.TRAFO_TAB));
+		ch.ehi.sqlgen.repository.DbColVarchar iliName=new ch.ehi.sqlgen.repository.DbColVarchar();
+		iliName.setName(DbNames.TRAFO_TAB_ILINAME_COL);
+		iliName.setNotNull(true);
+		iliName.setSize(1024);
+		//iliClassName.setPrimaryKey(true);
+		tab.addColumn(iliName);
+		ch.ehi.sqlgen.repository.DbColVarchar configCol=new ch.ehi.sqlgen.repository.DbColVarchar();
+		configCol.setName(DbNames.TRAFO_TAB_TAG_COL);
+		configCol.setNotNull(true);
+		configCol.setSize(1024);
+		tab.addColumn(configCol);
+		ch.ehi.sqlgen.repository.DbColVarchar valCol=new ch.ehi.sqlgen.repository.DbColVarchar();
+		valCol.setName(DbNames.TRAFO_TAB_SETTING_COL);
+		valCol.setNotNull(true);
+		valCol.setSize(1024);
+		tab.addColumn(valCol);
+		schema.addTable(tab);
+	}
 	static public void addSettingsTable(DbSchema schema)
 	{
 		DbTable tab=new DbTable();
@@ -1136,5 +1158,39 @@ public class TransferFromIli {
 			itfCode++;
 			seq++;
 		}
+	}
+	static public void addTableMappingTable(ch.ehi.sqlgen.repository.DbSchema schema)
+	{
+		ch.ehi.sqlgen.repository.DbTable tab=new ch.ehi.sqlgen.repository.DbTable();
+		tab.setName(new DbTableName(schema.getName(),DbNames.CLASSNAME_TAB));
+		ch.ehi.sqlgen.repository.DbColVarchar iliClassName=new ch.ehi.sqlgen.repository.DbColVarchar();
+		iliClassName.setName(DbNames.CLASSNAME_TAB_ILINAME_COL);
+		iliClassName.setNotNull(true);
+		iliClassName.setSize(1024);
+		iliClassName.setPrimaryKey(true);
+		tab.addColumn(iliClassName);
+		ch.ehi.sqlgen.repository.DbColVarchar sqlTableName=new ch.ehi.sqlgen.repository.DbColVarchar();
+		sqlTableName.setName(DbNames.CLASSNAME_TAB_SQLNAME_COL);
+		sqlTableName.setNotNull(true);
+		sqlTableName.setSize(1024);
+		tab.addColumn(sqlTableName);
+		schema.addTable(tab);
+	}
+	static public void addAttrMappingTable(ch.ehi.sqlgen.repository.DbSchema schema)
+	{
+		ch.ehi.sqlgen.repository.DbTable tab=new ch.ehi.sqlgen.repository.DbTable();
+		tab.setName(new DbTableName(schema.getName(),DbNames.ATTRNAME_TAB));
+		ch.ehi.sqlgen.repository.DbColVarchar iliClassName=new ch.ehi.sqlgen.repository.DbColVarchar();
+		iliClassName.setName(DbNames.CLASSNAME_TAB_ILINAME_COL);
+		iliClassName.setNotNull(true);
+		iliClassName.setSize(1024);
+		iliClassName.setPrimaryKey(true);
+		tab.addColumn(iliClassName);
+		ch.ehi.sqlgen.repository.DbColVarchar sqlTableName=new ch.ehi.sqlgen.repository.DbColVarchar();
+		sqlTableName.setName(DbNames.CLASSNAME_TAB_SQLNAME_COL);
+		sqlTableName.setNotNull(true);
+		sqlTableName.setSize(1024);
+		tab.addColumn(sqlTableName);
+		schema.addTable(tab);
 	}
 }

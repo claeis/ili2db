@@ -22,25 +22,19 @@ import java.util.HashMap;
 import java.util.HashSet;
 
 import ch.ehi.basics.logging.EhiLogger;
-
 import ch.interlis.ili2c.metamodel.Viewable;
 import ch.interlis.iom.IomObject;
 import ch.interlis.iom_j.xtf.XtfReader;
 import ch.interlis.iox.*;
-
 import ch.ehi.ili2db.mapping.*;
+import ch.ehi.ili2db.base.DbNames;
 import ch.ehi.ili2db.base.Ili2dbException;
-import ch.ehi.sqlgen.repository.DbTableName;
 
 /** make names unique and conforming to the underlying database
  * @author ce
  * @version $Revision: 1.0 $ $Date: 04.04.2005 $
  */
-public class Mapping {
-	public static String SQL_T_ILI2DB_CLASSNAME="T_ILI2DB_CLASSNAME";
-	public static String SQL_T_ILI2DB_ATTRNAME="T_ILI2DB_ATTRNAME";
-	private static String SQL_IliName="IliName";
-	private static String SQL_SqlName="SqlName";
+public class NameMapping {
 	public static int DEFAULT_NAME_LENGTH=60;
 	private int _maxSqlNameLength=DEFAULT_NAME_LENGTH;
 	/** mapping from a qualified interlis viewable or attribute name to a sql table name.
@@ -60,8 +54,8 @@ public class Mapping {
 	 */
 	private HashMap<String,String> attrNameSql2ili=new HashMap<String,String>();
 	private HashMap deprecatedConfig=new HashMap();
-	private Mapping(){};
-	public Mapping(ch.ehi.ili2db.gui.Config config)
+	private NameMapping(){};
+	public NameMapping(ch.ehi.ili2db.gui.Config config)
 	{
 		_maxSqlNameLength=Integer.parseInt(config.getMaxSqlNameLength());
 	}
@@ -445,52 +439,17 @@ public class Mapping {
 	// ASSERT(!name.IsEmpty());
 	return name.toString();
 	}
-	static public void addTableMappingTable(ch.ehi.sqlgen.repository.DbSchema schema)
-	{
-		ch.ehi.sqlgen.repository.DbTable tab=new ch.ehi.sqlgen.repository.DbTable();
-		tab.setName(new DbTableName(schema.getName(),SQL_T_ILI2DB_CLASSNAME));
-		ch.ehi.sqlgen.repository.DbColVarchar iliClassName=new ch.ehi.sqlgen.repository.DbColVarchar();
-		iliClassName.setName(SQL_IliName);
-		iliClassName.setNotNull(true);
-		iliClassName.setSize(1024);
-		iliClassName.setPrimaryKey(true);
-		tab.addColumn(iliClassName);
-		ch.ehi.sqlgen.repository.DbColVarchar sqlTableName=new ch.ehi.sqlgen.repository.DbColVarchar();
-		sqlTableName.setName(SQL_SqlName);
-		sqlTableName.setNotNull(true);
-		sqlTableName.setSize(1024);
-		tab.addColumn(sqlTableName);
-		schema.addTable(tab);
-	}
-	static public void addAttrMappingTable(ch.ehi.sqlgen.repository.DbSchema schema)
-	{
-		ch.ehi.sqlgen.repository.DbTable tab=new ch.ehi.sqlgen.repository.DbTable();
-		tab.setName(new DbTableName(schema.getName(),SQL_T_ILI2DB_ATTRNAME));
-		ch.ehi.sqlgen.repository.DbColVarchar iliClassName=new ch.ehi.sqlgen.repository.DbColVarchar();
-		iliClassName.setName(SQL_IliName);
-		iliClassName.setNotNull(true);
-		iliClassName.setSize(1024);
-		iliClassName.setPrimaryKey(true);
-		tab.addColumn(iliClassName);
-		ch.ehi.sqlgen.repository.DbColVarchar sqlTableName=new ch.ehi.sqlgen.repository.DbColVarchar();
-		sqlTableName.setName(SQL_SqlName);
-		sqlTableName.setNotNull(true);
-		sqlTableName.setSize(1024);
-		tab.addColumn(sqlTableName);
-		schema.addTable(tab);
-	}
-
 	private static HashSet<String> readTableMappingTableEntries(java.sql.Connection conn,String schema)
 	throws Ili2dbException
 	{
 		HashSet<String> ret=new HashSet<String>();
-		String sqlName=SQL_T_ILI2DB_CLASSNAME;
+		String sqlName=DbNames.CLASSNAME_TAB;
 		if(schema!=null){
 			sqlName=schema+"."+sqlName;
 		}
 		try{
 			String exstStmt=null;
-			exstStmt="SELECT "+SQL_IliName+" FROM "+sqlName;
+			exstStmt="SELECT "+DbNames.CLASSNAME_TAB_ILINAME_COL+" FROM "+sqlName;
 			EhiLogger.traceBackendCmd(exstStmt);
 			java.sql.PreparedStatement exstPrepStmt = conn.prepareStatement(exstStmt);
 			try{
@@ -511,7 +470,7 @@ public class Mapping {
 	throws Ili2dbException
 	{
 		HashSet<String> exstEntries=readTableMappingTableEntries(conn,schema);
-		String mapTabName=SQL_T_ILI2DB_CLASSNAME;
+		String mapTabName=DbNames.CLASSNAME_TAB;
 		if(schema!=null){
 			mapTabName=schema+"."+mapTabName;
 		}
@@ -519,7 +478,7 @@ public class Mapping {
 		try{
 
 			// insert mapping entries
-			String stmt="INSERT INTO "+mapTabName+" ("+SQL_IliName+","+SQL_SqlName+") VALUES (?,?)";
+			String stmt="INSERT INTO "+mapTabName+" ("+DbNames.CLASSNAME_TAB_ILINAME_COL+","+DbNames.CLASSNAME_TAB_SQLNAME_COL+") VALUES (?,?)";
 			EhiLogger.traceBackendCmd(stmt);
 			java.sql.PreparedStatement ps = conn.prepareStatement(stmt);
 			String iliname=null;
@@ -548,20 +507,20 @@ public class Mapping {
 	public void readTableMappingTable(java.sql.Connection conn,String schema)
 	throws Ili2dbException
 	{
-		String mapTableName=SQL_T_ILI2DB_CLASSNAME;
+		String mapTableName=DbNames.CLASSNAME_TAB;
 		if(schema!=null){
 			mapTableName=schema+"."+mapTableName;
 		}
 		// create table
-		String stmt="SELECT "+SQL_IliName+", "+SQL_SqlName+" FROM "+mapTableName;
+		String stmt="SELECT "+DbNames.CLASSNAME_TAB_ILINAME_COL+", "+DbNames.CLASSNAME_TAB_SQLNAME_COL+" FROM "+mapTableName;
 		java.sql.Statement dbstmt = null;
 		try{
 			
 			dbstmt = conn.createStatement();
 			java.sql.ResultSet rs=dbstmt.executeQuery(stmt);
 			while(rs.next()){
-				String iliname=rs.getString(SQL_IliName);
-				String sqlname=rs.getString(SQL_SqlName);
+				String iliname=rs.getString(DbNames.CLASSNAME_TAB_ILINAME_COL);
+				String sqlname=rs.getString(DbNames.CLASSNAME_TAB_SQLNAME_COL);
 				//EhiLogger.debug("map: "+iliname+"->"+sqlname);
 				if(classNameIli2sql.get(iliname)==null){
 					addTableNameMapping(iliname,sqlname);
@@ -584,13 +543,13 @@ public class Mapping {
 	throws Ili2dbException
 	{
 		HashSet<String> ret=new HashSet<String>();
-		String sqlName=SQL_T_ILI2DB_ATTRNAME;
+		String sqlName=DbNames.ATTRNAME_TAB;
 		if(schema!=null){
 			sqlName=schema+"."+sqlName;
 		}
 		try{
 			String exstStmt=null;
-			exstStmt="SELECT "+SQL_IliName+" FROM "+sqlName;
+			exstStmt="SELECT "+DbNames.CLASSNAME_TAB_ILINAME_COL+" FROM "+sqlName;
 			EhiLogger.traceBackendCmd(exstStmt);
 			java.sql.PreparedStatement exstPrepStmt = conn.prepareStatement(exstStmt);
 			try{
@@ -611,7 +570,7 @@ public class Mapping {
 	throws Ili2dbException
 	{
 		HashSet<String> exstEntries=readAttrMappingTableEntries(conn,schema);
-		String mapTabName=SQL_T_ILI2DB_ATTRNAME;
+		String mapTabName=DbNames.ATTRNAME_TAB;
 		if(schema!=null){
 			mapTabName=schema+"."+mapTabName;
 		}
@@ -619,7 +578,7 @@ public class Mapping {
 		try{
 
 			// insert mapping entries
-			String stmt="INSERT INTO "+mapTabName+" ("+SQL_IliName+","+SQL_SqlName+") VALUES (?,?)";
+			String stmt="INSERT INTO "+mapTabName+" ("+DbNames.CLASSNAME_TAB_ILINAME_COL+","+DbNames.CLASSNAME_TAB_SQLNAME_COL+") VALUES (?,?)";
 			EhiLogger.traceBackendCmd(stmt);
 			java.sql.PreparedStatement ps = conn.prepareStatement(stmt);
 			String iliname=null;
@@ -648,20 +607,20 @@ public class Mapping {
 	public void readAttrMappingTable(java.sql.Connection conn,String schema)
 	throws Ili2dbException
 	{
-		String mapTableName=SQL_T_ILI2DB_ATTRNAME;
+		String mapTableName=DbNames.ATTRNAME_TAB;
 		if(schema!=null){
 			mapTableName=schema+"."+mapTableName;
 		}
 		// create table
-		String stmt="SELECT "+SQL_IliName+", "+SQL_SqlName+" FROM "+mapTableName;
+		String stmt="SELECT "+DbNames.CLASSNAME_TAB_ILINAME_COL+", "+DbNames.CLASSNAME_TAB_SQLNAME_COL+" FROM "+mapTableName;
 		java.sql.Statement dbstmt = null;
 		try{
 			
 			dbstmt = conn.createStatement();
 			java.sql.ResultSet rs=dbstmt.executeQuery(stmt);
 			while(rs.next()){
-				String iliname=rs.getString(SQL_IliName);
-				String sqlname=rs.getString(SQL_SqlName);
+				String iliname=rs.getString(DbNames.CLASSNAME_TAB_ILINAME_COL);
+				String sqlname=rs.getString(DbNames.CLASSNAME_TAB_SQLNAME_COL);
 				//EhiLogger.debug("map: "+iliname+"->"+sqlname);
 				if(attrNameIli2sql.get(iliname)==null){
 					addAttrNameMapping(iliname,sqlname);

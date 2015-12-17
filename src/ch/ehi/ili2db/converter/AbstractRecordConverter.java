@@ -10,6 +10,7 @@ import ch.ehi.ili2db.base.DbNames;
 import ch.ehi.ili2db.base.Ili2cUtility;
 import ch.ehi.ili2db.base.Ili2dbException;
 import ch.ehi.ili2db.fromili.CustomMapping;
+import ch.ehi.ili2db.mapping.TrafoConfig;
 import ch.ehi.sqlgen.repository.DbColBoolean;
 import ch.ehi.sqlgen.repository.DbColDate;
 import ch.ehi.sqlgen.repository.DbColDateTime;
@@ -59,7 +60,7 @@ import ch.interlis.iom_j.itf.ModelUtilities;
 public class AbstractRecordConverter {
 	private EnumCodeMapper enumTypes=new EnumCodeMapper();
 	protected TransferDescription td=null;
-	protected ch.ehi.ili2db.mapping.Mapping ili2sqlName=null;
+	protected ch.ehi.ili2db.mapping.NameMapping ili2sqlName=null;
 	private String schemaName=null;
 	protected String defaultCrsAuthority=null;
 	protected String defaultCrsCode=null;
@@ -82,11 +83,12 @@ public class AbstractRecordConverter {
 	protected String colT_ID=null;
 	private String uuid_default_value=null;
 	private DbIdGen idGen=null;
-
-	public AbstractRecordConverter(TransferDescription td1,ch.ehi.ili2db.mapping.Mapping ili2sqlName,ch.ehi.ili2db.gui.Config config,DbIdGen idGen1){
+	protected TrafoConfig trafoConfig=null;
+	public AbstractRecordConverter(TransferDescription td1,ch.ehi.ili2db.mapping.NameMapping ili2sqlName,ch.ehi.ili2db.gui.Config config,DbIdGen idGen1, TrafoConfig trafoConfig1){
 		this.defaultCrsAuthority=config.getDefaultSrsAuthority();
 		this.defaultCrsCode=config.getDefaultSrsCode();
 		this.ili2sqlName=ili2sqlName;
+		trafoConfig=trafoConfig1;
 		createEnumTable=config.getCreateEnumDefs();
 		createEnumColAsItfCode=config.CREATE_ENUMCOL_AS_ITFCODE_YES.equals(config.getCreateEnumColAsItfCode());
 		createStdCols=config.CREATE_STD_COLS_ALL.equals(config.getCreateStdCols());

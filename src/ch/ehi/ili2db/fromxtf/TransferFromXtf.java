@@ -38,8 +38,9 @@ import ch.ehi.ili2db.base.Ili2cUtility;
 import ch.ehi.ili2db.base.Ili2db;
 import ch.ehi.ili2db.base.Ili2dbException;
 import ch.ehi.ili2db.converter.*;
+import ch.ehi.ili2db.mapping.TrafoConfig;
 import ch.ehi.ili2db.fromili.TransferFromIli;
-import ch.ehi.ili2db.mapping.Mapping;
+import ch.ehi.ili2db.mapping.NameMapping;
 import ch.ehi.ili2db.toxtf.TransferToXtf;
 import ch.ehi.ili2db.gui.Config;
 import ch.ehi.sqlgen.repository.DbTableName;
@@ -65,7 +66,7 @@ import ch.interlis.iox_j.jts.Iox2jtsException;
  * @version $Revision: 1.0 $ $Date: 17.02.2005 $
  */
 public class TransferFromXtf {
-	private Mapping ili2sqlName=null;
+	private NameMapping ili2sqlName=null;
 	/** mappings from xml-tags to Viewable|AttributeDef
 	 */
 	private HashMap tag2class=null;
@@ -94,21 +95,22 @@ public class TransferFromXtf {
 	private XtfidPool oidPool=null;
 	private HashMap<String,HashSet<Integer>> existingObjects=null;
 	private ArrayList<FixIomObjectExtRefs> delayedObjects=null;
-
+	private TrafoConfig trafoConfig=null;
 	private FromXtfRecordConverter recConv=null;
 	/** list of not yet processed struct values
 	 */
 	private ArrayList structQueue=null;
-	public TransferFromXtf(boolean importOnly,Mapping ili2sqlName1,
+	public TransferFromXtf(boolean importOnly,NameMapping ili2sqlName1,
 			TransferDescription td1,
 			Connection conn1,
 			String dbusr1,
 			SqlGeometryConverter geomConv,
 			DbIdGen idGen,
-			Config config){
+			Config config,TrafoConfig trafoConfig1){
 		ili2sqlName=ili2sqlName1;
 		td=td1;
 		conn=conn1;
+		trafoConfig=trafoConfig1;
 		dbusr=dbusr1;
 		if(dbusr==null || dbusr.length()==0){
 			dbusr=System.getProperty("user.name");
@@ -150,7 +152,7 @@ public class TransferFromXtf {
 		unknownTypev=new HashSet();
 		structQueue=new ArrayList();
 		boolean surfaceAsPolyline=true;
-		recConv=new FromXtfRecordConverter(td,ili2sqlName,config,idGen,geomConv,conn,dbusr,isItfReader,oidPool);
+		recConv=new FromXtfRecordConverter(td,ili2sqlName,config,idGen,geomConv,conn,dbusr,isItfReader,oidPool,trafoConfig);
 		
 		int datasetSqlId=oidPool.newObjSqlId();
 		int importSqlId=0;

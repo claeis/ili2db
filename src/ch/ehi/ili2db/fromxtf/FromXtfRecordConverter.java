@@ -22,7 +22,8 @@ import ch.ehi.ili2db.converter.ConverterException;
 import ch.ehi.ili2db.converter.SqlGeometryConverter;
 import ch.ehi.ili2db.fromili.CustomMapping;
 import ch.ehi.ili2db.gui.Config;
-import ch.ehi.ili2db.mapping.Mapping;
+import ch.ehi.ili2db.mapping.NameMapping;
+import ch.ehi.ili2db.mapping.TrafoConfig;
 import ch.ehi.sqlgen.repository.DbSchema;
 import ch.interlis.ili2c.metamodel.AreaType;
 import ch.interlis.ili2c.metamodel.AssociationDef;
@@ -58,10 +59,10 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 	private boolean isItfReader;
 	private XtfidPool oidPool=null;
 
-	public FromXtfRecordConverter(TransferDescription td1, Mapping ili2sqlName,
+	public FromXtfRecordConverter(TransferDescription td1, NameMapping ili2sqlName,
 			Config config,
-			DbIdGen idGen1,SqlGeometryConverter geomConv1,Connection conn1,String dbusr1,boolean isItfReader1,XtfidPool oidPool1) {
-		super(td1, ili2sqlName, config, idGen1);
+			DbIdGen idGen1,SqlGeometryConverter geomConv1,Connection conn1,String dbusr1,boolean isItfReader1,XtfidPool oidPool1,TrafoConfig trafoConfig) {
+		super(td1, ili2sqlName, config, idGen1,trafoConfig);
 		conn=conn1;
 		dbusr=dbusr1;
 		oidPool=oidPool1;
@@ -451,6 +452,16 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 					}
 					sep=",";
 			}else if (type instanceof CompositionType){
+				if(Config.CATALOGUE_REF_TRAFO_COALESCE.equals(trafoConfig.getAttrConfig(attr, Config.CATALOGUE_REF_TRAFO))){
+					ret.append(sep);
+					ret.append(attrSqlName);
+					if(isUpdate){
+						ret.append("=?");
+					}else{
+						values.append(",?");
+					}
+					sep=",";
+				}
 			}else if (type instanceof PolylineType){
 				 ret.append(sep);
 				 ret.append(attrSqlName);
@@ -601,13 +612,31 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 				Type type = attr.getDomainResolvingAliases();
 			 
 				if (type instanceof CompositionType){
-					 // enqueue struct values
 					 int structc=iomObj.getattrvaluecount(attrName);
-					 for(int structi=0;structi<structc;structi++){
-					 	IomObject struct=iomObj.getattrobj(attrName,structi);
-					 	String sqlAttrName=ili2sqlName.mapIliAttributeDef(attr);
-					 	enqueStructValue(structQueue,sqlId,sqlType,sqlAttrName,struct,structi,attr);
-					 }
+					if(Config.CATALOGUE_REF_TRAFO_COALESCE.equals(trafoConfig.getAttrConfig(attr, Config.CATALOGUE_REF_TRAFO))){
+						 IomObject catref=iomObj.getattrobj(attrName,0);
+						 String refoid=null;
+						 if(catref!=null){
+							 IomObject structvalue=catref.getattrobj("Reference",0);
+							 if(structvalue!=null){
+								 refoid=structvalue.getobjectrefoid();
+							 }
+						 }
+						 if(refoid!=null){
+								int refsqlId=oidPool.getObjSqlId(refoid);
+								ps.setInt(valuei, refsqlId);
+						 }else{
+								ps.setNull(valuei,Types.INTEGER);
+						 }
+						valuei++;
+					}else{
+						 // enqueue struct values
+						 for(int structi=0;structi<structc;structi++){
+						 	IomObject struct=iomObj.getattrobj(attrName,structi);
+						 	String sqlAttrName=ili2sqlName.mapIliAttributeDef(attr);
+						 	enqueStructValue(structQueue,sqlId,sqlType,sqlAttrName,struct,structi,attr);
+						 }
+					}
 				}else if (type instanceof PolylineType){
 					 IomObject value=iomObj.getattrobj(attrName,0);
 					 if(value!=null){
