@@ -281,10 +281,10 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 					sqlIliTid=rs.getString(valuei);
 					sqlid2xtfid.putSqlid2Xtfid(sqlid, sqlIliTid);
 					valuei++;
+				}else{
+					sqlIliTid=Integer.toString(sqlid);
+					sqlid2xtfid.putSqlid2Xtfid(sqlid, sqlIliTid);
 				}
-			}else{
-				sqlIliTid=Integer.toString(sqlid);
-				sqlid2xtfid.putSqlid2Xtfid(sqlid, sqlIliTid);
 			}
 		}
 		if(structWrapper==null){
