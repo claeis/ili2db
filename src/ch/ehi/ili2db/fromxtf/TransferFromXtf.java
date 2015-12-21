@@ -78,7 +78,7 @@ public class TransferFromXtf {
 	private String schema=null; // name of dbschema or null
 	private java.sql.Timestamp today=null;
 	private String dbusr=null;
-	private SqlGeometryConverter geomConv=null;
+	private SqlColumnConverter geomConv=null;
 	private boolean createStdCols=false;
 	private boolean createGenericStructRef=false;
 	private boolean readIliTid=false;
@@ -104,7 +104,7 @@ public class TransferFromXtf {
 			TransferDescription td1,
 			Connection conn1,
 			String dbusr1,
-			SqlGeometryConverter geomConv,
+			SqlColumnConverter geomConv,
 			DbIdGen idGen,
 			Config config,TrafoConfig trafoConfig1){
 		ili2sqlName=ili2sqlName1;

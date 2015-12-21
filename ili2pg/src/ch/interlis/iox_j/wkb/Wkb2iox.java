@@ -33,8 +33,11 @@
 package ch.interlis.iox_j.wkb;
 
 import java.io.IOException;
+import java.util.ArrayList;
 
+import ch.ehi.ili2db.base.IliNames;
 import ch.interlis.iom.IomObject;
+
 import com.vividsolutions.jts.io.ByteOrderDataInStream;
 import com.vividsolutions.jts.io.ByteArrayInStream;
 import com.vividsolutions.jts.io.InStream;
@@ -161,6 +164,10 @@ public class Wkb2iox
         return readPolygon();
       case WKBConstants.wkbCurvePolygon :
           return readCurvePolygon();
+      case WKBConstants.wkbMultiPolygon :
+          return readMultiPolygon();
+      case WKBConstants.wkbMultiSurface :
+          return readMultiSurface();
     }
     throw new ParseException("Unknown WKB type " + geometryType);
     //return null;
@@ -316,7 +323,73 @@ public class Wkb2iox
     
     
   }
+  private IomObject readMultiPolygon() throws IOException, ParseException
+  {
+/*
+	  <multipolygon binary representation> ::=
+			  <byte order> <wkbmultipolygon>
+			  [ <num> <polygon binary representation>... ]			  
+			  
+	  <polygon binary representation> ::=
+			  <byte order> <wkbpolygon> [ <num> <wkblinearring binary>... ]
+			  | <triangle binary representation>
 
+*/
+	  IomObject ret=null;
+	    int polygonc = dis.readInt();
+	    for(int polygoni=0;polygoni<polygonc;polygoni++){
+	        byte byteOrder = dis.readByte();
+	        int typeInt = dis.readInt();
+	        int geometryType = typeInt & 0xff;
+	        if(geometryType!=WKBConstants.wkbPolygon){
+	    	    throw new IllegalStateException("Unexpected WKB type " + geometryType);
+	        }
+	        if(ret==null){
+	        	ret=readPolygon();
+	        }else{
+	        	IomObject poly=readPolygon();
+	        	IomObject surface=poly.getattrobj("surface", 0);
+		    	ret.addattrobj("surface",surface);
+	        }
+	    }
+	    return ret;
+	  
+  }
+  private IomObject readMultiSurface() throws IOException, ParseException
+  {
+/*
+	  <multisurface binary representation> ::=
+			  <byte order> <wkbmultisurface>
+			  [ <num> <surface binary representation>... ]
+			  | <multipolygon binary representation>
+
+	  <multipolygon binary representation> ::=
+			  <byte order> <wkbmultipolygon>
+			  [ <num> <polygon binary representation>... ]			  
+
+	  <surface binary representation> ::=
+			  <curvepolygon binary representation>
+			  | <polyhedralsurface binary representation>					  
+*/
+	  IomObject ret=null;
+	    int surfacec = dis.readInt();
+	    for(int surfacei=0;surfacei<surfacec;surfacei++){
+	        byte byteOrder = dis.readByte();
+	        int typeInt = dis.readInt();
+	        int geometryType = typeInt & 0xff;
+	        if(geometryType!=WKBConstants.wkbCurvePolygon){
+	    	    throw new IllegalStateException("Unexpected WKB type " + geometryType);
+	        }
+	        if(ret==null){
+	        	ret=readCurvePolygon();
+	        }else{
+	        	IomObject poly=readCurvePolygon();
+	        	IomObject surface=poly.getattrobj("surface", 0);
+		    	ret.addattrobj("surface",surface);
+	        }
+	    }
+	    return ret;
+  }
   /**
    * Reads a coordinate value with the specified dimensionality.
    * Makes the X and Y ordinates precise according to the precision model

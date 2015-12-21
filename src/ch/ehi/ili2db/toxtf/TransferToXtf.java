@@ -64,7 +64,7 @@ public class TransferToXtf {
 	private boolean createTypeDiscriminator=false;
 	private boolean createGenericStructRef=false;
 	private boolean writeIliTid=false;
-	private SqlGeometryConverter geomConv=null;
+	private SqlColumnConverter geomConv=null;
 	private ToXtfRecordConverter recConv=null;
 	
 	/** map of xml-elementnames to interlis classdefs.
@@ -74,7 +74,7 @@ public class TransferToXtf {
 	private SqlidPool sqlidPool=new SqlidPool();
 	private ArrayList<FixIomObjectRefs> delayedObjects=null;
 	private ch.interlis.ili2c.generator.IndentPrintWriter expgen=null;
-	public TransferToXtf(NameMapping ili2sqlName1,TransferDescription td1,Connection conn1,SqlGeometryConverter geomConv,Config config,TrafoConfig trafoConfig){
+	public TransferToXtf(NameMapping ili2sqlName1,TransferDescription td1,Connection conn1,SqlColumnConverter geomConv,Config config,TrafoConfig trafoConfig){
 		ili2sqlName=ili2sqlName1;
 		td=td1;
 		tag2class=ch.interlis.ili2c.generator.XSDGenerator.getTagMap(td);
@@ -933,7 +933,7 @@ public class TransferToXtf {
 		String sqlname=ili2sqlName.mapItfLineTableAsTable(def);
 		return new DbTableName(schema,sqlname);
 	}
-	private String createItfLineTableQueryStmt(AttributeDef attr,Integer basketSqlId,SqlGeometryConverter conv){
+	private String createItfLineTableQueryStmt(AttributeDef attr,Integer basketSqlId,SqlColumnConverter conv){
 		StringBuffer ret = new StringBuffer();
 		ret.append("SELECT r0."+colT_ID);
 		if(writeIliTid){

@@ -29,51 +29,70 @@ import com.vividsolutions.jts.io.ParseException;
 import ch.interlis.iom.IomObject;
 import ch.interlis.iox_j.jts.Iox2jtsException;
 
-public abstract class AbstractWKTGeometryConverter implements SqlGeometryConverter {
-	public void setAreaNull(PreparedStatement stmt, int parameterIndex) throws SQLException {
-		stmt.setNull(parameterIndex,java.sql.Types.CLOB);
-	}
+public abstract class AbstractWKTGeometryConverter implements SqlColumnConverter {
+	@Override
 	public void setCoordNull(PreparedStatement stmt, int parameterIndex) throws SQLException {
 		stmt.setNull(parameterIndex,java.sql.Types.CLOB);
 	}
+	@Override
 	public void setDecimalNull(PreparedStatement stmt, int parameterIndex) throws SQLException {
 		stmt.setNull(parameterIndex,java.sql.Types.DECIMAL);
 	}
+	@Override
 	public void setBoolean(java.sql.PreparedStatement stmt,int parameterIndex,boolean value)
 	throws java.sql.SQLException
 	{
 			stmt.setBoolean(parameterIndex, value);
 	}
+	@Override
 	public void setPolylineNull(PreparedStatement stmt, int parameterIndex) throws SQLException {
 		stmt.setNull(parameterIndex,java.sql.Types.CLOB);
 	}
+	@Override
 	public void setSurfaceNull(PreparedStatement stmt, int parameterIndex) throws SQLException {
 		stmt.setNull(parameterIndex,java.sql.Types.CLOB);
 	}
+	@Override
 	public String getInsertValueWrapperCoord(String wkfValue,int srid) {
 		//return "ST_GeometryFromWKB("+wkfValue+(srid==-1?"":","+srid)+")";
 		return "GeomFromWKT("+wkfValue+(srid==-1?"":","+srid)+")";
 	}
+	@Override
 	public String getInsertValueWrapperPolyline(String wkfValue,int srid) {
 		//return "ST_GeometryFromWKB("+wkfValue+(srid==-1?"":","+srid)+")";
 		return "GeomFromWKT("+wkfValue+(srid==-1?"":","+srid)+")";
 	}
+	@Override
 	public String getInsertValueWrapperSurface(String wkfValue,int srid) {
 		//return "ST_GeometryFromWKB("+wkfValue+(srid==-1?"":","+srid)+")";
 		return "GeomFromWKT("+wkfValue+(srid==-1?"":","+srid)+")";
 	}
+	@Override
+	public String getInsertValueWrapperMultiSurface(String wkfValue,int srid) {
+		//return "ST_GeometryFromWKB("+wkfValue+(srid==-1?"":","+srid)+")";
+		return "GeomFromWKT("+wkfValue+(srid==-1?"":","+srid)+")";
+	}
+	@Override
 	public String getSelectValueWrapperCoord(String dbNativeValue) {
 		//return "ST_AsBinary("+dbNativeValue+")";
 		return "AsText("+dbNativeValue+")";
 	}
+	@Override
 	public String getSelectValueWrapperPolyline(String dbNativeValue) {
 		//return "ST_AsBinary("+dbNativeValue+")";
 		return "AsText("+dbNativeValue+")";
 	}
+	@Override
 	public String getSelectValueWrapperSurface(String dbNativeValue) {
 		//return "ST_AsBinary("+dbNativeValue+")";
 		return "AsText("+dbNativeValue+")";
 	}
+	@Override
+	public String getSelectValueWrapperMultiSurface(String dbNativeValue) {
+		//return "ST_AsBinary("+dbNativeValue+")";
+		return "AsText("+dbNativeValue+")";
+	}
+	@Override
 	public java.lang.Object fromIomCoord(IomObject value, int srid,boolean is3D)
 		throws SQLException, ConverterException {
 		if(value!=null){			
@@ -122,6 +141,19 @@ public abstract class AbstractWKTGeometryConverter implements SqlGeometryConvert
 				}
 				return null;
 		}
+	@Override
+	public java.lang.Object fromIomMultiSurface(
+			IomObject value,
+			int srid,
+			boolean hasLineAttr,
+			boolean is3D,double p)
+			throws SQLException, ConverterException {
+				if(value!=null){			
+					throw new ConverterException("MultiSurface not supported");
+				}
+				return null;
+		}
+	@Override
 	public IomObject toIomCoord(
 		Object geomobj,
 		String sqlAttrName,
@@ -136,6 +168,7 @@ public abstract class AbstractWKTGeometryConverter implements SqlGeometryConvert
 		}
 		return ch.interlis.iox_j.jts.Jts2iox.JTS2coord(geom.getCoordinate());
 	}
+	@Override
 	public IomObject toIomSurface(
 		Object geomobj,
 		String sqlAttrName,
@@ -150,6 +183,22 @@ public abstract class AbstractWKTGeometryConverter implements SqlGeometryConvert
 		}
 		return ch.interlis.iox_j.jts.Jts2iox.JTS2surface((com.vividsolutions.jts.geom.Polygon)geom);
 	}
+	@Override
+	public IomObject toIomMultiSurface(
+		Object geomobj,
+		String sqlAttrName,
+		boolean is3D)
+		throws SQLException, ConverterException {
+		String bv=(String)geomobj;
+		com.vividsolutions.jts.geom.Geometry geom;
+		try {
+			geom = new com.vividsolutions.jts.io.WKTReader().read(bv);
+		} catch (ParseException e) {
+			throw new ConverterException(e);
+		}
+		return ch.interlis.iox_j.jts.Jts2iox.JTS2surface((com.vividsolutions.jts.geom.Polygon)geom);
+	}
+	@Override
 	public IomObject toIomPolyline(
 		Object geomobj,
 		String sqlAttrName,
@@ -167,6 +216,7 @@ public abstract class AbstractWKTGeometryConverter implements SqlGeometryConvert
 	public AbstractWKTGeometryConverter()
 	{
 	}
+	@Override
 	public int getSrsid(String crsAuthority, String crsCode,Connection conn) 
 		throws ConverterException
 	{
@@ -182,6 +232,7 @@ public abstract class AbstractWKTGeometryConverter implements SqlGeometryConvert
 		}
 		return srsid;
 	}
+	@Override
 	public void setup(Connection conn, Config config) {
 	}
 

@@ -30,6 +30,7 @@ import ch.interlis.iom.IomObject;
 import ch.interlis.iom.IomConstants;
 
 public class OracleWKTGeometryConverter extends AbstractWKTGeometryConverter {
+	@Override
 	public void setBoolean(java.sql.PreparedStatement stmt,int parameterIndex,boolean value)
 	throws java.sql.SQLException
 	{
@@ -40,24 +41,35 @@ public class OracleWKTGeometryConverter extends AbstractWKTGeometryConverter {
 		}
 		
 	}
+	@Override
 	public String getInsertValueWrapperCoord(String wkfValue, int srid) {
 		return wkfValue;
 	}
+	@Override
 	public String getInsertValueWrapperPolyline(String wkfValue, int srid) {
 		return wkfValue;
 	}
+	@Override
 	public String getInsertValueWrapperSurface(String wkfValue, int srid) {
 		return wkfValue;
 	}
+	@Override
 	public String getSelectValueWrapperCoord(String dbNativeValue) {
 		return dbNativeValue;
 	}
+	@Override
 	public String getSelectValueWrapperPolyline(String dbNativeValue) {
 		return dbNativeValue;
 	}
+	@Override
 	public String getSelectValueWrapperSurface(String dbNativeValue) {
 		return dbNativeValue;
 	}
+	@Override
+	public String getSelectValueWrapperMultiSurface(String dbNativeValue) {
+		return dbNativeValue;
+	}
+	@Override
 	public int getSrsid(String crsAuthority, String crsCode, Connection conn) throws ConverterException {
 		return -1;
 	}

@@ -1,15 +1,13 @@
-package ch.ehi.ili2geodb;
+package ch.ehi.ili2db.converter;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
-import ch.ehi.ili2db.converter.ConverterException;
-import ch.ehi.ili2db.converter.SqlGeometryConverter;
 import ch.ehi.ili2db.gui.Config;
 import ch.interlis.iom.IomObject;
 
-public class NullGeometryConverter implements SqlGeometryConverter {
+public class NullColumnConverter implements SqlColumnConverter {
 
 	@Override
 	public Object fromIomCoord(IomObject value, int srid, boolean is3D)
@@ -28,6 +26,11 @@ public class NullGeometryConverter implements SqlGeometryConverter {
 			boolean is3D,double p) throws SQLException, ConverterException {
 		return null;
 	}
+	@Override
+	public Object fromIomMultiSurface(IomObject obj, int srid, boolean hasLineAttr,
+			boolean is3D,double p) throws SQLException, ConverterException {
+		return null;
+	}
 
 	@Override
 	public String getInsertValueWrapperCoord(String wkfValue, int srid) {
@@ -43,6 +46,10 @@ public class NullGeometryConverter implements SqlGeometryConverter {
 	public String getInsertValueWrapperSurface(String wkfValue, int srid) {
 		return null;
 	}
+	@Override
+	public String getInsertValueWrapperMultiSurface(String wkfValue, int srid) {
+		return null;
+	}
 
 	@Override
 	public String getSelectValueWrapperCoord(String dbNativeValue) {
@@ -56,6 +63,10 @@ public class NullGeometryConverter implements SqlGeometryConverter {
 
 	@Override
 	public String getSelectValueWrapperSurface(String dbNativeValue) {
+		return null;
+	}
+	@Override
+	public String getSelectValueWrapperMultiSurface(String dbNativeValue) {
 		return null;
 	}
 
@@ -108,6 +119,11 @@ public class NullGeometryConverter implements SqlGeometryConverter {
 
 	@Override
 	public IomObject toIomSurface(Object geomobj, String sqlAttrName,
+			boolean is3D) throws SQLException, ConverterException {
+		return null;
+	}
+	@Override
+	public IomObject toIomMultiSurface(Object geomobj, String sqlAttrName,
 			boolean is3D) throws SQLException, ConverterException {
 		return null;
 	}

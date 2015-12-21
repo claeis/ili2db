@@ -8,6 +8,7 @@ import ch.ehi.ili2db.base.DbIdGen;
 import ch.ehi.ili2db.base.DbNames;
 import ch.ehi.ili2db.base.Ili2cUtility;
 import ch.ehi.ili2db.base.Ili2dbException;
+import ch.ehi.ili2db.base.IliNames;
 import ch.ehi.ili2db.converter.AbstractRecordConverter;
 import ch.ehi.ili2db.gui.Config;
 import ch.ehi.ili2db.mapping.NameMapping;
@@ -35,6 +36,7 @@ import ch.interlis.ili2c.metamodel.CompositionType;
 import ch.interlis.ili2c.metamodel.CoordType;
 import ch.interlis.ili2c.metamodel.EnumerationType;
 import ch.interlis.ili2c.metamodel.Evaluable;
+import ch.interlis.ili2c.metamodel.LineType;
 import ch.interlis.ili2c.metamodel.LocalAttribute;
 import ch.interlis.ili2c.metamodel.NumericType;
 import ch.interlis.ili2c.metamodel.ObjectPath;
@@ -44,6 +46,7 @@ import ch.interlis.ili2c.metamodel.PrecisionDecimal;
 import ch.interlis.ili2c.metamodel.ReferenceType;
 import ch.interlis.ili2c.metamodel.RoleDef;
 import ch.interlis.ili2c.metamodel.SurfaceOrAreaType;
+import ch.interlis.ili2c.metamodel.SurfaceType;
 import ch.interlis.ili2c.metamodel.Table;
 import ch.interlis.ili2c.metamodel.TextType;
 import ch.interlis.ili2c.metamodel.TransferDescription;
@@ -60,6 +63,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 	private String nl=System.getProperty("line.separator");
 	private ArrayList<AttributeDef> surfaceAttrs=null; 
 	private boolean coalesceCatalogueRef=true;
+	private boolean coalesceMultiSurface=true;
 	private boolean expandMultilingual=true;
 
 	public FromIliRecordConverter(TransferDescription td1, NameMapping ili2sqlName,
@@ -70,6 +74,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 		customMapping=customMapping1;
 		schema=schema1;
 		coalesceCatalogueRef=Config.CATALOGUE_REF_TRAFO_COALESCE.equals(config.getCatalogueRefTrafo());
+		coalesceMultiSurface=Config.MULTISURFACE_TRAFO_COALESCE.equals(config.getMultiSurfaceTrafo());
 		expandMultilingual=Config.MULTILINGUAL_TRAFO_EXPAND.equals(config.getMultilingualTrafo());
 	}
 
@@ -349,6 +354,23 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 					}
 					trafoConfig.setAttrConfig(attr, Config.CATALOGUE_REF_TRAFO,Config.CATALOGUE_REF_TRAFO_COALESCE);
 					dbCol=ret;
+				}else if(isChbaseMultiSurface(td, attr) && (coalesceMultiSurface 
+						|| Config.MULTISURFACE_TRAFO_COALESCE.equals(trafoConfig.getAttrConfig(attr,Config.MULTISURFACE_TRAFO)))){
+					DbColGeometry ret=new DbColGeometry();
+					boolean curvePolygon=false;
+					if(!strokeArcs){
+						curvePolygon=true;
+					}
+					ret.setType(curvePolygon ? DbColGeometry.MULTISURFACE : DbColGeometry.MULTIPOLYGON);
+					// TODO get crs from ili
+					ret.setSrsAuth(defaultCrsAuthority);
+					ret.setSrsId(defaultCrsCode);
+					SurfaceType surface=((SurfaceType) ((AttributeDef) ((CompositionType) ((AttributeDef) ((CompositionType) type).getComponentType().getElement(AttributeDef.class, IliNames.CHBASE1_GEOMETRY_MULTISURFACE_SURFACES)).getDomain()).getComponentType().getElement(AttributeDef.class,IliNames.CHBASE1_GEOMETRY_SURFACESTRUCTURE_SURFACE)).getDomainResolvingAliases());
+					CoordType coord=(CoordType)surface.getControlPointDomain().getType();
+					ret.setDimension(coord.getDimensions().length);
+					setBB(ret, coord,attr.getContainer().getScopedName(null)+"."+attr.getName());
+					dbCol=ret;
+					trafoConfig.setAttrConfig(attr, Config.MULTISURFACE_TRAFO,Config.MULTISURFACE_TRAFO_COALESCE);
 				}else if(isChbaseMultilingual(td, attr) && (expandMultilingual 
 							|| Config.MULTILINGUAL_TRAFO_EXPAND.equals(trafoConfig.getAttrConfig(attr,Config.MULTILINGUAL_TRAFO)))){
 					for(String sfx:DbNames.MULTILINGUAL_TXT_COL_SUFFIXS){
@@ -460,6 +482,16 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 	private boolean isChbaseCatalogueRef(TransferDescription td,
 			AttributeDef attr) {
 		if(Ili2cUtility.isPureChbaseCatalogueRef(td, attr)){
+			CompositionType type=(CompositionType)attr.getDomain();
+			if(type.getCardinality().getMaximum()==1){
+				return true;
+			}
+		}
+		return false;
+	}
+	private boolean isChbaseMultiSurface(TransferDescription td,
+			AttributeDef attr) {
+		if(Ili2cUtility.isPureChbaseMultiSuface(td, attr)){
 			CompositionType type=(CompositionType)attr.getDomain();
 			if(type.getCardinality().getMaximum()==1){
 				return true;

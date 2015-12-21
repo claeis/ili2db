@@ -20,8 +20,10 @@ package ch.ehi.ili2geodb;
 import ch.ehi.basics.logging.EhiLogger;
 import ch.ehi.ili2db.base.DbUrlConverter;
 import ch.ehi.ili2db.base.Ili2db;
+import ch.ehi.ili2db.converter.NullColumnConverter;
 import ch.ehi.ili2db.gui.Config;
 import ch.ehi.ili2db.gui.AbstractDbPanelDescriptor;
+
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Method;
@@ -37,7 +39,7 @@ public class GeodbMain extends ch.ehi.ili2db.AbstractMain {
 	@Override
 	public void initConfig(Config config) {
 		super.initConfig(config);
-		config.setGeometryConverter(NullGeometryConverter.class.getName());
+		config.setGeometryConverter(NullColumnConverter.class.getName());
 		config.setDdlGenerator(ch.ehi.ili2geodb.sqlgen.GeodbGenerator.class.getName());
 		config.setJdbcDriver(ch.ehi.ili2geodb.jdbc.GeodbDriver.class.getName());
 		config.setInitStrategy(ch.ehi.ili2geodb.InitAOEngine.class.getName());

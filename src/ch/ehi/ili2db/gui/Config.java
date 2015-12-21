@@ -28,6 +28,8 @@ public class Config extends Settings {
 	public static final String STRUCT_MAPPING_GENERICREF="genericRef";
 	public static final String CATALOGUE_REF_TRAFO=PREFIX+".catalogueRefTrafo";
 	public static final String CATALOGUE_REF_TRAFO_COALESCE="coalesce";
+	public static final String MULTISURFACE_TRAFO=PREFIX+".multiSurfaceTrafo";
+	public static final String MULTISURFACE_TRAFO_COALESCE="coalesce";
 	public static final String MULTILINGUAL_TRAFO=PREFIX+".multilingualTrafo";
 	public static final String MULTILINGUAL_TRAFO_EXPAND="expand";
 	private static final String NAME_OPTIMIZATION=PREFIX+".nameOptimization";
@@ -290,6 +292,12 @@ public class Config extends Settings {
 	}
 	public void setCatalogueRefTrafo(String value) {
 		setValue(CATALOGUE_REF_TRAFO,value);
+	}
+	public String getMultiSurfaceTrafo() {
+		return getValue(MULTISURFACE_TRAFO);
+	}
+	public void setMultiSurfaceTrafo(String value) {
+		setValue(MULTISURFACE_TRAFO,value);
 	}
 	public String getMultilingualTrafo() {
 		return getValue(MULTILINGUAL_TRAFO);

@@ -20,7 +20,7 @@ import ch.ehi.ili2db.base.Ili2cUtility;
 import ch.ehi.ili2db.base.IliNames;
 import ch.ehi.ili2db.converter.AbstractRecordConverter;
 import ch.ehi.ili2db.converter.ConverterException;
-import ch.ehi.ili2db.converter.SqlGeometryConverter;
+import ch.ehi.ili2db.converter.SqlColumnConverter;
 import ch.ehi.ili2db.fromili.CustomMapping;
 import ch.ehi.ili2db.gui.Config;
 import ch.ehi.ili2db.mapping.NameMapping;
@@ -41,6 +41,7 @@ import ch.interlis.ili2c.metamodel.PrecisionDecimal;
 import ch.interlis.ili2c.metamodel.ReferenceType;
 import ch.interlis.ili2c.metamodel.RoleDef;
 import ch.interlis.ili2c.metamodel.SurfaceOrAreaType;
+import ch.interlis.ili2c.metamodel.SurfaceType;
 import ch.interlis.ili2c.metamodel.Table;
 import ch.interlis.ili2c.metamodel.TransferDescription;
 import ch.interlis.ili2c.metamodel.Type;
@@ -52,7 +53,7 @@ import ch.interlis.iom_j.itf.EnumCodeMapper;
 import ch.interlis.iom_j.itf.ItfReader2;
 
 public class FromXtfRecordConverter extends AbstractRecordConverter {
-	private SqlGeometryConverter geomConv=null;
+	private SqlColumnConverter geomConv=null;
 	private java.sql.Timestamp today=null;
 	private int defaultSrsid=0;
 	private Connection conn=null;
@@ -62,7 +63,7 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 
 	public FromXtfRecordConverter(TransferDescription td1, NameMapping ili2sqlName,
 			Config config,
-			DbIdGen idGen1,SqlGeometryConverter geomConv1,Connection conn1,String dbusr1,boolean isItfReader1,XtfidPool oidPool1,TrafoConfig trafoConfig) {
+			DbIdGen idGen1,SqlColumnConverter geomConv1,Connection conn1,String dbusr1,boolean isItfReader1,XtfidPool oidPool1,TrafoConfig trafoConfig) {
 		super(td1, ili2sqlName, config, idGen1,trafoConfig);
 		conn=conn1;
 		dbusr=dbusr1;
@@ -462,6 +463,15 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 						values.append(",?");
 					}
 					sep=",";
+				}else if(Config.MULTISURFACE_TRAFO_COALESCE.equals(trafoConfig.getAttrConfig(attr, Config.MULTISURFACE_TRAFO))){
+					 ret.append(sep);
+					 ret.append(attrSqlName);
+						if(isUpdate){
+							ret.append("="+geomConv.getInsertValueWrapperMultiSurface("?",getSrsid(type)));
+						}else{
+							values.append(","+geomConv.getInsertValueWrapperMultiSurface("?",getSrsid(type)));
+						}
+						sep=",";
 				}else if(Config.MULTILINGUAL_TRAFO_EXPAND.equals(trafoConfig.getAttrConfig(attr, Config.MULTILINGUAL_TRAFO))){
 					for(String sfx:DbNames.MULTILINGUAL_TXT_COL_SUFFIXS){
 						ret.append(sep);
@@ -641,6 +651,33 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 								ps.setNull(valuei,Types.INTEGER);
 						 }
 						valuei++;
+					}else if(Config.MULTISURFACE_TRAFO_COALESCE.equals(trafoConfig.getAttrConfig(attr, Config.MULTISURFACE_TRAFO))){
+						 IomObject iomValue=iomObj.getattrobj(attrName,0);
+						 IomObject iomMultisurface=null;
+						 if(iomValue!=null){
+							 int surfacec=iomValue.getattrvaluecount(IliNames.CHBASE1_GEOMETRY_MULTISURFACE_SURFACES);
+							 for(int surfacei=0;surfacei<surfacec;surfacei++){
+								 IomObject iomSurfaceStructure=iomValue.getattrobj(IliNames.CHBASE1_GEOMETRY_MULTISURFACE_SURFACES, surfacei);
+								 IomObject iomPoly=iomSurfaceStructure.getattrobj(IliNames.CHBASE1_GEOMETRY_SURFACESTRUCTURE_SURFACE, 0);
+								 IomObject iomSurface=iomPoly.getattrobj("surface", 0);
+								 if(iomMultisurface==null){
+									 iomMultisurface=new ch.interlis.iom_j.Iom_jObject("MULTISURFACE",null);
+								 }
+								 iomMultisurface.addattrobj("surface", iomSurface);
+							 }
+						 }
+						 if(iomMultisurface!=null){
+								Table multiSurfaceType = ((CompositionType) type).getComponentType();
+								Table surfaceStructureType=((CompositionType) ((AttributeDef) multiSurfaceType.getElement(AttributeDef.class, IliNames.CHBASE1_GEOMETRY_MULTISURFACE_SURFACES)).getDomain()).getComponentType();
+								SurfaceType surface=((SurfaceType) ((AttributeDef) surfaceStructureType.getElement(AttributeDef.class,IliNames.CHBASE1_GEOMETRY_SURFACESTRUCTURE_SURFACE)).getDomainResolvingAliases());
+								CoordType coord=(CoordType)surface.getControlPointDomain().getType();
+							 boolean is3D=coord.getDimensions().length==3;
+							 Object geomObj = geomConv.fromIomMultiSurface(iomMultisurface,getSrsid(type),surface.getLineAttributeStructure()!=null,is3D,getP(surface));
+							ps.setObject(valuei,geomObj);
+						 }else{
+							geomConv.setSurfaceNull(ps,valuei);
+						 }
+						 valuei++;
 					}else if(Config.MULTILINGUAL_TRAFO_EXPAND.equals(trafoConfig.getAttrConfig(attr, Config.MULTILINGUAL_TRAFO))){
 						 IomObject iomMulti=iomObj.getattrobj(attrName,0);
 						for(String sfx:DbNames.MULTILINGUAL_TXT_COL_SUFFIXS){

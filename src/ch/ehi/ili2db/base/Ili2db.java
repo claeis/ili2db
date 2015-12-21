@@ -375,9 +375,9 @@ public class Ili2db {
 					throw new Ili2dbException("failed to load/create ID generator",ex);
 				}
 				idGen.init(config.getDbschema());
-				SqlGeometryConverter geomConverter=null;
+				SqlColumnConverter geomConverter=null;
 				try{
-					geomConverter=(SqlGeometryConverter)Class.forName(geometryConverter).newInstance();
+					geomConverter=(SqlColumnConverter)Class.forName(geometryConverter).newInstance();
 				}catch(Exception ex){
 					throw new Ili2dbException("failed to load/create geometry converter",ex);
 				}
@@ -843,9 +843,9 @@ public class Ili2db {
 			java.util.List<Element> eles=ms.getModelElements(modelNames,td, td.getIli1Format()!=null && config.getDoItfLineTables(),Config.CREATE_ENUM_DEFS_MULTI.equals(config.getCreateEnumDefs()));
 			optimizeSqlNames(config,mapping,eles);
 
-			SqlGeometryConverter geomConverter=null;
+			SqlColumnConverter geomConverter=null;
 			try{
-				geomConverter=(SqlGeometryConverter)Class.forName(geometryConverter).newInstance();
+				geomConverter=(SqlColumnConverter)Class.forName(geometryConverter).newInstance();
 			}catch(Exception ex){
 				throw new Ili2dbException("failed to load/create geometry converter",ex);
 			}
@@ -1134,9 +1134,9 @@ public class Ili2db {
 			}
 			
 
-			SqlGeometryConverter geomConverter=null;
+			SqlColumnConverter geomConverter=null;
 			try{
-				geomConverter=(SqlGeometryConverter)Class.forName(geometryConverter).newInstance();
+				geomConverter=(SqlColumnConverter)Class.forName(geometryConverter).newInstance();
 			}catch(Exception ex){
 				throw new Ili2dbException("failed to load/create geometry converter",ex);
 			}
@@ -1537,7 +1537,7 @@ public class Ili2db {
 
 	static private void transferFromXtf(Connection conn,IoxReader reader,boolean importOnly,NameMapping ili2sqlName,TransferDescription td,
 			String dbusr,
-			SqlGeometryConverter geomConv,
+			SqlColumnConverter geomConv,
 			DbIdGen idGen,
 			Config config,
 			HashSet<BasketStat> stat,
@@ -1554,7 +1554,7 @@ public class Ili2db {
 	/** transfer data from database to xml file
 	*/
 	static private void transferToXtf(Connection conn,String xtffile,NameMapping ili2sqlName,TransferDescription td
-			,SqlGeometryConverter geomConv
+			,SqlColumnConverter geomConv
 			,String sender
 			,Config config
 			,int basketSqlIds[]
