@@ -17,6 +17,7 @@ import ch.ehi.basics.logging.EhiLogger;
 import ch.ehi.ili2db.base.DbIdGen;
 import ch.ehi.ili2db.base.DbNames;
 import ch.ehi.ili2db.base.Ili2cUtility;
+import ch.ehi.ili2db.base.IliNames;
 import ch.ehi.ili2db.converter.AbstractRecordConverter;
 import ch.ehi.ili2db.converter.ConverterException;
 import ch.ehi.ili2db.converter.SqlGeometryConverter;
@@ -628,7 +629,7 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 						 IomObject catref=iomObj.getattrobj(attrName,0);
 						 String refoid=null;
 						 if(catref!=null){
-							 IomObject structvalue=catref.getattrobj("Reference",0);
+							 IomObject structvalue=catref.getattrobj(IliNames.CHBASE1_CATALOGUEREFERENCE_REFERENCE,0);
 							 if(structvalue!=null){
 								 refoid=structvalue.getobjectrefoid();
 							 }
@@ -792,18 +793,19 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 		}
 		return valuei;
 	}
+	final private int  LEN_LANG_PREFIX=DbNames.MULTILINGUAL_TXT_COL_PREFIX.length();
 	private String getMultilingualText(IomObject iomMulti, String sfx) {
 		if(sfx.length()>0){
 			// remove leading '_'
-			sfx=sfx.substring(1);
+			sfx=sfx.substring(LEN_LANG_PREFIX);
 		}
-	 	int txtc=iomMulti.getattrvaluecount("LocalisedText");
+	 	int txtc=iomMulti.getattrvaluecount(IliNames.CHBASE1_LOCALISEDTEXT);
 	 	for(int txti=0;txti<txtc;txti++){
-			IomObject iomTxt=iomMulti.getattrobj("LocalisedText",txti);
-			String lang=iomTxt.getattrvalue("Language");
+			IomObject iomTxt=iomMulti.getattrobj(IliNames.CHBASE1_LOCALISEDTEXT,txti);
+			String lang=iomTxt.getattrvalue(IliNames.CHBASE1_LOCALISEDTEXT_LANGUAGE);
 			if(lang==null)lang="";
 			if(lang.equals(sfx)){
-				return iomTxt.getattrvalue("Text");
+				return iomTxt.getattrvalue(IliNames.CHBASE1_LOCALISEDTEXT_TEXT);
 			}
 	 	}
 		return null;

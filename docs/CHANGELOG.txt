@@ -12,6 +12,7 @@ ideas/open issues/questions
 - support geopackage
 - smart inheritance mapping
 - smart chbase.multisurface mapping
+- map simple unique constraints
 
 ili2pg 2.5.0 (2015-12-xx)
 ----------------------------

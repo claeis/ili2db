@@ -153,8 +153,8 @@ public class Ili2cUtility {
 			if(root==null){
 				root=struct;
 			}
-			if(root.getContainer().getScopedName(null).equals("CatalogueObjects_V1.Catalogues")){
-				if(root.getName().equals("CatalogueReference") || root.getName().equals("MandatoryCatalogueReference")){
+			if(root.getContainer().getScopedName(null).equals(IliNames.CHBASE1_CATALOGUEOBJECTS_CATALOGUES)){
+				if(root.getName().equals(IliNames.CHBASE1_CATALOGUEREFERENCE) || root.getName().equals(IliNames.CHBASE1_MANDATORYCATALOGUEREFERENCE)){
 					java.util.Iterator it=struct.getAttributesAndRoles2();
 					int c=0;
 					while(it.hasNext()){
@@ -173,11 +173,11 @@ public class Ili2cUtility {
 
 	public static boolean isPureChbaseMultilingualMText(TransferDescription td,
 			AttributeDef attr) {
-		return isPureChbaseMultilingualText(td, attr, "MultilingualMText");
+		return isPureChbaseMultilingualText(td, attr, IliNames.CHBASE1_MULTILINGUALMTEXT);
 	}
 	public static boolean isPureChbaseMultilingualText(TransferDescription td,
 				AttributeDef attr) {
-		return isPureChbaseMultilingualText(td, attr, "MultilingualText");
+		return isPureChbaseMultilingualText(td, attr, IliNames.CHBASE1_MULTILINGUALTEXT);
 	}
 	private static boolean isPureChbaseMultilingualText(TransferDescription td,
 			AttributeDef attr,String textType) {
@@ -186,14 +186,14 @@ public class Ili2cUtility {
 			CompositionType type=(CompositionType)typeo;
 			Table struct=type.getComponentType();
 			Table base=null;
-			if(struct.getContainer().getScopedName(null).equals("LocalisationCH_V1")){
+			if(struct.getContainer().getScopedName(null).equals(IliNames.CHBASE1_LOCALISATIONCH)){
 				base=struct;
 			}else{
 				base=(Table) struct.getExtending();
 				if(base==null){
 					base=struct;
 				}
-				while(base!=null && !base.getContainer().getScopedName(null).equals("LocalisationCH_V1")){
+				while(base!=null && !base.getContainer().getScopedName(null).equals(IliNames.CHBASE1_LOCALISATIONCH)){
 					base=(Table) base.getExtending();
 				}
 				

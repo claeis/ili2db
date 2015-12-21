@@ -10,6 +10,7 @@ import ch.ehi.basics.logging.EhiLogger;
 import ch.ehi.ili2db.base.DbIdGen;
 import ch.ehi.ili2db.base.DbNames;
 import ch.ehi.ili2db.base.Ili2cUtility;
+import ch.ehi.ili2db.base.IliNames;
 import ch.ehi.ili2db.converter.AbstractRecordConverter;
 import ch.ehi.ili2db.converter.ConverterException;
 import ch.ehi.ili2db.converter.SqlGeometryConverter;
@@ -348,6 +349,8 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 		}
 		return iomObj;
 	}
+	
+	final private int  LEN_LANG_PREFIX=DbNames.MULTILINGUAL_TXT_COL_PREFIX.length();
 	public int addAttrValue(java.sql.ResultSet rs, int valuei, int sqlid,
 			Iom_jObject iomObj, AttributeDef attr,ArrayList<StructWrapper> structQueue,FixIomObjectRefs fixref) throws SQLException {
 		if(attr.getExtending()==null){
@@ -399,7 +402,7 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 						valuei++;
 						if(!rs.wasNull()){
 							IomObject catref=iomObj.addattrobj(attrName,((CompositionType) type).getComponentType().getScopedName(null));
-							IomObject ref=catref.addattrobj("Reference","REF");
+							IomObject ref=catref.addattrobj(IliNames.CHBASE1_CATALOGUEREFERENCE_REFERENCE,"REF");
 							mapSqlid2Xtfid(fixref,value,ref,((ReferenceType) ((AttributeDef)((CompositionType)type).getComponentType().getAttributes().next()).getDomain()).getReferred());
 						}
 						
@@ -414,10 +417,10 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 								if(iomMulti==null){
 									iomMulti=new Iom_jObject(multilingualTextType, null);
 								}
-								IomObject iomTxt=iomMulti.addattrobj("LocalisedText",localizedTextType);
+								IomObject iomTxt=iomMulti.addattrobj(IliNames.CHBASE1_LOCALISEDTEXT,localizedTextType);
 								
-								iomTxt.setattrvalue("Language",sfx.length()==0?null:sfx.substring(1));
-								iomTxt.setattrvalue("Text",value);
+								iomTxt.setattrvalue(IliNames.CHBASE1_LOCALISEDTEXT_LANGUAGE,sfx.length()==0?null:sfx.substring(LEN_LANG_PREFIX));
+								iomTxt.setattrvalue(IliNames.CHBASE1_LOCALISEDTEXT_TEXT,value);
 							}
 						}
 						if(iomMulti!=null){
