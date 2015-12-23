@@ -10,16 +10,16 @@ ideas/open issues/questions
 - support ili2 views
 - --initNameMapping
 - support geopackage
-- smart inheritance mapping
 - map simple unique constraints
 
-ili2pg 2.5.0 (2015-12-xx)
+ili2pg 2.5.0 (2015-12-23)
 ----------------------------
 - ili-obj/sql-record conversion refactored 
 - new option --noSmartMapping
 - new option --coalesceCatalogueRef
 - new option --expandMultilingual
 - new option --coalesceMultiSurface
+- new option --smartInheritance
 
 ili2pg 2.4.0 (2015-12-09)
 ----------------------------

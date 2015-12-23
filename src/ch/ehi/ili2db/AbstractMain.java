@@ -50,6 +50,7 @@ public abstract class AbstractMain {
 		config.setDefaultSrsCode("21781");
 		config.setMaxSqlNameLength(Integer.toString(NameMapping.DEFAULT_NAME_LENGTH));
 		config.setIdGenerator(ch.ehi.ili2db.base.TableBasedIdGen.class.getName());
+		config.setInheritanceTrafo(config.INHERITANCE_TRAFO_SMART);
 		config.setCatalogueRefTrafo(Config.CATALOGUE_REF_TRAFO_COALESCE);
 		config.setMultiSurfaceTrafo(Config.MULTISURFACE_TRAFO_COALESCE);
 		config.setMultilingualTrafo(Config.MULTILINGUAL_TRAFO_EXPAND);
@@ -175,6 +176,10 @@ public abstract class AbstractMain {
 				config.setCatalogueRefTrafo(null);
 				config.setMultiSurfaceTrafo(null);
 				config.setMultilingualTrafo(null);
+				config.setInheritanceTrafo(null);
+			}else if(arg.equals("--smartInheritance")){
+				argi++;
+				config.setInheritanceTrafo(config.INHERITANCE_TRAFO_SMART);
 			}else if(arg.equals("--coalesceCatalogueRef")){
 				argi++;
 				config.setCatalogueRefTrafo(config.CATALOGUE_REF_TRAFO_COALESCE);
@@ -262,6 +267,7 @@ public abstract class AbstractMain {
 					System.err.println("--dropscript filename  Generate a sql script that drops the generated db schema.");
 					System.err.println("--mapconfig filename   Name of config file, that controls the schema mapping.");
 					System.err.println("--noSmartMapping       disable all smart mappings");
+					System.err.println("--smartInheritance     enable smart mapping of class/structure inheritance");
 					System.err.println("--coalesceCatalogueRef enable smart mapping of CHBase:CatalogueReference");
 					System.err.println("--coalesceMultiSurface enable smart mapping of CHBase:MultiSurface");
 					System.err.println("--expandMultilingual   enable smart mapping of CHBase:MultilingualText");

@@ -13,6 +13,9 @@ import ch.ehi.ili2db.converter.AbstractRecordConverter;
 import ch.ehi.ili2db.gui.Config;
 import ch.ehi.ili2db.mapping.NameMapping;
 import ch.ehi.ili2db.mapping.TrafoConfig;
+import ch.ehi.ili2db.mapping.TrafoConfigNames;
+import ch.ehi.ili2db.mapping.Viewable2TableMapping;
+import ch.ehi.ili2db.mapping.ViewableWrapper;
 import ch.ehi.sqlgen.repository.DbColBoolean;
 import ch.ehi.sqlgen.repository.DbColDate;
 import ch.ehi.sqlgen.repository.DbColDateTime;
@@ -65,35 +68,38 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 	private boolean coalesceCatalogueRef=true;
 	private boolean coalesceMultiSurface=true;
 	private boolean expandMultilingual=true;
+	private Viewable2TableMapping class2wrapper=null;
+	
 
 	public FromIliRecordConverter(TransferDescription td1, NameMapping ili2sqlName,
 			Config config, DbSchema schema1, CustomMapping customMapping1,
-			DbIdGen idGen1, HashSet visitedEnums1, TrafoConfig trafoConfig) {
+			DbIdGen idGen1, HashSet visitedEnums1, TrafoConfig trafoConfig,	Viewable2TableMapping class2wrapper1) {
 		super(td1, ili2sqlName, config, idGen1,trafoConfig);
 		visitedEnums=visitedEnums1;
 		customMapping=customMapping1;
+		class2wrapper=class2wrapper1;
 		schema=schema1;
 		coalesceCatalogueRef=Config.CATALOGUE_REF_TRAFO_COALESCE.equals(config.getCatalogueRefTrafo());
 		coalesceMultiSurface=Config.MULTISURFACE_TRAFO_COALESCE.equals(config.getMultiSurfaceTrafo());
 		expandMultilingual=Config.MULTILINGUAL_TRAFO_EXPAND.equals(config.getMultilingualTrafo());
 	}
 
-	public void generateViewable(Viewable def)
+	public void generateTable(ViewableWrapper def)
 	throws Ili2dbException
 	{
 		//EhiLogger.debug("viewable "+def);
-		DbTableName sqlName=getSqlTableName(def);
-		Viewable base=(Viewable)def.getExtending();
+		DbTableName sqlName=getSqlTableName(def.getViewable());
+		ViewableWrapper base=def.getExtending();
 		DbTable dbTable=new DbTable();
 		dbTable.setName(sqlName);
-		dbTable.setIliName(def.getScopedName(null));
+		dbTable.setIliName(def.getViewable().getScopedName(null));
 		StringBuffer cmt=new StringBuffer();
 		String cmtSep="";
-		if(def.getDocumentation()!=null){
-			cmt.append(cmtSep+def.getDocumentation());
+		if(def.getViewable().getDocumentation()!=null){
+			cmt.append(cmtSep+def.getViewable().getDocumentation());
 			cmtSep=nl;
 		}
-		cmt.append(cmtSep+"@iliname "+def.getScopedName(null));
+		cmt.append(cmtSep+"@iliname "+def.getViewable().getScopedName(null));
 		cmtSep=nl;
 		if(cmt.length()>0){
 			dbTable.setComment(cmt.toString());
@@ -108,9 +114,9 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 		String baseRef="";
 		DbColId dbColId=addKeyCol(dbTable);
 		if(base!=null){
-		  dbColId.setScriptComment("REFERENCES "+base.getScopedName(null));
+		  dbColId.setScriptComment("REFERENCES "+base.getViewable().getScopedName(null));
 		  if(createFk){
-			  dbColId.setReferencedTable(getSqlTableName(base));
+			  dbColId.setReferencedTable(getSqlTableName(base.getViewable()));
 		  }
 		}
 		  if(createBasketCol){
@@ -129,18 +135,18 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 		  }
 		DbColumn dbCol;
 		if(base==null){
-			if(createTypeDiscriminator || Ili2cUtility.isViewableWithExtension(def)){
+			if(createTypeDiscriminator || def.includesMultipleTypes()){
 				  dbCol=createSqlTypeCol(DbNames.T_TYPE_COL);
 				  dbTable.addColumn(dbCol);
 			}
 			// if CLASS
-			  if((def instanceof View) || (def instanceof Table) && ((Table)def).isIdentifiable()){
-				  if(createIliTidCol || Ili2cUtility.isViewableWithOid(def)){
-						addIliTidCol(dbTable,def);
+			  if(!def.isStructure()){
+				  if(createIliTidCol || def.getOid()!=null){
+						addIliTidCol(dbTable,def.getOid());
 				  }
 			  }
 		  // if STRUCTURE, add ref to parent
-		  if((def instanceof Table) && !((Table)def).isIdentifiable()){
+		  if(def.isStructure()){
 			  if(createGenericStructRef){
 				  // add parentid
 					DbColId dbParentId=new DbColId();
@@ -168,14 +174,9 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 
 		// body
 		surfaceAttrs=new ArrayList<AttributeDef>(); 
-		Iterator iter=null;
-		if(isIli1Model){
-			iter=ModelUtilities.getIli1AttrList((AbstractClassDef)def).iterator();
-		}else{
-			iter=def.getDefinedAttributesAndRoles2();
-		}
+		Iterator<ViewableTransferElement> iter=def.getAttrIterator();
 		  while (iter.hasNext()) {
-			  ViewableTransferElement obj = (ViewableTransferElement)iter.next();
+			  ViewableTransferElement obj = iter.next();
 			  if (obj.obj instanceof AttributeDef) {
 				  AttributeDef attr = (AttributeDef) obj.obj;
 				  if(attr.getExtending()==null){
@@ -188,7 +189,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 							if(proxyType!=null && (proxyType instanceof ObjectType)){
 								// skip implicit particles (base-viewables) of views
 							}else{
-								generateAttr(dbTable,attr);
+								generateAttr(dbTable,def.getViewable(),attr);
 							}
 						}
 					}catch(Exception ex){
@@ -206,7 +207,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 				  RoleDef role = (RoleDef) obj.obj;
 					if(role.getExtending()==null){
 						// not an embedded role and roledef not defined in a lightweight association?
-						if (!obj.embedded && !((AssociationDef)def).isLightweight()){
+						if (!obj.embedded && !def.isAssocLightweight()){
 						  dbColId=new DbColId();
 						  dbColId.setName(getSqlRoleName(role));
 						  dbColId.setNotNull(true);
@@ -264,11 +265,11 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 		  if(createStdCols){
 				addStdCol(dbTable);
 		  }
-		  customMapping.fixupViewable(dbTable,def);
+		  customMapping.fixupViewable(dbTable,def.getViewable());
 	  	schema.addTable(dbTable);
 	  	
 	}
-	public void generateAttr(DbTable dbTable,AttributeDef attr)
+	public void generateAttr(DbTable dbTable,Viewable aclass,AttributeDef attr)
 	throws Ili2dbException
 	{
 		if(attr.getDomain() instanceof EnumerationType){
@@ -317,7 +318,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 					String sqlName=getSqlAttrName(attr)+DbNames.ITF_MAINTABLE_GEOTABLEREF_COL_SUFFIX;
 					ret.setName(sqlName);
 					ret.setType(DbColGeometry.POINT);
-					setNullable(attr, ret);
+					setNullable(aclass,attr, ret);
 					// TODO get crs from ili
 					ret.setSrsAuth(defaultCrsAuthority);
 					ret.setSrsId(defaultCrsCode);
@@ -341,7 +342,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 			// skip it
 			if(!createGenericStructRef){
 				if(isChbaseCatalogueRef(td, attr) && (coalesceCatalogueRef 
-						|| Config.CATALOGUE_REF_TRAFO_COALESCE.equals(trafoConfig.getAttrConfig(attr,Config.CATALOGUE_REF_TRAFO)))){
+						|| TrafoConfigNames.CATALOGUE_REF_TRAFO_COALESCE.equals(trafoConfig.getAttrConfig(attr,TrafoConfigNames.CATALOGUE_REF_TRAFO)))){
 					
 					DbColId ret=new DbColId();
 					ret.setNotNull(false);
@@ -352,10 +353,10 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 					if(createFkIdx){
 						ret.setIndex(true);
 					}
-					trafoConfig.setAttrConfig(attr, Config.CATALOGUE_REF_TRAFO,Config.CATALOGUE_REF_TRAFO_COALESCE);
+					trafoConfig.setAttrConfig(attr, TrafoConfigNames.CATALOGUE_REF_TRAFO,TrafoConfigNames.CATALOGUE_REF_TRAFO_COALESCE);
 					dbCol=ret;
 				}else if(isChbaseMultiSurface(td, attr) && (coalesceMultiSurface 
-						|| Config.MULTISURFACE_TRAFO_COALESCE.equals(trafoConfig.getAttrConfig(attr,Config.MULTISURFACE_TRAFO)))){
+						|| TrafoConfigNames.MULTISURFACE_TRAFO_COALESCE.equals(trafoConfig.getAttrConfig(attr,TrafoConfigNames.MULTISURFACE_TRAFO)))){
 					DbColGeometry ret=new DbColGeometry();
 					boolean curvePolygon=false;
 					if(!strokeArcs){
@@ -370,9 +371,9 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 					ret.setDimension(coord.getDimensions().length);
 					setBB(ret, coord,attr.getContainer().getScopedName(null)+"."+attr.getName());
 					dbCol=ret;
-					trafoConfig.setAttrConfig(attr, Config.MULTISURFACE_TRAFO,Config.MULTISURFACE_TRAFO_COALESCE);
+					trafoConfig.setAttrConfig(attr, TrafoConfigNames.MULTISURFACE_TRAFO,TrafoConfigNames.MULTISURFACE_TRAFO_COALESCE);
 				}else if(isChbaseMultilingual(td, attr) && (expandMultilingual 
-							|| Config.MULTILINGUAL_TRAFO_EXPAND.equals(trafoConfig.getAttrConfig(attr,Config.MULTILINGUAL_TRAFO)))){
+							|| TrafoConfigNames.MULTILINGUAL_TRAFO_EXPAND.equals(trafoConfig.getAttrConfig(attr,TrafoConfigNames.MULTILINGUAL_TRAFO)))){
 					for(String sfx:DbNames.MULTILINGUAL_TXT_COL_SUFFIXS){
 						DbColVarchar ret=new DbColVarchar();
 						ret.setName(getSqlAttrName(attr)+sfx);
@@ -381,7 +382,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 						ret.setPrimaryKey(false);
 						dbColExts.add(ret);
 					}
-					trafoConfig.setAttrConfig(attr, Config.MULTILINGUAL_TRAFO,Config.MULTILINGUAL_TRAFO_EXPAND);
+					trafoConfig.setAttrConfig(attr, TrafoConfigNames.MULTILINGUAL_TRAFO,TrafoConfigNames.MULTILINGUAL_TRAFO_EXPAND);
 				}else{
 					// add reference to struct table
 					addParentRef(attr);
@@ -417,7 +418,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 				DbColVarchar ret = new DbColVarchar();
 				ret.setSize(255);
 				ret.setName(getSqlAttrName(attr)+DbNames.ENUM_TXT_COL_SUFFIX);
-				setNullable(attr, ret);
+				setNullable(aclass,attr, ret);
 				dbColExts.add(ret);
 			}
 		}else if(type instanceof NumericType){
@@ -456,7 +457,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 
 		if (dbCol != null) {
 			String sqlName=getSqlAttrName(attr);
-			setAttrDbColProps(attr, dbCol, sqlName);
+			setAttrDbColProps(aclass,attr, dbCol, sqlName);
 			customMapping.fixupAttribute(dbTable, dbCol, attr);
 			dbTable.addColumn(dbCol);
 		}
@@ -507,7 +508,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 		if(root!=null){
 			structClass=root;
 		}
-		DbTableName structClassSqlName=getSqlTableName(structClass);
+		DbTableName structClassSqlName=getSqlTableName(class2wrapper.get(structClass).getViewable());
 		
 		// find struct table
 		DbTable dbTable=schema.findTable(structClassSqlName);
@@ -537,7 +538,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 		}
 		dbTable.addColumn(dbParentId);
 	}
-	protected void setAttrDbColProps(AttributeDef attr, DbColumn dbCol,
+	protected void setAttrDbColProps(Viewable aclass,AttributeDef attr, DbColumn dbCol,
 			String sqlName) {
 		dbCol.setName(sqlName);
 		StringBuffer cmt=new StringBuffer();
@@ -553,10 +554,10 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 		if(cmt.length()>0){
 			dbCol.setComment(cmt.toString());
 		}
-		setNullable(attr, dbCol);
+		setNullable(aclass,attr, dbCol);
 	}
 
-	public void setNullable(AttributeDef attr, DbColumn dbCol) {
+	public void setNullable(Viewable aclass,AttributeDef attr, DbColumn dbCol) {
 		if (sqlEnableNull) {
 			dbCol.setNotNull(false);
 		} else {
@@ -566,7 +567,10 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 				type=((ObjectPath)ev[0]).getType();
 			}
 			if (type.isMandatoryConsideringAliases()) {
-				dbCol.setNotNull(true);
+				// attr not defined in sub-class
+				if (attr.getContainer()==aclass || aclass.isExtending(attr.getContainer())) {
+					dbCol.setNotNull(true);
+				}
 			}
 		}
 	}

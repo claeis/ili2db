@@ -39,6 +39,8 @@ import ch.ehi.ili2db.base.Ili2db;
 import ch.ehi.ili2db.base.Ili2dbException;
 import ch.ehi.ili2db.converter.*;
 import ch.ehi.ili2db.mapping.TrafoConfig;
+import ch.ehi.ili2db.mapping.Viewable2TableMapping;
+import ch.ehi.ili2db.mapping.ViewableWrapper;
 import ch.ehi.ili2db.fromili.TransferFromIli;
 import ch.ehi.ili2db.mapping.NameMapping;
 import ch.ehi.ili2db.toxtf.TransferToXtf;
@@ -97,6 +99,7 @@ public class TransferFromXtf {
 	private ArrayList<FixIomObjectExtRefs> delayedObjects=null;
 	private TrafoConfig trafoConfig=null;
 	private FromXtfRecordConverter recConv=null;
+	private Viewable2TableMapping class2wrapper=null;
 	/** list of not yet processed struct values
 	 */
 	private ArrayList structQueue=null;
@@ -106,12 +109,13 @@ public class TransferFromXtf {
 			String dbusr1,
 			SqlColumnConverter geomConv,
 			DbIdGen idGen,
-			Config config,TrafoConfig trafoConfig1){
+			Config config,TrafoConfig trafoConfig1,Viewable2TableMapping class2wrapper1){
 		ili2sqlName=ili2sqlName1;
 		td=td1;
 		conn=conn1;
 		trafoConfig=trafoConfig1;
 		dbusr=dbusr1;
+		class2wrapper=class2wrapper1;
 		if(dbusr==null || dbusr.length()==0){
 			dbusr=System.getProperty("user.name");
 		}
@@ -810,8 +814,8 @@ public class TransferFromXtf {
 			return;
 		}
 		// ASSERT: an ordinary class/table
-		Viewable aclass=(Viewable)modelele;		
-		String sqlType=(String)ili2sqlName.mapIliClassDef(aclass);
+		Viewable aclass1=(Viewable)modelele;		
+		String sqlType=(String)ili2sqlName.mapIliClassDef(aclass1);
 		 int sqlId;
 		 boolean updateObj=false;
 		 // is it an object?
@@ -836,8 +840,9 @@ public class TransferFromXtf {
 		 }
 		 updateObjStat(tag,sqlId);
 		 // loop over all classes; start with leaf, end with the base of the inheritance hierarchy
+		 ViewableWrapper aclass=class2wrapper.get(aclass1);
 		 while(aclass!=null){
-			String sqlname = recConv.getSqlTableName(aclass).getQName();
+			String sqlname = recConv.getSqlTableName(aclass.getViewable()).getQName();
 			String insert = getInsertStmt(updateObj,sqlname,aclass,structEle);
 			EhiLogger.traceBackendCmd(insert);
 			PreparedStatement ps = conn.prepareStatement(insert);
@@ -848,7 +853,7 @@ public class TransferFromXtf {
 			}finally{
 				ps.close();
 			}
-			aclass=(Viewable)aclass.getExtending();
+			aclass=aclass.getExtending();
 		 }
 	}
 
@@ -1251,7 +1256,7 @@ public class TransferFromXtf {
 	 * @param aclass viewable
 	 * @return insert statement
 	 */
-	private String getInsertStmt(boolean isUpdate,String sqlname,Viewable aclass,StructWrapper structEle){
+	private String getInsertStmt(boolean isUpdate,String sqlname,ViewableWrapper aclass,StructWrapper structEle){
 		Object key=null;
 		if(!createGenericStructRef && structEle!=null && aclass.getExtending()==null){
 			key=structEle.getParentAttr();

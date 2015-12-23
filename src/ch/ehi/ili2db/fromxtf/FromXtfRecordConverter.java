@@ -25,6 +25,8 @@ import ch.ehi.ili2db.fromili.CustomMapping;
 import ch.ehi.ili2db.gui.Config;
 import ch.ehi.ili2db.mapping.NameMapping;
 import ch.ehi.ili2db.mapping.TrafoConfig;
+import ch.ehi.ili2db.mapping.TrafoConfigNames;
+import ch.ehi.ili2db.mapping.ViewableWrapper;
 import ch.ehi.sqlgen.repository.DbSchema;
 import ch.interlis.ili2c.metamodel.AreaType;
 import ch.interlis.ili2c.metamodel.AssociationDef;
@@ -82,7 +84,7 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 		
 	}
 	public void writeRecord(int basketSqlId, IomObject iomObj,
-			StructWrapper structEle, Viewable aclass, String sqlType,
+			StructWrapper structEle, ViewableWrapper aclass, String sqlType,
 			int sqlId, boolean updateObj, PreparedStatement ps,ArrayList structQueue)
 			throws SQLException, ConverterException {
 		int valuei=1;
@@ -102,17 +104,17 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 		}
 		
 		if(aclass.getExtending()==null){
-			if(createTypeDiscriminator || Ili2cUtility.isViewableWithExtension(aclass)){
+			if(createTypeDiscriminator || aclass.includesMultipleTypes()){
 				ps.setString(valuei, sqlType);
 				valuei++;
 			}
 			// if class
 			if(structEle==null){
 				if(!updateObj){
-					if((aclass instanceof View) || (aclass instanceof Table) && ((Table)aclass).isIdentifiable()){
-						if(createIliTidCol || Ili2cUtility.isViewableWithOid(aclass)){
+					if(!aclass.isStructure()){
+						if(createIliTidCol || aclass.getOid()!=null){
 							// import TID from transfer file
-							if(AbstractRecordConverter.isUuidOid(td, aclass)){
+							if(AbstractRecordConverter.isUuidOid(td, aclass.getOid())){
 								 org.postgresql.util.PGobject toInsertUUID = new org.postgresql.util.PGobject();
 								 toInsertUUID.setType("uuid");
 								 toInsertUUID.setValue(iomObj.getobjectoid());										
@@ -142,7 +144,7 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 			}
 		}
  
-		Iterator iter = aclass.getDefinedAttributesAndRoles2();
+		Iterator iter = aclass.getAttrIterator();
 		while (iter.hasNext()) {
 			ViewableTransferElement obj = (ViewableTransferElement)iter.next();
 			if (obj.obj instanceof AttributeDef) {
@@ -236,7 +238,7 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 	 * @param aclass viewable
 	 * @return insert statement
 	 */
-	public String createInsertStmt(boolean isUpdate,String sqlname,Viewable aclass,StructWrapper structEle){
+	public String createInsertStmt(boolean isUpdate,String sqlname,ViewableWrapper aclass,StructWrapper structEle){
 		StringBuffer ret = new StringBuffer();
 		StringBuffer values = new StringBuffer();
 		//INSERT INTO table_name (column1,column2,column3,...)
@@ -280,7 +282,7 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 		
 		// if root, add type
 		if(aclass.getExtending()==null){
-			if(createTypeDiscriminator || Ili2cUtility.isViewableWithExtension(aclass)){
+			if(createTypeDiscriminator || aclass.includesMultipleTypes()){
 				ret.append(sep);
 				ret.append(DbNames.T_TYPE_COL);
 				if(isUpdate){
@@ -291,9 +293,9 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 				sep=",";
 			}
 			// if Class
-			if((aclass instanceof View) || (aclass instanceof Table) && ((Table)aclass).isIdentifiable()){
+			if(!aclass.isStructure()){
 				if(!isUpdate){
-					if(createIliTidCol || Ili2cUtility.isViewableWithOid(aclass)){
+					if(createIliTidCol || aclass.getOid()!=null){
 						ret.append(sep);
 						ret.append(DbNames.T_ILI_TID_COL);
 						values.append(",?");
@@ -302,7 +304,7 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 				}
 			}
 			// if STRUCTURE, add ref to parent
-			if((aclass instanceof Table) && !((Table)aclass).isIdentifiable()){
+			if(aclass.isStructure()){
 				if(createGenericStructRef){
 					ret.append(sep);
 					ret.append(DbNames.T_PARENT_ID_COL);
@@ -351,7 +353,7 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 			}
 		}
 		
-		Iterator iter = aclass.getDefinedAttributesAndRoles2();
+		Iterator iter = aclass.getAttrIterator();
 		while (iter.hasNext()) {
 		   ViewableTransferElement obj = (ViewableTransferElement)iter.next();
 		   if (obj.obj instanceof AttributeDef) {
@@ -454,7 +456,7 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 					}
 					sep=",";
 			}else if (type instanceof CompositionType){
-				if(Config.CATALOGUE_REF_TRAFO_COALESCE.equals(trafoConfig.getAttrConfig(attr, Config.CATALOGUE_REF_TRAFO))){
+				if(TrafoConfigNames.CATALOGUE_REF_TRAFO_COALESCE.equals(trafoConfig.getAttrConfig(attr, TrafoConfigNames.CATALOGUE_REF_TRAFO))){
 					ret.append(sep);
 					ret.append(attrSqlName);
 					if(isUpdate){
@@ -463,7 +465,7 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 						values.append(",?");
 					}
 					sep=",";
-				}else if(Config.MULTISURFACE_TRAFO_COALESCE.equals(trafoConfig.getAttrConfig(attr, Config.MULTISURFACE_TRAFO))){
+				}else if(TrafoConfigNames.MULTISURFACE_TRAFO_COALESCE.equals(trafoConfig.getAttrConfig(attr, TrafoConfigNames.MULTISURFACE_TRAFO))){
 					 ret.append(sep);
 					 ret.append(attrSqlName);
 						if(isUpdate){
@@ -472,7 +474,7 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 							values.append(","+geomConv.getInsertValueWrapperMultiSurface("?",getSrsid(type)));
 						}
 						sep=",";
-				}else if(Config.MULTILINGUAL_TRAFO_EXPAND.equals(trafoConfig.getAttrConfig(attr, Config.MULTILINGUAL_TRAFO))){
+				}else if(TrafoConfigNames.MULTILINGUAL_TRAFO_EXPAND.equals(trafoConfig.getAttrConfig(attr, TrafoConfigNames.MULTILINGUAL_TRAFO))){
 					for(String sfx:DbNames.MULTILINGUAL_TXT_COL_SUFFIXS){
 						ret.append(sep);
 						ret.append(attrSqlName+sfx);
@@ -635,7 +637,7 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 			 
 				if (type instanceof CompositionType){
 					 int structc=iomObj.getattrvaluecount(attrName);
-					if(Config.CATALOGUE_REF_TRAFO_COALESCE.equals(trafoConfig.getAttrConfig(attr, Config.CATALOGUE_REF_TRAFO))){
+					if(TrafoConfigNames.CATALOGUE_REF_TRAFO_COALESCE.equals(trafoConfig.getAttrConfig(attr, TrafoConfigNames.CATALOGUE_REF_TRAFO))){
 						 IomObject catref=iomObj.getattrobj(attrName,0);
 						 String refoid=null;
 						 if(catref!=null){
@@ -651,7 +653,7 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 								ps.setNull(valuei,Types.INTEGER);
 						 }
 						valuei++;
-					}else if(Config.MULTISURFACE_TRAFO_COALESCE.equals(trafoConfig.getAttrConfig(attr, Config.MULTISURFACE_TRAFO))){
+					}else if(TrafoConfigNames.MULTISURFACE_TRAFO_COALESCE.equals(trafoConfig.getAttrConfig(attr, TrafoConfigNames.MULTISURFACE_TRAFO))){
 						 IomObject iomValue=iomObj.getattrobj(attrName,0);
 						 IomObject iomMultisurface=null;
 						 if(iomValue!=null){
@@ -678,7 +680,7 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 							geomConv.setSurfaceNull(ps,valuei);
 						 }
 						 valuei++;
-					}else if(Config.MULTILINGUAL_TRAFO_EXPAND.equals(trafoConfig.getAttrConfig(attr, Config.MULTILINGUAL_TRAFO))){
+					}else if(TrafoConfigNames.MULTILINGUAL_TRAFO_EXPAND.equals(trafoConfig.getAttrConfig(attr, TrafoConfigNames.MULTILINGUAL_TRAFO))){
 						 IomObject iomMulti=iomObj.getattrobj(attrName,0);
 						for(String sfx:DbNames.MULTILINGUAL_TXT_COL_SUFFIXS){
 							 if(iomMulti!=null){

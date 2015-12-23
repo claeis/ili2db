@@ -3,7 +3,7 @@ package ch.ehi.ili2db.gui;
 import ch.ehi.basics.settings.Settings;
 
 public class Config extends Settings {
-	private static final String PREFIX="ch.ehi.ili2db";
+	public static final String PREFIX="ch.ehi.ili2db";
 	public static final String SENDER=PREFIX+".sender";
 	private static final String DEFAULT_SRS_AUTHORITY=PREFIX+".defaultSrsAuthority";
 	private static final String DEFAULT_SRS_CODE=PREFIX+".defaultSrsCode";
@@ -26,6 +26,8 @@ public class Config extends Settings {
 	public static final String CREATE_TYPE_DISCRIMINATOR_ALWAYS="always";
 	private static final String STRUCT_MAPPING=PREFIX+".structMapping";
 	public static final String STRUCT_MAPPING_GENERICREF="genericRef";
+	public static final String INHERITANCE_TRAFO=PREFIX+".inheritanceTrafo";
+	public static final String INHERITANCE_TRAFO_SMART="smart";
 	public static final String CATALOGUE_REF_TRAFO=PREFIX+".catalogueRefTrafo";
 	public static final String CATALOGUE_REF_TRAFO_COALESCE="coalesce";
 	public static final String MULTISURFACE_TRAFO=PREFIX+".multiSurfaceTrafo";
@@ -286,6 +288,12 @@ public class Config extends Settings {
 	}
 	public void setStructMapping(String value) {
 		setValue(STRUCT_MAPPING,value);
+	}
+	public String getInheritanceTrafo() {
+		return getValue(INHERITANCE_TRAFO);
+	}
+	public void setInheritanceTrafo(String value) {
+		setValue(INHERITANCE_TRAFO,value);
 	}
 	public String getCatalogueRefTrafo() {
 		return getValue(CATALOGUE_REF_TRAFO);

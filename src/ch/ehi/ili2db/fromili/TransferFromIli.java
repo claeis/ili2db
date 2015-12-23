@@ -40,6 +40,8 @@ import ch.ehi.ili2db.converter.AbstractRecordConverter;
 import ch.ehi.ili2db.gui.Config;
 import ch.ehi.ili2db.mapping.NameMapping;
 import ch.ehi.ili2db.mapping.TrafoConfig;
+import ch.ehi.ili2db.mapping.Viewable2TableMapping;
+import ch.ehi.ili2db.mapping.ViewableWrapper;
 
 /**
  * @author ce
@@ -48,6 +50,8 @@ import ch.ehi.ili2db.mapping.TrafoConfig;
 public class TransferFromIli {
 	private DbSchema schema=null;
 	private HashSet visitedElements=null;
+	private Viewable2TableMapping class2wrapper=null;
+	private HashSet<ViewableWrapper> visitedWrapper=null;
 	private HashSet visitedEnums=null;
 	private TransferDescription td=null;
 	private ch.ehi.ili2db.mapping.NameMapping ili2sqlName=null;
@@ -64,7 +68,7 @@ public class TransferFromIli {
 	private String colT_ID=null;
 	private String nl=System.getProperty("line.separator");
 	private FromIliRecordConverter recConv=null;
-	public DbSchema doit(TransferDescription td1,java.util.List<Element> modelEles,ch.ehi.ili2db.mapping.NameMapping ili2sqlName,ch.ehi.ili2db.gui.Config config,DbIdGen idGen,TrafoConfig trafoConfig)
+	public DbSchema doit(TransferDescription td1,java.util.List<Element> modelEles,ch.ehi.ili2db.mapping.NameMapping ili2sqlName,ch.ehi.ili2db.gui.Config config,DbIdGen idGen,TrafoConfig trafoConfig,Viewable2TableMapping class2wrapper1)
 	throws Ili2dbException
 	{
 		this.ili2sqlName=ili2sqlName;
@@ -93,9 +97,11 @@ public class TransferFromIli {
 		schema=new DbSchema();
 		schema.setName(config.getDbschema());
 		visitedElements=new HashSet();
+		class2wrapper=class2wrapper1;
+		visitedWrapper=new HashSet<ViewableWrapper>();
 		visitedEnums=new HashSet();
 		td=td1;
-		recConv=new FromIliRecordConverter(td,ili2sqlName,config,schema,customMapping,idGen,visitedEnums,trafoConfig);
+		recConv=new FromIliRecordConverter(td,ili2sqlName,config,schema,customMapping,idGen,visitedEnums,trafoConfig,class2wrapper);
 
 		Iterator modeli=modelEles.iterator();
 		while(modeli.hasNext()){
@@ -192,14 +198,23 @@ public class TransferFromIli {
 				return;
 			}
 		}
+		
 		//EhiLogger.debug("viewable "+def);
-		recConv.generateViewable(def);
-	  	
-	  	if(createItfLineTables){
-	  		for(AttributeDef attr : recConv.getSurfaceAttrs()){
-	  			generateItfLineTable(attr);
-	  		}
-	  	}
+		Viewable base=def;
+		while(base!=null){
+			ViewableWrapper wrapper=class2wrapper.get(base);
+			if(!visitedWrapper.contains(wrapper)){
+				visitedWrapper.add(wrapper);
+				recConv.generateTable(wrapper);
+			  	
+			  	if(createItfLineTables){
+			  		for(AttributeDef attr : recConv.getSurfaceAttrs()){
+			  			generateItfLineTable(attr);
+			  		}
+			  	}
+			}
+			base=(Viewable) base.getExtending();
+		}
 	}
 	private void generateItfLineTable(AttributeDef attr)
 	throws Ili2dbException
@@ -268,7 +283,7 @@ public class TransferFromIli {
 			    Iterator attri = lineAttrTable.getAttributes ();
 			    while(attri.hasNext()){
 			    	AttributeDef lineattr=(AttributeDef)attri.next();
-			    	recConv.generateAttr(dbTable,lineattr);
+			    	recConv.generateAttr(dbTable,lineAttrTable,lineattr);
 			    }
 			}
 		

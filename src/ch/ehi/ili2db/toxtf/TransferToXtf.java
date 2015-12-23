@@ -36,6 +36,8 @@ import ch.ehi.ili2db.fromxtf.BasketStat;
 import ch.ehi.ili2db.fromxtf.ClassStat;
 import ch.ehi.ili2db.mapping.NameMapping;
 import ch.ehi.ili2db.mapping.TrafoConfig;
+import ch.ehi.ili2db.mapping.Viewable2TableMapping;
+import ch.ehi.ili2db.mapping.ViewableWrapper;
 import ch.ehi.ili2db.gui.Config;
 import ch.ehi.sqlgen.repository.DbTableName;
 import ch.interlis.ili2c.metamodel.*;
@@ -66,6 +68,7 @@ public class TransferToXtf {
 	private boolean writeIliTid=false;
 	private SqlColumnConverter geomConv=null;
 	private ToXtfRecordConverter recConv=null;
+	private Viewable2TableMapping class2wrapper=null;
 	
 	/** map of xml-elementnames to interlis classdefs.
 	 *  Used to map typenames read from the T_TYPE column to the classdef.
@@ -74,9 +77,10 @@ public class TransferToXtf {
 	private SqlidPool sqlidPool=new SqlidPool();
 	private ArrayList<FixIomObjectRefs> delayedObjects=null;
 	private ch.interlis.ili2c.generator.IndentPrintWriter expgen=null;
-	public TransferToXtf(NameMapping ili2sqlName1,TransferDescription td1,Connection conn1,SqlColumnConverter geomConv,Config config,TrafoConfig trafoConfig){
+	public TransferToXtf(NameMapping ili2sqlName1,TransferDescription td1,Connection conn1,SqlColumnConverter geomConv,Config config,TrafoConfig trafoConfig,Viewable2TableMapping class2wrapper1){
 		ili2sqlName=ili2sqlName1;
 		td=td1;
+		class2wrapper=class2wrapper1;
 		tag2class=ch.interlis.ili2c.generator.XSDGenerator.getTagMap(td);
 		conn=conn1;
 		schema=config.getDbschema();
@@ -88,7 +92,7 @@ public class TransferToXtf {
 		createGenericStructRef=config.STRUCT_MAPPING_GENERICREF.equals(config.getStructMapping());
 		writeIliTid=config.TID_HANDLING_PROPERTY.equals(config.getTidHandling());
 		this.geomConv=geomConv;
-		recConv=new ToXtfRecordConverter(td,ili2sqlName,config,null,geomConv,conn,sqlidPool,trafoConfig);
+		recConv=new ToXtfRecordConverter(td,ili2sqlName,config,null,geomConv,conn,sqlidPool,trafoConfig,class2wrapper);
 
 	}
 	public void doit(String filename,IoxWriter iomFile,String sender,int basketSqlIds[],HashSet<BasketStat> stat)
@@ -232,8 +236,10 @@ public class TransferToXtf {
 			  }else if (!suppressViewable ((Viewable)obj))
 			  {
 				Viewable aclass=(Viewable)obj;
+				ViewableWrapper wrapper=class2wrapper.get(aclass);
+				
 				// get sql name
-				DbTableName sqlName=recConv.getSqlTableName(aclass);
+				DbTableName sqlName=recConv.getSqlTableName(wrapper.getViewable());
 				// if table exists?
 				if(DbUtility.tableExists(conn,sqlName)){
 					// dump it
@@ -485,14 +491,14 @@ public class TransferToXtf {
 	}
 	/** dumps all struct values of a given struct attr.
 	 */
-	private void dumpStructs(StructWrapper wrapper,FixIomObjectRefs fixref)
+	private void dumpStructs(StructWrapper structWrapper,FixIomObjectRefs fixref)
 	{
-		Viewable baseClass=((CompositionType)wrapper.getParentAttr().getDomain()).getComponentType();
+		Viewable baseClass=((CompositionType)structWrapper.getParentAttr().getDomain()).getComponentType();
 
 		HashMap structelev=new HashMap();
 		HashSet structClassv=new HashSet();
 
-		String stmt=createQueryStmt4Type(baseClass,wrapper);
+		String stmt=createQueryStmt4Type(baseClass,structWrapper);
 		EhiLogger.traceBackendCmd(stmt);
 		java.sql.Statement dbstmt = null;
 		try{
@@ -510,7 +516,7 @@ public class TransferToXtf {
 					structEleClass=baseClass.getScopedName(null);
 					structClass=baseClass;
 				}
-				IomObject iomObj=wrapper.getParent().addattrobj(wrapper.getParentAttr().getName(),structEleClass);
+				IomObject iomObj=structWrapper.getParent().addattrobj(structWrapper.getParentAttr().getName(),structEleClass);
 				structelev.put(tid,iomObj);
 				structClassv.add(structClass);
 			}
@@ -529,7 +535,7 @@ public class TransferToXtf {
 		Iterator classi=structClassv.iterator();
 		while(classi.hasNext()){
 			Viewable aclass=(Viewable)classi.next();
-			dumpObjHelper(null,aclass,null,fixref,wrapper,structelev);
+			dumpObjHelper(null,aclass,null,fixref,structWrapper,structelev);
 		}
 	}
 	private void dumpItfTableObject(IoxWriter out,AttributeDef attr,Integer basketSqlId)
@@ -1021,7 +1027,7 @@ public class TransferToXtf {
 	private String createQueryStmt4Type(Viewable aclass,StructWrapper wrapper){
 		StringBuffer ret = new StringBuffer();
 		ret.append("SELECT r0."+colT_ID);
-		if(createTypeDiscriminator || Ili2cUtility.isViewableWithExtension(aclass)){
+		if(createTypeDiscriminator || class2wrapper.get(aclass).includesMultipleTypes()){
 			ret.append(", r0."+DbNames.T_TYPE_COL);
 		}
 		ret.append(" FROM ");
@@ -1029,7 +1035,7 @@ public class TransferToXtf {
 		if(rootClass==null){
 		 rootClass=aclass;
 		}
-		ret.append(recConv.getSqlTableName(rootClass));
+		ret.append(recConv.getSqlTableName(class2wrapper.get(rootClass).getViewable()));
 		ret.append(" r0");
 		if(wrapper!=null){
 			if(createGenericStructRef){

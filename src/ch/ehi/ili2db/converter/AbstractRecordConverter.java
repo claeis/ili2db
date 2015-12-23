@@ -146,8 +146,8 @@ public class AbstractRecordConverter {
 			  table.addColumn(dbColId);
 			  return dbColId;
 		}
-		public void addIliTidCol(DbTable dbTable,Viewable aclass) {
-			if(isUuidOid(td,aclass)){
+		public void addIliTidCol(DbTable dbTable,Domain oidDomain) {
+			if(isUuidOid(td,oidDomain)){
 				DbColUuid dbColIliTid= new DbColUuid();
 				dbColIliTid.setName(DbNames.T_ILI_TID_COL);
 				// CREATE EXTENSION "uuid-ossp";
@@ -171,14 +171,16 @@ public class AbstractRecordConverter {
 		String sqlname=ili2sqlName.mapIliClassDef(def);
 		return new DbTableName(schemaName,sqlname);
 	}
-	public static boolean isUuidOid(TransferDescription td,Viewable aclass) {
-		if(aclass instanceof AbstractClassDef){
-			Domain oid=((AbstractClassDef<AbstractLeafElement>) aclass).getOid();
+	public static boolean isUuidOid(TransferDescription td,Domain oid) {
+		if(oid!=null){
 			if(oid==td.INTERLIS.UUIDOID){
 				return true;
 			}
 		}
 		return false;
+	}
+	public static boolean isUuidOid(TransferDescription td,Viewable aclass) {
+		throw new IllegalArgumentException("to be removed");
 	}
 	public static void addStdCol(DbTable table) {
 		DbColumn dbCol=new DbColDateTime();
