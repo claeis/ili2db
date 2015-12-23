@@ -33,7 +33,7 @@ public class PgMain extends ch.ehi.ili2db.AbstractMain {
 	@Override
 	public void initConfig(Config config) {
 		super.initConfig(config);
-		config.setGeometryConverter(ch.ehi.ili2pg.converter.PostgisGeometryConverter.class.getName());
+		config.setGeometryConverter(ch.ehi.ili2pg.converter.PostgisColumnConverter.class.getName());
 		config.setDdlGenerator(ch.ehi.sqlgen.generator_impl.jdbc.GeneratorPostgresql.class.getName());
 		config.setJdbcDriver("org.postgresql.Driver");
 		config.setIdGenerator(ch.ehi.ili2pg.PgSequenceBasedIdGen.class.getName());

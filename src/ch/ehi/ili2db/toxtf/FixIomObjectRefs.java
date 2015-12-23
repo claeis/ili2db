@@ -19,10 +19,13 @@ public class FixIomObjectRefs {
 		Viewable aclass;
 			
 	}
-	public FixIomObjectRefs(IomObject rootObj) {
-		root=rootObj;
-	}
 
+	public void setRoot(IomObject root1){
+		if(root!=null){
+			throw new IllegalStateException("root can only be set once");
+		}
+		root=root1;
+	}
 	public IomObject getRoot(){
 		return root;
 	}

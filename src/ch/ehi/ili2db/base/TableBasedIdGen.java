@@ -67,7 +67,7 @@ public class TableBasedIdGen implements DbIdGen {
 		t_lastuniqueid.setName(SQL_T_LASTUNIQUEID);
 		t_lastuniqueid.setNotNull(true);
 		tab.addColumn(t_lastuniqueid);
-		ch.ehi.ili2db.fromili.TransferFromIli.addStdCol(tab);
+		ch.ehi.ili2db.converter.AbstractRecordConverter.addStdCol(tab);
 		schema.addTable(tab);
 	}
 	public int getCount(String key)

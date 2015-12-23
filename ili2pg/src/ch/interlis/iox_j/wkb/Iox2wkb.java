@@ -789,6 +789,34 @@ public class Iox2wkb {
 		}
 		return os.toByteArray();
 	}
+	public byte[] multisurface2wkb(IomObject obj,boolean asCurvePolygon,double strokeP) //SurfaceOrAreaType type)
+	throws Iox2wkbException
+	{
+		if(obj==null){
+			return null;
+		}
+	    try {
+			writeByteOrder();
+			if(asCurvePolygon){
+				writeGeometryType(WKBConstants.wkbMultiSurface);
+			}else{
+				writeGeometryType(WKBConstants.wkbMultiPolygon);
+			}
+			int surfacec=obj.getattrvaluecount("surface");
+			os.writeInt(surfacec);
+
+			for(int surfacei=0;surfacei<surfacec;surfacei++){
+				IomObject surface=obj.getattrobj("surface",surfacei);
+				IomObject iomSurfaceClone=new ch.interlis.iom_j.Iom_jObject("MULTISURFACE",null);
+				iomSurfaceClone.addattrobj("surface",surface);
+				Iox2wkb helper=new Iox2wkb(outputDimension,os.order());
+				os.write(helper.surface2wkb(iomSurfaceClone,asCurvePolygon,strokeP));
+			}
+		} catch (IOException e) {
+	        throw new RuntimeException("Unexpected IO exception: " + e.getMessage());
+		}
+		return os.toByteArray();
+	}
 
 	  private void writeByteOrder() throws IOException
 	  {

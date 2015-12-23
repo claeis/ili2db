@@ -20,13 +20,13 @@ package ch.ehi.ili2db;
 import java.io.File;
 
 import ch.ehi.basics.logging.EhiLogger;
+import ch.ehi.ili2db.base.DbNames;
 import ch.ehi.ili2db.base.Ili2db;
 import ch.ehi.ili2db.base.Ili2dbException;
 import ch.ehi.ili2db.gui.Config;
 import ch.ehi.ili2db.gui.AbstractDbPanelDescriptor;
-import ch.ehi.ili2db.mapping.Mapping;
+import ch.ehi.ili2db.mapping.NameMapping;
 import ch.ehi.ili2db.base.DbUrlConverter;
-import ch.ehi.ili2db.fromili.TransferFromIli;
 import ch.ehi.sqlgen.generator.SqlConfiguration;
 
 /**
@@ -48,8 +48,12 @@ public abstract class AbstractMain {
 		config.setModels(Ili2db.XTF);
 		config.setDefaultSrsAuthority("EPSG");
 		config.setDefaultSrsCode("21781");
-		config.setMaxSqlNameLength(Integer.toString(Mapping.DEFAULT_NAME_LENGTH));
+		config.setMaxSqlNameLength(Integer.toString(NameMapping.DEFAULT_NAME_LENGTH));
 		config.setIdGenerator(ch.ehi.ili2db.base.TableBasedIdGen.class.getName());
+		config.setInheritanceTrafo(config.INHERITANCE_TRAFO_SMART);
+		config.setCatalogueRefTrafo(Config.CATALOGUE_REF_TRAFO_COALESCE);
+		config.setMultiSurfaceTrafo(Config.MULTISURFACE_TRAFO_COALESCE);
+		config.setMultilingualTrafo(Config.MULTILINGUAL_TRAFO_EXPAND);
 	}
 	protected abstract DbUrlConverter getDbUrlConverter();
 
@@ -167,6 +171,24 @@ public abstract class AbstractMain {
 			}else if(arg.equals("--createEnumColAsItfCode")){
 				argi++;
 				config.setCreateEnumColAsItfCode(config.CREATE_ENUMCOL_AS_ITFCODE_YES);
+			}else if(arg.equals("--noSmartMapping")){
+				argi++;
+				config.setCatalogueRefTrafo(null);
+				config.setMultiSurfaceTrafo(null);
+				config.setMultilingualTrafo(null);
+				config.setInheritanceTrafo(null);
+			}else if(arg.equals("--smartInheritance")){
+				argi++;
+				config.setInheritanceTrafo(config.INHERITANCE_TRAFO_SMART);
+			}else if(arg.equals("--coalesceCatalogueRef")){
+				argi++;
+				config.setCatalogueRefTrafo(config.CATALOGUE_REF_TRAFO_COALESCE);
+			}else if(arg.equals("--coalesceMultiSurface")){
+				argi++;
+				config.setMultiSurfaceTrafo(config.MULTISURFACE_TRAFO_COALESCE);
+			}else if(arg.equals("--expandMultilingual")){
+				argi++;
+				config.setMultilingualTrafo(config.MULTILINGUAL_TRAFO_EXPAND);
 			}else if(arg.equals("--createFk")){
 				argi++;
 				config.setCreateFk(config.CREATE_FK_YES);
@@ -244,13 +266,18 @@ public abstract class AbstractMain {
 					System.err.println("--createscript filename  Generate a sql script that creates the db schema.");
 					System.err.println("--dropscript filename  Generate a sql script that drops the generated db schema.");
 					System.err.println("--mapconfig filename   Name of config file, that controls the schema mapping.");
+					System.err.println("--noSmartMapping       disable all smart mappings");
+					System.err.println("--smartInheritance     enable smart mapping of class/structure inheritance");
+					System.err.println("--coalesceCatalogueRef enable smart mapping of CHBase:CatalogueReference");
+					System.err.println("--coalesceMultiSurface enable smart mapping of CHBase:MultiSurface");
+					System.err.println("--expandMultilingual   enable smart mapping of CHBase:MultilingualText");
 					System.err.println("--createGeomIdx        create a spatial index on geometry columns.");
 					System.err.println("--createEnumColAsItfCode create enum type column with value according to ITF (instead of XTF).");
 					System.err.println("--createEnumTxtCol     create an additional column with the text of the enumeration value.");
 					System.err.println("--createEnumTabs       generate tables with enum definitions.");
 					System.err.println("--createSingleEnumTab  generate all enum definitions in a single table.");
-					System.err.println("--createStdCols        generate "+TransferFromIli.T_USER+", "+TransferFromIli.T_CREATE_DATE+", "+TransferFromIli.T_LAST_CHANGE+" columns.");
-					System.err.println("--t_id_Name name       change name of t_id column ("+TransferFromIli.T_ID+")");
+					System.err.println("--createStdCols        generate "+DbNames.T_USER_COL+", "+DbNames.T_CREATE_DATE_COL+", "+DbNames.T_LAST_CHANGE_COL+" columns.");
+					System.err.println("--t_id_Name name       change name of t_id column ("+DbNames.T_ID_COL+")");
 					System.err.println("--createTypeDiscriminator  generate always a type discriminaor colum.");
 					System.err.println("--structWithGenericRef  generate one generic reference to parent in struct tables.");
 					System.err.println("--disableNameOptimization disable use of unqualified class name as table name.");
@@ -260,8 +287,8 @@ public abstract class AbstractMain {
 					System.err.println("--strokeArcs           stroke ARCS on import.");
 					System.err.println("--skipPolygonBuilding  keep linetables; don't build polygons on import.");
 					System.err.println("--keepAreaRef          keep arreaRef as additional column on import.");
-					System.err.println("--importTid            read TID into additional column "+TransferFromIli.T_ILI_TID);
-					System.err.println("--createBasketCol      generate "+TransferFromIli.T_BASKET+" column.");
+					System.err.println("--importTid            read TID into additional column "+DbNames.T_ILI_TID_COL);
+					System.err.println("--createBasketCol      generate "+DbNames.T_BASKET_COL+" column.");
 					System.err.println("--createFk             generate foreign key constraints.");
 					System.err.println("--createFkIdx          create an index on foreign key columns.");
 					printSpecificOptions();

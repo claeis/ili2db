@@ -27,7 +27,7 @@ import ch.interlis.iom.IomObject;
  * @author ce
  * @version $Revision: 1.0 $ $Date: 12.02.2007 $
  */
-public interface SqlGeometryConverter {
+public interface SqlColumnConverter {
 	public void setup(Connection conn,ch.ehi.ili2db.gui.Config config);
 	public abstract int getSrsid(String crsAuthority,String crsCode,Connection conn) throws ConverterException;
 	/*
@@ -39,20 +39,30 @@ public interface SqlGeometryConverter {
 	public abstract String getInsertValueWrapperCoord(String wkfValue,int srid);
 	public abstract String getInsertValueWrapperPolyline(String wkfValue,int srid);
 	public abstract String getInsertValueWrapperSurface(String wkfValue,int srid);
+	public abstract String getInsertValueWrapperMultiSurface(String wkfValue,int srid);
 	public abstract String getSelectValueWrapperCoord(String dbNativeValue);
 	public abstract String getSelectValueWrapperPolyline(String dbNativeValue);
 	public abstract String getSelectValueWrapperSurface(String dbNativeValue);
+	public abstract String getSelectValueWrapperMultiSurface(String dbColName);
 	public abstract void setCoordNull(java.sql.PreparedStatement stmt,int parameterIndex) throws java.sql.SQLException;
 	public abstract void setPolylineNull(java.sql.PreparedStatement stmt,int parameterIndex)throws java.sql.SQLException;
 	public abstract void setSurfaceNull(java.sql.PreparedStatement stmt,int parameterIndex)throws java.sql.SQLException;
 	public abstract void setDecimalNull(java.sql.PreparedStatement stmt,int parameterIndex)throws java.sql.SQLException;
 	public abstract void setBoolean(java.sql.PreparedStatement stmt,int parameterIndex,boolean value)throws java.sql.SQLException;
+	public abstract Object fromIomUuid(String uuid)
+			throws java.sql.SQLException, ConverterException;
 	public abstract java.lang.Object fromIomSurface(
 		IomObject obj,
 		int srid,
 		boolean hasLineAttr,
 		boolean is3D,double p)
 		throws java.sql.SQLException, ConverterException;
+	public abstract java.lang.Object fromIomMultiSurface(
+			IomObject obj,
+			int srid,
+			boolean hasLineAttr,
+			boolean is3D,double p)
+			throws java.sql.SQLException, ConverterException;
 	public abstract java.lang.Object fromIomCoord(IomObject value,int srid, boolean is3D)
 		throws java.sql.SQLException, ConverterException;
 	public abstract java.lang.Object fromIomPolyline(
@@ -70,6 +80,11 @@ public interface SqlGeometryConverter {
 		String sqlAttrName,
 		boolean is3D)
 		throws java.sql.SQLException, ConverterException;
+	public abstract IomObject toIomMultiSurface(
+			Object geomobj,
+			String sqlAttrName,
+			boolean is3D)
+			throws java.sql.SQLException, ConverterException;
 	public abstract IomObject toIomPolyline(
 		Object geomobj,
 		String sqlAttrName,

@@ -50,6 +50,7 @@ public interface WKBConstants {
   int wkbCompoundCurve = 9;
   int wkbCurvePolygon = 10;
   int wkbMultiCurve = 11;
+  int wkbMultiSurface = 12;
   int wkbPolyhedralSurface = 15;
   int wkbTIN = 16;
   int wkbTriangle = 17;

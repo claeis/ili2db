@@ -19,14 +19,16 @@ package ch.ehi.ili2ora.converter;
 
 import ch.interlis.iom.IomObject;
 import ch.interlis.iom_j.Iom_jObject;
-
 import ch.interlis.iom.IomConstants;
+
 import java.util.ArrayList;
+
 import ch.ehi.basics.logging.EhiLogger;
 import ch.ehi.ili2db.converter.ConverterException;
-import ch.ehi.ili2db.converter.SqlGeometryConverter;
+import ch.ehi.ili2db.converter.SqlColumnConverter;
 import ch.ehi.ili2db.gui.Config;
 import oracle.spatial.geometry.JGeometry;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -35,23 +37,28 @@ import java.sql.SQLException;
  * @author ce
  * @version $Revision: 1.0 $ $Date: 10.02.2007 $
  */
-public class OracleGeometryConverter implements SqlGeometryConverter {
+public class OracleColumnConverter implements SqlColumnConverter {
 	public void setAreaNull(PreparedStatement stmt, int parameterIndex) throws SQLException {
 		stmt.setNull(parameterIndex,java.sql.Types.STRUCT);
 	}
+	@Override
 	public void setCoordNull(PreparedStatement stmt, int parameterIndex) throws SQLException {
 		stmt.setNull(parameterIndex,java.sql.Types.STRUCT);
 		
 	}
+	@Override
 	public void setDecimalNull(PreparedStatement stmt, int parameterIndex) throws SQLException {
 		stmt.setNull(parameterIndex,java.sql.Types.DECIMAL);
 	}
+	@Override
 	public void setPolylineNull(PreparedStatement stmt, int parameterIndex) throws SQLException {
 		stmt.setNull(parameterIndex,java.sql.Types.STRUCT);
 	}
+	@Override
 	public void setSurfaceNull(PreparedStatement stmt, int parameterIndex) throws SQLException {
 		stmt.setNull(parameterIndex,java.sql.Types.STRUCT);
 	}
+	@Override
 	public void setBoolean(java.sql.PreparedStatement stmt,int parameterIndex,boolean value)
 	throws java.sql.SQLException
 	{
@@ -69,6 +76,7 @@ public class OracleGeometryConverter implements SqlGeometryConverter {
 		elemInfo.add(new Integer(sdoEtype));
 		elemInfo.add(new Integer(sdoInterpretation));
 	}
+	@Override
 	public java.lang.Object fromIomSurface(IomObject obj,int srid,boolean hasLineAttr,boolean is3D,double p)
 		throws java.sql.SQLException,ConverterException
 	{
@@ -125,6 +133,17 @@ public class OracleGeometryConverter implements SqlGeometryConverter {
 		}
 		return null;
 	}
+	@Override
+	public java.lang.Object fromIomMultiSurface(IomObject obj,int srid,boolean hasLineAttr,boolean is3D,double p)
+		throws java.sql.SQLException,ConverterException
+	{
+		is3D=false;
+		if(obj!=null){
+			throw new ConverterException("MultiSurface not supported");
+		}
+		return null;
+	}
+	@Override
 	public java.lang.Object fromIomCoord(IomObject value,int srid,boolean is3D)
 		throws java.sql.SQLException,ConverterException
 	{
@@ -151,6 +170,7 @@ public class OracleGeometryConverter implements SqlGeometryConverter {
 		}
 		return null;
 	}
+	@Override
 	public java.lang.Object fromIomPolyline(IomObject obj,int srid,boolean is3D,double p)
 		throws java.sql.SQLException,ConverterException
 	{
@@ -267,6 +287,12 @@ public class OracleGeometryConverter implements SqlGeometryConverter {
 			}
 		}
 	}
+	@Override
+	public Object fromIomUuid(String value)
+			throws SQLException, ConverterException {
+		return value;
+	}
+	@Override
 	public IomObject toIomCoord(Object geomobj,String sqlAttrName,boolean is3D)
 		throws java.sql.SQLException,ConverterException
 	{
@@ -291,6 +317,7 @@ public class OracleGeometryConverter implements SqlGeometryConverter {
 									
 		}
 	}
+	@Override
 	public IomObject toIomSurface(
 		Object geomobj,
 		String sqlAttrName,
@@ -394,6 +421,15 @@ public class OracleGeometryConverter implements SqlGeometryConverter {
 			
 		}
 	}
+	@Override
+	public IomObject toIomMultiSurface(
+		Object geomobj,
+		String sqlAttrName,
+		boolean is3D)
+		throws java.sql.SQLException,ConverterException {
+		throw new java.lang.UnsupportedOperationException();
+	}
+	@Override
 	public IomObject toIomPolyline(
 		Object geomobj,
 		String sqlAttrName,
@@ -490,6 +526,7 @@ public class OracleGeometryConverter implements SqlGeometryConverter {
 			
 		}
 	}
+	@Override
 	public int getSrsid(String crsAuthority, String crsCode,Connection conn) 
 	throws ConverterException
 	{
@@ -510,25 +547,40 @@ public class OracleGeometryConverter implements SqlGeometryConverter {
 		}
 		return srsid;
 	}
+	@Override
 	public String getInsertValueWrapperCoord(String wkfValue, int srid) {
 		return wkfValue;
 	}
+	@Override
 	public String getInsertValueWrapperPolyline(String wkfValue, int srid) {
 		return wkfValue;
 	}
+	@Override
 	public String getInsertValueWrapperSurface(String wkfValue, int srid) {
 		return wkfValue;
 	}
+	@Override
+	public String getInsertValueWrapperMultiSurface(String wkfValue, int srid) {
+		return wkfValue;
+	}
+	@Override
 	public String getSelectValueWrapperCoord(String dbNativeValue) {
 		return dbNativeValue;
 	}
+	@Override
 	public String getSelectValueWrapperPolyline(String dbNativeValue) {
 		return dbNativeValue;
 	}
+	@Override
 	public String getSelectValueWrapperSurface(String dbNativeValue) {
 		return dbNativeValue;
 	}
+	@Override
+	public String getSelectValueWrapperMultiSurface(String dbNativeValue) {
+		return dbNativeValue;
+	}
 	private Connection conn=null;
+	@Override
 	public void setup(Connection conn, Config config) {
 		this.conn=conn;
 	}

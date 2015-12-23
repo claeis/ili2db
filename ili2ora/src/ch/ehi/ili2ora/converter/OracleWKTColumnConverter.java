@@ -18,7 +18,7 @@
 package ch.ehi.ili2ora.converter;
 
 import ch.ehi.basics.logging.EhiLogger;
-import ch.ehi.ili2db.converter.AbstractWKBGeometryConverter;
+import ch.ehi.ili2db.converter.AbstractWKTColumnConverter;
 import ch.ehi.ili2db.converter.ConverterException;
 
 import java.sql.PreparedStatement;
@@ -29,7 +29,8 @@ import java.sql.Connection;
 import ch.interlis.iom.IomObject;
 import ch.interlis.iom.IomConstants;
 
-public class OracleWKBGeometryConverter extends AbstractWKBGeometryConverter {
+public class OracleWKTColumnConverter extends AbstractWKTColumnConverter {
+	@Override
 	public void setBoolean(java.sql.PreparedStatement stmt,int parameterIndex,boolean value)
 	throws java.sql.SQLException
 	{
@@ -40,24 +41,35 @@ public class OracleWKBGeometryConverter extends AbstractWKBGeometryConverter {
 		}
 		
 	}
+	@Override
 	public String getInsertValueWrapperCoord(String wkfValue, int srid) {
 		return wkfValue;
 	}
+	@Override
 	public String getInsertValueWrapperPolyline(String wkfValue, int srid) {
 		return wkfValue;
 	}
+	@Override
 	public String getInsertValueWrapperSurface(String wkfValue, int srid) {
 		return wkfValue;
 	}
+	@Override
 	public String getSelectValueWrapperCoord(String dbNativeValue) {
 		return dbNativeValue;
 	}
+	@Override
 	public String getSelectValueWrapperPolyline(String dbNativeValue) {
 		return dbNativeValue;
 	}
+	@Override
 	public String getSelectValueWrapperSurface(String dbNativeValue) {
 		return dbNativeValue;
 	}
+	@Override
+	public String getSelectValueWrapperMultiSurface(String dbNativeValue) {
+		return dbNativeValue;
+	}
+	@Override
 	public int getSrsid(String crsAuthority, String crsCode, Connection conn) throws ConverterException {
 		return -1;
 	}

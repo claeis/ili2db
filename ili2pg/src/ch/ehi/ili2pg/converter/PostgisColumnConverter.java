@@ -18,7 +18,7 @@
 package ch.ehi.ili2pg.converter;
 
 import ch.ehi.basics.logging.EhiLogger;
-import ch.ehi.ili2db.converter.AbstractWKBGeometryConverter;
+import ch.ehi.ili2db.converter.AbstractWKBColumnConverter;
 import ch.ehi.ili2db.converter.ConverterException;
 import ch.ehi.ili2db.gui.Config;
 
@@ -35,36 +35,62 @@ import ch.interlis.iox_j.wkb.Iox2wkb;
 import ch.interlis.iox_j.wkb.Iox2wkbException;
 import ch.interlis.iox_j.wkb.Wkb2iox;
 
-public class PostgisGeometryConverter extends AbstractWKBGeometryConverter {
+public class PostgisColumnConverter extends AbstractWKBColumnConverter {
 	private boolean strokeArcs=true;
+	@Override
 	public void setup(Connection conn, Config config) {
 		super.setup(conn,config);
-		strokeArcs=config.STROKE_ARCS_ENABLE.equals(config.getStrokeArcs());
+		strokeArcs=Config.STROKE_ARCS_ENABLE.equals(config.getStrokeArcs());
 	}
 	
+	@Override
 	public String getInsertValueWrapperCoord(String wkfValue,int srid) {
 		return "ST_GeomFromWKB("+wkfValue+(srid==-1?"":","+srid)+")";
 		//return "GeomFromWKB("+wkfValue+(srid==-1?"":","+srid)+")";
 	}
+	@Override
 	public String getInsertValueWrapperPolyline(String wkfValue,int srid) {
 		return "ST_GeomFromWKB("+wkfValue+(srid==-1?"":","+srid)+")";
 		//return "GeomFromWKB("+wkfValue+(srid==-1?"":","+srid)+")";
 	}
+	@Override
 	public String getInsertValueWrapperSurface(String wkfValue,int srid) {
 		return "ST_GeomFromWKB("+wkfValue+(srid==-1?"":","+srid)+")";
 		//return "GeomFromWKB("+wkfValue+(srid==-1?"":","+srid)+")";
 	}
+	@Override
+	public String getInsertValueWrapperMultiSurface(String wkfValue,int srid) {
+		return "ST_GeomFromWKB("+wkfValue+(srid==-1?"":","+srid)+")";
+		//return "GeomFromWKB("+wkfValue+(srid==-1?"":","+srid)+")";
+	}
+	@Override
 	public String getSelectValueWrapperCoord(String dbNativeValue) {
 		return "ST_AsEWKB("+dbNativeValue+")";
 		//return "AsBinary("+dbNativeValue+")";
 	}
+	@Override
 	public String getSelectValueWrapperPolyline(String dbNativeValue) {
 		return "ST_AsEWKB("+dbNativeValue+")";
 		//return "AsBinary("+dbNativeValue+")";
 	}
+	@Override
 	public String getSelectValueWrapperSurface(String dbNativeValue) {
 		return "ST_AsEWKB("+dbNativeValue+")";
 		//return "AsBinary("+dbNativeValue+")";
+	}
+	@Override
+	public String getSelectValueWrapperMultiSurface(String dbNativeValue) {
+		return "ST_AsEWKB("+dbNativeValue+")";
+		//return "AsBinary("+dbNativeValue+")";
+	}
+	@Override
+	public Object fromIomUuid(String uuid) 
+			throws java.sql.SQLException, ConverterException
+	{
+		 org.postgresql.util.PGobject toInsertUUID = new org.postgresql.util.PGobject();
+		 toInsertUUID.setType("uuid");
+		 toInsertUUID.setValue(uuid);	
+		return toInsertUUID;
 	}
 	@Override
 	public java.lang.Object fromIomSurface(
@@ -84,6 +110,25 @@ public class PostgisGeometryConverter extends AbstractWKBGeometryConverter {
 				}
 				return null;
 		}
+	@Override
+	public java.lang.Object fromIomMultiSurface(
+			IomObject value,
+			int srid,
+			boolean hasLineAttr,
+			boolean is3D,double p)
+			throws SQLException, ConverterException {
+				if(value!=null){
+					Iox2wkb conv=new Iox2wkb(is3D?3:2);
+					//EhiLogger.debug("conv "+conv); // select st_asewkt(form) from tablea
+					try {
+						return conv.multisurface2wkb(value,!strokeArcs,p);
+					} catch (Iox2wkbException ex) {
+						throw new ConverterException(ex);
+					}
+				}
+				return null;
+		}
+		@Override
 		public java.lang.Object fromIomCoord(IomObject value, int srid,boolean is3D)
 			throws SQLException, ConverterException {
 			if(value!=null){
@@ -109,6 +154,7 @@ public class PostgisGeometryConverter extends AbstractWKBGeometryConverter {
 			}
 			return null;
 		}
+		@Override
 		public IomObject toIomCoord(
 				Object geomobj,
 				String sqlAttrName,
@@ -122,6 +168,7 @@ public class PostgisGeometryConverter extends AbstractWKBGeometryConverter {
 					throw new ConverterException(e);
 				}
 			}
+		@Override
 			public IomObject toIomSurface(
 				Object geomobj,
 				String sqlAttrName,
@@ -135,6 +182,21 @@ public class PostgisGeometryConverter extends AbstractWKBGeometryConverter {
 					throw new ConverterException(e);
 				}
 			}
+		@Override
+		public IomObject toIomMultiSurface(
+			Object geomobj,
+			String sqlAttrName,
+			boolean is3D)
+			throws SQLException, ConverterException {
+			byte bv[]=(byte [])geomobj;
+			Wkb2iox conv=new Wkb2iox();
+			try {
+				return conv.read(bv);
+			} catch (ParseException e) {
+				throw new ConverterException(e);
+			}
+		}
+		@Override
 			public IomObject toIomPolyline(
 				Object geomobj,
 				String sqlAttrName,
