@@ -10,6 +10,11 @@ import ch.interlis.iom.IomObject;
 public class NullColumnConverter implements SqlColumnConverter {
 
 	@Override
+	public Object fromIomUuid(String value)
+			throws SQLException, ConverterException {
+		return null;
+	}
+	@Override
 	public Object fromIomCoord(IomObject value, int srid, boolean is3D)
 			throws SQLException, ConverterException {
 		return null;

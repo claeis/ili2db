@@ -49,6 +49,8 @@ public interface SqlColumnConverter {
 	public abstract void setSurfaceNull(java.sql.PreparedStatement stmt,int parameterIndex)throws java.sql.SQLException;
 	public abstract void setDecimalNull(java.sql.PreparedStatement stmt,int parameterIndex)throws java.sql.SQLException;
 	public abstract void setBoolean(java.sql.PreparedStatement stmt,int parameterIndex,boolean value)throws java.sql.SQLException;
+	public abstract Object fromIomUuid(String uuid)
+			throws java.sql.SQLException, ConverterException;
 	public abstract java.lang.Object fromIomSurface(
 		IomObject obj,
 		int srid,

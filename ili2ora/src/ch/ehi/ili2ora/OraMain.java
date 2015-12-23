@@ -34,7 +34,7 @@ public class OraMain extends ch.ehi.ili2db.AbstractMain {
 	@Override
 	public void initConfig(Config config) {
 		super.initConfig(config);
-		config.setGeometryConverter(ch.ehi.ili2ora.converter.OracleGeometryConverter.class.getName());
+		config.setGeometryConverter(ch.ehi.ili2ora.converter.OracleColumnConverter.class.getName());
 		config.setDdlGenerator(ch.ehi.sqlgen.generator_impl.jdbc.GeneratorOracle.class.getName());
 		config.setJdbcDriver("oracle.jdbc.OracleDriver");
 		config.setDbport(DB_PORT);
@@ -120,11 +120,11 @@ public class OraMain extends ch.ehi.ili2db.AbstractMain {
 			argi++;
 		}else if(arg.equals("--geomwkb")){
 			argi++;
-			config.setGeometryConverter(ch.ehi.ili2ora.converter.OracleWKBGeometryConverter.class.getName());
+			config.setGeometryConverter(ch.ehi.ili2ora.converter.OracleWKBColumnConverter.class.getName());
 			config.setDdlGenerator(ch.ehi.sqlgen.generator_impl.jdbc.GeneratorOracleWKB.class.getName());
 		}else if(arg.equals("--geomwkt")){
 			argi++;
-			config.setGeometryConverter(ch.ehi.ili2ora.converter.OracleWKTGeometryConverter.class.getName());
+			config.setGeometryConverter(ch.ehi.ili2ora.converter.OracleWKTColumnConverter.class.getName());
 			config.setDdlGenerator(ch.ehi.sqlgen.generator_impl.jdbc.GeneratorOracleWKT.class.getName());
 		}
 		return argi;

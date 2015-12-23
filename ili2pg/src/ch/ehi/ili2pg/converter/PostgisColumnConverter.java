@@ -18,7 +18,7 @@
 package ch.ehi.ili2pg.converter;
 
 import ch.ehi.basics.logging.EhiLogger;
-import ch.ehi.ili2db.converter.AbstractWKBGeometryConverter;
+import ch.ehi.ili2db.converter.AbstractWKBColumnConverter;
 import ch.ehi.ili2db.converter.ConverterException;
 import ch.ehi.ili2db.gui.Config;
 
@@ -35,7 +35,7 @@ import ch.interlis.iox_j.wkb.Iox2wkb;
 import ch.interlis.iox_j.wkb.Iox2wkbException;
 import ch.interlis.iox_j.wkb.Wkb2iox;
 
-public class PostgisGeometryConverter extends AbstractWKBGeometryConverter {
+public class PostgisColumnConverter extends AbstractWKBColumnConverter {
 	private boolean strokeArcs=true;
 	@Override
 	public void setup(Connection conn, Config config) {
@@ -82,6 +82,15 @@ public class PostgisGeometryConverter extends AbstractWKBGeometryConverter {
 	public String getSelectValueWrapperMultiSurface(String dbNativeValue) {
 		return "ST_AsEWKB("+dbNativeValue+")";
 		//return "AsBinary("+dbNativeValue+")";
+	}
+	@Override
+	public Object fromIomUuid(String uuid) 
+			throws java.sql.SQLException, ConverterException
+	{
+		 org.postgresql.util.PGobject toInsertUUID = new org.postgresql.util.PGobject();
+		 toInsertUUID.setType("uuid");
+		 toInsertUUID.setValue(uuid);	
+		return toInsertUUID;
 	}
 	@Override
 	public java.lang.Object fromIomSurface(

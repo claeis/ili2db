@@ -115,9 +115,7 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 						if(createIliTidCol || aclass.getOid()!=null){
 							// import TID from transfer file
 							if(AbstractRecordConverter.isUuidOid(td, aclass.getOid())){
-								 org.postgresql.util.PGobject toInsertUUID = new org.postgresql.util.PGobject();
-								 toInsertUUID.setType("uuid");
-								 toInsertUUID.setValue(iomObj.getobjectoid());										
+								 Object toInsertUUID = geomConv.fromIomUuid(iomObj.getobjectoid());
 								 ps.setObject(valuei, toInsertUUID);
 							}else{
 								ps.setString(valuei, iomObj.getobjectoid());

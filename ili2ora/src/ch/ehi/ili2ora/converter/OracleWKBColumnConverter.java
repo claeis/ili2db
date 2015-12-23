@@ -18,7 +18,7 @@
 package ch.ehi.ili2ora.converter;
 
 import ch.ehi.basics.logging.EhiLogger;
-import ch.ehi.ili2db.converter.AbstractWKBGeometryConverter;
+import ch.ehi.ili2db.converter.AbstractWKBColumnConverter;
 import ch.ehi.ili2db.converter.ConverterException;
 
 import java.sql.PreparedStatement;
@@ -29,7 +29,7 @@ import java.sql.Connection;
 import ch.interlis.iom.IomObject;
 import ch.interlis.iom.IomConstants;
 
-public class OracleWKBGeometryConverter extends AbstractWKBGeometryConverter {
+public class OracleWKBColumnConverter extends AbstractWKBColumnConverter {
 	@Override
 	public void setBoolean(java.sql.PreparedStatement stmt,int parameterIndex,boolean value)
 	throws java.sql.SQLException

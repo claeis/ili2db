@@ -37,7 +37,7 @@ import java.sql.SQLException;
  * @author ce
  * @version $Revision: 1.0 $ $Date: 10.02.2007 $
  */
-public class OracleGeometryConverter implements SqlColumnConverter {
+public class OracleColumnConverter implements SqlColumnConverter {
 	public void setAreaNull(PreparedStatement stmt, int parameterIndex) throws SQLException {
 		stmt.setNull(parameterIndex,java.sql.Types.STRUCT);
 	}
@@ -286,6 +286,11 @@ public class OracleGeometryConverter implements SqlColumnConverter {
 				}
 			}
 		}
+	}
+	@Override
+	public Object fromIomUuid(String value)
+			throws SQLException, ConverterException {
+		return value;
 	}
 	@Override
 	public IomObject toIomCoord(Object geomobj,String sqlAttrName,boolean is3D)
