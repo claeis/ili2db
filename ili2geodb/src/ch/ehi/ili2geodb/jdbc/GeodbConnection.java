@@ -17,6 +17,8 @@ import java.sql.Statement;
 import java.sql.Struct;
 import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.Executor;
+
 import com.esri.arcgis.geodatabase.IWorkspace;
 
 public class GeodbConnection implements ch.ehi.ili2db.base.GeodbConnection, Connection {
@@ -265,21 +267,47 @@ public class GeodbConnection implements ch.ehi.ili2db.base.GeodbConnection, Conn
 
 	}
 
-	public void setTypeMap(Map arg0) throws SQLException {
-		// TODO Auto-generated method stub
-
+	public IWorkspace getGeodbWorkspace(){
+		return wksp;
 	}
-
-	public boolean isWrapperFor(Class arg0) throws SQLException {
+	@Override
+	public boolean isWrapperFor(Class<?> arg0) throws SQLException {
 		// TODO Auto-generated method stub
 		return false;
 	}
-
-	public Object unwrap(Class arg0) throws SQLException {
+	@Override
+	public <T> T unwrap(Class<T> arg0) throws SQLException {
 		// TODO Auto-generated method stub
 		return null;
 	}
-	public IWorkspace getGeodbWorkspace(){
-		return wksp;
+	@Override
+	public void abort(Executor arg0) throws SQLException {
+		// TODO Auto-generated method stub
+		
+	}
+	@Override
+	public int getNetworkTimeout() throws SQLException {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+	@Override
+	public String getSchema() throws SQLException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	@Override
+	public void setNetworkTimeout(Executor arg0, int arg1) throws SQLException {
+		// TODO Auto-generated method stub
+		
+	}
+	@Override
+	public void setSchema(String arg0) throws SQLException {
+		// TODO Auto-generated method stub
+		
+	}
+	@Override
+	public void setTypeMap(Map<String, Class<?>> arg0) throws SQLException {
+		// TODO Auto-generated method stub
+		
 	}
 }
