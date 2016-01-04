@@ -23,7 +23,7 @@ public class ViewableWrapper {
 	 * list<Viewable.TransferElement>
 	 */
 	private List<ViewableTransferElement> attrv=new java.util.ArrayList<ViewableTransferElement>();
-	private List<ViewableTransferElement> allAttrv=null;
+	private ArrayList<ViewableWrapper> allTablev=null;
 	/** the attributes and roles that this record has.
 	 * @return list<ViewableTransferElement>
 	 */
@@ -36,21 +36,17 @@ public class ViewableWrapper {
 	public java.util.Iterator<ViewableTransferElement> getAttrIterator() {
 		return attrv.iterator();
 	}
-	public java.util.Iterator<ViewableTransferElement> getAllAttrIterator() {
-		if(allAttrv==null){
-			ArrayList<ViewableWrapper> tablev=new ArrayList<ViewableWrapper>(10);
-			tablev.add(this);
+	public ArrayList<ViewableWrapper> getWrappers() {
+		if(allTablev==null){
+			allTablev=new ArrayList<ViewableWrapper>(10);
+			allTablev.add(this);
 			ViewableWrapper base=this.getExtending();
 			while(base!=null){
-				tablev.add(0,base);		
+				allTablev.add(0,base);		
 				base=base.getExtending();
 			}
-			allAttrv=new ArrayList<ViewableTransferElement>();
-			for(ViewableWrapper aclass:tablev){
-				allAttrv.addAll(aclass.getAttrv());
-			}
 		}
-		return allAttrv.iterator();
+		return allTablev;
 	}
 
 

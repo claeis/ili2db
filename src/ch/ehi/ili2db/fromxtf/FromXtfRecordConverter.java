@@ -62,12 +62,14 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 	private String dbusr=null;
 	private boolean isItfReader;
 	private XtfidPool oidPool=null;
-
-	public FromXtfRecordConverter(TransferDescription td1, NameMapping ili2sqlName,
+	private HashMap tag2class=null;
+	
+	public FromXtfRecordConverter(TransferDescription td1, NameMapping ili2sqlName,HashMap tag2class1,
 			Config config,
 			DbIdGen idGen1,SqlColumnConverter geomConv1,Connection conn1,String dbusr1,boolean isItfReader1,XtfidPool oidPool1,TrafoConfig trafoConfig) {
 		super(td1, ili2sqlName, config, idGen1,trafoConfig);
 		conn=conn1;
+		tag2class=tag2class1;
 		dbusr=dbusr1;
 		oidPool=oidPool1;
 		this.geomConv=geomConv1;
@@ -331,7 +333,9 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 					sep=",";
 				}else{
 					ret.append(sep);
-					ret.append(ili2sqlName.mapIliAttributeDefQualified(structEle.getParentAttr()));
+					String parentIliQname=ili2sqlName.mapSqlTableName(structEle.getParentSqlType());
+					Viewable parent=(Viewable) tag2class.get(parentIliQname);
+					ret.append(ili2sqlName.mapIliAttributeDefQualified(parent,structEle.getParentAttr()));
 					if(isUpdate){
 						ret.append("=?");
 					}else{
