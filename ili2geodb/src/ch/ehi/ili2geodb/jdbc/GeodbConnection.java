@@ -280,27 +280,22 @@ public class GeodbConnection implements ch.ehi.ili2db.base.GeodbConnection, Conn
 		// TODO Auto-generated method stub
 		return null;
 	}
-	@Override
 	public void abort(Executor arg0) throws SQLException {
 		// TODO Auto-generated method stub
 		
 	}
-	@Override
 	public int getNetworkTimeout() throws SQLException {
 		// TODO Auto-generated method stub
 		return 0;
 	}
-	@Override
 	public String getSchema() throws SQLException {
 		// TODO Auto-generated method stub
 		return null;
 	}
-	@Override
 	public void setNetworkTimeout(Executor arg0, int arg1) throws SQLException {
 		// TODO Auto-generated method stub
 		
 	}
-	@Override
 	public void setSchema(String arg0) throws SQLException {
 		// TODO Auto-generated method stub
 		
