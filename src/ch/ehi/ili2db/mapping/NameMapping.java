@@ -334,14 +334,13 @@ public class NameMapping {
 		}
 		return sqlname;
 	}
-	public String mapIliAttributeDefQualified(ch.interlis.ili2c.metamodel.AttributeDef def){
-		String iliname=def.getContainer().getScopedName(null)+"."+def.getName();
+	public String mapIliAttributeDefQualified(Viewable parentTable,ch.interlis.ili2c.metamodel.AttributeDef def){
+		String iliname=parentTable.getScopedName(null)+"."+def.getName();
 		String sqlname=(String)attrNameIli2sql.get(iliname);
 		if(sqlname==null){
-			ch.interlis.ili2c.metamodel.Topic topic=(ch.interlis.ili2c.metamodel.Topic)def.getContainer(ch.interlis.ili2c.metamodel.Topic.class);
-			ch.interlis.ili2c.metamodel.Model model=(ch.interlis.ili2c.metamodel.Model)def.getContainer(ch.interlis.ili2c.metamodel.Model.class);
-			ch.interlis.ili2c.metamodel.Viewable aclass=(ch.interlis.ili2c.metamodel.Viewable)def.getContainer(ch.interlis.ili2c.metamodel.Viewable.class);
-			sqlname=makeSqlAttrName(model.getName(),topic!=null ? topic.getName():null,aclass.getName(),def.getName(),getMaxSqlNameLength());
+			ch.interlis.ili2c.metamodel.Topic topic=(ch.interlis.ili2c.metamodel.Topic)parentTable.getContainer(ch.interlis.ili2c.metamodel.Topic.class);
+			ch.interlis.ili2c.metamodel.Model model=(ch.interlis.ili2c.metamodel.Model)parentTable.getContainer(ch.interlis.ili2c.metamodel.Model.class);
+			sqlname=makeSqlAttrName(model.getName(),topic!=null ? topic.getName():null,parentTable.getName(),def.getName(),getMaxSqlNameLength());
 			addAttrNameMapping(iliname,sqlname);
 		}
 		return sqlname;

@@ -6,6 +6,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import ch.ehi.basics.logging.EhiLogger;
 import ch.ehi.ili2db.gui.Config;
 import ch.interlis.ili2c.metamodel.AbstractClassDef;
 import ch.interlis.ili2c.metamodel.AssociationDef;
@@ -38,6 +39,7 @@ public class Viewable2TableMapper {
 				// not a Viewable; skip it
 			}else{
 				// a Viewable
+				EhiLogger.debug("viewable "+ele.getScopedName(null));
 				Viewable aclass=(Viewable) ele;
 				if(trafoConfig.getViewableConfig(aclass, TrafoConfigNames.INHERITANCE_TRAFO)==null){
 					if(smartInheritance){
@@ -169,6 +171,7 @@ public class Viewable2TableMapper {
 			if(TrafoConfigNames.INHERITANCE_TRAFO_NEWCLASS.equals(trafoConfig.getViewableConfig(base, TrafoConfigNames.INHERITANCE_TRAFO))){
 				return false;
 			}
+			base=(Viewable) base.getExtending();
 		}
 		return true;
 	}

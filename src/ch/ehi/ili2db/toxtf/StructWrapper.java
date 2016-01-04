@@ -17,6 +17,7 @@
  */
 package ch.ehi.ili2db.toxtf;
 
+import ch.ehi.ili2db.mapping.ViewableWrapper;
 import ch.interlis.iom.IomObject;
 import ch.interlis.ili2c.metamodel.AttributeDef;
 
@@ -28,14 +29,16 @@ public class StructWrapper {
 	private int parentSqlId;
 	private IomObject parent;
 	private AttributeDef parentAttr;
+	private ViewableWrapper parentTable;
 	/** creates a StructWrapper.
 	 * @param parentSqlId1 sqlid of the parent object/structele.
 	 * @param parentAttr1 Structure attribute in the parent CLASS/STRUCTURE.
 	 * @param parent1 parent object/structele.
 	 */
-	public StructWrapper(int parentSqlId1,AttributeDef parentAttr1,IomObject parent1){
+	public StructWrapper(int parentSqlId1,AttributeDef parentAttr1,IomObject parent1,ViewableWrapper parentTable1){
 		parentSqlId=parentSqlId1;
 		parentAttr=parentAttr1;
+		parentTable=parentTable1;
 		parent=parent1;
 	}
 	public int getParentSqlId() {
@@ -46,5 +49,8 @@ public class StructWrapper {
 	}
 	public IomObject getParent() {
 		return parent;
+	}
+	public ViewableWrapper getParentTable() {
+		return parentTable;
 	}
 }

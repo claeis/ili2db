@@ -603,7 +603,7 @@ public class TransferToXtf {
 				    Iterator attri = lineAttrTable.getAttributes ();
 				    while(attri.hasNext()){
 						AttributeDef lineattr=(AttributeDef)attri.next();
-						valuei = recConv.addAttrValue(rs, valuei, sqlid, iomObj, lineattr,null,null);
+						valuei = recConv.addAttrValue(rs, valuei, sqlid, iomObj, lineattr,null,null,null);
 				    }
 				}
 				
@@ -1043,7 +1043,7 @@ public class TransferToXtf {
 						+ili2sqlName.mapIliAttributeDef(wrapper.getParentAttr())
 						+"' ORDER BY r0."+DbNames.T_SEQ_COL+" ASC");
 			}else{
-				ret.append(" WHERE r0."+ili2sqlName.mapIliAttributeDefQualified(wrapper.getParentAttr())+"="+wrapper.getParentSqlId()
+				ret.append(" WHERE r0."+ili2sqlName.mapIliAttributeDefQualified(wrapper.getParentTable().getViewable(),wrapper.getParentAttr())+"="+wrapper.getParentSqlId()
 						+" ORDER BY r0."+DbNames.T_SEQ_COL+" ASC");
 			}
 		}

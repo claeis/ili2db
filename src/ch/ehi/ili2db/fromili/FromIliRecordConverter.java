@@ -385,7 +385,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 					trafoConfig.setAttrConfig(attr, TrafoConfigNames.MULTILINGUAL_TRAFO,TrafoConfigNames.MULTILINGUAL_TRAFO_EXPAND);
 				}else{
 					// add reference to struct table
-					addParentRef(attr);
+					addParentRef(aclass,attr);
 					dbCol=null;
 				}
 			}else{
@@ -501,7 +501,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 		return false;
 	}
 
-	private void addParentRef(AttributeDef attr){
+	private void addParentRef(Viewable parentTable,AttributeDef attr){
 		CompositionType type = (CompositionType)attr.getDomainResolvingAll();
 		Table structClass=type.getComponentType();
 		Table root=(Table)structClass.getRootExtending();
@@ -514,7 +514,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 		DbTable dbTable=schema.findTable(structClassSqlName);
 		
 		// add ref attr
-		String refAttrSqlName=ili2sqlName.mapIliAttributeDefQualified(attr);
+		String refAttrSqlName=ili2sqlName.mapIliAttributeDefQualified(parentTable,attr);
 		DbColId dbParentId=new DbColId();
 		dbParentId.setName(refAttrSqlName);
 		dbParentId.setNotNull(false); // values of other struct attrs will have NULL
@@ -531,7 +531,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 			dbParentId.setComment(cmt.toString());
 		}
 		if(createFk){
-			dbParentId.setReferencedTable(getSqlTableName((Viewable)attr.getContainer()));
+			dbParentId.setReferencedTable(getSqlTableName((Viewable)parentTable));
 		}
 		if(createFkIdx){
 			dbParentId.setIndex(true);

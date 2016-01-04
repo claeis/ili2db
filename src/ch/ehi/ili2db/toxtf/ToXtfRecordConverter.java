@@ -86,53 +86,55 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 				ret.append(", r0."+DbNames.T_PARENT_TYPE_COL);
 				ret.append(", r0."+DbNames.T_PARENT_ATTR_COL);
 			}else{
-				ret.append(", r0."+ili2sqlName.mapIliAttributeDefQualified(structWrapper.getParentAttr()));
+				ret.append(", r0."+ili2sqlName.mapIliAttributeDefQualified(structWrapper.getParentTable().getViewable(),structWrapper.getParentAttr()));
 			}
 			ret.append(", r0."+DbNames.T_SEQ_COL);
 		}
 		String sep=",";
-		Iterator iter = aclass.getAllAttrIterator();
-		while (iter.hasNext()) {
-		   ViewableTransferElement obj = (ViewableTransferElement)iter.next();
-		   if (obj.obj instanceof AttributeDef) {
-			   AttributeDef attr = (AttributeDef) obj.obj;
-			   AttributeDef baseAttr=attr;
-			   while(true){
-				   AttributeDef baseAttr1=(AttributeDef)baseAttr.getExtending();
-				   if(baseAttr1==null){
-					   break;
+		for(ViewableWrapper table:aclass.getWrappers()){
+			Iterator iter = table.getAttrIterator();
+			while (iter.hasNext()) {
+			   ViewableTransferElement obj = (ViewableTransferElement)iter.next();
+			   if (obj.obj instanceof AttributeDef) {
+				   AttributeDef attr = (AttributeDef) obj.obj;
+				   AttributeDef baseAttr=attr;
+				   while(true){
+					   AttributeDef baseAttr1=(AttributeDef)baseAttr.getExtending();
+					   if(baseAttr1==null){
+						   break;
+					   }
+					   baseAttr=baseAttr1;
 				   }
-				   baseAttr=baseAttr1;
-			   }
-				if(!baseAttr.isTransient()){
-					Type proxyType=baseAttr.getDomain();
-					if(proxyType!=null && (proxyType instanceof ObjectType)){
-						// skip implicit particles (base-viewables) of views
-					}else{
-						 sep = addAttrToQueryStmt(ret, sep, baseAttr);
+					if(!baseAttr.isTransient()){
+						Type proxyType=baseAttr.getDomain();
+						if(proxyType!=null && (proxyType instanceof ObjectType)){
+							// skip implicit particles (base-viewables) of views
+						}else{
+							 sep = addAttrToQueryStmt(ret, sep, baseAttr);
+						}
 					}
-				}
-		   }
-		   if(obj.obj instanceof RoleDef){
-			   RoleDef role = (RoleDef) obj.obj;
-			   if(role.getExtending()==null){
-				String roleName=ili2sqlName.mapIliRoleDef(role);
-				// a role of an embedded association?
-				if(obj.embedded){
-					AssociationDef roleOwner = (AssociationDef) role.getContainer();
-					if(roleOwner.getDerivedFrom()==null){
+			   }
+			   if(obj.obj instanceof RoleDef){
+				   RoleDef role = (RoleDef) obj.obj;
+				   if(role.getExtending()==null){
+					String roleName=ili2sqlName.mapIliRoleDef(role);
+					// a role of an embedded association?
+					if(obj.embedded){
+						AssociationDef roleOwner = (AssociationDef) role.getContainer();
+						if(roleOwner.getDerivedFrom()==null){
+							 // TODO if(orderPos!=0){
+							 ret.append(sep);
+							 sep=",";
+							 ret.append(roleName);
+						}
+					 }else{
 						 // TODO if(orderPos!=0){
 						 ret.append(sep);
 						 sep=",";
 						 ret.append(roleName);
-					}
-				 }else{
-					 // TODO if(orderPos!=0){
-					 ret.append(sep);
-					 sep=",";
-					 ret.append(roleName);
-				 }
-			   }
+					 }
+				   }
+				}
 			}
 		}
 		// stdcols
@@ -184,7 +186,7 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 			if(createGenericStructRef){
 				ret.append(sep+" r0."+DbNames.T_PARENT_ID_COL+"=? AND r0."+DbNames.T_PARENT_ATTR_COL+"=?");
 			}else{
-				ret.append(sep+" r0."+ili2sqlName.mapIliAttributeDefQualified(structWrapper.getParentAttr())+"=?");
+				ret.append(sep+" r0."+ili2sqlName.mapIliAttributeDefQualified(structWrapper.getParentTable().getViewable(),structWrapper.getParentAttr())+"=?");
 			}
 			sep=" AND";
 		}
@@ -310,61 +312,65 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 				valuei+=2;
 			}
 		}
-
-		Iterator iter = aclass.getAllAttrIterator();
-		while (iter.hasNext()) {
-		   ViewableTransferElement obj = (ViewableTransferElement)iter.next();
-		   if (obj.obj instanceof AttributeDef) {
-			   AttributeDef attr = (AttributeDef) obj.obj;
-			   AttributeDef baseAttr=attr;
-			   while(true){
-				   AttributeDef baseAttr1=(AttributeDef)baseAttr.getExtending();
-				   if(baseAttr1==null){
-					   break;
+		
+		for(ViewableWrapper table:aclass.getWrappers()){
+			Iterator iter = table.getAttrIterator();
+			while (iter.hasNext()) {
+			   ViewableTransferElement obj = (ViewableTransferElement)iter.next();
+			   if (obj.obj instanceof AttributeDef) {
+				   AttributeDef attr = (AttributeDef) obj.obj;
+				   AttributeDef baseAttr=attr;
+				   while(true){
+					   AttributeDef baseAttr1=(AttributeDef)baseAttr.getExtending();
+					   if(baseAttr1==null){
+						   break;
+					   }
+					   baseAttr=baseAttr1;
 				   }
-				   baseAttr=baseAttr1;
-			   }
-				if(!baseAttr.isTransient()){
-					Type proxyType=baseAttr.getDomain();
-					if(proxyType!=null && (proxyType instanceof ObjectType)){
-						// skip implicit particles (base-viewables) of views
-					}else{
-						   valuei = addAttrValue(rs, valuei, sqlid, iomObj, baseAttr,structQueue,fixref);
-					}
-				}
-		   }
-		   if(obj.obj instanceof RoleDef){
-			   RoleDef role = (RoleDef) obj.obj;
-			   if(role.getExtending()==null){
-				 String roleName=role.getName();
-				 String sqlRoleName=ili2sqlName.mapIliRoleDef(role);
-				 // a role of an embedded association?
-				 if(obj.embedded){
-					AssociationDef roleOwner = (AssociationDef) role.getContainer();
-					if(roleOwner.getDerivedFrom()==null){
-						 // TODO if(orderPos!=0){
-						int value=rs.getInt(valuei);
-						valuei++;
-						if(!rs.wasNull()){
-							IomObject ref=iomObj.addattrobj(roleName,roleOwner.getScopedName(null));
-							mapSqlid2Xtfid(fixref,value,ref,role.getDestination());
+					if(!baseAttr.isTransient()){
+						Type proxyType=baseAttr.getDomain();
+						if(proxyType!=null && (proxyType instanceof ObjectType)){
+							// skip implicit particles (base-viewables) of views
+						}else{
+							   valuei = addAttrValue(rs, valuei, sqlid, iomObj, baseAttr,structQueue,table,fixref);
 						}
 					}
-				 }else{
-					 // TODO if(orderPos!=0){
-					IomObject ref=iomObj.addattrobj(roleName,"REF");
-					mapSqlid2Xtfid(fixref,rs.getInt(valuei),ref,role.getDestination());
-					valuei++;
-				 }
 			   }
+			   if(obj.obj instanceof RoleDef){
+				   RoleDef role = (RoleDef) obj.obj;
+				   if(role.getExtending()==null){
+					 String roleName=role.getName();
+					 String sqlRoleName=ili2sqlName.mapIliRoleDef(role);
+					 // a role of an embedded association?
+					 if(obj.embedded){
+						AssociationDef roleOwner = (AssociationDef) role.getContainer();
+						if(roleOwner.getDerivedFrom()==null){
+							 // TODO if(orderPos!=0){
+							int value=rs.getInt(valuei);
+							valuei++;
+							if(!rs.wasNull()){
+								IomObject ref=iomObj.addattrobj(roleName,roleOwner.getScopedName(null));
+								mapSqlid2Xtfid(fixref,value,ref,role.getDestination());
+							}
+						}
+					 }else{
+						 // TODO if(orderPos!=0){
+						IomObject ref=iomObj.addattrobj(roleName,"REF");
+						mapSqlid2Xtfid(fixref,rs.getInt(valuei),ref,role.getDestination());
+						valuei++;
+					 }
+				   }
+				}
 			}
+			
 		}
+
 		return iomObj;
 	}
 	
 	final private int  LEN_LANG_PREFIX=DbNames.MULTILINGUAL_TXT_COL_PREFIX.length();
 	public int addAttrValue(java.sql.ResultSet rs, int valuei, int sqlid,
-			Iom_jObject iomObj, AttributeDef attr,ArrayList<StructWrapper> structQueue,FixIomObjectRefs fixref) throws SQLException {
+			Iom_jObject iomObj, AttributeDef attr,ArrayList<StructWrapper> structQueue,ViewableWrapper table,FixIomObjectRefs fixref) throws SQLException {
 		if(attr.getExtending()==null){
 			String attrName=attr.getName();
 			String sqlAttrName=ili2sqlName.mapIliAttributeDef(attr);
@@ -468,7 +474,7 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 						}
 					}else{
 						// enque iomObj as parent
-						structQueue.add(new StructWrapper(sqlid,attr,iomObj));
+						structQueue.add(new StructWrapper(sqlid,attr,iomObj,table));
 					}
 				}else if (type instanceof PolylineType){
 					Object geomobj=rs.getObject(valuei);

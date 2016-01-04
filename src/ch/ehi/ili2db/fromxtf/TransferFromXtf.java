@@ -156,7 +156,7 @@ public class TransferFromXtf {
 		unknownTypev=new HashSet();
 		structQueue=new ArrayList();
 		boolean surfaceAsPolyline=true;
-		recConv=new FromXtfRecordConverter(td,ili2sqlName,config,idGen,geomConv,conn,dbusr,isItfReader,oidPool,trafoConfig);
+		recConv=new FromXtfRecordConverter(td,ili2sqlName,tag2class,config,idGen,geomConv,conn,dbusr,isItfReader,oidPool,trafoConfig);
 		
 		int datasetSqlId=oidPool.newObjSqlId();
 		int importSqlId=0;

@@ -9,8 +9,12 @@ ideas/open issues/questions
 - --logValidOverlaps
 - support ili2 views
 - --initNameMapping
-- support geopackage
 - map simple unique constraints
+
+ili2pg 2.5.1 (2016-01-04)
+----------------------------
+- support GeoPackage (--dbfile file.gpkg)
+- fixed duplicate columnname if structattr in class with subclass-mapping
 
 ili2pg 2.5.0 (2015-12-23)
 ----------------------------
