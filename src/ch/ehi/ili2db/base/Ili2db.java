@@ -128,6 +128,9 @@ public class Ili2db {
 		if(jdbcDriver.equals("ch.ehi.ili2geodb.jdbc.GeodbDriver")){
 			return;
 		}
+		
+		CustomMapping customMapping=getCustomMappingStrategy(config);
+		
 		// open db connection
 		try{
 			Class.forName(jdbcDriver);
@@ -138,7 +141,7 @@ public class Ili2db {
 		Connection conn=null;
 		String url = dburl;
 		try {
-			conn = DriverManager.getConnection(url, dbusr, dbpwd);
+			conn = connect(url, dbusr, dbpwd, config, customMapping);
 			TransferFromIli.readSettings(conn,config,config.getDbschema());
 		} catch (SQLException e) {
 			EhiLogger.logError(e);
@@ -286,6 +289,7 @@ public class Ili2db {
 			if(jdbcDriver==null){
 				throw new Ili2dbException("no JDBC driver given");
 			}
+			CustomMapping customMapping=getCustomMappingStrategy(config);
 			
 			// open db connection
 			try{
@@ -297,14 +301,11 @@ public class Ili2db {
 			String url = dburl;
 			ch.ehi.basics.logging.ErrorTracker errs=null;
 			try{
-				EhiLogger.logState("dburl <"+url+">");
-				EhiLogger.logState("dbusr <"+dbusr+">");
-			  //DriverManager.registerDriver(new oracle.jdbc.OracleDriver());
-			  try {
-				conn = DriverManager.getConnection(url, dbusr, dbpwd);
-			} catch (SQLException ex) {
-				throw new Ili2dbException("failed to get db connection",ex);
-			}
+				try {
+					conn = connect(url, dbusr, dbpwd, config, customMapping);
+				} catch (SQLException ex) {
+					throw new Ili2dbException("failed to get db connection", ex);
+				}
 			  logDBVersion(conn);
 			  
 			  // switch off auto-commit
@@ -397,7 +398,7 @@ public class Ili2db {
 						// map ili-classes to sql-tables
 						DbSchema schema;
 						try {
-							schema = trsfFromIli.doit(td,eles,mapping,config,idGen,trafoConfig,class2wrapper);
+							schema = trsfFromIli.doit(td,eles,mapping,config,idGen,trafoConfig,class2wrapper,customMapping);
 						} catch (Ili2dbException e) {
 							throw new Ili2dbException("mapping of ili-classes to sql-tables failed",e);
 						}
@@ -653,16 +654,16 @@ public class Ili2db {
 		out.close();
 	}
 	
-	public static Ili2dbInit getInitStrategy(Config config)
+	public static Ili2dbLibraryInit getInitStrategy(Config config)
 	throws Ili2dbException
 	{
 		String initClassName=config.getInitStrategy();
 		if(initClassName==null){
-			return new Ili2dbInitNull();
+			return new Ili2dbLibraryInitNull();
 		}
-		Ili2dbInit init=null;
+		Ili2dbLibraryInit init=null;
 		try{
-			init=(Ili2dbInit)Class.forName(initClassName).newInstance();
+			init=(Ili2dbLibraryInit)Class.forName(initClassName).newInstance();
 		}catch(Exception ex){
 			throw new Ili2dbException("failed to load/create init strategy",ex);
 		}
@@ -679,7 +680,7 @@ public class Ili2db {
 		try{
 			logGeneralInfo(config);
 			
-			Ili2dbInit ao=null;
+			Ili2dbLibraryInit ao=null;
 			try{
 				ao=getInitStrategy(config); 
 				ao.init();
@@ -747,6 +748,7 @@ public class Ili2db {
 				throw new Ili2dbException("no JDBC driver given");
 			}
 
+			CustomMapping customMapping=getCustomMappingStrategy(config);
 			// open db connection
 			try{
 				Class.forName(jdbcDriver);
@@ -756,9 +758,7 @@ public class Ili2db {
 			Connection conn=null;
 			String url = dburl;
 			try{
-				EhiLogger.logState("dburl <"+url+">");
-				EhiLogger.logState("dbusr <"+dbusr+">");
-				conn = DriverManager.getConnection(url, dbusr, dbpwd);
+				conn = connect(url, dbusr, dbpwd, config, customMapping);
 			  logDBVersion(conn);
 			  
 			  // switch off auto-commit
@@ -862,7 +862,7 @@ public class Ili2db {
 				// TODO move default SRS to config
 				DbSchema schema;
 				try {
-					schema = trsfFromIli.doit(td,eles,mapping,config,idGen,trafoConfig,class2wrapper);
+					schema = trsfFromIli.doit(td,eles,mapping,config,idGen,trafoConfig,class2wrapper,customMapping);
 				} catch (Ili2dbException e) {
 					throw new Ili2dbException("mapping of ili-classes to sql-tables failed",e);
 				}
@@ -1073,6 +1073,8 @@ public class Ili2db {
 				throw new Ili2dbException("no models, baskets or topics given");
 			}
 			
+			CustomMapping customMapping=getCustomMappingStrategy(config);
+			
 			// open db connection
 			try{
 				Class.forName(jdbcDriver);
@@ -1082,11 +1084,9 @@ public class Ili2db {
 			Connection conn=null;
 			String url = dburl;
 			try{
-				EhiLogger.logState("dburl <"+url+">");
-				EhiLogger.logState("dbusr <"+dbusr+">");
 			  //DriverManager.registerDriver(new oracle.jdbc.OracleDriver());
 			  try {
-				conn = DriverManager.getConnection(url, dbusr, dbpwd);
+					conn = connect(url, dbusr, dbpwd, config, customMapping);
 			} catch (SQLException e) {
 				throw new Ili2dbException("failed to get db connection",e);
 			}
@@ -1231,6 +1231,16 @@ public class Ili2db {
 				logfile=null;
 			}
 		}
+	}
+	private static Connection connect(String url, String dbusr, String dbpwd,
+			Config config, CustomMapping customMapping) throws SQLException {
+		Connection conn;
+		EhiLogger.logState("dburl <" + url + ">");
+		EhiLogger.logState("dbusr <" + dbusr + ">");
+		customMapping.preConnect(url, dbusr, dbpwd, config);
+		conn = DriverManager.getConnection(url, dbusr, dbpwd);
+		customMapping.postConnect(conn, config);
+		return conn;
 	}
 	private static int[] getBasketSqlIdsFromBID(String[] basketids,
 			Configuration modelv,Connection conn,Config config) throws Ili2dbException {
@@ -1758,6 +1768,21 @@ public class Ili2db {
 			EhiLogger.logError(e);
 		}
 		
+	}
+	private static CustomMapping getCustomMappingStrategy(ch.ehi.ili2db.gui.Config config)
+	throws Ili2dbException
+	{
+		String mappingClassName=config.getIli2dbCustomStrategy();
+		if(mappingClassName==null){
+			return new CustomMappingNull();
+		}
+		CustomMapping mapping=null;
+		try{
+			mapping=(CustomMapping)Class.forName(mappingClassName).newInstance();
+		}catch(Exception ex){
+			throw new Ili2dbException("failed to load/create custom mapping strategy",ex);
+		}
+		return mapping;
 	}
 
 }

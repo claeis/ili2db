@@ -1,6 +1,9 @@
 package ch.ehi.ili2geodb;
 
+import java.sql.Connection;
+
 import ch.ehi.ili2db.fromili.CustomMapping;
+import ch.ehi.ili2db.gui.Config;
 import ch.ehi.sqlgen.repository.DbColumn;
 import ch.ehi.sqlgen.repository.DbTable;
 import ch.ehi.sqlgen.repository.DbTableName;
@@ -11,13 +14,13 @@ public class GeodbMapping implements CustomMapping {
 	private java.util.HashMap geodbDomains=new java.util.HashMap(); // map<String geodbDomainName,AttributeDef | DomainDef>
 	private java.util.HashSet geodbLinks=new java.util.HashSet(); // map<GeodbLink>
 	@Override
-	public void init(ch.ehi.ili2db.gui.Config config)
+	public void fromIliInit(ch.ehi.ili2db.gui.Config config)
 	{
 		
 	}
 	
 	@Override
-	public void end(ch.ehi.ili2db.gui.Config config)
+	public void fromIliEnd(ch.ehi.ili2db.gui.Config config)
 	{
 		config.setTransientObject(ch.ehi.ili2geodb.sqlgen.GeodbGenerator.GEODB_DOMAINS,geodbDomains);
 		config.setTransientObject(ch.ehi.ili2geodb.sqlgen.GeodbGenerator.GEODB_LINKS,geodbLinks);
@@ -84,6 +87,14 @@ public class GeodbMapping implements CustomMapping {
 					, targetPk // OriginPrimaryKey
 					, dbFk.getName() // OriginForeignKey
 					));
+	}
+
+	@Override
+	public void preConnect(String url, String dbusr, String dbpwd, Config config) {
+	}
+
+	@Override
+	public void postConnect(Connection conn, Config config) {
 	}
 
 }

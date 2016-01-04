@@ -68,7 +68,7 @@ public class TransferFromIli {
 	private String colT_ID=null;
 	private String nl=System.getProperty("line.separator");
 	private FromIliRecordConverter recConv=null;
-	public DbSchema doit(TransferDescription td1,java.util.List<Element> modelEles,ch.ehi.ili2db.mapping.NameMapping ili2sqlName,ch.ehi.ili2db.gui.Config config,DbIdGen idGen,TrafoConfig trafoConfig,Viewable2TableMapping class2wrapper1)
+	public DbSchema doit(TransferDescription td1,java.util.List<Element> modelEles,ch.ehi.ili2db.mapping.NameMapping ili2sqlName,ch.ehi.ili2db.gui.Config config,DbIdGen idGen,TrafoConfig trafoConfig,Viewable2TableMapping class2wrapper1,CustomMapping customMapping1)
 	throws Ili2dbException
 	{
 		this.ili2sqlName=ili2sqlName;
@@ -91,8 +91,8 @@ public class TransferFromIli {
 		isIli1Model=td1.getIli1Format()!=null;
 		createItfLineTables=isIli1Model && config.getDoItfLineTables();
 		
-		customMapping=getCustomMappingStrategy(config);
-		customMapping.init(config);
+		customMapping=customMapping1;
+		customMapping.fromIliInit(config);
 
 		schema=new DbSchema();
 		schema.setName(config.getDbschema());
@@ -142,7 +142,7 @@ public class TransferFromIli {
 		// interlis LONGVARCHAR(767)
 		// db VARCHAR(30)
 		
-		customMapping.end(config);
+		customMapping.fromIliEnd(config);
 		return schema;		
 
 	}
@@ -159,21 +159,6 @@ public class TransferFromIli {
 			return false;
 		}
 		return true;
-	}
-	private CustomMapping getCustomMappingStrategy(ch.ehi.ili2db.gui.Config config)
-	throws Ili2dbException
-	{
-		String mappingClassName=config.getIli2dbCustomStrategy();
-		if(mappingClassName==null){
-			return new CustomMappingNull();
-		}
-		CustomMapping mapping=null;
-		try{
-			mapping=(CustomMapping)Class.forName(mappingClassName).newInstance();
-		}catch(Exception ex){
-			throw new Ili2dbException("failed to load/create custom mapping strategy",ex);
-		}
-		return mapping;
 	}
 
 	private void generateDomain(Domain def)

@@ -11,7 +11,7 @@ import com.esri.arcgis.system.esriLicenseStatus;
 import com.esri.arcgis.system.EngineInitializer;
 import com.esri.arcgis.system.AoInitialize;
 
-public class InitAOEngine implements ch.ehi.ili2db.base.Ili2dbInit {
+public class InitAOEngine implements ch.ehi.ili2db.base.Ili2dbLibraryInit {
 	private static int refc=0;
 	static AoInitialize aoInitializer = null;
 	public void init()
