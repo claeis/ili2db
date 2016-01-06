@@ -30,10 +30,21 @@ import java.util.Iterator;
 
 
 
+
+
+
+
+
+import com.vividsolutions.jts.geom.Envelope;
+import com.vividsolutions.jts.geom.Polygon;
+
 import ch.ehi.basics.logging.EhiLogger;
 import ch.interlis.iom.IomConstants;
 import ch.interlis.iom.IomObject;
+import ch.interlis.iom_j.itf.impl.jtsext.geom.CompoundCurve;
+import ch.interlis.iox.IoxException;
 import ch.interlis.iox_j.jts.Iox2jtsException;
+import ch.interlis.iox_j.jts.Iox2jtsext;
 import ch.interlis.iox_j.wkb.ByteArrayOutputStream;
 import ch.interlis.iox_j.wkb.Iox2wkb;
 import ch.interlis.iox_j.wkb.Iox2wkbException;
@@ -67,7 +78,7 @@ public class Iox2gpkg {
 		}
 	    try {
 	    	os.reset();
-	    	writeGeoPackageBinaryHeader(srsId);
+	    	writeGeoPackageBinaryHeader(srsId,null);
 	    	// wkb
 			Iox2wkb helper=new Iox2wkb(outputDimension,os.order());
 			os.write(helper.coord2wkb(obj));
@@ -91,12 +102,15 @@ public class Iox2gpkg {
 		}
 	    try {
 	    	os.reset();
-	    	writeGeoPackageBinaryHeader(srsId);
+	    	CompoundCurve surface = Iox2jtsext.polyline2JTS(obj,false, p);
+	    	writeGeoPackageBinaryHeader(srsId,surface.getEnvelopeInternal());
 	    	// wkb
 			Iox2wkb helper=new Iox2wkb(outputDimension,os.order());
 			os.write(helper.polyline2wkb(obj,isSurfaceOrArea,asCompoundCurve,p));
 		} catch (IOException e) {
 	        throw new RuntimeException("Unexpected IO exception: " + e.getMessage());
+		} catch (IoxException e) {
+	        throw new RuntimeException("Unexpected exception: " + e.getMessage());
 		}
 		return os.toByteArray();
 	}
@@ -114,12 +128,15 @@ public class Iox2gpkg {
 		}
 	    try {
 	    	os.reset();
-	    	writeGeoPackageBinaryHeader(srsId);
+	    	Polygon surface = Iox2jtsext.surface2JTS(obj, strokeP);
+	    	writeGeoPackageBinaryHeader(srsId,surface.getEnvelopeInternal());
 	    	// wkb
 			Iox2wkb helper=new Iox2wkb(outputDimension,os.order());
 			os.write(helper.surface2wkb(obj,asCurvePolygon,strokeP));
 		} catch (IOException e) {
 	        throw new RuntimeException("Unexpected IO exception: " + e.getMessage());
+		} catch (IoxException e) {
+	        throw new RuntimeException("Unexpected exception: " + e.getMessage());
 		}
 		return os.toByteArray();
 	}
@@ -131,7 +148,7 @@ public class Iox2gpkg {
 		}
 	    try {
 	    	os.reset();
-	    	writeGeoPackageBinaryHeader(srsId);
+	    	writeGeoPackageBinaryHeader(srsId,null);
 	    	// wkb
 			Iox2wkb helper=new Iox2wkb(outputDimension,os.order());
 			os.write(helper.multisurface2wkb(obj,asCurvePolygon,strokeP));
@@ -140,7 +157,7 @@ public class Iox2gpkg {
 		}
 		return os.toByteArray();
 	}
-	private void writeGeoPackageBinaryHeader(int srsId) {
+	private void writeGeoPackageBinaryHeader(int srsId, Envelope envelope) {
 		// GeoPackageBinaryHeader {
 		// byte[2] magic = 0x4750;  // ‘GP’
 		// byte version; // 8-bit unsigned integer, 0 = version 1
@@ -160,10 +177,19 @@ public class Iox2gpkg {
 		}else{
 			flags&=~0x01;
 		}
+		if(envelope!=null){
+			flags |= (0x01<<1);
+		}
 		os.write(flags);
 		// srs_id
 		os.writeInt(srsId);
 		// envelope
+		if(envelope!=null){
+			os.writeDouble(envelope.getMinX());
+			os.writeDouble(envelope.getMaxX());
+			os.writeDouble(envelope.getMinY());
+			os.writeDouble(envelope.getMaxY());
+		}
 	}
 
 }
