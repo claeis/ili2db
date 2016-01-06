@@ -34,7 +34,16 @@ public class GpkgColumnConverter extends AbstractWKBColumnConverter {
 	@Override
 	public int getSrsid(String crsAuthority, String crsCode, Connection conn)
 			throws ConverterException {
-		return -1;
+		int srsid;
+		try{
+			java.sql.Statement stmt=conn.createStatement();
+			java.sql.ResultSet ret=stmt.executeQuery("SELECT srs_id FROM gpkg_spatial_ref_sys WHERE organization=\'"+crsAuthority+"\' AND organization_coordsys_id="+crsCode);
+			ret.next();
+			srsid=ret.getInt(1);
+		}catch(java.sql.SQLException ex){
+			throw new ConverterException("failed to query srsid from database",ex);
+		}
+		return srsid;
 	}
 	private boolean strokeArcs=true;
 	@Override
