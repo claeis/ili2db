@@ -41,17 +41,6 @@ public class GpkgMain extends ch.ehi.ili2db.AbstractMain {
 		config.setIdGenerator(ch.ehi.ili2db.base.TableBasedIdGen.class.getName());
 		config.setIli2dbCustomStrategy(ch.ehi.ili2gpkg.GpkgMapping.class.getName());
 	}
-	/**
-	 * GeoPackage application id
-	 */
-	public static final String APPLICATION_ID = "GP10";
-	public void setApplicationId() {
-		// Set the application id as a GeoPackage
-		int applicationId = ByteBuffer
-				.wrap(APPLICATION_ID.getBytes())
-				.asIntBuffer().get();
-		//exec sql("PRAGMA application_id = "+ applicationId+";");
-	}
 
 	@Override
 	protected DbUrlConverter getDbUrlConverter() {
@@ -106,10 +95,6 @@ public class GpkgMain extends ch.ehi.ili2db.AbstractMain {
 		if(arg.equals("--dbfile")){
 			argi++;
 			config.setDbfile(args[argi]);
-			argi++;
-		}else if(arg.equals("--dbschema")){
-			argi++;
-			config.setDbschema(args[argi]);
 			argi++;
 		}
 		return argi;
