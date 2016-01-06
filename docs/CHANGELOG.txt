@@ -11,6 +11,14 @@ ideas/open issues/questions
 - --initNameMapping
 - map simple unique constraints
 
+ili2gpkg 2.5.2 (2016-01-xx)
+----------------------------
+- fixed missing init.sql
+- fixed TOWGS84-Parameter of EPSG:21781
+- added TABLE gpkg_extensions
+- added envelope to GeoPackageBinaryHeader
+- add only first geometry column to gpkg_contents and gpkg_geometry_columns
+
 ili2pg 2.5.1 (2016-01-04)
 ----------------------------
 - support GeoPackage (--dbfile file.gpkg)
