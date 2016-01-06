@@ -52,6 +52,7 @@
     <jar jarfile="${projectjar}" manifest="other/manifest-ili2gpkg">
 	<fileset dir="${build}/classes" includes="**/*.class"/>
     	<fileset dir="${src}" includes="**/*.properties"/>
+    	<fileset dir="ili2gpkg/src" includes="**/*.sql"/>
     	<fileset dir="ili2gpkg/src" includes="**/*.properties"/>
     	<!-- <fileset dir="resources/de" includes="**/*.properties"/>
     	<fileset dir="resources/fr" includes="**/*.properties"/>
