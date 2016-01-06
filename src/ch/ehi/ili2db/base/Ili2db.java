@@ -65,8 +65,6 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import com.sun.org.apache.bcel.internal.generic.GETSTATIC;
-
 import ch.ehi.ili2db.gui.Config;
 
 /**
