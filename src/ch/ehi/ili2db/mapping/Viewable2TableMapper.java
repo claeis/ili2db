@@ -25,7 +25,7 @@ public class Viewable2TableMapper {
 		boolean smartInheritance=Config.INHERITANCE_TRAFO_SMART.equals(config.getInheritanceTrafo());
 		// setup/update TrafoConfig
 		/*
-		 * Für Klassen, die referenziert werden und deren Basisklassen nicht mit
+		 * Fuer Klassen, die referenziert werden und deren Basisklassen nicht mit
 		 * einer NewClass-Strategie abgebildet werden, wird die
 		 * NewClass-Strategie verwendet. Abstrakte Klassen werden mit einer
 		 * SubClass-Strategie abgebildet. Konkrete Klassen, ohne Basisklasse
