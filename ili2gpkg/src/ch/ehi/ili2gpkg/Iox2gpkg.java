@@ -159,7 +159,7 @@ public class Iox2gpkg {
 	}
 	private void writeGeoPackageBinaryHeader(int srsId, Envelope envelope) {
 		// GeoPackageBinaryHeader {
-		// byte[2] magic = 0x4750;  // ‘GP’
+		// byte[2] magic = 0x4750;  // 'GP'
 		// byte version; // 8-bit unsigned integer, 0 = version 1
 		// byte flags; // see flags layout below
 		// int32 srs_id;
