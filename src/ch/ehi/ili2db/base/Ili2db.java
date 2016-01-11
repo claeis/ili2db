@@ -1092,6 +1092,7 @@ public class Ili2db {
 			
 			ch.interlis.ili2c.config.Configuration modelv=new ch.interlis.ili2c.config.Configuration();
 			boolean createBasketCol=config.BASKET_HANDLING_READWRITE.equals(config.getBasketHandling());
+			String exportModelnames[]=null;
 			int basketSqlIds[]=null;
 			if(baskets!=null){
 				if(!createBasketCol){
@@ -1114,9 +1115,9 @@ public class Ili2db {
 					String modelnames[]=models.split(ch.interlis.ili2c.Main.MODELS_SEPARATOR);
 					basketSqlIds=getBasketSqlIdsFromModel(modelnames,modelv,conn,config);
 				}else{
-					String modelnames[]=models.split(ch.interlis.ili2c.Main.MODELS_SEPARATOR);
-					for(int modeli=0;modeli<modelnames.length;modeli++){
-						String m=modelnames[modeli];
+					exportModelnames=models.split(ch.interlis.ili2c.Main.MODELS_SEPARATOR);
+					for(int modeli=0;modeli<exportModelnames.length;modeli++){
+						String m=exportModelnames[modeli];
 						if(m.equals(XTF)){
 							// TODO read modelname from db
 						}
@@ -1195,7 +1196,7 @@ public class Ili2db {
 				HashSet<BasketStat> stat=new HashSet<BasketStat>();
 				ch.ehi.basics.logging.ErrorTracker errs=new ch.ehi.basics.logging.ErrorTracker();
 				EhiLogger.getInstance().addListener(errs);
-				transferToXtf(conn,xtffile,mapping,td,geomConverter,config.getSender(),config,basketSqlIds,stat,trafoConfig,class2wrapper);
+				transferToXtf(conn,xtffile,mapping,td,geomConverter,config.getSender(),config,exportModelnames,basketSqlIds,stat,trafoConfig,class2wrapper);
 				if (errs.hasSeenErrors()) {
 					throw new Ili2dbException("...export failed");
 				} else {
@@ -1583,6 +1584,7 @@ public class Ili2db {
 			,SqlColumnConverter geomConv
 			,String sender
 			,Config config
+			,String exportParamModelnames[]
 			,int basketSqlIds[]
 			,HashSet<BasketStat> stat
 			,TrafoConfig trafoConfig
@@ -1604,7 +1606,7 @@ public class Ili2db {
 				ioxWriter=new XtfWriter(outfile,td);
 			}
 			TransferToXtf trsfr=new TransferToXtf(ili2sqlName,td,conn,geomConv,config,trafoConfig,class2wrapper);
-			trsfr.doit(outfile.getName(),ioxWriter,sender,basketSqlIds,stat);
+			trsfr.doit(outfile.getName(),ioxWriter,sender,exportParamModelnames,basketSqlIds,stat);
 			//trsfr.doitJava();
 			ioxWriter.flush();
 		}catch(ch.interlis.iox.IoxException ex){

@@ -95,7 +95,7 @@ public class TransferToXtf {
 		recConv=new ToXtfRecordConverter(td,ili2sqlName,config,null,geomConv,conn,sqlidPool,trafoConfig,class2wrapper);
 
 	}
-	public void doit(String filename,IoxWriter iomFile,String sender,int basketSqlIds[],HashSet<BasketStat> stat)
+	public void doit(String filename,IoxWriter iomFile,String sender,String exportParamModelnames[],int basketSqlIds[],HashSet<BasketStat> stat)
 	throws ch.interlis.iox.IoxException
 	{
 		this.basketStat=stat;
@@ -116,11 +116,10 @@ public class TransferToXtf {
 			
 		}else{
 			// for all MODELs
-			Iterator modeli = td.iterator ();
-			while (modeli.hasNext ())
+			for(String modelName:exportParamModelnames)
 			{
-			  Object mObj = modeli.next ();
-			  if ((mObj instanceof Model) && !(suppressModel((Model)mObj)))
+			  Object mObj = td.getElement(Model.class, modelName);
+			  if (mObj!=null && (mObj instanceof Model) && !(suppressModel((Model)mObj)))
 			  {
 				Model model=(Model)mObj;
 				// for all TOPICs
