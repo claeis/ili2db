@@ -13,11 +13,14 @@ ideas/open issues/questions
 
 ili2gpkg 2.5.2 (2016-01-xx)
 ----------------------------
-- fixed missing init.sql
-- fixed TOWGS84-Parameter of EPSG:21781
-- added TABLE gpkg_extensions
-- added envelope to GeoPackageBinaryHeader
-- add only first geometry column to gpkg_contents and gpkg_geometry_columns
+- GPKG: fixed missing init.sql
+- GPKG: fixed TOWGS84-Parameter of EPSG:21781
+- GPKG: fixed CH srs
+- GPKG: added TABLE gpkg_extensions
+- GPKG: added envelope to GeoPackageBinaryHeader
+- GPKG: add only first geometry column to gpkg_contents and gpkg_geometry_columns
+- T_ILI2DB_SETTINGS.setting changed to length 255
+- jts-core-1.14
 
 ili2pg 2.5.1 (2016-01-04)
 ----------------------------

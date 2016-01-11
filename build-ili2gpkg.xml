@@ -23,7 +23,7 @@
       <classpath>
         <pathelement location="lib/ehisqlgen.jar"/>
         <pathelement location="lib/ili2c.jar"/>
-        <pathelement location="lib/jts-1.13.jar"/>
+        <pathelement location="lib/jts-core-1.14.jar"/>
         <pathelement location="lib/jdbm-2.4.jar"/>
 	<pathelement location="lib/sqlite-jdbc-3.8.11.2.jar"/>
       </classpath>
@@ -61,7 +61,7 @@
     	<fileset dir="${src}" includes="**/*.jpg"/>
     	<fileset dir="${src}" includes="**/*.png"/>
     	<zipfileset src="lib/ehisqlgen.jar"/>
-    	<zipfileset src="lib/jts-1.13.jar"/>
+    	<zipfileset src="lib/jts-core-1.14.jar"/>
     	<zipfileset src="lib/jdbm-2.4.jar"/>
     </jar>
   </target>
@@ -111,7 +111,7 @@
 		<patternset includes="resources/it/**/*.properties"/>
 	    	<patternset includes="lib/ili2c.jar"/>
 		<patternset includes="lib/ehisqlgen.jar"/>
-		<patternset includes="lib/jts-1.13.jar"/>
+		<patternset includes="lib/jts-core-1.14.jar"/>
 		<patternset includes="lib/jdbm-2.4.jar"/>
 		<patternset includes="lib/sqlite-jdbc-3.8.11.2.jar"/>
     	</zipfileset>
