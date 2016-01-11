@@ -21,6 +21,7 @@ ili2gpkg 2.5.2 (2016-01-xx)
 - GPKG: add only first geometry column to gpkg_contents and gpkg_geometry_columns
 - T_ILI2DB_SETTINGS.setting changed to length 255
 - jts-core-1.14
+- new option --skipPolygonBuildingErrors
 
 ili2pg 2.5.1 (2016-01-04)
 ----------------------------

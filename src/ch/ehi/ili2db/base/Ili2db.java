@@ -461,7 +461,7 @@ public class Ili2db {
 								ioxReader=new ItfReader(in);
 								((ItfReader)ioxReader).setModel(td);		
 							}else{
-								ioxReader=new ItfReader2(in);
+								ioxReader=new ItfReader2(in,config.ignorePolygonBuildingErrors());
 								((ItfReader2)ioxReader).setModel(td);		
 							}
 						}else{
@@ -525,7 +525,7 @@ public class Ili2db {
 								ioxReader=new ItfReader(new java.io.File(inputFilename));
 								((ItfReader)ioxReader).setModel(td);		
 							}else{
-								ioxReader=new ItfReader2(new java.io.File(inputFilename));
+								ioxReader=new ItfReader2(new java.io.File(inputFilename),config.ignorePolygonBuildingErrors());
 								((ItfReader2)ioxReader).setModel(td);		
 							}
 						}else{

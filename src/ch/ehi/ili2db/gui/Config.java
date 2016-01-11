@@ -34,6 +34,8 @@ public class Config extends Settings {
 	public static final String MULTISURFACE_TRAFO_COALESCE="coalesce";
 	public static final String MULTILINGUAL_TRAFO=PREFIX+".multilingualTrafo";
 	public static final String MULTILINGUAL_TRAFO_EXPAND="expand";
+	public static final String POLYGON_BUILDING_ERRORS=PREFIX+".polygonBuildingErrors";
+	public static final String POLYGON_BUILDING_ERRORS_IGNORE="reportAndSkip";
 	private static final String NAME_OPTIMIZATION=PREFIX+".nameOptimization";
 	public static final String NAME_OPTIMIZATION_DISABLE="disable";
 	public static final String NAME_OPTIMIZATION_TOPIC="topic";
@@ -336,6 +338,12 @@ public class Config extends Settings {
 	}
 	public void setDoItfLineTables(boolean value) {
 		setValue(DO_ITF_LINE_TABLES,value?"True":"False");
+	}
+	public void setIgnorePolygonBuildingErrors(boolean ignore) {
+		setValue(POLYGON_BUILDING_ERRORS,ignore?POLYGON_BUILDING_ERRORS_IGNORE:null);
+	}
+	public boolean ignorePolygonBuildingErrors() {
+		return POLYGON_BUILDING_ERRORS_IGNORE.equals(getValue(POLYGON_BUILDING_ERRORS));
 	}
 	public String getAreaRef() {
 		return getValue(AREA_REF);
