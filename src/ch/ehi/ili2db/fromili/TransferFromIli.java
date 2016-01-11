@@ -120,7 +120,10 @@ public class TransferFromIli {
 					// skip it
 				}else{
 					try{
-						generateViewable((Viewable)modelo);
+						ViewableWrapper wrapper=class2wrapper.get((Viewable)modelo);
+						if(wrapper!=null){
+							generateViewable(wrapper);
+						}
 					}catch(Ili2dbException ex){
 						throw new Ili2dbException("mapping of "+((Viewable)modelo).getScopedName(null)+" failed",ex);
 					}
@@ -168,29 +171,29 @@ public class TransferFromIli {
 			visitedEnums.add(def);
 		}
 	}
-	private void generateViewable(Viewable def)
+	private void generateViewable(ViewableWrapper def)
 	throws Ili2dbException
 	{
-		if(def instanceof AssociationDef){
-			AssociationDef assoc=(AssociationDef)def;
+		if(def.getViewable() instanceof AssociationDef){
+			AssociationDef assoc=(AssociationDef)def.getViewable();
 			if(assoc.getDerivedFrom()!=null){
 				return;
 			}
 			if(assoc.isLightweight() 
 				&& !assoc.getAttributes().hasNext()
 				&& !assoc.getLightweightAssociations().iterator().hasNext()) {
-				customMapping.fixupViewable(null,def);
+				customMapping.fixupViewable(null,def.getViewable());
 				return;
 			}
 		}
 		
 		//EhiLogger.debug("viewable "+def);
-		Viewable base=def;
+		ViewableWrapper base=def;
 		while(base!=null){
-			ViewableWrapper wrapper=class2wrapper.get(base);
-			if(!visitedWrapper.contains(wrapper)){
-				visitedWrapper.add(wrapper);
-				recConv.generateTable(wrapper);
+			EhiLogger.debug("wrapper of viewable "+def.getViewable());
+			if(!visitedWrapper.contains(def)){
+				visitedWrapper.add(def);
+				recConv.generateTable(def);
 			  	
 			  	if(createItfLineTables){
 			  		for(AttributeDef attr : recConv.getSurfaceAttrs()){
@@ -198,7 +201,7 @@ public class TransferFromIli {
 			  		}
 			  	}
 			}
-			base=(Viewable) base.getExtending();
+			base=base.getExtending();
 		}
 	}
 	private void generateItfLineTable(AttributeDef attr)

@@ -39,7 +39,6 @@ public class Viewable2TableMapper {
 				// not a Viewable; skip it
 			}else{
 				// a Viewable
-				EhiLogger.debug("viewable "+ele.getScopedName(null));
 				Viewable aclass=(Viewable) ele;
 				if(trafoConfig.getViewableConfig(aclass, TrafoConfigNames.INHERITANCE_TRAFO)==null){
 					if(smartInheritance){
@@ -64,6 +63,7 @@ public class Viewable2TableMapper {
 						trafoConfig.setViewableConfig(aclass, TrafoConfigNames.INHERITANCE_TRAFO, TrafoConfigNames.INHERITANCE_TRAFO_NEWCLASS);
 					}
 				}
+				EhiLogger.traceState("viewable "+aclass.getScopedName(null)+" "+trafoConfig.getViewableConfig(aclass, TrafoConfigNames.INHERITANCE_TRAFO));
 			}
 		}
 		Viewable2TableMapping ret=new Viewable2TableMapping();
@@ -89,7 +89,6 @@ public class Viewable2TableMapper {
 							if(!TrafoConfigNames.INHERITANCE_TRAFO_SUBCLASS.equals(trafoConfig.getViewableConfig(base, TrafoConfigNames.INHERITANCE_TRAFO))){
 								break;
 							}
-							ret.add(base, wrapper);
 							addProps(props,base.getDefinedAttributesAndRoles2());
 							base=(Viewable) base.getExtending();
 						}

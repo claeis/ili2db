@@ -1026,15 +1026,15 @@ public class TransferToXtf {
 	private String createQueryStmt4Type(Viewable aclass,StructWrapper wrapper){
 		StringBuffer ret = new StringBuffer();
 		ret.append("SELECT r0."+colT_ID);
-		if(createTypeDiscriminator || class2wrapper.get(aclass).includesMultipleTypes()){
+		ViewableWrapper root=class2wrapper.get(aclass);
+		while(root.getExtending()!=null){
+			root=root.getExtending();
+		}
+		if(createTypeDiscriminator || root.includesMultipleTypes()){
 			ret.append(", r0."+DbNames.T_TYPE_COL);
 		}
 		ret.append(" FROM ");
-		Viewable rootClass=(Viewable)aclass.getRootExtending();
-		if(rootClass==null){
-		 rootClass=aclass;
-		}
-		ret.append(recConv.getSqlTableName(class2wrapper.get(rootClass).getViewable()));
+		ret.append(recConv.getSqlTableName(root.getViewable()));
 		ret.append(" r0");
 		if(wrapper!=null){
 			if(createGenericStructRef){

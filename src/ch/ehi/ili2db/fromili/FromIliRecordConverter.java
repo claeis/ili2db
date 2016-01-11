@@ -504,10 +504,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 	private void addParentRef(Viewable parentTable,AttributeDef attr){
 		CompositionType type = (CompositionType)attr.getDomainResolvingAll();
 		Table structClass=type.getComponentType();
-		Table root=(Table)structClass.getRootExtending();
-		if(root!=null){
-			structClass=root;
-		}
+		// TODO if abstract struct, might be multiple tables!
 		DbTableName structClassSqlName=getSqlTableName(class2wrapper.get(structClass).getViewable());
 		
 		// find struct table
