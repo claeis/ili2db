@@ -564,6 +564,20 @@ public class OracleColumnConverter implements SqlColumnConverter {
 		return wkfValue;
 	}
 	@Override
+	public String getSelectValueWrapperDate(String sqlColName) {
+		 return sqlColName;
+	}
+
+	@Override
+	public String getSelectValueWrapperTime(String sqlColName) {
+		 return sqlColName;
+	}
+
+	@Override
+	public String getSelectValueWrapperDateTime(String sqlColName) {
+		 return sqlColName;
+	}
+	@Override
 	public String getSelectValueWrapperCoord(String dbNativeValue) {
 		return dbNativeValue;
 	}

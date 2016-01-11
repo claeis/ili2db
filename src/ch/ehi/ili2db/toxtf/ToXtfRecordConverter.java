@@ -202,7 +202,23 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 		if(attr.getExtending()==null){
 			Type type = attr.getDomainResolvingAliases();
 			 String attrName=ili2sqlName.mapIliAttributeDef(attr);
-			if (type instanceof CompositionType){
+			if( Ili2cUtility.isIli1Date(td,attr)) {
+				 ret.append(sep);
+				 sep=",";
+				 ret.append(geomConv.getSelectValueWrapperDate(attrName));
+			}else if( Ili2cUtility.isIli2Date(td,attr)) {
+				 ret.append(sep);
+				 sep=",";
+				 ret.append(geomConv.getSelectValueWrapperDate(attrName));
+			}else if( Ili2cUtility.isIli2Time(td,attr)) {
+				 ret.append(sep);
+				 sep=",";
+				 ret.append(geomConv.getSelectValueWrapperTime(attrName));
+			}else if( Ili2cUtility.isIli2DateTime(td,attr)) {
+				 ret.append(sep);
+				 sep=",";
+				 ret.append(geomConv.getSelectValueWrapperDateTime(attrName));
+			}else if (type instanceof CompositionType){
 				if(TrafoConfigNames.CATALOGUE_REF_TRAFO_COALESCE.equals(trafoConfig.getAttrConfig(attr, TrafoConfigNames.CATALOGUE_REF_TRAFO))){
 					 ret.append(sep);
 					 sep=",";

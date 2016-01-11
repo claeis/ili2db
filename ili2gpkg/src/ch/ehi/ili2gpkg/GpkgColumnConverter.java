@@ -69,6 +69,20 @@ public class GpkgColumnConverter extends AbstractWKBColumnConverter {
 		return wkfValue;
 	}
 	@Override
+	public String getSelectValueWrapperDate(String sqlColName) {
+		 return "strftime('%Y-%m-%d %H:%M:%fZ',"+sqlColName+")";
+	}
+
+	@Override
+	public String getSelectValueWrapperTime(String sqlColName) {
+		 return "strftime('%Y-%m-%d %H:%M:%fZ',"+sqlColName+")";
+	}
+
+	@Override
+	public String getSelectValueWrapperDateTime(String sqlColName) {
+		 return "strftime('%Y-%m-%d %H:%M:%fZ',"+sqlColName+")";
+	}
+	@Override
 	public String getSelectValueWrapperCoord(String dbNativeValue) {
 		return dbNativeValue;
 	}
@@ -208,4 +222,5 @@ public class GpkgColumnConverter extends AbstractWKBColumnConverter {
 					throw new ConverterException(e);
 				}
 			}
+
 }
