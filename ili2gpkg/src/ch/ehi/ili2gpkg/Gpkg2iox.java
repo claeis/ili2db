@@ -66,7 +66,7 @@ public class Gpkg2iox
   public IomObject read(byte[] bytes) throws ParseException
   {
 		// GeoPackageBinaryHeader {
-		// byte[2] magic = 0x4750;  // ‘GP’
+		// byte[2] magic = 0x4750;  // 'GP'
 		// byte version; // 8-bit unsigned integer, 0 = version 1
 		// byte flags; // see flags layout below
 		// int32 srs_id;
