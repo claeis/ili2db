@@ -47,14 +47,12 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 	private Connection conn=null;
 	private SqlColumnConverter geomConv=null;
 	private SqlidPool sqlid2xtfid=null;
-	private Viewable2TableMapping class2wrapper=null;
 	public ToXtfRecordConverter(TransferDescription td1, NameMapping ili2sqlName,
 			Config config, DbIdGen idGen1,SqlColumnConverter geomConv1,Connection conn1,SqlidPool sqlidPool,TrafoConfig trafoConfig,Viewable2TableMapping class2wrapper1) {
-		super(td1, ili2sqlName, config, idGen1,trafoConfig);
+		super(td1, ili2sqlName, config, idGen1,trafoConfig,class2wrapper1);
 		conn=conn1;
 		geomConv=geomConv1;
 		sqlid2xtfid=sqlidPool;
-		class2wrapper=class2wrapper1;
 		try {
 			if(conn.getMetaData().getURL().startsWith("jdbc:odbc:DRIVER={Microsoft Access Driver (*.mdb)}")){
 				isMsAccess=true;
@@ -86,12 +84,13 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 				ret.append(", r0."+DbNames.T_PARENT_TYPE_COL);
 				ret.append(", r0."+DbNames.T_PARENT_ATTR_COL);
 			}else{
-				ret.append(", r0."+ili2sqlName.mapIliAttributeDefQualified(structWrapper.getParentTable().getViewable(),structWrapper.getParentAttr()));
+				ret.append(", r0."+ili2sqlName.mapIliAttributeDefReverse(structWrapper.getParentAttr(),getSqlType(aclass.getViewable()).getName(),getSqlType(structWrapper.getParentTable().getViewable()).getName()));
 			}
 			ret.append(", r0."+DbNames.T_SEQ_COL);
 		}
 		String sep=",";
 		for(ViewableWrapper table:aclass.getWrappers()){
+			String sqlTableName=getSqlType(table.getViewable()).getName();
 			Iterator iter = table.getAttrIterator();
 			while (iter.hasNext()) {
 			   ViewableTransferElement obj = (ViewableTransferElement)iter.next();
@@ -110,14 +109,14 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 						if(proxyType!=null && (proxyType instanceof ObjectType)){
 							// skip implicit particles (base-viewables) of views
 						}else{
-							 sep = addAttrToQueryStmt(ret, sep, baseAttr);
+							 sep = addAttrToQueryStmt(ret, sep, baseAttr,sqlTableName);
 						}
 					}
 			   }
 			   if(obj.obj instanceof RoleDef){
 				   RoleDef role = (RoleDef) obj.obj;
 				   if(role.getExtending()==null){
-					String roleName=ili2sqlName.mapIliRoleDef(role);
+					String roleSqlName=ili2sqlName.mapIliRoleDef(role,sqlTableName,getSqlType(role.getDestination()).getName());
 					// a role of an embedded association?
 					if(obj.embedded){
 						AssociationDef roleOwner = (AssociationDef) role.getContainer();
@@ -125,13 +124,13 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 							 // TODO if(orderPos!=0){
 							 ret.append(sep);
 							 sep=",";
-							 ret.append(roleName);
+							 ret.append(roleSqlName);
 						}
 					 }else{
 						 // TODO if(orderPos!=0){
 						 ret.append(sep);
 						 sep=",";
-						 ret.append(roleName);
+						 ret.append(roleSqlName);
 					 }
 				   }
 				}
@@ -167,7 +166,7 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 		}
 		for(int i=0;i<tablec;i++){
 			ret.append(sep);
-			ret.append(getSqlTableName(tablev.get(i).getViewable()));
+			ret.append(getSqlType(tablev.get(i).getViewable()));
 			ret.append(" r"+Integer.toString(tablec-1-i));
 			if(i>0){
 				ret.append(" ON r"+Integer.toString(tablec-i)+"."+colT_ID+"=r"+Integer.toString(tablec-1-i)+"."+colT_ID);
@@ -179,14 +178,14 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 		}
 		sep=" WHERE";
 		if(createTypeDiscriminator || aclass.includesMultipleTypes()){
-			ret.append(sep+" r0."+DbNames.T_TYPE_COL+"='"+getSqlTableName(aclass1).getName()+"'");
+			ret.append(sep+" r0."+DbNames.T_TYPE_COL+"='"+getSqlType(aclass1).getName()+"'");
 			sep=" AND";
 		}
 		if(structWrapper!=null){
 			if(createGenericStructRef){
 				ret.append(sep+" r0."+DbNames.T_PARENT_ID_COL+"=? AND r0."+DbNames.T_PARENT_ATTR_COL+"=?");
 			}else{
-				ret.append(sep+" r0."+ili2sqlName.mapIliAttributeDefQualified(structWrapper.getParentTable().getViewable(),structWrapper.getParentAttr())+"=?");
+				ret.append(sep+" r0."+ili2sqlName.mapIliAttributeDefReverse(structWrapper.getParentAttr(),getSqlType(aclass.getViewable()).getName(),getSqlType(structWrapper.getParentTable().getViewable()).getName())+"=?");
 			}
 			sep=" AND";
 		}
@@ -198,68 +197,68 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 		}
 		return ret.toString();
 	}
-	public String addAttrToQueryStmt(StringBuffer ret, String sep, AttributeDef attr) {
+	public String addAttrToQueryStmt(StringBuffer ret, String sep, AttributeDef attr,String sqlTableName) {
 		if(attr.getExtending()==null){
 			Type type = attr.getDomainResolvingAliases();
-			 String attrName=ili2sqlName.mapIliAttributeDef(attr);
+			 String attrSqlName=ili2sqlName.mapIliAttributeDef(attr,sqlTableName,null);
 			if( Ili2cUtility.isIli1Date(td,attr)) {
 				 ret.append(sep);
 				 sep=",";
-				 ret.append(geomConv.getSelectValueWrapperDate(attrName));
+				 ret.append(geomConv.getSelectValueWrapperDate(attrSqlName));
 			}else if( Ili2cUtility.isIli2Date(td,attr)) {
 				 ret.append(sep);
 				 sep=",";
-				 ret.append(geomConv.getSelectValueWrapperDate(attrName));
+				 ret.append(geomConv.getSelectValueWrapperDate(attrSqlName));
 			}else if( Ili2cUtility.isIli2Time(td,attr)) {
 				 ret.append(sep);
 				 sep=",";
-				 ret.append(geomConv.getSelectValueWrapperTime(attrName));
+				 ret.append(geomConv.getSelectValueWrapperTime(attrSqlName));
 			}else if( Ili2cUtility.isIli2DateTime(td,attr)) {
 				 ret.append(sep);
 				 sep=",";
-				 ret.append(geomConv.getSelectValueWrapperDateTime(attrName));
+				 ret.append(geomConv.getSelectValueWrapperDateTime(attrSqlName));
 			}else if (type instanceof CompositionType){
 				if(TrafoConfigNames.CATALOGUE_REF_TRAFO_COALESCE.equals(trafoConfig.getAttrConfig(attr, TrafoConfigNames.CATALOGUE_REF_TRAFO))){
 					 ret.append(sep);
 					 sep=",";
-					 ret.append(attrName);
+					 ret.append(attrSqlName);
 				}else if(TrafoConfigNames.MULTISURFACE_TRAFO_COALESCE.equals(trafoConfig.getAttrConfig(attr, TrafoConfigNames.MULTISURFACE_TRAFO))){
 					 ret.append(sep);
 					 sep=",";
-					 ret.append(geomConv.getSelectValueWrapperMultiSurface(attrName));
+					 ret.append(geomConv.getSelectValueWrapperMultiSurface(attrSqlName));
 				}else if(TrafoConfigNames.MULTILINGUAL_TRAFO_EXPAND.equals(trafoConfig.getAttrConfig(attr, TrafoConfigNames.MULTILINGUAL_TRAFO))){
 					for(String sfx:DbNames.MULTILINGUAL_TXT_COL_SUFFIXS){
 						 ret.append(sep);
 						 sep=",";
-						 ret.append(attrName+sfx);
+						 ret.append(attrSqlName+sfx);
 					}
 				}
 			}else if (type instanceof PolylineType){
 				 ret.append(sep);
 				 sep=",";
-				 ret.append(geomConv.getSelectValueWrapperPolyline(attrName));
+				 ret.append(geomConv.getSelectValueWrapperPolyline(attrSqlName));
 			 }else if(type instanceof SurfaceOrAreaType){
 				 if(createItfLineTables){
 				 }else{
 					 ret.append(sep);
 					 sep=",";
-					 ret.append(geomConv.getSelectValueWrapperSurface(attrName));
+					 ret.append(geomConv.getSelectValueWrapperSurface(attrSqlName));
 				 }
 				 if(createItfAreaRef){
 					 if(type instanceof AreaType){
 						 ret.append(sep);
 						 sep=",";
-						 ret.append(geomConv.getSelectValueWrapperCoord(attrName+DbNames.ITF_MAINTABLE_GEOTABLEREF_COL_SUFFIX));
+						 ret.append(geomConv.getSelectValueWrapperCoord(attrSqlName+DbNames.ITF_MAINTABLE_GEOTABLEREF_COL_SUFFIX));
 					 }
 				 }
 			 }else if(type instanceof CoordType){
 				 ret.append(sep);
 				 sep=",";
-				 ret.append(geomConv.getSelectValueWrapperCoord(attrName));
+				 ret.append(geomConv.getSelectValueWrapperCoord(attrSqlName));
 			}else{
 				 ret.append(sep);
 				 sep=",";
-				 ret.append(attrName);
+				 ret.append(attrSqlName);
 			}
 		   }
 		return sep;
@@ -272,7 +271,7 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 		if(structWrapper!=null){
 			dbstmt.setInt(paramIdx++,structWrapper.getParentSqlId());
 			if(createGenericStructRef){
-				dbstmt.setString(paramIdx++,ili2sqlName.mapIliAttributeDef(structWrapper.getParentAttr()));
+				dbstmt.setString(paramIdx++,ili2sqlName.mapIliAttributeDef(structWrapper.getParentAttr(),getSqlType(structWrapper.getParentTable().getViewable()).getName(),null));
 			}
 		}else{
 			if(fixref!=null){
@@ -356,7 +355,7 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 				   RoleDef role = (RoleDef) obj.obj;
 				   if(role.getExtending()==null){
 					 String roleName=role.getName();
-					 String sqlRoleName=ili2sqlName.mapIliRoleDef(role);
+					 String sqlRoleName=ili2sqlName.mapIliRoleDef(role,getSqlType(table.getViewable()).getName(),getSqlType(role.getDestination()).getName());
 					 // a role of an embedded association?
 					 if(obj.embedded){
 						AssociationDef roleOwner = (AssociationDef) role.getContainer();
@@ -389,7 +388,7 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 			Iom_jObject iomObj, AttributeDef attr,ArrayList<StructWrapper> structQueue,ViewableWrapper table,FixIomObjectRefs fixref) throws SQLException {
 		if(attr.getExtending()==null){
 			String attrName=attr.getName();
-			String sqlAttrName=ili2sqlName.mapIliAttributeDef(attr);
+			String sqlAttrName=ili2sqlName.mapIliAttributeDef(attr,getSqlType(table.getViewable()).getName(),null);
 			if( Ili2cUtility.isBoolean(td,attr)) {
 					boolean value=rs.getBoolean(valuei);
 					valuei++;

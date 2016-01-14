@@ -11,6 +11,7 @@ import ch.ehi.ili2db.base.Ili2cUtility;
 import ch.ehi.ili2db.base.Ili2dbException;
 import ch.ehi.ili2db.fromili.CustomMapping;
 import ch.ehi.ili2db.mapping.TrafoConfig;
+import ch.ehi.ili2db.mapping.Viewable2TableMapping;
 import ch.ehi.sqlgen.repository.DbColBoolean;
 import ch.ehi.sqlgen.repository.DbColDate;
 import ch.ehi.sqlgen.repository.DbColDateTime;
@@ -84,13 +85,16 @@ public class AbstractRecordConverter {
 	private String uuid_default_value=null;
 	private DbIdGen idGen=null;
 	protected TrafoConfig trafoConfig=null;
-	public AbstractRecordConverter(TransferDescription td1,ch.ehi.ili2db.mapping.NameMapping ili2sqlName,ch.ehi.ili2db.gui.Config config,DbIdGen idGen1, TrafoConfig trafoConfig1){
+	protected Viewable2TableMapping class2wrapper=null;
+
+	public AbstractRecordConverter(TransferDescription td1,ch.ehi.ili2db.mapping.NameMapping ili2sqlName,ch.ehi.ili2db.gui.Config config,DbIdGen idGen1, TrafoConfig trafoConfig1,Viewable2TableMapping class2wrapper1){
 		td=td1;
 		this.defaultCrsAuthority=config.getDefaultSrsAuthority();
 		this.defaultCrsCode=config.getDefaultSrsCode();
 		this.ili2sqlName=ili2sqlName;
 		trafoConfig=trafoConfig1;
 		createEnumTable=config.getCreateEnumDefs();
+		class2wrapper=class2wrapper1;
 		createEnumColAsItfCode=config.CREATE_ENUMCOL_AS_ITFCODE_YES.equals(config.getCreateEnumColAsItfCode());
 		createStdCols=config.CREATE_STD_COLS_ALL.equals(config.getCreateStdCols());
 		createEnumTxtCol=config.CREATE_ENUM_TXT_COL.equals(config.getCreateEnumCols());
@@ -161,13 +165,17 @@ public class AbstractRecordConverter {
 			}
 		}
 		
-	protected String getSqlRoleName(RoleDef def){
-		return ili2sqlName.mapIliRoleDef(def);
+	protected String getSqlRoleName(RoleDef def,String ownerSqlTableName,String targetSqlTableName){
+		return ili2sqlName.mapIliRoleDef(def,ownerSqlTableName,targetSqlTableName);
 	}
-	protected String getSqlAttrName(AttributeDef def){
-		return ili2sqlName.mapIliAttributeDef(def);
+	protected String getSqlAttrName(AttributeDef def,String ownerSqlTableName,String targetSqlTableName){
+		return ili2sqlName.mapIliAttributeDef(def,ownerSqlTableName,targetSqlTableName);
 	}
-	public DbTableName getSqlTableName(Viewable def){
+	/** maps a ili2c viewable to a sql name. 
+	 * @param def class, structure, association to map
+	 * @return table name or value of column t_type if this viewable is not mapped with a newClass strategy
+	 */
+	public DbTableName getSqlType(Viewable def){
 		String sqlname=ili2sqlName.mapIliClassDef(def);
 		return new DbTableName(schemaName,sqlname);
 	}

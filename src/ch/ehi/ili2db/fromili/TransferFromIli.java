@@ -247,18 +247,18 @@ public class TransferFromIli {
 			SurfaceOrAreaType type = (SurfaceOrAreaType)attr.getDomainResolvingAll();
 			
 			DbColGeometry dbCol = recConv.generatePolylineType(type, attr.getContainer().getScopedName(null)+"."+attr.getName());
-			  dbCol.setName(getSqlColNameItfLineTableGeomAttr(attr,DbNames.ITF_LINETABLE_GEOMATTR_ILI_SUFFIX));
+			  dbCol.setName(ili2sqlName.getSqlColNameItfLineTableGeomAttr(attr,sqlName.getName()));
 			  dbCol.setNotNull(true);
 			  dbTable.addColumn(dbCol);
 			
 			if(type instanceof SurfaceType){
 				  dbColId=new DbColId();
-				  dbColId.setName(getSqlColNameItfLineTableRefAttr(attr,DbNames.ITF_LINETABLE_MAINTABLEREF_ILI_SUFFIX));
+				  dbColId.setName(ili2sqlName.getSqlColNameItfLineTableRefAttr(attr,sqlName.getName()));
 				  dbColId.setNotNull(true);
 				  dbColId.setPrimaryKey(false);
-				  dbColId.setScriptComment("REFERENCES "+recConv.getSqlTableName((Viewable)attr.getContainer()));
+				  dbColId.setScriptComment("REFERENCES "+recConv.getSqlType((Viewable)attr.getContainer()));
 				  if(createFk){
-					  dbColId.setReferencedTable(recConv.getSqlTableName((Viewable)attr.getContainer()));
+					  dbColId.setReferencedTable(recConv.getSqlType((Viewable)attr.getContainer()));
 				  }
 					if(createFkIdx){
 						dbColId.setIndex(true);
@@ -303,14 +303,6 @@ public class TransferFromIli {
 		  }
 		}
 		return ret;
-	}
-	private String getSqlColNameItfLineTableRefAttr(AttributeDef attr,String ioxName)
-	{
-		return ili2sqlName.mapIliAttrName(attr,ioxName);
-	}
-	private String getSqlColNameItfLineTableGeomAttr(AttributeDef attr,String ioxName)
-	{
-		return ili2sqlName.mapIliAttrName(attr,ioxName);
 	}
 	private DbTableName getSqlTableName(Domain def){
 		String sqlname=ili2sqlName.mapIliDomainDef(def);
@@ -945,12 +937,12 @@ public class TransferFromIli {
 					Object entro=entri.next();
 					if(entro instanceof Viewable){
 						Viewable aclass=(Viewable)entro;
-						thisClass=recConv.getSqlTableName(aclass);
+						thisClass=recConv.getSqlType(aclass);
 						if(!exstEntries.contains(thisClass)){
 							Viewable base=(Viewable)aclass.getExtending();
 							ps.setString(1, thisClass.getName());
 							if(base!=null){
-								DbTableName baseClass=recConv.getSqlTableName(base);
+								DbTableName baseClass=recConv.getSqlType(base);
 								ps.setString(2, baseClass.getName());
 							}else{
 								ps.setNull(2,java.sql.Types.VARCHAR);
@@ -1183,17 +1175,31 @@ public class TransferFromIli {
 	{
 		ch.ehi.sqlgen.repository.DbTable tab=new ch.ehi.sqlgen.repository.DbTable();
 		tab.setName(new DbTableName(schema.getName(),DbNames.ATTRNAME_TAB));
-		ch.ehi.sqlgen.repository.DbColVarchar iliClassName=new ch.ehi.sqlgen.repository.DbColVarchar();
-		iliClassName.setName(DbNames.CLASSNAME_TAB_ILINAME_COL);
-		iliClassName.setNotNull(true);
-		iliClassName.setSize(1024);
-		iliClassName.setPrimaryKey(true);
-		tab.addColumn(iliClassName);
-		ch.ehi.sqlgen.repository.DbColVarchar sqlTableName=new ch.ehi.sqlgen.repository.DbColVarchar();
-		sqlTableName.setName(DbNames.CLASSNAME_TAB_SQLNAME_COL);
-		sqlTableName.setNotNull(true);
-		sqlTableName.setSize(1024);
-		tab.addColumn(sqlTableName);
+		ch.ehi.sqlgen.repository.DbColVarchar ilinameCol=new ch.ehi.sqlgen.repository.DbColVarchar();
+		ilinameCol.setName(DbNames.ATTRNAME_TAB_ILINAME_COL);
+		ilinameCol.setNotNull(true);
+		ilinameCol.setSize(1024);
+		tab.addColumn(ilinameCol);
+		ch.ehi.sqlgen.repository.DbColVarchar sqlnameCol=new ch.ehi.sqlgen.repository.DbColVarchar();
+		sqlnameCol.setName(DbNames.ATTRNAME_TAB_SQLNAME_COL);
+		sqlnameCol.setNotNull(true);
+		sqlnameCol.setSize(1024);
+		tab.addColumn(sqlnameCol);
+		ch.ehi.sqlgen.repository.DbColVarchar ownerCol=new ch.ehi.sqlgen.repository.DbColVarchar();
+		ownerCol.setName(DbNames.ATTRNAME_TAB_OWNER_COL);
+		ownerCol.setNotNull(true);
+		ownerCol.setSize(1024);
+		tab.addColumn(ownerCol);
+		ch.ehi.sqlgen.repository.DbColVarchar targetCol=new ch.ehi.sqlgen.repository.DbColVarchar();
+		targetCol.setName(DbNames.ATTRNAME_TAB_TARGET_COL);
+		targetCol.setNotNull(false);
+		targetCol.setSize(1024);
+		tab.addColumn(targetCol);
+		DbIndex pk=new DbIndex();
+		pk.setPrimary(true);
+		pk.addAttr(ownerCol);
+		pk.addAttr(sqlnameCol);
+		tab.addIndex(pk);
 		schema.addTable(tab);
 	}
 }

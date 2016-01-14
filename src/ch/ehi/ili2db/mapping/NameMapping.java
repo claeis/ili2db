@@ -45,14 +45,7 @@ public class NameMapping {
 	 * Maintained by addMApping().
 	 */
 	private HashMap<String,String> classNameSql2ili=new HashMap<String,String>();
-	/** mapping from a qualified interlis attribute name to a sql column name.
-	 * Maintained by addMapping().
-	 */
-	private HashMap<String,String> attrNameIli2sql=new HashMap<String,String>();
-	/** mapping from a sql column name to a qualified interlis attribute name.
-	 * Maintained by addMApping().
-	 */
-	private HashMap<String,String> attrNameSql2ili=new HashMap<String,String>();
+	private ColumnNameMapping columnMapping=new ColumnNameMapping();
 	private HashMap deprecatedConfig=new HashMap();
 	private NameMapping(){};
 	public NameMapping(ch.ehi.ili2db.gui.Config config)
@@ -235,26 +228,6 @@ public class NameMapping {
 		}
 		return ret.toString();
 	}
-	private String makeSqlAttrName(String modelName,String topicName,String className,String attrName,int maxSqlNameLength)
-	{
-		StringBuffer ret=new StringBuffer();
-		String modelSqlName=modelName;
-		String topicSqlName=topicName;
-		String classSqlName=className;
-		String attrSqlName=attrName;
-		int maxClassNameLength=maxSqlNameLength-5;
-		if(topicSqlName==null){
-			ret.append(shortcutName(modelSqlName,maxClassNameLength/2-2));
-		}else{
-			ret.append(shortcutName(modelSqlName,maxClassNameLength/4-1));
-			ret.append(shortcutName(topicSqlName,maxClassNameLength/4+2));
-		}
-		ret.append("_");
-		ret.append(shortcutName(classSqlName,maxClassNameLength-ret.length()));
-		ret.append("_");
-		ret.append(shortcutName(attrSqlName,maxSqlNameLength-ret.length()));
-		return ret.toString();
-	}
 	public String mapSqlTableName(String sqlname){
 		return (String)classNameSql2ili.get(sqlname);
 	}
@@ -263,26 +236,12 @@ public class NameMapping {
 		classNameIli2sql.put(iliname,sqlname);
 		classNameSql2ili.put(sqlname,iliname);
 	}
-	private void addAttrNameMapping(String iliname,String sqlname)
-	{
-		attrNameIli2sql.put(iliname,sqlname);
-		attrNameSql2ili.put(sqlname,iliname);
-	}
 	public String defineTableNameMapping(String iliname,String sqlname1)
 	{
 		String sqlname=(String)classNameIli2sql.get(iliname);
 		if(sqlname==null){
 			sqlname=makeValidSqlName(shortcutName(sqlname1, getMaxSqlNameLength()));
 			addTableNameMapping(iliname,sqlname);
-		}
-		return sqlname;
-	}
-	public String defineAttrNameMapping(String iliname,String sqlname1)
-	{
-		String sqlname=(String)attrNameIli2sql.get(iliname);
-		if(sqlname==null){
-			sqlname=makeValidSqlName(shortcutName(sqlname1, getMaxSqlNameLength()));
-			addAttrNameMapping(iliname,sqlname);
 		}
 		return sqlname;
 	}
@@ -334,51 +293,61 @@ public class NameMapping {
 		}
 		return sqlname;
 	}
-	public String mapIliAttributeDefQualified(Viewable parentTable,ch.interlis.ili2c.metamodel.AttributeDef def){
-		String iliname=parentTable.getScopedName(null)+"."+def.getName();
-		String sqlname=(String)attrNameIli2sql.get(iliname);
+	public String mapIliAttributeDefReverse(ch.interlis.ili2c.metamodel.AttributeDef def,String ownerSqlTablename,String targetSqlTablename){
+		String iliname=def.getContainer().getScopedName(null)+"."+def.getName();
+		String sqlname=(String)columnMapping.getSqlName(iliname,ownerSqlTablename,targetSqlTablename);
 		if(sqlname==null){
-			ch.interlis.ili2c.metamodel.Topic topic=(ch.interlis.ili2c.metamodel.Topic)parentTable.getContainer(ch.interlis.ili2c.metamodel.Topic.class);
-			ch.interlis.ili2c.metamodel.Model model=(ch.interlis.ili2c.metamodel.Model)parentTable.getContainer(ch.interlis.ili2c.metamodel.Model.class);
-			sqlname=makeSqlAttrName(model.getName(),topic!=null ? topic.getName():null,parentTable.getName(),def.getName(),getMaxSqlNameLength());
-			addAttrNameMapping(iliname,sqlname);
+			/*
+			ch.interlis.ili2c.metamodel.Topic topic=(ch.interlis.ili2c.metamodel.Topic)targetTable.getContainer(ch.interlis.ili2c.metamodel.Topic.class);
+			ch.interlis.ili2c.metamodel.Model model=(ch.interlis.ili2c.metamodel.Model)targetTable.getContainer(ch.interlis.ili2c.metamodel.Model.class);
+			sqlname=makeSqlAttrName(model.getName(),topic!=null ? topic.getName():null,targetTable.getName(),def.getName(),getMaxSqlNameLength());
+			*/
+			sqlname=shortcutName(def.getName(),targetSqlTablename,getMaxSqlNameLength()-6);
+			sqlname=makeValidSqlName(sqlname);
+			sqlname=makeSqlColNameUnique(ownerSqlTablename, sqlname);
+			columnMapping.addAttrNameMapping(iliname,sqlname,ownerSqlTablename,targetSqlTablename);
 		}
 		return sqlname;
 	}
-	public String mapIliRoleDef(ch.interlis.ili2c.metamodel.RoleDef def){
-		String iliname=def.getContainer().getScopedName(null)+"."+def.getName();
-		String sqlname=(String)attrNameIli2sql.get(iliname);
+	public String mapIliRoleDef(ch.interlis.ili2c.metamodel.RoleDef def,String ownerSqlTablename,String targetSqlTablename){
+		String iliqname=def.getContainer().getScopedName(null)+"."+def.getName();
+		String sqlname=(String)columnMapping.getSqlName(iliqname,ownerSqlTablename,targetSqlTablename);
 		if(sqlname==null){
 			sqlname=shortcutName(def.getName(),getMaxSqlNameLength()-6);
 			sqlname=makeValidSqlName(sqlname);
-			if(!def.getName().equals(sqlname)){
-				addAttrNameMapping(iliname,sqlname);
-			}
+			sqlname=makeSqlColNameUnique(ownerSqlTablename,sqlname);
+			columnMapping.addAttrNameMapping(iliqname,sqlname,ownerSqlTablename,targetSqlTablename);
 		}
 		return sqlname;
 	}
-	public String mapIliAttributeDef(ch.interlis.ili2c.metamodel.AttributeDef def){
-		String iliname=def.getContainer().getScopedName(null)+"."+def.getName();
-		String sqlname=(String)attrNameIli2sql.get(iliname);
+	public String mapIliAttributeDef(ch.interlis.ili2c.metamodel.AttributeDef def,String ownerSqlTablename,String targetSqlTablename){
+		String iliqname=def.getContainer().getScopedName(null)+"."+def.getName();
+		String sqlname=columnMapping.getSqlName(iliqname,ownerSqlTablename,targetSqlTablename);
 		if(sqlname==null){
 			sqlname=shortcutName(def.getName(),getMaxSqlNameLength());
 			sqlname=makeValidSqlName(sqlname);
-			if(!def.getName().equals(sqlname)){
-				addAttrNameMapping(iliname,sqlname);
-			}
+			sqlname=makeSqlColNameUnique(ownerSqlTablename,sqlname);
+			columnMapping.addAttrNameMapping(iliqname,sqlname,ownerSqlTablename,targetSqlTablename);
 		}
 		return sqlname;
 	}
-	public String mapIliAttrName(ch.interlis.ili2c.metamodel.AttributeDef def,String iliAttrName)
+	private String mapIliAttrName(String ownerSqlTablename,ch.interlis.ili2c.metamodel.AttributeDef def,String suffix)
 	{
-		String iliname=def.getContainer().getScopedName(null)+"."+def.getName()+"."+iliAttrName;
-		String sqlname=(String)attrNameIli2sql.get(iliname);
+		String iliqname=def.getContainer().getScopedName(null)+"."+def.getName()+"."+suffix;
+		String sqlname=(String)columnMapping.getSqlName(iliqname,ownerSqlTablename,null);
 		if(sqlname==null){
-			sqlname=shortcutName(iliAttrName,getMaxSqlNameLength());
+			sqlname=shortcutName(suffix,getMaxSqlNameLength());
 			sqlname=makeValidSqlName(sqlname);
-			if(!iliAttrName.equals(sqlname)){
-				addAttrNameMapping(iliname,sqlname);
-			}
+			sqlname=makeSqlColNameUnique(ownerSqlTablename, sqlname);
+			columnMapping.addAttrNameMapping(iliqname,sqlname,ownerSqlTablename,null);
+		}
+		return sqlname;
+	}
+	private String makeSqlColNameUnique(String ownerSqlTablename, String sqlname) {
+		String base=sqlname;
+		int c=1;
+		while(columnMapping.existsSqlName(ownerSqlTablename,sqlname)){
+			sqlname=base+Integer.toString(c++);
 		}
 		return sqlname;
 	}
@@ -437,6 +406,51 @@ public class NameMapping {
 	name.delete(start,start+stripc);
 	// ASSERT(!name.IsEmpty());
 	return name.toString();
+	}
+	private static String shortcutName(String modelName,String topicName,String className,String attrName,int maxSqlNameLength)
+	{
+		StringBuffer ret=new StringBuffer();
+		String modelSqlName=modelName;
+		String topicSqlName=topicName;
+		String classSqlName=className;
+		String attrSqlName=attrName;
+		int maxClassNameLength=maxSqlNameLength-5;
+		if(topicSqlName==null){
+			ret.append(shortcutName(modelSqlName,maxClassNameLength/2-2));
+		}else{
+			ret.append(shortcutName(modelSqlName,maxClassNameLength/4-1));
+			ret.append(shortcutName(topicSqlName,maxClassNameLength/4+2));
+		}
+		ret.append("_");
+		ret.append(shortcutName(classSqlName,maxClassNameLength-ret.length()));
+		ret.append("_");
+		ret.append(shortcutName(attrSqlName,maxSqlNameLength-ret.length()));
+		return ret.toString();
+	}
+	private static String shortcutName(String modelName,String className,String attrName,int maxSqlNameLength)
+	{
+		StringBuffer ret=new StringBuffer();
+		String modelSqlName=modelName;
+		String classSqlName=className;
+		String attrSqlName=attrName;
+		int maxClassNameLength=maxSqlNameLength-5;
+		ret.append(shortcutName(modelSqlName,maxClassNameLength/2-2));
+		ret.append("_");
+		ret.append(shortcutName(classSqlName,maxClassNameLength-ret.length()));
+		ret.append("_");
+		ret.append(shortcutName(attrSqlName,maxSqlNameLength-ret.length()));
+		return ret.toString();
+	}
+	private static String shortcutName(String modelName,String attrName,int maxSqlNameLength)
+	{
+		StringBuffer ret=new StringBuffer();
+		String modelSqlName=modelName;
+		String attrSqlName=attrName;
+		int maxClassNameLength=maxSqlNameLength-5;
+		ret.append(shortcutName(modelSqlName,maxClassNameLength/2-2));
+		ret.append("_");
+		ret.append(shortcutName(attrSqlName,maxSqlNameLength-ret.length()));
+		return ret.toString();
 	}
 	private static HashSet<String> readTableMappingTableEntries(java.sql.Connection conn,String schema)
 	throws Ili2dbException
@@ -538,109 +552,28 @@ public class NameMapping {
 		}
 
 	}
-	private static HashSet<String> readAttrMappingTableEntries(java.sql.Connection conn,String schema)
-	throws Ili2dbException
-	{
-		HashSet<String> ret=new HashSet<String>();
-		String sqlName=DbNames.ATTRNAME_TAB;
-		if(schema!=null){
-			sqlName=schema+"."+sqlName;
-		}
-		try{
-			String exstStmt=null;
-			exstStmt="SELECT "+DbNames.CLASSNAME_TAB_ILINAME_COL+" FROM "+sqlName;
-			EhiLogger.traceBackendCmd(exstStmt);
-			java.sql.PreparedStatement exstPrepStmt = conn.prepareStatement(exstStmt);
-			try{
-				java.sql.ResultSet rs=exstPrepStmt.executeQuery();
-				while(rs.next()){
-					String iliCode=rs.getString(1);
-					ret.add(iliCode);
-				}
-			}finally{
-				exstPrepStmt.close();
-			}
-		}catch(java.sql.SQLException ex){		
-			throw new Ili2dbException("failed to read attr-mapping-table "+sqlName,ex);
-		}
-		return ret;
-	}
 	public void updateAttrMappingTable(java.sql.Connection conn,String schema)
 	throws Ili2dbException
 	{
-		HashSet<String> exstEntries=readAttrMappingTableEntries(conn,schema);
-		String mapTabName=DbNames.ATTRNAME_TAB;
-		if(schema!=null){
-			mapTabName=schema+"."+mapTabName;
-		}
-		// create table
-		try{
-
-			// insert mapping entries
-			String stmt="INSERT INTO "+mapTabName+" ("+DbNames.CLASSNAME_TAB_ILINAME_COL+","+DbNames.CLASSNAME_TAB_SQLNAME_COL+") VALUES (?,?)";
-			EhiLogger.traceBackendCmd(stmt);
-			java.sql.PreparedStatement ps = conn.prepareStatement(stmt);
-			String iliname=null;
-			String sqlname=null;
-			try{
-				java.util.Iterator<String> entri=attrNameIli2sql.keySet().iterator();
-				while(entri.hasNext()){
-					iliname=entri.next();
-					if(!exstEntries.contains(iliname)){
-						sqlname=attrNameIli2sql.get(iliname);
-						ps.setString(1, iliname);
-						ps.setString(2, sqlname);
-						ps.executeUpdate();
-					}
-				}
-			}catch(java.sql.SQLException ex){
-				throw new Ili2dbException("failed to insert attrname-mapping "+iliname,ex);
-			}finally{
-				ps.close();
-			}
-		}catch(java.sql.SQLException ex){		
-			throw new Ili2dbException("failed to update mapping-table "+mapTabName,ex);
-		}
-
+		columnMapping.updateAttrMappingTable(conn, schema);
 	}
 	public void readAttrMappingTable(java.sql.Connection conn,String schema)
 	throws Ili2dbException
 	{
-		String mapTableName=DbNames.ATTRNAME_TAB;
-		if(schema!=null){
-			mapTableName=schema+"."+mapTableName;
-		}
-		// create table
-		String stmt="SELECT "+DbNames.CLASSNAME_TAB_ILINAME_COL+", "+DbNames.CLASSNAME_TAB_SQLNAME_COL+" FROM "+mapTableName;
-		java.sql.Statement dbstmt = null;
-		try{
-			
-			dbstmt = conn.createStatement();
-			java.sql.ResultSet rs=dbstmt.executeQuery(stmt);
-			while(rs.next()){
-				String iliname=rs.getString(DbNames.CLASSNAME_TAB_ILINAME_COL);
-				String sqlname=rs.getString(DbNames.CLASSNAME_TAB_SQLNAME_COL);
-				//EhiLogger.debug("map: "+iliname+"->"+sqlname);
-				if(attrNameIli2sql.get(iliname)==null){
-					addAttrNameMapping(iliname,sqlname);
-				}
-			}
-		}catch(java.sql.SQLException ex){		
-			throw new Ili2dbException("failed to query mapping-table "+mapTableName,ex);
-		}finally{
-			if(dbstmt!=null){
-				try{
-					dbstmt.close();
-				}catch(java.sql.SQLException ex){		
-					throw new Ili2dbException("failed to close query of "+mapTableName,ex);
-				}
-			}
-		}
-
+		columnMapping.readAttrMappingTable(conn, schema);
 	}
 
 	public int getMaxSqlNameLength()
 	{
 		return _maxSqlNameLength;
+	}
+	
+	public String getSqlColNameItfLineTableRefAttr(ch.interlis.ili2c.metamodel.AttributeDef attr,String ownerSqlTablename)
+	{
+		return mapIliAttrName(ownerSqlTablename,attr,DbNames.ITF_LINETABLE_MAINTABLEREF_ILI_SUFFIX);
+	}
+	public String getSqlColNameItfLineTableGeomAttr(ch.interlis.ili2c.metamodel.AttributeDef attr,String ownerSqlTablename)
+	{
+		return mapIliAttrName(ownerSqlTablename,attr,DbNames.ITF_LINETABLE_GEOMATTR_ILI_SUFFIX);
 	}
 }

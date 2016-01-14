@@ -42,6 +42,10 @@ public class StructWrapper {
 	public int getParentSqlId() {
 		return parentSqlId;
 	}
+	/** gets the sql name of the parent class/structure. 
+	 * @return table name or value of column t_type if parent is not mapped with a newClass strategy
+	 */
+	
 	public String getParentSqlType() {
 		return parentSqlType;
 	}

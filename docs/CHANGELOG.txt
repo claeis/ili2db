@@ -11,7 +11,7 @@ ideas/open issues/questions
 - --initNameMapping
 - map simple unique constraints
 
-ili2gpkg 2.5.2 (2016-01-xx)
+ili2gpkg 3.0.0 (2016-01-xx)
 ----------------------------
 - GPKG: fixed missing init.sql
 - GPKG: fixed TOWGS84-Parameter of EPSG:21781
@@ -24,6 +24,7 @@ ili2gpkg 2.5.2 (2016-01-xx)
 - new option --skipPolygonBuildingErrors
 - GPKG: fixed timestamp parse exception 
 - fixed export without t_basket column
+- fixed duplicate column name from same attribute-name in subclasses
 
 ili2pg 2.5.1 (2016-01-04)
 ----------------------------

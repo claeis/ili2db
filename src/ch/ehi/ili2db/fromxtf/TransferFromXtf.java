@@ -156,7 +156,7 @@ public class TransferFromXtf {
 		unknownTypev=new HashSet();
 		structQueue=new ArrayList();
 		boolean surfaceAsPolyline=true;
-		recConv=new FromXtfRecordConverter(td,ili2sqlName,tag2class,config,idGen,geomConv,conn,dbusr,isItfReader,oidPool,trafoConfig);
+		recConv=new FromXtfRecordConverter(td,ili2sqlName,tag2class,config,idGen,geomConv,conn,dbusr,isItfReader,oidPool,trafoConfig,class2wrapper);
 		
 		int datasetSqlId=oidPool.newObjSqlId();
 		int importSqlId=0;
@@ -301,7 +301,7 @@ public class TransferFromXtf {
 		HashSet<DbTableName> tables=new HashSet<DbTableName>(); 
 		for(AbstractClassDef aclass:classv){
 			while(aclass!=null){
-				DbTableName sqlName=recConv.getSqlTableName(aclass);
+				DbTableName sqlName=recConv.getSqlType(aclass);
 				if(!tables.contains(sqlName)){
 					dropStructEles(sqlName,basketSqlId);
 					tables.add(sqlName);
@@ -419,7 +419,7 @@ public class TransferFromXtf {
 				if(classo instanceof Viewable){
 					Viewable aclass=(Viewable) classo;
 					while(aclass!=null){
-						deleteExistingObjectsHelper(recConv.getSqlTableName(aclass),ids.toString());
+						deleteExistingObjectsHelper(recConv.getSqlType(aclass),ids.toString());
 						aclass=(Viewable) aclass.getExtending();
 					}
 				}else if(classo instanceof AttributeDef){
@@ -490,7 +490,7 @@ public class TransferFromXtf {
 					base=aclass;
 				}
 				// get sql name
-				DbTableName sqlName=recConv.getSqlTableName(base);
+				DbTableName sqlName=recConv.getSqlType(base);
 				if(!visitedTables.contains(sqlName.getQName())){
 					visitedTables.add(sqlName.getQName());
 					// if table exists?
@@ -715,7 +715,7 @@ public class TransferFromXtf {
 		if(base==null){
 			base=aclass;
 		}
-		ret.append(recConv.getSqlTableName(base));
+		ret.append(recConv.getSqlType(base));
 		ret.append(" r0");
 		ret.append(" WHERE r0."+DbNames.T_ILI_TID_COL+"=?");
 		return ret.toString();
@@ -842,12 +842,12 @@ public class TransferFromXtf {
 		 // loop over all classes; start with leaf, end with the base of the inheritance hierarchy
 		 ViewableWrapper aclass=class2wrapper.get(aclass1);
 		 while(aclass!=null){
-			String sqlname = recConv.getSqlTableName(aclass.getViewable()).getQName();
-			String insert = getInsertStmt(updateObj,sqlname,aclass,structEle);
+			DbTableName sqlTablename = recConv.getSqlType(aclass.getViewable());
+			String insert = getInsertStmt(updateObj,aclass1,sqlTablename,aclass,structEle);
 			EhiLogger.traceBackendCmd(insert);
 			PreparedStatement ps = conn.prepareStatement(insert);
 			try{
-				recConv.writeRecord(basketSqlId, iomObj, structEle, aclass, sqlType,
+				recConv.writeRecord(basketSqlId, iomObj, aclass1,structEle, aclass, sqlType,
 						sqlId, updateObj, ps,structQueue);
 				ps.executeUpdate();
 			}finally{
@@ -878,6 +878,7 @@ public class TransferFromXtf {
 		// map oid of transfer file to a sql id
 		int sqlId=oidPool.getObjSqlId(iomObj.getobjectoid());
 		
+		String sqlTableName=getSqlTableNameItfLineTable(attrDef).getQName();
 		String insert=createItfLineTableInsertStmt(attrDef);
 		EhiLogger.traceBackendCmd(insert);
 		PreparedStatement ps = conn.prepareStatement(insert);
@@ -921,7 +922,7 @@ public class TransferFromXtf {
 			    Iterator attri = lineAttrTable.getAttributes ();
 			    while(attri.hasNext()){
 			    	AttributeDef lineattr=(AttributeDef)attri.next();
-					valuei = recConv.addAttrValue(iomObj, ili2sqlName.mapItfLineTableAsTable(attrDef), sqlId, ps,
+					valuei = recConv.addAttrValue(iomObj, ili2sqlName.mapItfLineTableAsTable(attrDef), sqlId, sqlTableName,ps,
 							valuei, lineattr,null);
 			    }
 			}
@@ -1179,8 +1180,8 @@ public class TransferFromXtf {
 		StringBuffer stmt = new StringBuffer();
 		StringBuffer values = new StringBuffer();
 		stmt.append("INSERT INTO ");
-		String sqlTabName=getSqlTableNameItfLineTable(attrDef).getQName();
-		stmt.append(sqlTabName);
+		DbTableName sqlTabName=getSqlTableNameItfLineTable(attrDef);
+		stmt.append(sqlTabName.getQName());
 		String sep=" (";
 
 		// add T_Id
@@ -1207,14 +1208,14 @@ public class TransferFromXtf {
 		// POLYLINE
 		 stmt.append(sep);
 		 sep=",";
-		 stmt.append(ili2sqlName.mapIliAttrName(attrDef,DbNames.ITF_LINETABLE_GEOMATTR_ILI_SUFFIX));
+		 stmt.append(ili2sqlName.getSqlColNameItfLineTableGeomAttr(attrDef,sqlTabName.getName()));
 		values.append(","+geomConv.getInsertValueWrapperPolyline("?",recConv.getSrsid(type)));
 
 		// -> mainTable
 		if(type instanceof SurfaceType){
 			stmt.append(sep);
 			sep=",";
-			stmt.append(ili2sqlName.mapIliAttrName(attrDef,DbNames.ITF_LINETABLE_MAINTABLEREF_ILI_SUFFIX));
+			stmt.append(ili2sqlName.getSqlColNameItfLineTableRefAttr(attrDef,sqlTabName.getName()));
 			values.append(",?");
 		}
 		
@@ -1223,7 +1224,7 @@ public class TransferFromXtf {
 		    Iterator attri = lineAttrTable.getAttributes ();
 		    while(attri.hasNext()){
 		    	AttributeDef lineattr=(AttributeDef)attri.next();
-			   sep = recConv.addAttrToInsertStmt(false,stmt, values, sep, lineattr);
+			   sep = recConv.addAttrToInsertStmt(false,stmt, values, sep, lineattr,sqlTabName.getName());
 		    }
 		}
 		
@@ -1256,12 +1257,13 @@ public class TransferFromXtf {
 	 * @param aclass viewable
 	 * @return insert statement
 	 */
-	private String getInsertStmt(boolean isUpdate,String sqlname,ViewableWrapper aclass,StructWrapper structEle){
+	private String getInsertStmt(boolean isUpdate,Viewable iomClass,DbTableName sqlname,ViewableWrapper aclass,StructWrapper structEle){
 		Object key=null;
 		if(!createGenericStructRef && structEle!=null && aclass.getExtending()==null){
-			key=structEle.getParentAttr();
+			ViewableWrapper parentTable=recConv.getViewableWrapper(structEle.getParentSqlType());
+			key=recConv.getSqlType(parentTable.getViewable()).getName()+":"+structEle.getParentAttr();
 		}else{
-			key=sqlname;
+			key=sqlname.getName()+":"+iomClass.getScopedName(null);
 		}
 		if(isUpdate){
 			if(updateStmts.containsKey(key)){
@@ -1272,7 +1274,7 @@ public class TransferFromXtf {
 				return insertStmts.get(key);
 			}
 		}
-		String stmt=recConv.createInsertStmt(isUpdate,sqlname,aclass,structEle);
+		String stmt=recConv.createInsertStmt(isUpdate,iomClass,sqlname,aclass,structEle);
 		EhiLogger.traceBackendCmd(stmt);
 		if(isUpdate){
 			updateStmts.put(key,stmt);
