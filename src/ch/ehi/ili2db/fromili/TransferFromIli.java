@@ -187,21 +187,18 @@ public class TransferFromIli {
 			}
 		}
 		
-		//EhiLogger.debug("viewable "+def);
-		ViewableWrapper base=def;
-		while(base!=null){
-			EhiLogger.debug("wrapper of viewable "+def.getViewable());
-			if(!visitedWrapper.contains(def)){
-				visitedWrapper.add(def);
-				recConv.generateTable(def);
-			  	
-			  	if(createItfLineTables){
-			  		for(AttributeDef attr : recConv.getSurfaceAttrs()){
-			  			generateItfLineTable(attr);
-			  		}
-			  	}
+		EhiLogger.traceState("wrapper of viewable "+def.getViewable());
+		if(!visitedWrapper.contains(def)){
+			visitedWrapper.add(def);
+			recConv.generateTable(def);
+			for(ViewableWrapper secondary:def.getSecondaryTables()){
+				recConv.generateTable(secondary);
 			}
-			base=base.getExtending();
+		  	if(createItfLineTables){
+		  		for(AttributeDef attr : recConv.getSurfaceAttrs()){
+		  			generateItfLineTable(attr);
+		  		}
+		  	}
 		}
 	}
 	private void generateItfLineTable(AttributeDef attr)
@@ -313,7 +310,7 @@ public class TransferFromIli {
 		return new DbTableName(schema.getName(),sqlname);
 	}
 	private DbTableName getSqlTableNameItfLineTable(AttributeDef def){
-		String sqlname=ili2sqlName.mapItfLineTableAsTable(def);
+		String sqlname=ili2sqlName.mapGeometryAsTable(def);
 		return new DbTableName(schema.getName(),sqlname);
 	}
 	static public void addModelsTable(DbSchema schema)

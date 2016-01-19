@@ -842,16 +842,33 @@ public class TransferFromXtf {
 		 // loop over all classes; start with leaf, end with the base of the inheritance hierarchy
 		 ViewableWrapper aclass=class2wrapper.get(aclass1);
 		 while(aclass!=null){
-			DbTableName sqlTablename = recConv.getSqlType(aclass.getViewable());
-			String insert = getInsertStmt(updateObj,aclass1,sqlTablename,aclass,structEle);
-			EhiLogger.traceBackendCmd(insert);
-			PreparedStatement ps = conn.prepareStatement(insert);
-			try{
-				recConv.writeRecord(basketSqlId, iomObj, aclass1,structEle, aclass, sqlType,
-						sqlId, updateObj, ps,structQueue);
-				ps.executeUpdate();
-			}finally{
-				ps.close();
+			 {
+					String insert = getInsertStmt(updateObj,aclass1,aclass,structEle);
+					EhiLogger.traceBackendCmd(insert);
+					PreparedStatement ps = conn.prepareStatement(insert);
+					try{
+						recConv.writeRecord(basketSqlId, iomObj, aclass1,structEle, aclass, sqlType,
+								sqlId, updateObj, ps,structQueue);
+						ps.executeUpdate();
+					}finally{
+						ps.close();
+					}
+			 }
+			for(ViewableWrapper secondary:aclass.getSecondaryTables()){
+				// secondarytable contains attributes of this class?
+				if(secondary.containsAttributes(recConv.getIomObjectAttrs(aclass1))){
+					String insert = getInsertStmt(updateObj,aclass1,secondary,structEle);
+					EhiLogger.traceBackendCmd(insert);
+					PreparedStatement ps = conn.prepareStatement(insert);
+					try{
+						recConv.writeRecord(basketSqlId, iomObj, aclass1,structEle, secondary, sqlType,
+								sqlId, updateObj, ps,structQueue);
+						ps.executeUpdate();
+					}finally{
+						ps.close();
+					}
+				}
+				
 			}
 			aclass=aclass.getExtending();
 		 }
@@ -859,7 +876,7 @@ public class TransferFromXtf {
 
 
 	private DbTableName getSqlTableNameItfLineTable(AttributeDef attrDef){
-		String sqlTabName=ili2sqlName.mapItfLineTableAsTable(attrDef);
+		String sqlTabName=ili2sqlName.mapGeometryAsTable(attrDef);
 		return new DbTableName(schema,sqlTabName);
 		
 	}
@@ -922,7 +939,7 @@ public class TransferFromXtf {
 			    Iterator attri = lineAttrTable.getAttributes ();
 			    while(attri.hasNext()){
 			    	AttributeDef lineattr=(AttributeDef)attri.next();
-					valuei = recConv.addAttrValue(iomObj, ili2sqlName.mapItfLineTableAsTable(attrDef), sqlId, sqlTableName,ps,
+					valuei = recConv.addAttrValue(iomObj, ili2sqlName.mapGeometryAsTable(attrDef), sqlId, sqlTableName,ps,
 							valuei, lineattr,null);
 			    }
 			}
@@ -1254,16 +1271,16 @@ public class TransferFromXtf {
 	/** gets an insert statement for a given viewable. Creates only a new
 	 *  statement if this is not yet seen sqlname.
 	 * @param sqlname table name of viewable
-	 * @param aclass viewable
+	 * @param sqltable viewable
 	 * @return insert statement
 	 */
-	private String getInsertStmt(boolean isUpdate,Viewable iomClass,DbTableName sqlname,ViewableWrapper aclass,StructWrapper structEle){
+	private String getInsertStmt(boolean isUpdate,Viewable iomClass,ViewableWrapper sqltable,StructWrapper structEle){
 		Object key=null;
-		if(!createGenericStructRef && structEle!=null && aclass.getExtending()==null){
+		if(!createGenericStructRef && structEle!=null && sqltable.getExtending()==null){
 			ViewableWrapper parentTable=recConv.getViewableWrapper(structEle.getParentSqlType());
-			key=recConv.getSqlType(parentTable.getViewable()).getName()+":"+structEle.getParentAttr();
+			key=sqltable.getSqlTablename()+":"+iomClass.getScopedName(null)+":"+parentTable.getSqlTablename()+":"+structEle.getParentAttr();
 		}else{
-			key=sqlname.getName()+":"+iomClass.getScopedName(null);
+			key=sqltable.getSqlTablename()+":"+iomClass.getScopedName(null);
 		}
 		if(isUpdate){
 			if(updateStmts.containsKey(key)){
@@ -1274,7 +1291,7 @@ public class TransferFromXtf {
 				return insertStmts.get(key);
 			}
 		}
-		String stmt=recConv.createInsertStmt(isUpdate,iomClass,sqlname,aclass,structEle);
+		String stmt=recConv.createInsertStmt(isUpdate,iomClass,new DbTableName(schema,sqltable.getSqlTablename()),sqltable,structEle);
 		EhiLogger.traceBackendCmd(stmt);
 		if(isUpdate){
 			updateStmts.put(key,stmt);

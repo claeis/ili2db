@@ -40,6 +40,7 @@ public class GpkgMain extends ch.ehi.ili2db.AbstractMain {
 		config.setJdbcDriver("org.sqlite.JDBC");
 		config.setIdGenerator(ch.ehi.ili2db.base.TableBasedIdGen.class.getName());
 		config.setIli2dbCustomStrategy(ch.ehi.ili2gpkg.GpkgMapping.class.getName());
+		config.setOneGeomPerTable(true);
 	}
 
 	@Override

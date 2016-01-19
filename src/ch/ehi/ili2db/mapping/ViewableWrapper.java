@@ -1,9 +1,12 @@
 package ch.ehi.ili2db.mapping;
 
+import ch.ehi.sqlgen.repository.DbTableName;
 import ch.interlis.ili2c.metamodel.*;
+import ch.interlis.ili2c.metamodel.AttributeDef;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
@@ -12,9 +15,30 @@ import java.util.ListIterator;
  * make it aware of all attributes of all specializations.
  */
 public class ViewableWrapper {
+	private DbTableName sqlTablename=null;
 	private ViewableWrapper base=null;
-	public ViewableWrapper(Viewable viewable){
+	private ViewableWrapper mainTable=null;
+	private ArrayList<ViewableWrapper> secondaryTables=new ArrayList<ViewableWrapper>();
+	private ViewableWrapper(String sqlSchemaname1,String sqlTablename1){
+		sqlTablename=new DbTableName(sqlSchemaname1,sqlTablename1);
+	}
+	public ViewableWrapper(String sqlSchemaname1,String sqlTablename1,Viewable viewable){
+		this(sqlSchemaname1,sqlTablename1);
 		this.viewable=viewable;
+	}
+	public ViewableWrapper createSecondaryTable(String sqlTablename1) {
+		ViewableWrapper ret=new ViewableWrapper(sqlTablename.getSchema(),sqlTablename1);
+		ret.mainTable=this;
+		secondaryTables.add(ret);
+		return ret;
+	}
+	public ViewableWrapper getSecondaryTable(String sqlTablename1) {
+		for(ViewableWrapper sec:secondaryTables){
+			if(sec.sqlTablename.equals(sqlTablename1)){
+				return sec;
+			}
+		}
+		return null;
 	}
 	/** the viewable that this wrapper wraps.
 	 */
@@ -36,13 +60,16 @@ public class ViewableWrapper {
 	public java.util.Iterator<ViewableTransferElement> getAttrIterator() {
 		return attrv.iterator();
 	}
+	public ArrayList<ViewableWrapper> getSecondaryTables() {
+		return secondaryTables;
+	}
 	public ArrayList<ViewableWrapper> getWrappers() {
 		if(allTablev==null){
 			allTablev=new ArrayList<ViewableWrapper>(10);
-			allTablev.add(this);
-			ViewableWrapper base=this.getExtending();
+			ViewableWrapper base=this;
 			while(base!=null){
-				allTablev.add(0,base);		
+				allTablev.add(0,base);	// root (table with column t_type) must be first (because of query stmt)
+				allTablev.addAll(secondaryTables);
 				base=base.getExtending();
 			}
 		}
@@ -89,6 +116,28 @@ public class ViewableWrapper {
 	}
 	public void setExtending(ViewableWrapper base1) {
 		base=base1;
+	}
+	public String getSqlTablename() {
+		return sqlTablename.getName();
+	}
+	public String getSqlTableQName() {
+		return sqlTablename.getQName();
+	}
+	public ViewableWrapper getMainTable() {
+		return mainTable;
+	}
+	public boolean isSecondaryTable() {
+		return mainTable!=null;
+	}
+	public boolean containsAttributes(HashSet<AttributeDef> iomObjectAttrs) {
+		for(ViewableTransferElement ele:attrv){
+			if(ele.obj instanceof AttributeDef){
+				if(iomObjectAttrs.contains(ele.obj)){
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 
 }

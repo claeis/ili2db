@@ -50,7 +50,7 @@ public abstract class AbstractMain {
 		config.setDefaultSrsCode("21781");
 		config.setMaxSqlNameLength(Integer.toString(NameMapping.DEFAULT_NAME_LENGTH));
 		config.setIdGenerator(ch.ehi.ili2db.base.TableBasedIdGen.class.getName());
-		config.setInheritanceTrafo(config.INHERITANCE_TRAFO_SMART);
+		config.setInheritanceTrafo(config.INHERITANCE_TRAFO_SMART1);
 		config.setCatalogueRefTrafo(Config.CATALOGUE_REF_TRAFO_COALESCE);
 		config.setMultiSurfaceTrafo(Config.MULTISURFACE_TRAFO_COALESCE);
 		config.setMultilingualTrafo(Config.MULTILINGUAL_TRAFO_EXPAND);
@@ -179,7 +179,7 @@ public abstract class AbstractMain {
 				config.setInheritanceTrafo(null);
 			}else if(arg.equals("--smartInheritance")){
 				argi++;
-				config.setInheritanceTrafo(config.INHERITANCE_TRAFO_SMART);
+				config.setInheritanceTrafo(config.INHERITANCE_TRAFO_SMART1);
 			}else if(arg.equals("--coalesceCatalogueRef")){
 				argi++;
 				config.setCatalogueRefTrafo(config.CATALOGUE_REF_TRAFO_COALESCE);

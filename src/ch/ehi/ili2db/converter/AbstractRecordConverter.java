@@ -146,7 +146,9 @@ public class AbstractRecordConverter {
 			  dbColId.setName(colT_ID);
 			  dbColId.setNotNull(true);
 			  dbColId.setPrimaryKey(true);
-			  dbColId.setDefaultValue(idGen.getDefaultValueSql());
+			  if(table.isRequiresSequence()){
+				  dbColId.setDefaultValue(idGen.getDefaultValueSql());
+			  }
 			  table.addColumn(dbColId);
 			  return dbColId;
 		}

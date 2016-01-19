@@ -25,6 +25,7 @@ ili2gpkg 3.0.0 (2016-01-xx)
 - GPKG: fixed timestamp parse exception 
 - fixed export without t_basket column
 - fixed duplicate column name from same attribute-name in subclasses
+- new option --oneGeomPerTable
 
 ili2pg 2.5.1 (2016-01-04)
 ----------------------------

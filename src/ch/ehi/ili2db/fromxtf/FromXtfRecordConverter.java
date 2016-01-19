@@ -107,42 +107,44 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 			valuei++;
 		}
 		
-		if(aclass.getExtending()==null){
-			if(createTypeDiscriminator || aclass.includesMultipleTypes()){
-				ps.setString(valuei, sqlType);
-				valuei++;
-			}
-			// if class
-			if(structEle==null){
-				if(!updateObj){
-					if(!aclass.isStructure()){
-						if(createIliTidCol || aclass.getOid()!=null){
-							// import TID from transfer file
-							if(AbstractRecordConverter.isUuidOid(td, aclass.getOid())){
-								 Object toInsertUUID = geomConv.fromIomUuid(iomObj.getobjectoid());
-								 ps.setObject(valuei, toInsertUUID);
-							}else{
-								ps.setString(valuei, iomObj.getobjectoid());
+		if(!aclass.isSecondaryTable()){
+			if(aclass.getExtending()==null){
+				if(createTypeDiscriminator || aclass.includesMultipleTypes()){
+					ps.setString(valuei, sqlType);
+					valuei++;
+				}
+				// if class
+				if(structEle==null){
+					if(!updateObj){
+						if(!aclass.isStructure()){
+							if(createIliTidCol || aclass.getOid()!=null){
+								// import TID from transfer file
+								if(AbstractRecordConverter.isUuidOid(td, aclass.getOid())){
+									 Object toInsertUUID = geomConv.fromIomUuid(iomObj.getobjectoid());
+									 ps.setObject(valuei, toInsertUUID);
+								}else{
+									ps.setString(valuei, iomObj.getobjectoid());
+								}
+								valuei++;
 							}
-							valuei++;
 						}
 					}
 				}
-			}
-			// if struct, add ref to parent
-			if(structEle!=null){
-				ps.setInt(valuei, structEle.getParentSqlId());
-				valuei++;
-				if(createGenericStructRef){
-					ps.setString(valuei, structEle.getParentSqlType());
+				// if struct, add ref to parent
+				if(structEle!=null){
+					ps.setInt(valuei, structEle.getParentSqlId());
 					valuei++;
-					// T_ParentAttr
-					ps.setString(valuei, structEle.getParentSqlAttr());
+					if(createGenericStructRef){
+						ps.setString(valuei, structEle.getParentSqlType());
+						valuei++;
+						// T_ParentAttr
+						ps.setString(valuei, structEle.getParentSqlAttr());
+						valuei++;
+					}
+					// T_Seq
+					ps.setInt(valuei, structEle.getStructi());
 					valuei++;
 				}
-				// T_Seq
-				ps.setInt(valuei, structEle.getStructi());
-				valuei++;
 			}
 		}
  
@@ -158,7 +160,7 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 						if(proxyType!=null && (proxyType instanceof ObjectType)){
 							// skip implicit particles (base-viewables) of views
 						}else{
-							valuei = addAttrValue(iomObj, sqlType, sqlId, getSqlType(aclass.getViewable()).getName(),ps,
+							valuei = addAttrValue(iomObj, sqlType, sqlId, aclass.getSqlTablename(),ps,
 									valuei, attr,structQueue);
 						}
 					}
@@ -240,8 +242,7 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 			//valuei++;
 		}
 	}
-	private HashSet getIomObjectAttrs(Viewable aclass) {
-		// TODO Auto-generated method stub
+	public HashSet getIomObjectAttrs(Viewable aclass) {
 		HashSet ret=new HashSet();
 		Iterator iter = aclass.getAttributesAndRoles2();
 		while (iter.hasNext()) {
@@ -336,61 +337,72 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 			sep=",";
 		}
 		
-		// if root, add type
-		if(aclass.getExtending()==null){
-			if(createTypeDiscriminator || aclass.includesMultipleTypes()){
-				ret.append(sep);
-				ret.append(DbNames.T_TYPE_COL);
-				if(isUpdate){
-					ret.append("=?");
-				}else{
-					values.append(",?");
-				}
-				sep=",";
-			}
-			// if Class
-			if(!aclass.isStructure()){
-				if(!isUpdate){
-					if(createIliTidCol || aclass.getOid()!=null){
-						ret.append(sep);
-						ret.append(DbNames.T_ILI_TID_COL);
+		if(!aclass.isSecondaryTable()){
+			// if root, add type
+			if(aclass.getExtending()==null){
+				if(createTypeDiscriminator || aclass.includesMultipleTypes()){
+					ret.append(sep);
+					ret.append(DbNames.T_TYPE_COL);
+					if(isUpdate){
+						ret.append("=?");
+					}else{
 						values.append(",?");
+					}
+					sep=",";
+				}
+				// if Class
+				if(!aclass.isStructure()){
+					if(!isUpdate){
+						if(createIliTidCol || aclass.getOid()!=null){
+							ret.append(sep);
+							ret.append(DbNames.T_ILI_TID_COL);
+							values.append(",?");
+							sep=",";
+						}
+					}
+				}
+				// if STRUCTURE, add ref to parent
+				if(aclass.isStructure()){
+					if(createGenericStructRef){
+						ret.append(sep);
+						ret.append(DbNames.T_PARENT_ID_COL);
+						if(isUpdate){
+							ret.append("=?");
+						}else{
+							values.append(",?");
+						}
+						sep=",";
+						ret.append(sep);
+						ret.append(DbNames.T_PARENT_TYPE_COL);
+						if(isUpdate){
+							ret.append("=?");
+						}else{
+							values.append(",?");
+						}
+						sep=",";
+						// attribute name in parent class
+						ret.append(sep);
+						ret.append(DbNames.T_PARENT_ATTR_COL);
+						if(isUpdate){
+							ret.append("=?");
+						}else{
+							values.append(",?");
+						}
+						sep=",";
+					}else{
+						ret.append(sep);
+						ViewableWrapper parentTable=getViewableWrapper(structEle.getParentSqlType());
+						ret.append(ili2sqlName.mapIliAttributeDefReverse(structEle.getParentAttr(),sqlTableName.getName(),getSqlType(parentTable.getViewable()).getName()));
+						if(isUpdate){
+							ret.append("=?");
+						}else{
+							values.append(",?");
+						}
 						sep=",";
 					}
-				}
-			}
-			// if STRUCTURE, add ref to parent
-			if(aclass.isStructure()){
-				if(createGenericStructRef){
+					// seqeunce (not null if LIST)
 					ret.append(sep);
-					ret.append(DbNames.T_PARENT_ID_COL);
-					if(isUpdate){
-						ret.append("=?");
-					}else{
-						values.append(",?");
-					}
-					sep=",";
-					ret.append(sep);
-					ret.append(DbNames.T_PARENT_TYPE_COL);
-					if(isUpdate){
-						ret.append("=?");
-					}else{
-						values.append(",?");
-					}
-					sep=",";
-					// attribute name in parent class
-					ret.append(sep);
-					ret.append(DbNames.T_PARENT_ATTR_COL);
-					if(isUpdate){
-						ret.append("=?");
-					}else{
-						values.append(",?");
-					}
-					sep=",";
-				}else{
-					ret.append(sep);
-					ViewableWrapper parentTable=getViewableWrapper(structEle.getParentSqlType());
-					ret.append(ili2sqlName.mapIliAttributeDefReverse(structEle.getParentAttr(),sqlTableName.getName(),getSqlType(parentTable.getViewable()).getName()));
+					ret.append(DbNames.T_SEQ_COL);
 					if(isUpdate){
 						ret.append("=?");
 					}else{
@@ -398,15 +410,6 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 					}
 					sep=",";
 				}
-				// seqeunce (not null if LIST)
-				ret.append(sep);
-				ret.append(DbNames.T_SEQ_COL);
-				if(isUpdate){
-					ret.append("=?");
-				}else{
-					values.append(",?");
-				}
-				sep=",";
 			}
 		}
 		

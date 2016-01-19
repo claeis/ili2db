@@ -90,7 +90,7 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 		}
 		String sep=",";
 		for(ViewableWrapper table:aclass.getWrappers()){
-			String sqlTableName=getSqlType(table.getViewable()).getName();
+			String sqlTableName=table.getSqlTablename();
 			Iterator iter = table.getAttrIterator();
 			while (iter.hasNext()) {
 			   ViewableTransferElement obj = (ViewableTransferElement)iter.next();
@@ -151,12 +151,7 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 
 		ret.append(" FROM ");
 		ArrayList<ViewableWrapper> tablev=new ArrayList<ViewableWrapper>(10);
-		tablev.add(aclass);
-		ViewableWrapper base=aclass.getExtending();
-		while(base!=null){
-			tablev.add(base);		
-			base=base.getExtending();
-		}
+		tablev.addAll(aclass.getWrappers());
 		sep="";
 		int tablec=tablev.size();
 		if(isMsAccess){
@@ -166,15 +161,15 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 		}
 		for(int i=0;i<tablec;i++){
 			ret.append(sep);
-			ret.append(getSqlType(tablev.get(i).getViewable()));
-			ret.append(" r"+Integer.toString(tablec-1-i));
+			ret.append(tablev.get(i).getSqlTableQName());
+			ret.append(" r"+Integer.toString(i));
 			if(i>0){
-				ret.append(" ON r"+Integer.toString(tablec-i)+"."+colT_ID+"=r"+Integer.toString(tablec-1-i)+"."+colT_ID);
+				ret.append(" ON r0."+colT_ID+"=r"+Integer.toString(i)+"."+colT_ID);
 			}
 			if(isMsAccess){
 				ret.append(")");
 			}
-			sep=" INNER JOIN ";
+			sep=" LEFT JOIN ";
 		}
 		sep=" WHERE";
 		if(createTypeDiscriminator || aclass.includesMultipleTypes()){
@@ -388,7 +383,7 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 			Iom_jObject iomObj, AttributeDef attr,ArrayList<StructWrapper> structQueue,ViewableWrapper table,FixIomObjectRefs fixref) throws SQLException {
 		if(attr.getExtending()==null){
 			String attrName=attr.getName();
-			String sqlAttrName=ili2sqlName.mapIliAttributeDef(attr,getSqlType(table.getViewable()).getName(),null);
+			String sqlAttrName=ili2sqlName.mapIliAttributeDef(attr,table.getSqlTablename(),null);
 			if( Ili2cUtility.isBoolean(td,attr)) {
 					boolean value=rs.getBoolean(valuei);
 					valuei++;

@@ -27,7 +27,7 @@ public class Config extends Settings {
 	private static final String STRUCT_MAPPING=PREFIX+".structMapping";
 	public static final String STRUCT_MAPPING_GENERICREF="genericRef";
 	public static final String INHERITANCE_TRAFO=PREFIX+".inheritanceTrafo";
-	public static final String INHERITANCE_TRAFO_SMART="smart";
+	public static final String INHERITANCE_TRAFO_SMART1="smart1";
 	public static final String CATALOGUE_REF_TRAFO=PREFIX+".catalogueRefTrafo";
 	public static final String CATALOGUE_REF_TRAFO_COALESCE="coalesce";
 	public static final String MULTISURFACE_TRAFO=PREFIX+".multiSurfaceTrafo";
@@ -36,6 +36,8 @@ public class Config extends Settings {
 	public static final String MULTILINGUAL_TRAFO_EXPAND="expand";
 	public static final String POLYGON_BUILDING_ERRORS=PREFIX+".polygonBuildingErrors";
 	public static final String POLYGON_BUILDING_ERRORS_IGNORE="reportAndSkip";
+	public static final String GEOMATTR_PER_TABLE=PREFIX+".geomAttrPerTable";
+	public static final String GEOMATTR_PER_TABLE_ONE="oneGeomAttrPerTable";
 	private static final String NAME_OPTIMIZATION=PREFIX+".nameOptimization";
 	public static final String NAME_OPTIMIZATION_DISABLE="disable";
 	public static final String NAME_OPTIMIZATION_TOPIC="topic";
@@ -344,6 +346,12 @@ public class Config extends Settings {
 	}
 	public boolean ignorePolygonBuildingErrors() {
 		return POLYGON_BUILDING_ERRORS_IGNORE.equals(getValue(POLYGON_BUILDING_ERRORS));
+	}
+	public void setOneGeomPerTable(boolean onlyOne) {
+		setValue(GEOMATTR_PER_TABLE,onlyOne?GEOMATTR_PER_TABLE_ONE:null);
+	}
+	public boolean isOneGeomPerTable() {
+		return GEOMATTR_PER_TABLE_ONE.equals(getValue(GEOMATTR_PER_TABLE));
 	}
 	public String getAreaRef() {
 		return getValue(AREA_REF);

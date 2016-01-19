@@ -281,7 +281,7 @@ public class NameMapping {
 		}
 		return sqlname;
 	}
-	public String mapItfLineTableAsTable(ch.interlis.ili2c.metamodel.AttributeDef def){
+	public String mapGeometryAsTable(ch.interlis.ili2c.metamodel.AttributeDef def){
 		String iliname=def.getContainer().getScopedName(null)+"."+def.getName();
 		String sqlname=(String)classNameIli2sql.get(iliname);
 		if(sqlname==null){

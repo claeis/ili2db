@@ -86,19 +86,21 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 	throws Ili2dbException
 	{
 		//EhiLogger.debug("viewable "+def);
-		DbTableName sqlName=getSqlType(def.getViewable());
+		DbTableName sqlName=new DbTableName(schema.getName(),def.getSqlTablename());
 		ViewableWrapper base=def.getExtending();
 		DbTable dbTable=new DbTable();
 		dbTable.setName(sqlName);
-		dbTable.setIliName(def.getViewable().getScopedName(null));
 		StringBuffer cmt=new StringBuffer();
 		String cmtSep="";
-		if(def.getViewable().getDocumentation()!=null){
-			cmt.append(cmtSep+def.getViewable().getDocumentation());
+		if(!def.isSecondaryTable()){
+			dbTable.setIliName(def.getViewable().getScopedName(null));
+			if(def.getViewable().getDocumentation()!=null){
+				cmt.append(cmtSep+def.getViewable().getDocumentation());
+				cmtSep=nl;
+			}
+			cmt.append(cmtSep+"@iliname "+def.getViewable().getScopedName(null));
 			cmtSep=nl;
 		}
-		cmt.append(cmtSep+"@iliname "+def.getViewable().getScopedName(null));
-		cmtSep=nl;
 		if(cmt.length()>0){
 			dbTable.setComment(cmt.toString());
 		}
@@ -106,7 +108,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 		if(deleteExistingData){
 			dbTable.setDeleteDataIfTableExists(true);
 		}
-		if(base==null){
+		if(base==null && !def.isSecondaryTable()){
 		  dbTable.setRequiresSequence(true);
 		}
 		String baseRef="";
@@ -116,6 +118,10 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 		  if(createFk){
 			  dbColId.setReferencedTable(getSqlType(base.getViewable()));
 		  }
+		}else if(def.isSecondaryTable()){
+			  if(createFk){
+				  dbColId.setReferencedTable(new DbTableName(schema.getName(),def.getMainTable().getSqlTablename()));
+			  }
 		}
 		  if(createBasketCol){
 			  // add basketCol
@@ -132,7 +138,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 				dbTable.addColumn(t_basket);
 		  }
 		DbColumn dbCol;
-		if(base==null){
+		if(base==null && !def.isSecondaryTable()){
 			if(createTypeDiscriminator || def.includesMultipleTypes()){
 				  dbCol=createSqlTypeCol(DbNames.T_TYPE_COL);
 				  dbTable.addColumn(dbCol);
@@ -266,7 +272,9 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 		  if(createStdCols){
 				addStdCol(dbTable);
 		  }
-		  customMapping.fixupViewable(dbTable,def.getViewable());
+		  if(!def.isSecondaryTable()){
+			  customMapping.fixupViewable(dbTable,def.getViewable());
+		  }
 	  	schema.addTable(dbTable);
 	  	
 	}
