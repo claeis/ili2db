@@ -20,6 +20,7 @@ package ch.ehi.ili2db.mapping;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Set;
 
 import ch.ehi.basics.logging.EhiLogger;
 import ch.interlis.ili2c.metamodel.Viewable;
@@ -47,10 +48,22 @@ public class NameMapping {
 	private HashMap<String,String> classNameSql2ili=new HashMap<String,String>();
 	private ColumnNameMapping columnMapping=new ColumnNameMapping();
 	private HashMap deprecatedConfig=new HashMap();
+	private int nameing=UNQUALIFIED_NAMES;
+	private static final int UNQUALIFIED_NAMES=0;
+	private static final int TOPIC_QUALIFIED_NAMES=1;
+	private static final int FULL_QUALIFIED_NAMES=2;
 	private NameMapping(){};
 	public NameMapping(ch.ehi.ili2db.gui.Config config)
 	{
 		_maxSqlNameLength=Integer.parseInt(config.getMaxSqlNameLength());
+		if(config.NAME_OPTIMIZATION_DISABLE.equals(config.getNameOptimization())){
+			nameing=FULL_QUALIFIED_NAMES;
+		}else if(config.NAME_OPTIMIZATION_TOPIC.equals(config.getNameOptimization())){
+			nameing=TOPIC_QUALIFIED_NAMES;
+		}else{
+			nameing=UNQUALIFIED_NAMES;
+		}
+		
 	}
 	/** @deprecated
 	 */
@@ -214,19 +227,54 @@ public class NameMapping {
 		if(attrName!=null){
 			maxClassNameLength=maxClassNameLength-5;
 		}
-		if(topicSqlName==null){
-			ret.append(shortcutName(modelSqlName,maxClassNameLength/2-2));
+		if(nameing==UNQUALIFIED_NAMES){
+		}else if(nameing==TOPIC_QUALIFIED_NAMES){
+			if(topicSqlName==null){
+			}else{
+				ret.append(shortcutName(topicSqlName,maxClassNameLength/4+2));
+				ret.append("_");
+			}
+		}else if(nameing==FULL_QUALIFIED_NAMES){
+			if(topicSqlName==null){
+				ret.append(shortcutName(modelSqlName,maxClassNameLength/2-2));
+			}else{
+				ret.append(shortcutName(modelSqlName,maxClassNameLength/4-1));
+				ret.append(shortcutName(topicSqlName,maxClassNameLength/4+2));
+			}
+			ret.append("_");
 		}else{
-			ret.append(shortcutName(modelSqlName,maxClassNameLength/4-1));
-			ret.append(shortcutName(topicSqlName,maxClassNameLength/4+2));
+			throw new IllegalStateException("nameing=="+nameing);
 		}
-		ret.append("_");
 		ret.append(shortcutName(classSqlName,maxClassNameLength-ret.length()));
 		if(attrSqlName!=null){
 			ret.append("_");
 			ret.append(shortcutName(attrSqlName,maxSqlNameLength-ret.length()));
 		}
-		return ret.toString();
+		String sqlTableName=ret.toString();
+		if((nameing!=FULL_QUALIFIED_NAMES) && classNameSql2ili.containsKey(sqlTableName)){
+			// try full qualified name
+			maxClassNameLength=maxSqlNameLength;
+			if(attrName!=null){
+				maxClassNameLength=maxClassNameLength-5;
+			}
+			if(topicSqlName==null){
+				ret.append(shortcutName(modelSqlName,maxClassNameLength/2-2));
+			}else{
+				ret.append(shortcutName(modelSqlName,maxClassNameLength/4-1));
+				ret.append(shortcutName(topicSqlName,maxClassNameLength/4+2));
+			}
+			ret.append("_");
+			ret.append(shortcutName(classSqlName,maxClassNameLength-ret.length()));
+			if(attrSqlName!=null){
+				ret.append("_");
+				ret.append(shortcutName(attrSqlName,maxSqlNameLength-ret.length()));
+			}
+			sqlTableName=ret.toString();
+		}
+		if(classNameSql2ili.containsKey(sqlTableName)){
+			sqlTableName=makeSqlTableNameUnique(sqlTableName);
+		}
+		return sqlTableName;
 	}
 	public String mapSqlTableName(String sqlname){
 		return (String)classNameSql2ili.get(sqlname);
@@ -235,15 +283,6 @@ public class NameMapping {
 	{
 		classNameIli2sql.put(iliname,sqlname);
 		classNameSql2ili.put(sqlname,iliname);
-	}
-	public String defineTableNameMapping(String iliname,String sqlname1)
-	{
-		String sqlname=(String)classNameIli2sql.get(iliname);
-		if(sqlname==null){
-			sqlname=makeValidSqlName(shortcutName(sqlname1, getMaxSqlNameLength()));
-			addTableNameMapping(iliname,sqlname);
-		}
-		return sqlname;
 	}
 	public String mapIliClassDef(ch.interlis.ili2c.metamodel.Viewable def)
 	{
@@ -302,7 +341,7 @@ public class NameMapping {
 			ch.interlis.ili2c.metamodel.Model model=(ch.interlis.ili2c.metamodel.Model)targetTable.getContainer(ch.interlis.ili2c.metamodel.Model.class);
 			sqlname=makeSqlAttrName(model.getName(),topic!=null ? topic.getName():null,targetTable.getName(),def.getName(),getMaxSqlNameLength());
 			*/
-			sqlname=shortcutName(def.getName(),targetSqlTablename,getMaxSqlNameLength()-6);
+			sqlname=shortcutName(targetSqlTablename,def.getName(),getMaxSqlNameLength()-6);
 			sqlname=makeValidSqlName(sqlname);
 			sqlname=makeSqlColNameUnique(ownerSqlTablename, sqlname);
 			columnMapping.addAttrNameMapping(iliname,sqlname,ownerSqlTablename,targetSqlTablename);
@@ -351,37 +390,26 @@ public class NameMapping {
 		}
 		return sqlname;
 	}
+	private String makeSqlTableNameUnique(String sqlname) {
+		String base=sqlname;
+		int c=1;
+		while(classNameSql2ili.containsKey(sqlname)){
+			sqlname=base+Integer.toString(c++);
+		}
+		return sqlname;
+	}
+	private Set<String> kws=null;
 	private String makeValidSqlName(String name)
 	{
-		if(name.equalsIgnoreCase("Date")){
-		  return "adate";
+		if(kws==null){
+			kws=Sql2003kw.getKeywords();			
+			kws.add("TEXT");
 		}
-		if(name.equalsIgnoreCase("level")){
-		  return "alevel";
+		String ucname=name.toUpperCase();
+		while(kws.contains(ucname)){
+			  name= "a"+name;
+			  ucname=name.toUpperCase();
 		}
-		if(name.equalsIgnoreCase("number")){
-		  return "anumber";
-		}
-		// Postgresql
-		if(name.equalsIgnoreCase("union")){
-			  return "aunion";
-			}
-		if(name.equalsIgnoreCase("from")){
-			  return "afrom";
-			}
-		if(name.equalsIgnoreCase("to")){
-			  return "ato";
-			}
-		if(name.equalsIgnoreCase("with")){
-			  return "awith";
-			}
-		// MS-ACCESS
-		if(name.equalsIgnoreCase("value")){
-		  return "avalue";
-		}
-		if(name.equalsIgnoreCase("text")){
-			  return "atext";
-			}
 		return name;
 	}
 	private static String shortcutName(String aname, int maxlen)
@@ -406,40 +434,6 @@ public class NameMapping {
 	name.delete(start,start+stripc);
 	// ASSERT(!name.IsEmpty());
 	return name.toString();
-	}
-	private static String shortcutName(String modelName,String topicName,String className,String attrName,int maxSqlNameLength)
-	{
-		StringBuffer ret=new StringBuffer();
-		String modelSqlName=modelName;
-		String topicSqlName=topicName;
-		String classSqlName=className;
-		String attrSqlName=attrName;
-		int maxClassNameLength=maxSqlNameLength-5;
-		if(topicSqlName==null){
-			ret.append(shortcutName(modelSqlName,maxClassNameLength/2-2));
-		}else{
-			ret.append(shortcutName(modelSqlName,maxClassNameLength/4-1));
-			ret.append(shortcutName(topicSqlName,maxClassNameLength/4+2));
-		}
-		ret.append("_");
-		ret.append(shortcutName(classSqlName,maxClassNameLength-ret.length()));
-		ret.append("_");
-		ret.append(shortcutName(attrSqlName,maxSqlNameLength-ret.length()));
-		return ret.toString();
-	}
-	private static String shortcutName(String modelName,String className,String attrName,int maxSqlNameLength)
-	{
-		StringBuffer ret=new StringBuffer();
-		String modelSqlName=modelName;
-		String classSqlName=className;
-		String attrSqlName=attrName;
-		int maxClassNameLength=maxSqlNameLength-5;
-		ret.append(shortcutName(modelSqlName,maxClassNameLength/2-2));
-		ret.append("_");
-		ret.append(shortcutName(classSqlName,maxClassNameLength-ret.length()));
-		ret.append("_");
-		ret.append(shortcutName(attrSqlName,maxSqlNameLength-ret.length()));
-		return ret.toString();
 	}
 	private static String shortcutName(String modelName,String attrName,int maxSqlNameLength)
 	{

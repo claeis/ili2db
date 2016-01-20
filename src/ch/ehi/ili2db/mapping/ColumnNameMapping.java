@@ -18,6 +18,10 @@ public class ColumnNameMapping {
 	}
 	public void addAttrNameMapping(String iliname,String sqlname,String ownerSqlTablename,String targetSqlTablename)
 	{
+		if(ownerSqlTablename==null){
+			throw new IllegalArgumentException("ownerSqlTablename==null");
+		}
+
 		attrNameIli2sql.put(new AttrMappingKey(iliname,ownerSqlTablename,targetSqlTablename),sqlname);
 		
 		HashSet<String> colNames=null;
@@ -34,6 +38,9 @@ public class ColumnNameMapping {
 	}
 	public String getSqlName(String iliAttrqname,String ownerSqlTablename,String targetSqlTablename)
 	{
+		if(ownerSqlTablename==null){
+			throw new IllegalArgumentException("ownerSqlTablename==null");
+		}
 		return attrNameIli2sql.get(new AttrMappingKey(iliAttrqname,ownerSqlTablename,targetSqlTablename));
 	}
 	private static HashSet<AttrMappingKey> readAttrMappingTableEntries(java.sql.Connection conn,String schema)
@@ -139,6 +146,9 @@ public class ColumnNameMapping {
 
 	}
 	public boolean existsSqlName(String ownerSqlTablename, String sqlname) {
+		if(ownerSqlTablename==null){
+			throw new IllegalArgumentException("ownerSqlTablename==null");
+		}
 		if(tables.containsKey(ownerSqlTablename)){
 			HashSet<String> colNames=tables.get(ownerSqlTablename);
 			if(colNames.contains(sqlname)){

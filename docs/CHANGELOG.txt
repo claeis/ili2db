@@ -26,6 +26,7 @@ ili2gpkg 3.0.0 (2016-01-xx)
 - fixed export without t_basket column
 - fixed duplicate column name from same attribute-name in subclasses
 - new option --oneGeomPerTable
+- refactored table naming
 
 ili2pg 2.5.1 (2016-01-04)
 ----------------------------

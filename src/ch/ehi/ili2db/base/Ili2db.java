@@ -359,7 +359,6 @@ public class Ili2db {
 					}
 				}
 				java.util.List<Element> eles=ms.getModelElements(modelNames,td, td.getIli1Format()!=null && config.getDoItfLineTables(),Config.CREATE_ENUM_DEFS_MULTI.equals(config.getCreateEnumDefs()));
-				optimizeSqlTableNames(config,mapping,eles);
 				Viewable2TableMapping class2wrapper=Viewable2TableMapper.getClass2TableMapping(config,trafoConfig,eles,mapping);
 
 				Generator gen=null;
@@ -840,7 +839,6 @@ public class Ili2db {
 				}
 			}
 			java.util.List<Element> eles=ms.getModelElements(modelNames,td, td.getIli1Format()!=null && config.getDoItfLineTables(),Config.CREATE_ENUM_DEFS_MULTI.equals(config.getCreateEnumDefs()));
-			optimizeSqlTableNames(config,mapping,eles);
 			Viewable2TableMapping class2wrapper=Viewable2TableMapper.getClass2TableMapping(config,trafoConfig,eles,mapping);
 
 			SqlColumnConverter geomConverter=null;
@@ -1620,85 +1618,6 @@ public class Ili2db {
 				}
 			}
 			ioxWriter=null;
-		}
-	}
-	static public void optimizeSqlTableNames(Config config,NameMapping mapping,java.util.List<Element> eles)
-	{
-		if(config.NAME_OPTIMIZATION_DISABLE.equals(config.getNameOptimization())){
-			return;
-		}
-		NameOptimizer optimizer=null;
-		if(config.NAME_OPTIMIZATION_TOPIC.equals(config.getNameOptimization())){
-			optimizer=new NameOptimizer(){
-				@Override
-				public String createTableName(Element ele) {
-					if(ele instanceof ch.interlis.ili2c.metamodel.Viewable
-							|| ele instanceof ch.interlis.ili2c.metamodel.Domain){
-						ch.interlis.ili2c.metamodel.Container container=ele.getContainer();
-						String optimizedName=container.getName()+"_"+ele.getName();
-						return optimizedName;
-					}else if(ele instanceof AttributeDef)
-					  {
-						AttributeDef attr = (AttributeDef) ele;
-						ch.interlis.ili2c.metamodel.Viewable v=(ch.interlis.ili2c.metamodel.Viewable)attr.getContainer();
-						ch.interlis.ili2c.metamodel.Container container=v.getContainer();
-						Type type = Type.findReal (attr.getDomain());
-						return container.getName()+"_"+v.getName()+"_"+attr.getName();
-					  }
-					return null;
-				}
-				
-			};
-		}else{
-			optimizer=new NameOptimizer(){
-				@Override
-				public String createTableName(Element ele) {
-					if(ele instanceof ch.interlis.ili2c.metamodel.Viewable
-							|| ele instanceof ch.interlis.ili2c.metamodel.Domain){
-						return ele.getName();
-					}else if(ele instanceof AttributeDef)
-					  {
-						AttributeDef attr = (AttributeDef) ele;
-						ch.interlis.ili2c.metamodel.Viewable v=(ch.interlis.ili2c.metamodel.Viewable)attr.getContainer();
-						return v.getName()+"_"+attr.getName();
-					  }
-					return null;
-				}
-				
-			};
-		}
-		HashSet<String> names=new HashSet<String>();
-		
-		ArrayList<Element> elev=new ArrayList<Element>(eles);
-		//java.util.Collections.reverse(elev);
-		for (Element ele : elev) {
-			if (ele instanceof ch.interlis.ili2c.metamodel.Viewable
-					|| ele instanceof ch.interlis.ili2c.metamodel.Domain) {
-				if(ele instanceof ch.interlis.ili2c.metamodel.Table && ((ch.interlis.ili2c.metamodel.Table)ele).isIli1LineAttrStruct()){
-					// skip it
-				}else{
-					String optimizedTableName = optimizer.createTableName(ele);
-					if (optimizedTableName != null && !names.contains(optimizedTableName)) {
-						mapping.defineTableNameMapping(ele.getScopedName(null),
-								optimizedTableName);
-						names.add(optimizedTableName);
-					}
-				}
-			} else if (ele instanceof AttributeDef) {
-				AttributeDef attr = (AttributeDef) ele;
-				Viewable v = (Viewable) attr.getContainer();
-				String optimizedTableName = optimizer.createTableName(attr);
-				if (optimizedTableName != null
-						&& !names.contains(optimizedTableName)) {
-					String qualifiedModelElementName = v.getContainer()
-					.getScopedName(null) + "." + v.getName() + "."
-							+ attr.getName();
-					mapping.defineTableNameMapping(qualifiedModelElementName,
-							optimizedTableName);
-					names.add(optimizedTableName);
-				}
-			}
-
 		}
 	}
 	
