@@ -139,10 +139,6 @@ public abstract class AbstractMain {
 				argi++;
 				config.setLogfile(args[argi]);
 				argi++;
-			}else if(arg.equals("--mapconfig")){
-				argi++;
-				config.setMappingConfigFilename(args[argi]);
-				argi++;
 			}else if(arg.equals("--defaultSrsAuth")){
 				argi++;
 				String auth=args[argi];
@@ -268,7 +264,6 @@ public abstract class AbstractMain {
 					System.err.println("--topics topicname     Name(s) of ili-topics to export.");
 					System.err.println("--createscript filename  Generate a sql script that creates the db schema.");
 					System.err.println("--dropscript filename  Generate a sql script that drops the generated db schema.");
-					System.err.println("--mapconfig filename   Name of config file, that controls the schema mapping.");
 					System.err.println("--noSmartMapping       disable all smart mappings");
 					System.err.println("--smartInheritance     enable smart mapping of class/structure inheritance");
 					System.err.println("--coalesceCatalogueRef enable smart mapping of CHBase:CatalogueReference");

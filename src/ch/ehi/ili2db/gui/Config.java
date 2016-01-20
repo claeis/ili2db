@@ -76,7 +76,6 @@ public class Config extends Settings {
 	private String createscript;
 	private String dropscript;
 	private String xtffile;
-	private String mappingConfig;
 	private String idGenerator=null;
 	private String geometryConverter;
 	private String jdbcDriver=null;
@@ -130,12 +129,6 @@ public class Config extends Settings {
 	}
 	public void setDropscript(String dropscript) {
 		this.dropscript = dropscript;
-	}
-	public String getMappingConfigFilename() {
-		return mappingConfig;
-	}
-	public void setMappingConfigFilename(String mappingConfig) {
-		this.mappingConfig = mappingConfig;
 	}
 	public String getModeldir() {
 		return modeldir;

@@ -47,7 +47,6 @@ public class NameMapping {
 	 */
 	private HashMap<String,String> classNameSql2ili=new HashMap<String,String>();
 	private ColumnNameMapping columnMapping=new ColumnNameMapping();
-	private HashMap deprecatedConfig=new HashMap();
 	private int nameing=UNQUALIFIED_NAMES;
 	private static final int UNQUALIFIED_NAMES=0;
 	private static final int TOPIC_QUALIFIED_NAMES=1;
@@ -65,126 +64,6 @@ public class NameMapping {
 		}
 		
 	}
-	/** @deprecated
-	 */
-	public void readDeprecatedConfig(String filename)
-	throws Ili2dbException
-	{
-		java.io.InputStream inputFile=null;
-		try{
-			inputFile=new java.io.FileInputStream(new java.io.File (filename));
-			XtfReader reader=new XtfReader(inputFile);
-			IoxEvent event=reader.read();
-			while(event!=null){
-				if(event instanceof ObjectEvent){
-					IomObject obj=((ObjectEvent)event).getIomObject();
-					String tag=obj.getobjecttag();
-					if(tag.equals("Ili2ora05.MappingConfig.ModelDef")){
-						String iliName=obj.getattrvalue("iliName");
-						String sqlName=obj.getattrvalue("sqlName");
-						ModelDef model=new ModelDef();
-						model.setIliName(iliName);
-						if(sqlName!=null){
-							model.setSqlName(sqlName);
-						}
-						deprecatedConfig.put(iliName,model);
-						int topicc=obj.getattrvaluecount("definition");
-						for(int topici=0;topici<topicc;topici++){
-							handleModelMember(model,obj.getattrobj("definition",topici));
-						}
-					}else{
-						throw new Ili2dbException("("+obj.getobjectline()+","+obj.getobjectcol()+"): unknown tag "+tag);
-					}
-				}
-			}
-		}catch(ch.interlis.iox.IoxException ex){
-			throw new Ili2dbException(ex);
-		}catch(java.io.IOException ex){
-			throw new Ili2dbException(ex);
-		}finally{
-			if(inputFile!=null){
-				try{
-					inputFile.close();
-				}catch(java.io.IOException ex){
-					throw new Ili2dbException(ex);
-				}
-				inputFile=null;
-			}
-		}
-				
-	}
-	private void handleModelMember(ModelDef model,IomObject topicObj){
-		if(topicObj!=null){
-			String tag=topicObj.getobjecttag();
-			if(tag.equals("Ili2ora05.MappingConfig.TopicDef")){
-				String iliName=topicObj.getattrvalue("iliName");
-				String sqlName=topicObj.getattrvalue("sqlName");
-				TopicDef topic=new TopicDef();
-				topic.setIliName(iliName);
-				if(sqlName!=null){
-					topic.setSqlName(sqlName);
-				}
-				model.addDefinition(topic);
-				int classc=topicObj.getattrvaluecount("definition");
-				for(int memberi=0;memberi<classc;memberi++){
-					handleTopicMember(topic,topicObj.getattrobj("definition",memberi));
-				}
-			}else if(tag.equals("Ili2ora05.MappingConfig.ClassDef")){
-				String iliName=topicObj.getattrvalue("iliName");
-				String sqlName=topicObj.getattrvalue("sqlName");
-				ClassDef aclass=new ClassDef();
-				aclass.setIliName(iliName);
-				if(sqlName!=null){
-					aclass.setSqlName(sqlName);
-				}
-				model.addDefinition(aclass);
-				int attrc=topicObj.getattrvaluecount("attribute");
-				for(int memberi=0;memberi<attrc;memberi++){
-					handleAttribute(aclass,topicObj.getattrobj("attribute",memberi));
-				}
-			}else{
-				EhiLogger.logError("("+topicObj.getobjectline()+","+topicObj.getobjectcol()+"): unknown tag "+tag);
-			}
-		}
-	}
-	private void handleTopicMember(TopicDef topic,IomObject classObj){
-		if(classObj!=null){
-			String tag=classObj.getobjecttag();
-			if(tag.equals("Ili2ora05.MappingConfig.ClassDef")){
-				String iliName=classObj.getattrvalue("iliName");
-				String sqlName=classObj.getattrvalue("sqlName");
-				ClassDef aclass=new ClassDef();
-				aclass.setIliName(iliName);
-				if(sqlName!=null){
-					aclass.setSqlName(sqlName);
-				}
-				topic.addDefinition(aclass);
-				int attrc=classObj.getattrvaluecount("attribute");
-				for(int memberi=0;memberi<attrc;memberi++){
-					handleAttribute(aclass,classObj.getattrobj("attribute",memberi));
-				}
-			}else{
-				EhiLogger.logError("("+classObj.getobjectline()+","+classObj.getobjectcol()+"): unknown tag "+tag);
-			}
-		}
-	}
-	private void handleAttribute(ClassDef aclass,IomObject attrObj){
-		if(attrObj!=null){
-			String tag=attrObj.getobjecttag();
-			if(tag.equals("Ili2ora05.MappingConfig.AttributeDef")){
-				String iliName=attrObj.getattrvalue("iliName");
-				String sqlName=attrObj.getattrvalue("sqlName");
-				AttributeDef attr=new AttributeDef();
-				attr.setIliName(iliName);
-				if(sqlName!=null){
-					attr.setSqlName(sqlName);
-				}
-				aclass.addAttribute(attr);
-			}else{
-				EhiLogger.logError("("+attrObj.getobjectline()+","+attrObj.getobjectcol()+"): unknown tag "+tag);
-			}
-		}
-	}
 	private String makeSqlTableName(String modelName,String topicName,String className,String attrName,int maxSqlNameLength)
 	{
 		StringBuffer ret=new StringBuffer();
@@ -192,37 +71,6 @@ public class NameMapping {
 		String topicSqlName=topicName;
 		String classSqlName=className;
 		String attrSqlName=attrName;
-		ModelDef model=(ModelDef)deprecatedConfig.get(modelName);
-		if(model!=null){
-			String sqlName=model.getSqlName();
-			if(sqlName!=null){
-				modelSqlName=sqlName;
-			}
-			if(topicName!=null){
-				TopicDef topic=(TopicDef)model.getDefinition(topicName);
-				if(topic!=null){
-					sqlName=topic.getSqlName();
-					if(sqlName!=null){
-						topicSqlName=sqlName;
-					}
-					ClassDef aclass=(ClassDef)topic.getDefinition(className);
-					if(aclass!=null){
-						sqlName=aclass.getSqlName();
-						if(sqlName!=null){
-							classSqlName=sqlName;
-						}
-					}
-				}
-			}else{
-				ClassDef aclass=(ClassDef)model.getDefinition(className);
-				if(aclass!=null){
-					sqlName=aclass.getSqlName();
-					if(sqlName!=null){
-						classSqlName=sqlName;
-					}
-				}
-			}
-		}
 		int maxClassNameLength=maxSqlNameLength;
 		if(attrName!=null){
 			maxClassNameLength=maxClassNameLength-5;

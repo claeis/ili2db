@@ -334,7 +334,6 @@ public class Ili2db {
 				}
 			  	
 				// read mapping file
-				String mappingConfig=config.getMappingConfigFilename();
 				NameMapping mapping=new NameMapping(config);
 				  if(DbUtility.tableExists(conn,new DbTableName(config.getDbschema(),DbNames.CLASSNAME_TAB))){
 					  // read mapping from db
@@ -344,9 +343,6 @@ public class Ili2db {
 					  // read mapping from db
 					  mapping.readAttrMappingTable(conn,config.getDbschema());
 				  }
-				if(mappingConfig!=null){
-					mapping.readDeprecatedConfig(mappingConfig);
-				}
 				  TrafoConfig trafoConfig=new TrafoConfig();
 				  trafoConfig.readTrafoConfig(conn, config.getDbschema());
 
@@ -805,7 +801,6 @@ public class Ili2db {
 		  	idGen.init(config.getDbschema());
 
 			// read mapping file
-			String mappingConfigFilename=config.getMappingConfigFilename();
 			NameMapping mapping=new NameMapping(config);
 			if(!(conn instanceof GeodbConnection)){
 				  if(DbUtility.tableExists(conn,new DbTableName(config.getDbschema(),DbNames.CLASSNAME_TAB))){
@@ -816,9 +811,6 @@ public class Ili2db {
 					  // read mapping from db
 					  mapping.readAttrMappingTable(conn,config.getDbschema());
 				  }
-			}
-			if(mappingConfigFilename!=null){
-				mapping.readDeprecatedConfig(mappingConfigFilename);
 			}
 			  TrafoConfig trafoConfig=new TrafoConfig();
 			  trafoConfig.readTrafoConfig(conn, config.getDbschema());
@@ -1156,14 +1148,10 @@ public class Ili2db {
 			  geomConverter.setup(conn, config);
 			  
 			  // get mapping definition
-			  String mappingConfigFilename=config.getMappingConfigFilename();
 			  NameMapping mapping=new NameMapping(config);
 			  if(DbUtility.tableExists(conn,new DbTableName(config.getDbschema(),DbNames.CLASSNAME_TAB))){
 				  // read mapping from db
 				  mapping.readTableMappingTable(conn,config.getDbschema());
-			  }else if(mappingConfigFilename!=null){
-				  // read mapping from config file if it doesn't exist in the db
-				  mapping.readDeprecatedConfig(mappingConfigFilename);
 			  }
 			  if(DbUtility.tableExists(conn,new DbTableName(config.getDbschema(),DbNames.ATTRNAME_TAB))){
 				  // read mapping from db
