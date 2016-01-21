@@ -101,10 +101,11 @@ public class Ili2db {
 	public static void readSettingsFromDb(Config config)
 	throws Ili2dbException
 	{
+		boolean connectionFromExtern=config.getJdbcConnection()!=null;
 		String dburl=config.getDburl();
 		String dbusr=config.getDbusr();
 		String dbpwd=config.getDbpwd();
-		if(dburl==null){
+		if(!connectionFromExtern && dburl==null){
 			EhiLogger.logError("no dburl given");
 			return;
 		}
@@ -118,38 +119,46 @@ public class Ili2db {
 			//return;
 			dbpwd="";
 		}
-		String jdbcDriver=config.getJdbcDriver();
-		if(jdbcDriver==null){
-			EhiLogger.logError("no JDBC driver given");
-			return;
-		}
-		if(jdbcDriver.equals("ch.ehi.ili2geodb.jdbc.GeodbDriver")){
-			return;
+		if(!connectionFromExtern){
+			String jdbcDriver=config.getJdbcDriver();
+			if(jdbcDriver==null){
+				EhiLogger.logError("no JDBC driver given");
+				return;
+			}
+			if(jdbcDriver.equals("ch.ehi.ili2geodb.jdbc.GeodbDriver")){
+				return;
+			}
+			
+			try{
+				Class.forName(jdbcDriver);
+			}catch(Exception ex){
+				EhiLogger.logError("failed to load JDBC driver",ex);
+				return;
+			}
 		}
 		
 		CustomMapping customMapping=getCustomMappingStrategy(config);
 		
 		// open db connection
-		try{
-			Class.forName(jdbcDriver);
-		}catch(Exception ex){
-			EhiLogger.logError("failed to load JDBC driver",ex);
-			return;
-		}
 		Connection conn=null;
 		String url = dburl;
 		try {
-			conn = connect(url, dbusr, dbpwd, config, customMapping);
+			if(connectionFromExtern){
+				conn=config.getJdbcConnection();
+			}else{
+				conn = connect(url, dbusr, dbpwd, config, customMapping);
+			}
 			TransferFromIli.readSettings(conn,config,config.getDbschema());
 		} catch (SQLException e) {
 			EhiLogger.logError(e);
 		}finally{
-			if(conn!=null){
+			if(!connectionFromExtern && conn!=null){
 				try{
 					conn.close();
 				}catch(java.sql.SQLException ex){
 					EhiLogger.logError(ex);
 				}finally{
+					config.setJdbcConnection(null);
 					conn=null;
 				}
 			}
@@ -187,6 +196,7 @@ public class Ili2db {
 			EhiLogger.getInstance().addListener(logfile);
 		}
 		try{
+			boolean connectionFromExtern=config.getJdbcConnection()!=null;
 			logGeneralInfo(config);
 			
 			//String zipfilename=null;
@@ -254,7 +264,7 @@ public class Ili2db {
 			String dburl=config.getDburl();
 			String dbusr=config.getDbusr();
 			String dbpwd=config.getDbpwd();
-			if(dburl==null){
+			if(!connectionFromExtern && dburl==null){
 				throw new Ili2dbException("no dburl given");
 			}
 			if(dbusr==null){
@@ -283,35 +293,43 @@ public class Ili2db {
 			if(idGenerator==null){
 				throw new Ili2dbException("no ID generator given");
 			}
-			String jdbcDriver=config.getJdbcDriver();
-			if(jdbcDriver==null){
-				throw new Ili2dbException("no JDBC driver given");
+			if(!connectionFromExtern){
+				String jdbcDriver=config.getJdbcDriver();
+				if(jdbcDriver==null){
+					throw new Ili2dbException("no JDBC driver given");
+				}
+				try{
+					Class.forName(jdbcDriver);
+				}catch(Exception ex){
+					throw new Ili2dbException("failed to load JDBC driver",ex);
+				}
 			}
 			CustomMapping customMapping=getCustomMappingStrategy(config);
 			
 			// open db connection
-			try{
-				Class.forName(jdbcDriver);
-			}catch(Exception ex){
-				throw new Ili2dbException("failed to load JDBC driver",ex);
-			}
 			Connection conn=null;
 			String url = dburl;
 			ch.ehi.basics.logging.ErrorTracker errs=null;
 			try{
 				try {
-					conn = connect(url, dbusr, dbpwd, config, customMapping);
+					if(connectionFromExtern){
+						conn=config.getJdbcConnection();
+					}else{
+						conn = connect(url, dbusr, dbpwd, config, customMapping);
+					}
 				} catch (SQLException ex) {
 					throw new Ili2dbException("failed to get db connection", ex);
 				}
 			  logDBVersion(conn);
 			  
-			  // switch off auto-commit
-			  try {
-				conn.setAutoCommit(false);
-			} catch (SQLException ex) {
-				throw new Ili2dbException("failed to switch off auto-commit",ex);
-			}
+			  if(!connectionFromExtern){
+				  // switch off auto-commit
+				  try {
+					conn.setAutoCommit(false);
+				} catch (SQLException ex) {
+					throw new Ili2dbException("failed to switch off auto-commit",ex);
+				}
+			  }
 			  
 			  // create db schema
 				if(importOnly){
@@ -378,7 +396,6 @@ public class Ili2db {
 				}
 				geomConverter.setup(conn, config);
 
-				config.setJdbcConnection(conn);
 				idGen.initDb(conn,dbusr);
 				idGen.initDbDefs();
 				
@@ -542,30 +559,36 @@ public class Ili2db {
 				}
 				
 				if(errs.hasSeenErrors()){
-					try {
-						conn.rollback();
-					} catch (SQLException e) {
-						EhiLogger.logError("rollback failed",e);
+					if(!connectionFromExtern){
+						try {
+							conn.rollback();
+						} catch (SQLException e) {
+							EhiLogger.logError("rollback failed",e);
+						}
 					}
 					throw new Ili2dbException("...import failed");
 				}else{
-					try {
-						conn.commit();
-					} catch (SQLException e) {
-						EhiLogger.logError("commit failed",e);
-						throw new Ili2dbException("...import failed");
+					if(!connectionFromExtern){
+						try {
+							conn.commit();
+						} catch (SQLException e) {
+							EhiLogger.logError("commit failed",e);
+							throw new Ili2dbException("...import failed");
+						}
 					}
 					logStatistics(td.getIli1Format()!=null,stat);
 					EhiLogger.logState("...import done");
 				}
 			}finally{
-				if(conn!=null){
-					try{
-						conn.close();
-					}catch(java.sql.SQLException ex){
-						EhiLogger.logError(ex);
-					}finally{
-						conn=null;
+				if(!connectionFromExtern){
+					if(conn!=null){
+						try{
+							conn.close();
+						}catch(java.sql.SQLException ex){
+							EhiLogger.logError(ex);
+						}finally{
+							conn=null;
+						}
 					}
 				}
 				if(errs!=null){
@@ -671,6 +694,7 @@ public class Ili2db {
 			EhiLogger.getInstance().addListener(logfile);
 		}
 		try{
+			boolean connectionFromExtern=config.getJdbcConnection()!=null;
 			logGeneralInfo(config);
 			
 			Ili2dbLibraryInit ao=null;
@@ -707,7 +731,7 @@ public class Ili2db {
 			String dburl=config.getDburl();
 			String dbusr=config.getDbusr();
 			String dbpwd=config.getDbpwd();
-			if(dburl==null){
+			if(!connectionFromExtern && dburl==null){
 				throw new Ili2dbException("no dburl given");
 			}
 			if(dbusr==null){
@@ -736,26 +760,34 @@ public class Ili2db {
 			if(idGenerator==null){
 				throw new Ili2dbException("no ID generator given");
 			}
-			String jdbcDriver=config.getJdbcDriver();
-			if(jdbcDriver==null){
-				throw new Ili2dbException("no JDBC driver given");
+			if(!connectionFromExtern){
+				String jdbcDriver=config.getJdbcDriver();
+				if(jdbcDriver==null){
+					throw new Ili2dbException("no JDBC driver given");
+				}
+				try{
+					Class.forName(jdbcDriver);
+				}catch(Exception ex){
+					throw new Ili2dbException("failed to load JDBC driver",ex);
+				}
 			}
 
 			CustomMapping customMapping=getCustomMappingStrategy(config);
 			// open db connection
-			try{
-				Class.forName(jdbcDriver);
-			}catch(Exception ex){
-				throw new Ili2dbException("failed to load JDBC driver",ex);
-			}
 			Connection conn=null;
 			String url = dburl;
 			try{
-				conn = connect(url, dbusr, dbpwd, config, customMapping);
+				if(connectionFromExtern){
+					conn=config.getJdbcConnection();
+				}else{
+					conn = connect(url, dbusr, dbpwd, config, customMapping);
+				}
 			  logDBVersion(conn);
 			  
-			  // switch off auto-commit
-			  conn.setAutoCommit(false);
+			  if(!connectionFromExtern){
+				  // switch off auto-commit
+				  conn.setAutoCommit(false);
+			  }
 			  
 			}catch(SQLException ex){
 				throw new Ili2dbException(ex);
@@ -877,7 +909,6 @@ public class Ili2db {
 				}
 							
 				GeneratorDriver drv=new GeneratorDriver(gen);
-				config.setJdbcConnection(conn);
 				idGen.initDb(conn,dbusr);
 				idGen.initDbDefs();
 				
@@ -917,10 +948,12 @@ public class Ili2db {
 				//		EhiLogger.logError("failed to export gdb to "+xmlfile,ex);
 				//	}
 				//}
-				try {
-					conn.commit();
-				} catch (SQLException e) {
-					throw new Ili2dbException("failed to commit",e);
+				if(!connectionFromExtern){
+					try {
+						conn.commit();
+					} catch (SQLException e) {
+						throw new Ili2dbException("failed to commit",e);
+					}
 				}
 				
 			}catch(java.io.IOException ex){
@@ -928,9 +961,11 @@ public class Ili2db {
 			}
 			
 			try{
-				if(conn!=null){
-					conn.close();
-					conn=null;
+				if(!connectionFromExtern){
+					if(conn!=null){
+						conn.close();
+						conn=null;
+					}
 				}
 				EhiLogger.logState("...done");
 			}catch(java.sql.SQLException ex){
@@ -1014,6 +1049,7 @@ public class Ili2db {
 			EhiLogger.getInstance().addListener(logfile);
 		}
 		try{
+			boolean connectionFromExtern=config.getJdbcConnection()!=null;
 			logGeneralInfo(config);
 			
 			String xtffile=config.getXtffile();
@@ -1028,7 +1064,7 @@ public class Ili2db {
 			String dburl=config.getDburl();
 			String dbusr=config.getDbusr();
 			String dbpwd=config.getDbpwd();
-			if(dburl==null){
+			if(!connectionFromExtern && dburl==null){
 				throw new Ili2dbException("no dburl given");
 			}
 			if(dbusr==null){
@@ -1049,9 +1085,17 @@ public class Ili2db {
 			if(geometryConverter==null){
 				throw new Ili2dbException("no geoemtry converter given");
 			}
-			String jdbcDriver=config.getJdbcDriver();
-			if(jdbcDriver==null){
-				throw new Ili2dbException("no JDBC driver given");
+			if(!connectionFromExtern){
+				String jdbcDriver=config.getJdbcDriver();
+				if(jdbcDriver==null){
+					throw new Ili2dbException("no JDBC driver given");
+				}
+				// open db connection
+				try{
+					Class.forName(jdbcDriver);
+				}catch(Exception ex){
+					throw new Ili2dbException("failed to load JDBC driver",ex);
+				}
 			}
 			
 			String baskets=config.getBaskets();
@@ -1063,18 +1107,16 @@ public class Ili2db {
 			
 			CustomMapping customMapping=getCustomMappingStrategy(config);
 			
-			// open db connection
-			try{
-				Class.forName(jdbcDriver);
-			}catch(Exception ex){
-				throw new Ili2dbException("failed to load JDBC driver",ex);
-			}
 			Connection conn=null;
 			String url = dburl;
 			try{
 			  //DriverManager.registerDriver(new oracle.jdbc.OracleDriver());
 			  try {
-					conn = connect(url, dbusr, dbpwd, config, customMapping);
+				  if(connectionFromExtern){
+					  conn=config.getJdbcConnection();
+				  }else{
+						conn = connect(url, dbusr, dbpwd, config, customMapping);
+				  }
 			} catch (SQLException e) {
 				throw new Ili2dbException("failed to get db connection",e);
 			}
@@ -1193,10 +1235,12 @@ public class Ili2db {
 			//}catch(Exception ex){
 				//EhiLogger.logError(ex);
 			}finally{
-				try{
-					conn.close();
-				}catch(java.sql.SQLException ex){
-					EhiLogger.logError(ex);
+				if(!connectionFromExtern){
+					try{
+						conn.close();
+					}catch(java.sql.SQLException ex){
+						EhiLogger.logError(ex);
+					}
 				}
 			}			
 		}catch(Ili2dbException ex){
@@ -1224,6 +1268,7 @@ public class Ili2db {
 		EhiLogger.logState("dbusr <" + dbusr + ">");
 		customMapping.preConnect(url, dbusr, dbpwd, config);
 		conn = DriverManager.getConnection(url, dbusr, dbpwd);
+		config.setJdbcConnection(conn);
 		customMapping.postConnect(conn, config);
 		return conn;
 	}

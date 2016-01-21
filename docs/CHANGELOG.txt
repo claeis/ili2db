@@ -29,6 +29,7 @@ ili2gpkg 3.0.0 (2016-01-xx)
 - refactored table naming
 - removed deprecated option --mapconfig
 - new option --createUnique to map simple ili unique constraints
+- API: client might open db connection (use Config.setJdbcConnection())
 
 ili2pg 2.5.1 (2016-01-04)
 ----------------------------
