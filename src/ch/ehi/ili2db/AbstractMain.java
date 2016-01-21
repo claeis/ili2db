@@ -191,6 +191,9 @@ public abstract class AbstractMain {
 			}else if(arg.equals("--createFkIdx")){
 				argi++;
 				config.setCreateFkIdx(config.CREATE_FKIDX_YES);
+			}else if(arg.equals("--createUnique")){
+				argi++;
+				config.setCreateUniqueConstraints(true);
 			}else if(arg.equals("--createStdCols")){
 				argi++;
 				config.setCreateStdCols(config.CREATE_STD_COLS_ALL);
@@ -290,6 +293,7 @@ public abstract class AbstractMain {
 					System.err.println("--createBasketCol      generate "+DbNames.T_BASKET_COL+" column.");
 					System.err.println("--createFk             generate foreign key constraints.");
 					System.err.println("--createFkIdx          create an index on foreign key columns.");
+					System.err.println("--createUnique         create UNIQUE db constraints.");
 					printSpecificOptions();
 					System.err.println("--log filename         log message to given file.");
 					System.err.println("--gui                  start GUI.");

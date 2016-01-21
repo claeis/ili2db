@@ -36,6 +36,8 @@ public class Config extends Settings {
 	public static final String MULTILINGUAL_TRAFO_EXPAND="expand";
 	public static final String POLYGON_BUILDING_ERRORS=PREFIX+".polygonBuildingErrors";
 	public static final String POLYGON_BUILDING_ERRORS_IGNORE="reportAndSkip";
+	public static final String UNIQUE_CONSTRAINTS=PREFIX+".uniqueConstraints";
+	public static final String UNIQUE_CONSTRAINTS_CREATE="create";
 	public static final String GEOMATTR_PER_TABLE=PREFIX+".geomAttrPerTable";
 	public static final String GEOMATTR_PER_TABLE_ONE="oneGeomAttrPerTable";
 	private static final String NAME_OPTIMIZATION=PREFIX+".nameOptimization";
@@ -339,6 +341,12 @@ public class Config extends Settings {
 	}
 	public boolean ignorePolygonBuildingErrors() {
 		return POLYGON_BUILDING_ERRORS_IGNORE.equals(getValue(POLYGON_BUILDING_ERRORS));
+	}
+	public void setCreateUniqueConstraints(boolean ignore) {
+		setValue(UNIQUE_CONSTRAINTS,ignore?UNIQUE_CONSTRAINTS_CREATE:null);
+	}
+	public boolean isCreateUniqueConstraints() {
+		return UNIQUE_CONSTRAINTS_CREATE.equals(getValue(UNIQUE_CONSTRAINTS));
 	}
 	public void setOneGeomPerTable(boolean onlyOne) {
 		setValue(GEOMATTR_PER_TABLE,onlyOne?GEOMATTR_PER_TABLE_ONE:null);

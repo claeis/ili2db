@@ -3,6 +3,7 @@ package ch.ehi.ili2db.fromili;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 
 import ch.ehi.ili2db.base.DbIdGen;
 import ch.ehi.ili2db.base.DbNames;
@@ -27,6 +28,7 @@ import ch.ehi.sqlgen.repository.DbColTime;
 import ch.ehi.sqlgen.repository.DbColUuid;
 import ch.ehi.sqlgen.repository.DbColVarchar;
 import ch.ehi.sqlgen.repository.DbColumn;
+import ch.ehi.sqlgen.repository.DbIndex;
 import ch.ehi.sqlgen.repository.DbSchema;
 import ch.ehi.sqlgen.repository.DbTable;
 import ch.ehi.sqlgen.repository.DbTableName;
@@ -34,6 +36,7 @@ import ch.interlis.ili2c.metamodel.AbstractClassDef;
 import ch.interlis.ili2c.metamodel.AreaType;
 import ch.interlis.ili2c.metamodel.AssociationDef;
 import ch.interlis.ili2c.metamodel.AttributeDef;
+import ch.interlis.ili2c.metamodel.AttributeRef;
 import ch.interlis.ili2c.metamodel.BasketType;
 import ch.interlis.ili2c.metamodel.CompositionType;
 import ch.interlis.ili2c.metamodel.CoordType;
@@ -44,6 +47,8 @@ import ch.interlis.ili2c.metamodel.LocalAttribute;
 import ch.interlis.ili2c.metamodel.NumericType;
 import ch.interlis.ili2c.metamodel.ObjectPath;
 import ch.interlis.ili2c.metamodel.ObjectType;
+import ch.interlis.ili2c.metamodel.PathEl;
+import ch.interlis.ili2c.metamodel.PathElAssocRole;
 import ch.interlis.ili2c.metamodel.PolylineType;
 import ch.interlis.ili2c.metamodel.PrecisionDecimal;
 import ch.interlis.ili2c.metamodel.ReferenceType;
@@ -54,6 +59,8 @@ import ch.interlis.ili2c.metamodel.Table;
 import ch.interlis.ili2c.metamodel.TextType;
 import ch.interlis.ili2c.metamodel.TransferDescription;
 import ch.interlis.ili2c.metamodel.Type;
+import ch.interlis.ili2c.metamodel.UniqueEl;
+import ch.interlis.ili2c.metamodel.UniquenessConstraint;
 import ch.interlis.ili2c.metamodel.View;
 import ch.interlis.ili2c.metamodel.Viewable;
 import ch.interlis.ili2c.metamodel.ViewableTransferElement;
@@ -68,6 +75,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 	private boolean coalesceCatalogueRef=true;
 	private boolean coalesceMultiSurface=true;
 	private boolean expandMultilingual=true;
+	private boolean createUnique=true;
 	
 
 	public FromIliRecordConverter(TransferDescription td1, NameMapping ili2sqlName,
@@ -80,6 +88,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 		coalesceCatalogueRef=Config.CATALOGUE_REF_TRAFO_COALESCE.equals(config.getCatalogueRefTrafo());
 		coalesceMultiSurface=Config.MULTISURFACE_TRAFO_COALESCE.equals(config.getMultiSurfaceTrafo());
 		expandMultilingual=Config.MULTILINGUAL_TRAFO_EXPAND.equals(config.getMultilingualTrafo());
+		createUnique=config.isCreateUniqueConstraints();
 	}
 
 	public void generateTable(ViewableWrapper def)
@@ -272,12 +281,95 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 		  if(createStdCols){
 				addStdCol(dbTable);
 		  }
+		  if(createUnique && !def.isStructure()){
+			  // check if UNIQUE mappable
+			  HashSet wrapperCols=getWrapperCols(def.getAttrv());
+			  Viewable aclass=def.getViewable();
+			  Iterator it=aclass.iterator();
+			  while(it.hasNext()){
+				  Object cnstro=it.next();
+				  if(cnstro instanceof UniquenessConstraint){
+					  UniquenessConstraint cnstr=(UniquenessConstraint)cnstro;
+					  HashSet attrs=getUniqueAttrs(cnstr,wrapperCols);
+					  // mappable?
+					  if(attrs!=null){
+						  DbIndex dbIndex=new DbIndex();
+						  dbIndex.setPrimary(false);
+						  dbIndex.setUnique(true);
+						  for(Object attro:attrs){
+							  String attrSqlName=null;
+							  if(attro instanceof AttributeDef){
+									attrSqlName=ili2sqlName.mapIliAttributeDef((AttributeDef) attro,def.getSqlTablename(),null);
+							  }else if(attro instanceof RoleDef){
+								  RoleDef role=(RoleDef) attro;
+								  DbTableName targetSqlTableName=getSqlType(role.getDestination());
+								  attrSqlName=getSqlRoleName(role,def.getSqlTablename(),targetSqlTableName.getName());
+							  }else{
+								  throw new IllegalStateException("unexpected attr "+attro);
+							  }
+							  DbColumn idxCol=dbTable.getColumn(attrSqlName);
+							  dbIndex.addAttr(idxCol);
+						  }
+						  dbTable.addIndex(dbIndex);
+					  }
+				  }
+			  }
+			  
+		  }
 		  if(!def.isSecondaryTable()){
 			  customMapping.fixupViewable(dbTable,def.getViewable());
 		  }
 	  	schema.addTable(dbTable);
 	  	
 	}
+	private HashSet getWrapperCols(List<ViewableTransferElement> attrv) {
+		HashSet ret=new HashSet();
+		for(ViewableTransferElement attr:attrv){
+			ret.add(attr.obj);
+		}
+		return ret;
+	}
+
+	private HashSet getUniqueAttrs(UniquenessConstraint cnstr, HashSet wrapperCols) {
+		  if(cnstr.getLocal()){
+			  return null;
+		  }
+			HashSet ret=new HashSet();
+		  UniqueEl attribs=cnstr.getElements();
+        	Iterator attri=attribs.iteratorAttribute();
+          for (; attri.hasNext();)
+          {
+         		ObjectPath path=(ObjectPath)attri.next();
+         		PathEl pathEles[]=path.getPathElements();
+         		if(pathEles.length!=1){
+         			return null;
+         		}
+         		PathEl pathEle=pathEles[0];
+         		if(pathEle instanceof AttributeRef){
+         			AttributeDef attr=((AttributeRef) pathEle).getAttr();
+         			while(attr.getExtending()!=null){
+         				attr=(AttributeDef) attr.getExtending();
+         			}
+         			if(!wrapperCols.contains(attr)){
+         				return null;
+         			}
+         			ret.add(attr);
+         		}else if(pathEle instanceof PathElAssocRole){
+         			RoleDef role=((PathElAssocRole) pathEle).getRole();
+         			while(role.getExtending()!=null){
+         				role=(RoleDef) role.getExtending();
+         			}
+         			if(!wrapperCols.contains(role)){
+         				return null;
+         			}
+         			ret.add(role);
+         		}else{
+         			return null;
+         		}
+          }
+          return ret;
+	}
+
 	public void generateAttr(DbTable dbTable,Viewable aclass,AttributeDef attr)
 	throws Ili2dbException
 	{

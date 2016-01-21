@@ -80,12 +80,18 @@ public class ViewableWrapper {
 	/** gets the viewable that this wrapper wraps.
 	 */
 	public Viewable getViewable() {
+		  if(isSecondaryTable()){
+			  return getMainTable().getViewable();
+		  }
 		return viewable;
 	}
 	public boolean isStructure() {
 		return (viewable instanceof Table) && !((Table)viewable).isIdentifiable();
 	}
 	public Domain getOid() {
+		if(isSecondaryTable()){
+			return null;
+		}
 		Viewable def=getViewable();
 		if(!(def instanceof AbstractClassDef)){
 			return null;
