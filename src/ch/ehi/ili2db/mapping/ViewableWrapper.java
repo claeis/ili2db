@@ -126,6 +126,9 @@ public class ViewableWrapper {
 	public String getSqlTablename() {
 		return sqlTablename.getName();
 	}
+	public DbTableName getSqlTable() {
+		return sqlTablename;
+	}
 	public String getSqlTableQName() {
 		return sqlTablename.getQName();
 	}

@@ -485,7 +485,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 					}
 					trafoConfig.setAttrConfig(attr, TrafoConfigNames.MULTILINGUAL_TRAFO,TrafoConfigNames.MULTILINGUAL_TRAFO_EXPAND);
 				}else{
-					// add reference to struct table
+					// add reference col from struct ele to parent obj to struct table
 					addParentRef(aclass,attr);
 					dbCol=null;
 				}
@@ -605,14 +605,18 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 	private void addParentRef(Viewable parentTable,AttributeDef attr){
 		CompositionType type = (CompositionType)attr.getDomainResolvingAll();
 		Table structClass=type.getComponentType();
-		// TODO if abstract struct, might be multiple tables!
-		DbTableName structClassSqlName=getSqlType(class2wrapper.get(structClass).getViewable());
+		// TODO if abstract struct, might have multiple tables!
+		ViewableWrapper structWrapper=class2wrapper.get(structClass);
+		if(structWrapper.getExtending()!=null){
+			structWrapper=structWrapper.getExtending();
+		}
+		DbTableName structClassSqlName=structWrapper.getSqlTable();
 		
 		// find struct table
 		DbTable dbTable=schema.findTable(structClassSqlName);
 		
 		// add ref attr
-		String refAttrSqlName=ili2sqlName.mapIliAttributeDefReverse(attr,structClassSqlName.getName(),getSqlType(parentTable).getName());
+		String refAttrSqlName=ili2sqlName.mapIliAttributeDefReverse(attr,structClassSqlName.getName(),class2wrapper.get(parentTable).getSqlTablename());
 		DbColId dbParentId=new DbColId();
 		dbParentId.setName(refAttrSqlName);
 		dbParentId.setNotNull(false); // values of other struct attrs will have NULL
@@ -629,7 +633,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 			dbParentId.setComment(cmt.toString());
 		}
 		if(createFk){
-			dbParentId.setReferencedTable(getSqlType((Viewable)parentTable));
+			dbParentId.setReferencedTable(class2wrapper.get(parentTable).getSqlTable());
 		}
 		if(createFkIdx){
 			dbParentId.setIndex(true);
