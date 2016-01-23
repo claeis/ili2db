@@ -49,7 +49,7 @@ import ch.ehi.ili2db.mapping.ViewableWrapper;
  */
 public class TransferFromIli {
 	private DbSchema schema=null;
-	private HashSet visitedElements=null;
+	private HashSet<Element> visitedElements=null;
 	private Viewable2TableMapping class2wrapper=null;
 	private HashSet<ViewableWrapper> visitedWrapper=null;
 	private HashSet visitedEnums=null;
@@ -96,7 +96,7 @@ public class TransferFromIli {
 
 		schema=new DbSchema();
 		schema.setName(config.getDbschema());
-		visitedElements=new HashSet();
+		visitedElements=new HashSet<Element>();
 		class2wrapper=class2wrapper1;
 		visitedWrapper=new HashSet<ViewableWrapper>();
 		visitedEnums=new HashSet();
@@ -113,6 +113,7 @@ public class TransferFromIli {
 				//generateTopic((Topic)modelo);
 			}else if (modelo instanceof Domain){
 				generateDomain((Domain)modelo);
+				visitedElements.add((Domain)modelo);
 			}else if (modelo instanceof Viewable){
 				if(modelo instanceof Table && ((Table)modelo).isIli1LineAttrStruct()){
 					// skip it
@@ -124,6 +125,7 @@ public class TransferFromIli {
 						if(wrapper!=null){
 							generateViewable(wrapper);
 						}
+						visitedElements.add((Viewable)modelo);
 					}catch(Ili2dbException ex){
 						throw new Ili2dbException("mapping of "+((Viewable)modelo).getScopedName(null)+" failed",ex);
 					}
@@ -885,10 +887,10 @@ public class TransferFromIli {
 			
 		}
 	}
-	private static HashSet readInheritanceTable(java.sql.Connection conn,String schema)
+	private static HashSet<String> readInheritanceTable(java.sql.Connection conn,String schema)
 	throws Ili2dbException
 	{
-		HashSet ret=new HashSet();
+		HashSet<String> ret=new HashSet<String>();
 		String sqlName=DbNames.INHERIT_TAB;
 		if(schema!=null){
 			sqlName=schema+"."+sqlName;
@@ -901,8 +903,8 @@ public class TransferFromIli {
 			try{
 				java.sql.ResultSet rs=exstPrepStmt.executeQuery();
 				while(rs.next()){
-					String iliCode=rs.getString(1);
-					ret.add(iliCode);
+					String iliClassQName=rs.getString(1);
+					ret.add(iliClassQName);
 				}
 			}finally{
 				exstPrepStmt.close();
@@ -920,27 +922,23 @@ public class TransferFromIli {
 			sqlName=schema+"."+sqlName;
 		}
 		//String stmt="CREATE TABLE "+tabname+" ("+thisClassCol+" VARCHAR2(30) NOT NULL,"+baseClassCol+" VARCHAR2(30) NULL)";
-		HashSet exstEntries=readInheritanceTable(conn,schema);
+		HashSet<String> exstEntries=readInheritanceTable(conn,schema);
 		try{
 
 			// insert entries
 			String stmt="INSERT INTO "+sqlName+" ("+DbNames.INHERIT_TAB_THIS_COL+","+DbNames.INHERIT_TAB_BASE_COL+") VALUES (?,?)";
 			EhiLogger.traceBackendCmd(stmt);
 			java.sql.PreparedStatement ps = conn.prepareStatement(stmt);
-			DbTableName thisClass=null;
+			String thisClass=null;
 			try{
-				java.util.Iterator entri=visitedElements.iterator();
-				while(entri.hasNext()){
-					Object entro=entri.next();
-					if(entro instanceof Viewable){
-						Viewable aclass=(Viewable)entro;
-						thisClass=recConv.getSqlType(aclass);
+				for(Object aclass:visitedElements){
+					if(aclass instanceof Viewable){
+						thisClass=((Viewable) aclass).getScopedName(null);
 						if(!exstEntries.contains(thisClass)){
-							Viewable base=(Viewable)aclass.getExtending();
-							ps.setString(1, thisClass.getName());
+							Viewable base=(Viewable) ((Viewable) aclass).getExtending();
+							ps.setString(1, thisClass);
 							if(base!=null){
-								DbTableName baseClass=recConv.getSqlType(base);
-								ps.setString(2, baseClass.getName());
+								ps.setString(2, base.getScopedName(null));
 							}else{
 								ps.setNull(2,java.sql.Types.VARCHAR);
 							}

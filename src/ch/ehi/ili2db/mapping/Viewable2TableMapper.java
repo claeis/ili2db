@@ -117,7 +117,7 @@ public class Viewable2TableMapper {
 					{
 						Viewable base=(Viewable) aclass.getExtending();
 						while(base!=null){
-							if(!TrafoConfigNames.INHERITANCE_TRAFO_NEWCLASS.equals(trafoConfig.getViewableConfig(base, TrafoConfigNames.INHERITANCE_TRAFO))){
+							if(TrafoConfigNames.INHERITANCE_TRAFO_NEWCLASS.equals(trafoConfig.getViewableConfig(base, TrafoConfigNames.INHERITANCE_TRAFO))){
 								break;
 							}
 							base=(Viewable) base.getExtending();
