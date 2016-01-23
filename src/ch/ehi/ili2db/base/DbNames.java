@@ -70,9 +70,13 @@ public class DbNames {
 	public static final String IMPORTS_OBJECTS_TAB_CLASS_COL="class";
 	public static final String IMPORTS_OBJECTS_TAB_IMPORT_COL="import_basket";
 	public static final String CLASSNAME_TAB="T_ILI2DB_CLASSNAME";
-	public static final String ATTRNAME_TAB="T_ILI2DB_ATTRNAME";
 	public static final String CLASSNAME_TAB_ILINAME_COL="IliName";
 	public static final String CLASSNAME_TAB_SQLNAME_COL="SqlName";
+	public static final String ATTRNAME_TAB="T_ILI2DB_ATTRNAME";
+	public static final String ATTRNAME_TAB_OWNER_COL="Owner";
+	public static final String ATTRNAME_TAB_TARGET_COL="Target";
+	public static final String ATTRNAME_TAB_ILINAME_COL="IliName";
+	public static final String ATTRNAME_TAB_SQLNAME_COL="SqlName";
 	public static final String TRAFO_TAB="T_ILI2DB_TRAFO";
 	public static final String TRAFO_TAB_ILINAME_COL="iliname";
 	public static final String TRAFO_TAB_TAG_COL="tag";

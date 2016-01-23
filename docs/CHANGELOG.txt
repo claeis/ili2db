@@ -9,7 +9,29 @@ ideas/open issues/questions
 - --logValidOverlaps
 - support ili2 views
 - --initNameMapping
-- map simple unique constraints
+
+
+ili2gpkg/ili2pg 3.0.0 (2016-01-23)
+----------------------------
+- GPKG: fixed missing init.sql
+- GPKG: fixed TOWGS84-Parameter of EPSG:21781
+- GPKG: fixed CH srs
+- GPKG: added TABLE gpkg_extensions
+- GPKG: added envelope to GeoPackageBinaryHeader
+- GPKG: add only first geometry column to gpkg_contents and gpkg_geometry_columns
+- T_ILI2DB_SETTINGS.setting changed to length 255
+- jts-core-1.14
+- new option --skipPolygonBuildingErrors
+- GPKG: fixed timestamp parse exception 
+- fixed export without t_basket column
+- fixed duplicate column name from same attribute-name in subclasses
+- new option --oneGeomPerTable
+- refactored table naming
+- removed deprecated option --mapconfig
+- new option --createUnique to map simple ili unique constraints
+- API: client might open db connection (use Config.setJdbcConnection())
+- fixed missing content of table t_ili2db_inheritance
+- changed content of table t_ili2db_inheritance from sqlnames to ilinames
 
 ili2pg 2.5.1 (2016-01-04)
 ----------------------------

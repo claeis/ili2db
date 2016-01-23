@@ -11,9 +11,10 @@ public class TrafoConfigNames {
 	public static final String MULTISURFACE_TRAFO_COALESCE=Config.MULTISURFACE_TRAFO_COALESCE;
 	public static final String MULTILINGUAL_TRAFO=Config.MULTILINGUAL_TRAFO;
 	public static final String MULTILINGUAL_TRAFO_EXPAND=Config.MULTILINGUAL_TRAFO_EXPAND;
-	public static final String INHERITANCE_TRAFO=Config.PREFIX+"inheritance";
+	public static final String INHERITANCE_TRAFO=Config.PREFIX+".inheritance";
 	public static final String INHERITANCE_TRAFO_NEWCLASS="newClass";
 	public static final String INHERITANCE_TRAFO_SUPERCLASS="superClass";
 	public static final String INHERITANCE_TRAFO_SUBCLASS="subClass";
+	public static final String SECONDARY_TABLE = Config.PREFIX+".secondaryTable";;
 
 }

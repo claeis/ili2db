@@ -23,7 +23,7 @@
       <classpath>
         <pathelement location="lib/ehisqlgen.jar"/>
         <pathelement location="lib/ili2c.jar"/>
-        <pathelement location="lib/jts-1.13.jar"/>
+        <pathelement location="lib/jts-core-1.14.0.jar"/>
         <pathelement location="lib/jdbm-2.4.jar"/>
 	<pathelement location="lib/sqlite-jdbc-3.8.11.2.jar"/>
       </classpath>
@@ -52,6 +52,7 @@
     <jar jarfile="${projectjar}" manifest="other/manifest-ili2gpkg">
 	<fileset dir="${build}/classes" includes="**/*.class"/>
     	<fileset dir="${src}" includes="**/*.properties"/>
+    	<fileset dir="ili2gpkg/src" includes="**/*.sql"/>
     	<fileset dir="ili2gpkg/src" includes="**/*.properties"/>
     	<!-- <fileset dir="resources/de" includes="**/*.properties"/>
     	<fileset dir="resources/fr" includes="**/*.properties"/>
@@ -60,7 +61,7 @@
     	<fileset dir="${src}" includes="**/*.jpg"/>
     	<fileset dir="${src}" includes="**/*.png"/>
     	<zipfileset src="lib/ehisqlgen.jar"/>
-    	<zipfileset src="lib/jts-1.13.jar"/>
+    	<zipfileset src="lib/jts-core-1.14.0.jar"/>
     	<zipfileset src="lib/jdbm-2.4.jar"/>
     </jar>
   </target>
@@ -82,7 +83,7 @@
 	    	<patternset includes="sqlite-jdbc-3.8.11.2.jar"/>
     	</zipfileset>
     	<zipfileset dir="." prefix="${ant.project.name}-${buildnr}">
-	    	<patternset includes="docs/ili2pg.docx"/>
+	    	<patternset includes="docs/ili2db.pdf"/>
 	</zipfileset>	    	
     	<!-- <zipfileset dir="." prefix="${ant.project.name}-${buildnr}">
 	    	<patternset includes="lib/**"/> 
@@ -110,7 +111,7 @@
 		<patternset includes="resources/it/**/*.properties"/>
 	    	<patternset includes="lib/ili2c.jar"/>
 		<patternset includes="lib/ehisqlgen.jar"/>
-		<patternset includes="lib/jts-1.13.jar"/>
+		<patternset includes="lib/jts-core-1.14.0.jar"/>
 		<patternset includes="lib/jdbm-2.4.jar"/>
 		<patternset includes="lib/sqlite-jdbc-3.8.11.2.jar"/>
     	</zipfileset>

@@ -57,6 +57,18 @@ public class NullColumnConverter implements SqlColumnConverter {
 	}
 
 	@Override
+	public String getSelectValueWrapperDate(String sqlColName) {
+		return null;
+	}
+	@Override
+	public String getSelectValueWrapperTime(String sqlColName) {
+		return null;
+	}
+	@Override
+	public String getSelectValueWrapperDateTime(String sqlColName) {
+		return null;
+	}
+	@Override
 	public String getSelectValueWrapperCoord(String dbNativeValue) {
 		return null;
 	}

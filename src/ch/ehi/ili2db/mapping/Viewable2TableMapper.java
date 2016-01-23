@@ -18,14 +18,30 @@ import ch.interlis.ili2c.metamodel.ViewableTransferElement;
 
 public class Viewable2TableMapper {
 
-	private Viewable2TableMapper() {	}
+	private Config config=null;
+	private String sqlSchemaname=null;
+	private TrafoConfig trafoConfig=null;
+	private NameMapping nameMapping=null;	
+	boolean singleGeom=false;
+	private Viewable2TableMapper(Config config1,
+			TrafoConfig trafoConfig1, NameMapping nameMapping1) {	
+		config=config1;
+		trafoConfig=trafoConfig1;
+		nameMapping=nameMapping1;
+		sqlSchemaname=config.getDbschema();
+	}
 
 	public static Viewable2TableMapping getClass2TableMapping(Config config,
-			TrafoConfig trafoConfig, List<Element> eles) {
-		boolean smartInheritance=Config.INHERITANCE_TRAFO_SMART.equals(config.getInheritanceTrafo());
+			TrafoConfig trafoConfig, List<Element> eles,NameMapping nameMapping) {
+		Viewable2TableMapper mapper=new Viewable2TableMapper(config, trafoConfig, nameMapping);
+		mapper.singleGeom=config.isOneGeomPerTable();
+		return mapper.doit(eles);
+	}
+	private Viewable2TableMapping doit(List<Element> eles) {
+		boolean smartInheritance=Config.INHERITANCE_TRAFO_SMART1.equals(config.getInheritanceTrafo());
 		// setup/update TrafoConfig
 		/*
-		 * Für Klassen, die referenziert werden und deren Basisklassen nicht mit
+		 * Fuer Klassen, die referenziert werden und deren Basisklassen nicht mit
 		 * einer NewClass-Strategie abgebildet werden, wird die
 		 * NewClass-Strategie verwendet. Abstrakte Klassen werden mit einer
 		 * SubClass-Strategie abgebildet. Konkrete Klassen, ohne Basisklasse
@@ -39,7 +55,6 @@ public class Viewable2TableMapper {
 				// not a Viewable; skip it
 			}else{
 				// a Viewable
-				EhiLogger.debug("viewable "+ele.getScopedName(null));
 				Viewable aclass=(Viewable) ele;
 				if(trafoConfig.getViewableConfig(aclass, TrafoConfigNames.INHERITANCE_TRAFO)==null){
 					if(smartInheritance){
@@ -64,6 +79,8 @@ public class Viewable2TableMapper {
 						trafoConfig.setViewableConfig(aclass, TrafoConfigNames.INHERITANCE_TRAFO, TrafoConfigNames.INHERITANCE_TRAFO_NEWCLASS);
 					}
 				}
+				String sqlTablename=nameMapping.mapIliClassDef(aclass);
+				EhiLogger.traceState("viewable "+aclass.getScopedName(null)+" "+trafoConfig.getViewableConfig(aclass, TrafoConfigNames.INHERITANCE_TRAFO)+", "+sqlTablename);
 			}
 		}
 		Viewable2TableMapping ret=new Viewable2TableMapping();
@@ -76,11 +93,12 @@ public class Viewable2TableMapper {
 				Viewable aclass=(Viewable) ele;
 				String inheritanceStrategy = trafoConfig.getViewableConfig(aclass, TrafoConfigNames.INHERITANCE_TRAFO);
 				if(TrafoConfigNames.INHERITANCE_TRAFO_NEWCLASS.equals(inheritanceStrategy)){
-					ViewableWrapper wrapper=new ViewableWrapper(aclass);
+					String sqlTablename=nameMapping.mapIliClassDef(aclass);
+					ViewableWrapper wrapper=new ViewableWrapper(sqlSchemaname,sqlTablename,aclass);
 					List<ViewableTransferElement> props=new java.util.ArrayList<ViewableTransferElement>();
 					// defined attrs
 					{
-						addProps(props,aclass.getDefinedAttributesAndRoles2());
+						addProps(wrapper,props,aclass.getDefinedAttributesAndRoles2());
 					}
 					// defined attrs of bases with subclass strategy
 					{
@@ -89,8 +107,7 @@ public class Viewable2TableMapper {
 							if(!TrafoConfigNames.INHERITANCE_TRAFO_SUBCLASS.equals(trafoConfig.getViewableConfig(base, TrafoConfigNames.INHERITANCE_TRAFO))){
 								break;
 							}
-							ret.add(base, wrapper);
-							addProps(props,base.getDefinedAttributesAndRoles2());
+							addProps(wrapper,props,base.getDefinedAttributesAndRoles2());
 							base=(Viewable) base.getExtending();
 						}
 					}
@@ -101,7 +118,7 @@ public class Viewable2TableMapper {
 					{
 						Viewable base=(Viewable) aclass.getExtending();
 						while(base!=null){
-							if(!TrafoConfigNames.INHERITANCE_TRAFO_NEWCLASS.equals(trafoConfig.getViewableConfig(base, TrafoConfigNames.INHERITANCE_TRAFO))){
+							if(TrafoConfigNames.INHERITANCE_TRAFO_NEWCLASS.equals(trafoConfig.getViewableConfig(base, TrafoConfigNames.INHERITANCE_TRAFO))){
 								break;
 							}
 							base=(Viewable) base.getExtending();
@@ -127,7 +144,7 @@ public class Viewable2TableMapper {
 					ViewableWrapper wrapper=ret.get(base);
 					List<ViewableTransferElement> props=wrapper.getAttrv();
 					// add props of extension
-					addProps(props,aclass.getDefinedAttributesAndRoles2());
+					addProps(wrapper,props,aclass.getDefinedAttributesAndRoles2());
 					wrapper.setAttrv(props);
 					ret.add(aclass, wrapper);
 				}else if(TrafoConfigNames.INHERITANCE_TRAFO_SUBCLASS.equals(inheritanceStrategy)){
@@ -140,12 +157,60 @@ public class Viewable2TableMapper {
 		return ret;
 	}
 
-	private static void addProps(List<ViewableTransferElement> attrv,
+	private void addProps(ViewableWrapper viewable,List<ViewableTransferElement> attrv,
 		Iterator<ViewableTransferElement> iter) {
+		boolean hasGeometry=false;
+		if(singleGeom){
+			for(ViewableTransferElement attrE:attrv){
+				if(attrE.obj instanceof AttributeDef){
+					AttributeDef attr=(AttributeDef) attrE.obj;
+					ch.interlis.ili2c.metamodel.Type type=attr.getDomainResolvingAliases();
+					if(type instanceof ch.interlis.ili2c.metamodel.CoordType || type instanceof ch.interlis.ili2c.metamodel.LineType){
+						hasGeometry=true;
+						break;
+					}
+				}
+			}
+		}
 		while (iter.hasNext()) {
 			ViewableTransferElement obj = iter.next();
 			if (obj.obj instanceof AttributeDef) {
-				attrv.add(obj);
+				AttributeDef attr=(AttributeDef) obj.obj;
+				String sqlname=trafoConfig.getAttrConfig(attr, TrafoConfigNames.SECONDARY_TABLE);
+				if(sqlname!=null){
+					ViewableWrapper attrWrapper=viewable.getSecondaryTable(sqlname);
+					if(attrWrapper==null){
+						attrWrapper=viewable.createSecondaryTable(sqlname);
+					}
+					List<ViewableTransferElement> attrProps=new java.util.ArrayList<ViewableTransferElement>();
+					attrProps.add(obj);
+					attrWrapper.setAttrv(attrProps);
+				}else{
+					if(singleGeom){
+						ch.interlis.ili2c.metamodel.Type type=attr.getDomainResolvingAliases();
+						if(type instanceof ch.interlis.ili2c.metamodel.CoordType || type instanceof ch.interlis.ili2c.metamodel.LineType){
+							if(hasGeometry){
+								// create new secondary table
+								sqlname=nameMapping.mapGeometryAsTable(attr);
+								ViewableWrapper attrWrapper=viewable.getSecondaryTable(sqlname);
+								if(attrWrapper==null){
+									attrWrapper=viewable.createSecondaryTable(sqlname);
+								}
+								List<ViewableTransferElement> attrProps=new java.util.ArrayList<ViewableTransferElement>();
+								attrProps.add(obj);
+								attrWrapper.setAttrv(attrProps);
+								trafoConfig.setAttrConfig(attr, TrafoConfigNames.SECONDARY_TABLE, sqlname);
+							}else{
+								hasGeometry=true;
+								attrv.add(obj);
+							}
+						}else{
+							attrv.add(obj);
+						}
+					}else{
+						attrv.add(obj);
+					}
+				}
 			}
 			if(obj.obj instanceof RoleDef){
 				RoleDef role = (RoleDef) obj.obj;

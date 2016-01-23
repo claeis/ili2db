@@ -65,8 +65,6 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import com.sun.org.apache.bcel.internal.generic.GETSTATIC;
-
 import ch.ehi.ili2db.gui.Config;
 
 /**
@@ -103,10 +101,11 @@ public class Ili2db {
 	public static void readSettingsFromDb(Config config)
 	throws Ili2dbException
 	{
+		boolean connectionFromExtern=config.getJdbcConnection()!=null;
 		String dburl=config.getDburl();
 		String dbusr=config.getDbusr();
 		String dbpwd=config.getDbpwd();
-		if(dburl==null){
+		if(!connectionFromExtern && dburl==null){
 			EhiLogger.logError("no dburl given");
 			return;
 		}
@@ -120,38 +119,46 @@ public class Ili2db {
 			//return;
 			dbpwd="";
 		}
-		String jdbcDriver=config.getJdbcDriver();
-		if(jdbcDriver==null){
-			EhiLogger.logError("no JDBC driver given");
-			return;
-		}
-		if(jdbcDriver.equals("ch.ehi.ili2geodb.jdbc.GeodbDriver")){
-			return;
+		if(!connectionFromExtern){
+			String jdbcDriver=config.getJdbcDriver();
+			if(jdbcDriver==null){
+				EhiLogger.logError("no JDBC driver given");
+				return;
+			}
+			if(jdbcDriver.equals("ch.ehi.ili2geodb.jdbc.GeodbDriver")){
+				return;
+			}
+			
+			try{
+				Class.forName(jdbcDriver);
+			}catch(Exception ex){
+				EhiLogger.logError("failed to load JDBC driver",ex);
+				return;
+			}
 		}
 		
 		CustomMapping customMapping=getCustomMappingStrategy(config);
 		
 		// open db connection
-		try{
-			Class.forName(jdbcDriver);
-		}catch(Exception ex){
-			EhiLogger.logError("failed to load JDBC driver",ex);
-			return;
-		}
 		Connection conn=null;
 		String url = dburl;
 		try {
-			conn = connect(url, dbusr, dbpwd, config, customMapping);
+			if(connectionFromExtern){
+				conn=config.getJdbcConnection();
+			}else{
+				conn = connect(url, dbusr, dbpwd, config, customMapping);
+			}
 			TransferFromIli.readSettings(conn,config,config.getDbschema());
 		} catch (SQLException e) {
 			EhiLogger.logError(e);
 		}finally{
-			if(conn!=null){
+			if(!connectionFromExtern && conn!=null){
 				try{
 					conn.close();
 				}catch(java.sql.SQLException ex){
 					EhiLogger.logError(ex);
 				}finally{
+					config.setJdbcConnection(null);
 					conn=null;
 				}
 			}
@@ -189,6 +196,7 @@ public class Ili2db {
 			EhiLogger.getInstance().addListener(logfile);
 		}
 		try{
+			boolean connectionFromExtern=config.getJdbcConnection()!=null;
 			logGeneralInfo(config);
 			
 			//String zipfilename=null;
@@ -256,7 +264,7 @@ public class Ili2db {
 			String dburl=config.getDburl();
 			String dbusr=config.getDbusr();
 			String dbpwd=config.getDbpwd();
-			if(dburl==null){
+			if(!connectionFromExtern && dburl==null){
 				throw new Ili2dbException("no dburl given");
 			}
 			if(dbusr==null){
@@ -285,35 +293,43 @@ public class Ili2db {
 			if(idGenerator==null){
 				throw new Ili2dbException("no ID generator given");
 			}
-			String jdbcDriver=config.getJdbcDriver();
-			if(jdbcDriver==null){
-				throw new Ili2dbException("no JDBC driver given");
+			if(!connectionFromExtern){
+				String jdbcDriver=config.getJdbcDriver();
+				if(jdbcDriver==null){
+					throw new Ili2dbException("no JDBC driver given");
+				}
+				try{
+					Class.forName(jdbcDriver);
+				}catch(Exception ex){
+					throw new Ili2dbException("failed to load JDBC driver",ex);
+				}
 			}
 			CustomMapping customMapping=getCustomMappingStrategy(config);
 			
 			// open db connection
-			try{
-				Class.forName(jdbcDriver);
-			}catch(Exception ex){
-				throw new Ili2dbException("failed to load JDBC driver",ex);
-			}
 			Connection conn=null;
 			String url = dburl;
 			ch.ehi.basics.logging.ErrorTracker errs=null;
 			try{
 				try {
-					conn = connect(url, dbusr, dbpwd, config, customMapping);
+					if(connectionFromExtern){
+						conn=config.getJdbcConnection();
+					}else{
+						conn = connect(url, dbusr, dbpwd, config, customMapping);
+					}
 				} catch (SQLException ex) {
 					throw new Ili2dbException("failed to get db connection", ex);
 				}
 			  logDBVersion(conn);
 			  
-			  // switch off auto-commit
-			  try {
-				conn.setAutoCommit(false);
-			} catch (SQLException ex) {
-				throw new Ili2dbException("failed to switch off auto-commit",ex);
-			}
+			  if(!connectionFromExtern){
+				  // switch off auto-commit
+				  try {
+					conn.setAutoCommit(false);
+				} catch (SQLException ex) {
+					throw new Ili2dbException("failed to switch off auto-commit",ex);
+				}
+			  }
 			  
 			  // create db schema
 				if(importOnly){
@@ -336,7 +352,6 @@ public class Ili2db {
 				}
 			  	
 				// read mapping file
-				String mappingConfig=config.getMappingConfigFilename();
 				NameMapping mapping=new NameMapping(config);
 				  if(DbUtility.tableExists(conn,new DbTableName(config.getDbschema(),DbNames.CLASSNAME_TAB))){
 					  // read mapping from db
@@ -346,9 +361,6 @@ public class Ili2db {
 					  // read mapping from db
 					  mapping.readAttrMappingTable(conn,config.getDbschema());
 				  }
-				if(mappingConfig!=null){
-					mapping.readDeprecatedConfig(mappingConfig);
-				}
 				  TrafoConfig trafoConfig=new TrafoConfig();
 				  trafoConfig.readTrafoConfig(conn, config.getDbschema());
 
@@ -361,8 +373,7 @@ public class Ili2db {
 					}
 				}
 				java.util.List<Element> eles=ms.getModelElements(modelNames,td, td.getIli1Format()!=null && config.getDoItfLineTables(),Config.CREATE_ENUM_DEFS_MULTI.equals(config.getCreateEnumDefs()));
-				optimizeSqlTableNames(config,mapping,eles);
-				Viewable2TableMapping class2wrapper=Viewable2TableMapper.getClass2TableMapping(config,trafoConfig,eles);
+				Viewable2TableMapping class2wrapper=Viewable2TableMapper.getClass2TableMapping(config,trafoConfig,eles,mapping);
 
 				Generator gen=null;
 				try{
@@ -385,7 +396,6 @@ public class Ili2db {
 				}
 				geomConverter.setup(conn, config);
 
-				config.setJdbcConnection(conn);
 				idGen.initDb(conn,dbusr);
 				idGen.initDbDefs();
 				
@@ -463,7 +473,7 @@ public class Ili2db {
 								ioxReader=new ItfReader(in);
 								((ItfReader)ioxReader).setModel(td);		
 							}else{
-								ioxReader=new ItfReader2(in);
+								ioxReader=new ItfReader2(in,config.ignorePolygonBuildingErrors());
 								((ItfReader2)ioxReader).setModel(td);		
 							}
 						}else{
@@ -527,7 +537,7 @@ public class Ili2db {
 								ioxReader=new ItfReader(new java.io.File(inputFilename));
 								((ItfReader)ioxReader).setModel(td);		
 							}else{
-								ioxReader=new ItfReader2(new java.io.File(inputFilename));
+								ioxReader=new ItfReader2(new java.io.File(inputFilename),config.ignorePolygonBuildingErrors());
 								((ItfReader2)ioxReader).setModel(td);		
 							}
 						}else{
@@ -549,30 +559,36 @@ public class Ili2db {
 				}
 				
 				if(errs.hasSeenErrors()){
-					try {
-						conn.rollback();
-					} catch (SQLException e) {
-						EhiLogger.logError("rollback failed",e);
+					if(!connectionFromExtern){
+						try {
+							conn.rollback();
+						} catch (SQLException e) {
+							EhiLogger.logError("rollback failed",e);
+						}
 					}
 					throw new Ili2dbException("...import failed");
 				}else{
-					try {
-						conn.commit();
-					} catch (SQLException e) {
-						EhiLogger.logError("commit failed",e);
-						throw new Ili2dbException("...import failed");
+					if(!connectionFromExtern){
+						try {
+							conn.commit();
+						} catch (SQLException e) {
+							EhiLogger.logError("commit failed",e);
+							throw new Ili2dbException("...import failed");
+						}
 					}
 					logStatistics(td.getIli1Format()!=null,stat);
 					EhiLogger.logState("...import done");
 				}
 			}finally{
-				if(conn!=null){
-					try{
-						conn.close();
-					}catch(java.sql.SQLException ex){
-						EhiLogger.logError(ex);
-					}finally{
-						conn=null;
+				if(!connectionFromExtern){
+					if(conn!=null){
+						try{
+							conn.close();
+						}catch(java.sql.SQLException ex){
+							EhiLogger.logError(ex);
+						}finally{
+							conn=null;
+						}
 					}
 				}
 				if(errs!=null){
@@ -678,6 +694,7 @@ public class Ili2db {
 			EhiLogger.getInstance().addListener(logfile);
 		}
 		try{
+			boolean connectionFromExtern=config.getJdbcConnection()!=null;
 			logGeneralInfo(config);
 			
 			Ili2dbLibraryInit ao=null;
@@ -714,7 +731,7 @@ public class Ili2db {
 			String dburl=config.getDburl();
 			String dbusr=config.getDbusr();
 			String dbpwd=config.getDbpwd();
-			if(dburl==null){
+			if(!connectionFromExtern && dburl==null){
 				throw new Ili2dbException("no dburl given");
 			}
 			if(dbusr==null){
@@ -743,26 +760,34 @@ public class Ili2db {
 			if(idGenerator==null){
 				throw new Ili2dbException("no ID generator given");
 			}
-			String jdbcDriver=config.getJdbcDriver();
-			if(jdbcDriver==null){
-				throw new Ili2dbException("no JDBC driver given");
+			if(!connectionFromExtern){
+				String jdbcDriver=config.getJdbcDriver();
+				if(jdbcDriver==null){
+					throw new Ili2dbException("no JDBC driver given");
+				}
+				try{
+					Class.forName(jdbcDriver);
+				}catch(Exception ex){
+					throw new Ili2dbException("failed to load JDBC driver",ex);
+				}
 			}
 
 			CustomMapping customMapping=getCustomMappingStrategy(config);
 			// open db connection
-			try{
-				Class.forName(jdbcDriver);
-			}catch(Exception ex){
-				throw new Ili2dbException("failed to load JDBC driver",ex);
-			}
 			Connection conn=null;
 			String url = dburl;
 			try{
-				conn = connect(url, dbusr, dbpwd, config, customMapping);
+				if(connectionFromExtern){
+					conn=config.getJdbcConnection();
+				}else{
+					conn = connect(url, dbusr, dbpwd, config, customMapping);
+				}
 			  logDBVersion(conn);
 			  
-			  // switch off auto-commit
-			  conn.setAutoCommit(false);
+			  if(!connectionFromExtern){
+				  // switch off auto-commit
+				  conn.setAutoCommit(false);
+			  }
 			  
 			}catch(SQLException ex){
 				throw new Ili2dbException(ex);
@@ -808,7 +833,6 @@ public class Ili2db {
 		  	idGen.init(config.getDbschema());
 
 			// read mapping file
-			String mappingConfigFilename=config.getMappingConfigFilename();
 			NameMapping mapping=new NameMapping(config);
 			if(!(conn instanceof GeodbConnection)){
 				  if(DbUtility.tableExists(conn,new DbTableName(config.getDbschema(),DbNames.CLASSNAME_TAB))){
@@ -819,9 +843,6 @@ public class Ili2db {
 					  // read mapping from db
 					  mapping.readAttrMappingTable(conn,config.getDbschema());
 				  }
-			}
-			if(mappingConfigFilename!=null){
-				mapping.readDeprecatedConfig(mappingConfigFilename);
 			}
 			  TrafoConfig trafoConfig=new TrafoConfig();
 			  trafoConfig.readTrafoConfig(conn, config.getDbschema());
@@ -842,8 +863,7 @@ public class Ili2db {
 				}
 			}
 			java.util.List<Element> eles=ms.getModelElements(modelNames,td, td.getIli1Format()!=null && config.getDoItfLineTables(),Config.CREATE_ENUM_DEFS_MULTI.equals(config.getCreateEnumDefs()));
-			optimizeSqlTableNames(config,mapping,eles);
-			Viewable2TableMapping class2wrapper=Viewable2TableMapper.getClass2TableMapping(config,trafoConfig,eles);
+			Viewable2TableMapping class2wrapper=Viewable2TableMapper.getClass2TableMapping(config,trafoConfig,eles,mapping);
 
 			SqlColumnConverter geomConverter=null;
 			try{
@@ -889,7 +909,6 @@ public class Ili2db {
 				}
 							
 				GeneratorDriver drv=new GeneratorDriver(gen);
-				config.setJdbcConnection(conn);
 				idGen.initDb(conn,dbusr);
 				idGen.initDbDefs();
 				
@@ -929,10 +948,12 @@ public class Ili2db {
 				//		EhiLogger.logError("failed to export gdb to "+xmlfile,ex);
 				//	}
 				//}
-				try {
-					conn.commit();
-				} catch (SQLException e) {
-					throw new Ili2dbException("failed to commit",e);
+				if(!connectionFromExtern){
+					try {
+						conn.commit();
+					} catch (SQLException e) {
+						throw new Ili2dbException("failed to commit",e);
+					}
 				}
 				
 			}catch(java.io.IOException ex){
@@ -940,9 +961,11 @@ public class Ili2db {
 			}
 			
 			try{
-				if(conn!=null){
-					conn.close();
-					conn=null;
+				if(!connectionFromExtern){
+					if(conn!=null){
+						conn.close();
+						conn=null;
+					}
 				}
 				EhiLogger.logState("...done");
 			}catch(java.sql.SQLException ex){
@@ -1026,6 +1049,7 @@ public class Ili2db {
 			EhiLogger.getInstance().addListener(logfile);
 		}
 		try{
+			boolean connectionFromExtern=config.getJdbcConnection()!=null;
 			logGeneralInfo(config);
 			
 			String xtffile=config.getXtffile();
@@ -1040,7 +1064,7 @@ public class Ili2db {
 			String dburl=config.getDburl();
 			String dbusr=config.getDbusr();
 			String dbpwd=config.getDbpwd();
-			if(dburl==null){
+			if(!connectionFromExtern && dburl==null){
 				throw new Ili2dbException("no dburl given");
 			}
 			if(dbusr==null){
@@ -1061,9 +1085,17 @@ public class Ili2db {
 			if(geometryConverter==null){
 				throw new Ili2dbException("no geoemtry converter given");
 			}
-			String jdbcDriver=config.getJdbcDriver();
-			if(jdbcDriver==null){
-				throw new Ili2dbException("no JDBC driver given");
+			if(!connectionFromExtern){
+				String jdbcDriver=config.getJdbcDriver();
+				if(jdbcDriver==null){
+					throw new Ili2dbException("no JDBC driver given");
+				}
+				// open db connection
+				try{
+					Class.forName(jdbcDriver);
+				}catch(Exception ex){
+					throw new Ili2dbException("failed to load JDBC driver",ex);
+				}
 			}
 			
 			String baskets=config.getBaskets();
@@ -1075,18 +1107,16 @@ public class Ili2db {
 			
 			CustomMapping customMapping=getCustomMappingStrategy(config);
 			
-			// open db connection
-			try{
-				Class.forName(jdbcDriver);
-			}catch(Exception ex){
-				throw new Ili2dbException("failed to load JDBC driver",ex);
-			}
 			Connection conn=null;
 			String url = dburl;
 			try{
 			  //DriverManager.registerDriver(new oracle.jdbc.OracleDriver());
 			  try {
-					conn = connect(url, dbusr, dbpwd, config, customMapping);
+				  if(connectionFromExtern){
+					  conn=config.getJdbcConnection();
+				  }else{
+						conn = connect(url, dbusr, dbpwd, config, customMapping);
+				  }
 			} catch (SQLException e) {
 				throw new Ili2dbException("failed to get db connection",e);
 			}
@@ -1094,6 +1124,7 @@ public class Ili2db {
 			
 			ch.interlis.ili2c.config.Configuration modelv=new ch.interlis.ili2c.config.Configuration();
 			boolean createBasketCol=config.BASKET_HANDLING_READWRITE.equals(config.getBasketHandling());
+			String exportModelnames[]=null;
 			int basketSqlIds[]=null;
 			if(baskets!=null){
 				if(!createBasketCol){
@@ -1116,9 +1147,9 @@ public class Ili2db {
 					String modelnames[]=models.split(ch.interlis.ili2c.Main.MODELS_SEPARATOR);
 					basketSqlIds=getBasketSqlIdsFromModel(modelnames,modelv,conn,config);
 				}else{
-					String modelnames[]=models.split(ch.interlis.ili2c.Main.MODELS_SEPARATOR);
-					for(int modeli=0;modeli<modelnames.length;modeli++){
-						String m=modelnames[modeli];
+					exportModelnames=models.split(ch.interlis.ili2c.Main.MODELS_SEPARATOR);
+					for(int modeli=0;modeli<exportModelnames.length;modeli++){
+						String m=exportModelnames[modeli];
 						if(m.equals(XTF)){
 							// TODO read modelname from db
 						}
@@ -1159,14 +1190,10 @@ public class Ili2db {
 			  geomConverter.setup(conn, config);
 			  
 			  // get mapping definition
-			  String mappingConfigFilename=config.getMappingConfigFilename();
 			  NameMapping mapping=new NameMapping(config);
 			  if(DbUtility.tableExists(conn,new DbTableName(config.getDbschema(),DbNames.CLASSNAME_TAB))){
 				  // read mapping from db
 				  mapping.readTableMappingTable(conn,config.getDbschema());
-			  }else if(mappingConfigFilename!=null){
-				  // read mapping from config file if it doesn't exist in the db
-				  mapping.readDeprecatedConfig(mappingConfigFilename);
 			  }
 			  if(DbUtility.tableExists(conn,new DbTableName(config.getDbschema(),DbNames.ATTRNAME_TAB))){
 				  // read mapping from db
@@ -1189,7 +1216,7 @@ public class Ili2db {
 				}
 				
 			  java.util.List<Element> eles=ms.getModelElements(modelNames,td, td.getIli1Format()!=null && config.getDoItfLineTables(),Config.CREATE_ENUM_DEFS_MULTI.equals(config.getCreateEnumDefs()));
-			  Viewable2TableMapping class2wrapper=Viewable2TableMapper.getClass2TableMapping(config,trafoConfig,eles);
+			  Viewable2TableMapping class2wrapper=Viewable2TableMapper.getClass2TableMapping(config,trafoConfig,eles,mapping);
 
 			  // process xtf files
 			  EhiLogger.logState("process data...");
@@ -1197,7 +1224,7 @@ public class Ili2db {
 				HashSet<BasketStat> stat=new HashSet<BasketStat>();
 				ch.ehi.basics.logging.ErrorTracker errs=new ch.ehi.basics.logging.ErrorTracker();
 				EhiLogger.getInstance().addListener(errs);
-				transferToXtf(conn,xtffile,mapping,td,geomConverter,config.getSender(),config,basketSqlIds,stat,trafoConfig,class2wrapper);
+				transferToXtf(conn,xtffile,mapping,td,geomConverter,config.getSender(),config,exportModelnames,basketSqlIds,stat,trafoConfig,class2wrapper);
 				if (errs.hasSeenErrors()) {
 					throw new Ili2dbException("...export failed");
 				} else {
@@ -1208,10 +1235,12 @@ public class Ili2db {
 			//}catch(Exception ex){
 				//EhiLogger.logError(ex);
 			}finally{
-				try{
-					conn.close();
-				}catch(java.sql.SQLException ex){
-					EhiLogger.logError(ex);
+				if(!connectionFromExtern){
+					try{
+						conn.close();
+					}catch(java.sql.SQLException ex){
+						EhiLogger.logError(ex);
+					}
 				}
 			}			
 		}catch(Ili2dbException ex){
@@ -1239,6 +1268,7 @@ public class Ili2db {
 		EhiLogger.logState("dbusr <" + dbusr + ">");
 		customMapping.preConnect(url, dbusr, dbpwd, config);
 		conn = DriverManager.getConnection(url, dbusr, dbpwd);
+		config.setJdbcConnection(conn);
 		customMapping.postConnect(conn, config);
 		return conn;
 	}
@@ -1585,6 +1615,7 @@ public class Ili2db {
 			,SqlColumnConverter geomConv
 			,String sender
 			,Config config
+			,String exportParamModelnames[]
 			,int basketSqlIds[]
 			,HashSet<BasketStat> stat
 			,TrafoConfig trafoConfig
@@ -1606,7 +1637,7 @@ public class Ili2db {
 				ioxWriter=new XtfWriter(outfile,td);
 			}
 			TransferToXtf trsfr=new TransferToXtf(ili2sqlName,td,conn,geomConv,config,trafoConfig,class2wrapper);
-			trsfr.doit(outfile.getName(),ioxWriter,sender,basketSqlIds,stat);
+			trsfr.doit(outfile.getName(),ioxWriter,sender,exportParamModelnames,basketSqlIds,stat);
 			//trsfr.doitJava();
 			ioxWriter.flush();
 		}catch(ch.interlis.iox.IoxException ex){
@@ -1620,85 +1651,6 @@ public class Ili2db {
 				}
 			}
 			ioxWriter=null;
-		}
-	}
-	static public void optimizeSqlTableNames(Config config,NameMapping mapping,java.util.List<Element> eles)
-	{
-		if(config.NAME_OPTIMIZATION_DISABLE.equals(config.getNameOptimization())){
-			return;
-		}
-		NameOptimizer optimizer=null;
-		if(config.NAME_OPTIMIZATION_TOPIC.equals(config.getNameOptimization())){
-			optimizer=new NameOptimizer(){
-				@Override
-				public String createTableName(Element ele) {
-					if(ele instanceof ch.interlis.ili2c.metamodel.Viewable
-							|| ele instanceof ch.interlis.ili2c.metamodel.Domain){
-						ch.interlis.ili2c.metamodel.Container container=ele.getContainer();
-						String optimizedName=container.getName()+"_"+ele.getName();
-						return optimizedName;
-					}else if(ele instanceof AttributeDef)
-					  {
-						AttributeDef attr = (AttributeDef) ele;
-						ch.interlis.ili2c.metamodel.Viewable v=(ch.interlis.ili2c.metamodel.Viewable)attr.getContainer();
-						ch.interlis.ili2c.metamodel.Container container=v.getContainer();
-						Type type = Type.findReal (attr.getDomain());
-						return container.getName()+"_"+v.getName()+"_"+attr.getName();
-					  }
-					return null;
-				}
-				
-			};
-		}else{
-			optimizer=new NameOptimizer(){
-				@Override
-				public String createTableName(Element ele) {
-					if(ele instanceof ch.interlis.ili2c.metamodel.Viewable
-							|| ele instanceof ch.interlis.ili2c.metamodel.Domain){
-						return ele.getName();
-					}else if(ele instanceof AttributeDef)
-					  {
-						AttributeDef attr = (AttributeDef) ele;
-						ch.interlis.ili2c.metamodel.Viewable v=(ch.interlis.ili2c.metamodel.Viewable)attr.getContainer();
-						return v.getName()+"_"+attr.getName();
-					  }
-					return null;
-				}
-				
-			};
-		}
-		HashSet<String> names=new HashSet<String>();
-		
-		ArrayList<Element> elev=new ArrayList<Element>(eles);
-		//java.util.Collections.reverse(elev);
-		for (Element ele : elev) {
-			if (ele instanceof ch.interlis.ili2c.metamodel.Viewable
-					|| ele instanceof ch.interlis.ili2c.metamodel.Domain) {
-				if(ele instanceof ch.interlis.ili2c.metamodel.Table && ((ch.interlis.ili2c.metamodel.Table)ele).isIli1LineAttrStruct()){
-					// skip it
-				}else{
-					String optimizedTableName = optimizer.createTableName(ele);
-					if (optimizedTableName != null && !names.contains(optimizedTableName)) {
-						mapping.defineTableNameMapping(ele.getScopedName(null),
-								optimizedTableName);
-						names.add(optimizedTableName);
-					}
-				}
-			} else if (ele instanceof AttributeDef) {
-				AttributeDef attr = (AttributeDef) ele;
-				Viewable v = (Viewable) attr.getContainer();
-				String optimizedTableName = optimizer.createTableName(attr);
-				if (optimizedTableName != null
-						&& !names.contains(optimizedTableName)) {
-					String qualifiedModelElementName = v.getContainer()
-					.getScopedName(null) + "." + v.getName() + "."
-							+ attr.getName();
-					mapping.defineTableNameMapping(qualifiedModelElementName,
-							optimizedTableName);
-					names.add(optimizedTableName);
-				}
-			}
-
 		}
 	}
 	

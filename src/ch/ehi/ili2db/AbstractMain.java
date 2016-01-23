@@ -50,7 +50,7 @@ public abstract class AbstractMain {
 		config.setDefaultSrsCode("21781");
 		config.setMaxSqlNameLength(Integer.toString(NameMapping.DEFAULT_NAME_LENGTH));
 		config.setIdGenerator(ch.ehi.ili2db.base.TableBasedIdGen.class.getName());
-		config.setInheritanceTrafo(config.INHERITANCE_TRAFO_SMART);
+		config.setInheritanceTrafo(config.INHERITANCE_TRAFO_SMART1);
 		config.setCatalogueRefTrafo(Config.CATALOGUE_REF_TRAFO_COALESCE);
 		config.setMultiSurfaceTrafo(Config.MULTISURFACE_TRAFO_COALESCE);
 		config.setMultilingualTrafo(Config.MULTILINGUAL_TRAFO_EXPAND);
@@ -139,10 +139,6 @@ public abstract class AbstractMain {
 				argi++;
 				config.setLogfile(args[argi]);
 				argi++;
-			}else if(arg.equals("--mapconfig")){
-				argi++;
-				config.setMappingConfigFilename(args[argi]);
-				argi++;
 			}else if(arg.equals("--defaultSrsAuth")){
 				argi++;
 				String auth=args[argi];
@@ -179,7 +175,7 @@ public abstract class AbstractMain {
 				config.setInheritanceTrafo(null);
 			}else if(arg.equals("--smartInheritance")){
 				argi++;
-				config.setInheritanceTrafo(config.INHERITANCE_TRAFO_SMART);
+				config.setInheritanceTrafo(config.INHERITANCE_TRAFO_SMART1);
 			}else if(arg.equals("--coalesceCatalogueRef")){
 				argi++;
 				config.setCatalogueRefTrafo(config.CATALOGUE_REF_TRAFO_COALESCE);
@@ -195,6 +191,9 @@ public abstract class AbstractMain {
 			}else if(arg.equals("--createFkIdx")){
 				argi++;
 				config.setCreateFkIdx(config.CREATE_FKIDX_YES);
+			}else if(arg.equals("--createUnique")){
+				argi++;
+				config.setCreateUniqueConstraints(true);
 			}else if(arg.equals("--createStdCols")){
 				argi++;
 				config.setCreateStdCols(config.CREATE_STD_COLS_ALL);
@@ -230,6 +229,9 @@ public abstract class AbstractMain {
 				argi++;
 				config.setDoItfLineTables(true);
 				config.setAreaRef(config.AREA_REF_KEEP);
+			}else if(arg.equals("--skipPolygonBuildingErrors")){
+				argi++;
+				config.setIgnorePolygonBuildingErrors(true);
 			}else if(arg.equals("--keepAreaRef")){
 				argi++;
 				config.setAreaRef(config.AREA_REF_KEEP);
@@ -265,7 +267,6 @@ public abstract class AbstractMain {
 					System.err.println("--topics topicname     Name(s) of ili-topics to export.");
 					System.err.println("--createscript filename  Generate a sql script that creates the db schema.");
 					System.err.println("--dropscript filename  Generate a sql script that drops the generated db schema.");
-					System.err.println("--mapconfig filename   Name of config file, that controls the schema mapping.");
 					System.err.println("--noSmartMapping       disable all smart mappings");
 					System.err.println("--smartInheritance     enable smart mapping of class/structure inheritance");
 					System.err.println("--coalesceCatalogueRef enable smart mapping of CHBase:CatalogueReference");
@@ -286,11 +287,13 @@ public abstract class AbstractMain {
 					System.err.println("--sqlEnableNull        create no NOT NULL constraints in db schema.");
 					System.err.println("--strokeArcs           stroke ARCS on import.");
 					System.err.println("--skipPolygonBuilding  keep linetables; don't build polygons on import.");
+					System.err.println("--skipPolygonBuildingErrors  report build polygon errors as info.");
 					System.err.println("--keepAreaRef          keep arreaRef as additional column on import.");
 					System.err.println("--importTid            read TID into additional column "+DbNames.T_ILI_TID_COL);
 					System.err.println("--createBasketCol      generate "+DbNames.T_BASKET_COL+" column.");
 					System.err.println("--createFk             generate foreign key constraints.");
 					System.err.println("--createFkIdx          create an index on foreign key columns.");
+					System.err.println("--createUnique         create UNIQUE db constraints.");
 					printSpecificOptions();
 					System.err.println("--log filename         log message to given file.");
 					System.err.println("--gui                  start GUI.");

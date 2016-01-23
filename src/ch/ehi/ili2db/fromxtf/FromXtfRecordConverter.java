@@ -26,8 +26,10 @@ import ch.ehi.ili2db.gui.Config;
 import ch.ehi.ili2db.mapping.NameMapping;
 import ch.ehi.ili2db.mapping.TrafoConfig;
 import ch.ehi.ili2db.mapping.TrafoConfigNames;
+import ch.ehi.ili2db.mapping.Viewable2TableMapping;
 import ch.ehi.ili2db.mapping.ViewableWrapper;
 import ch.ehi.sqlgen.repository.DbSchema;
+import ch.ehi.sqlgen.repository.DbTableName;
 import ch.interlis.ili2c.metamodel.AreaType;
 import ch.interlis.ili2c.metamodel.AssociationDef;
 import ch.interlis.ili2c.metamodel.AttributeDef;
@@ -66,8 +68,8 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 	
 	public FromXtfRecordConverter(TransferDescription td1, NameMapping ili2sqlName,HashMap tag2class1,
 			Config config,
-			DbIdGen idGen1,SqlColumnConverter geomConv1,Connection conn1,String dbusr1,boolean isItfReader1,XtfidPool oidPool1,TrafoConfig trafoConfig) {
-		super(td1, ili2sqlName, config, idGen1,trafoConfig);
+			DbIdGen idGen1,SqlColumnConverter geomConv1,Connection conn1,String dbusr1,boolean isItfReader1,XtfidPool oidPool1,TrafoConfig trafoConfig,	Viewable2TableMapping class2wrapper1) {
+		super(td1, ili2sqlName, config, idGen1,trafoConfig,class2wrapper1);
 		conn=conn1;
 		tag2class=tag2class1;
 		dbusr=dbusr1;
@@ -85,7 +87,7 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 		}
 		
 	}
-	public void writeRecord(int basketSqlId, IomObject iomObj,
+	public void writeRecord(int basketSqlId, IomObject iomObj,Viewable iomClass,
 			StructWrapper structEle, ViewableWrapper aclass, String sqlType,
 			int sqlId, boolean updateObj, PreparedStatement ps,ArrayList structQueue)
 			throws SQLException, ConverterException {
@@ -105,108 +107,115 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 			valuei++;
 		}
 		
-		if(aclass.getExtending()==null){
-			if(createTypeDiscriminator || aclass.includesMultipleTypes()){
-				ps.setString(valuei, sqlType);
-				valuei++;
-			}
-			// if class
-			if(structEle==null){
-				if(!updateObj){
-					if(!aclass.isStructure()){
-						if(createIliTidCol || aclass.getOid()!=null){
-							// import TID from transfer file
-							if(AbstractRecordConverter.isUuidOid(td, aclass.getOid())){
-								 Object toInsertUUID = geomConv.fromIomUuid(iomObj.getobjectoid());
-								 ps.setObject(valuei, toInsertUUID);
-							}else{
-								ps.setString(valuei, iomObj.getobjectoid());
+		if(!aclass.isSecondaryTable()){
+			if(aclass.getExtending()==null){
+				if(createTypeDiscriminator || aclass.includesMultipleTypes()){
+					ps.setString(valuei, sqlType);
+					valuei++;
+				}
+				// if class
+				if(structEle==null){
+					if(!updateObj){
+						if(!aclass.isStructure()){
+							if(createIliTidCol || aclass.getOid()!=null){
+								// import TID from transfer file
+								if(AbstractRecordConverter.isUuidOid(td, aclass.getOid())){
+									 Object toInsertUUID = geomConv.fromIomUuid(iomObj.getobjectoid());
+									 ps.setObject(valuei, toInsertUUID);
+								}else{
+									ps.setString(valuei, iomObj.getobjectoid());
+								}
+								valuei++;
 							}
-							valuei++;
 						}
 					}
 				}
-			}
-			// if struct, add ref to parent
-			if(structEle!=null){
-				ps.setInt(valuei, structEle.getParentSqlId());
-				valuei++;
-				if(createGenericStructRef){
-					ps.setString(valuei, structEle.getParentSqlType());
+				// if struct, add ref to parent
+				if(structEle!=null){
+					ps.setInt(valuei, structEle.getParentSqlId());
 					valuei++;
-					// T_ParentAttr
-					ps.setString(valuei, structEle.getParentSqlAttr());
+					if(createGenericStructRef){
+						ps.setString(valuei, structEle.getParentSqlType());
+						valuei++;
+						// T_ParentAttr
+						ps.setString(valuei, structEle.getParentSqlAttr());
+						valuei++;
+					}
+					// T_Seq
+					ps.setInt(valuei, structEle.getStructi());
 					valuei++;
 				}
-				// T_Seq
-				ps.setInt(valuei, structEle.getStructi());
-				valuei++;
 			}
 		}
  
+		HashSet attrs=getIomObjectAttrs(iomClass);
 		Iterator iter = aclass.getAttrIterator();
 		while (iter.hasNext()) {
 			ViewableTransferElement obj = (ViewableTransferElement)iter.next();
 			if (obj.obj instanceof AttributeDef) {
 				AttributeDef attr = (AttributeDef) obj.obj;
-				if(!attr.isTransient()){
-					Type proxyType=attr.getDomain();
-					if(proxyType!=null && (proxyType instanceof ObjectType)){
-						// skip implicit particles (base-viewables) of views
-					}else{
-						valuei = addAttrValue(iomObj, sqlType, sqlId, ps,
-								valuei, attr,structQueue);
+				if(attrs.contains(attr)){
+					if(!attr.isTransient()){
+						Type proxyType=attr.getDomain();
+						if(proxyType!=null && (proxyType instanceof ObjectType)){
+							// skip implicit particles (base-viewables) of views
+						}else{
+							valuei = addAttrValue(iomObj, sqlType, sqlId, aclass.getSqlTablename(),ps,
+									valuei, attr,structQueue);
+						}
 					}
 				}
 			}
 			if(obj.obj instanceof RoleDef){
 				RoleDef role = (RoleDef) obj.obj;
 				if(role.getExtending()==null){
-					String roleName=role.getName();
-					// a role of an embedded association?
-					if(obj.embedded){
-						AssociationDef roleOwner = (AssociationDef) role.getContainer();
-						if(roleOwner.getDerivedFrom()==null){
-							// not just a link?
-							 IomObject structvalue=iomObj.getattrobj(roleName,0);
-							if (roleOwner.getAttributes().hasNext()
-								|| roleOwner.getLightweightAssociations().iterator().hasNext()) {
-								 // TODO handle attributes of link
-							}
-							if(structvalue!=null){
-								String refoid=structvalue.getobjectrefoid();
-								long orderPos=structvalue.getobjectreforderpos();
-								if(orderPos!=0){
-								   // refoid,orderPos
-								   //ret.setStringAttribute(roleName, refoid);
-								   //ret.setStringAttribute(roleName+".orderPos", Long.toString(orderPos));
-								}else{
-								   // refoid
-								   //ret.setStringAttribute(roleName, refoid);
+					if(attrs.contains(role)){
+						String roleName=role.getName();
+						// a role of an embedded association?
+						if(obj.embedded){
+							AssociationDef roleOwner = (AssociationDef) role.getContainer();
+							if(roleOwner.getDerivedFrom()==null){
+								// not just a link?
+								 IomObject structvalue=iomObj.getattrobj(roleName,0);
+								if (roleOwner.getAttributes().hasNext()
+									|| roleOwner.getLightweightAssociations().iterator().hasNext()) {
+									 // TODO handle attributes of link
 								}
-							   int refsqlId=oidPool.getObjSqlId(refoid);
-							   ps.setInt(valuei, refsqlId);
-							}else{
-								ps.setNull(valuei, Types.INTEGER);
+								if(structvalue!=null){
+									String refoid=structvalue.getobjectrefoid();
+									long orderPos=structvalue.getobjectreforderpos();
+									if(orderPos!=0){
+									   // refoid,orderPos
+									   //ret.setStringAttribute(roleName, refoid);
+									   //ret.setStringAttribute(roleName+".orderPos", Long.toString(orderPos));
+									}else{
+									   // refoid
+									   //ret.setStringAttribute(roleName, refoid);
+									}
+								   int refsqlId=oidPool.getObjSqlId(refoid);
+								   ps.setInt(valuei, refsqlId);
+								}else{
+									ps.setNull(valuei, Types.INTEGER);
+								}
+								valuei++;
 							}
-							valuei++;
-						}
-					 }else{
-						 IomObject structvalue=iomObj.getattrobj(roleName,0);
-						 String refoid=structvalue.getobjectrefoid();
-						 long orderPos=structvalue.getobjectreforderpos();
-						 if(orderPos!=0){
-							// refoid,orderPos
-							//ret.setStringAttribute(roleName, refoid);
-							//ret.setStringAttribute(roleName+".orderPos", Long.toString(orderPos));
 						 }else{
-							// refoid
-							//ret.setStringAttribute(roleName, refoid);
+							 IomObject structvalue=iomObj.getattrobj(roleName,0);
+							 String refoid=structvalue.getobjectrefoid();
+							 long orderPos=structvalue.getobjectreforderpos();
+							 if(orderPos!=0){
+								// refoid,orderPos
+								//ret.setStringAttribute(roleName, refoid);
+								//ret.setStringAttribute(roleName+".orderPos", Long.toString(orderPos));
+							 }else{
+								// refoid
+								//ret.setStringAttribute(roleName, refoid);
+							 }
+							int refsqlId=oidPool.getObjSqlId(refoid);
+							ps.setInt(valuei, refsqlId);
+							valuei++;
 						 }
-						int refsqlId=oidPool.getObjSqlId(refoid);
-						ps.setInt(valuei, refsqlId);
-						valuei++;
-					 }
+					}
 				}
 			 }
 		}
@@ -233,12 +242,60 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 			//valuei++;
 		}
 	}
+	public HashSet getIomObjectAttrs(Viewable aclass) {
+		HashSet ret=new HashSet();
+		Iterator iter = aclass.getAttributesAndRoles2();
+		while (iter.hasNext()) {
+		   ViewableTransferElement obj = (ViewableTransferElement)iter.next();
+		   if (obj.obj instanceof AttributeDef) {
+			   AttributeDef attr = (AttributeDef) obj.obj;
+				if(!attr.isTransient()){
+					Type proxyType=attr.getDomain();
+					if(proxyType!=null && (proxyType instanceof ObjectType)){
+						// skip implicit particles (base-viewables) of views
+					}else{
+						AttributeDef base=(AttributeDef) attr.getExtending();
+						while(base!=null){
+							attr=base;
+							base=(AttributeDef) attr.getExtending();
+						}
+						ret.add(attr);
+					}
+				}
+		   }
+		   if(obj.obj instanceof RoleDef){
+			   RoleDef role = (RoleDef) obj.obj;
+			   if(role.getExtending()==null){
+					// a role of an embedded association?
+					if(obj.embedded){
+						AssociationDef roleOwner = (AssociationDef) role.getContainer();
+						if(roleOwner.getDerivedFrom()==null){
+							RoleDef base=(RoleDef) role.getExtending();
+							while(base!=null){
+								role=base;
+								base=(RoleDef) role.getExtending();
+							}
+							ret.add(role);
+						}
+					 }else{
+							RoleDef base=(RoleDef) role.getExtending();
+							while(base!=null){
+								role=base;
+								base=(RoleDef) role.getExtending();
+							}
+							ret.add(role);
+					 }
+				}
+			}
+		}
+		return ret;
+	}
 	/** creates an insert statement for a given viewable.
-	 * @param sqlname table name of viewable
+	 * @param sqlTableName table name of viewable
 	 * @param aclass viewable
 	 * @return insert statement
 	 */
-	public String createInsertStmt(boolean isUpdate,String sqlname,ViewableWrapper aclass,StructWrapper structEle){
+	public String createInsertStmt(boolean isUpdate,Viewable iomClass,DbTableName sqlTableName,ViewableWrapper aclass,StructWrapper structEle){
 		StringBuffer ret = new StringBuffer();
 		StringBuffer values = new StringBuffer();
 		//INSERT INTO table_name (column1,column2,column3,...)
@@ -252,7 +309,7 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 		}else{
 			ret.append("INSERT INTO ");
 		}
-		ret.append(sqlname);
+		ret.append(sqlTableName.getQName());
 		String sep=null;
 		if(isUpdate){
 			sep=" SET ";
@@ -280,62 +337,12 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 			sep=",";
 		}
 		
-		// if root, add type
-		if(aclass.getExtending()==null){
-			if(createTypeDiscriminator || aclass.includesMultipleTypes()){
-				ret.append(sep);
-				ret.append(DbNames.T_TYPE_COL);
-				if(isUpdate){
-					ret.append("=?");
-				}else{
-					values.append(",?");
-				}
-				sep=",";
-			}
-			// if Class
-			if(!aclass.isStructure()){
-				if(!isUpdate){
-					if(createIliTidCol || aclass.getOid()!=null){
-						ret.append(sep);
-						ret.append(DbNames.T_ILI_TID_COL);
-						values.append(",?");
-						sep=",";
-					}
-				}
-			}
-			// if STRUCTURE, add ref to parent
-			if(aclass.isStructure()){
-				if(createGenericStructRef){
+		if(!aclass.isSecondaryTable()){
+			// if root, add type
+			if(aclass.getExtending()==null){
+				if(createTypeDiscriminator || aclass.includesMultipleTypes()){
 					ret.append(sep);
-					ret.append(DbNames.T_PARENT_ID_COL);
-					if(isUpdate){
-						ret.append("=?");
-					}else{
-						values.append(",?");
-					}
-					sep=",";
-					ret.append(sep);
-					ret.append(DbNames.T_PARENT_TYPE_COL);
-					if(isUpdate){
-						ret.append("=?");
-					}else{
-						values.append(",?");
-					}
-					sep=",";
-					// attribute name in parent class
-					ret.append(sep);
-					ret.append(DbNames.T_PARENT_ATTR_COL);
-					if(isUpdate){
-						ret.append("=?");
-					}else{
-						values.append(",?");
-					}
-					sep=",";
-				}else{
-					ret.append(sep);
-					String parentIliQname=ili2sqlName.mapSqlTableName(structEle.getParentSqlType());
-					Viewable parent=(Viewable) tag2class.get(parentIliQname);
-					ret.append(ili2sqlName.mapIliAttributeDefQualified(parent,structEle.getParentAttr()));
+					ret.append(DbNames.T_TYPE_COL);
 					if(isUpdate){
 						ret.append("=?");
 					}else{
@@ -343,62 +350,119 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 					}
 					sep=",";
 				}
-				// seqeunce (not null if LIST)
-				ret.append(sep);
-				ret.append(DbNames.T_SEQ_COL);
-				if(isUpdate){
-					ret.append("=?");
-				}else{
-					values.append(",?");
-				}
-				sep=",";
-			}
-		}
-		
-		Iterator iter = aclass.getAttrIterator();
-		while (iter.hasNext()) {
-		   ViewableTransferElement obj = (ViewableTransferElement)iter.next();
-		   if (obj.obj instanceof AttributeDef) {
-			   AttributeDef attr = (AttributeDef) obj.obj;
-				if(!attr.isTransient()){
-					Type proxyType=attr.getDomain();
-					if(proxyType!=null && (proxyType instanceof ObjectType)){
-						// skip implicit particles (base-viewables) of views
-					}else{
-						   sep = addAttrToInsertStmt(isUpdate,ret, values, sep, attr);
-					}
-				}
-		   }
-		   if(obj.obj instanceof RoleDef){
-			   RoleDef role = (RoleDef) obj.obj;
-			   if(role.getExtending()==null){
-				String roleName=ili2sqlName.mapIliRoleDef(role);
-				// a role of an embedded association?
-				if(obj.embedded){
-					AssociationDef roleOwner = (AssociationDef) role.getContainer();
-					if(roleOwner.getDerivedFrom()==null){
-						 // TODO if(orderPos!=0){
-						 ret.append(sep);
-						 ret.append(roleName);
-							if(isUpdate){
-								ret.append("=?");
-							}else{
-								values.append(",?");
-							}
+				// if Class
+				if(!aclass.isStructure()){
+					if(!isUpdate){
+						if(createIliTidCol || aclass.getOid()!=null){
+							ret.append(sep);
+							ret.append(DbNames.T_ILI_TID_COL);
+							values.append(",?");
 							sep=",";
+						}
 					}
-				 }else{
-					 // TODO if(orderPos!=0){
-					 ret.append(sep);
-					 ret.append(roleName);
+				}
+				// if STRUCTURE, add ref to parent
+				if(aclass.isStructure()){
+					if(createGenericStructRef){
+						ret.append(sep);
+						ret.append(DbNames.T_PARENT_ID_COL);
 						if(isUpdate){
 							ret.append("=?");
 						}else{
 							values.append(",?");
 						}
 						sep=",";
-				 }
+						ret.append(sep);
+						ret.append(DbNames.T_PARENT_TYPE_COL);
+						if(isUpdate){
+							ret.append("=?");
+						}else{
+							values.append(",?");
+						}
+						sep=",";
+						// attribute name in parent class
+						ret.append(sep);
+						ret.append(DbNames.T_PARENT_ATTR_COL);
+						if(isUpdate){
+							ret.append("=?");
+						}else{
+							values.append(",?");
+						}
+						sep=",";
+					}else{
+						ret.append(sep);
+						ViewableWrapper parentTable=getViewableWrapper(structEle.getParentSqlType());
+						ret.append(ili2sqlName.mapIliAttributeDefReverse(structEle.getParentAttr(),sqlTableName.getName(),getSqlType(parentTable.getViewable()).getName()));
+						if(isUpdate){
+							ret.append("=?");
+						}else{
+							values.append(",?");
+						}
+						sep=",";
+					}
+					// seqeunce (not null if LIST)
+					ret.append(sep);
+					ret.append(DbNames.T_SEQ_COL);
+					if(isUpdate){
+						ret.append("=?");
+					}else{
+						values.append(",?");
+					}
+					sep=",";
+				}
+			}
+		}
+		
+		HashSet attrs=getIomObjectAttrs(iomClass);
+		Iterator iter = aclass.getAttrIterator();
+		while (iter.hasNext()) {
+		   ViewableTransferElement obj = (ViewableTransferElement)iter.next();
+		   if (obj.obj instanceof AttributeDef) {
+			   AttributeDef attr = (AttributeDef) obj.obj;
+			   if(attrs.contains(attr)){
+					if(!attr.isTransient()){
+						Type proxyType=attr.getDomain();
+						if(proxyType!=null && (proxyType instanceof ObjectType)){
+							// skip implicit particles (base-viewables) of views
+						}else{
+							   sep = addAttrToInsertStmt(isUpdate,ret, values, sep, attr,sqlTableName.getName());
+						}
+					}
 			   }
+		   }
+		   if(obj.obj instanceof RoleDef){
+			   RoleDef role = (RoleDef) obj.obj;
+			   if(role.getExtending()==null){
+				   if(attrs.contains(role)){
+						String roleName=ili2sqlName.mapIliRoleDef(role,sqlTableName.getName(),getSqlType(role.getDestination()).getName());
+						// a role of an embedded association?
+						if(obj.embedded){
+							AssociationDef roleOwner = (AssociationDef) role.getContainer();
+							if(roleOwner.getDerivedFrom()==null){
+								 // TODO if(orderPos!=0){
+								 ret.append(sep);
+								 ret.append(roleName);
+									if(isUpdate){
+										ret.append("=?");
+									}else{
+										values.append(",?");
+									}
+									sep=",";
+							}
+						 }else{
+							 // TODO if(orderPos!=0){
+							 ret.append(sep);
+							 ret.append(roleName);
+								if(isUpdate){
+									ret.append("=?");
+								}else{
+									values.append(",?");
+								}
+								sep=",";
+						 }
+					   
+				   }
+				}
 			}
 		}
 		// stdcols
@@ -443,11 +507,16 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 		
 		return ret.toString();
 	}
+	public ViewableWrapper getViewableWrapper(String sqlType){
+		String iliQname=ili2sqlName.mapSqlTableName(sqlType);
+		Viewable aclass=(Viewable) tag2class.get(iliQname);
+		return class2wrapper.get(aclass);
+	}
 	public String addAttrToInsertStmt(boolean isUpdate,
-			StringBuffer ret, StringBuffer values, String sep, AttributeDef attr) {
+			StringBuffer ret, StringBuffer values, String sep, AttributeDef attr,String sqlTableName) {
 		if(attr.getExtending()==null){
 			Type type = attr.getDomainResolvingAliases();
-			String attrSqlName=ili2sqlName.mapIliAttributeDef(attr);
+			String attrSqlName=ili2sqlName.mapIliAttributeDef(attr,sqlTableName,null);
 			if (Ili2cUtility.isBoolean(td,attr)) {
 					ret.append(sep);
 					ret.append(attrSqlName);
@@ -563,7 +632,7 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 		return sep;
 	}
 	public int addAttrValue(IomObject iomObj, String sqlType, int sqlId,
-			PreparedStatement ps, int valuei, AttributeDef attr,ArrayList structQueue)
+			String sqlTableName,PreparedStatement ps, int valuei, AttributeDef attr,ArrayList structQueue)
 			throws SQLException, ConverterException {
 		if(attr.getExtending()==null){
 			 String attrName=attr.getName();
@@ -701,7 +770,7 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 						 // enqueue struct values
 						 for(int structi=0;structi<structc;structi++){
 						 	IomObject struct=iomObj.getattrobj(attrName,structi);
-						 	String sqlAttrName=ili2sqlName.mapIliAttributeDef(attr);
+						 	String sqlAttrName=ili2sqlName.mapIliAttributeDef(attr,sqlTableName,null);
 						 	enqueStructValue(structQueue,sqlId,sqlType,sqlAttrName,struct,structi,attr);
 						 }
 					}

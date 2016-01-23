@@ -49,7 +49,7 @@ import ch.ehi.ili2db.mapping.ViewableWrapper;
  */
 public class TransferFromIli {
 	private DbSchema schema=null;
-	private HashSet visitedElements=null;
+	private HashSet<Element> visitedElements=null;
 	private Viewable2TableMapping class2wrapper=null;
 	private HashSet<ViewableWrapper> visitedWrapper=null;
 	private HashSet visitedEnums=null;
@@ -96,7 +96,7 @@ public class TransferFromIli {
 
 		schema=new DbSchema();
 		schema.setName(config.getDbschema());
-		visitedElements=new HashSet();
+		visitedElements=new HashSet<Element>();
 		class2wrapper=class2wrapper1;
 		visitedWrapper=new HashSet<ViewableWrapper>();
 		visitedEnums=new HashSet();
@@ -113,6 +113,7 @@ public class TransferFromIli {
 				//generateTopic((Topic)modelo);
 			}else if (modelo instanceof Domain){
 				generateDomain((Domain)modelo);
+				visitedElements.add((Domain)modelo);
 			}else if (modelo instanceof Viewable){
 				if(modelo instanceof Table && ((Table)modelo).isIli1LineAttrStruct()){
 					// skip it
@@ -120,7 +121,11 @@ public class TransferFromIli {
 					// skip it
 				}else{
 					try{
-						generateViewable((Viewable)modelo);
+						ViewableWrapper wrapper=class2wrapper.get((Viewable)modelo);
+						if(wrapper!=null){
+							generateViewable(wrapper);
+						}
+						visitedElements.add((Viewable)modelo);
 					}catch(Ili2dbException ex){
 						throw new Ili2dbException("mapping of "+((Viewable)modelo).getScopedName(null)+" failed",ex);
 					}
@@ -168,37 +173,34 @@ public class TransferFromIli {
 			visitedEnums.add(def);
 		}
 	}
-	private void generateViewable(Viewable def)
+	private void generateViewable(ViewableWrapper def)
 	throws Ili2dbException
 	{
-		if(def instanceof AssociationDef){
-			AssociationDef assoc=(AssociationDef)def;
+		if(def.getViewable() instanceof AssociationDef){
+			AssociationDef assoc=(AssociationDef)def.getViewable();
 			if(assoc.getDerivedFrom()!=null){
 				return;
 			}
 			if(assoc.isLightweight() 
 				&& !assoc.getAttributes().hasNext()
 				&& !assoc.getLightweightAssociations().iterator().hasNext()) {
-				customMapping.fixupViewable(null,def);
+				customMapping.fixupViewable(null,def.getViewable());
 				return;
 			}
 		}
 		
-		//EhiLogger.debug("viewable "+def);
-		Viewable base=def;
-		while(base!=null){
-			ViewableWrapper wrapper=class2wrapper.get(base);
-			if(!visitedWrapper.contains(wrapper)){
-				visitedWrapper.add(wrapper);
-				recConv.generateTable(wrapper);
-			  	
-			  	if(createItfLineTables){
-			  		for(AttributeDef attr : recConv.getSurfaceAttrs()){
-			  			generateItfLineTable(attr);
-			  		}
-			  	}
+		EhiLogger.traceState("wrapper of viewable "+def.getViewable());
+		if(!visitedWrapper.contains(def)){
+			visitedWrapper.add(def);
+			recConv.generateTable(def);
+			for(ViewableWrapper secondary:def.getSecondaryTables()){
+				recConv.generateTable(secondary);
 			}
-			base=(Viewable) base.getExtending();
+		  	if(createItfLineTables){
+		  		for(AttributeDef attr : recConv.getSurfaceAttrs()){
+		  			generateItfLineTable(attr);
+		  		}
+		  	}
 		}
 	}
 	private void generateItfLineTable(AttributeDef attr)
@@ -244,18 +246,18 @@ public class TransferFromIli {
 			SurfaceOrAreaType type = (SurfaceOrAreaType)attr.getDomainResolvingAll();
 			
 			DbColGeometry dbCol = recConv.generatePolylineType(type, attr.getContainer().getScopedName(null)+"."+attr.getName());
-			  dbCol.setName(getSqlColNameItfLineTableGeomAttr(attr,DbNames.ITF_LINETABLE_GEOMATTR_ILI_SUFFIX));
+			  dbCol.setName(ili2sqlName.getSqlColNameItfLineTableGeomAttr(attr,sqlName.getName()));
 			  dbCol.setNotNull(true);
 			  dbTable.addColumn(dbCol);
 			
 			if(type instanceof SurfaceType){
 				  dbColId=new DbColId();
-				  dbColId.setName(getSqlColNameItfLineTableRefAttr(attr,DbNames.ITF_LINETABLE_MAINTABLEREF_ILI_SUFFIX));
+				  dbColId.setName(ili2sqlName.getSqlColNameItfLineTableRefAttr(attr,sqlName.getName()));
 				  dbColId.setNotNull(true);
 				  dbColId.setPrimaryKey(false);
-				  dbColId.setScriptComment("REFERENCES "+recConv.getSqlTableName((Viewable)attr.getContainer()));
+				  dbColId.setScriptComment("REFERENCES "+recConv.getSqlType((Viewable)attr.getContainer()));
 				  if(createFk){
-					  dbColId.setReferencedTable(recConv.getSqlTableName((Viewable)attr.getContainer()));
+					  dbColId.setReferencedTable(recConv.getSqlType((Viewable)attr.getContainer()));
 				  }
 					if(createFkIdx){
 						dbColId.setIndex(true);
@@ -301,14 +303,6 @@ public class TransferFromIli {
 		}
 		return ret;
 	}
-	private String getSqlColNameItfLineTableRefAttr(AttributeDef attr,String ioxName)
-	{
-		return ili2sqlName.mapIliAttrName(attr,ioxName);
-	}
-	private String getSqlColNameItfLineTableGeomAttr(AttributeDef attr,String ioxName)
-	{
-		return ili2sqlName.mapIliAttrName(attr,ioxName);
-	}
 	private DbTableName getSqlTableName(Domain def){
 		String sqlname=ili2sqlName.mapIliDomainDef(def);
 		return new DbTableName(schema.getName(),sqlname);
@@ -318,7 +312,7 @@ public class TransferFromIli {
 		return new DbTableName(schema.getName(),sqlname);
 	}
 	private DbTableName getSqlTableNameItfLineTable(AttributeDef def){
-		String sqlname=ili2sqlName.mapItfLineTableAsTable(def);
+		String sqlname=ili2sqlName.mapGeometryAsTable(def);
 		return new DbTableName(schema.getName(),sqlname);
 	}
 	static public void addModelsTable(DbSchema schema)
@@ -545,7 +539,7 @@ public class TransferFromIli {
 		DbColVarchar settingCol=new DbColVarchar();
 		settingCol.setName(DbNames.SETTINGS_TAB_SETTING_COL);
 		settingCol.setNotNull(false);
-		settingCol.setSize(60);
+		settingCol.setSize(255);
 		tab.addColumn(settingCol);
 		schema.addTable(tab);
 	}
@@ -627,12 +621,12 @@ public class TransferFromIli {
 		thisClass.setName(DbNames.INHERIT_TAB_THIS_COL);
 		thisClass.setNotNull(true);
 		thisClass.setPrimaryKey(true);
-		thisClass.setSize(sqlNameSize);
+		thisClass.setSize(1024);
 		tab.addColumn(thisClass);
 		DbColVarchar baseClass=new DbColVarchar();
 		baseClass.setName(DbNames.INHERIT_TAB_BASE_COL);
 		baseClass.setNotNull(false);
-		baseClass.setSize(sqlNameSize);
+		baseClass.setSize(1024);
 		tab.addColumn(baseClass);
 		schema.addTable(tab);
 	}
@@ -893,10 +887,10 @@ public class TransferFromIli {
 			
 		}
 	}
-	private static HashSet readInheritanceTable(java.sql.Connection conn,String schema)
+	private static HashSet<String> readInheritanceTable(java.sql.Connection conn,String schema)
 	throws Ili2dbException
 	{
-		HashSet ret=new HashSet();
+		HashSet<String> ret=new HashSet<String>();
 		String sqlName=DbNames.INHERIT_TAB;
 		if(schema!=null){
 			sqlName=schema+"."+sqlName;
@@ -909,8 +903,8 @@ public class TransferFromIli {
 			try{
 				java.sql.ResultSet rs=exstPrepStmt.executeQuery();
 				while(rs.next()){
-					String iliCode=rs.getString(1);
-					ret.add(iliCode);
+					String iliClassQName=rs.getString(1);
+					ret.add(iliClassQName);
 				}
 			}finally{
 				exstPrepStmt.close();
@@ -928,27 +922,23 @@ public class TransferFromIli {
 			sqlName=schema+"."+sqlName;
 		}
 		//String stmt="CREATE TABLE "+tabname+" ("+thisClassCol+" VARCHAR2(30) NOT NULL,"+baseClassCol+" VARCHAR2(30) NULL)";
-		HashSet exstEntries=readInheritanceTable(conn,schema);
+		HashSet<String> exstEntries=readInheritanceTable(conn,schema);
 		try{
 
 			// insert entries
 			String stmt="INSERT INTO "+sqlName+" ("+DbNames.INHERIT_TAB_THIS_COL+","+DbNames.INHERIT_TAB_BASE_COL+") VALUES (?,?)";
 			EhiLogger.traceBackendCmd(stmt);
 			java.sql.PreparedStatement ps = conn.prepareStatement(stmt);
-			DbTableName thisClass=null;
+			String thisClass=null;
 			try{
-				java.util.Iterator entri=visitedElements.iterator();
-				while(entri.hasNext()){
-					Object entro=entri.next();
-					if(entro instanceof Viewable){
-						Viewable aclass=(Viewable)entro;
-						thisClass=recConv.getSqlTableName(aclass);
+				for(Object aclass:visitedElements){
+					if(aclass instanceof Viewable){
+						thisClass=((Viewable) aclass).getScopedName(null);
 						if(!exstEntries.contains(thisClass)){
-							Viewable base=(Viewable)aclass.getExtending();
-							ps.setString(1, thisClass.getName());
+							Viewable base=(Viewable) ((Viewable) aclass).getExtending();
+							ps.setString(1, thisClass);
 							if(base!=null){
-								DbTableName baseClass=recConv.getSqlTableName(base);
-								ps.setString(2, baseClass.getName());
+								ps.setString(2, base.getScopedName(null));
 							}else{
 								ps.setNull(2,java.sql.Types.VARCHAR);
 							}
@@ -1180,17 +1170,31 @@ public class TransferFromIli {
 	{
 		ch.ehi.sqlgen.repository.DbTable tab=new ch.ehi.sqlgen.repository.DbTable();
 		tab.setName(new DbTableName(schema.getName(),DbNames.ATTRNAME_TAB));
-		ch.ehi.sqlgen.repository.DbColVarchar iliClassName=new ch.ehi.sqlgen.repository.DbColVarchar();
-		iliClassName.setName(DbNames.CLASSNAME_TAB_ILINAME_COL);
-		iliClassName.setNotNull(true);
-		iliClassName.setSize(1024);
-		iliClassName.setPrimaryKey(true);
-		tab.addColumn(iliClassName);
-		ch.ehi.sqlgen.repository.DbColVarchar sqlTableName=new ch.ehi.sqlgen.repository.DbColVarchar();
-		sqlTableName.setName(DbNames.CLASSNAME_TAB_SQLNAME_COL);
-		sqlTableName.setNotNull(true);
-		sqlTableName.setSize(1024);
-		tab.addColumn(sqlTableName);
+		ch.ehi.sqlgen.repository.DbColVarchar ilinameCol=new ch.ehi.sqlgen.repository.DbColVarchar();
+		ilinameCol.setName(DbNames.ATTRNAME_TAB_ILINAME_COL);
+		ilinameCol.setNotNull(true);
+		ilinameCol.setSize(1024);
+		tab.addColumn(ilinameCol);
+		ch.ehi.sqlgen.repository.DbColVarchar sqlnameCol=new ch.ehi.sqlgen.repository.DbColVarchar();
+		sqlnameCol.setName(DbNames.ATTRNAME_TAB_SQLNAME_COL);
+		sqlnameCol.setNotNull(true);
+		sqlnameCol.setSize(1024);
+		tab.addColumn(sqlnameCol);
+		ch.ehi.sqlgen.repository.DbColVarchar ownerCol=new ch.ehi.sqlgen.repository.DbColVarchar();
+		ownerCol.setName(DbNames.ATTRNAME_TAB_OWNER_COL);
+		ownerCol.setNotNull(true);
+		ownerCol.setSize(1024);
+		tab.addColumn(ownerCol);
+		ch.ehi.sqlgen.repository.DbColVarchar targetCol=new ch.ehi.sqlgen.repository.DbColVarchar();
+		targetCol.setName(DbNames.ATTRNAME_TAB_TARGET_COL);
+		targetCol.setNotNull(false);
+		targetCol.setSize(1024);
+		tab.addColumn(targetCol);
+		DbIndex pk=new DbIndex();
+		pk.setPrimary(true);
+		pk.addAttr(ownerCol);
+		pk.addAttr(sqlnameCol);
+		tab.addIndex(pk);
 		schema.addTable(tab);
 	}
 }

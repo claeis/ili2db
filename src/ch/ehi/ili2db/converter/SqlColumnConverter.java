@@ -40,6 +40,9 @@ public interface SqlColumnConverter {
 	public abstract String getInsertValueWrapperPolyline(String wkfValue,int srid);
 	public abstract String getInsertValueWrapperSurface(String wkfValue,int srid);
 	public abstract String getInsertValueWrapperMultiSurface(String wkfValue,int srid);
+	public abstract String getSelectValueWrapperDate(String sqlColName);
+	public abstract String getSelectValueWrapperTime(String sqlColName);
+	public abstract String getSelectValueWrapperDateTime(String sqlColName);
 	public abstract String getSelectValueWrapperCoord(String dbNativeValue);
 	public abstract String getSelectValueWrapperPolyline(String dbNativeValue);
 	public abstract String getSelectValueWrapperSurface(String dbNativeValue);

@@ -23,7 +23,7 @@
       <classpath>
         <pathelement location="lib/ehisqlgen.jar"/>
         <pathelement location="lib/ili2c.jar"/>
-        <pathelement location="lib/jts-1.13.jar"/>
+        <pathelement location="lib/jts-core-1.14.0.jar"/>
         <pathelement location="lib/jdbm-2.4.jar"/>
 	<pathelement location="lib/postgresql-9.1-901.jdbc4.jar"/>
       </classpath>
@@ -60,7 +60,7 @@
     	<fileset dir="${src}" includes="**/*.jpg"/>
     	<fileset dir="${src}" includes="**/*.png"/>
     	<zipfileset src="lib/ehisqlgen.jar"/>
-    	<zipfileset src="lib/jts-1.13.jar"/>
+    	<zipfileset src="lib/jts-core-1.14.0.jar"/>
     	<zipfileset src="lib/jdbm-2.4.jar"/>
     </jar>
   </target>
@@ -85,7 +85,7 @@
 	    	<patternset includes="ili2pg.bat"/>
     	</zipfileset>
     	<zipfileset dir="." prefix="${ant.project.name}-${buildnr}">
-	    	<patternset includes="docs/ili2pg.docx"/>
+	    	<patternset includes="docs/ili2db.pdf"/>
 	</zipfileset>	    	
     	<!-- <zipfileset dir="." prefix="${ant.project.name}-${buildnr}">
 	    	<patternset includes="lib/**"/> 
@@ -114,7 +114,7 @@
 		<patternset includes="resources/it/**/*.properties"/>
 	    	<patternset includes="lib/ili2c.jar"/>
 		<patternset includes="lib/ehisqlgen.jar"/>
-		<patternset includes="lib/jts-1.13.jar"/>
+		<patternset includes="lib/jts-core-1.14.0.jar"/>
 		<patternset includes="lib/jdbm-2.4.jar"/>
 		<patternset includes="lib/postgresql-9.1-901.jdbc4.jar"/>
     	</zipfileset>

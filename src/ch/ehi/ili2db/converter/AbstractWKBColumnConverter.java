@@ -73,6 +73,20 @@ public abstract class AbstractWKBColumnConverter implements SqlColumnConverter {
 		return "GeomFromWKB("+wkfValue+(srid==-1?"":","+srid)+")";
 	}
 	@Override
+	public String getSelectValueWrapperDate(String sqlColName) {
+		 return sqlColName;
+	}
+
+	@Override
+	public String getSelectValueWrapperTime(String sqlColName) {
+		 return sqlColName;
+	}
+
+	@Override
+	public String getSelectValueWrapperDateTime(String sqlColName) {
+		 return sqlColName;
+	}
+	@Override
 	public String getSelectValueWrapperCoord(String dbNativeValue) {
 		//return "ST_AsBinary("+dbNativeValue+")";
 		return "AsBinary("+dbNativeValue+")";
