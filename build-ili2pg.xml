@@ -85,7 +85,7 @@
 	    	<patternset includes="ili2pg.bat"/>
     	</zipfileset>
     	<zipfileset dir="." prefix="${ant.project.name}-${buildnr}">
-	    	<patternset includes="docs/ili2pg.docx"/>
+	    	<patternset includes="docs/ili2db.pdf"/>
 	</zipfileset>	    	
     	<!-- <zipfileset dir="." prefix="${ant.project.name}-${buildnr}">
 	    	<patternset includes="lib/**"/> 

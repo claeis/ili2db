@@ -11,7 +11,7 @@ ideas/open issues/questions
 - --initNameMapping
 
 
-ili2gpkg 3.0.0 (2016-01-xx)
+ili2gpkg/ili2pg 3.0.0 (2016-01-23)
 ----------------------------
 - GPKG: fixed missing init.sql
 - GPKG: fixed TOWGS84-Parameter of EPSG:21781
@@ -31,6 +31,7 @@ ili2gpkg 3.0.0 (2016-01-xx)
 - new option --createUnique to map simple ili unique constraints
 - API: client might open db connection (use Config.setJdbcConnection())
 - fixed missing content of table t_ili2db_inheritance
+- changed content of table t_ili2db_inheritance from sqlnames to ilinames
 
 ili2pg 2.5.1 (2016-01-04)
 ----------------------------
