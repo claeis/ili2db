@@ -621,12 +621,12 @@ public class TransferFromIli {
 		thisClass.setName(DbNames.INHERIT_TAB_THIS_COL);
 		thisClass.setNotNull(true);
 		thisClass.setPrimaryKey(true);
-		thisClass.setSize(sqlNameSize);
+		thisClass.setSize(1024);
 		tab.addColumn(thisClass);
 		DbColVarchar baseClass=new DbColVarchar();
 		baseClass.setName(DbNames.INHERIT_TAB_BASE_COL);
 		baseClass.setNotNull(false);
-		baseClass.setSize(sqlNameSize);
+		baseClass.setSize(1024);
 		tab.addColumn(baseClass);
 		schema.addTable(tab);
 	}
