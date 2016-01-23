@@ -489,8 +489,9 @@ public class TransferToXtf {
 		}
 	}
 	/** dumps all struct values of a given struct attr.
+	 * @throws IoxException 
 	 */
-	private void dumpStructs(StructWrapper structWrapper,FixIomObjectRefs fixref)
+	private void dumpStructs(StructWrapper structWrapper,FixIomObjectRefs fixref) throws IoxException
 	{
 		Viewable baseClass=((CompositionType)structWrapper.getParentAttr().getDomain()).getComponentType();
 
@@ -509,7 +510,11 @@ public class TransferToXtf {
 				String structEleClass=null;
 				Viewable structClass=null;
 				if(createTypeDiscriminator || Ili2cUtility.isViewableWithExtension(baseClass)){
-					structEleClass=ili2sqlName.mapSqlTableName(rs.getString(DbNames.T_TYPE_COL));
+					String structEleSqlType=rs.getString(DbNames.T_TYPE_COL);
+					structEleClass=ili2sqlName.mapSqlTableName(structEleSqlType);
+					if(structEleClass==null){
+						throw new IoxException("unknown "+DbNames.T_TYPE_COL+" '"+structEleSqlType+"' in table "+getStructRootTableName(baseClass));
+					}
 					structClass=(Viewable)tag2class.get(structEleClass);
 				}else{
 					structEleClass=baseClass.getScopedName(null);
@@ -1019,6 +1024,14 @@ public class TransferToXtf {
 		}
 		return ret.toString();
 	}
+	private String getStructRootTableName(Viewable aclass) {
+		ViewableWrapper root=class2wrapper.get(aclass);
+		while(root.getExtending()!=null){
+			root=root.getExtending();
+		}
+		return root.getSqlTablename();
+	}
+	
 	/** creates sql query statement for a structattr.
 	 * @param aclass type of objects to build query for
 	 * @param wrapper not null, if building query for struct values

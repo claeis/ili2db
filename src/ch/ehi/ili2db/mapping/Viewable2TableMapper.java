@@ -79,7 +79,8 @@ public class Viewable2TableMapper {
 						trafoConfig.setViewableConfig(aclass, TrafoConfigNames.INHERITANCE_TRAFO, TrafoConfigNames.INHERITANCE_TRAFO_NEWCLASS);
 					}
 				}
-				EhiLogger.traceState("viewable "+aclass.getScopedName(null)+" "+trafoConfig.getViewableConfig(aclass, TrafoConfigNames.INHERITANCE_TRAFO));
+				String sqlTablename=nameMapping.mapIliClassDef(aclass);
+				EhiLogger.traceState("viewable "+aclass.getScopedName(null)+" "+trafoConfig.getViewableConfig(aclass, TrafoConfigNames.INHERITANCE_TRAFO)+", "+sqlTablename);
 			}
 		}
 		Viewable2TableMapping ret=new Viewable2TableMapping();
