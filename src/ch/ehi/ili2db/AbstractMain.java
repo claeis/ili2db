@@ -317,7 +317,7 @@ public abstract class AbstractMain {
 			String xtfFilename=args[argi];
 			config.setXtffile(xtfFilename);
 			if(Ili2db.isItfFilename(xtfFilename)){
-				config.setItfTranferfile(true);
+				config.setItfTransferfile(true);
 			}
 		}
 		if(doGui){

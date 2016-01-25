@@ -74,7 +74,7 @@ public class WorkPanel extends JPanel {
 							try {
 								config.setDburl(getDbUrlConverter().makeUrl(config));
 								if(config.getXtffile()!=null && Ili2db.isItfFilename(config.getXtffile())){
-									config.setItfTranferfile(true);
+									config.setItfTransferfile(true);
 								}
 								Ili2db.run(config,getAppHome());
 							}
