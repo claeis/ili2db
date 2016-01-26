@@ -435,7 +435,7 @@ public class Config extends Settings {
 	public boolean isItfTransferfile() {
 		return itfTransferFile;
 	}
-	public void setItfTranferfile(boolean value) {
+	public void setItfTransferfile(boolean value) {
 		itfTransferFile=value;
 	}
 }

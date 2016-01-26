@@ -101,6 +101,8 @@ public class NameMapping {
 		String sqlTableName=ret.toString();
 		if((nameing!=FULL_QUALIFIED_NAMES) && classNameSql2ili.containsKey(sqlTableName)){
 			// try full qualified name
+			// reset ret to empty string
+			ret.setLength(0);
 			maxClassNameLength=maxSqlNameLength;
 			if(attrName!=null){
 				maxClassNameLength=maxClassNameLength-5;

@@ -810,7 +810,7 @@ public class Ili2db {
 			
 			// an INTERLIS 1 model?
 			if(td.getIli1Format()!=null){
-				config.setItfTranferfile(true);
+				config.setItfTransferfile(true);
 			}
 			Generator gen=null;
 			try{
