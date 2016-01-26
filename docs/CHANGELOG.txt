@@ -10,8 +10,8 @@ ideas/open issues/questions
 - support ili2 views
 - --initNameMapping
 
-ili2gpkg/ili2pg 3.0.1 (2016-01-23)
-----------------------------
+ili2gpkg/ili2pg 3.0.1 (2016-01-26)
+----------------------------------
 - API: fixed typo Config.setItfTranferfile()
 - fixed String index out of range if sql table name conflict
 
