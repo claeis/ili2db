@@ -549,6 +549,9 @@ public class TransferFromXtf {
 				EhiLogger.logError("Object "+iomObj.getobjectoid()+"; Struct at (line "+struct.getStruct().getobjectline()+",col "+struct.getStruct().getobjectcol()+")",ex);
 			}catch(java.sql.SQLException ex){
 				EhiLogger.logError("Object "+iomObj.getobjectoid()+"; Struct at (line "+struct.getStruct().getobjectline()+",col "+struct.getStruct().getobjectcol()+")",ex);
+			}catch(java.lang.RuntimeException ex){
+				EhiLogger.traceState(iomObj.toString());
+				throw ex;
 			}
 		}
 	}

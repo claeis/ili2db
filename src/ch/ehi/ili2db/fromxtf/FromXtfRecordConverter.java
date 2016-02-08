@@ -391,7 +391,8 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 						sep=",";
 					}else{
 						ret.append(sep);
-						ViewableWrapper parentTable=class2wrapper.get((Viewable) structEle.getParentAttr().getContainer());
+						Viewable parentViewable=getViewable(structEle.getParentSqlType());
+						ViewableWrapper parentTable=getViewableWrapperOfAbstractClass((Viewable)structEle.getParentAttr().getContainer(),parentViewable);
 						ret.append(ili2sqlName.mapIliAttributeDefReverse(structEle.getParentAttr(),sqlTableName.getName(),parentTable.getSqlTablename()));
 						if(isUpdate){
 							ret.append("=?");
@@ -507,10 +508,31 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 		
 		return ret.toString();
 	}
+	private ViewableWrapper getViewableWrapperOfAbstractClass(
+			Viewable abstractClass, Viewable concreteClass) {
+		ViewableWrapper ret=class2wrapper.get(abstractClass);
+		if(ret!=null){
+			return ret;
+		}
+		ret=class2wrapper.get(concreteClass);
+		concreteClass=(Viewable) concreteClass.getExtending();
+		if(concreteClass!=null && concreteClass!=abstractClass){
+			ViewableWrapper ret2=class2wrapper.get(concreteClass);
+			if(ret2!=null){
+				ret=ret2;
+			}
+			concreteClass=(Viewable) concreteClass.getExtending();
+		}
+		return ret;
+	}
 	public ViewableWrapper getViewableWrapper(String sqlType){
+		Viewable aclass = getViewable(sqlType);
+		return class2wrapper.get(aclass);
+	}
+	private Viewable getViewable(String sqlType) {
 		String iliQname=ili2sqlName.mapSqlTableName(sqlType);
 		Viewable aclass=(Viewable) tag2class.get(iliQname);
-		return class2wrapper.get(aclass);
+		return aclass;
 	}
 	public String addAttrToInsertStmt(boolean isUpdate,
 			StringBuffer ret, StringBuffer values, String sep, AttributeDef attr,String sqlTableName) {
