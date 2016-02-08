@@ -222,7 +222,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 						// not an embedded role and roledef not defined in a lightweight association?
 						if (!obj.embedded && !def.isAssocLightweight()){
 						  dbColId=new DbColId();
-						  DbTableName targetSqlTableName=getSqlType(role.getDestination());
+						  DbTableName targetSqlTableName=class2wrapper.get(role.getDestination()).getSqlTable();
 						  String roleSqlName=getSqlRoleName(role,sqlName.getName(),targetSqlTableName.getName());
 						  dbColId.setName(roleSqlName);
 						  dbColId.setNotNull(true);
@@ -250,7 +250,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 							if(roleOwner.getDerivedFrom()==null){
 								// role is oppend;
 							  dbColId=new DbColId();
-							  DbTableName targetSqlTableName=getSqlType(role.getDestination());
+							  DbTableName targetSqlTableName=class2wrapper.get(role.getDestination()).getSqlTable();
 							  String roleSqlName=getSqlRoleName(role,sqlName.getName(),targetSqlTableName.getName());
 							  dbColId.setName(roleSqlName);
 							  boolean notNull=false;
