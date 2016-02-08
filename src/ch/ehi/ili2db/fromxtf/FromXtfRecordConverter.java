@@ -391,8 +391,8 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 						sep=",";
 					}else{
 						ret.append(sep);
-						ViewableWrapper parentTable=getViewableWrapper(structEle.getParentSqlType());
-						ret.append(ili2sqlName.mapIliAttributeDefReverse(structEle.getParentAttr(),sqlTableName.getName(),getSqlType(parentTable.getViewable()).getName()));
+						ViewableWrapper parentTable=class2wrapper.get((Viewable) structEle.getParentAttr().getContainer());
+						ret.append(ili2sqlName.mapIliAttributeDefReverse(structEle.getParentAttr(),sqlTableName.getName(),parentTable.getSqlTablename()));
 						if(isUpdate){
 							ret.append("=?");
 						}else{
@@ -434,7 +434,7 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 			   RoleDef role = (RoleDef) obj.obj;
 			   if(role.getExtending()==null){
 				   if(attrs.contains(role)){
-						String roleName=ili2sqlName.mapIliRoleDef(role,sqlTableName.getName(),getSqlType(role.getDestination()).getName());
+						String roleName=ili2sqlName.mapIliRoleDef(role,sqlTableName.getName(),class2wrapper.get(role.getDestination()).getSqlTablename());
 						// a role of an embedded association?
 						if(obj.embedded){
 							AssociationDef roleOwner = (AssociationDef) role.getContainer();
