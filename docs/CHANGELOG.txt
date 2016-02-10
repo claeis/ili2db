@@ -10,6 +10,11 @@ ideas/open issues/questions
 - support ili2 views
 - --initNameMapping
 
+ili2gpkg/ili2pg 3.0.2 (2016-02-10)
+----------------------------------
+- fixed smart mapping of RoleDef to class with superClass mapping 
+- fixed import with 1:1 mapping of struct attr in a base class
+
 ili2gpkg/ili2pg 3.0.1 (2016-01-26)
 ----------------------------------
 - API: fixed typo Config.setItfTranferfile()

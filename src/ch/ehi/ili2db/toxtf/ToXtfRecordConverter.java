@@ -116,7 +116,7 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 			   if(obj.obj instanceof RoleDef){
 				   RoleDef role = (RoleDef) obj.obj;
 				   if(role.getExtending()==null){
-					String roleSqlName=ili2sqlName.mapIliRoleDef(role,sqlTableName,getSqlType(role.getDestination()).getName());
+					String roleSqlName=ili2sqlName.mapIliRoleDef(role,sqlTableName,class2wrapper.get(role.getDestination()).getSqlTablename());
 					// a role of an embedded association?
 					if(obj.embedded){
 						AssociationDef roleOwner = (AssociationDef) role.getContainer();
