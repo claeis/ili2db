@@ -10,6 +10,10 @@ ideas/open issues/questions
 - support ili2 views
 - --initNameMapping
 
+ili2gpkg/ili2pg 3.0.3 (2016-03-xx)
+----------------------------------
+- map ili:TEXT to sql text type without length limit
+
 ili2gpkg/ili2pg 3.0.2 (2016-02-10)
 ----------------------------------
 - fixed smart mapping of RoleDef to class with superClass mapping 

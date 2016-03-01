@@ -547,7 +547,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 			if(((TextType)type).getMaxLength()>0){
 				ret.setSize(((TextType)type).getMaxLength());
 			}else{
-				ret.setSize(255);
+				ret.setSize(-1);
 			}
 			dbCol=ret;
 		}else{
