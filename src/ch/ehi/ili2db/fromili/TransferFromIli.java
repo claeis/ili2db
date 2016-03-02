@@ -98,11 +98,25 @@ public class TransferFromIli {
 		schema.setName(config.getDbschema());
 		visitedElements=new HashSet<Element>();
 		class2wrapper=class2wrapper1;
-		visitedWrapper=new HashSet<ViewableWrapper>();
 		visitedEnums=new HashSet();
 		td=td1;
 		recConv=new FromIliRecordConverter(td,ili2sqlName,config,schema,customMapping,idGen,visitedEnums,trafoConfig,class2wrapper);
 
+		visitedWrapper=new HashSet<ViewableWrapper>();
+		generatModelEles(modelEles,1);
+		visitedWrapper=new HashSet<ViewableWrapper>();
+		generatModelEles(modelEles,2);
+		
+		// sys_interlisnames
+		// interlis LONGVARCHAR(767)
+		// db VARCHAR(30)
+		
+		customMapping.fromIliEnd(config);
+		return schema;		
+
+	}
+	private void generatModelEles(java.util.List<Element> modelEles, int pass)
+			throws Ili2dbException {
 		Iterator modeli=modelEles.iterator();
 		while(modeli.hasNext()){
 			Object modelo=modeli.next();
@@ -112,8 +126,10 @@ public class TransferFromIli {
 			}else if (modelo instanceof Topic){
 				//generateTopic((Topic)modelo);
 			}else if (modelo instanceof Domain){
-				generateDomain((Domain)modelo);
-				visitedElements.add((Domain)modelo);
+				if(pass==2){
+					generateDomain((Domain)modelo);
+					visitedElements.add((Domain)modelo);
+				}
 			}else if (modelo instanceof Viewable){
 				if(modelo instanceof Table && ((Table)modelo).isIli1LineAttrStruct()){
 					// skip it
@@ -123,9 +139,11 @@ public class TransferFromIli {
 					try{
 						ViewableWrapper wrapper=class2wrapper.get((Viewable)modelo);
 						if(wrapper!=null){
-							generateViewable(wrapper);
+							generateViewable(wrapper,pass);
 						}
-						visitedElements.add((Viewable)modelo);
+						if(pass==2){
+							visitedElements.add((Viewable)modelo);
+						}
 					}catch(Ili2dbException ex){
 						throw new Ili2dbException("mapping of "+((Viewable)modelo).getScopedName(null)+" failed",ex);
 					}
@@ -133,9 +151,11 @@ public class TransferFromIli {
 			}else if (modelo instanceof AttributeDef){
 				AttributeDef attr=(AttributeDef)modelo;
 				if(attr.getDomainResolvingAll() instanceof SurfaceOrAreaType){
-					generateItfLineTable(attr);
+					generateItfLineTable(attr,pass);
 				}else if(attr.getDomainResolvingAll() instanceof EnumerationType){
-					visitedEnums.add(attr);
+					if(pass==2){
+						visitedEnums.add(attr);
+					}
 				}else{
 					// skip it
 				}
@@ -143,13 +163,6 @@ public class TransferFromIli {
 				// skip it
 			}
 		}
-		// sys_interlisnames
-		// interlis LONGVARCHAR(767)
-		// db VARCHAR(30)
-		
-		customMapping.fromIliEnd(config);
-		return schema;		
-
 	}
 	public static boolean isTransferableView(Object modelo) {
 		if(!(modelo instanceof View)){
@@ -173,7 +186,7 @@ public class TransferFromIli {
 			visitedEnums.add(def);
 		}
 	}
-	private void generateViewable(ViewableWrapper def)
+	private void generateViewable(ViewableWrapper def,int pass)
 	throws Ili2dbException
 	{
 		if(def.getViewable() instanceof AssociationDef){
@@ -184,7 +197,9 @@ public class TransferFromIli {
 			if(assoc.isLightweight() 
 				&& !assoc.getAttributes().hasNext()
 				&& !assoc.getLightweightAssociations().iterator().hasNext()) {
-				customMapping.fixupViewable(null,def.getViewable());
+				if(pass==1){
+					customMapping.fixupViewable(null,def.getViewable());
+				}
 				return;
 			}
 		}
@@ -192,24 +207,31 @@ public class TransferFromIli {
 		EhiLogger.traceState("wrapper of viewable "+def.getViewable());
 		if(!visitedWrapper.contains(def)){
 			visitedWrapper.add(def);
-			recConv.generateTable(def);
+			recConv.generateTable(def,pass);
 			for(ViewableWrapper secondary:def.getSecondaryTables()){
-				recConv.generateTable(secondary);
+				recConv.generateTable(secondary,pass);
 			}
 		  	if(createItfLineTables){
 		  		for(AttributeDef attr : recConv.getSurfaceAttrs()){
-		  			generateItfLineTable(attr);
+		  			generateItfLineTable(attr,pass);
 		  		}
 		  	}
 		}
 	}
-	private void generateItfLineTable(AttributeDef attr)
+	private void generateItfLineTable(AttributeDef attr,int pass)
 	throws Ili2dbException
 	{
+		if(pass==1){
+			DbTableName sqlName=getSqlTableNameItfLineTable(attr);
+			DbTable dbTable=new DbTable();
+			dbTable.setName(sqlName);
+			dbTable.setIliName(attr.getContainer().getScopedName(null)+"."+attr.getName());
+		  	schema.addTable(dbTable);
+			return;
+		}
+		// second pass; add columns
 		DbTableName sqlName=getSqlTableNameItfLineTable(attr);
-		DbTable dbTable=new DbTable();
-		dbTable.setName(sqlName);
-		dbTable.setIliName(attr.getContainer().getScopedName(null)+"."+attr.getName());
+		DbTable dbTable=schema.findTable(sqlName);
 		StringBuffer cmt=new StringBuffer();
 		String cmtSep="";
 		if(attr.getDocumentation()!=null){
@@ -277,7 +299,6 @@ public class TransferFromIli {
 			  if(createStdCols){
 					AbstractRecordConverter.addStdCol(dbTable);
 			  }
-		  	schema.addTable(dbTable);
 	}
 	/** setup a mapping from a qualified model or topic name
 	 * to the corresponding java object.

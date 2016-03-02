@@ -91,14 +91,21 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 		createUnique=config.isCreateUniqueConstraints();
 	}
 
-	public void generateTable(ViewableWrapper def)
+	public void generateTable(ViewableWrapper def,int pass)
 	throws Ili2dbException
 	{
 		//EhiLogger.debug("viewable "+def);
+		if(pass==1){
+			DbTableName sqlName=new DbTableName(schema.getName(),def.getSqlTablename());
+			DbTable dbTable=new DbTable();
+			dbTable.setName(sqlName);
+		  	schema.addTable(dbTable);
+			return;
+		}
+		// second pass; add columns
 		DbTableName sqlName=new DbTableName(schema.getName(),def.getSqlTablename());
+		DbTable dbTable=schema.findTable(sqlName);
 		ViewableWrapper base=def.getExtending();
-		DbTable dbTable=new DbTable();
-		dbTable.setName(sqlName);
 		StringBuffer cmt=new StringBuffer();
 		String cmtSep="";
 		if(!def.isSecondaryTable()){
@@ -319,7 +326,6 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 		  if(!def.isSecondaryTable()){
 			  customMapping.fixupViewable(dbTable,def.getViewable());
 		  }
-	  	schema.addTable(dbTable);
 	  	
 	}
 	private HashSet getWrapperCols(List<ViewableTransferElement> attrv) {
