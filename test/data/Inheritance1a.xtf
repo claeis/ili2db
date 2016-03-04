@@ -104,6 +104,29 @@
 				</s1>
 				<attrC1a>19_c1a</attrC1a>
 			</Inheritance1.TestC.ClassC1a>
+			<Inheritance1.TestC.ClassC3a TID="22">
+				<attrC3>22_c3</attrC3>
+				<s3>
+					<Inheritance1.TestC.StructC3a>
+						<attrStrC3a>22_s3_3a</attrStrC3a>
+					</Inheritance1.TestC.StructC3a>
+				</s3>
+				<s3>
+					<Inheritance1.TestC.StructC3bb>
+						<attrStrC3b>22_s3_3b</attrStrC3b>
+					</Inheritance1.TestC.StructC3bb>
+				</s3>
+				<s3a>
+					<Inheritance1.TestC.StructC3a>
+						<attrStrC3a>22_s3a_3a</attrStrC3a>
+					</Inheritance1.TestC.StructC3a>
+				</s3a>
+				<s3a>
+					<Inheritance1.TestC.StructC3bb>
+						<attrStrC3b>22_s3a_3b</attrStrC3b>
+					</Inheritance1.TestC.StructC3bb>
+				</s3a>
+			</Inheritance1.TestC.ClassC3a>
 		</Inheritance1.TestC>
 		<Inheritance1.TestD BID="Inheritance1.TestD">
 			<Inheritance1.TestD.ClassD1b TID="20">

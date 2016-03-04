@@ -1,9 +1,11 @@
 package ch.ehi.ili2db.fromili;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import ch.ehi.ili2db.base.DbIdGen;
 import ch.ehi.ili2db.base.DbNames;
@@ -33,6 +35,7 @@ import ch.ehi.sqlgen.repository.DbSchema;
 import ch.ehi.sqlgen.repository.DbTable;
 import ch.ehi.sqlgen.repository.DbTableName;
 import ch.interlis.ili2c.metamodel.AbstractClassDef;
+import ch.interlis.ili2c.metamodel.AbstractLeafElement;
 import ch.interlis.ili2c.metamodel.AreaType;
 import ch.interlis.ili2c.metamodel.AssociationDef;
 import ch.interlis.ili2c.metamodel.AttributeDef;
@@ -42,6 +45,7 @@ import ch.interlis.ili2c.metamodel.CompositionType;
 import ch.interlis.ili2c.metamodel.CoordType;
 import ch.interlis.ili2c.metamodel.EnumerationType;
 import ch.interlis.ili2c.metamodel.Evaluable;
+import ch.interlis.ili2c.metamodel.ExtendableContainer;
 import ch.interlis.ili2c.metamodel.LineType;
 import ch.interlis.ili2c.metamodel.LocalAttribute;
 import ch.interlis.ili2c.metamodel.NumericType;
@@ -611,41 +615,40 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 	private void addParentRef(Viewable parentTable,AttributeDef attr){
 		CompositionType type = (CompositionType)attr.getDomainResolvingAll();
 		Table structClass=type.getComponentType();
-		// TODO if abstract struct, might have multiple tables!
-		ViewableWrapper structWrapper=class2wrapper.get(structClass);
-		if(structWrapper.getExtending()!=null){
-			structWrapper=structWrapper.getExtending();
-		}
-		DbTableName structClassSqlName=structWrapper.getSqlTable();
-		
-		// find struct table
-		DbTable dbTable=schema.findTable(structClassSqlName);
-		
-		// add ref attr
-		String refAttrSqlName=ili2sqlName.mapIliAttributeDefReverse(attr,structClassSqlName.getName(),class2wrapper.get(parentTable).getSqlTablename());
-		DbColId dbParentId=new DbColId();
-		dbParentId.setName(refAttrSqlName);
-		dbParentId.setNotNull(false); // values of other struct attrs will have NULL
-		dbParentId.setPrimaryKey(false);
-		StringBuffer cmt=new StringBuffer();
-		String cmtSep="";
-		if(attr.getDocumentation()!=null){
-			cmt.append(cmtSep+attr.getDocumentation());
+		// if abstract struct, might have multiple tables!
+		for(ViewableWrapper structWrapper : getStructWrappers(structClass)){
+			DbTableName structClassSqlName=structWrapper.getSqlTable();
+			
+			// find struct table
+			DbTable dbTable=schema.findTable(structClassSqlName);
+			
+			// add ref attr
+			String refAttrSqlName=ili2sqlName.mapIliAttributeDefReverse(attr,structClassSqlName.getName(),class2wrapper.get(parentTable).getSqlTablename());
+			DbColId dbParentId=new DbColId();
+			dbParentId.setName(refAttrSqlName);
+			dbParentId.setNotNull(false); // values of other struct attrs will have NULL
+			dbParentId.setPrimaryKey(false);
+			StringBuffer cmt=new StringBuffer();
+			String cmtSep="";
+			if(attr.getDocumentation()!=null){
+				cmt.append(cmtSep+attr.getDocumentation());
+				cmtSep=nl;
+			}
+			cmt.append(cmtSep+"@iliname "+attr.getContainer().getScopedName(null)+"."+attr.getName());
 			cmtSep=nl;
+			if(cmt.length()>0){
+				dbParentId.setComment(cmt.toString());
+			}
+			if(createFk){
+				dbParentId.setReferencedTable(class2wrapper.get(parentTable).getSqlTable());
+			}
+			if(createFkIdx){
+				dbParentId.setIndex(true);
+			}
+			dbTable.addColumn(dbParentId);
 		}
-		cmt.append(cmtSep+"@iliname "+attr.getContainer().getScopedName(null)+"."+attr.getName());
-		cmtSep=nl;
-		if(cmt.length()>0){
-			dbParentId.setComment(cmt.toString());
-		}
-		if(createFk){
-			dbParentId.setReferencedTable(class2wrapper.get(parentTable).getSqlTable());
-		}
-		if(createFkIdx){
-			dbParentId.setIndex(true);
-		}
-		dbTable.addColumn(dbParentId);
 	}
+
 	protected void setAttrDbColProps(Viewable aclass,AttributeDef attr, DbColumn dbCol,
 			String sqlName) {
 		dbCol.setName(sqlName);

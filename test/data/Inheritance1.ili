@@ -108,6 +108,27 @@ MODEL Inheritance1
       attrC1ax : TEXT*30;
       s1ax : BAG OF StructC2; !! Struktur fuer Strukturattribut ist nach der Basisklasse (die newClass hat) definiert
     END ClassC1ax;
+
+    STRUCTURE StructC3 (ABSTRACT) =   !! subClass
+    END StructC3;
+    STRUCTURE StructC3a EXTENDS StructC3 =   !! newClass
+      attrStrC3a : TEXT*30;
+    END StructC3a;
+    STRUCTURE StructC3b EXTENDS StructC3 =   !! newClass
+      attrStrC3b : TEXT*30;
+    END StructC3b;
+    STRUCTURE StructC3bb EXTENDS StructC3b =   !! superClass
+    END StructC3bb;
+    
+    CLASS ClassC3 (ABSTRACT) = !! subClass
+      	attrC3 : TEXT*30;
+    	s3 : BAG OF StructC3;
+    END ClassC3;
+    
+    CLASS ClassC3a EXTENDS ClassC3 = !! newClass
+      s3a : BAG OF StructC3;
+    END ClassC3a;
+
     
   END TestC;
   

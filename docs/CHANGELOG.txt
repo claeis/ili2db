@@ -14,6 +14,7 @@ ili2gpkg/ili2pg 3.0.3 (2016-03-xx)
 ----------------------------------
 - map ili:TEXT to sql text type without length limit
 - fixed mapping of struct attr in sub class, if struct defined after base class
+- fixed mapping of struct attr with abstract structure
 
 ili2gpkg/ili2pg 3.0.2 (2016-02-10)
 ----------------------------------

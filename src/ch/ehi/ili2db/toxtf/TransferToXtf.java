@@ -509,17 +509,12 @@ public class TransferToXtf {
 				String tid=rs.getString(colT_ID);
 				String structEleClass=null;
 				Viewable structClass=null;
-				if(createTypeDiscriminator || Ili2cUtility.isViewableWithExtension(baseClass)){
-					String structEleSqlType=rs.getString(DbNames.T_TYPE_COL);
-					structEleClass=ili2sqlName.mapSqlTableName(structEleSqlType);
-					if(structEleClass==null){
-						throw new IoxException("unknown "+DbNames.T_TYPE_COL+" '"+structEleSqlType+"' in table "+getStructRootTableName(baseClass));
-					}
-					structClass=(Viewable)tag2class.get(structEleClass);
-				}else{
-					structEleClass=baseClass.getScopedName(null);
-					structClass=baseClass;
+				String structEleSqlType=rs.getString(DbNames.T_TYPE_COL);
+				structEleClass=ili2sqlName.mapSqlTableName(structEleSqlType);
+				if(structEleClass==null){
+					throw new IoxException("unknown "+DbNames.T_TYPE_COL+" '"+structEleSqlType+"' in table "+getStructRootTableName(baseClass));
 				}
+				structClass=(Viewable)tag2class.get(structEleClass);
 				IomObject iomObj=structWrapper.getParent().addattrobj(structWrapper.getParentAttr().getName(),structEleClass);
 				structelev.put(tid,iomObj);
 				structClassv.add(structClass);
@@ -1040,26 +1035,41 @@ public class TransferToXtf {
 	private String createQueryStmt4Type(Viewable aclass,StructWrapper wrapper){
 		StringBuffer ret = new StringBuffer();
 		ret.append("SELECT r0."+colT_ID);
-		ViewableWrapper root=class2wrapper.get(aclass);
-		while(root.getExtending()!=null){
-			root=root.getExtending();
-		}
-		if(createTypeDiscriminator || root.includesMultipleTypes()){
-			ret.append(", r0."+DbNames.T_TYPE_COL);
-		}
-		ret.append(" FROM ");
-		ret.append(recConv.getSqlType(root.getViewable()));
-		ret.append(" r0");
-		if(wrapper!=null){
-			if(createGenericStructRef){
-				ret.append(" WHERE r0."+DbNames.T_PARENT_ID_COL+"="+wrapper.getParentSqlId()+" AND r0."+DbNames.T_PARENT_ATTR_COL+"='"
-						+ili2sqlName.mapIliAttributeDef(wrapper.getParentAttr(),recConv.getSqlType(wrapper.getParentTable().getViewable()).getName(),null)
-						+"' ORDER BY r0."+DbNames.T_SEQ_COL+" ASC");
+		ret.append(", r0."+DbNames.T_TYPE_COL);
+		ret.append(", r0."+DbNames.T_SEQ_COL);
+		ret.append(" FROM (");
+		
+		// might have multiple tables!
+		int tabidx=0;
+		String subSelectSep="";
+		for(ViewableWrapper root : recConv.getStructWrappers((Table)aclass)){
+			tabidx++;
+			String tabalias="r"+tabidx;
+			ret.append(subSelectSep);
+			ret.append("SELECT ");
+			ret.append(tabalias+"."+colT_ID);
+			if(createTypeDiscriminator || root.includesMultipleTypes()){
+				ret.append(", "+tabalias+"."+DbNames.T_TYPE_COL);
 			}else{
-				ret.append(" WHERE r0."+ili2sqlName.mapIliAttributeDefReverse(wrapper.getParentAttr(),recConv.getSqlType(root.getViewable()).getName(),recConv.getSqlType(wrapper.getParentTable().getViewable()).getName())+"="+wrapper.getParentSqlId()
-						+" ORDER BY r0."+DbNames.T_SEQ_COL+" ASC");
+				ret.append(",'"+root.getSqlTablename()+"' AS "+DbNames.T_TYPE_COL);
+				
 			}
+			ret.append(","+tabalias+"."+DbNames.T_SEQ_COL);
+			ret.append(" FROM ");
+			ret.append(recConv.getSqlType(root.getViewable()));
+			ret.append(" "+tabalias);
+			if(wrapper!=null){
+				if(createGenericStructRef){
+					ret.append(" WHERE "+tabalias+"."+DbNames.T_PARENT_ID_COL+"="+wrapper.getParentSqlId()+" AND "+tabalias+"."+DbNames.T_PARENT_ATTR_COL+"='"
+							+ili2sqlName.mapIliAttributeDef(wrapper.getParentAttr(),recConv.getSqlType(wrapper.getParentTable().getViewable()).getName(),null));
+				}else{
+					ret.append(" WHERE "+tabalias+"."+ili2sqlName.mapIliAttributeDefReverse(wrapper.getParentAttr(),recConv.getSqlType(root.getViewable()).getName(),recConv.getSqlType(wrapper.getParentTable().getViewable()).getName())+"="+wrapper.getParentSqlId());
+				}
+			}
+			subSelectSep=" UNION ";
 		}
+		ret.append(" ) AS r0 ORDER BY "+DbNames.T_SEQ_COL+" ASC");
+
 		return ret.toString();
 	}
 
