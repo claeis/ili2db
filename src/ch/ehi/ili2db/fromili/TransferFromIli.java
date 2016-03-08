@@ -211,7 +211,8 @@ public class TransferFromIli {
 			for(ViewableWrapper secondary:def.getSecondaryTables()){
 				recConv.generateTable(secondary,pass);
 			}
-		  	if(createItfLineTables){
+			
+		  	if(false && createItfLineTables){
 		  		for(AttributeDef attr : recConv.getSurfaceAttrs()){
 		  			generateItfLineTable(attr,pass);
 		  		}

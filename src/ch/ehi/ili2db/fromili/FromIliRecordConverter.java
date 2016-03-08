@@ -98,6 +98,9 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 	public void generateTable(ViewableWrapper def,int pass)
 	throws Ili2dbException
 	{
+		if(!def.isSecondaryTable()){
+			surfaceAttrs=new ArrayList<AttributeDef>(); 
+		}
 		//EhiLogger.debug("viewable "+def);
 		if(pass==1){
 			DbTableName sqlName=new DbTableName(schema.getName(),def.getSqlTablename());
@@ -197,7 +200,6 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 		}
 
 		// body
-		surfaceAttrs=new ArrayList<AttributeDef>(); 
 		Iterator<ViewableTransferElement> iter=def.getAttrIterator();
 		  while (iter.hasNext()) {
 			  ViewableTransferElement obj = iter.next();

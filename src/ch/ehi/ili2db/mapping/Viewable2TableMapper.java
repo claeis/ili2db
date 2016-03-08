@@ -23,6 +23,7 @@ public class Viewable2TableMapper {
 	private TrafoConfig trafoConfig=null;
 	private NameMapping nameMapping=null;	
 	boolean singleGeom=false;
+	boolean createItfLineTables=false;
 	private Viewable2TableMapper(Config config1,
 			TrafoConfig trafoConfig1, NameMapping nameMapping1) {	
 		config=config1;
@@ -35,6 +36,7 @@ public class Viewable2TableMapper {
 			TrafoConfig trafoConfig, List<Element> eles,NameMapping nameMapping) {
 		Viewable2TableMapper mapper=new Viewable2TableMapper(config, trafoConfig, nameMapping);
 		mapper.singleGeom=config.isOneGeomPerTable();
+		mapper.createItfLineTables=config.getDoItfLineTables();
 		return mapper.doit(eles);
 	}
 	private Viewable2TableMapping doit(List<Element> eles) {
@@ -189,22 +191,27 @@ public class Viewable2TableMapper {
 					if(singleGeom){
 						ch.interlis.ili2c.metamodel.Type type=attr.getDomainResolvingAliases();
 						if(type instanceof ch.interlis.ili2c.metamodel.CoordType || type instanceof ch.interlis.ili2c.metamodel.LineType){
-							if(hasGeometry){
-								// create new secondary table
-								sqlname=nameMapping.mapGeometryAsTable(attr);
-								ViewableWrapper attrWrapper=viewable.getSecondaryTable(sqlname);
-								if(attrWrapper==null){
-									attrWrapper=viewable.createSecondaryTable(sqlname);
-								}
-								List<ViewableTransferElement> attrProps=new java.util.ArrayList<ViewableTransferElement>();
-								attrProps.add(obj);
-								attrWrapper.setAttrv(attrProps);
-								trafoConfig.setAttrConfig(attr, TrafoConfigNames.SECONDARY_TABLE, sqlname);
+							if(createItfLineTables && type instanceof ch.interlis.ili2c.metamodel.SurfaceOrAreaType){
+								// ignore it; will be created by legacy code 
 							}else{
-								hasGeometry=true;
-								attrv.add(obj);
+								if(hasGeometry){
+									// create new secondary table
+									sqlname=nameMapping.mapGeometryAsTable(attr);
+									ViewableWrapper attrWrapper=viewable.getSecondaryTable(sqlname);
+									if(attrWrapper==null){
+										attrWrapper=viewable.createSecondaryTable(sqlname);
+									}
+									List<ViewableTransferElement> attrProps=new java.util.ArrayList<ViewableTransferElement>();
+									attrProps.add(obj);
+									attrWrapper.setAttrv(attrProps);
+									trafoConfig.setAttrConfig(attr, TrafoConfigNames.SECONDARY_TABLE, sqlname);
+								}else{
+									hasGeometry=true;
+									attrv.add(obj);
+								}
 							}
 						}else{
+							// not a Geom type
 							attrv.add(obj);
 						}
 					}else{
