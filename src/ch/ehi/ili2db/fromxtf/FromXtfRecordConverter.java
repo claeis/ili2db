@@ -675,7 +675,7 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 				if(value!=null){
 					GregorianCalendar gdate=new GregorianCalendar(Integer.parseInt(value.substring(0,4)),Integer.parseInt(value.substring(4,6))-1,Integer.parseInt(value.substring(6,8)));
 					java.sql.Date date=new java.sql.Date(gdate.getTimeInMillis());
-					ps.setDate(valuei,date);
+					geomConv.setDate(ps,valuei,date);
 				}else{
 					ps.setNull(valuei,Types.DATE);
 				}
@@ -690,7 +690,7 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 						throw new ConverterException(e);
 					}
 					java.sql.Date date=new java.sql.Date(xmldate.toGregorianCalendar().getTimeInMillis());
-					ps.setDate(valuei,date);
+					geomConv.setDate(ps,valuei,date);
 				}else{
 					ps.setNull(valuei,Types.DATE);
 				}
@@ -705,7 +705,7 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 						throw new ConverterException(e);
 					}
 					java.sql.Time time=new java.sql.Time(xmldate.toGregorianCalendar().getTimeInMillis());
-					ps.setTime(valuei,time);
+					geomConv.setTime(ps,valuei,time);
 				}else{
 					ps.setNull(valuei,Types.TIME);
 				}
@@ -720,7 +720,7 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 						throw new ConverterException(e);
 					}
 					java.sql.Timestamp datetime=new java.sql.Timestamp(xmldate.toGregorianCalendar().getTimeInMillis());
-					ps.setTimestamp(valuei,datetime);
+					geomConv.setTimestamp(ps,valuei,datetime);
 				}else{
 					ps.setNull(valuei,Types.TIMESTAMP);
 				}

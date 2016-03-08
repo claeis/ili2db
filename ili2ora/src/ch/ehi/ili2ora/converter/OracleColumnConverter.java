@@ -30,8 +30,11 @@ import ch.ehi.ili2db.gui.Config;
 import oracle.spatial.geometry.JGeometry;
 
 import java.sql.Connection;
+import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.Time;
+import java.sql.Timestamp;
 
 /**
  * @author ce
@@ -68,6 +71,23 @@ public class OracleColumnConverter implements SqlColumnConverter {
 			stmt.setString(parameterIndex, "0");
 		}
 		
+	}
+	@Override
+	public void setTimestamp(java.sql.PreparedStatement stmt, int parameterIndex,
+			Timestamp value) throws SQLException {
+		stmt.setTimestamp(parameterIndex, value);
+	}
+
+	@Override
+	public void setDate(java.sql.PreparedStatement stmt, int parameterIndex, Date value)
+			throws SQLException {
+		stmt.setDate(parameterIndex, value);
+	}
+
+	@Override
+	public void setTime(java.sql.PreparedStatement stmt, int parameterIndex, Time value)
+			throws SQLException {
+		stmt.setTime(parameterIndex, value);
 	}
 	/** helper to build SDO input
 	 */

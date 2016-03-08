@@ -1,8 +1,11 @@
 package ch.ehi.ili2db.converter;
 
 import java.sql.Connection;
+import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.Time;
+import java.sql.Timestamp;
 
 import ch.ehi.ili2db.gui.Config;
 import ch.interlis.iom.IomObject;
@@ -96,6 +99,16 @@ public class NullColumnConverter implements SqlColumnConverter {
 	@Override
 	public void setBoolean(PreparedStatement stmt, int parameterIndex,
 			boolean value) throws SQLException {
+	}
+	@Override
+	public void setTimestamp(PreparedStatement ps, int valuei,
+			Timestamp datetime) throws SQLException{
+	}
+	@Override
+	public void setDate(PreparedStatement ps, int valuei, Date date) throws SQLException{
+	}
+	@Override
+	public void setTime(PreparedStatement ps, int valuei, Time time) throws SQLException{
 	}
 
 	@Override

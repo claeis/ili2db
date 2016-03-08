@@ -17,9 +17,13 @@
  */
 package ch.ehi.ili2db.converter;
 
+import java.sql.Date;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Struct;
 import java.sql.Connection;
+import java.sql.Time;
+import java.sql.Timestamp;
 
 import ch.interlis.iom.IomObject;
 
@@ -52,6 +56,9 @@ public interface SqlColumnConverter {
 	public abstract void setSurfaceNull(java.sql.PreparedStatement stmt,int parameterIndex)throws java.sql.SQLException;
 	public abstract void setDecimalNull(java.sql.PreparedStatement stmt,int parameterIndex)throws java.sql.SQLException;
 	public abstract void setBoolean(java.sql.PreparedStatement stmt,int parameterIndex,boolean value)throws java.sql.SQLException;
+	public abstract void setTimestamp(PreparedStatement ps, int valuei,Timestamp datetime) throws SQLException;
+	public abstract void setDate(PreparedStatement ps, int valuei, Date date) throws SQLException;
+	public abstract void setTime(PreparedStatement ps, int valuei, Time time) throws SQLException;
 	public abstract Object fromIomUuid(String uuid)
 			throws java.sql.SQLException, ConverterException;
 	public abstract java.lang.Object fromIomSurface(

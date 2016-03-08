@@ -15,6 +15,8 @@ ili2gpkg/ili2pg 3.0.3 (2016-03-xx)
 - map ili:TEXT to sql text type without length limit
 - fixed mapping of struct attr in sub class, if struct defined after base class
 - fixed mapping of struct attr with abstract structure
+- GPKG: fixed mapping of 1..10 to INTEGER
+- GPKG: fixed import of date/time to meet GeoPackage spec
 
 ili2gpkg/ili2pg 3.0.2 (2016-02-10)
 ----------------------------------
