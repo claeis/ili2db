@@ -20,9 +20,12 @@ package ch.ehi.ili2db.converter;
 import ch.ehi.basics.logging.EhiLogger;
 import ch.ehi.ili2db.gui.Config;
 
+import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Connection;
+import java.sql.Time;
+import java.sql.Timestamp;
 
 import com.vividsolutions.jts.io.ParseException;
 
@@ -43,6 +46,23 @@ public abstract class AbstractWKTColumnConverter implements SqlColumnConverter {
 	throws java.sql.SQLException
 	{
 			stmt.setBoolean(parameterIndex, value);
+	}
+	@Override
+	public void setTimestamp(java.sql.PreparedStatement stmt, int parameterIndex,
+			Timestamp value) throws SQLException {
+		stmt.setTimestamp(parameterIndex, value);
+	}
+
+	@Override
+	public void setDate(java.sql.PreparedStatement stmt, int parameterIndex, Date value)
+			throws SQLException {
+		stmt.setDate(parameterIndex, value);
+	}
+
+	@Override
+	public void setTime(java.sql.PreparedStatement stmt, int parameterIndex, Time value)
+			throws SQLException {
+		stmt.setTime(parameterIndex, value);
 	}
 	@Override
 	public void setPolylineNull(PreparedStatement stmt, int parameterIndex) throws SQLException {

@@ -12,6 +12,7 @@ import ch.ehi.ili2db.base.Ili2dbException;
 import ch.ehi.ili2db.fromili.CustomMapping;
 import ch.ehi.ili2db.mapping.TrafoConfig;
 import ch.ehi.ili2db.mapping.Viewable2TableMapping;
+import ch.ehi.ili2db.mapping.ViewableWrapper;
 import ch.ehi.sqlgen.repository.DbColBoolean;
 import ch.ehi.sqlgen.repository.DbColDate;
 import ch.ehi.sqlgen.repository.DbColDateTime;
@@ -37,6 +38,7 @@ import ch.interlis.ili2c.metamodel.CoordType;
 import ch.interlis.ili2c.metamodel.Domain;
 import ch.interlis.ili2c.metamodel.EnumerationType;
 import ch.interlis.ili2c.metamodel.Evaluable;
+import ch.interlis.ili2c.metamodel.ExtendableContainer;
 import ch.interlis.ili2c.metamodel.LineType;
 import ch.interlis.ili2c.metamodel.LocalAttribute;
 import ch.interlis.ili2c.metamodel.NumericType;
@@ -234,5 +236,31 @@ public class AbstractRecordConverter {
 	{
 		return enumTypes.mapItfCode2XtfCode(type, Integer.toString(itfCode));
 	}	
+	public ArrayList<ViewableWrapper> getStructWrappers(Table structClass) {
+		ArrayList<ViewableWrapper> ret=new ArrayList<ViewableWrapper>();
+		ViewableWrapper structWrapper=class2wrapper.get(structClass);
+		if(structWrapper!=null){
+			while(structWrapper.getExtending()!=null){
+				structWrapper=structWrapper.getExtending();
+			}
+			ret.add(structWrapper);
+			return ret;
+		}
+		ArrayList<ExtendableContainer<AbstractLeafElement>> exts=new ArrayList<ExtendableContainer<AbstractLeafElement>>();
+		exts.addAll(structClass.getDirectExtensions());
+		while(exts.size()>0){
+			structClass=(Table)exts.remove(0);
+			structWrapper=class2wrapper.get(structClass);
+			if(structWrapper!=null){
+				while(structWrapper.getExtending()!=null){
+					structWrapper=structWrapper.getExtending();
+				}
+				ret.add(structWrapper);
+			}else{
+				exts.addAll(structClass.getDirectExtensions());
+			}
+		}
+		return ret;
+	}
 	
 }

@@ -3,6 +3,7 @@ INTERLIS 2.3;
 MODEL Inheritance1
   AT "mailto:ce@eisenhutinformatik.ch" VERSION "2015-12-22" =
     
+  !! Erweiterung von CLASS, aber ohne Strukturattribute, STRUCTURE
   TOPIC TestA =
   
     !! ohne Erweiterung
@@ -41,6 +42,7 @@ MODEL Inheritance1
     
   END TestA;
   
+  !! Erweiterung von STRUCTURE
   TOPIC TestB =
   
     !! ohne Erweiterung
@@ -76,6 +78,7 @@ MODEL Inheritance1
     
   END TestB;
   
+  !! Erweiterung von CLASS, mit Strukturattributen, mit STRUCTURE Erweiterungen
   TOPIC TestC =
   
     STRUCTURE StructC1 =   !! newClass
@@ -89,11 +92,43 @@ MODEL Inheritance1
     
     CLASS ClassC1a EXTENDS ClassC1 = !! newClass
       attrC1a : TEXT*30;
+      s1a : BAG OF StructC1;
     END ClassC1a;
 
     CLASS ClassC1b EXTENDS ClassC1 = !! newClass
       attrC1b : TEXT*30;
+      s1b : BAG OF StructC1;
     END ClassC1b;
+
+    STRUCTURE StructC2 =   !! newClass
+      attrStrC2 : TEXT*30;
+    END StructC2;
+    
+    CLASS ClassC1ax EXTENDS ClassC1a = !! superClass
+      attrC1ax : TEXT*30;
+      s1ax : BAG OF StructC2; !! Struktur fuer Strukturattribut ist nach der Basisklasse (die newClass hat) definiert
+    END ClassC1ax;
+
+    STRUCTURE StructC3 (ABSTRACT) =   !! subClass
+    END StructC3;
+    STRUCTURE StructC3a EXTENDS StructC3 =   !! newClass
+      attrStrC3a : TEXT*30;
+    END StructC3a;
+    STRUCTURE StructC3b EXTENDS StructC3 =   !! newClass
+      attrStrC3b : TEXT*30;
+    END StructC3b;
+    STRUCTURE StructC3bb EXTENDS StructC3b =   !! superClass
+    END StructC3bb;
+    
+    CLASS ClassC3 (ABSTRACT) = !! subClass
+      	attrC3 : TEXT*30;
+    	s3 : BAG OF StructC3;
+    END ClassC3;
+    
+    CLASS ClassC3a EXTENDS ClassC3 = !! newClass
+      s3a : BAG OF StructC3;
+    END ClassC3a;
+
     
   END TestC;
   

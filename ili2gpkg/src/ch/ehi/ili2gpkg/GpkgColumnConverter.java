@@ -22,8 +22,12 @@ import ch.ehi.ili2db.converter.AbstractWKBColumnConverter;
 import ch.ehi.ili2db.converter.ConverterException;
 import ch.ehi.ili2db.gui.Config;
 
+import java.sql.Date;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Connection;
+import java.sql.Time;
+import java.sql.Timestamp;
 
 import com.vividsolutions.jts.io.ParseException;
 
@@ -222,5 +226,32 @@ public class GpkgColumnConverter extends AbstractWKBColumnConverter {
 					throw new ConverterException(e);
 				}
 			}
+
+		@Override
+		public void setTimestamp(PreparedStatement ps, int valuei,
+				Timestamp datetime) throws SQLException {
+			java.text.DateFormat dfm = new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
+			dfm.setTimeZone(java.util.TimeZone.getTimeZone("GMT+0"));
+			String stmp=dfm.format(datetime)+"Z"; // add timesone indicator (Z)
+			ps.setString(valuei, stmp);
+		}
+
+		@Override
+		public void setDate(PreparedStatement ps, int valuei, Date date)
+				throws SQLException {
+			java.text.DateFormat dfm = new java.text.SimpleDateFormat("yyyy-MM-dd");
+			dfm.setTimeZone(java.util.TimeZone.getTimeZone("GMT+0"));
+			String stmp=dfm.format(date);
+			ps.setString(valuei, stmp);
+		}
+
+		@Override
+		public void setTime(PreparedStatement ps, int valuei, Time time)
+				throws SQLException {
+			java.text.DateFormat dfm = new java.text.SimpleDateFormat("HH:mm:ss.SSS");
+			dfm.setTimeZone(java.util.TimeZone.getTimeZone("GMT+0"));
+			String stmp=dfm.format(time);
+			ps.setString(valuei, stmp);
+		}
 
 }

@@ -240,15 +240,21 @@ public class TransferFromXtf {
 						}else{
 							// object in another basket
 							Viewable aclass=fixref.getTargetClass(ref);
-							// read object
-							Integer sqlid=readObjectSqlid(aclass,xtfid);
-							if(sqlid==null){
+							if(readIliTid || (aclass instanceof AbstractClassDef && ((AbstractClassDef) aclass).getOid()!=null)){
+								// read object
+								Integer sqlid=readObjectSqlid(aclass,xtfid);
+								if(sqlid==null){
+									EhiLogger.logError("unknown referenced object "+aclass.getScopedName(null)+" TID "+xtfid+" referenced from "+fixref.getRoot().getobjecttag()+" TID "+fixref.getRoot().getobjectoid());
+									referrs=true;
+									skipObj=true;
+								}else{
+									// remember found sqlid
+									oidPool.putXtfid2sqlid(xtfid, sqlid);
+								}
+							}else{
 								EhiLogger.logError("unknown referenced object "+aclass.getScopedName(null)+" TID "+xtfid+" referenced from "+fixref.getRoot().getobjecttag()+" TID "+fixref.getRoot().getobjectoid());
 								referrs=true;
 								skipObj=true;
-							}else{
-								// remember found sqlid
-								oidPool.putXtfid2sqlid(xtfid, sqlid);
 							}
 						}
 						
