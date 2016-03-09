@@ -17,6 +17,8 @@ ili2gpkg/ili2pg 3.0.3 (2016-03-xx)
 - fixed mapping of struct attr with abstract structure
 - GPKG: fixed mapping of 1..10 to INTEGER
 - GPKG: fixed import of date/time to meet GeoPackage spec
+- do not create duplicate linetables with --skipPolygonBuilding and mor than one geom attr in maintable
+- fixed import of invalid dangling references
 
 ili2gpkg/ili2pg 3.0.2 (2016-02-10)
 ----------------------------------
