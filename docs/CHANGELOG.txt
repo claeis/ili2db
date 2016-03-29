@@ -10,6 +10,10 @@ ideas/open issues/questions
 - support ili2 views
 - --initNameMapping
 
+ili2gpkg/ili2pg 3.0.4 (2016-03-xx)
+----------------------------------
+- API: set connection as closed after processing (Config.setJdbcConnection(null);)
+
 ili2gpkg/ili2pg 3.0.3 (2016-03-09)
 ----------------------------------
 - map ili:TEXT to sql text type without length limit
