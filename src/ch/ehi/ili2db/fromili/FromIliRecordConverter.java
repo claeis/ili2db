@@ -193,7 +193,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 			// add seqeunce attr
 			DbColId dbSeq=new DbColId();
 			dbSeq.setName(DbNames.T_SEQ_COL);
-			dbSeq.setNotNull(true);
+			//dbSeq.setNotNull(true); // must be optional for cases where struct is exdended by a class
 			dbSeq.setPrimaryKey(false);
 			dbTable.addColumn(dbSeq);
 		  }
