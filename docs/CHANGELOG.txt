@@ -13,6 +13,8 @@ ideas/open issues/questions
 ili2gpkg/ili2pg 3.0.4 (2016-03-xx)
 ----------------------------------
 - API: set connection as closed after processing (Config.setJdbcConnection(null);)
+- ili2c-4.5.22
+- iox-ili-1.11.5
 
 ili2gpkg/ili2pg 3.0.3 (2016-03-09)
 ----------------------------------
