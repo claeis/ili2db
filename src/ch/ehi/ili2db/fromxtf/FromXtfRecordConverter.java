@@ -675,6 +675,15 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 						ps.setNull(valuei,Types.BIT);
 					}
 					valuei++;
+			}else if(Ili2cUtility.isUuidOid(td, attr)){
+				String value=iomObj.getattrvalue(attrName);
+				if(value==null){
+					 geomConv.setUuidNull(ps, valuei);
+				}else{
+					 Object toInsertUUID = geomConv.fromIomUuid(value);
+					 ps.setObject(valuei, toInsertUUID);
+				}
+				valuei++;
 			}else if( Ili2cUtility.isIli1Date(td,attr)) {
 				String value=iomObj.getattrvalue(attrName);
 				if(value!=null){

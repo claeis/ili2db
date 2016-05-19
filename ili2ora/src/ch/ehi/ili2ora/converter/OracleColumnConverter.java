@@ -54,6 +54,10 @@ public class OracleColumnConverter implements SqlColumnConverter {
 		stmt.setNull(parameterIndex,java.sql.Types.DECIMAL);
 	}
 	@Override
+	public void setUuidNull(PreparedStatement stmt, int parameterIndex) throws SQLException {
+		stmt.setNull(parameterIndex,java.sql.Types.VARCHAR);
+	}
+	@Override
 	public void setPolylineNull(PreparedStatement stmt, int parameterIndex) throws SQLException {
 		stmt.setNull(parameterIndex,java.sql.Types.STRUCT);
 	}

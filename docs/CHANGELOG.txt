@@ -18,6 +18,7 @@ ili2gpkg/ili2pg 3.0.4 (2016-03-xx)
 - ili2c-4.5.22
 - iox-ili-1.11.5
 - GPKG: fixed mapping of date value (avoid shift of one day due to timezone conversion)
+- PG: fixed insert of a NULL UUID
 
 ili2gpkg/ili2pg 3.0.3 (2016-03-09)
 ----------------------------------

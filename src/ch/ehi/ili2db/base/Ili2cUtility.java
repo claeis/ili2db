@@ -123,6 +123,22 @@ public class Ili2cUtility {
 		
 		return false;
 	}
+	public static boolean isUuidOid(TransferDescription td, AttributeDef attr) {
+		if (attr.getDomain() instanceof TypeAlias && Ili2cUtility.isUuidOid(td,attr.getDomain())) {
+			return true;
+		}
+		return false;
+	}
+	static public boolean isUuidOid(TransferDescription td,Type type){
+		while(type instanceof TypeAlias) {
+			if (((TypeAlias) type).getAliasing() == td.INTERLIS.UUIDOID) {
+				return true;
+			}
+			type=((TypeAlias) type).getAliasing().getType();
+		}
+		
+		return false;
+	}
 
 	public static boolean isViewableWithOid(Viewable def) {
 		if(!(def instanceof AbstractClassDef)){
@@ -244,5 +260,6 @@ public class Ili2cUtility {
 		}
 		return false;
 	}
+
 
 }
