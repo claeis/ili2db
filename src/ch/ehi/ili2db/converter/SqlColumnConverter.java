@@ -55,6 +55,7 @@ public interface SqlColumnConverter {
 	public abstract void setPolylineNull(java.sql.PreparedStatement stmt,int parameterIndex)throws java.sql.SQLException;
 	public abstract void setSurfaceNull(java.sql.PreparedStatement stmt,int parameterIndex)throws java.sql.SQLException;
 	public abstract void setDecimalNull(java.sql.PreparedStatement stmt,int parameterIndex)throws java.sql.SQLException;
+	public abstract void setUuidNull(java.sql.PreparedStatement stmt,int parameterIndex)throws java.sql.SQLException;
 	public abstract void setBoolean(java.sql.PreparedStatement stmt,int parameterIndex,boolean value)throws java.sql.SQLException;
 	public abstract void setTimestamp(PreparedStatement ps, int valuei,Timestamp datetime) throws SQLException;
 	public abstract void setDate(PreparedStatement ps, int valuei, Date date) throws SQLException;

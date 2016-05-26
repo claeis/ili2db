@@ -240,7 +240,6 @@ public class GpkgColumnConverter extends AbstractWKBColumnConverter {
 		public void setDate(PreparedStatement ps, int valuei, Date date)
 				throws SQLException {
 			java.text.DateFormat dfm = new java.text.SimpleDateFormat("yyyy-MM-dd");
-			dfm.setTimeZone(java.util.TimeZone.getTimeZone("GMT+0"));
 			String stmp=dfm.format(date);
 			ps.setString(valuei, stmp);
 		}
@@ -249,7 +248,6 @@ public class GpkgColumnConverter extends AbstractWKBColumnConverter {
 		public void setTime(PreparedStatement ps, int valuei, Time time)
 				throws SQLException {
 			java.text.DateFormat dfm = new java.text.SimpleDateFormat("HH:mm:ss.SSS");
-			dfm.setTimeZone(java.util.TimeZone.getTimeZone("GMT+0"));
 			String stmp=dfm.format(time);
 			ps.setString(valuei, stmp);
 		}

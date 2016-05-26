@@ -587,6 +587,7 @@ public class Ili2db {
 						}catch(java.sql.SQLException ex){
 							EhiLogger.logError(ex);
 						}finally{
+							config.setJdbcConnection(null);
 							conn=null;
 						}
 					}
@@ -963,8 +964,12 @@ public class Ili2db {
 			try{
 				if(!connectionFromExtern){
 					if(conn!=null){
-						conn.close();
-						conn=null;
+						try{
+							conn.close();
+						}finally{
+							conn=null;
+							config.setJdbcConnection(null);
+						}
 					}
 				}
 				EhiLogger.logState("...done");
@@ -1240,6 +1245,9 @@ public class Ili2db {
 						conn.close();
 					}catch(java.sql.SQLException ex){
 						EhiLogger.logError(ex);
+					}finally{
+						conn=null;
+						config.setJdbcConnection(null);
 					}
 				}
 			}			

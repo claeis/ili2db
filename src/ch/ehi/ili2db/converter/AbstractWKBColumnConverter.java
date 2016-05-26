@@ -42,6 +42,10 @@ public abstract class AbstractWKBColumnConverter implements SqlColumnConverter {
 		stmt.setNull(parameterIndex,java.sql.Types.DECIMAL);
 	}
 	@Override
+	public void setUuidNull(PreparedStatement stmt, int parameterIndex) throws SQLException {
+		stmt.setNull(parameterIndex,java.sql.Types.VARCHAR);
+	}
+	@Override
 	public void setBoolean(java.sql.PreparedStatement stmt,int parameterIndex,boolean value)
 	throws java.sql.SQLException
 	{

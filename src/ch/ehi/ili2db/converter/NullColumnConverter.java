@@ -130,6 +130,9 @@ public class NullColumnConverter implements SqlColumnConverter {
 	public void setSurfaceNull(PreparedStatement stmt, int parameterIndex)
 			throws SQLException {
 	}
+	@Override
+	public void setUuidNull(PreparedStatement stmt, int parameterIndex) throws SQLException {
+	}
 
 	@Override
 	public void setup(Connection conn, Config config) {

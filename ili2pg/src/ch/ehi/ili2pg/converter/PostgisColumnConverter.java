@@ -25,6 +25,7 @@ import ch.ehi.ili2db.gui.Config;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Connection;
+import java.sql.Types;
 
 import com.vividsolutions.jts.io.ParseException;
 import com.vividsolutions.jts.io.WKBReader;
@@ -212,4 +213,10 @@ public class PostgisColumnConverter extends AbstractWKBColumnConverter {
 					throw new ConverterException(e);
 				}
 			}
+
+		@Override
+		public void setUuidNull(PreparedStatement stmt, int parameterIndex)
+				throws SQLException {
+			 stmt.setNull(parameterIndex, Types.OTHER,"uuid");
+		}
 }
