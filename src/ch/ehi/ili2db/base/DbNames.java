@@ -6,6 +6,7 @@ public class DbNames {
 	public static final String BASKETS_TAB_DATASET_COL="dataset";
 	public static final String BASKETS_TAB_ATTACHMENT_KEY_COL="attachmentKey";
 	public static final String DATASETS_TAB="T_ILI2DB_DATASET";
+	public static final String DATASETS_TAB_DATASETNAME="datasetName";
 	public static final String ENUM_TAB="T_ILI2DB_ENUM";
 	public static final String ENUM_TAB_THIS_COL="thisClass";
 	public static final String ENUM_TAB_BASE_COL="baseClass";
