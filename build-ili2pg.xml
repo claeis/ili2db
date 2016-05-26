@@ -5,6 +5,7 @@
   <property name="src" value="${basedir}/src"/>
   <property name="build" value="${basedir}/build"/>
   <property name="dist" value="${basedir}/dist"/>
+  <property name="postgresql" value="postgresql-9.4.1208.jre6.jar"/>
 
   <target name="init">
     <!-- Create the time stamp -->
@@ -25,7 +26,7 @@
         <pathelement location="lib/ili2c.jar"/>
         <pathelement location="lib/jts-core-1.14.0.jar"/>
         <pathelement location="lib/jdbm-2.4.jar"/>
-	<pathelement location="lib/postgresql-9.1-901.jdbc4.jar"/>
+	<pathelement location="lib/${postgresql}"/>
       </classpath>
     	<src path="${src}" />
     	<src path="ili2pg/src"/>
@@ -79,7 +80,7 @@
     	</zipfileset>
     	<zipfileset dir="${basedir}/lib" prefix="${ant.project.name}-${buildnr}">
 	    	<patternset includes="ili2c.jar"/>
-	    	<patternset includes="postgresql-9.1-901.jdbc4.jar"/>
+	    	<patternset includes="${postgresql}"/>
     	</zipfileset>
     	<zipfileset dir="${basedir}/other" prefix="${ant.project.name}-${buildnr}">
 	    	<patternset includes="ili2pg.bat"/>
@@ -116,7 +117,7 @@
 		<patternset includes="lib/ehisqlgen.jar"/>
 		<patternset includes="lib/jts-core-1.14.0.jar"/>
 		<patternset includes="lib/jdbm-2.4.jar"/>
-		<patternset includes="lib/postgresql-9.1-901.jdbc4.jar"/>
+		<patternset includes="lib/${postgresql}"/>
     	</zipfileset>
     </zip>
   </target>
