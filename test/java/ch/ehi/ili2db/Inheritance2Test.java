@@ -11,9 +11,8 @@ import ch.ehi.ili2db.base.Ili2dbException;
 import ch.ehi.ili2db.gui.Config;
 import ch.ehi.ili2db.mapping.NameMapping;
 
-public class Inheritance1Test {
-	private static final String INHERITANCE1_SMART1 = "Inheritance1_smart1";
-	private static final String INHERITANCE1_NOSMART = "Inheritance1_nosmart";
+public class Inheritance2Test {
+	private static final String INHERITANCE2_SMART2 = "Inheritance2_smart2";
 	String dbhost=null;
 	String dbport=null;
 	String dbname="ili2db";
@@ -77,43 +76,22 @@ public class Inheritance1Test {
 	//config.setTidHandling(config.TID_HANDLING_PROPERTY);
 	
 	@Test
-	public void importSmart1() throws Ili2dbException
+	public void importSmart2() throws Ili2dbException
 	{
-		File data=new File("test/data/Inheritance1a.xtf");
-		Config config=initConfig(data.getPath(),INHERITANCE1_SMART1,data.getPath()+".log");
+		File data=new File("test/data/Inheritance2a.xtf");
+		Config config=initConfig(data.getPath(),INHERITANCE2_SMART2,data.getPath()+".log");
 		config.setFunction(Config.FC_IMPORT);
 		config.setCreateFk(config.CREATE_FK_YES);
-		config.setInheritanceTrafo(config.INHERITANCE_TRAFO_SMART1);
+		config.setInheritanceTrafo(config.INHERITANCE_TRAFO_SMART2);
 		Ili2db.readSettingsFromDb(config);
 		Ili2db.run(config,null);
 	}
 	@Test
-	public void exportSmart() throws Ili2dbException
+	public void exportSmart2() throws Ili2dbException
 	{
-		File data=new File("test/data/Inheritance1a-smartOut.xtf");
-		Config config=initConfig(data.getPath(),INHERITANCE1_SMART1,data.getPath()+".log");
-		config.setModels("Inheritance1");
-		config.setFunction(Config.FC_EXPORT);
-		Ili2db.readSettingsFromDb(config);
-		Ili2db.run(config,null);
-	}
-	@Test
-	public void importNoSmart() throws Ili2dbException
-	{
-		File data=new File("test/data/Inheritance1a.xtf");
-		Config config=initConfig(data.getPath(),INHERITANCE1_NOSMART,data.getPath()+".log");
-		config.setFunction(Config.FC_IMPORT);
-		config.setCreateFk(config.CREATE_FK_YES);
-		config.setInheritanceTrafo(null);
-		Ili2db.readSettingsFromDb(config);
-		Ili2db.run(config,null);
-	}
-	@Test
-	public void exportNoSmart() throws Ili2dbException
-	{
-		File data=new File("test/data/Inheritance1a-noSmartOut.xtf");
-		Config config=initConfig(data.getPath(),INHERITANCE1_NOSMART,data.getPath()+".log");
-		config.setModels("Inheritance1");
+		File data=new File("test/data/Inheritance2a-smart2Out.xtf");
+		Config config=initConfig(data.getPath(),INHERITANCE2_SMART2,data.getPath()+".log");
+		config.setModels("Inheritance2");
 		config.setFunction(Config.FC_EXPORT);
 		Ili2db.readSettingsFromDb(config);
 		Ili2db.run(config,null);

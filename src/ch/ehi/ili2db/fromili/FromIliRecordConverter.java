@@ -190,7 +190,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 			  }else{
 				  // add reference to parent for each structAttr when generating structAttr
 			  }
-			// add seqeunce attr
+			// add sequence attr
 			DbColId dbSeq=new DbColId();
 			dbSeq.setName(DbNames.T_SEQ_COL);
 			//dbSeq.setNotNull(true); // must be optional for cases where struct is exdended by a class
@@ -234,40 +234,13 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 					if(role.getExtending()==null){
 						// not an embedded role and roledef not defined in a lightweight association?
 						if (!obj.embedded && !def.isAssocLightweight()){
-						  dbColId=new DbColId();
-						  DbTableName targetSqlTableName=class2wrapper.get(role.getDestination()).getSqlTable();
-						  String roleSqlName=getSqlRoleName(role,sqlName.getName(),targetSqlTableName.getName());
-						  dbColId.setName(roleSqlName);
-						  dbColId.setNotNull(true);
-						  dbColId.setPrimaryKey(false);
-						  if(createFk){
-							  dbColId.setReferencedTable(targetSqlTableName);
-						  }
-							if(createFkIdx){
-								dbColId.setIndex(true);
-							}
-						  dbTable.addColumn(dbColId);
-						  // handle ordered
-						  if(role.isOrdered()){
-								// add seqeunce attr
-								DbColId dbSeq=new DbColId();
-								dbSeq.setName(roleSqlName+"_"+DbNames.T_SEQ_COL);
-								dbSeq.setNotNull(true);
-								dbSeq.setPrimaryKey(false);
-								dbTable.addColumn(dbSeq);
-						  }
-						}
-						// a role of an embedded association?
-						if(obj.embedded){
-							AssociationDef roleOwner = (AssociationDef) role.getContainer();
-							if(roleOwner.getDerivedFrom()==null){
-								// role is oppend;
+							ArrayList<ViewableWrapper> targetTables = getTargetTables(role.getDestination());
+						  for(ViewableWrapper targetTable : targetTables){
 							  dbColId=new DbColId();
-							  DbTableName targetSqlTableName=class2wrapper.get(role.getDestination()).getSqlTable();
-							  String roleSqlName=getSqlRoleName(role,sqlName.getName(),targetSqlTableName.getName());
+							  DbTableName targetSqlTableName=targetTable.getSqlTable();
+							  String roleSqlName=ili2sqlName.mapIliRoleDef(role,sqlName.getName(),targetSqlTableName.getName(),targetTables.size()>1);
 							  dbColId.setName(roleSqlName);
-							  boolean notNull=false;
-							  dbColId.setNotNull(notNull);
+							  dbColId.setNotNull(true);
 							  dbColId.setPrimaryKey(false);
 							  if(createFk){
 								  dbColId.setReferencedTable(targetSqlTableName);
@@ -275,16 +248,50 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 								if(createFkIdx){
 									dbColId.setIndex(true);
 								}
-							  customMapping.fixupEmbeddedLink(dbTable,dbColId,roleOwner,role,targetSqlTableName,colT_ID);
 							  dbTable.addColumn(dbColId);
 							  // handle ordered
-							  if(role.getOppEnd().isOrdered()){
+							  if(role.isOrdered()){
 									// add seqeunce attr
 									DbColId dbSeq=new DbColId();
 									dbSeq.setName(roleSqlName+"_"+DbNames.T_SEQ_COL);
-									dbSeq.setNotNull(notNull);
+									dbSeq.setNotNull(true);
 									dbSeq.setPrimaryKey(false);
 									dbTable.addColumn(dbSeq);
+							  }
+						  }
+						}
+						// a role of an embedded association?
+						if(obj.embedded){
+							AssociationDef roleOwner = (AssociationDef) role.getContainer();
+							if(roleOwner.getDerivedFrom()==null){
+								// role is oppend;
+								ArrayList<ViewableWrapper> targetTables = getTargetTables(role.getDestination());
+							  for(ViewableWrapper targetTable:targetTables){
+								  dbColId=new DbColId();
+								  DbTableName targetSqlTableName=targetTable.getSqlTable();
+								  String roleSqlName=ili2sqlName.mapIliRoleDef(role,sqlName.getName(),targetSqlTableName.getName(),targetTables.size()>1);
+								  dbColId.setName(roleSqlName);
+								  boolean notNull=false;
+								  dbColId.setNotNull(notNull);
+								  dbColId.setPrimaryKey(false);
+								  if(createFk){
+									  dbColId.setReferencedTable(targetSqlTableName);
+								  }
+									if(createFkIdx){
+										dbColId.setIndex(true);
+									}
+								  customMapping.fixupEmbeddedLink(dbTable,dbColId,roleOwner,role,targetSqlTableName,colT_ID);
+								  dbTable.addColumn(dbColId);
+								  // handle ordered
+								  if(role.getOppEnd().isOrdered()){
+										// add seqeunce attr
+										DbColId dbSeq=new DbColId();
+										dbSeq.setName(roleSqlName+"_"+DbNames.T_SEQ_COL);
+										dbSeq.setNotNull(notNull);
+										dbSeq.setPrimaryKey(false);
+										dbTable.addColumn(dbSeq);
+								  }
+								  
 							  }
 							}
 						}
@@ -316,7 +323,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 							  }else if(attro instanceof RoleDef){
 								  RoleDef role=(RoleDef) attro;
 								  DbTableName targetSqlTableName=getSqlType(role.getDestination());
-								  attrSqlName=getSqlRoleName(role,def.getSqlTablename(),targetSqlTableName.getName());
+								  attrSqlName=ili2sqlName.mapIliRoleDef(role,def.getSqlTablename(),targetSqlTableName.getName());
 							  }else{
 								  throw new IllegalStateException("unexpected attr "+attro);
 							  }
@@ -334,6 +341,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 		  }
 	  	
 	}
+
 	private HashSet getWrapperCols(List<ViewableTransferElement> attrv) {
 		HashSet ret=new HashSet();
 		for(ViewableTransferElement attr:attrv){
@@ -505,16 +513,21 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 				dbCol=null;
 			}
 		}else if (type instanceof ReferenceType){
-			DbColId ret=new DbColId();
-			ret.setNotNull(false);
-			ret.setPrimaryKey(false);
-			if(createFk){
-				ret.setReferencedTable(getSqlType(((ReferenceType)type).getReferred()));
+			ArrayList<ViewableWrapper> targetTables = getTargetTables(((ReferenceType)type).getReferred());
+			for(ViewableWrapper targetTable:targetTables)
+			{
+				DbColId ret=new DbColId();
+				ret.setName(ili2sqlName.mapIliAttributeDef(attr,dbTable.getName().getName(),targetTable.getSqlTablename(),targetTables.size()>1));
+				ret.setNotNull(false);
+				ret.setPrimaryKey(false);
+				if(createFk){
+					ret.setReferencedTable(targetTable.getSqlTable());
+				}
+				if(createFkIdx){
+					ret.setIndex(true);
+				}
+				dbColExts.add(ret);
 			}
-			if(createFkIdx){
-				ret.setIndex(true);
-			}
-			dbCol=ret;
 		}else if (type instanceof BasketType){
 			// skip it; type no longer exists in ili 2.3
 			dbCol=null;

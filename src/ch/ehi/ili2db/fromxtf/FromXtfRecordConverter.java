@@ -170,6 +170,8 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 				RoleDef role = (RoleDef) obj.obj;
 				if(role.getExtending()==null){
 					if(attrs.contains(role)){
+												
+						 String refoid=null;
 						String roleName=role.getName();
 						// a role of an embedded association?
 						if(obj.embedded){
@@ -182,7 +184,7 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 									 // TODO handle attributes of link
 								}
 								if(structvalue!=null){
-									String refoid=structvalue.getobjectrefoid();
+									refoid=structvalue.getobjectrefoid();
 									long orderPos=structvalue.getobjectreforderpos();
 									if(orderPos!=0){
 									   // refoid,orderPos
@@ -192,16 +194,13 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 									   // refoid
 									   //ret.setStringAttribute(roleName, refoid);
 									}
-								   int refsqlId=oidPool.getObjSqlId(refoid);
-								   ps.setInt(valuei, refsqlId);
 								}else{
-									ps.setNull(valuei, Types.INTEGER);
+									refoid=null;
 								}
-								valuei++;
 							}
 						 }else{
 							 IomObject structvalue=iomObj.getattrobj(roleName,0);
-							 String refoid=structvalue.getobjectrefoid();
+							 refoid=structvalue.getobjectrefoid();
 							 long orderPos=structvalue.getobjectreforderpos();
 							 if(orderPos!=0){
 								// refoid,orderPos
@@ -211,10 +210,26 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 								// refoid
 								//ret.setStringAttribute(roleName, refoid);
 							 }
-							int refsqlId=oidPool.getObjSqlId(refoid);
-							ps.setInt(valuei, refsqlId);
-							valuei++;
 						 }
+						String targetClass=null;
+						if(refoid!=null){
+							targetClass=oidPool.getXtfObjTag(refoid);
+							if(targetClass==null){
+								// should not happen, because objects with forward references are buffered, 
+								// until all other objects are processed
+								throw new IllegalStateException("unknown class of TID "+refoid);
+							}
+						}
+						ArrayList<ViewableWrapper> targetTables = getTargetTables(role.getDestination());
+						  for(ViewableWrapper targetTable : targetTables){
+							  if(targetTable.getViewable()==tag2class.get(targetClass) && refoid!=null){
+								   int refsqlId=oidPool.getObjSqlId(refoid);
+								   ps.setInt(valuei, refsqlId);
+								}else{
+									ps.setNull(valuei, Types.INTEGER);
+								}
+								valuei++;
+						  }
 					}
 				}
 			 }
@@ -440,32 +455,35 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 			   RoleDef role = (RoleDef) obj.obj;
 			   if(role.getExtending()==null){
 				   if(attrs.contains(role)){
-						String roleName=ili2sqlName.mapIliRoleDef(role,sqlTableName.getName(),class2wrapper.get(role.getDestination()).getSqlTablename());
-						// a role of an embedded association?
-						if(obj.embedded){
-							AssociationDef roleOwner = (AssociationDef) role.getContainer();
-							if(roleOwner.getDerivedFrom()==null){
-								 // TODO if(orderPos!=0){
-								 ret.append(sep);
-								 ret.append(roleName);
-									if(isUpdate){
-										ret.append("=?");
-									}else{
-										values.append(",?");
+						ArrayList<ViewableWrapper> targetTables = getTargetTables(role.getDestination());
+						  for(ViewableWrapper targetTable : targetTables){
+								String roleName=ili2sqlName.mapIliRoleDef(role,sqlTableName.getName(),targetTable.getSqlTablename(),targetTables.size()>1);
+								// a role of an embedded association?
+								if(obj.embedded){
+									AssociationDef roleOwner = (AssociationDef) role.getContainer();
+									if(roleOwner.getDerivedFrom()==null){
+										 // TODO if(orderPos!=0){
+										 ret.append(sep);
+										 ret.append(roleName);
+											if(isUpdate){
+												ret.append("=?");
+											}else{
+												values.append(",?");
+											}
+											sep=",";
 									}
-									sep=",";
-							}
-						 }else{
-							 // TODO if(orderPos!=0){
-							 ret.append(sep);
-							 ret.append(roleName);
-								if(isUpdate){
-									ret.append("=?");
-								}else{
-									values.append(",?");
-								}
-								sep=",";
-						 }
+								 }else{
+									 // TODO if(orderPos!=0){
+									 ret.append(sep);
+									 ret.append(roleName);
+										if(isUpdate){
+											ret.append("=?");
+										}else{
+											values.append(",?");
+										}
+										sep=",";
+								 }
+						  }
 					   
 				   }
 				}
@@ -638,6 +656,20 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 				if(createEnumTxtCol){
 					ret.append(sep);
 					ret.append(attrSqlName+DbNames.ENUM_TXT_COL_SUFFIX);
+					if(isUpdate){
+						ret.append("=?");
+					}else{
+						values.append(",?");
+					}
+					sep=",";
+				}
+			}if(type instanceof ReferenceType){
+				ArrayList<ViewableWrapper> targetTables = getTargetTables(((ReferenceType)type).getReferred());
+				for(ViewableWrapper targetTable:targetTables)
+				{
+					attrSqlName=ili2sqlName.mapIliAttributeDef(attr,sqlTableName,targetTable.getSqlTablename(),targetTables.size()>1);
+					ret.append(sep);
+					ret.append(attrSqlName);
 					if(isUpdate){
 						ret.append("=?");
 					}else{
