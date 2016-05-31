@@ -173,9 +173,12 @@ public abstract class AbstractMain {
 				config.setMultiSurfaceTrafo(null);
 				config.setMultilingualTrafo(null);
 				config.setInheritanceTrafo(null);
-			}else if(arg.equals("--smartInheritance")){
+			}else if(arg.equals("--smart1Inheritance")){
 				argi++;
 				config.setInheritanceTrafo(config.INHERITANCE_TRAFO_SMART1);
+			}else if(arg.equals("--smart2Inheritance")){
+				argi++;
+				config.setInheritanceTrafo(config.INHERITANCE_TRAFO_SMART2);
 			}else if(arg.equals("--coalesceCatalogueRef")){
 				argi++;
 				config.setCatalogueRefTrafo(config.CATALOGUE_REF_TRAFO_COALESCE);
@@ -268,7 +271,8 @@ public abstract class AbstractMain {
 					System.err.println("--createscript filename  Generate a sql script that creates the db schema.");
 					System.err.println("--dropscript filename  Generate a sql script that drops the generated db schema.");
 					System.err.println("--noSmartMapping       disable all smart mappings");
-					System.err.println("--smartInheritance     enable smart mapping of class/structure inheritance");
+					System.err.println("--smart1Inheritance     enable smart1 mapping of class/structure inheritance");
+					System.err.println("--smart2Inheritance     enable smart2 mapping of class/structure inheritance");
 					System.err.println("--coalesceCatalogueRef enable smart mapping of CHBase:CatalogueReference");
 					System.err.println("--coalesceMultiSurface enable smart mapping of CHBase:MultiSurface");
 					System.err.println("--expandMultilingual   enable smart mapping of CHBase:MultilingualText");

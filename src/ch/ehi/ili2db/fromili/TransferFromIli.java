@@ -700,6 +700,13 @@ public class TransferFromIli {
 			// primary key
 			recConv.addKeyCol(tab);
 			
+			// name of dataset
+			DbColVarchar thisClass=new DbColVarchar();
+			thisClass.setName(DbNames.DATASETS_TAB_DATASETNAME);
+			thisClass.setNotNull(false);
+			thisClass.setSize(200);
+			tab.addColumn(thisClass);
+			
 			schema.addTable(tab);
 			
 		}

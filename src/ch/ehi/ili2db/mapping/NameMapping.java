@@ -198,11 +198,41 @@ public class NameMapping {
 		}
 		return sqlname;
 	}
+	public String mapIliRoleDef(ch.interlis.ili2c.metamodel.RoleDef def,String ownerSqlTablename,String targetSqlTablename,boolean hasMultipleTargets){
+		String iliqname=def.getContainer().getScopedName(null)+"."+def.getName();
+		String sqlname=(String)columnMapping.getSqlName(iliqname,ownerSqlTablename,targetSqlTablename);
+		if(sqlname==null){
+			if(hasMultipleTargets){
+				sqlname=shortcutName(def.getName(),targetSqlTablename,getMaxSqlNameLength()-6);
+			}else{
+				sqlname=shortcutName(def.getName(),getMaxSqlNameLength()-6);
+			}
+			sqlname=makeValidSqlName(sqlname);
+			sqlname=makeSqlColNameUnique(ownerSqlTablename,sqlname);
+			columnMapping.addAttrNameMapping(iliqname,sqlname,ownerSqlTablename,targetSqlTablename);
+		}
+		return sqlname;
+	}
 	public String mapIliRoleDef(ch.interlis.ili2c.metamodel.RoleDef def,String ownerSqlTablename,String targetSqlTablename){
 		String iliqname=def.getContainer().getScopedName(null)+"."+def.getName();
 		String sqlname=(String)columnMapping.getSqlName(iliqname,ownerSqlTablename,targetSqlTablename);
 		if(sqlname==null){
 			sqlname=shortcutName(def.getName(),getMaxSqlNameLength()-6);
+			sqlname=makeValidSqlName(sqlname);
+			sqlname=makeSqlColNameUnique(ownerSqlTablename,sqlname);
+			columnMapping.addAttrNameMapping(iliqname,sqlname,ownerSqlTablename,targetSqlTablename);
+		}
+		return sqlname;
+	}
+	public String mapIliAttributeDef(ch.interlis.ili2c.metamodel.AttributeDef def,String ownerSqlTablename,String targetSqlTablename,boolean hasMultipleTargets){
+		String iliqname=def.getContainer().getScopedName(null)+"."+def.getName();
+		String sqlname=columnMapping.getSqlName(iliqname,ownerSqlTablename,targetSqlTablename);
+		if(sqlname==null){
+			if(hasMultipleTargets){
+				sqlname=shortcutName(def.getName(),targetSqlTablename,getMaxSqlNameLength()-6);
+			}else{
+				sqlname=shortcutName(def.getName(),getMaxSqlNameLength());
+			}
 			sqlname=makeValidSqlName(sqlname);
 			sqlname=makeSqlColNameUnique(ownerSqlTablename,sqlname);
 			columnMapping.addAttrNameMapping(iliqname,sqlname,ownerSqlTablename,targetSqlTablename);

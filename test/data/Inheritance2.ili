@@ -1,0 +1,33 @@
+INTERLIS 2.3;
+
+MODEL Inheritance2
+  AT "mailto:ce@eisenhutinformatik.ch" VERSION "2016-05-26" =
+    
+  TOPIC TestA =
+  
+  CLASS ClassA3 (ABSTRACT) =
+  	attrA3 : TEXT*20;
+  END ClassA3;
+  
+  CLASS ClassA3b EXTENDS ClassA3 =
+  	attrA3b : TEXT*30;
+  END ClassA3b;
+
+  CLASS ClassA3c EXTENDS ClassA3b =
+  	attrA3c : TEXT*40;
+  END ClassA3c;
+
+  CLASS ClassB =
+  	attrB : TEXT*40;
+  END ClassB;
+
+  ASSOCIATION a2b =
+  	a -- {1} ClassA3b;
+  	b -- {0..*} ClassB;
+  END a2b;
+  
+  END TestA;
+  
+  
+END Inheritance2.
+

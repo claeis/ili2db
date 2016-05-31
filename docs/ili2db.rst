@@ -367,9 +367,11 @@ Optionen:
 +-------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | --dropscript filename         | Erstellt ein SQL-Skript um die Tabellenstruktur unabhängig vom Programm löschen zu können.                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
 +-------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| --noSmartMapping              | Alle strukturellen Abbildungsoptimierungen werden ausgeschaltet. (s.a. --smartInheritance, --coalesceCatalogueRef, --coalesceMultiSurface, --expandMultilingual)                                                                                                                                                                                                                                                                                                                                                                           |
+| --noSmartMapping              | Alle strukturellen Abbildungsoptimierungen werden ausgeschaltet. (s.a. --smart1Inheritance, --coalesceCatalogueRef, --coalesceMultiSurface, --expandMultilingual)                                                                                                                                                                                                                                                                                                                                                                          |
 +-------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| --smartInheritance            | Bildet die Vererbungshierarchie mit einer dymamischen Strategie ab. Für Klassen, die referenziert werden und deren Basisklassen nicht mit einer NewClass-Strategie abgebildet werden, wird die NewClass-Strategie verwendet. Abstrakte Klassen werden mit einer SubClass-Strategie abgebildet. Konkrete Klassen, ohne Basisklasse oder deren direkte Basisklassen mit einer SubClass-Strategie abgebildet werden, werden mit einer NewClass-Strategie abgebildet. Alle anderen Klassen werden mit einer SuperClass-Strategie abgebildet.   |
+| --smart1Inheritance           | Bildet die Vererbungshierarchie mit einer dymamischen Strategie ab. Für Klassen, die referenziert werden und deren Basisklassen nicht mit einer NewClass-Strategie abgebildet werden, wird die NewClass-Strategie verwendet. Abstrakte Klassen werden mit einer SubClass-Strategie abgebildet. Konkrete Klassen, ohne Basisklasse oder deren direkte Basisklassen mit einer SubClass-Strategie abgebildet werden, werden mit einer NewClass-Strategie abgebildet. Alle anderen Klassen werden mit einer SuperClass-Strategie abgebildet.   |
++-------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| --smart2Inheritance           | Bildet die Vererbungshierarchie mit einer dymamischen Strategie ab. Abstrakte Klassen werden mit einer SubClass-Strategie abgebildet. Konkrete Klassen werden mit einer NewAndSubClass-Strategie abgebildet.                                                                                                                                                                                                                                                                                                                               |
 +-------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | --coalesceCatalogueRef        | Strukturattribute deren maximale Kardinalität 1 ist, deren Basistyp CHBase:CatalogueReference oder CHBase:MandatoryCatalogueReference ist und die ausser „Reference“ keine weiteren Attribute haben, werden direkt mit einem Fremdschlüssel auf die Ziel-Tabelle (die die konkrete CHBase:Item Klasse realisiert) abgebildet, d.h. kein Record in der Tabelle für die Struktur mit dem „Reference“ Attribut.                                                                                                                               |
 +-------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
@@ -520,10 +522,10 @@ SubClass
 	Spalten in den Tabellen der Sub-Klassen ergänzt.
 
 ili2db bildet die Vererbung nach einer je nach Klasse unterschiedlichen
-Strategie (--smartInheritance) oder für alle Klassen einheitlich nach
-der NewClass-Strategie (--noSmartMapping) ab.
+Strategie (--smart1Inheritance oder --smart2Inheritance) oder für alle 
+Klassen einheitlich nach der NewClass-Strategie (--noSmartMapping) ab.
 
-Bei --smartInheritance wird wie folgt abgebildet: Fuer Klassen, die
+Bei --smart1Inheritance wird wie folgt abgebildet: Fuer Klassen, die
 referenziert werden und deren Basisklassen nicht mit einer
 NewClass-Strategie abgebildet werden, wird die NewClass-Strategie
 verwendet. Abstrakte Klassen werden mit einer SubClass-Strategie
@@ -532,11 +534,15 @@ Basisklassen mit einer SubClass-Strategie abgebildet werden, werden mit
 einer NewClass-Strategie abgebildet. Alle anderen Klassen werden mit
 einer SuperClass-Strategie abgebildet.
 
+Bei --smart2Inheritance wird wie folgt abgebildet: Abstrakte Klassen werden 
+mit einer SubClass-Strategie abgebildet. 
+Konkrete Klassen werden mit einer NewAndSubClass-Strategie abgebildet. 
+
 +--------------+---------------------------+---------------------------------+------------------------------------------------------------------------------------------------------+
 | Nummer       | Beispiel INTERLIS         | Beispiel SQL                    | Kommentare                                                                                           |
 +==============+===========================+=================================+======================================================================================================+
-| 1            | ::                        | ::                              | Für jede Klasse wird eine Tabelle erstellt. Ein Objekt A ergibt ein Record in Tabellen A.            |
-|              |                           |                                 |                                                                                                      |
+| 1            | ::                        | ::                              | Bei --noSmartMapping wird für jede Klasse eine Tabelle erstellt. Ein Objekt A ergibt                 |
+|              |                           |                                 | ein Record in Tabellen A.                                                                            |
 |              |  CLASS A =                |  CREATE TABLE A (               | Ein Objekt B ergibt je ein Record in Tabellen A und B. Die T\_Id ist bei beiden Records identisch.   |
 |              |   Attribut_1 : TEXT*20;   |   T_Id integer PRIMARY KEY,     |                                                                                                      |
 |              |  END A;                   |   T_Type varchar(60) NOT NULL,  |                                                                                                      |
@@ -553,7 +559,56 @@ einer SuperClass-Strategie abgebildet.
 |              |                           |                                 |                                                                                                      |
 |              |                           |                                 |                                                                                                      |
 +--------------+---------------------------+---------------------------------+------------------------------------------------------------------------------------------------------+
-|              |                           |                                 | TODO Beispiele für --smartInheritance ergänzen                                                       |
+| 2            | ::                        | ::                              | Bei --smart1Inheritance wird für abstrakte Klassen (A) keine Tabelle erstellt (ausser sie wird       |
+|              |                           |                                 | referenziert). Für die allgemeinste konkrete Klasse (B) wird eine Tabelle erstellt.                  |
+|              |  CLASS A (ABSTRACT) =     |                                 | Für erweiterte konkrete Klassen (C), die eine konkrete Klasse erweitern,                             |
+|              |   Attribut_1 : TEXT*20;   |                                 | wird keine eigene Tabelle erstellt.                                                                  |
+|              |  END A;                   |                                 |                                                                                                      |
+|              |                           |                                 |                                                                                                      |
+|              |                           |                                 |                                                                                                      |
+|              |                           |                                 |                                                                                                      |
+|              |  CLASS B EXTENDS A =      |  CREATE TABLE B (               |                                                                                                      |
+|              |   Attribut_2 : TEST*20;   |   T_Id integer PRIMARY KEY,     |                                                                                                      |
+|              |  END B;                   |   T_Type varchar(60) NOT NULL,  |                                                                                                      |
+|              |                           |   Attribut_1 varchar(20),       |                                                                                                      |
+|              |                           |   Attribut_2 varchar(20),       |                                                                                                      |
+|              |                           |   Attribut_3 varchar(20)        |                                                                                                      |
+|              |                           |  );                             |                                                                                                      |
+|              |                           |                                 |                                                                                                      |
+|              |  CLASS C EXTENDS B =      |                                 |                                                                                                      |
+|              |   Attribut_3 : TEST*20;   |                                 |                                                                                                      |
+|              |  END C;                   |                                 |                                                                                                      |
+|              |                           |                                 |                                                                                                      |
+|              |                           |                                 |                                                                                                      |
+|              |                           |                                 |                                                                                                      |
+|              |                           |                                 |                                                                                                      |
++--------------+---------------------------+---------------------------------+------------------------------------------------------------------------------------------------------+
+| 3            | ::                        | ::                              | Bei --smart2Inheritance wird für abstrakte Klassen (A) keine Tabelle erstellt (auch nicht, wenn sie  |
+|              |                           |                                 | referenziert wird). Für konkrete Klassen (B und C) wird je eine vollständige Tabelle erstellt        |
+|              |  CLASS A (ABSTRACT) =     |                                 | (inkl. geerbte Attribute).                                                                           |
+|              |   Attribut_1 : TEXT*20;   |                                 |                                                                                                      |
+|              |  END A;                   |                                 |                                                                                                      |
+|              |                           |                                 |                                                                                                      |
+|              |                           |                                 |                                                                                                      |
+|              |                           |                                 |                                                                                                      |
+|              |  CLASS B EXTENDS A =      |  CREATE TABLE B (               |                                                                                                      |
+|              |   Attribut_2 : TEST*20;   |   T_Id integer PRIMARY KEY,     |                                                                                                      |
+|              |  END B;                   |   T_Type varchar(60) NOT NULL,  |                                                                                                      |
+|              |                           |   Attribut_1 varchar(20),       |                                                                                                      |
+|              |                           |   Attribut_2 varchar(20)        |                                                                                                      |
+|              |                           |  );                             |                                                                                                      |
+|              |                           |                                 |                                                                                                      |
+|              |  CLASS C EXTENDS B =      |  CREATE TABLE C (               |                                                                                                      |
+|              |   Attribut_3 : TEST*20;   |   T_Id integer PRIMARY KEY,     |                                                                                                      |
+|              |  END B;                   |   T_Type varchar(60) NOT NULL,  |                                                                                                      |
+|              |                           |   Attribut_1 varchar(20),       |                                                                                                      |
+|              |                           |   Attribut_2 varchar(20),       |                                                                                                      |
+|              |                           |   Attribut_3 varchar(20)        |                                                                                                      |
+|              |                           |  );                             |                                                                                                      |
+|              |                           |                                 |                                                                                                      |
+|              |                           |                                 |                                                                                                      |
+|              |                           |                                 |                                                                                                      |
+|              |                           |                                 |                                                                                                      |
 +--------------+---------------------------+---------------------------------+------------------------------------------------------------------------------------------------------+
 
 EXTENDED Attribute ergeben keine Spalte, nur die Basis-Definition des

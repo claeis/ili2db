@@ -1,6 +1,7 @@
 package ch.ehi.ili2db.converter;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 
@@ -11,6 +12,7 @@ import ch.ehi.ili2db.base.Ili2cUtility;
 import ch.ehi.ili2db.base.Ili2dbException;
 import ch.ehi.ili2db.fromili.CustomMapping;
 import ch.ehi.ili2db.mapping.TrafoConfig;
+import ch.ehi.ili2db.mapping.TrafoConfigNames;
 import ch.ehi.ili2db.mapping.Viewable2TableMapping;
 import ch.ehi.ili2db.mapping.ViewableWrapper;
 import ch.ehi.sqlgen.repository.DbColBoolean;
@@ -168,10 +170,38 @@ public class AbstractRecordConverter {
 				dbTable.addColumn(dbColIliTid);
 			}
 		}
-		
-	protected String getSqlRoleName(RoleDef def,String ownerSqlTableName,String targetSqlTableName){
-		return ili2sqlName.mapIliRoleDef(def,ownerSqlTableName,targetSqlTableName);
-	}
+		private HashMap<AbstractClassDef,ArrayList<ViewableWrapper>> targetTablesPool=new HashMap<AbstractClassDef,ArrayList<ViewableWrapper>>(); 
+		protected ArrayList<ViewableWrapper> getTargetTables(AbstractClassDef destination) {
+			if(targetTablesPool.containsKey(destination)){
+				return targetTablesPool.get(destination);
+			}
+			ArrayList<ViewableWrapper> ret=new ArrayList<ViewableWrapper>(); 
+			ArrayList<AbstractClassDef> candids=new ArrayList<AbstractClassDef>();
+			candids.add(destination);
+			while(!candids.isEmpty()){
+				AbstractClassDef candid=candids.remove(0);
+				String inheritanceStrategy = trafoConfig.getViewableConfig(candid, TrafoConfigNames.INHERITANCE_TRAFO);
+				if(TrafoConfigNames.INHERITANCE_TRAFO_SUPERCLASS.equals(inheritanceStrategy)){
+					ret.add(class2wrapper.get(candid)); // ViewableWrapper of base
+				}else if(TrafoConfigNames.INHERITANCE_TRAFO_SUBCLASS.equals(inheritanceStrategy)){
+					// visit all sub classes
+					candids.addAll(candid.getDirectExtensions());
+				}else if(TrafoConfigNames.INHERITANCE_TRAFO_NEWCLASS.equals(inheritanceStrategy)){
+					ret.add(class2wrapper.get(candid));
+				}else if(TrafoConfigNames.INHERITANCE_TRAFO_NEWANDSUBCLASS.equals(inheritanceStrategy)){
+					ret.add(class2wrapper.get(candid));
+					// visit all sub classes
+					candids.addAll(candid.getDirectExtensions());
+				}else{
+					throw new IllegalStateException("unexpected mapping strategy <"+inheritanceStrategy+">");
+				}
+			}
+			// buffer result, so that later calls return exactly the same ordering of targetTables
+			// first call: build sql statement
+			// second++ calls: set/get sql parameters
+			targetTablesPool.put(destination, ret);
+			return ret;
+		}
 	protected String getSqlAttrName(AttributeDef def,String ownerSqlTableName,String targetSqlTableName){
 		return ili2sqlName.mapIliAttributeDef(def,ownerSqlTableName,targetSqlTableName);
 	}

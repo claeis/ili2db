@@ -116,22 +116,25 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 			   if(obj.obj instanceof RoleDef){
 				   RoleDef role = (RoleDef) obj.obj;
 				   if(role.getExtending()==null){
-					String roleSqlName=ili2sqlName.mapIliRoleDef(role,sqlTableName,class2wrapper.get(role.getDestination()).getSqlTablename());
-					// a role of an embedded association?
-					if(obj.embedded){
-						AssociationDef roleOwner = (AssociationDef) role.getContainer();
-						if(roleOwner.getDerivedFrom()==null){
-							 // TODO if(orderPos!=0){
-							 ret.append(sep);
-							 sep=",";
-							 ret.append(roleSqlName);
-						}
-					 }else{
-						 // TODO if(orderPos!=0){
-						 ret.append(sep);
-						 sep=",";
-						 ret.append(roleSqlName);
-					 }
+						ArrayList<ViewableWrapper> targetTables = getTargetTables(role.getDestination());
+						  for(ViewableWrapper targetTable : targetTables){
+								String roleSqlName=ili2sqlName.mapIliRoleDef(role,sqlTableName,targetTable.getSqlTablename(),targetTables.size()>1);
+								// a role of an embedded association?
+								if(obj.embedded){
+									AssociationDef roleOwner = (AssociationDef) role.getContainer();
+									if(roleOwner.getDerivedFrom()==null){
+										 // TODO if(orderPos!=0){
+										 ret.append(sep);
+										 sep=",";
+										 ret.append(roleSqlName);
+									}
+								 }else{
+									 // TODO if(orderPos!=0){
+									 ret.append(sep);
+									 sep=",";
+									 ret.append(roleSqlName);
+								 }
+						  }
 				   }
 				}
 			}
@@ -250,6 +253,15 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 				 ret.append(sep);
 				 sep=",";
 				 ret.append(geomConv.getSelectValueWrapperCoord(attrSqlName));
+			 }else if(type instanceof ReferenceType){
+					ArrayList<ViewableWrapper> targetTables = getTargetTables(((ReferenceType)type).getReferred());
+					for(ViewableWrapper targetTable:targetTables)
+					{
+						attrSqlName=ili2sqlName.mapIliAttributeDef(attr,sqlTableName,targetTable.getSqlTablename(),targetTables.size()>1);
+						 ret.append(sep);
+						 sep=",";
+						 ret.append(attrSqlName);
+					}				 
 			}else{
 				 ret.append(sep);
 				 sep=",";
@@ -350,25 +362,43 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 				   RoleDef role = (RoleDef) obj.obj;
 				   if(role.getExtending()==null){
 					 String roleName=role.getName();
-					 String sqlRoleName=ili2sqlName.mapIliRoleDef(role,getSqlType(table.getViewable()).getName(),getSqlType(role.getDestination()).getName());
-					 // a role of an embedded association?
-					 if(obj.embedded){
-						AssociationDef roleOwner = (AssociationDef) role.getContainer();
-						if(roleOwner.getDerivedFrom()==null){
-							 // TODO if(orderPos!=0){
-							int value=rs.getInt(valuei);
-							valuei++;
-							if(!rs.wasNull()){
-								IomObject ref=iomObj.addattrobj(roleName,roleOwner.getScopedName(null));
-								mapSqlid2Xtfid(fixref,value,ref,role.getDestination());
-							}
-						}
-					 }else{
-						 // TODO if(orderPos!=0){
-						IomObject ref=iomObj.addattrobj(roleName,"REF");
-						mapSqlid2Xtfid(fixref,rs.getInt(valuei),ref,role.getDestination());
-						valuei++;
-					 }
+						ArrayList<ViewableWrapper> targetTables = getTargetTables(role.getDestination());
+						boolean refAlreadyDefined=false;
+						  for(ViewableWrapper targetTable : targetTables){
+								 String sqlRoleName=ili2sqlName.mapIliRoleDef(role,getSqlType(table.getViewable()).getName(),targetTable.getSqlTablename(),targetTables.size()>1);
+								 // a role of an embedded association?
+								 if(obj.embedded){
+									AssociationDef roleOwner = (AssociationDef) role.getContainer();
+									if(roleOwner.getDerivedFrom()==null){
+										 // TODO if(orderPos!=0){
+										int value=rs.getInt(valuei);
+										valuei++;
+										if(!rs.wasNull()){
+											if(refAlreadyDefined){
+												EhiLogger.logAdaption("Table "+table.getSqlTablename()+"(id "+sqlid+") more than one value for role "+roleName+"; value of "+sqlRoleName+" ignored");
+											}else{
+												IomObject ref=iomObj.addattrobj(roleName,roleOwner.getScopedName(null));
+												mapSqlid2Xtfid(fixref,value,ref,role.getDestination());
+												refAlreadyDefined=true;
+											}
+										}
+									}
+								 }else{
+									 // TODO if(orderPos!=0){
+										int value=rs.getInt(valuei);
+										valuei++;
+										if(!rs.wasNull()){
+											if(refAlreadyDefined){
+												EhiLogger.logAdaption("Table "+table.getSqlTablename()+"(id "+sqlid+") more than one value for role "+roleName+"; value of "+sqlRoleName+" ignored");
+											}else{
+												IomObject ref=iomObj.addattrobj(roleName,"REF");
+												mapSqlid2Xtfid(fixref,value,ref,role.getDestination());
+												refAlreadyDefined=true;
+											}
+										}
+								 }
+							  
+						  }
 				   }
 				}
 			}
@@ -556,11 +586,22 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 						
 					}
 				}else if(type instanceof ReferenceType){
-					int value=rs.getInt(valuei);
-					valuei++;
-					if(!rs.wasNull()){
-						IomObject ref=iomObj.addattrobj(attrName,"REF");
-						mapSqlid2Xtfid(fixref,value,ref,((ReferenceType)type).getReferred());
+					ArrayList<ViewableWrapper> targetTables = getTargetTables(((ReferenceType)type).getReferred());
+					boolean refAlreadyDefined=false;
+					for(ViewableWrapper targetTable:targetTables)
+					{
+						int value=rs.getInt(valuei);
+						valuei++;
+						if(!rs.wasNull()){
+							if(refAlreadyDefined){
+								sqlAttrName=ili2sqlName.mapIliAttributeDef(attr,table.getSqlTablename(),targetTable.getSqlTablename(),targetTables.size()>1);
+								EhiLogger.logAdaption("Table "+table.getSqlTablename()+"(id "+sqlid+") more than one value for refattr "+attrName+"; value of "+sqlAttrName+" ignored");
+							}else{
+								IomObject ref=iomObj.addattrobj(attrName,"REF");
+								mapSqlid2Xtfid(fixref,value,ref,((ReferenceType)type).getReferred());
+								refAlreadyDefined=true;
+							}
+						}
 					}
 				}else{
 					String value=rs.getString(valuei);

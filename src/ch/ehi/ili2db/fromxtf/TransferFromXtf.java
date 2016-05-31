@@ -574,7 +574,7 @@ public class TransferFromXtf {
 		}
 	 	String tid=iomObj.getobjectoid();
 	 	if(tid!=null && tid.length()>0){
-			oidPool.getObjSqlId(tid);
+			oidPool.getObjSqlId(tag,tid);
 	 	}
 		FixIomObjectExtRefs extref=new FixIomObjectExtRefs(iomObj);
 		allReferencesKnownHelper(iomObj, extref);
@@ -832,7 +832,7 @@ public class TransferFromXtf {
 				// map oid of transfer file to a sql id
 			 	String tid=iomObj.getobjectoid();
 			 	if(tid!=null && tid.length()>0){
-					sqlId=oidPool.getObjSqlId(tid);
+					sqlId=oidPool.getObjSqlId(tag,tid);
 			 		if(updateExistingData && existingObjectsContains(sqlType,sqlId)){
 			 			updateObj=true;
 			 			existingObjectsRemove(sqlType,sqlId);

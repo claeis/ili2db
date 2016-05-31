@@ -28,6 +28,7 @@ public class Config extends Settings {
 	public static final String STRUCT_MAPPING_GENERICREF="genericRef";
 	public static final String INHERITANCE_TRAFO=PREFIX+".inheritanceTrafo";
 	public static final String INHERITANCE_TRAFO_SMART1="smart1";
+	public static final String INHERITANCE_TRAFO_SMART2="smart2";
 	public static final String CATALOGUE_REF_TRAFO=PREFIX+".catalogueRefTrafo";
 	public static final String CATALOGUE_REF_TRAFO_COALESCE="coalesce";
 	public static final String MULTISURFACE_TRAFO=PREFIX+".multiSurfaceTrafo";

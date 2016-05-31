@@ -6,6 +6,7 @@ import ch.ehi.ili2db.base.DbIdGen;
 
 public class XtfidPool {
 	private HashMap<String,Integer> xtfId2sqlId=new HashMap<String,Integer>();
+	private HashMap<String,String> xtfId2tag=new HashMap<String,String>();
 	private DbIdGen idGen=null;
 	public XtfidPool(DbIdGen idGen1) {
 		idGen=idGen1;
@@ -13,6 +14,17 @@ public class XtfidPool {
 	/** maps the xtfId to a sqlId.
 	 */
 	public int getObjSqlId(String xtfId){
+		if(xtfId2sqlId.containsKey(xtfId)){
+			return xtfId2sqlId.get(xtfId).intValue();
+		}
+		int ret=newObjSqlId();
+		xtfId2sqlId.put(xtfId,new Integer(ret));
+		return ret;
+	}
+	public int getObjSqlId(String tag,String xtfId){
+		if(tag!=null && !xtfId2tag.containsKey(xtfId)){
+			xtfId2tag.put(xtfId,tag);
+		}
 		if(xtfId2sqlId.containsKey(xtfId)){
 			return xtfId2sqlId.get(xtfId).intValue();
 		}
@@ -34,6 +46,9 @@ public class XtfidPool {
 	}
 	public void putXtfid2sqlid(String xtfid, Integer sqlid) {
 		xtfId2sqlId.put(xtfid, sqlid);
+	}
+	public String getXtfObjTag(String refoid) {
+		return xtfId2tag.get(refoid);
 	}
 
 }
