@@ -222,7 +222,7 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 						}
 						ArrayList<ViewableWrapper> targetTables = getTargetTables(role.getDestination());
 						  for(ViewableWrapper targetTable : targetTables){
-							  if(targetTable.getViewable()==tag2class.get(targetClass) && refoid!=null){
+							  if(targetTable==class2wrapper.get((Viewable) tag2class.get(targetClass)) && refoid!=null){
 								   int refsqlId=oidPool.getObjSqlId(refoid);
 								   ps.setInt(valuei, refsqlId);
 								}else{
@@ -663,7 +663,7 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 					}
 					sep=",";
 				}
-			}if(type instanceof ReferenceType){
+			}else if(type instanceof ReferenceType){
 				ArrayList<ViewableWrapper> targetTables = getTargetTables(((ReferenceType)type).getReferred());
 				for(ViewableWrapper targetTable:targetTables)
 				{

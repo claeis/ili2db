@@ -102,6 +102,24 @@ public class Viewable2TableMapper {
 							}
 						}
 					}
+					// includes more than one type
+					if(wrapper.getExtending()!=null){
+						wrapper.setMultipleTypes(false); // base contains type typediscriminator
+					}else{
+						// if a concrete base
+						if(hasAnyConcreteBaseWithSubClass(trafoConfig,aclass)){
+							wrapper.setMultipleTypes(true);
+						}else if(TrafoConfigNames.INHERITANCE_TRAFO_NEWCLASS.equals(inheritanceStrategy) && hasAnyConreteExtension(aclass)){
+							// newClass and any concrete extensions
+							wrapper.setMultipleTypes(true);
+						}else if(TrafoConfigNames.INHERITANCE_TRAFO_NEWANDSUBCLASS.equals(inheritanceStrategy) && hasAnyConreteExtensionWithoutNewClass(trafoConfig,aclass)){
+							// newAndSubClass and any concrete extensions without newClass or newAndSubClass
+							wrapper.setMultipleTypes(true);
+						}else{
+							wrapper.setMultipleTypes(false);
+						}
+						aclass.getDirectExtensions();
+					}
 					ret.add(aclass, wrapper);
 				}else if(TrafoConfigNames.INHERITANCE_TRAFO_SUPERCLASS.equals(inheritanceStrategy)){
 					// add props of extensions with superclass strategy to base-class
@@ -315,6 +333,42 @@ public class Viewable2TableMapper {
 		}
 		return true;
 	}
+	private static boolean hasAnyConcreteBaseWithSubClass(TrafoConfig trafoConfig,Viewable aclass) {
+		Viewable base=(Viewable) aclass.getExtending();
+		while(base!=null){
+			if(!base.isAbstract()){
+				String baseInheritanceStrategy = trafoConfig.getViewableConfig(base, TrafoConfigNames.INHERITANCE_TRAFO);
+				if(TrafoConfigNames.INHERITANCE_TRAFO_SUBCLASS.equals(baseInheritanceStrategy)){
+					return true;
+				}
+			}
+			base=(Viewable) base.getExtending();
+		}
+		return false;
+	}
+	private static boolean hasAnyConreteExtensionWithoutNewClass(TrafoConfig trafoConfig,Viewable aclass) {
+		for(Viewable ext: (Set<Viewable>)aclass.getExtensions()){
+			if(!ext.isAbstract()){
+				
+				String extInheritanceStrategy = trafoConfig.getViewableConfig(ext, TrafoConfigNames.INHERITANCE_TRAFO);
+				if(!TrafoConfigNames.INHERITANCE_TRAFO_NEWCLASS.equals(extInheritanceStrategy)
+						&& !TrafoConfigNames.INHERITANCE_TRAFO_NEWANDSUBCLASS.equals(extInheritanceStrategy)){
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	private static boolean hasAnyConreteExtension(Viewable aclass) {
+		for(Viewable ext: (Set<Viewable>)aclass.getExtensions()){
+			if(!ext.isAbstract()){
+				return true;
+			}
+		}
+		return false;
+	}
+
 
 	private static boolean isReferenced(Viewable viewable) {
 		if(viewable instanceof AbstractClassDef){

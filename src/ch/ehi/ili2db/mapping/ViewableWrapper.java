@@ -19,6 +19,8 @@ public class ViewableWrapper {
 	private ViewableWrapper base=null;
 	private ViewableWrapper mainTable=null;
 	private ArrayList<ViewableWrapper> secondaryTables=new ArrayList<ViewableWrapper>();
+	boolean incMultipleTypes=true;
+	
 	private ViewableWrapper(String sqlSchemaname1,String sqlTablename1){
 		sqlTablename=new DbTableName(sqlSchemaname1,sqlTablename1);
 	}
@@ -112,7 +114,10 @@ public class ViewableWrapper {
 		return null;
 	}
 	public boolean includesMultipleTypes() {
-		return viewable.getExtensions().size()>1; // TODO or no record for base-viewable
+		return incMultipleTypes;
+	}
+	public void setMultipleTypes(boolean multipleTypes) {
+		incMultipleTypes=multipleTypes;
 	}
 	public boolean isAssocLightweight() {
 		return (viewable instanceof AssociationDef) && ((AssociationDef)viewable).isLightweight();

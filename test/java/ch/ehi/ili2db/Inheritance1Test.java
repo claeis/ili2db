@@ -88,7 +88,7 @@ public class Inheritance1Test {
 		Ili2db.run(config,null);
 	}
 	@Test
-	public void exportSmart() throws Ili2dbException
+	public void exportSmart1() throws Ili2dbException
 	{
 		File data=new File("test/data/Inheritance1a-smartOut.xtf");
 		Config config=initConfig(data.getPath(),INHERITANCE1_SMART1,data.getPath()+".log");
