@@ -348,6 +348,9 @@ public class Viewable2TableMapper {
 	}
 	private static boolean hasAnyConreteExtensionWithoutNewClass(TrafoConfig trafoConfig,Viewable aclass) {
 		for(Viewable ext: (Set<Viewable>)aclass.getExtensions()){
+			if(ext==aclass){
+				continue;
+			}
 			if(!ext.isAbstract()){
 				
 				String extInheritanceStrategy = trafoConfig.getViewableConfig(ext, TrafoConfigNames.INHERITANCE_TRAFO);
@@ -362,6 +365,9 @@ public class Viewable2TableMapper {
 
 	private static boolean hasAnyConreteExtension(Viewable aclass) {
 		for(Viewable ext: (Set<Viewable>)aclass.getExtensions()){
+			if(ext==aclass){
+				continue;
+			}
 			if(!ext.isAbstract()){
 				return true;
 			}
