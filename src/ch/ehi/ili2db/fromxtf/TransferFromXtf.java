@@ -646,11 +646,11 @@ public class TransferFromXtf {
 	{
 		if(attr.getExtending()==null){
 			 String attrName=attr.getName();
-			if( Ili2cUtility.isBoolean(td,attr)) {
-			}else if( Ili2cUtility.isIli1Date(td,attr)) {
-			}else if( Ili2cUtility.isIli2Date(td,attr)) {
-			}else if( Ili2cUtility.isIli2Time(td,attr)) {
-			}else if( Ili2cUtility.isIli2DateTime(td,attr)) {
+			if( attr.isDomainBoolean()) {
+			}else if( attr.isDomainIli1Date()) {
+			}else if( attr.isDomainIli2Date()) {
+			}else if( attr.isDomainIli2Time()) {
+			}else if( attr.isDomainIli2DateTime()) {
 			}else{
 				Type type = attr.getDomainResolvingAliases();
 			 
