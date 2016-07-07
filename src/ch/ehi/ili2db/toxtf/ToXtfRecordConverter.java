@@ -68,6 +68,7 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 	 */
 	public String createQueryStmt(Viewable aclass1,Integer basketSqlId,StructWrapper structWrapper){
 		ViewableWrapper aclass=class2wrapper.get(aclass1);
+		ViewableWrapper rootWrapper=aclass.getWrappers().get(0);
 		StringBuffer ret = new StringBuffer();
 		ret.append("SELECT r0."+colT_ID);
 		if(createTypeDiscriminator || aclass.includesMultipleTypes()){
@@ -175,7 +176,7 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 			sep=" LEFT JOIN ";
 		}
 		sep=" WHERE";
-		if(createTypeDiscriminator || aclass.includesMultipleTypes()){
+		if(createTypeDiscriminator || rootWrapper.includesMultipleTypes()){
 			ret.append(sep+" r0."+DbNames.T_TYPE_COL+"='"+getSqlType(aclass1).getName()+"'");
 			sep=" AND";
 		}
