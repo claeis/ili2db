@@ -16,6 +16,9 @@ ili2gpkg/ili2pg 3.1.1 (2016-06-xx)
 ----------------------------------
 - fixed superfluous t_type if a concrete class without any extensions
 - API: moved Ili2cUtility functions to ili2c.jar
+- new function --replace implemented
+- new function --delete implemented
+- new option --dataset name
 
 ili2gpkg/ili2pg 3.1.0 (2016-05-31)
 ----------------------------------

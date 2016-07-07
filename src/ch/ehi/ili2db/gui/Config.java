@@ -74,6 +74,7 @@ public class Config extends Settings {
 	private String dbschema=null;
 	private String modeldir;
 	private String models=null;
+	private String datasetName=null;
 	private String baskets=null;
 	private String topics=null;
 	private String createscript;
@@ -91,6 +92,8 @@ public class Config extends Settings {
 	static public final int FC_SCHEMAIMPORT=1;
 	static public final int FC_EXPORT=2;
 	static public final int FC_UPDATE=3;
+	static public final int FC_DELETE=4;
+	static public final int FC_REPLACE=5;
 	public String getIdGenerator() {
 		return idGenerator;
 	}
@@ -144,6 +147,12 @@ public class Config extends Settings {
 	}
 	public void setModels(String models) {
 		this.models = models;
+	}
+	public String getDatasetName() {
+		return datasetName;
+	}
+	public void setDatasetName(String datasetName) {
+		this.datasetName = datasetName;
 	}
 	public String getBaskets() {
 		return baskets;
