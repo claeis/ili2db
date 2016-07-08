@@ -701,11 +701,11 @@ public class TransferFromIli {
 			recConv.addKeyCol(tab);
 			
 			// name of dataset
-			DbColVarchar thisClass=new DbColVarchar();
-			thisClass.setName(DbNames.DATASETS_TAB_DATASETNAME);
-			thisClass.setNotNull(false);
-			thisClass.setSize(200);
-			tab.addColumn(thisClass);
+			DbColVarchar dsNameCol=new DbColVarchar();
+			dsNameCol.setName(DbNames.DATASETS_TAB_DATASETNAME);
+			dsNameCol.setNotNull(false);
+			dsNameCol.setSize(200);
+			tab.addColumn(dsNameCol);
 			
 			schema.addTable(tab);
 			
@@ -716,6 +716,7 @@ public class TransferFromIli {
 		{
 			DbTable tab=new DbTable();
 			tab.setName(new DbTableName(schema.getName(),DbNames.IMPORTS_TAB));
+			tab.setComment(DbNames.DEPRECATED);
 			
 			recConv.addKeyCol(tab);
 			
@@ -723,7 +724,8 @@ public class TransferFromIli {
 			dbColBasket.setName(DbNames.IMPORTS_TAB_DATASET_COL);
 			dbColBasket.setNotNull(true);
 			dbColBasket.setScriptComment("REFERENCES "+DbNames.DATASETS_TAB);
-			if(createFk){
+			if(false && createFk){
+				// do not create ref so that entry in dataset table can be deleted without deleting import stat
 				dbColBasket.setReferencedTable(new DbTableName(schema.getName(),DbNames.DATASETS_TAB));
 			}
 			if(createFkIdx){
@@ -744,7 +746,7 @@ public class TransferFromIli {
 			
 			DbColVarchar dbColFile=new DbColVarchar();
 			dbColFile.setName(DbNames.IMPORTS_TAB_IMPORTFILE_COL);
-			dbColFile.setNotNull(true);
+			dbColFile.setNotNull(false); // NULLable so that delete can only be logged
 			dbColFile.setSize(200);
 			tab.addColumn(dbColFile);
 			
@@ -753,6 +755,7 @@ public class TransferFromIli {
 		{
 			DbTable tab=new DbTable();
 			tab.setName(new DbTableName(schema.getName(),DbNames.IMPORTS_BASKETS_TAB));
+			tab.setComment(DbNames.DEPRECATED);
 			
 			recConv.addKeyCol(tab);
 			
@@ -801,6 +804,8 @@ public class TransferFromIli {
 		{
 			DbTable tab=new DbTable();
 			tab.setName(new DbTableName(schema.getName(),DbNames.IMPORTS_OBJECTS_TAB));
+			tab.setComment(DbNames.DEPRECATED);
+			
 			recConv.addKeyCol(tab);
 			DbColId dbColBasket=new DbColId();
 			dbColBasket.setName(DbNames.IMPORTS_OBJECTS_TAB_IMPORT_COL);

@@ -22,6 +22,8 @@ import java.util.Vector;
 import java.util.HashSet;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.sql.PreparedStatement;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -61,6 +63,8 @@ import ch.interlis.iox_j.ObjectEvent;
 import ch.interlis.iox_j.StartBasketEvent;
 import ch.interlis.iox_j.jts.Iox2jts;
 import ch.interlis.iox_j.jts.Iox2jtsException;
+import ch.interlis.iox_j.logging.LogEventFactory;
+import ch.interlis.iox_j.validator.ValidationConfig;
 
 
 /**
@@ -90,7 +94,7 @@ public class TransferFromXtf {
 	private boolean doItfLineTables=false;
 	private boolean createItfLineTables=false;
 	private boolean isItfReader=false;
-	private boolean updateExistingData=false;
+	private int functionCode=0;
 	private String colT_ID=null;
 	//private int sqlIdGen=1;
 	private ch.ehi.ili2db.base.DbIdGen idGen=null;
@@ -103,7 +107,7 @@ public class TransferFromXtf {
 	/** list of not yet processed struct values
 	 */
 	private ArrayList structQueue=null;
-	public TransferFromXtf(boolean importOnly,NameMapping ili2sqlName1,
+	public TransferFromXtf(int function,NameMapping ili2sqlName1,
 			TransferDescription td1,
 			Connection conn1,
 			String dbusr1,
@@ -134,12 +138,7 @@ public class TransferFromXtf {
 		doItfLineTables=config.isItfTransferfile();
 		createItfLineTables=doItfLineTables && config.getDoItfLineTables();
 		xtffilename=config.getXtffile();
-		
-		if(importOnly){
-			updateExistingData=false;
-		}else{
-			updateExistingData=true;
-		}
+		functionCode=function;
 	}
 		
 	public void doit(IoxReader reader,Config config,HashSet<BasketStat> stat)
@@ -158,144 +157,236 @@ public class TransferFromXtf {
 		boolean surfaceAsPolyline=true;
 		recConv=new FromXtfRecordConverter(td,ili2sqlName,tag2class,config,idGen,geomConv,conn,dbusr,isItfReader,oidPool,trafoConfig,class2wrapper);
 		
-		int datasetSqlId=oidPool.newObjSqlId();
+		Integer datasetSqlId=null;
 		int importSqlId=0;
 		int basketSqlId=0;
 		int startTid=0;
 		int endTid=0;
 		int objCount=0;
 		boolean referrs=false;
-		try {
-			writeDataset(datasetSqlId);
-			importSqlId=writeImportStat(datasetSqlId,xtffilename,today,dbusr);
-		} catch (SQLException e) {
-			EhiLogger.logError(e);
-		} catch (ConverterException e) {
-			EhiLogger.logError(e);
+		
+		if(functionCode==Config.FC_DELETE || functionCode==Config.FC_REPLACE){
+			// delete existing data base on basketSqlId
+			datasetSqlId=Ili2db.getDatasetId(config.getDatasetName(),conn,config);
+			if(datasetSqlId==null){
+				if(functionCode==Config.FC_DELETE){
+					// nothing to do
+				}else if(functionCode==Config.FC_REPLACE){
+					// new dataset, not a replace!
+					datasetSqlId=oidPool.newObjSqlId();
+					try {
+						writeDataset(datasetSqlId,config.getDatasetName());
+						importSqlId=writeImportStat(datasetSqlId,xtffilename,today,dbusr);
+					} catch (SQLException e) {
+						EhiLogger.logError(e);
+					} catch (ConverterException e) {
+						EhiLogger.logError(e);
+					}
+				}
+			}else{
+				deleteObjectsOfExistingDataset(datasetSqlId,config);
+				if(functionCode==Config.FC_DELETE){
+					String sqlName=DbNames.DATASETS_TAB;
+					if(schema!=null){
+						sqlName=schema+"."+sqlName;
+					}
+					java.sql.PreparedStatement getstmt = null;
+					try{
+						String stmt="DELETE FROM "+sqlName+" WHERE "+colT_ID+"= ?";
+						EhiLogger.traceBackendCmd(stmt);
+						getstmt=conn.prepareStatement(stmt);
+						getstmt.setInt(1,datasetSqlId);
+						getstmt.executeUpdate();
+					}catch(java.sql.SQLException ex){
+						throw new Ili2dbException("failed to delete from "+sqlName,ex);
+					}finally{
+						if(getstmt!=null){
+							try{
+								getstmt.close();
+								getstmt=null;
+							}catch(java.sql.SQLException ex){
+								EhiLogger.logError(ex);
+							}
+						}
+					}
+				}
+				try {
+					importSqlId=writeImportStat(datasetSqlId,xtffilename,today,dbusr);
+				} catch (SQLException e) {
+					EhiLogger.logError(e);
+				} catch (ConverterException e) {
+					EhiLogger.logError(e);
+				}
+			}
+		}else{
+			try {
+				datasetSqlId=oidPool.newObjSqlId();
+				writeDataset(datasetSqlId,config.getDatasetName());
+				importSqlId=writeImportStat(datasetSqlId,xtffilename,today,dbusr);
+			} catch (SQLException e) {
+				EhiLogger.logError(e);
+			} catch (ConverterException e) {
+				EhiLogger.logError(e);
+			}
+		}
+		if(functionCode==Config.FC_DELETE){
+			return;
+		}
+
+		ch.interlis.iox_j.validator.Validator validator=null;
+		if(config.isValidation()){
+			ValidationConfig modelConfig=new ValidationConfig();
+			modelConfig.mergeIliMetaAttrs(td);
+			String configFilename=config.getValidConfigFile();
+			if(configFilename!=null){
+				try {
+					modelConfig.mergeConfigFile(new File(configFilename));
+				} catch (FileNotFoundException e) {
+					EhiLogger.logError("validator config file <"+configFilename+"> not found");
+				}
+			}
+			IoxLogging errHandler=new ch.interlis.iox_j.logging.Log2EhiLogger();
+			LogEventFactory errFactory=new LogEventFactory();
+			errFactory.setDataSource(xtffilename);
+			validator=new ch.interlis.iox_j.validator.Validator(td,modelConfig, errHandler, errFactory, config);
+			
 		}
 		
 		StartBasketEvent basket=null;
 		// more baskets?
 		IoxEvent event=reader.read();
-		while(event!=null){
-			if(event instanceof StartBasketEvent){
-				basket=(StartBasketEvent)event;
-				EhiLogger.logState("Basket "+basket.getType()+"(oid "+basket.getBid()+")...");
-				try {
-					Integer existingBasketSqlId=null;
-					if(updateExistingData){
-						// read existing oid/sqlid mapping (but might also be a new basket)
-						existingObjects=new HashMap<String,HashSet<Integer>>();
-						existingBasketSqlId=readExistingSqlObjIds(reader instanceof ItfReader,basket.getBid());
-						if(existingBasketSqlId==null){
-							// new basket 
+		try{
+			while(event!=null){
+				if(event instanceof StartBasketEvent){
+					basket=(StartBasketEvent)event;
+					EhiLogger.logState("Basket "+basket.getType()+"(oid "+basket.getBid()+")...");
+					try {
+						if(validator!=null)validator.validate(event);
+						Integer existingBasketSqlId=null;
+						if(functionCode==Config.FC_UPDATE){
+							// read existing oid/sqlid mapping (but might also be a new basket)
+							existingObjects=new HashMap<String,HashSet<Integer>>();
+							existingBasketSqlId=readExistingSqlObjIds(reader instanceof ItfReader,basket.getBid());
+							if(existingBasketSqlId==null){
+								// new basket 
+								basketSqlId=oidPool.getObjSqlId(basket.getBid());
+							}else{
+								// existing basket
+								basketSqlId=existingBasketSqlId;
+								// drop existing structeles
+								dropExistingStructEles(basket.getType(),basketSqlId);
+							}
+						}else{
 							basketSqlId=oidPool.getObjSqlId(basket.getBid());
-						}else{
-							// existing basket
-							basketSqlId=existingBasketSqlId;
-							// drop existing structeles
-							dropExistingStructEles(basket.getType(),basketSqlId);
 						}
-					}else{
-						basketSqlId=oidPool.getObjSqlId(basket.getBid());
-					}
-					if(attachmentKey==null){
-						if(xtffilename!=null){
-							attachmentKey=new java.io.File(xtffilename).getName()+"-"+Integer.toString(basketSqlId);
-						}else{
-							attachmentKey=Integer.toString(basketSqlId);
+						if(attachmentKey==null){
+							if(xtffilename!=null){
+								attachmentKey=new java.io.File(xtffilename).getName()+"-"+Integer.toString(basketSqlId);
+							}else{
+								attachmentKey=Integer.toString(basketSqlId);
+							}
+							config.setAttachmentKey(attachmentKey);
 						}
-						config.setAttachmentKey(attachmentKey);
-					}
-					if(existingBasketSqlId==null){
-						writeBasket(datasetSqlId,basket,basketSqlId,attachmentKey);
-					}else{
-						// TODO update attachmentKey of existing basket
-					}
-					delayedObjects=new ArrayList<FixIomObjectExtRefs>();
-				} catch (SQLException ex) {
-					EhiLogger.logError("Basket "+basket.getType()+"(oid "+basket.getBid()+")",ex);
-				} catch (ConverterException ex) {
-					EhiLogger.logError("Basket "+basket.getType()+"(oid "+basket.getBid()+")",ex);
-				}
-				startTid=oidPool.getLastSqlId();
-				objCount=0;
-			}else if(event instanceof EndBasketEvent){
-				if(reader instanceof ItfReader2){
-		        	ArrayList<IoxInvalidDataException> dataerrs = ((ItfReader2) reader).getDataErrs();
-		        	if(dataerrs.size()>0){
-		        		for(IoxInvalidDataException dataerr:dataerrs){
-		        			EhiLogger.logError(dataerr);
-		        		}
-		        		((ItfReader2) reader).clearDataErrs();
-		        	}
-				}
-				// fix external references
-				for(FixIomObjectExtRefs fixref : delayedObjects){
-					boolean skipObj=false;
-					for(IomObject ref:fixref.getRefs()){
-						String xtfid=ref.getobjectrefoid();
-						if(oidPool.containsXtfid(xtfid)){
-							// skip it; now resolvable
+						if(existingBasketSqlId==null){
+							writeBasket(datasetSqlId,basket,basketSqlId,attachmentKey);
 						}else{
-							// object in another basket
-							Viewable aclass=fixref.getTargetClass(ref);
-							if(readIliTid || (aclass instanceof AbstractClassDef && ((AbstractClassDef) aclass).getOid()!=null)){
-								// read object
-								Integer sqlid=readObjectSqlid(aclass,xtfid);
-								if(sqlid==null){
+							// TODO update attachmentKey of existing basket
+						}
+						delayedObjects=new ArrayList<FixIomObjectExtRefs>();
+					} catch (SQLException ex) {
+						EhiLogger.logError("Basket "+basket.getType()+"(oid "+basket.getBid()+")",ex);
+					} catch (ConverterException ex) {
+						EhiLogger.logError("Basket "+basket.getType()+"(oid "+basket.getBid()+")",ex);
+					}
+					startTid=oidPool.getLastSqlId();
+					objCount=0;
+				}else if(event instanceof EndBasketEvent){
+					if(validator!=null)validator.validate(event);
+					if(reader instanceof ItfReader2){
+			        	ArrayList<IoxInvalidDataException> dataerrs = ((ItfReader2) reader).getDataErrs();
+			        	if(dataerrs.size()>0){
+			        		for(IoxInvalidDataException dataerr:dataerrs){
+			        			EhiLogger.logError(dataerr);
+			        		}
+			        		((ItfReader2) reader).clearDataErrs();
+			        	}
+					}
+					// fix external references
+					for(FixIomObjectExtRefs fixref : delayedObjects){
+						boolean skipObj=false;
+						for(IomObject ref:fixref.getRefs()){
+							String xtfid=ref.getobjectrefoid();
+							if(oidPool.containsXtfid(xtfid)){
+								// skip it; now resolvable
+							}else{
+								// object in another basket
+								Viewable aclass=fixref.getTargetClass(ref);
+								if(readIliTid || (aclass instanceof AbstractClassDef && ((AbstractClassDef) aclass).getOid()!=null)){
+									// read object
+									Integer sqlid=readObjectSqlid(aclass,xtfid);
+									if(sqlid==null){
+										EhiLogger.logError("unknown referenced object "+aclass.getScopedName(null)+" TID "+xtfid+" referenced from "+fixref.getRoot().getobjecttag()+" TID "+fixref.getRoot().getobjectoid());
+										referrs=true;
+										skipObj=true;
+									}else{
+										// remember found sqlid
+										oidPool.putXtfid2sqlid(xtfid, sqlid);
+									}
+								}else{
 									EhiLogger.logError("unknown referenced object "+aclass.getScopedName(null)+" TID "+xtfid+" referenced from "+fixref.getRoot().getobjecttag()+" TID "+fixref.getRoot().getobjectoid());
 									referrs=true;
 									skipObj=true;
-								}else{
-									// remember found sqlid
-									oidPool.putXtfid2sqlid(xtfid, sqlid);
 								}
-							}else{
-								EhiLogger.logError("unknown referenced object "+aclass.getScopedName(null)+" TID "+xtfid+" referenced from "+fixref.getRoot().getobjecttag()+" TID "+fixref.getRoot().getobjectoid());
-								referrs=true;
-								skipObj=true;
 							}
+							
 						}
-						
+						if(!skipObj){
+							doObject(basketSqlId,fixref.getRoot());
+						}
 					}
-					if(!skipObj){
-						doObject(basketSqlId,fixref.getRoot());
+					if(functionCode==Config.FC_UPDATE){
+						// delete no longer existing objects
+						deleteExisitingObjects();
 					}
-				}
-				if(updateExistingData){
-					// delete no longer existing objects
-					deleteExisitingObjects();
-				}
-				
-				// TODO update import counters
-				endTid=oidPool.getLastSqlId();
-				try {
-					String filename=null;
-					if(xtffilename!=null){
-						filename=new java.io.File(xtffilename).getName();
+					
+					// TODO update import counters
+					endTid=oidPool.getLastSqlId();
+					try {
+						String filename=null;
+						if(xtffilename!=null){
+							filename=new java.io.File(xtffilename).getName();
+						}
+						int importId=writeImportBasketStat(importSqlId,basketSqlId,startTid,endTid,objCount);
+						saveObjStat(importId,basket.getBid(),filename,basket.getType());
+					} catch (SQLException ex) {
+						EhiLogger.logError("Basket "+basket.getType()+"(oid "+basket.getBid()+")",ex);
+					} catch (ConverterException ex) {
+						EhiLogger.logError("Basket "+basket.getType()+"(oid "+basket.getBid()+")",ex);
 					}
-					int importId=writeImportBasketStat(importSqlId,basketSqlId,startTid,endTid,objCount);
-					saveObjStat(importId,basket.getBid(),filename,basket.getType());
-				} catch (SQLException ex) {
-					EhiLogger.logError("Basket "+basket.getType()+"(oid "+basket.getBid()+")",ex);
-				} catch (ConverterException ex) {
-					EhiLogger.logError("Basket "+basket.getType()+"(oid "+basket.getBid()+")",ex);
+				}else if(event instanceof ObjectEvent){
+					if(validator!=null)validator.validate(event);
+					objCount++;
+					IomObject iomObj=((ObjectEvent)event).getIomObject();
+					if(allReferencesKnown(iomObj)){
+						// translate object
+						doObject(basketSqlId, iomObj);
+					}
+				}else if(event instanceof EndTransferEvent){
+					if(validator!=null)validator.validate(event);
+					break;
+				}else if(event instanceof StartTransferEvent){
+					if(validator!=null)validator.validate(event);
 				}
-			}else if(event instanceof ObjectEvent){
-				objCount++;
-				IomObject iomObj=((ObjectEvent)event).getIomObject();
-				if(allReferencesKnown(iomObj)){
-					// translate object
-					doObject(basketSqlId, iomObj);
-				}
-			}else if(event instanceof EndTransferEvent){
-				break;
+				event=reader.read();
 			}
-			event=reader.read();
-		}
-		if(referrs){
-			throw new IoxException("dangling references");
+			if(referrs){
+				throw new IoxException("dangling references");
+			}
+		}finally{
+			if(validator!=null){
+				validator.close();
+				validator=null;
+			}
 		}
 		
 	}
@@ -304,19 +395,30 @@ public class TransferFromXtf {
 		// get all structs that are reachable from this topic
 		HashSet<AbstractClassDef> classv=getStructs(topic);
 		// delete all structeles
-		HashSet<DbTableName> tables=new HashSet<DbTableName>(); 
-		for(AbstractClassDef aclass:classv){
-			while(aclass!=null){
-				DbTableName sqlName=recConv.getSqlType(aclass);
-				if(!tables.contains(sqlName)){
-					dropStructEles(sqlName,basketSqlId);
-					tables.add(sqlName);
-					aclass=(AbstractClassDef) aclass.getExtending();
-				}else{
-					break;
-				}
-				
-			}
+		HashSet<ViewableWrapper> visitedTables=new HashSet<ViewableWrapper>();
+		for(AbstractClassDef aclass1:classv){
+
+			ViewableWrapper wrapper = class2wrapper.get(aclass1);
+			
+			 while(wrapper!=null){
+				 {
+						if (!visitedTables.contains(wrapper)) {
+							visitedTables.add(wrapper);
+							// if table exists?
+							// get sql name
+							DbTableName sqlName = wrapper.getSqlTable();
+							if (DbUtility.tableExists(conn, sqlName)) {
+								// delete it
+								dropRecords(sqlName, basketSqlId);
+							} else {
+								// skip it; no table
+							}
+						}
+				 }
+				wrapper=wrapper.getExtending();
+			 }
+			
+			
 			
 		}
 	}
@@ -387,7 +489,7 @@ public class TransferFromXtf {
 		}
 	}
 
-	private void dropStructEles(DbTableName sqlTableName, int basketSqlId) {
+	private void dropRecords(DbTableName sqlTableName, int basketSqlId) {
 		// DELETE FROM products WHERE t_id in (10,20);
 		String stmt = "DELETE FROM "+sqlTableName.getQName()+" WHERE "+DbNames.T_BASKET_COL+"="+basketSqlId;
 		EhiLogger.traceBackendCmd(stmt);
@@ -532,6 +634,167 @@ public class TransferFromXtf {
 		}		
 		return basketSqlId;
 	}
+	private void deleteObjectsOfExistingDataset(int datasetSqlId,Config config) throws Ili2dbException {
+		// get basket id, topicname
+		String schema=config.getDbschema();
+		String colT_ID=config.getColT_ID();
+		if(colT_ID==null){
+			colT_ID=DbNames.T_ID_COL;
+		}
+
+		String sqlName=DbNames.BASKETS_TAB;
+		if(schema!=null){
+			sqlName=schema+"."+sqlName;
+		}
+		java.sql.PreparedStatement getstmt=null;
+		try{
+			String stmt="SELECT "+colT_ID+","+DbNames.BASKETS_TAB_TOPIC_COL+" FROM "+sqlName+" WHERE "+DbNames.BASKETS_TAB_DATASET_COL+"= ?";
+			EhiLogger.traceBackendCmd(stmt);
+			getstmt=conn.prepareStatement(stmt);
+			getstmt.setInt(1,datasetSqlId);
+			java.sql.ResultSet res=getstmt.executeQuery();
+			if(res.next()){
+				int sqlId=res.getInt(1);
+				String topicQName=res.getString(2);
+				deleteObjectsOfBasket(sqlId,topicQName);
+			}
+		}catch(java.sql.SQLException ex){
+			throw new Ili2dbException("failed to query "+sqlName,ex);
+		}finally{
+			if(getstmt!=null){
+				try{
+					getstmt.close();
+					getstmt=null;
+				}catch(java.sql.SQLException ex){
+					EhiLogger.logError(ex);
+				}
+			}
+		}
+		try{
+			String stmt="DELETE FROM "+sqlName+" WHERE "+DbNames.BASKETS_TAB_DATASET_COL+"= ?";
+			EhiLogger.traceBackendCmd(stmt);
+			getstmt=conn.prepareStatement(stmt);
+			getstmt.setInt(1,datasetSqlId);
+			getstmt.executeUpdate();
+		}catch(java.sql.SQLException ex){
+			throw new Ili2dbException("failed to delete from "+sqlName,ex);
+		}finally{
+			if(getstmt!=null){
+				try{
+					getstmt.close();
+					getstmt=null;
+				}catch(java.sql.SQLException ex){
+					EhiLogger.logError(ex);
+				}
+			}
+		}
+	}
+	private void deleteObjectsOfBasket(int basketSqlId,String topicQName) throws Ili2dbException {
+		boolean isItf=false;
+		Topic topic=TransferToXtf.getTopicDef(td, topicQName);
+		if(topic==null){
+			throw new Ili2dbException("unkown topic "+topicQName.toString());
+		}
+		Model model=(Model) topic.getContainer();
+		// for all Viewables
+		// see also export
+		Iterator iter = null;
+		if(isItf){
+			ArrayList itftablev=ModelUtilities.getItfTables(td,model.getName(),topic.getName());
+			iter=itftablev.iterator();
+		}else{
+			// get transferable viewables of topic
+			iter= topic.getViewables().iterator();
+		}
+		
+		
+		
+		HashSet<ViewableWrapper> visitedTables=new HashSet<ViewableWrapper>();
+		while (iter.hasNext())
+		{
+		  Object obj = iter.next();
+		  if(obj instanceof Viewable){
+			  if((obj instanceof View) && !TransferFromIli.isTransferableView(obj)){
+				  // skip it
+			  }else if (!TransferToXtf.suppressViewable ((Viewable)obj))
+			  {
+					Viewable aclass1 = (Viewable) obj;
+					ViewableWrapper wrapper = class2wrapper.get(aclass1);
+					
+					 while(wrapper!=null){
+						 {
+								if (!visitedTables.contains(wrapper)) {
+									visitedTables.add(wrapper);
+									// if table exists?
+									// get sql name
+									DbTableName sqlName = wrapper.getSqlTable();
+									if (DbUtility.tableExists(conn, sqlName)) {
+										// delete it
+										dropRecords(sqlName, basketSqlId);
+									} else {
+										// skip it; no table
+									}
+								}
+						 }
+						for(ViewableWrapper secondary:wrapper.getSecondaryTables()){
+							if (!visitedTables.contains(secondary)) {
+								visitedTables.add(secondary);
+								// if table exists?
+								// get sql name
+								DbTableName sqlName = secondary.getSqlTable();
+								if (DbUtility.tableExists(conn, sqlName)) {
+									// delete it
+									dropRecords(sqlName, basketSqlId);
+								} else {
+									// skip it; no table
+								}
+							}
+						}
+						wrapper=wrapper.getExtending();
+					 }
+			  }
+			  
+		  }else if(obj instanceof AttributeDef){
+			  if(isItf){
+					AttributeDef attr=(AttributeDef)obj;
+					// get sql name
+					DbTableName sqlName=getSqlTableNameItfLineTable(attr);
+					// if table exists?
+					if(DbUtility.tableExists(conn,sqlName)){
+						dropRecords(sqlName, basketSqlId);
+					}else{
+						// skip it; no table
+					}
+			  }
+		  }
+		}		
+		dropExistingStructEles(topicQName,basketSqlId);
+		
+		String sqlName=DbNames.IMPORTS_BASKETS_TAB;
+		if(schema!=null){
+			sqlName=schema+"."+sqlName;
+		}
+		java.sql.PreparedStatement getstmt=null;
+		try{
+			String stmt="DELETE FROM "+sqlName+" WHERE "+DbNames.IMPORTS_BASKETS_TAB_BASKET_COL+"= ?";
+			EhiLogger.traceBackendCmd(stmt);
+			getstmt=conn.prepareStatement(stmt);
+			getstmt.setInt(1,basketSqlId);
+			getstmt.executeUpdate();
+		}catch(java.sql.SQLException ex){
+			throw new Ili2dbException("failed to delete from "+sqlName,ex);
+		}finally{
+			if(getstmt!=null){
+				try{
+					getstmt.close();
+					getstmt=null;
+				}catch(java.sql.SQLException ex){
+					EhiLogger.logError(ex);
+				}
+			}
+		}
+		
+	}
 
 	private void doObject(int basketSqlId, IomObject iomObj) {
 		try{
@@ -646,11 +909,11 @@ public class TransferFromXtf {
 	{
 		if(attr.getExtending()==null){
 			 String attrName=attr.getName();
-			if( Ili2cUtility.isBoolean(td,attr)) {
-			}else if( Ili2cUtility.isIli1Date(td,attr)) {
-			}else if( Ili2cUtility.isIli2Date(td,attr)) {
-			}else if( Ili2cUtility.isIli2Time(td,attr)) {
-			}else if( Ili2cUtility.isIli2DateTime(td,attr)) {
+			if( attr.isDomainBoolean()) {
+			}else if( attr.isDomainIli1Date()) {
+			}else if( attr.isDomainIli2Date()) {
+			}else if( attr.isDomainIli2Time()) {
+			}else if( attr.isDomainIli2DateTime()) {
 			}else{
 				Type type = attr.getDomainResolvingAliases();
 			 
@@ -833,7 +1096,7 @@ public class TransferFromXtf {
 			 	String tid=iomObj.getobjectoid();
 			 	if(tid!=null && tid.length()>0){
 					sqlId=oidPool.getObjSqlId(tag,tid);
-			 		if(updateExistingData && existingObjectsContains(sqlType,sqlId)){
+			 		if(functionCode==Config.FC_UPDATE && existingObjectsContains(sqlType,sqlId)){
 			 			updateObj=true;
 			 			existingObjectsRemove(sqlType,sqlId);
 			 		}
@@ -1173,7 +1436,7 @@ public class TransferFromXtf {
 		}
 		return basketSqlId;
 }
-	private int writeDataset(int datasetSqlId)
+	private int writeDataset(int datasetSqlId,String datasetName)
 	throws java.sql.SQLException
 
 	{
@@ -1184,12 +1447,16 @@ public class TransferFromXtf {
 		}
 		String insert = "INSERT INTO "+sqlname
 			+"("+colT_ID 
-			+") VALUES (?)";
+			+","+DbNames.DATASETS_TAB_DATASETNAME
+			+") VALUES (?,?)";
 		EhiLogger.traceBackendCmd(insert);
 		PreparedStatement ps = conn.prepareStatement(insert);
 		try{
 			int valuei=1;
 			ps.setInt(valuei, datasetSqlId);
+			valuei++;
+			
+			ps.setString(valuei, datasetName);
 			valuei++;
 			
 			ps.executeUpdate();

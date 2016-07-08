@@ -54,6 +54,7 @@ public abstract class AbstractMain {
 		config.setCatalogueRefTrafo(Config.CATALOGUE_REF_TRAFO_COALESCE);
 		config.setMultiSurfaceTrafo(Config.MULTISURFACE_TRAFO_COALESCE);
 		config.setMultilingualTrafo(Config.MULTILINGUAL_TRAFO_EXPAND);
+		config.setValidation(true);
 	}
 	protected abstract DbUrlConverter getDbUrlConverter();
 
@@ -98,6 +99,10 @@ public abstract class AbstractMain {
 				argi++;
 				config.setModels(args[argi]);
 				argi++;
+			}else if(arg.equals("--dataset")){
+				argi++;
+				config.setDatasetName(args[argi]);
+				argi++;
 			}else if(arg.equals("--baskets")){
 				argi++;
 				config.setBaskets(args[argi]);
@@ -114,6 +119,12 @@ public abstract class AbstractMain {
 				argi++;
 			}else if(arg.equals("--update")){
 				config.setFunction(Config.FC_UPDATE);
+				argi++;
+			}else if(arg.equals("--delete")){
+				config.setFunction(Config.FC_DELETE);
+				argi++;
+			}else if(arg.equals("--replace")){
+				config.setFunction(Config.FC_REPLACE);
 				argi++;
 			}else if(arg.equals("--export")){
 				config.setFunction(Config.FC_EXPORT);
@@ -155,6 +166,13 @@ public abstract class AbstractMain {
 				argi++;
 				config.setAttachmentsPath(args[argi]);
 				argi++;
+			}else if(arg.equals("--validConfig")){
+				argi++;
+				config.setValidConfigFile(args[argi]);
+				argi++;
+			}else if(arg.equals("--disableValidation")){
+				argi++;
+				config.setValidation(false);
 			}else if(arg.equals("--createSingleEnumTab")){
 				argi++;
 				config.setCreateEnumDefs(config.CREATE_ENUM_DEFS_SINGLE);
@@ -258,14 +276,19 @@ public abstract class AbstractMain {
 					System.err.println();
 					System.err.println("--import               do an import.");
 					System.err.println("--update               do an update.");
+					System.err.println("--replace              do a replace.");
+					System.err.println("--delete               do a delete.");
 					System.err.println("--export               do an export.");
 					System.err.println("--schemaimport         do an schema import.");
 					printConnectOptions();
+					System.err.println("--validConfig file     Config file for validation.");
+					System.err.println("--disableValidation    Disable validation of data.");
 					System.err.println("--deleteData           on schema/data import, delete existing data from existing tables.");
 					System.err.println("--defaultSrsAuth  auth Default SRS authority "+config.getDefaultSrsAuthority());
 					System.err.println("--defaultSrsCode  code Default SRS code "+config.getDefaultSrsCode());
 					System.err.println("--modeldir  path       Path(s) of directories containing ili-files.");
 					System.err.println("--models modelname     Name(s) of ili-models to generate an db schema for.");
+					System.err.println("--dataset name         Name of dataset.");
 					System.err.println("--baskets BID          Basket-Id(s) of ili-baskets to export.");
 					System.err.println("--topics topicname     Name(s) of ili-topics to export.");
 					System.err.println("--createscript filename  Generate a sql script that creates the db schema.");

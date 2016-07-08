@@ -68,6 +68,7 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 	 */
 	public String createQueryStmt(Viewable aclass1,Integer basketSqlId,StructWrapper structWrapper){
 		ViewableWrapper aclass=class2wrapper.get(aclass1);
+		ViewableWrapper rootWrapper=aclass.getWrappers().get(0);
 		StringBuffer ret = new StringBuffer();
 		ret.append("SELECT r0."+colT_ID);
 		if(createTypeDiscriminator || aclass.includesMultipleTypes()){
@@ -175,7 +176,7 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 			sep=" LEFT JOIN ";
 		}
 		sep=" WHERE";
-		if(createTypeDiscriminator || aclass.includesMultipleTypes()){
+		if(createTypeDiscriminator || rootWrapper.includesMultipleTypes()){
 			ret.append(sep+" r0."+DbNames.T_TYPE_COL+"='"+getSqlType(aclass1).getName()+"'");
 			sep=" AND";
 		}
@@ -199,19 +200,19 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 		if(attr.getExtending()==null){
 			Type type = attr.getDomainResolvingAliases();
 			 String attrSqlName=ili2sqlName.mapIliAttributeDef(attr,sqlTableName,null);
-			if( Ili2cUtility.isIli1Date(td,attr)) {
+			if( attr.isDomainIli1Date()) {
 				 ret.append(sep);
 				 sep=",";
 				 ret.append(geomConv.getSelectValueWrapperDate(attrSqlName));
-			}else if( Ili2cUtility.isIli2Date(td,attr)) {
+			}else if( attr.isDomainIli2Date()) {
 				 ret.append(sep);
 				 sep=",";
 				 ret.append(geomConv.getSelectValueWrapperDate(attrSqlName));
-			}else if( Ili2cUtility.isIli2Time(td,attr)) {
+			}else if( attr.isDomainIli2Time()) {
 				 ret.append(sep);
 				 sep=",";
 				 ret.append(geomConv.getSelectValueWrapperTime(attrSqlName));
-			}else if( Ili2cUtility.isIli2DateTime(td,attr)) {
+			}else if( attr.isDomainIli2DateTime()) {
 				 ret.append(sep);
 				 sep=",";
 				 ret.append(geomConv.getSelectValueWrapperDateTime(attrSqlName));
@@ -414,7 +415,7 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 		if(attr.getExtending()==null){
 			String attrName=attr.getName();
 			String sqlAttrName=ili2sqlName.mapIliAttributeDef(attr,table.getSqlTablename(),null);
-			if( Ili2cUtility.isBoolean(td,attr)) {
+			if( attr.isDomainBoolean()) {
 					boolean value=rs.getBoolean(valuei);
 					valuei++;
 					if(!rs.wasNull()){
@@ -424,28 +425,28 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 							iomObj.setattrvalue(attrName,"false");
 						}
 					}
-			}else if( Ili2cUtility.isIli1Date(td,attr)) {
+			}else if( attr.isDomainIli1Date()) {
 				java.sql.Date value=rs.getDate(valuei);
 				valuei++;
 				if(!rs.wasNull()){
 					java.text.SimpleDateFormat fmt=new java.text.SimpleDateFormat("yyyyMMdd");
 					iomObj.setattrvalue(attrName,fmt.format(value));
 				}
-			}else if( Ili2cUtility.isIli2Date(td,attr)) {
+			}else if( attr.isDomainIli2Date()) {
 				java.sql.Date value=rs.getDate(valuei);
 				valuei++;
 				if(!rs.wasNull()){
 					java.text.SimpleDateFormat fmt=new java.text.SimpleDateFormat("yyyy-MM-dd");
 					iomObj.setattrvalue(attrName,fmt.format(value));
 				}
-			}else if( Ili2cUtility.isIli2Time(td,attr)) {
+			}else if( attr.isDomainIli2Time()) {
 				java.sql.Time value=rs.getTime(valuei);
 				valuei++;
 				if(!rs.wasNull()){
 					java.text.SimpleDateFormat fmt=new java.text.SimpleDateFormat("HH:mm:ss.SSS");
 					iomObj.setattrvalue(attrName,fmt.format(value));
 				}
-			}else if( Ili2cUtility.isIli2DateTime(td,attr)) {
+			}else if( attr.isDomainIli2DateTime()) {
 				java.sql.Timestamp value=rs.getTimestamp(valuei);
 				valuei++;
 				if(!rs.wasNull()){

@@ -12,6 +12,19 @@ ideas/open issues/questions
 - einfache Liste mit den neu erzeugten Vertexpunkte (aufgrund der Overlap-Bereinigung)
 - Schalter für das "disablen" der Overlaps-Bereinigung. Bei vorhandenen gueltigen Overlaps erfolgen: a) Import mit NULL als Polygon, ohne Fehlermeldung, b) Import mit NULL als Polygon, mit Warning, c) kein Import, Fehlermeldung
 
+ili2gpkg/ili2pg 3.2.0 (2016-07-08)
+----------------------------------
+- new function --replace to replace a dataset
+- new function --delete to delete a dataset
+- new option --dataset name to name a dataset
+- new option --validConfig file to configure the validation
+- new option --disableValidation to disable any data validation
+- fixed superfluous t_type if a concrete class without any extensions
+- API: moved Ili2cUtility functions to ili2c.jar
+- deprecated t_ili2db_import, t_ili2db_import_basket, t_ili2db_import_object
+- ili2c-4.5.23
+- iox-ili-1.12.0
+
 ili2gpkg/ili2pg 3.1.0 (2016-05-31)
 ----------------------------------
 - added column datasetName to table T_ILI2DB_DATASET to make a dataset identifiable from the outside

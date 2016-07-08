@@ -222,7 +222,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 						throw new Ili2dbException(attr.getContainer().getScopedName(null)+"."+attr.getName(),ex);
 					}
 				  }else{
-					  if(Ili2cUtility.isBoolean(td,attr)){
+					  if(attr.isDomainBoolean()){
 						  
 					  }else if(createEnumColAsItfCode && attr.getDomainResolvingAll() instanceof EnumerationType){
 						  throw new Ili2dbException("EXTENDED attributes with type enumeration not supported");
@@ -399,17 +399,17 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 		DbColumn dbCol=null;
 		ArrayList<DbColumn> dbColExts=new ArrayList<DbColumn>();
 		Type type = attr.getDomainResolvingAll();
-		if (Ili2cUtility.isBoolean(td,attr)) {
+		if (attr.isDomainBoolean()) {
 			dbCol= new DbColBoolean();
-		}else if (Ili2cUtility.isIli1Date(td,attr)) {
+		}else if (attr.isDomainIli1Date()) {
 			dbCol= new DbColDate();
-		}else if (Ili2cUtility.isIliUuid(td,attr)) {
+		}else if (attr.isDomainIliUuid()) {
 			dbCol= new DbColUuid();
-		}else if (Ili2cUtility.isIli2Date(td,attr)) {
+		}else if (attr.isDomainIli2Date()) {
 			dbCol= new DbColDate();
-		}else if (Ili2cUtility.isIli2DateTime(td,attr)) {
+		}else if (attr.isDomainIli2DateTime()) {
 			dbCol= new DbColDateTime();
-		}else if (Ili2cUtility.isIli2Time(td,attr)) {
+		}else if (attr.isDomainIli2Time()) {
 			dbCol= new DbColTime();
 		}else if (type instanceof PolylineType){
 			String attrName=attr.getContainer().getScopedName(null)+"."+attr.getName();

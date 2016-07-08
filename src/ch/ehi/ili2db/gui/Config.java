@@ -74,6 +74,7 @@ public class Config extends Settings {
 	private String dbschema=null;
 	private String modeldir;
 	private String models=null;
+	private String datasetName=null;
 	private String baskets=null;
 	private String topics=null;
 	private String createscript;
@@ -87,10 +88,14 @@ public class Config extends Settings {
 	private String logfile=null;
 	private boolean configReadFromDb=false;
 	private boolean itfTransferFile=false;
+	private String validConfigFileName=null;
+	private boolean validation=false;
 	static public final int FC_IMPORT=0;
 	static public final int FC_SCHEMAIMPORT=1;
 	static public final int FC_EXPORT=2;
 	static public final int FC_UPDATE=3;
+	static public final int FC_DELETE=4;
+	static public final int FC_REPLACE=5;
 	public String getIdGenerator() {
 		return idGenerator;
 	}
@@ -144,6 +149,12 @@ public class Config extends Settings {
 	}
 	public void setModels(String models) {
 		this.models = models;
+	}
+	public String getDatasetName() {
+		return datasetName;
+	}
+	public void setDatasetName(String datasetName) {
+		this.datasetName = datasetName;
 	}
 	public String getBaskets() {
 		return baskets;
@@ -438,5 +449,17 @@ public class Config extends Settings {
 	}
 	public void setItfTransferfile(boolean value) {
 		itfTransferFile=value;
+	}
+	public String getValidConfigFile() {
+		return validConfigFileName;
+	}
+	public void setValidConfigFile(String fileName) {
+		this.validConfigFileName = fileName;
+	}
+	public boolean isValidation() {
+		return validation;
+	}
+	public void setValidation(boolean enable) {
+		this.validation = enable;
 	}
 }

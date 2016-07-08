@@ -562,7 +562,7 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 		if(attr.getExtending()==null){
 			Type type = attr.getDomainResolvingAliases();
 			String attrSqlName=ili2sqlName.mapIliAttributeDef(attr,sqlTableName,null);
-			if (Ili2cUtility.isBoolean(td,attr)) {
+			if (attr.isDomainBoolean()) {
 					ret.append(sep);
 					ret.append(attrSqlName);
 					if(isUpdate){
@@ -695,7 +695,7 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 			throws SQLException, ConverterException {
 		if(attr.getExtending()==null){
 			 String attrName=attr.getName();
-			if( Ili2cUtility.isBoolean(td,attr)) {
+			if( attr.isDomainBoolean()) {
 					String value=iomObj.getattrvalue(attrName);
 					if(value!=null){
 						if(value.equals("true")){
@@ -707,7 +707,7 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 						ps.setNull(valuei,Types.BIT);
 					}
 					valuei++;
-			}else if(Ili2cUtility.isUuidOid(td, attr)){
+			}else if(attr.isDomainIliUuid()){
 				String value=iomObj.getattrvalue(attrName);
 				if(value==null){
 					 geomConv.setUuidNull(ps, valuei);
@@ -716,7 +716,7 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 					 ps.setObject(valuei, toInsertUUID);
 				}
 				valuei++;
-			}else if( Ili2cUtility.isIli1Date(td,attr)) {
+			}else if( attr.isDomainIli1Date()) {
 				String value=iomObj.getattrvalue(attrName);
 				if(value!=null){
 					GregorianCalendar gdate=new GregorianCalendar(Integer.parseInt(value.substring(0,4)),Integer.parseInt(value.substring(4,6))-1,Integer.parseInt(value.substring(6,8)));
@@ -726,7 +726,7 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 					ps.setNull(valuei,Types.DATE);
 				}
 				valuei++;
-			}else if( Ili2cUtility.isIli2Date(td,attr)) {
+			}else if( attr.isDomainIli2Date()) {
 				String value=iomObj.getattrvalue(attrName);
 				if(value!=null){
 					XMLGregorianCalendar xmldate;
@@ -741,7 +741,7 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 					ps.setNull(valuei,Types.DATE);
 				}
 				valuei++;
-			}else if( Ili2cUtility.isIli2Time(td,attr)) {
+			}else if( attr.isDomainIli2Time()) {
 				String value=iomObj.getattrvalue(attrName);
 				if(value!=null){
 					XMLGregorianCalendar xmldate;
@@ -756,7 +756,7 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 					ps.setNull(valuei,Types.TIME);
 				}
 				valuei++;
-			}else if( Ili2cUtility.isIli2DateTime(td,attr)) {
+			}else if( attr.isDomainIli2DateTime()) {
 				String value=iomObj.getattrvalue(attrName);
 				if(value!=null){
 					XMLGregorianCalendar xmldate;

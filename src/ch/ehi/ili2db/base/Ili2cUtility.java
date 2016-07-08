@@ -22,97 +22,6 @@ public class Ili2cUtility {
 		return def.getExtensions().size()>1;
 	}
 
-	static public boolean isIli1Date(TransferDescription td,AttributeDef attr){
-		if (attr.getDomain() instanceof TypeAlias){
-			Type type=attr.getDomain();
-			while(type instanceof TypeAlias) {
-				if (((TypeAlias) type).getAliasing() == td.INTERLIS.INTERLIS_1_DATE) {
-					return true;
-				}
-				type=((TypeAlias) type).getAliasing().getType();
-			}
-		}
-		return false;
-	}
-
-	static public boolean isIli2Date(TransferDescription td,AttributeDef attr){
-		Type type=attr.getDomain();
-		if (type instanceof TypeAlias){
-			while(type instanceof TypeAlias) {
-				if (((TypeAlias) type).getAliasing() == td.INTERLIS.XmlDate) {
-					return true;
-				}
-				type=((TypeAlias) type).getAliasing().getType();
-			}
-		}
-		if(type instanceof FormattedType){
-			FormattedType ft=(FormattedType)type;
-			if(ft.getDefinedBaseDomain()== td.INTERLIS.XmlDate){
-				return true;
-			}
-		}
-		return false;
-	}
-
-	static public boolean isIli2Time(TransferDescription td,AttributeDef attr){
-		Type type=attr.getDomain();
-		if (type instanceof TypeAlias){
-			while(type instanceof TypeAlias) {
-				if (((TypeAlias) type).getAliasing() == td.INTERLIS.XmlTime) {
-					return true;
-				}
-				type=((TypeAlias) type).getAliasing().getType();
-			}
-		}
-		if(type instanceof FormattedType){
-			FormattedType ft=(FormattedType)type;
-			if(ft.getDefinedBaseDomain()== td.INTERLIS.XmlTime){
-				return true;
-			}
-		}
-		return false;
-	}
-
-	static public boolean isIli2DateTime(TransferDescription td,AttributeDef attr){
-		Type type=attr.getDomain();
-		if (type instanceof TypeAlias){
-			while(type instanceof TypeAlias) {
-				if (((TypeAlias) type).getAliasing() == td.INTERLIS.XmlDateTime) {
-					return true;
-				}
-				type=((TypeAlias) type).getAliasing().getType();
-			}
-		}
-		if(type instanceof FormattedType){
-			FormattedType ft=(FormattedType)type;
-			if(ft.getDefinedBaseDomain()== td.INTERLIS.XmlDateTime){
-				return true;
-			}
-		}
-		return false;
-	}
-
-	static public boolean isIliUuid(TransferDescription td,AttributeDef attr){
-		if (attr.getDomain() instanceof TypeAlias){
-			Type type=attr.getDomain();
-			while(type instanceof TypeAlias) {
-				if (((TypeAlias) type).getAliasing() == td.INTERLIS.UUIDOID) {
-					return true;
-				}
-				type=((TypeAlias) type).getAliasing().getType();
-			}
-		}
-		return false;
-	}
-
-	static public boolean isBoolean(TransferDescription td,AttributeDef attr){
-		if (attr.getDomain() instanceof TypeAlias && Ili2cUtility.isBoolean(td,attr.getDomain())) {
-			return true;
-		}
-		return false;
-		
-	}
-
 	static public boolean isBoolean(TransferDescription td,Type type){
 		while(type instanceof TypeAlias) {
 			if (((TypeAlias) type).getAliasing() == td.INTERLIS.BOOLEAN) {
@@ -121,12 +30,6 @@ public class Ili2cUtility {
 			type=((TypeAlias) type).getAliasing().getType();
 		}
 		
-		return false;
-	}
-	public static boolean isUuidOid(TransferDescription td, AttributeDef attr) {
-		if (attr.getDomain() instanceof TypeAlias && Ili2cUtility.isUuidOid(td,attr.getDomain())) {
-			return true;
-		}
 		return false;
 	}
 	static public boolean isUuidOid(TransferDescription td,Type type){
