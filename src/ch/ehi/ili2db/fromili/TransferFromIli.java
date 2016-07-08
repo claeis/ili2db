@@ -716,6 +716,7 @@ public class TransferFromIli {
 		{
 			DbTable tab=new DbTable();
 			tab.setName(new DbTableName(schema.getName(),DbNames.IMPORTS_TAB));
+			tab.setComment(DbNames.DEPRECATED);
 			
 			recConv.addKeyCol(tab);
 			
@@ -754,6 +755,7 @@ public class TransferFromIli {
 		{
 			DbTable tab=new DbTable();
 			tab.setName(new DbTableName(schema.getName(),DbNames.IMPORTS_BASKETS_TAB));
+			tab.setComment(DbNames.DEPRECATED);
 			
 			recConv.addKeyCol(tab);
 			
@@ -802,6 +804,8 @@ public class TransferFromIli {
 		{
 			DbTable tab=new DbTable();
 			tab.setName(new DbTableName(schema.getName(),DbNames.IMPORTS_OBJECTS_TAB));
+			tab.setComment(DbNames.DEPRECATED);
+			
 			recConv.addKeyCol(tab);
 			DbColId dbColBasket=new DbColId();
 			dbColBasket.setName(DbNames.IMPORTS_OBJECTS_TAB_IMPORT_COL);

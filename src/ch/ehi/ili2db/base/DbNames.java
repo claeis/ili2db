@@ -1,6 +1,7 @@
 package ch.ehi.ili2db.base;
 
 public class DbNames {
+	public static final String DEPRECATED="DEPRECATED, do not use";
 	public static final String BASKETS_TAB="T_ILI2DB_BASKET";
 	public static final String BASKETS_TAB_TOPIC_COL="topic";
 	public static final String BASKETS_TAB_DATASET_COL="dataset";
