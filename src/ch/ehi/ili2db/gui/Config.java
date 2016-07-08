@@ -88,6 +88,8 @@ public class Config extends Settings {
 	private String logfile=null;
 	private boolean configReadFromDb=false;
 	private boolean itfTransferFile=false;
+	private String validConfigFileName=null;
+	private boolean validation=false;
 	static public final int FC_IMPORT=0;
 	static public final int FC_SCHEMAIMPORT=1;
 	static public final int FC_EXPORT=2;
@@ -447,5 +449,17 @@ public class Config extends Settings {
 	}
 	public void setItfTransferfile(boolean value) {
 		itfTransferFile=value;
+	}
+	public String getValidConfigFile() {
+		return validConfigFileName;
+	}
+	public void setValidConfigFile(String fileName) {
+		this.validConfigFileName = fileName;
+	}
+	public boolean isValidation() {
+		return validation;
+	}
+	public void setValidation(boolean enable) {
+		this.validation = enable;
 	}
 }

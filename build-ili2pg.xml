@@ -26,6 +26,8 @@
         <pathelement location="lib/ili2c.jar"/>
         <pathelement location="lib/jts-core-1.14.0.jar"/>
         <pathelement location="lib/jdbm-2.4.jar"/>
+	<pathelement location="lib/gson-2.6.2.jar"/>
+	<pathelement location="lib/toml4j-0.5.1.jar"/>
 	<pathelement location="lib/${postgresql}"/>
       </classpath>
     	<src path="${src}" />
@@ -63,6 +65,8 @@
     	<zipfileset src="lib/ehisqlgen.jar"/>
     	<zipfileset src="lib/jts-core-1.14.0.jar"/>
     	<zipfileset src="lib/jdbm-2.4.jar"/>
+	<zipfileset src="lib/gson-2.6.2.jar"/>
+	<zipfileset src="lib/toml4j-0.5.1.jar"/>
     </jar>
   </target>
   
@@ -118,6 +122,8 @@
 		<patternset includes="lib/jts-core-1.14.0.jar"/>
 		<patternset includes="lib/jdbm-2.4.jar"/>
 		<patternset includes="lib/${postgresql}"/>
+		<patternset includes="lib/gson-2.6.2.jar"/>
+		<patternset includes="lib/toml4j-0.5.1.jar"/>
     	</zipfileset>
     </zip>
   </target>

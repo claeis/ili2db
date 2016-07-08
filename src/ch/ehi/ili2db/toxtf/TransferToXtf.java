@@ -22,6 +22,8 @@ import java.util.GregorianCalendar;
 import java.util.HashSet;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.sql.Connection;
 import java.sql.SQLException;
 
@@ -44,8 +46,11 @@ import ch.interlis.ili2c.metamodel.*;
 import ch.interlis.iom.IomObject;
 import ch.interlis.iom_j.Iom_jObject;
 import ch.interlis.iox.IoxException;
+import ch.interlis.iox.IoxLogging;
 import ch.interlis.iox.IoxWriter;
 import ch.interlis.iox_j.*;
+import ch.interlis.iox_j.logging.LogEventFactory;
+import ch.interlis.iox_j.validator.ValidationConfig;
 import ch.interlis.iom_j.itf.EnumCodeMapper;
 import ch.interlis.iom_j.itf.ItfWriter;
 import ch.interlis.iom_j.itf.ItfWriter2;
@@ -69,6 +74,8 @@ public class TransferToXtf {
 	private SqlColumnConverter geomConv=null;
 	private ToXtfRecordConverter recConv=null;
 	private Viewable2TableMapping class2wrapper=null;
+	private Config config=null;
+	private ch.interlis.iox_j.validator.Validator validator=null;
 	
 	/** map of xml-elementnames to interlis classdefs.
 	 *  Used to map typenames read from the T_TYPE column to the classdef.
@@ -93,6 +100,7 @@ public class TransferToXtf {
 		writeIliTid=config.TID_HANDLING_PROPERTY.equals(config.getTidHandling());
 		this.geomConv=geomConv;
 		recConv=new ToXtfRecordConverter(td,ili2sqlName,config,null,geomConv,conn,sqlidPool,trafoConfig,class2wrapper);
+		this.config=config;
 
 	}
 	public void doit(String filename,IoxWriter iomFile,String sender,String exportParamModelnames[],int basketSqlIds[],HashSet<BasketStat> stat)
@@ -100,8 +108,27 @@ public class TransferToXtf {
 	{
 		this.basketStat=stat;
 		boolean referrs=false;
+		if(config.isValidation()){
+			ValidationConfig modelConfig=new ValidationConfig();
+			modelConfig.mergeIliMetaAttrs(td);
+			String configFilename=config.getValidConfigFile();
+			if(configFilename!=null){
+				try {
+					modelConfig.mergeConfigFile(new File(configFilename));
+				} catch (FileNotFoundException e) {
+					EhiLogger.logError("validator config file <"+configFilename+"> not found");
+				}
+			}
+			IoxLogging errHandler=new ch.interlis.iox_j.logging.Log2EhiLogger();
+			LogEventFactory errFactory=new LogEventFactory();
+			errFactory.setDataSource(filename);
+			validator=new ch.interlis.iox_j.validator.Validator(td,modelConfig, errHandler, errFactory, config);
+			
+		}
+		
 		StartTransferEvent startEvent=new StartTransferEvent();
 		startEvent.setSender(sender);
+		if(validator!=null)validator.validate(startEvent);
 		iomFile.write(startEvent);
 		if(basketSqlIds!=null){
 			for(int basketSqlId : basketSqlIds){
@@ -137,7 +164,10 @@ public class TransferToXtf {
 		if(referrs){
 			throw new IoxException("dangling references");
 		}
-		iomFile.write(new EndTransferEvent());
+		EndTransferEvent endEvent=new EndTransferEvent();
+		if(validator!=null)validator.validate(endEvent);
+		iomFile.write(endEvent);
+		if(validator!=null)validator.close();
 	}
 	private Topic getTopicByBasketId(int basketSqlId, StringBuilder basketXtfId) throws IoxException {
 		
@@ -245,6 +275,7 @@ public class TransferToXtf {
 					EhiLogger.logState(aclass.getScopedName(null)+"...");
 					if(iomBasket==null){
 						iomBasket=new StartBasketEvent(topic.getScopedName(null),basketXtfId);
+						if(validator!=null)validator.validate(iomBasket);
 						iomFile.write(iomBasket);
 					}
 					dumpObject(iomFile,aclass,basketSqlId);
@@ -265,6 +296,7 @@ public class TransferToXtf {
 						EhiLogger.logState(attr.getContainer().getScopedName(null)+"_"+attr.getName()+"...");
 						if(iomBasket==null){
 							iomBasket=new StartBasketEvent(topic.getScopedName(null),topic.getScopedName(null));
+							if(validator!=null)validator.validate(iomBasket);
 							iomFile.write(iomBasket);
 						}
 						dumpItfTableObject(iomFile,attr,basketSqlId);
@@ -302,11 +334,14 @@ public class TransferToXtf {
 					
 				}
 				if(!skipObj){
-					iomFile.write(new ObjectEvent(fixref.getRoot()));
+					ObjectEvent objEvent=new ObjectEvent(fixref.getRoot());
+					if(validator!=null)validator.validate(objEvent);
+					iomFile.write(objEvent);
 				}
 			}
-			
-			iomFile.write(new EndBasketEvent());
+			EndBasketEvent endBasket=new EndBasketEvent();
+			if(validator!=null)validator.validate(endBasket);
+			iomFile.write(endBasket);
 			saveObjStat(iomBasket.getBid(),filename,iomBasket.getType());
 		}
 		return referrs;
@@ -609,7 +644,9 @@ public class TransferToXtf {
 				
 				if(out!=null){
 					// write object
-					out.write(new ObjectEvent(iomObj));
+					ObjectEvent objEvent=new ObjectEvent(iomObj);
+					if(validator!=null)validator.validate(objEvent);
+					out.write(objEvent);
 				}
 			}
 			}catch(java.sql.SQLException ex){		
@@ -664,7 +701,9 @@ public class TransferToXtf {
 							delayedObjects.add(fixref);
 						}else{
 							// write object
-							out.write(new ObjectEvent(iomObj));
+							ObjectEvent objEvent=new ObjectEvent(iomObj);
+							if(validator!=null)validator.validate(objEvent);
+							out.write(objEvent);
 						}
 					}
 				}

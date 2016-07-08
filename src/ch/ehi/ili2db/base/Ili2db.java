@@ -19,6 +19,7 @@ package ch.ehi.ili2db.base;
 
 import ch.ehi.basics.logging.EhiLogger;
 import ch.ehi.basics.logging.LogEvent;
+import ch.ehi.basics.logging.StdListener;
 import ch.ehi.basics.logging.StdLogEvent;
 import ch.ehi.basics.settings.Settings;
 import ch.interlis.ili2c.config.Configuration;
@@ -53,6 +54,8 @@ import ch.interlis.iom_j.xtf.XtfReader;
 import ch.interlis.iox.IoxException;
 import ch.interlis.iox.IoxReader;
 import ch.interlis.iox.IoxWriter;
+import ch.interlis.iox_j.logging.FileLogger;
+import ch.interlis.iox_j.logging.StdLogger;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -196,9 +199,13 @@ public class Ili2db {
 		{
 		ch.ehi.basics.logging.FileListener logfile=null;
 		if(config.getLogfile()!=null){
-			logfile=new Ili2dbLogger(new java.io.File(config.getLogfile()),true);
+			logfile=new FileLogger(new java.io.File(config.getLogfile()));
 			EhiLogger.getInstance().addListener(logfile);
 		}
+		StdLogger logStderr=new StdLogger(config.getLogfile());
+		EhiLogger.getInstance().addListener(logStderr);
+		EhiLogger.getInstance().removeListener(StdListener.getInstance());
+		
 		try{
 			boolean connectionFromExtern=config.getJdbcConnection()!=null;
 			logGeneralInfo(config);
@@ -643,6 +650,10 @@ public class Ili2db {
 				logfile.close();
 				logfile=null;
 			}
+			if(logStderr!=null){
+				EhiLogger.getInstance().addListener(StdListener.getInstance());
+				EhiLogger.getInstance().removeListener(logStderr);
+			}
 		}
 		
 
@@ -721,9 +732,13 @@ public class Ili2db {
 	{
 		ch.ehi.basics.logging.FileListener logfile=null;
 		if(config.getLogfile()!=null){
-			logfile=new ch.ehi.basics.logging.FileListener(new java.io.File(config.getLogfile()),true);
+			logfile=new FileLogger(new java.io.File(config.getLogfile()));
 			EhiLogger.getInstance().addListener(logfile);
 		}
+		StdLogger logStderr=new StdLogger(config.getLogfile());
+		EhiLogger.getInstance().addListener(logStderr);
+		EhiLogger.getInstance().removeListener(StdListener.getInstance());
+		
 		try{
 			boolean connectionFromExtern=config.getJdbcConnection()!=null;
 			logGeneralInfo(config);
@@ -1027,6 +1042,10 @@ public class Ili2db {
 				logfile.close();
 				logfile=null;
 			}
+			if(logStderr!=null){
+				EhiLogger.getInstance().addListener(StdListener.getInstance());
+				EhiLogger.getInstance().removeListener(logStderr);
+			}
 		}
 		
 }
@@ -1080,9 +1099,13 @@ public class Ili2db {
 	{
 		ch.ehi.basics.logging.FileListener logfile=null;
 		if(config.getLogfile()!=null){
-			logfile=new ch.ehi.basics.logging.FileListener(new java.io.File(config.getLogfile()),true);
+			logfile=new FileLogger(new java.io.File(config.getLogfile()));
 			EhiLogger.getInstance().addListener(logfile);
 		}
+		StdLogger logStderr=new StdLogger(config.getLogfile());
+		EhiLogger.getInstance().addListener(logStderr);
+		EhiLogger.getInstance().removeListener(StdListener.getInstance());
+		
 		try{
 			boolean connectionFromExtern=config.getJdbcConnection()!=null;
 			logGeneralInfo(config);
@@ -1307,6 +1330,10 @@ public class Ili2db {
 				EhiLogger.getInstance().removeListener(logfile);
 				logfile.close();
 				logfile=null;
+			}
+			if(logStderr!=null){
+				EhiLogger.getInstance().addListener(StdListener.getInstance());
+				EhiLogger.getInstance().removeListener(logStderr);
 			}
 		}
 	}
