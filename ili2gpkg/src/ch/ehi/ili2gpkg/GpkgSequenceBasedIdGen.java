@@ -22,6 +22,7 @@ import java.sql.Connection;
 
 import ch.ehi.basics.logging.EhiLogger;
 import ch.ehi.ili2db.base.DbIdGen;
+import ch.ehi.ili2db.gui.Config;
 import ch.ehi.sqlgen.repository.DbTableName;
 
 
@@ -35,7 +36,7 @@ public class GpkgSequenceBasedIdGen implements DbIdGen {
 	String dbusr=null;
 	String schema=null;
 	@Override
-	public void init(String schema) {
+	public void init(String schema,Config config) {
 		this.schema=schema;
 	}
 	@Override

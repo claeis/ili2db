@@ -422,7 +422,7 @@ public class Ili2db {
 				}catch(Exception ex){
 					throw new Ili2dbException("failed to load/create ID generator",ex);
 				}
-				idGen.init(config.getDbschema());
+				idGen.init(config.getDbschema(),config);
 				SqlColumnConverter geomConverter=null;
 				try{
 					geomConverter=(SqlColumnConverter)Class.forName(geometryConverter).newInstance();
@@ -876,7 +876,7 @@ public class Ili2db {
 			}catch(Exception ex){
 				throw new Ili2dbException("failed to load/create ID generator",ex);
 			}
-		  	idGen.init(config.getDbschema());
+		  	idGen.init(config.getDbschema(),config);
 
 			// read mapping file
 			NameMapping mapping=new NameMapping(config);

@@ -90,6 +90,9 @@ public class Config extends Settings {
 	private boolean itfTransferFile=false;
 	private String validConfigFileName=null;
 	private boolean validation=false;
+	private Long minIdSeqValue=null;
+	private Long maxIdSeqValue=null;
+	
 	static public final int FC_IMPORT=0;
 	static public final int FC_SCHEMAIMPORT=1;
 	static public final int FC_EXPORT=2;
@@ -461,5 +464,17 @@ public class Config extends Settings {
 	}
 	public void setValidation(boolean enable) {
 		this.validation = enable;
+	}
+	public Long getMinIdSeqValue() {
+		return minIdSeqValue;
+	}
+	public void setMinIdSeqValue(Long minIdSeqValue) {
+		this.minIdSeqValue = minIdSeqValue;
+	}
+	public Long getMaxIdSeqValue() {
+		return maxIdSeqValue;
+	}
+	public void setMaxIdSeqValue(Long maxIdSeqValue) {
+		this.maxIdSeqValue = maxIdSeqValue;
 	}
 }

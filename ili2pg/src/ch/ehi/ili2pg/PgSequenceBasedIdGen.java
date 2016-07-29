@@ -22,6 +22,7 @@ import java.sql.Connection;
 
 import ch.ehi.basics.logging.EhiLogger;
 import ch.ehi.ili2db.base.DbIdGen;
+import ch.ehi.ili2db.gui.Config;
 import ch.ehi.sqlgen.repository.DbTableName;
 
 
@@ -34,9 +35,13 @@ public class PgSequenceBasedIdGen implements DbIdGen {
 	java.sql.Connection conn=null;
 	String dbusr=null;
 	String schema=null;
+	Long minValue=null;
+	Long maxValue=null;
 	@Override
-	public void init(String schema) {
+	public void init(String schema,Config config) {
 		this.schema=schema;
+		minValue=config.getMinIdSeqValue();
+		maxValue=config.getMaxIdSeqValue();
 	}
 	@Override
 	public void initDb(Connection conn, String dbusr) {
@@ -106,7 +111,14 @@ public class PgSequenceBasedIdGen implements DbIdGen {
 		if(schema!=null){
 			sqlName=schema+"."+sqlName;
 		}
-		String stmt="CREATE SEQUENCE "+sqlName+";";
+		String stmt="CREATE SEQUENCE "+sqlName;
+		if(minValue!=null){
+			stmt=stmt+" MINVALUE "+minValue;
+		}
+		if(maxValue!=null){
+			stmt=stmt+" MAXVALUE "+maxValue;
+		}
+		stmt=stmt+";";
 		EhiLogger.traceBackendCmd(stmt);
 		java.sql.PreparedStatement updstmt = null;
 		try{
