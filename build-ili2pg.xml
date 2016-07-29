@@ -6,6 +6,11 @@
   <property name="build" value="${basedir}/build"/>
   <property name="dist" value="${basedir}/dist"/>
   <property name="postgresql" value="postgresql-9.4.1208.jre6.jar"/>
+  <property file="user.properties" prefix="user."/>
+
+  <property name="python" value="${user.python}"/>
+  <property name="pythonhome" value="${user.pythonhome}"/>
+  <property name="rst2html" value="${user.rst2html}"/>
 
   <target name="init">
     <!-- Create the time stamp -->
@@ -41,6 +46,15 @@
     <javadoc Public="true" Windowtitle="${ant.project.name}" destdir="${build}/javadoc/api">
     	<sourcepath path="${src}"/>
     </javadoc>
+  </target>
+  
+  <target depends="init" name="usrdoc">
+  	<exec dir="docs" executable="${python}">
+  		<env key="PYTHONHOME" value="${pythonhome}"/>
+  		<arg value="${rst2html}"/>
+  		<arg value="ili2db.rst"/>
+  		<arg value="ili2db.html"/>
+  	</exec>
   </target>
 
 
