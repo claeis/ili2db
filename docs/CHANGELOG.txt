@@ -16,6 +16,7 @@ ili2pg 3.3.0 (2016-07-xx)
 ----------------------------------
 - fixed visiting of class/structure extensions in models that are not referenced but loaded (Jagdbanngebiete_V2.ili failure)
 - new option --idSeqMin and --idSeqMax to set the min/max of the id sequence generator
+- show maxMemory at startup
 
 ili2gpkg/ili2pg 3.2.0 (2016-07-08)
 ----------------------------------

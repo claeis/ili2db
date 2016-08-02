@@ -1054,6 +1054,7 @@ public class Ili2db {
 		EhiLogger.logState("ili2c-"+ch.interlis.ili2c.Main.getVersion());
 		EhiLogger.logState("java.version "+System.getProperty("java.version"));
 		EhiLogger.logState("user.name <"+System.getProperty("user.name")+">");
+		EhiLogger.logState("maxMemory "+java.lang.Runtime.getRuntime().maxMemory()/1024L+" KB");
 	}
 	private static void setupIli2cPathmap(Config config, String appHome,
 			String xtffile,java.sql.Connection conn) throws Ili2dbException {
