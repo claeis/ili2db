@@ -369,6 +369,21 @@ public class Ili2db {
 					}
 					getBasketSqlIdsFromDatasetId(datasetId,modelv,conn,config);
 				}
+				if(function==Config.FC_IMPORT){
+					String datasetName=config.getDatasetName();
+					if(datasetName!=null){
+						if(DbUtility.tableExists(conn,new DbTableName(config.getDbschema(),DbNames.DATASETS_TAB))){
+							Integer datasetId=getDatasetId(datasetName, conn, config);
+							if(datasetId!=null){
+								throw new Ili2dbException("dataset <"+datasetName+"> already exists");
+							}
+						}
+						boolean createBasketCol=config.BASKET_HANDLING_READWRITE.equals(config.getBasketHandling());
+						if(!createBasketCol){
+							throw new Ili2dbException("import with dataset name requires column "+DbNames.T_BASKET_COL);
+						}
+					}
+				}
 				
 				if(modelv.getSizeFileEntry()==0){
 					throw new Ili2dbException("no models given");

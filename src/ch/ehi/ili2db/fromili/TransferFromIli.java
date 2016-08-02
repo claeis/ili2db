@@ -706,8 +706,15 @@ public class TransferFromIli {
 			dsNameCol.setNotNull(false);
 			dsNameCol.setSize(200);
 			tab.addColumn(dsNameCol);
+
+			DbIndex dbIndex=new DbIndex();
+			dbIndex.setPrimary(false);
+			dbIndex.setUnique(true);
+			dbIndex.addAttr(dsNameCol);
+			tab.addIndex(dbIndex);
 			
 			schema.addTable(tab);
+
 			
 		}
 	}
