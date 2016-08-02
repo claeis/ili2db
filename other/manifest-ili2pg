@@ -1,3 +1,0 @@
-Manifest-Version: 1.0
-Main-Class: ch.ehi.ili2pg.PgMain
-Class-Path: ili2c.jar  postgresql-9.4.1208.jre6.jar

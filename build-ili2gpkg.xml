@@ -5,6 +5,8 @@
   <property name="src" value="${basedir}/src"/>
   <property name="build" value="${basedir}/build"/>
   <property name="dist" value="${basedir}/dist"/>
+  <property name="lib" value="libs"/>
+  <property name="sqlite" value="sqlite-jdbc-3.8.11.2.jar"/>
 
   <target name="init">
     <!-- Create the time stamp -->
@@ -21,13 +23,18 @@
     <mkdir dir="${build}/classes"/>
     <javac destdir="${build}/classes" includes="**/*.java" excludes="**/test/*.java"  source="1.6" target="1.6">
       <classpath>
-        <pathelement location="lib/ehisqlgen.jar"/>
-        <pathelement location="lib/ili2c.jar"/>
-        <pathelement location="lib/jts-core-1.14.0.jar"/>
-        <pathelement location="lib/jdbm-2.4.jar"/>
-	<pathelement location="lib/sqlite-jdbc-3.8.11.2.jar"/>
-        <pathelement location="lib/gson-2.6.2.jar"/>
-        <pathelement location="lib/toml4j-0.5.1.jar"/>
+        <pathelement location="${lib}/antlr.jar"/>
+        <pathelement location="${lib}/ehibasics.jar"/>
+        <pathelement location="${lib}/ili2c-core.jar"/>
+        <pathelement location="${lib}/ili2c-tool.jar"/>
+        <pathelement location="${lib}/iox-api.jar"/>
+        <pathelement location="${lib}/iox-ili.jar"/>
+        <pathelement location="${lib}/jts-core-1.14.0.jar"/>
+        <pathelement location="${lib}/jdbm-2.4.jar"/>
+	<pathelement location="${lib}/gson-2.6.2.jar"/>
+	<pathelement location="${lib}/toml4j-0.5.1.jar"/>
+        <pathelement location="${lib}/ehisqlgen.jar"/>
+	<pathelement location="${lib}/${sqlite}"/>
       </classpath>
     	<src path="${src}" />
     	<src path="ili2gpkg/src"/>
@@ -51,7 +58,20 @@
 
     <delete file="${projectjar}" quiet="true"/>
 
-    <jar jarfile="${projectjar}" manifest="other/manifest-ili2gpkg">
+    <jar jarfile="${projectjar}">
+	    <manifest>
+	      <!-- attribute name="Built-By" value="${user.name}"/>
+	      <attribute name="Build-Jdk" value="${java.version}"/>
+	      <attribute name="ArtefactId" value="GBDBS"/>
+	      <attribute name="Buildnumber" value=""/>
+	      <attribute name="Description" value="${mf.description}"/>
+	      <attribute name="GroupId" value="${mf.groupid}"/>
+	      <attribute name="Organisazion" value="${mf.organization}"/>
+	      <attribute name="Url" value="${mf.url}"/>
+	      <attribute name="Version" value="${version}"/-->
+	      <attribute name="Main-Class" value="ch.ehi.ili2gpkg.GpkgMain"/>
+	      <attribute name="Class-Path" value="${lib}/antlr.jar ${lib}/ehibasics.jar ${lib}/gson-2.6.2.jar ${lib}/ili2c-core.jar ${lib}/ili2c-tool.jar ${lib}/iox-api.jar ${lib}/iox-ili.jar ${lib}/jdbm-2.4.jar ${lib}/jts-core-1.14.0.jar ${lib}/toml4j-0.5.1.jar ${lib}/ehisqlgen.jar ${lib}/${sqlite}"/>
+	    </manifest>
 	<fileset dir="${build}/classes" includes="**/*.class"/>
     	<fileset dir="${src}" includes="**/*.properties"/>
     	<fileset dir="ili2gpkg/src" includes="**/*.sql"/>
@@ -62,11 +82,6 @@
     	<fileset dir="${src}" includes="**/*.gif"/>
     	<fileset dir="${src}" includes="**/*.jpg"/>
     	<fileset dir="${src}" includes="**/*.png"/>
-    	<zipfileset src="lib/ehisqlgen.jar"/>
-    	<zipfileset src="lib/jts-core-1.14.0.jar"/>
-    	<zipfileset src="lib/jdbm-2.4.jar"/>
-        <zipfileset src="lib/gson-2.6.2.jar"/>
-        <zipfileset src="lib/toml4j-0.5.1.jar"/>
     </jar>
   </target>
   
@@ -82,22 +97,23 @@
     	<zipfileset dir="${build}/jar" prefix="${ant.project.name}-${buildnr}">
 	    	<patternset includes="${ant.project.name}.jar"/>
     	</zipfileset>
-    	<zipfileset dir="${basedir}/lib" prefix="${ant.project.name}-${buildnr}">
-	    	<patternset includes="ili2c.jar"/>
-	    	<patternset includes="sqlite-jdbc-3.8.11.2.jar"/>
+    	<zipfileset dir="${basedir}" prefix="${ant.project.name}-${buildnr}">
+		<patternset includes="${lib}/antlr.jar"/>
+		<patternset includes="${lib}/ehibasics.jar"/>
+		<patternset includes="${lib}/gson-2.6.2.jar"/>
+		<patternset includes="${lib}/ili2c-core.jar"/>
+		<patternset includes="${lib}/ili2c-tool.jar"/>
+		<patternset includes="${lib}/iox-api.jar"/>
+		<patternset includes="${lib}/iox-ili.jar"/>
+		<patternset includes="${lib}/jdbm-2.4.jar"/>
+		<patternset includes="${lib}/jts-core-1.14.0.jar"/>
+		<patternset includes="${lib}/toml4j-0.5.1.jar"/>
+		<patternset includes="${lib}/ehisqlgen.jar"/>
+	    	<patternset includes="${lib}/${sqlite}"/>
     	</zipfileset>
     	<zipfileset dir="." prefix="${ant.project.name}-${buildnr}">
 	    	<patternset includes="docs/ili2db.html"/>
 	</zipfileset>	    	
-    	<!-- <zipfileset dir="." prefix="${ant.project.name}-${buildnr}">
-	    	<patternset includes="lib/**"/> 
-	    	<patternset includes="docs/LICENSE.*"/>
-	    	<patternset includes="docs/README.txt"/>
-	    	<patternset includes="docs/CHANGELOG.txt"/>
-	    	<patternset includes="docs/ili2ora/ili2ora05.ili"/>
-	    	<patternset includes="docs/ili2ora/MappingConfig.jpeg"/>
-	    	<patternset includes="sample/zpl/**"/>
-    	</zipfileset> -->
     </zip>
   </target>
   <target depends="init,buildnr" name="srcdist">
@@ -105,21 +121,24 @@
     <zip zipfile="${dist}/${ant.project.name}-${buildnr}.src.zip">
     	<zipfileset dir="." prefix="${ant.project.name}-${buildnr}">
 	    	<patternset includes="build-ili2gpkg.xml"/>
-	    	<!-- <patternset includes="lib/**"/> -->
-	    	<patternset includes="other/manifest-ili2gpkg"/>
 	    	<patternset includes="sample/zpl/**"/>
 	    	<patternset includes="src/**" excludes="**/CVS/*;**/bak~/*"/>
 	    	<patternset includes="ili2gpkg/src/**" excludes="**/CVS/*;**/bak~/*"/>
 		<patternset includes="resources/de/**/*.properties"/>
 		<patternset includes="resources/fr/**/*.properties"/>
 		<patternset includes="resources/it/**/*.properties"/>
-	    	<patternset includes="lib/ili2c.jar"/>
-		<patternset includes="lib/ehisqlgen.jar"/>
-		<patternset includes="lib/jts-core-1.14.0.jar"/>
-		<patternset includes="lib/jdbm-2.4.jar"/>
-		<patternset includes="lib/sqlite-jdbc-3.8.11.2.jar"/>
-		<patternset includes="lib/gson-2.6.2.jar"/>
-		<patternset includes="lib/toml4j-0.5.1.jar"/>
+		<patternset includes="${lib}/antlr.jar"/>
+		<patternset includes="${lib}/ehibasics.jar"/>
+		<patternset includes="${lib}/gson-2.6.2.jar"/>
+		<patternset includes="${lib}/ili2c-core.jar"/>
+		<patternset includes="${lib}/ili2c-tool.jar"/>
+		<patternset includes="${lib}/iox-api.jar"/>
+		<patternset includes="${lib}/iox-ili.jar"/>
+		<patternset includes="${lib}/jdbm-2.4.jar"/>
+		<patternset includes="${lib}/jts-core-1.14.0.jar"/>
+		<patternset includes="${lib}/toml4j-0.5.1.jar"/>
+		<patternset includes="${lib}/ehisqlgen.jar"/>
+	    	<patternset includes="${lib}/${sqlite}"/>
     	</zipfileset>
     </zip>
   </target>
