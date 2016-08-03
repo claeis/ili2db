@@ -653,7 +653,7 @@ public class TransferFromXtf {
 			getstmt=conn.prepareStatement(stmt);
 			getstmt.setInt(1,datasetSqlId);
 			java.sql.ResultSet res=getstmt.executeQuery();
-			if(res.next()){
+			while(res.next()){
 				int sqlId=res.getInt(1);
 				String topicQName=res.getString(2);
 				deleteObjectsOfBasket(sqlId,topicQName);
