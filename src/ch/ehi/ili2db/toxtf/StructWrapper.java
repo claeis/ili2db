@@ -26,7 +26,7 @@ import ch.interlis.ili2c.metamodel.AttributeDef;
  * @version $Revision: 1.0 $ $Date: 05.04.2005 $
  */
 public class StructWrapper {
-	private int parentSqlId;
+	private long parentSqlId;
 	private IomObject parent;
 	private AttributeDef parentAttr;
 	private ViewableWrapper parentTable;
@@ -35,13 +35,13 @@ public class StructWrapper {
 	 * @param parentAttr1 Structure attribute in the parent CLASS/STRUCTURE.
 	 * @param parent1 parent object/structele.
 	 */
-	public StructWrapper(int parentSqlId1,AttributeDef parentAttr1,IomObject parent1,ViewableWrapper parentTable1){
+	public StructWrapper(long parentSqlId1,AttributeDef parentAttr1,IomObject parent1,ViewableWrapper parentTable1){
 		parentSqlId=parentSqlId1;
 		parentAttr=parentAttr1;
 		parentTable=parentTable1;
 		parent=parent1;
 	}
-	public int getParentSqlId() {
+	public long getParentSqlId() {
 		return parentSqlId;
 	}
 	public AttributeDef getParentAttr() {

@@ -71,7 +71,7 @@ public class TableBasedIdGen implements DbIdGen {
 		ch.ehi.ili2db.converter.AbstractRecordConverter.addStdCol(tab);
 		schema.addTable(tab);
 	}
-	public int getCount(String key)
+	public long getCount(String key)
 	{
 		String sqlName=SQL_T_KEY_OBJECT;
 		if(schema!=null){
@@ -84,9 +84,9 @@ public class TableBasedIdGen implements DbIdGen {
 			getstmt=conn.prepareStatement(stmt);
 			getstmt.setString(1,key);
 			java.sql.ResultSet res=getstmt.executeQuery();
-			int ret=0;
+			long ret=0;
 			if(res.next()){
-				ret=res.getInt(1);
+				ret=res.getLong(1);
 				return ret;
 			}
 		}catch(java.sql.SQLException ex){
@@ -102,7 +102,7 @@ public class TableBasedIdGen implements DbIdGen {
 		}
 			
 		// INSERT
-		int ret=0;
+		long ret=0;
 		java.sql.Timestamp today=new java.sql.Timestamp(System.currentTimeMillis());
 		String stmt="INSERT INTO "+sqlName+" ("+SQL_T_KEY+","+SQL_T_LASTUNIQUEID+",T_LastChange,T_CreateDate,T_User) VALUES (?,?,?,?,?)";
 		EhiLogger.traceBackendCmd(stmt);
@@ -110,7 +110,7 @@ public class TableBasedIdGen implements DbIdGen {
 		try{
 			updstmt = conn.prepareStatement(stmt);
 			updstmt.setString(1, key);
-			updstmt.setInt(2, ret);
+			updstmt.setLong(2, ret);
 			updstmt.setTimestamp(3, today);
 			updstmt.setTimestamp(4, today);
 			updstmt.setString(5, dbusr);
@@ -128,7 +128,7 @@ public class TableBasedIdGen implements DbIdGen {
 		}
 		return ret;
 	}
-	public void setCount(int newId,String key)
+	public void setCount(long newId,String key)
 	{
 		String sqlName=SQL_T_KEY_OBJECT;
 		if(schema!=null){
@@ -141,7 +141,7 @@ public class TableBasedIdGen implements DbIdGen {
 		java.sql.PreparedStatement updstmt = null;
 		try{
 			updstmt = conn.prepareStatement(stmt);
-			updstmt.setInt(1, newId);
+			updstmt.setLong(1, newId);
 			updstmt.setTimestamp(2, today);
 			updstmt.setString(3, dbusr);
 			updstmt.setString(4, key);
@@ -164,12 +164,12 @@ public class TableBasedIdGen implements DbIdGen {
 	}
 	/** gets a new obj id.
 	 */
-	int idBlockStart=0;
-	int lastLocalId=0;
+	long idBlockStart=0;
+	long lastLocalId=0;
 	@Override
-	public int newObjSqlId(){
-		int ret;
-		final int BLOCK_SIZE=20;
+	public long newObjSqlId(){
+		long ret;
+		final long BLOCK_SIZE=20;
 		if(lastLocalId!=0 && lastLocalId<BLOCK_SIZE){
 			lastLocalId++;
 			ret=idBlockStart+lastLocalId;
@@ -181,7 +181,7 @@ public class TableBasedIdGen implements DbIdGen {
 		return ret;
 	}
 	@Override
-	public int getLastSqlId()
+	public long getLastSqlId()
 	{
 		return idBlockStart+lastLocalId;
 	}

@@ -103,7 +103,7 @@ public class TransferToXtf {
 		this.config=config;
 
 	}
-	public void doit(String filename,IoxWriter iomFile,String sender,String exportParamModelnames[],int basketSqlIds[],HashSet<BasketStat> stat)
+	public void doit(String filename,IoxWriter iomFile,String sender,String exportParamModelnames[],long basketSqlIds[],HashSet<BasketStat> stat)
 	throws ch.interlis.iox.IoxException
 	{
 		this.basketStat=stat;
@@ -131,7 +131,7 @@ public class TransferToXtf {
 		if(validator!=null)validator.validate(startEvent);
 		iomFile.write(startEvent);
 		if(basketSqlIds!=null){
-			for(int basketSqlId : basketSqlIds){
+			for(long basketSqlId : basketSqlIds){
 				StringBuilder basketXtfId=new StringBuilder();
 				Topic topic=getTopicByBasketId(basketSqlId,basketXtfId);
 				if(topic==null){
@@ -169,7 +169,7 @@ public class TransferToXtf {
 		iomFile.write(endEvent);
 		if(validator!=null)validator.close();
 	}
-	private Topic getTopicByBasketId(int basketSqlId, StringBuilder basketXtfId) throws IoxException {
+	private Topic getTopicByBasketId(long basketSqlId, StringBuilder basketXtfId) throws IoxException {
 		
 		String sqlName=DbNames.BASKETS_TAB;
 		if(schema!=null){
@@ -182,7 +182,7 @@ public class TransferToXtf {
 			String stmt="SELECT "+DbNames.BASKETS_TAB_TOPIC_COL+","+DbNames.T_ILI_TID_COL+" FROM "+sqlName+" WHERE "+colT_ID+"= ?";
 			EhiLogger.traceBackendCmd(stmt);
 			getstmt=conn.prepareStatement(stmt);
-			getstmt.setInt(1,basketSqlId);
+			getstmt.setLong(1,basketSqlId);
 			java.sql.ResultSet res=getstmt.executeQuery();
 			if(res.next()){
 				topicName=res.getString(1);
@@ -243,7 +243,7 @@ public class TransferToXtf {
 			  }
 		return null;
 	}
-	private boolean doBasket(String filename, IoxWriter iomFile,Topic topic,Integer basketSqlId,String basketXtfId) throws IoxException {
+	private boolean doBasket(String filename, IoxWriter iomFile,Topic topic,Long basketSqlId,String basketXtfId) throws IoxException {
 		Model model=(Model) topic.getContainer();
 		boolean referrs=false;
 		StartBasketEvent iomBasket=null;
@@ -313,7 +313,7 @@ public class TransferToXtf {
 			for(FixIomObjectRefs fixref : delayedObjects){
 				boolean skipObj=false;
 				for(IomObject ref:fixref.getRefs()){
-					int sqlid=fixref.getTargetSqlid(ref);
+					long sqlid=fixref.getTargetSqlid(ref);
 					if(sqlidPool.containsSqlid(sqlid)){
 						// fix it
 						ref.setobjectrefoid(sqlidPool.getXtfid(sqlid));
@@ -346,7 +346,7 @@ public class TransferToXtf {
 		}
 		return referrs;
 	}
-	private String readObjectTid(Viewable aclass, int sqlid) {
+	private String readObjectTid(Viewable aclass, long sqlid) {
 		String sqlIliTid = null;
 		if (writeIliTid || Ili2cUtility.isViewableWithOid(aclass)) {
 			String stmt = createQueryStmt4xtfid(aclass);
@@ -356,7 +356,7 @@ public class TransferToXtf {
 
 				dbstmt = conn.prepareStatement(stmt);
 				dbstmt.clearParameters();
-				dbstmt.setInt(1, sqlid);
+				dbstmt.setLong(1, sqlid);
 				java.sql.ResultSet rs = dbstmt.executeQuery();
 				if(rs.next()) {
 					sqlIliTid = rs.getString(2);
@@ -377,7 +377,7 @@ public class TransferToXtf {
 				}
 			}
 		}else{
-			sqlIliTid = Integer.toString(sqlid);
+			sqlIliTid = Long.toString(sqlid);
 			sqlidPool.putSqlid2Xtfid(sqlid, sqlIliTid);
 		}
 		return sqlIliTid;
@@ -572,7 +572,7 @@ public class TransferToXtf {
 			dumpObjHelper(null,aclass,null,fixref,structWrapper,structelev);
 		}
 	}
-	private void dumpItfTableObject(IoxWriter out,AttributeDef attr,Integer basketSqlId)
+	private void dumpItfTableObject(IoxWriter out,AttributeDef attr,Long basketSqlId)
 	{
 		String stmt=createItfLineTableQueryStmt(attr,basketSqlId,geomConv);
 		String sqlTabName=ili2sqlName.mapGeometryAsTable(attr);
@@ -592,12 +592,12 @@ public class TransferToXtf {
 			dbstmt.clearParameters();
 			int paramIdx=1;
 			if(basketSqlId!=null){
-				dbstmt.setInt(paramIdx++,basketSqlId);
+				dbstmt.setLong(paramIdx++,basketSqlId);
 			}
 			java.sql.ResultSet rs=dbstmt.executeQuery();
 			while(rs.next()){
 				int valuei=1;
-				int sqlid=rs.getInt(valuei);
+				long sqlid=rs.getLong(valuei);
 				valuei++;
 				
 				if(writeIliTid){
@@ -609,7 +609,7 @@ public class TransferToXtf {
 				Viewable aclass=(Viewable)attr.getContainer();
 
 				Iom_jObject iomObj;
-				iomObj=new Iom_jObject(aclass.getScopedName(null)+"_"+attr.getName(),Integer.toString(sqlid));
+				iomObj=new Iom_jObject(aclass.getScopedName(null)+"_"+attr.getName(),Long.toString(sqlid));
 				
 				// geomAttr
 				Object geomobj=rs.getObject(valuei);
@@ -665,13 +665,13 @@ public class TransferToXtf {
 	}
 	/** dumps all objects of a given class.
 	 */
-	private void dumpObject(IoxWriter out,Viewable aclass,Integer basketSqlId)
+	private void dumpObject(IoxWriter out,Viewable aclass,Long basketSqlId)
 	{
 		dumpObjHelper(out,aclass,basketSqlId,null,null,null);
 	}
 	/** helper to dump all objects/structvalues of a given class/structure.
 	 */
-	private void dumpObjHelper(IoxWriter out,Viewable aclass,Integer basketSqlId,FixIomObjectRefs fixref,StructWrapper structWrapper,HashMap structelev)
+	private void dumpObjHelper(IoxWriter out,Viewable aclass,Long basketSqlId,FixIomObjectRefs fixref,StructWrapper structWrapper,HashMap structelev)
 	{
 		String stmt=recConv.createQueryStmt(aclass,basketSqlId,structWrapper);
 		EhiLogger.traceBackendCmd(stmt);
@@ -684,7 +684,7 @@ public class TransferToXtf {
 			while(rs.next()){
 				// list of not yet processed struct attrs
 				ArrayList<StructWrapper> structQueue=new ArrayList<StructWrapper>();
-				int sqlid = recConv.getT_ID(rs);
+				long sqlid = recConv.getT_ID(rs);
 				Iom_jObject iomObj=null;
 				fixref=new FixIomObjectRefs();
 				iomObj = recConv.convertRecord(rs, aclass, fixref, structWrapper,
@@ -978,7 +978,7 @@ public class TransferToXtf {
 		String sqlname=ili2sqlName.mapGeometryAsTable(def);
 		return new DbTableName(schema,sqlname);
 	}
-	private String createItfLineTableQueryStmt(AttributeDef attr,Integer basketSqlId,SqlColumnConverter conv){
+	private String createItfLineTableQueryStmt(AttributeDef attr,Long basketSqlId,SqlColumnConverter conv){
 		StringBuffer ret = new StringBuffer();
 		ret.append("SELECT r0."+colT_ID);
 		if(writeIliTid){
@@ -1114,7 +1114,7 @@ public class TransferToXtf {
 
 	private HashSet<BasketStat> basketStat=null;
 	private HashMap<String, ClassStat> objStat=new HashMap<String, ClassStat>();
-	private void updateObjStat(String tag, int sqlId)
+	private void updateObjStat(String tag, long sqlId)
 	{
 		if(objStat.containsKey(tag)){
 			ClassStat stat=objStat.get(tag);

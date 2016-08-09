@@ -138,18 +138,18 @@ public class PgSequenceBasedIdGen implements DbIdGen {
 	}
 	/** gets a new obj id.
 	 */
-	int lastLocalId=0;
+	long lastLocalId=0;
 	@Override
-	public int newObjSqlId(){
+	public long newObjSqlId(){
 		lastLocalId=getSeqCount();
 		return lastLocalId;
 	}
 	@Override
-	public int getLastSqlId()
+	public long getLastSqlId()
 	{
 		return lastLocalId;
 	}
-	private int getSeqCount()
+	private long getSeqCount()
 	{
 		String sqlName=SQL_ILI2DB_SEQ_NAME;
 		if(schema!=null){
@@ -161,9 +161,9 @@ public class PgSequenceBasedIdGen implements DbIdGen {
 			EhiLogger.traceBackendCmd(stmt);
 			getstmt=conn.prepareStatement(stmt);
 			java.sql.ResultSet res=getstmt.executeQuery();
-			int ret=0;
+			long ret=0;
 			if(res.next()){
-				ret=res.getInt(1);
+				ret=res.getLong(1);
 				return ret;
 			}
 		}catch(java.sql.SQLException ex){

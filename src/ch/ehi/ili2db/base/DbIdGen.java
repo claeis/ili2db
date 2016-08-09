@@ -35,8 +35,8 @@ public interface DbIdGen {
 	
 	/** gets a new obj id.
 	 */
-	public int newObjSqlId();
-	public int getLastSqlId();
+	public long newObjSqlId();
+	public long getLastSqlId();
 
 	public String getDefaultValueSql();
 }
