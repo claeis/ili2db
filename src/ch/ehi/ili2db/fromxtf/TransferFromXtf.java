@@ -99,7 +99,7 @@ public class TransferFromXtf {
 	//private int sqlIdGen=1;
 	private ch.ehi.ili2db.base.DbIdGen idGen=null;
 	private XtfidPool oidPool=null;
-	private HashMap<String,HashSet<Integer>> existingObjects=null;
+	private HashMap<String,HashSet<Long>> existingObjects=null;
 	private ArrayList<FixIomObjectExtRefs> delayedObjects=null;
 	private TrafoConfig trafoConfig=null;
 	private FromXtfRecordConverter recConv=null;
@@ -157,12 +157,12 @@ public class TransferFromXtf {
 		boolean surfaceAsPolyline=true;
 		recConv=new FromXtfRecordConverter(td,ili2sqlName,tag2class,config,idGen,geomConv,conn,dbusr,isItfReader,oidPool,trafoConfig,class2wrapper);
 		
-		Integer datasetSqlId=null;
-		int importSqlId=0;
-		int basketSqlId=0;
-		int startTid=0;
-		int endTid=0;
-		int objCount=0;
+		Long datasetSqlId=null;
+		long importSqlId=0;
+		long basketSqlId=0;
+		long startTid=0;
+		long endTid=0;
+		long objCount=0;
 		boolean referrs=false;
 		
 		if(functionCode==Config.FC_DELETE || functionCode==Config.FC_REPLACE){
@@ -195,7 +195,7 @@ public class TransferFromXtf {
 						String stmt="DELETE FROM "+sqlName+" WHERE "+colT_ID+"= ?";
 						EhiLogger.traceBackendCmd(stmt);
 						getstmt=conn.prepareStatement(stmt);
-						getstmt.setInt(1,datasetSqlId);
+						getstmt.setLong(1,datasetSqlId);
 						getstmt.executeUpdate();
 					}catch(java.sql.SQLException ex){
 						throw new Ili2dbException("failed to delete from "+sqlName,ex);
@@ -262,10 +262,10 @@ public class TransferFromXtf {
 					EhiLogger.logState("Basket "+basket.getType()+"(oid "+basket.getBid()+")...");
 					try {
 						if(validator!=null)validator.validate(event);
-						Integer existingBasketSqlId=null;
+						Long existingBasketSqlId=null;
 						if(functionCode==Config.FC_UPDATE){
 							// read existing oid/sqlid mapping (but might also be a new basket)
-							existingObjects=new HashMap<String,HashSet<Integer>>();
+							existingObjects=new HashMap<String,HashSet<Long>>();
 							existingBasketSqlId=readExistingSqlObjIds(reader instanceof ItfReader,basket.getBid());
 							if(existingBasketSqlId==null){
 								// new basket 
@@ -281,9 +281,9 @@ public class TransferFromXtf {
 						}
 						if(attachmentKey==null){
 							if(xtffilename!=null){
-								attachmentKey=new java.io.File(xtffilename).getName()+"-"+Integer.toString(basketSqlId);
+								attachmentKey=new java.io.File(xtffilename).getName()+"-"+Long.toString(basketSqlId);
 							}else{
-								attachmentKey=Integer.toString(basketSqlId);
+								attachmentKey=Long.toString(basketSqlId);
 							}
 							config.setAttachmentKey(attachmentKey);
 						}
@@ -323,7 +323,7 @@ public class TransferFromXtf {
 								Viewable aclass=fixref.getTargetClass(ref);
 								if(readIliTid || (aclass instanceof AbstractClassDef && ((AbstractClassDef) aclass).getOid()!=null)){
 									// read object
-									Integer sqlid=readObjectSqlid(aclass,xtfid);
+									Long sqlid=readObjectSqlid(aclass,xtfid);
 									if(sqlid==null){
 										EhiLogger.logError("unknown referenced object "+aclass.getScopedName(null)+" TID "+xtfid+" referenced from "+fixref.getRoot().getobjecttag()+" TID "+fixref.getRoot().getobjectoid());
 										referrs=true;
@@ -356,7 +356,7 @@ public class TransferFromXtf {
 						if(xtffilename!=null){
 							filename=new java.io.File(xtffilename).getName();
 						}
-						int importId=writeImportBasketStat(importSqlId,basketSqlId,startTid,endTid,objCount);
+						long importId=writeImportBasketStat(importSqlId,basketSqlId,startTid,endTid,objCount);
 						saveObjStat(importId,basket.getBid(),filename,basket.getType());
 					} catch (SQLException ex) {
 						EhiLogger.logError("Basket "+basket.getType()+"(oid "+basket.getBid()+")",ex);
@@ -391,7 +391,7 @@ public class TransferFromXtf {
 		
 	}
 
-	private void dropExistingStructEles(String topic, int basketSqlId) {
+	private void dropExistingStructEles(String topic, long basketSqlId) {
 		// get all structs that are reachable from this topic
 		HashSet<AbstractClassDef> classv=getStructs(topic);
 		// delete all structeles
@@ -489,7 +489,7 @@ public class TransferFromXtf {
 		}
 	}
 
-	private void dropRecords(DbTableName sqlTableName, int basketSqlId) {
+	private void dropRecords(DbTableName sqlTableName, long basketSqlId) {
 		// DELETE FROM products WHERE t_id in (10,20);
 		String stmt = "DELETE FROM "+sqlTableName.getQName()+" WHERE "+DbNames.T_BASKET_COL+"="+basketSqlId;
 		EhiLogger.traceBackendCmd(stmt);
@@ -514,11 +514,11 @@ public class TransferFromXtf {
 
 	private void deleteExisitingObjects() {
 		for(String sqlType:existingObjects.keySet()){
-			HashSet<Integer> objs=existingObjects.get(sqlType);
+			HashSet<Long> objs=existingObjects.get(sqlType);
 			StringBuilder ids=new StringBuilder();
 			String sep="";
 			if(objs.size()>0){
-				for(Integer sqlId:objs){
+				for(Long sqlId:objs){
 					ids.append(sep);
 					ids.append(sqlId);
 					sep=",";
@@ -563,9 +563,9 @@ public class TransferFromXtf {
 		}
 	}
 
-	private Integer readExistingSqlObjIds(boolean isItf,String bid) throws Ili2dbException {
+	private Long readExistingSqlObjIds(boolean isItf,String bid) throws Ili2dbException {
 		StringBuilder topicQName=new StringBuilder();
-		Integer basketSqlId=Ili2db.getBasketSqlIdFromBID(bid, conn, schema,colT_ID, topicQName);
+		Long basketSqlId=Ili2db.getBasketSqlIdFromBID(bid, conn, schema,colT_ID, topicQName);
 		if(basketSqlId==null){
 			// new basket
 			return null;
@@ -634,7 +634,7 @@ public class TransferFromXtf {
 		}		
 		return basketSqlId;
 	}
-	private void deleteObjectsOfExistingDataset(int datasetSqlId,Config config) throws Ili2dbException {
+	private void deleteObjectsOfExistingDataset(long datasetSqlId,Config config) throws Ili2dbException {
 		// get basket id, topicname
 		String schema=config.getDbschema();
 		String colT_ID=config.getColT_ID();
@@ -651,10 +651,10 @@ public class TransferFromXtf {
 			String stmt="SELECT "+colT_ID+","+DbNames.BASKETS_TAB_TOPIC_COL+" FROM "+sqlName+" WHERE "+DbNames.BASKETS_TAB_DATASET_COL+"= ?";
 			EhiLogger.traceBackendCmd(stmt);
 			getstmt=conn.prepareStatement(stmt);
-			getstmt.setInt(1,datasetSqlId);
+			getstmt.setLong(1,datasetSqlId);
 			java.sql.ResultSet res=getstmt.executeQuery();
-			if(res.next()){
-				int sqlId=res.getInt(1);
+			while(res.next()){
+				long sqlId=res.getLong(1);
 				String topicQName=res.getString(2);
 				deleteObjectsOfBasket(sqlId,topicQName);
 			}
@@ -674,7 +674,7 @@ public class TransferFromXtf {
 			String stmt="DELETE FROM "+sqlName+" WHERE "+DbNames.BASKETS_TAB_DATASET_COL+"= ?";
 			EhiLogger.traceBackendCmd(stmt);
 			getstmt=conn.prepareStatement(stmt);
-			getstmt.setInt(1,datasetSqlId);
+			getstmt.setLong(1,datasetSqlId);
 			getstmt.executeUpdate();
 		}catch(java.sql.SQLException ex){
 			throw new Ili2dbException("failed to delete from "+sqlName,ex);
@@ -689,7 +689,7 @@ public class TransferFromXtf {
 			}
 		}
 	}
-	private void deleteObjectsOfBasket(int basketSqlId,String topicQName) throws Ili2dbException {
+	private void deleteObjectsOfBasket(long basketSqlId,String topicQName) throws Ili2dbException {
 		boolean isItf=false;
 		Topic topic=TransferToXtf.getTopicDef(td, topicQName);
 		if(topic==null){
@@ -779,7 +779,7 @@ public class TransferFromXtf {
 			String stmt="DELETE FROM "+sqlName+" WHERE "+DbNames.IMPORTS_BASKETS_TAB_BASKET_COL+"= ?";
 			EhiLogger.traceBackendCmd(stmt);
 			getstmt=conn.prepareStatement(stmt);
-			getstmt.setInt(1,basketSqlId);
+			getstmt.setLong(1,basketSqlId);
 			getstmt.executeUpdate();
 		}catch(java.sql.SQLException ex){
 			throw new Ili2dbException("failed to delete from "+sqlName,ex);
@@ -796,7 +796,7 @@ public class TransferFromXtf {
 		
 	}
 
-	private void doObject(int basketSqlId, IomObject iomObj) {
+	private void doObject(long basketSqlId, IomObject iomObj) {
 		try{
 			//EhiLogger.debug(iomObj.toString());
 			writeObject(basketSqlId,iomObj,null);
@@ -946,11 +946,11 @@ public class TransferFromXtf {
 		}
 	}
 
-	private Integer readObjectSqlid(Viewable aclass, String xtfid) {
+	private Long readObjectSqlid(Viewable aclass, String xtfid) {
 		String stmt = createQueryStmt4sqlid(aclass);
 		EhiLogger.traceBackendCmd(stmt);
 		java.sql.PreparedStatement dbstmt = null;
-		int sqlid=0;
+		long sqlid=0;
 		try {
 
 			dbstmt = conn.prepareStatement(stmt);
@@ -958,7 +958,7 @@ public class TransferFromXtf {
 			dbstmt.setString(1, xtfid);
 			java.sql.ResultSet rs = dbstmt.executeQuery();
 			if(rs.next()) {
-				sqlid = rs.getInt(1);
+				sqlid = rs.getLong(1);
 			}else{
 				// unknown object
 				return null;
@@ -992,7 +992,7 @@ public class TransferFromXtf {
 		ret.append(" WHERE r0."+DbNames.T_ILI_TID_COL+"=?");
 		return ret.toString();
 	}
-	private void readObjectSqlIds(boolean isItf,String sqltablename, int basketsqlid) {
+	private void readObjectSqlIds(boolean isItf,String sqltablename, long basketsqlid) {
 		String stmt = createQueryStmt4sqlids(isItf,sqltablename);
 		EhiLogger.traceBackendCmd(stmt);
 		java.sql.PreparedStatement dbstmt = null;
@@ -1000,10 +1000,10 @@ public class TransferFromXtf {
 
 			dbstmt = conn.prepareStatement(stmt);
 			dbstmt.clearParameters();
-			dbstmt.setInt(1, basketsqlid);
+			dbstmt.setLong(1, basketsqlid);
 			java.sql.ResultSet rs = dbstmt.executeQuery();
 			while(rs.next()) {
-				int sqlid = rs.getInt(1);
+				long sqlid = rs.getLong(1);
 				String xtfid=rs.getString(2);
 				String sqlType=null;
 				if(!isItf){
@@ -1027,26 +1027,26 @@ public class TransferFromXtf {
 			}
 		}
 	}
-	private void addExistingObjects(String sqlType, int sqlid) {
-		HashSet<Integer> objs=null;
+	private void addExistingObjects(String sqlType, long sqlid) {
+		HashSet<Long> objs=null;
 		if(existingObjects.containsKey(sqlType)){
 			objs=existingObjects.get(sqlType);
 		}else{
-			objs=new HashSet<Integer>();
+			objs=new HashSet<Long>();
 			existingObjects.put(sqlType, objs);
 		}
 		objs.add(sqlid);
 	}
-	private boolean existingObjectsContains(String sqlType, int sqlid) {
+	private boolean existingObjectsContains(String sqlType, long sqlid) {
 		if(existingObjects.containsKey(sqlType)){
-			HashSet<Integer> objs=existingObjects.get(sqlType);
+			HashSet<Long> objs=existingObjects.get(sqlType);
 			return objs.contains(sqlid);
 		}
 		return false;
 	}
-	private void existingObjectsRemove(String sqlType, int sqlid) {
+	private void existingObjectsRemove(String sqlType, long sqlid) {
 		if(existingObjects.containsKey(sqlType)){
-			HashSet<Integer> objs=existingObjects.get(sqlType);
+			HashSet<Long> objs=existingObjects.get(sqlType);
 			objs.remove(sqlid);
 		}
 		return;
@@ -1068,7 +1068,7 @@ public class TransferFromXtf {
 
 	/** if structEle==null, iomObj is an object. If structEle!=null iomObj is a struct value.
 	 */
-	private void writeObject(int basketSqlId,IomObject iomObj,StructWrapper structEle)
+	private void writeObject(long basketSqlId,IomObject iomObj,StructWrapper structEle)
 		throws java.sql.SQLException,ConverterException
 	{
 		String tag=iomObj.getobjecttag();
@@ -1088,7 +1088,7 @@ public class TransferFromXtf {
 		// ASSERT: an ordinary class/table
 		Viewable aclass1=(Viewable)modelele;		
 		String sqlType=(String)ili2sqlName.mapIliClassDef(aclass1);
-		 int sqlId;
+		 long sqlId;
 		 boolean updateObj=false;
 		 // is it an object?
 		 if(structEle==null){
@@ -1153,7 +1153,7 @@ public class TransferFromXtf {
 		
 	}
 
-	private void writeItfLineTableObject(int basketSqlId,IomObject iomObj,AttributeDef attrDef)
+	private void writeItfLineTableObject(long basketSqlId,IomObject iomObj,AttributeDef attrDef)
 	throws java.sql.SQLException,ConverterException
 	{
 		SurfaceOrAreaType type = (SurfaceOrAreaType)attrDef.getDomainResolvingAliases();
@@ -1165,7 +1165,7 @@ public class TransferFromXtf {
 		Table lineAttrTable=type.getLineAttributeStructure();
 		
 		// map oid of transfer file to a sql id
-		int sqlId=oidPool.getObjSqlId(iomObj.getobjectoid());
+		long sqlId=oidPool.getObjSqlId(iomObj.getobjectoid());
 		
 		String sqlTableName=getSqlTableNameItfLineTable(attrDef).getQName();
 		String insert=createItfLineTableInsertStmt(attrDef);
@@ -1174,11 +1174,11 @@ public class TransferFromXtf {
 		try {
 			int valuei = 1;
 
-			ps.setInt(valuei, sqlId);
+			ps.setLong(valuei, sqlId);
 			valuei++;
 
 			if (createBasketCol) {
-				ps.setInt(valuei, basketSqlId);
+				ps.setLong(valuei, basketSqlId);
 				valuei++;
 			}
 			
@@ -1201,9 +1201,9 @@ public class TransferFromXtf {
 			if (type instanceof SurfaceType) {
 				IomObject structvalue = iomObj.getattrobj(refAttrName, 0);
 				String refoid = structvalue.getobjectrefoid();
-				int refsqlId = oidPool.getObjSqlId(refoid); // TODO handle non unique
+				long refsqlId = oidPool.getObjSqlId(refoid); // TODO handle non unique
 													// tids
-				ps.setInt(valuei, refsqlId);
+				ps.setLong(valuei, refsqlId);
 				valuei++;
 			}
 			
@@ -1235,7 +1235,7 @@ public class TransferFromXtf {
 	}
 	private HashSet<BasketStat> basketStat=null;
 	private HashMap<String, ClassStat> objStat=new HashMap<String, ClassStat>();
-	private void updateObjStat(String tag, int sqlId)
+	private void updateObjStat(String tag, long sqlId)
 	{
 		if(objStat.containsKey(tag)){
 			ClassStat stat=objStat.get(tag);
@@ -1245,7 +1245,7 @@ public class TransferFromXtf {
 			objStat.put(tag,stat);
 		}
 	}
-	private void saveObjStat(int sqlImportId,String iliBasketId,String file,String topic) throws SQLException
+	private void saveObjStat(long sqlImportId,String iliBasketId,String file,String topic) throws SQLException
 	{
 		for(String className : objStat.keySet()){
 			ClassStat stat=objStat.get(className);
@@ -1257,7 +1257,7 @@ public class TransferFromXtf {
 		objStat=new HashMap<String, ClassStat>();
 	}
 
-	private int writeImportStat(int datasetSqlId,String importFile,java.sql.Timestamp importDate,String importUsr)
+	private long writeImportStat(long datasetSqlId,String importFile,java.sql.Timestamp importDate,String importUsr)
 	throws java.sql.SQLException,ConverterException
 	{
 		String sqlname=DbNames.IMPORTS_TAB;
@@ -1276,11 +1276,11 @@ public class TransferFromXtf {
 		try{
 			int valuei=1;
 			
-			int key=oidPool.newObjSqlId();
-			ps.setInt(valuei, key);
+			long key=oidPool.newObjSqlId();
+			ps.setLong(valuei, key);
 			valuei++;
 			
-			ps.setInt(valuei, datasetSqlId);
+			ps.setLong(valuei, datasetSqlId);
 			valuei++;
 
 			ps.setTimestamp(valuei, importDate);
@@ -1300,7 +1300,7 @@ public class TransferFromXtf {
 		}
 		
 	}
-	private int writeImportBasketStat(int importSqlId,int basketSqlId,int startTid,int endTid,int objCount)
+	private long writeImportBasketStat(long importSqlId,long basketSqlId,long startTid,long endTid,long objCount)
 	throws java.sql.SQLException,ConverterException
 	{
 		String sqlname=DbNames.IMPORTS_BASKETS_TAB;
@@ -1320,23 +1320,23 @@ public class TransferFromXtf {
 		try{
 			int valuei=1;
 			
-			int key=oidPool.newObjSqlId();
-			ps.setInt(valuei, key);
+			long key=oidPool.newObjSqlId();
+			ps.setLong(valuei, key);
 			valuei++;
 			
-			ps.setInt(valuei, importSqlId);
+			ps.setLong(valuei, importSqlId);
 			valuei++;
 
-			ps.setInt(valuei, basketSqlId);
+			ps.setLong(valuei, basketSqlId);
 			valuei++;
 
-			ps.setInt(valuei, objCount);
+			ps.setLong(valuei, objCount);
 			valuei++;
 
-			ps.setInt(valuei, startTid);
+			ps.setLong(valuei, startTid);
 			valuei++;
 			
-			ps.setInt(valuei, endTid);
+			ps.setLong(valuei, endTid);
 			valuei++;
 			
 			ps.executeUpdate();
@@ -1348,7 +1348,7 @@ public class TransferFromXtf {
 		
 	}
 
-	private void writeImportStatDetail(int importSqlId,int startTid,int endTid,int objCount,String importClassName)
+	private void writeImportStatDetail(long importSqlId,long startTid,long endTid,long objCount,String importClassName)
 	throws java.sql.SQLException
 	{
 		String sqlname=DbNames.IMPORTS_OBJECTS_TAB;
@@ -1368,22 +1368,22 @@ public class TransferFromXtf {
 		try{
 			int valuei=1;
 			
-			ps.setInt(valuei, oidPool.newObjSqlId());
+			ps.setLong(valuei, oidPool.newObjSqlId());
 			valuei++;
 			
-			ps.setInt(valuei, importSqlId);
+			ps.setLong(valuei, importSqlId);
 			valuei++;
 
 			ps.setString(valuei, importClassName);
 			valuei++;
 
-			ps.setInt(valuei, objCount);
+			ps.setLong(valuei, objCount);
 			valuei++;
 
-			ps.setInt(valuei, startTid);
+			ps.setLong(valuei, startTid);
 			valuei++;
 			
-			ps.setInt(valuei, endTid);
+			ps.setLong(valuei, endTid);
 			valuei++;
 			
 			ps.executeUpdate();
@@ -1393,7 +1393,7 @@ public class TransferFromXtf {
 		
 	}
 
-	private int writeBasket(int datasetSqlId,StartBasketEvent iomBasket,int basketSqlId,String attachmentKey)
+	private long writeBasket(long datasetSqlId,StartBasketEvent iomBasket,long basketSqlId,String attachmentKey)
 	throws java.sql.SQLException,ConverterException
 
 	{
@@ -1415,7 +1415,7 @@ public class TransferFromXtf {
 		PreparedStatement ps = conn.prepareStatement(insert);
 		try{
 			int valuei=1;
-			ps.setInt(valuei, basketSqlId);
+			ps.setLong(valuei, basketSqlId);
 			valuei++;
 
 			ps.setString(valuei, tag);
@@ -1427,7 +1427,7 @@ public class TransferFromXtf {
 			ps.setString(valuei, attachmentKey);
 			valuei++;
 			
-			ps.setInt(valuei, datasetSqlId);
+			ps.setLong(valuei, datasetSqlId);
 			valuei++;
 			
 			ps.executeUpdate();
@@ -1436,7 +1436,7 @@ public class TransferFromXtf {
 		}
 		return basketSqlId;
 }
-	private int writeDataset(int datasetSqlId,String datasetName)
+	private long writeDataset(long datasetSqlId,String datasetName)
 	throws java.sql.SQLException
 
 	{
@@ -1453,7 +1453,7 @@ public class TransferFromXtf {
 		PreparedStatement ps = conn.prepareStatement(insert);
 		try{
 			int valuei=1;
-			ps.setInt(valuei, datasetSqlId);
+			ps.setLong(valuei, datasetSqlId);
 			valuei++;
 			
 			ps.setString(valuei, datasetName);

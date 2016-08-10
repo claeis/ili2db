@@ -706,8 +706,15 @@ public class TransferFromIli {
 			dsNameCol.setNotNull(false);
 			dsNameCol.setSize(200);
 			tab.addColumn(dsNameCol);
+
+			DbIndex dbIndex=new DbIndex();
+			dbIndex.setPrimary(false);
+			dbIndex.setUnique(true);
+			dbIndex.addAttr(dsNameCol);
+			tab.addIndex(dbIndex);
 			
 			schema.addTable(tab);
+
 			
 		}
 	}
@@ -788,12 +795,12 @@ public class TransferFromIli {
 			dbColObjc.setNotNull(false);
 			tab.addColumn(dbColObjc);
 
-			DbColNumber dbColStartId=new DbColNumber();
+			DbColId dbColStartId=new DbColId();
 			dbColStartId.setName(DbNames.IMPORTS_TAB_STARTTID_COL);
 			dbColStartId.setNotNull(false);
 			tab.addColumn(dbColStartId);
 
-			DbColNumber dbColEndId=new DbColNumber();
+			DbColId dbColEndId=new DbColId();
 			dbColEndId.setName(DbNames.IMPORTS_TAB_ENDTID_COL);
 			dbColEndId.setNotNull(false);
 			tab.addColumn(dbColEndId);
@@ -825,12 +832,12 @@ public class TransferFromIli {
 			dbColObjc.setNotNull(false);
 			tab.addColumn(dbColObjc);
 
-			DbColNumber dbColStartId=new DbColNumber();
+			DbColId dbColStartId=new DbColId();
 			dbColStartId.setName(DbNames.IMPORTS_TAB_STARTTID_COL);
 			dbColStartId.setNotNull(false);
 			tab.addColumn(dbColStartId);
 
-			DbColNumber dbColEndId=new DbColNumber();
+			DbColId dbColEndId=new DbColId();
 			dbColEndId.setName(DbNames.IMPORTS_TAB_ENDTID_COL);
 			dbColEndId.setNotNull(false);
 			tab.addColumn(dbColEndId);

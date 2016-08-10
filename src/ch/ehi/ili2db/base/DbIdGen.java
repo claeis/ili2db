@@ -18,6 +18,7 @@
 package ch.ehi.ili2db.base;
 
 import ch.ehi.basics.logging.EhiLogger;
+import ch.ehi.ili2db.gui.Config;
 import ch.ehi.sqlgen.repository.DbTableName;
 
 
@@ -26,7 +27,7 @@ import ch.ehi.sqlgen.repository.DbTableName;
  * @version $Revision: 1.0 $ $Date: 15.03.2007 $
  */
 public interface DbIdGen {
-	public void init(String schema);
+	public void init(String schema,Config config);
 	public void initDb(java.sql.Connection conn,String dbusr);
 	 
 	public void initDbDefs();
@@ -34,8 +35,8 @@ public interface DbIdGen {
 	
 	/** gets a new obj id.
 	 */
-	public int newObjSqlId();
-	public int getLastSqlId();
+	public long newObjSqlId();
+	public long getLastSqlId();
 
 	public String getDefaultValueSql();
 }

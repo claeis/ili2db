@@ -193,7 +193,12 @@ public class AbstractRecordConverter {
 					// visit all sub classes
 					candids.addAll(candid.getDirectExtensions());
 				}else{
-					throw new IllegalStateException("unexpected mapping strategy <"+inheritanceStrategy+">");
+					// skip it
+					// classes that have no assigned inheritanceStrategy are loaded by the compiler, but are not used
+					// example: 
+					// CLASS CatalogueObjectTrees_V1.Catalogues.Item is loaded and an extension 
+					// of CLASS CatalogueObjects_V1.Catalogues.Item.
+					// It is loaded because it is defined in the same ili-file, but is normally not used.
 				}
 			}
 			// buffer result, so that later calls return exactly the same ordering of targetTables

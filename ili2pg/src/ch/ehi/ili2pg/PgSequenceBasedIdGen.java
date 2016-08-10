@@ -22,6 +22,7 @@ import java.sql.Connection;
 
 import ch.ehi.basics.logging.EhiLogger;
 import ch.ehi.ili2db.base.DbIdGen;
+import ch.ehi.ili2db.gui.Config;
 import ch.ehi.sqlgen.repository.DbTableName;
 
 
@@ -34,9 +35,13 @@ public class PgSequenceBasedIdGen implements DbIdGen {
 	java.sql.Connection conn=null;
 	String dbusr=null;
 	String schema=null;
+	Long minValue=null;
+	Long maxValue=null;
 	@Override
-	public void init(String schema) {
+	public void init(String schema,Config config) {
 		this.schema=schema;
+		minValue=config.getMinIdSeqValue();
+		maxValue=config.getMaxIdSeqValue();
 	}
 	@Override
 	public void initDb(Connection conn, String dbusr) {
@@ -106,7 +111,14 @@ public class PgSequenceBasedIdGen implements DbIdGen {
 		if(schema!=null){
 			sqlName=schema+"."+sqlName;
 		}
-		String stmt="CREATE SEQUENCE "+sqlName+";";
+		String stmt="CREATE SEQUENCE "+sqlName;
+		if(minValue!=null){
+			stmt=stmt+" MINVALUE "+minValue;
+		}
+		if(maxValue!=null){
+			stmt=stmt+" MAXVALUE "+maxValue;
+		}
+		stmt=stmt+";";
 		EhiLogger.traceBackendCmd(stmt);
 		java.sql.PreparedStatement updstmt = null;
 		try{
@@ -126,18 +138,18 @@ public class PgSequenceBasedIdGen implements DbIdGen {
 	}
 	/** gets a new obj id.
 	 */
-	int lastLocalId=0;
+	long lastLocalId=0;
 	@Override
-	public int newObjSqlId(){
+	public long newObjSqlId(){
 		lastLocalId=getSeqCount();
 		return lastLocalId;
 	}
 	@Override
-	public int getLastSqlId()
+	public long getLastSqlId()
 	{
 		return lastLocalId;
 	}
-	private int getSeqCount()
+	private long getSeqCount()
 	{
 		String sqlName=SQL_ILI2DB_SEQ_NAME;
 		if(schema!=null){
@@ -149,9 +161,9 @@ public class PgSequenceBasedIdGen implements DbIdGen {
 			EhiLogger.traceBackendCmd(stmt);
 			getstmt=conn.prepareStatement(stmt);
 			java.sql.ResultSet res=getstmt.executeQuery();
-			int ret=0;
+			long ret=0;
 			if(res.next()){
-				ret=res.getInt(1);
+				ret=res.getLong(1);
 				return ret;
 			}
 		}catch(java.sql.SQLException ex){

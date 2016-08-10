@@ -25,13 +25,13 @@ import ch.interlis.ili2c.metamodel.AttributeDef;
  * @version $Revision: 1.0 $ $Date: 05.04.2005 $
  */
 public class StructWrapper {
-	private int parentSqlId;
+	private long parentSqlId;
 	private String parentSqlType;
 	private IomObject struct;
 	private int structi;
 	private String parentSqlAttr;
 	private AttributeDef parentAttr;
-	public StructWrapper(int parentSqlId1,String parentSqlType1,String parentSqlAttr1,IomObject struct1,int structi1,AttributeDef parentAttr1){
+	public StructWrapper(long parentSqlId1,String parentSqlType1,String parentSqlAttr1,IomObject struct1,int structi1,AttributeDef parentAttr1){
 		parentSqlId=parentSqlId1;
 		parentSqlType=parentSqlType1;
 		parentSqlAttr=parentSqlAttr1;
@@ -39,7 +39,7 @@ public class StructWrapper {
 		struct=struct1;
 		structi=structi1;
 	}
-	public int getParentSqlId() {
+	public long getParentSqlId() {
 		return parentSqlId;
 	}
 	/** gets the sql name of the parent class/structure. 

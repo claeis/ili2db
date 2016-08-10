@@ -222,6 +222,14 @@ public abstract class AbstractMain {
 				argi++;
 				config.setColT_ID(args[argi]);
 				argi++;
+			}else if(arg.equals("--idSeqMin")){
+				argi++;
+				config.setMinIdSeqValue(Long.parseLong(args[argi]));
+				argi++;
+			}else if(arg.equals("--idSeqMax")){
+				argi++;
+				config.setMaxIdSeqValue(Long.parseLong(args[argi]));
+				argi++;
 			}else if(arg.equals("--createTypeDiscriminator")){
 				argi++;
 				config.setCreateTypeDiscriminator(config.CREATE_TYPE_DISCRIMINATOR_ALWAYS);
@@ -306,6 +314,8 @@ public abstract class AbstractMain {
 					System.err.println("--createSingleEnumTab  generate all enum definitions in a single table.");
 					System.err.println("--createStdCols        generate "+DbNames.T_USER_COL+", "+DbNames.T_CREATE_DATE_COL+", "+DbNames.T_LAST_CHANGE_COL+" columns.");
 					System.err.println("--t_id_Name name       change name of t_id column ("+DbNames.T_ID_COL+")");
+					System.err.println("--idSeqMin minValue    sets the minimum value of the id sequence generator.");
+					System.err.println("--idSeqMax maxValue    sets the maximum value of the id sequence generator.");
 					System.err.println("--createTypeDiscriminator  generate always a type discriminaor colum.");
 					System.err.println("--structWithGenericRef  generate one generic reference to parent in struct tables.");
 					System.err.println("--disableNameOptimization disable use of unqualified class name as table name.");

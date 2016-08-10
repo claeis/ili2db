@@ -10,12 +10,12 @@ public class FixIomObjectRefs {
 	private IomObject root=null;
 	private HashMap<IomObject,Target> refs=new HashMap<IomObject,Target>();
 	private class Target{
-		public Target(int sqlid, Viewable aclass) {
+		public Target(long sqlid, Viewable aclass) {
 			super();
 			this.sqlid = sqlid;
 			this.aclass = aclass;
 		}
-		int sqlid;
+		long sqlid;
 		Viewable aclass;
 			
 	}
@@ -29,7 +29,7 @@ public class FixIomObjectRefs {
 	public IomObject getRoot(){
 		return root;
 	}
-	public void addFix(IomObject refobj, int sqlid,Viewable targetClass) {
+	public void addFix(IomObject refobj, long sqlid,Viewable targetClass) {
 		refs.put(refobj, new Target(sqlid,targetClass));
 	}
 
@@ -41,7 +41,7 @@ public class FixIomObjectRefs {
 		return refs.keySet();
 	}
 
-	public int getTargetSqlid(IomObject ref) {
+	public long getTargetSqlid(IomObject ref) {
 		return refs.get(ref).sqlid;
 	}
 	public Viewable getTargetClass(IomObject ref) {

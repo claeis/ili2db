@@ -66,7 +66,7 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 	 * @param wrapper not null, if building query for struct values
 	 * @return SQL-Query statement
 	 */
-	public String createQueryStmt(Viewable aclass1,Integer basketSqlId,StructWrapper structWrapper){
+	public String createQueryStmt(Viewable aclass1,Long basketSqlId,StructWrapper structWrapper){
 		ViewableWrapper aclass=class2wrapper.get(aclass1);
 		ViewableWrapper rootWrapper=aclass.getWrappers().get(0);
 		StringBuffer ret = new StringBuffer();
@@ -272,12 +272,12 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 		return sep;
 	}
 	public void setStmtParams(java.sql.PreparedStatement dbstmt,
-			Integer basketSqlId, FixIomObjectRefs fixref,
+			Long basketSqlId, FixIomObjectRefs fixref,
 			StructWrapper structWrapper) throws SQLException {
 		dbstmt.clearParameters();
 		int paramIdx=1;
 		if(structWrapper!=null){
-			dbstmt.setInt(paramIdx++,structWrapper.getParentSqlId());
+			dbstmt.setLong(paramIdx++,structWrapper.getParentSqlId());
 			if(createGenericStructRef){
 				dbstmt.setString(paramIdx++,ili2sqlName.mapIliAttributeDef(structWrapper.getParentAttr(),getSqlType(structWrapper.getParentTable().getViewable()).getName(),null));
 			}
@@ -287,16 +287,16 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 			}
 		}
 		if(basketSqlId!=null){
-			dbstmt.setInt(paramIdx++,basketSqlId);
+			dbstmt.setLong(paramIdx++,basketSqlId);
 		}
 	}
-	public int getT_ID(java.sql.ResultSet rs) throws SQLException {
-		int sqlid=rs.getInt(1);
+	public long getT_ID(java.sql.ResultSet rs) throws SQLException {
+		long sqlid=rs.getLong(1);
 		return sqlid;
 	}
 	public Iom_jObject convertRecord(java.sql.ResultSet rs, Viewable aclass1,
 			FixIomObjectRefs fixref, StructWrapper structWrapper,
-			HashMap structelev, ArrayList<StructWrapper> structQueue, int sqlid)
+			HashMap structelev, ArrayList<StructWrapper> structQueue, long sqlid)
 			throws SQLException {
 		ViewableWrapper aclass=class2wrapper.get(aclass1);
 		Iom_jObject iomObj;
@@ -314,7 +314,7 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 					sqlid2xtfid.putSqlid2Xtfid(sqlid, sqlIliTid);
 					valuei++;
 				}else{
-					sqlIliTid=Integer.toString(sqlid);
+					sqlIliTid=Long.toString(sqlid);
 					sqlid2xtfid.putSqlid2Xtfid(sqlid, sqlIliTid);
 				}
 			}
@@ -325,10 +325,10 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 			}else{
 				iomObj=new Iom_jObject(aclass1.getScopedName(null),null);
 			}
-			iomObj.setattrvalue(ItfWriter2.INTERNAL_T_ID, Integer.toString(sqlid));
+			iomObj.setattrvalue(ItfWriter2.INTERNAL_T_ID, Long.toString(sqlid));
 			fixref.setRoot(iomObj);
 		}else{
-			iomObj=(Iom_jObject)structelev.get(Integer.toString(sqlid));
+			iomObj=(Iom_jObject)structelev.get(Long.toString(sqlid));
 			if(createGenericStructRef){
 				valuei+=4;
 			}else{
@@ -372,7 +372,7 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 									AssociationDef roleOwner = (AssociationDef) role.getContainer();
 									if(roleOwner.getDerivedFrom()==null){
 										 // TODO if(orderPos!=0){
-										int value=rs.getInt(valuei);
+										long value=rs.getLong(valuei);
 										valuei++;
 										if(!rs.wasNull()){
 											if(refAlreadyDefined){
@@ -386,7 +386,7 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 									}
 								 }else{
 									 // TODO if(orderPos!=0){
-										int value=rs.getInt(valuei);
+										long value=rs.getLong(valuei);
 										valuei++;
 										if(!rs.wasNull()){
 											if(refAlreadyDefined){
@@ -410,7 +410,7 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 	}
 	
 	final private int  LEN_LANG_PREFIX=DbNames.MULTILINGUAL_TXT_COL_PREFIX.length();
-	public int addAttrValue(java.sql.ResultSet rs, int valuei, int sqlid,
+	public int addAttrValue(java.sql.ResultSet rs, int valuei, long sqlid,
 			Iom_jObject iomObj, AttributeDef attr,ArrayList<StructWrapper> structQueue,ViewableWrapper table,FixIomObjectRefs fixref) throws SQLException {
 		if(attr.getExtending()==null){
 			String attrName=attr.getName();
@@ -458,7 +458,7 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 				if (type instanceof CompositionType){
 					if(TrafoConfigNames.CATALOGUE_REF_TRAFO_COALESCE.equals(trafoConfig.getAttrConfig(attr, TrafoConfigNames.CATALOGUE_REF_TRAFO))){
 						Table catalogueReferenceTyp = ((CompositionType) type).getComponentType();
-						int value=rs.getInt(valuei);
+						long value=rs.getLong(valuei);
 						valuei++;
 						if(!rs.wasNull()){
 							IomObject catref=iomObj.addattrobj(attrName,catalogueReferenceTyp.getScopedName(null));
@@ -591,7 +591,7 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 					boolean refAlreadyDefined=false;
 					for(ViewableWrapper targetTable:targetTables)
 					{
-						int value=rs.getInt(valuei);
+						long value=rs.getLong(valuei);
 						valuei++;
 						if(!rs.wasNull()){
 							if(refAlreadyDefined){
@@ -615,7 +615,7 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 			}
 		return valuei;
 	}
-	private String mapSqlid2Xtfid(FixIomObjectRefs fixref, int sqlid,IomObject refobj,Viewable targetClass) {
+	private String mapSqlid2Xtfid(FixIomObjectRefs fixref, long sqlid,IomObject refobj,Viewable targetClass) {
 		if(sqlid2xtfid.containsSqlid(sqlid)){
 			refobj.setobjectrefoid(sqlid2xtfid.getXtfid(sqlid));
 		}else{

@@ -87,9 +87,9 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 		}
 		
 	}
-	public void writeRecord(int basketSqlId, IomObject iomObj,Viewable iomClass,
+	public void writeRecord(long basketSqlId, IomObject iomObj,Viewable iomClass,
 			StructWrapper structEle, ViewableWrapper aclass, String sqlType,
-			int sqlId, boolean updateObj, PreparedStatement ps,ArrayList structQueue)
+			long sqlId, boolean updateObj, PreparedStatement ps,ArrayList structQueue)
 			throws SQLException, ConverterException {
 		int valuei=1;
 		
@@ -98,12 +98,12 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 			//ps.setInt(valuei, sqlId);
 			//valuei++;
 		}else{
-			ps.setInt(valuei, sqlId);
+			ps.setLong(valuei, sqlId);
 			valuei++;
 		}
 		
 		if(createBasketCol){
-			ps.setInt(valuei, basketSqlId);
+			ps.setLong(valuei, basketSqlId);
 			valuei++;
 		}
 		
@@ -132,7 +132,7 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 				}
 				// if struct, add ref to parent
 				if(structEle!=null){
-					ps.setInt(valuei, structEle.getParentSqlId());
+					ps.setLong(valuei, structEle.getParentSqlId());
 					valuei++;
 					if(createGenericStructRef){
 						ps.setString(valuei, structEle.getParentSqlType());
@@ -223,10 +223,10 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 						ArrayList<ViewableWrapper> targetTables = getTargetTables(role.getDestination());
 						  for(ViewableWrapper targetTable : targetTables){
 							  if(targetTable==class2wrapper.get((Viewable) tag2class.get(targetClass)) && refoid!=null){
-								   int refsqlId=oidPool.getObjSqlId(refoid);
-								   ps.setInt(valuei, refsqlId);
+								   long refsqlId=oidPool.getObjSqlId(refoid);
+								   ps.setLong(valuei, refsqlId);
 								}else{
-									ps.setNull(valuei, Types.INTEGER);
+									ps.setNull(valuei, Types.BIGINT);
 								}
 								valuei++;
 						  }
@@ -249,7 +249,7 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 		}
 		if(updateObj){
 			// if update, t_id is last param
-			ps.setInt(valuei, sqlId);
+			ps.setLong(valuei, sqlId);
 			valuei++;
 		}else{
 			// if insert, t_id is first param
@@ -690,7 +690,7 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 		   }
 		return sep;
 	}
-	public int addAttrValue(IomObject iomObj, String sqlType, int sqlId,
+	public int addAttrValue(IomObject iomObj, String sqlType, long sqlId,
 			String sqlTableName,PreparedStatement ps, int valuei, AttributeDef attr,ArrayList structQueue)
 			throws SQLException, ConverterException {
 		if(attr.getExtending()==null){
@@ -786,10 +786,10 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 							 }
 						 }
 						 if(refoid!=null){
-								int refsqlId=oidPool.getObjSqlId(refoid);
-								ps.setInt(valuei, refsqlId);
+								long refsqlId=oidPool.getObjSqlId(refoid);
+								ps.setLong(valuei, refsqlId);
 						 }else{
-								ps.setNull(valuei,Types.INTEGER);
+								ps.setNull(valuei,Types.BIGINT);
 						 }
 						valuei++;
 					}else if(TrafoConfigNames.MULTISURFACE_TRAFO_COALESCE.equals(trafoConfig.getAttrConfig(attr, TrafoConfigNames.MULTISURFACE_TRAFO))){
@@ -952,10 +952,10 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 						 refoid=structvalue.getobjectrefoid();
 					 }
 					 if(refoid!=null){
-							int refsqlId=oidPool.getObjSqlId(refoid);
-							ps.setInt(valuei, refsqlId);
+							long refsqlId=oidPool.getObjSqlId(refoid);
+							ps.setLong(valuei, refsqlId);
 					 }else{
-							ps.setNull(valuei,Types.INTEGER);
+							ps.setNull(valuei,Types.BIGINT);
 					 }
 					valuei++;
 				}else{
@@ -1010,7 +1010,7 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 		typeCache.put(type,new Double(p));
 		return p;
 	}
-	private void enqueStructValue(ArrayList structQueue,int parentSqlId,String parentSqlType,String parentSqlAttr,IomObject struct,int structi,AttributeDef attr)
+	private void enqueStructValue(ArrayList structQueue,long parentSqlId,String parentSqlType,String parentSqlAttr,IomObject struct,int structi,AttributeDef attr)
 	{
 		structQueue.add(new StructWrapper(parentSqlId,parentSqlType,parentSqlAttr,struct,structi,attr));
 	}

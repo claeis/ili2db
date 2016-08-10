@@ -363,11 +363,26 @@ public class Ili2db {
 					}
 					String datasetName=config.getDatasetName();
 					// map datasetName to modelnames
-					Integer datasetId=getDatasetId(datasetName, conn, config);
+					Long datasetId=getDatasetId(datasetName, conn, config);
 					if(datasetId==null){
 						throw new Ili2dbException("dataset <"+datasetName+"> doesn't exist");
 					}
 					getBasketSqlIdsFromDatasetId(datasetId,modelv,conn,config);
+				}
+				if(function==Config.FC_IMPORT){
+					String datasetName=config.getDatasetName();
+					if(datasetName!=null){
+						if(DbUtility.tableExists(conn,new DbTableName(config.getDbschema(),DbNames.DATASETS_TAB))){
+							Long datasetId=getDatasetId(datasetName, conn, config);
+							if(datasetId!=null){
+								throw new Ili2dbException("dataset <"+datasetName+"> already exists");
+							}
+						}
+						boolean createBasketCol=config.BASKET_HANDLING_READWRITE.equals(config.getBasketHandling());
+						if(!createBasketCol){
+							throw new Ili2dbException("import with dataset name requires column "+DbNames.T_BASKET_COL);
+						}
+					}
 				}
 				
 				if(modelv.getSizeFileEntry()==0){
@@ -422,7 +437,7 @@ public class Ili2db {
 				}catch(Exception ex){
 					throw new Ili2dbException("failed to load/create ID generator",ex);
 				}
-				idGen.init(config.getDbschema());
+				idGen.init(config.getDbschema(),config);
 				SqlColumnConverter geomConverter=null;
 				try{
 					geomConverter=(SqlColumnConverter)Class.forName(geometryConverter).newInstance();
@@ -693,7 +708,7 @@ public class Ili2db {
 			String nbsp=Character.toString('\u00A0');
 			for(String className : classv){
 				ClassStat classStat=objStat.get(className);
-				String objCount=Integer.toString(classStat.getObjcount());
+				String objCount=Long.toString(classStat.getObjcount());
 				if(objCount.length()<6){
 					objCount=ch.ehi.basics.tools.StringUtility.STRING(6-objCount.length(), ' ')+objCount;
 				}
@@ -876,7 +891,7 @@ public class Ili2db {
 			}catch(Exception ex){
 				throw new Ili2dbException("failed to load/create ID generator",ex);
 			}
-		  	idGen.init(config.getDbschema());
+		  	idGen.init(config.getDbschema(),config);
 
 			// read mapping file
 			NameMapping mapping=new NameMapping(config);
@@ -1054,6 +1069,7 @@ public class Ili2db {
 		EhiLogger.logState("ili2c-"+ch.interlis.ili2c.Main.getVersion());
 		EhiLogger.logState("java.version "+System.getProperty("java.version"));
 		EhiLogger.logState("user.name <"+System.getProperty("user.name")+">");
+		EhiLogger.logState("maxMemory "+java.lang.Runtime.getRuntime().maxMemory()/1024L+" KB");
 	}
 	private static void setupIli2cPathmap(Config config, String appHome,
 			String xtffile,java.sql.Connection conn) throws Ili2dbException {
@@ -1184,13 +1200,13 @@ public class Ili2db {
 			ch.interlis.ili2c.config.Configuration modelv=new ch.interlis.ili2c.config.Configuration();
 			boolean createBasketCol=config.BASKET_HANDLING_READWRITE.equals(config.getBasketHandling());
 			String exportModelnames[]=null;
-			int basketSqlIds[]=null;
+			long basketSqlIds[]=null;
 			if(datasetName!=null){
 				if(!createBasketCol){
 					throw new Ili2dbException("dataset wise export requires column "+DbNames.T_BASKET_COL);
 				}
 				// map datasetName to sqlBasketId and modelnames
-				Integer datasetId=getDatasetId(datasetName, conn, config);
+				Long datasetId=getDatasetId(datasetName, conn, config);
 				if(datasetId==null){
 					throw new Ili2dbException("dataset <"+datasetName+"> doesn't exist");
 				}
@@ -1348,8 +1364,7 @@ public class Ili2db {
 		customMapping.postConnect(conn, config);
 		return conn;
 	}
-	public static Integer getDatasetId(String datasetName,Connection conn,Config config) throws Ili2dbException {
-		ArrayList<Integer> ret=new ArrayList<Integer>();
+	public static Long getDatasetId(String datasetName,Connection conn,Config config) throws Ili2dbException {
 		String schema=config.getDbschema();
 		String colT_ID=config.getColT_ID();
 		if(colT_ID==null){
@@ -1368,7 +1383,7 @@ public class Ili2db {
 			getstmt.setString(1,datasetName);
 			java.sql.ResultSet res=getstmt.executeQuery();
 			if(res.next()){
-				int sqlId=res.getInt(1);
+				long sqlId=res.getLong(1);
 				return sqlId;
 			}
 		}catch(java.sql.SQLException ex){
@@ -1384,9 +1399,9 @@ public class Ili2db {
 		}
 		return null;
 	}
-	public static int[] getBasketSqlIdsFromDatasetId(int datasetId,
+	public static long[] getBasketSqlIdsFromDatasetId(long datasetId,
 			Configuration modelv,Connection conn,Config config) throws Ili2dbException {
-		ArrayList<Integer> ret=new ArrayList<Integer>();
+		ArrayList<Long> ret=new ArrayList<Long>();
 		String schema=config.getDbschema();
 		String colT_ID=config.getColT_ID();
 		if(colT_ID==null){
@@ -1403,10 +1418,10 @@ public class Ili2db {
 			String stmt="SELECT "+colT_ID+","+DbNames.BASKETS_TAB_TOPIC_COL+" FROM "+sqlName+" WHERE "+DbNames.BASKETS_TAB_DATASET_COL+"= ?";
 			EhiLogger.traceBackendCmd(stmt);
 			getstmt=conn.prepareStatement(stmt);
-			getstmt.setInt(1,datasetId);
+			getstmt.setLong(1,datasetId);
 			java.sql.ResultSet res=getstmt.executeQuery();
 			if(res.next()){
-				int sqlId=res.getInt(1);
+				long sqlId=res.getLong(1);
 				String topicQName=res.getString(2);
 				String topicName[]=splitIliQName(topicQName.toString());
 				if(topicName[0]==null){
@@ -1431,16 +1446,16 @@ public class Ili2db {
 				}
 			}
 		}
-		int ret2[]=new int[ret.size()];
+		long ret2[]=new long[ret.size()];
 		int idx=0;
-		for(int x:ret){
+		for(long x:ret){
 			ret2[idx++]=x;
 		}
 		return ret2;
 	}
-	private static int[] getBasketSqlIdsFromBID(String[] basketids,
+	private static long[] getBasketSqlIdsFromBID(String[] basketids,
 			Configuration modelv,Connection conn,Config config) throws Ili2dbException {
-		int ret[]=new int[basketids.length];
+		long ret[]=new long[basketids.length];
 		int retidx=0;
 		String schema=config.getDbschema();
 		String colT_ID=config.getColT_ID();
@@ -1455,7 +1470,7 @@ public class Ili2db {
 		HashSet<String> models=new HashSet<String>();
 		for(String basketid:basketids){
 			StringBuilder topicQName=new StringBuilder();
-			Integer sqlId=getBasketSqlIdFromBID(basketid, conn, schema,colT_ID, topicQName);
+			Long sqlId=getBasketSqlIdFromBID(basketid, conn, schema,colT_ID, topicQName);
 			if(sqlId==null){
 				throw new Ili2dbException("no basket with BID "+basketid+" in table "+sqlName);
 			}
@@ -1473,13 +1488,13 @@ public class Ili2db {
 		}
 		return ret;
 	}
-	public static Integer getBasketSqlIdFromBID(String basketid,Connection conn,String schema, String colT_ID,StringBuilder topicName) throws Ili2dbException {
+	public static Long getBasketSqlIdFromBID(String basketid,Connection conn,String schema, String colT_ID,StringBuilder topicName) throws Ili2dbException {
 
 		String sqlName=DbNames.BASKETS_TAB;
 		if(schema!=null){
 			sqlName=schema+"."+sqlName;
 		}
-		int sqlId=0;
+		long sqlId=0;
 		java.sql.PreparedStatement getstmt=null;
 		try{
 			String stmt="SELECT "+colT_ID+","+DbNames.BASKETS_TAB_TOPIC_COL+" FROM "+sqlName+" WHERE "+DbNames.T_ILI_TID_COL+"= ?";
@@ -1488,7 +1503,7 @@ public class Ili2db {
 			getstmt.setString(1,basketid);
 			java.sql.ResultSet res=getstmt.executeQuery();
 			if(res.next()){
-				sqlId=res.getInt(1);
+				sqlId=res.getLong(1);
 				topicName.append(res.getString(2));
 				return sqlId;
 			}
@@ -1505,7 +1520,7 @@ public class Ili2db {
 		}
 		return null;
 	}
-	private static int[] getBasketSqlIdsFromTopic(String[] topics,
+	private static long[] getBasketSqlIdsFromTopic(String[] topics,
 			Configuration modelv,Connection conn,Config config) throws Ili2dbException {
 		String schema=config.getDbschema();
 		String colT_ID=config.getColT_ID();
@@ -1523,9 +1538,9 @@ public class Ili2db {
 			sqlName=schema+"."+sqlName;
 		}
 		HashSet<String> models=new HashSet<String>();
-		HashSet<Integer> bids=new HashSet<Integer>();
+		HashSet<Long> bids=new HashSet<Long>();
 		String topicQName=null;
-		int sqlId=0;
+		long sqlId=0;
 		java.sql.PreparedStatement getstmt=null;
 		try{
 			String stmt="SELECT "+colT_ID+","+DbNames.BASKETS_TAB_TOPIC_COL+" FROM "+sqlName;
@@ -1533,7 +1548,7 @@ public class Ili2db {
 			getstmt=conn.prepareStatement(stmt);
 			java.sql.ResultSet res=getstmt.executeQuery();
 			while(res.next()){
-				sqlId=res.getInt(1);
+				sqlId=res.getLong(1);
 				topicQName=res.getString(2);
 				String dbTopic[]=splitIliQName(topicQName);
 				String modelName=null;
@@ -1573,14 +1588,14 @@ public class Ili2db {
 		if(bids.size()==0){
 			throw new Ili2dbException("no baskets with given topic names in table "+sqlName);
 		}
-		int ret[]=new int[bids.size()];
+		long ret[]=new long[bids.size()];
 		idx=0;
-		for(int bid:bids){
+		for(long bid:bids){
 			ret[idx++]=bid;
 		}
 		return ret;
 	}
-	private static int[] getBasketSqlIdsFromModel(String[] qryModels,
+	private static long[] getBasketSqlIdsFromModel(String[] qryModels,
 			Configuration modelv,Connection conn,Config config) throws Ili2dbException {
 		String schema=config.getDbschema();
 		String colT_ID=config.getColT_ID();
@@ -1594,9 +1609,9 @@ public class Ili2db {
 			sqlName=schema+"."+sqlName;
 		}
 		HashSet<String> models=new HashSet<String>();
-		HashSet<Integer> bids=new HashSet<Integer>();
+		HashSet<Long> bids=new HashSet<Long>();
 		String topicQName=null;
-		int sqlId=0;
+		long sqlId=0;
 		java.sql.PreparedStatement getstmt=null;
 		try{
 			String stmt="SELECT "+colT_ID+","+DbNames.BASKETS_TAB_TOPIC_COL+" FROM "+sqlName;
@@ -1604,7 +1619,7 @@ public class Ili2db {
 			getstmt=conn.prepareStatement(stmt);
 			java.sql.ResultSet res=getstmt.executeQuery();
 			while(res.next()){
-				sqlId=res.getInt(1);
+				sqlId=res.getLong(1);
 				topicQName=res.getString(2);
 				String dbTopic[]=splitIliQName(topicQName);
 				String modelName=null;
@@ -1640,9 +1655,9 @@ public class Ili2db {
 		if(bids.size()==0){
 			throw new Ili2dbException("no baskets with given topic names in table "+sqlName);
 		}
-		int ret[]=new int[bids.size()];
+		long ret[]=new long[bids.size()];
 		idx=0;
-		for(int bid:bids){
+		for(long bid:bids){
 			ret[idx++]=bid;
 		}
 		return ret;
@@ -1782,7 +1797,7 @@ public class Ili2db {
 			,String sender
 			,Config config
 			,String exportParamModelnames[]
-			,int basketSqlIds[]
+			,long basketSqlIds[]
 			,HashSet<BasketStat> stat
 			,TrafoConfig trafoConfig
 			,Viewable2TableMapping class2wrapper){	
