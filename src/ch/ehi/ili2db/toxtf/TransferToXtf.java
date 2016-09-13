@@ -600,16 +600,18 @@ public class TransferToXtf {
 				long sqlid=rs.getLong(valuei);
 				valuei++;
 				
+				String sqlIliTid=null;
 				if(writeIliTid){
-					// String sqlIliTid=rs.getString(valuei);
-					// TODO (forward) references need mapping from t_id to t_ili_tid
+					sqlIliTid=rs.getString(valuei);
 					valuei++;
+				}else{
+					sqlIliTid=Long.toString(sqlid);
 				}
 				
 				Viewable aclass=(Viewable)attr.getContainer();
 
 				Iom_jObject iomObj;
-				iomObj=new Iom_jObject(aclass.getScopedName(null)+"_"+attr.getName(),Long.toString(sqlid));
+				iomObj=new Iom_jObject(aclass.getScopedName(null)+"_"+attr.getName(),sqlIliTid);
 				
 				// geomAttr
 				Object geomobj=rs.getObject(valuei);
@@ -628,7 +630,13 @@ public class TransferToXtf {
 				if(type instanceof SurfaceType){
 					// -> mainTable
 					IomObject ref=iomObj.addattrobj(refAttrName,"REF");
-					ref.setobjectrefoid(rs.getString(valuei));
+					long refSqlId=rs.getLong(valuei);
+					if(sqlidPool.containsSqlid(refSqlId)){
+						String refTid=sqlidPool.getXtfid(refSqlId);
+						ref.setobjectrefoid(refTid);
+					}else{
+						EhiLogger.logError("unknown referenced object "+attr.getContainer().getScopedName(null)+" sqlid "+refSqlId+" referenced from "+sqlTabName+" "+colT_ID+" "+sqlid);
+					}
 					valuei++;
 					
 				}
@@ -697,13 +705,14 @@ public class TransferToXtf {
 						dumpStructs(wrapper,fixref);
 					}
 					if(structWrapper==null){
-						if(fixref.needsFixing()){
-							delayedObjects.add(fixref);
-						}else{
+						if(!fixref.needsFixing() || out instanceof ItfWriter){
+							// no forward references
 							// write object
 							ObjectEvent objEvent=new ObjectEvent(iomObj);
 							if(validator!=null)validator.validate(objEvent);
 							out.write(objEvent);
+						}else{
+							delayedObjects.add(fixref);
 						}
 					}
 				}

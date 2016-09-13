@@ -14,7 +14,8 @@ ideas/open issues/questions
 
 ili2pg 3.3.3 (2016-09-xx)
 -----------------------------
-- fixed --skipPolygonBuilding (failed to create line tables)
+- import: fixed --skipPolygonBuilding (failed to create line tables)
+- export: fixed mapping of sqlid to TID if --skipPolygonBuilding
 
 ili2pg 3.3.2 (2016-09-05)
 -----------------------------
