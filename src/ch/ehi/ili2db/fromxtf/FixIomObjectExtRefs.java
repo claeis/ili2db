@@ -7,7 +7,8 @@ import ch.interlis.iom.IomObject;
 
 public class FixIomObjectExtRefs {
 
-	private IomObject root=null;
+	private String rootTid=null;
+	private String rootTag=null;
 	private HashMap<IomObject,Target> refs=new HashMap<IomObject,Target>();
 	private class Target{
 		public Target(Viewable aclass) {
@@ -17,12 +18,16 @@ public class FixIomObjectExtRefs {
 		Viewable aclass;
 			
 	}
-	public FixIomObjectExtRefs(IomObject rootObj) {
-		root=rootObj;
+	public FixIomObjectExtRefs(String rootObjTag,String rootObjTid) {
+		rootTid=rootObjTid;
+		rootTag=rootObjTag;
 	}
 
-	public IomObject getRoot(){
-		return root;
+	public String getRootTid(){
+		return rootTid;
+	}
+	public String getRootTag(){
+		return rootTag;
 	}
 	public void addFix(IomObject refobj, Viewable targetClass) {
 		refs.put(refobj, new Target(targetClass));
