@@ -254,6 +254,9 @@ public class TransferFromXtf {
 				IoxLogging errHandler=new ch.interlis.iox_j.logging.Log2EhiLogger();
 				LogEventFactory errFactory=new LogEventFactory();
 				errFactory.setDataSource(xtffilename);
+				if(createItfLineTables){
+					config.setValue(ch.interlis.iox_j.validator.Validator.CONFIG_DO_ITF_LINETABLES, ch.interlis.iox_j.validator.Validator.CONFIG_DO_ITF_LINETABLES_DO);
+				}
 				validator=new ch.interlis.iox_j.validator.Validator(td,modelConfig, errHandler, errFactory, config);
 				
 			}

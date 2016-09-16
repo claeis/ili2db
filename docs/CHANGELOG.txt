@@ -17,6 +17,7 @@ ili2pg 3.3.3 (2016-09-xx)
 - import: fixed --skipPolygonBuilding (failed to create line tables)
 - export: fixed mapping of sqlid to TID if --skipPolygonBuilding
 - import: buffer objects with forward references to disk to save heap space
+- validation: handle Itf linetables
 
 ili2pg 3.3.2 (2016-09-05)
 -----------------------------
