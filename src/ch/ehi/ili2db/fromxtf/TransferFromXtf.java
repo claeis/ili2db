@@ -872,8 +872,6 @@ public class TransferFromXtf {
 	 	}
 	 	if(tid!=null && tid.length()>0){
 			oidPool.getObjSqlId(tag,tid);
-	 	}else{
-	 		throw new IllegalStateException("tid required ("+tag+")");
 	 	}
 		FixIomObjectExtRefs extref=new FixIomObjectExtRefs(tag,tid);
 		allReferencesKnownHelper(iomObj, extref);
