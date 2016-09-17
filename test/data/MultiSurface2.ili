@@ -1,0 +1,29 @@
+INTERLIS 2.3;
+
+MODEL MultiSurface2
+  AT "mailto:ce@eisenhutinformatik.ch" VERSION "2016-09-17" =
+  DOMAIN
+  	Lkoord = COORD 480000.000.. 850000.000 [INTERLIS.m],
+		70000.000 .. 310000.000 [INTERLIS.m],
+		ROTATION 2 -> 1;
+	Einzelflaeche2D = SURFACE WITH (STRAIGHTS,ARCS) VERTEX Lkoord WITHOUT OVERLAPS > 0.001;
+	
+   STRUCTURE FlaecheStruktur2D =
+      Flaeche: Einzelflaeche2D;
+   END FlaecheStruktur2D;
+
+   !!@ili2db.mapping=MultiSurface
+   STRUCTURE MultiFlaeche2D =
+      Flaechen: BAG {1..*} OF FlaecheStruktur2D;
+   END MultiFlaeche2D;
+	
+  TOPIC TestA =
+  
+    CLASS ClassA1 =
+	geom : MANDATORY MultiFlaeche2D;    	
+    END ClassA1;
+    
+  END TestA;
+  
+  
+END MultiSurface2.

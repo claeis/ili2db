@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TRANSFER xmlns="http://www.interlis.ch/INTERLIS2.3">
+	<HEADERSECTION SENDER="ili2pg-2.5.0-20151209" VERSION="2.3">
+		<MODELS>
+			<MODEL NAME="MultiSurface2" VERSION="2015-12-03" URI="mailto:ce@eisenhutinformatik.ch"></MODEL>
+		</MODELS>
+	</HEADERSECTION>
+	<DATASECTION>
+		<MultiSurface2.TestA BID="MultiSurface2.TestA">
+			<MultiSurface2.TestA.ClassA1  TID="13">
+				<geom>
+					<MultiSurface2.MultiFlaeche2D>
+						<Flaechen>
+							<MultiSurface2.FlaecheStruktur2D>
+								<Flaeche>
+									<SURFACE>
+										<BOUNDARY>
+											<POLYLINE>
+												<COORD>
+													<C1>600030.0</C1>
+													<C2>200020.0</C2>
+												</COORD>
+												<COORD>
+													<C1>600045.0</C1>
+													<C2>200040.0</C2>
+												</COORD>
+												<COORD>
+													<C1>600010.0</C1>
+													<C2>200040.0</C2>
+												</COORD>
+												<COORD>
+													<C1>600030.0</C1>
+													<C2>200020.0</C2>
+												</COORD>
+											</POLYLINE>
+										</BOUNDARY>
+									</SURFACE>
+								</Flaeche>
+							</MultiSurface2.FlaecheStruktur2D>
+							<MultiSurface2.FlaecheStruktur2D>
+								<Flaeche>
+									<SURFACE>
+										<BOUNDARY>
+											<POLYLINE>
+												<COORD>
+													<C1>600015.0</C1>
+													<C2>200005.0</C2>
+												</COORD>
+												<COORD>
+													<C1>600040.0</C1>
+													<C2>200010.0</C2>
+												</COORD>
+												<COORD>
+													<C1>600010.0</C1>
+													<C2>200020.0</C2>
+												</COORD>
+												<COORD>
+													<C1>600005.0</C1>
+													<C2>200010.0</C2>
+												</COORD>
+												<COORD>
+													<C1>600015.0</C1>
+													<C2>200005.0</C2>
+												</COORD>
+											</POLYLINE>
+										</BOUNDARY>
+									</SURFACE>
+								</Flaeche>
+							</MultiSurface2.FlaecheStruktur2D>
+						</Flaechen>
+					</MultiSurface2.MultiFlaeche2D>
+				</geom>
+			</MultiSurface2.TestA.ClassA1>
+		</MultiSurface2.TestA>
+	</DATASECTION>
+</TRANSFER>
