@@ -14,6 +14,8 @@ import ch.ehi.ili2db.base.Ili2dbException;
 import ch.ehi.ili2db.base.IliNames;
 import ch.ehi.ili2db.converter.AbstractRecordConverter;
 import ch.ehi.ili2db.gui.Config;
+import ch.ehi.ili2db.mapping.IliMetaAttrNames;
+import ch.ehi.ili2db.mapping.MultiSurfaceMapping;
 import ch.ehi.ili2db.mapping.NameMapping;
 import ch.ehi.ili2db.mapping.TrafoConfig;
 import ch.ehi.ili2db.mapping.TrafoConfigNames;
@@ -476,8 +478,10 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 					}
 					trafoConfig.setAttrConfig(attr, TrafoConfigNames.CATALOGUE_REF_TRAFO,TrafoConfigNames.CATALOGUE_REF_TRAFO_COALESCE);
 					dbCol=ret;
-				}else if(isChbaseMultiSurface(td, attr) && (coalesceMultiSurface 
+				}else if(isMultiSurfaceAttr(td, attr) && (coalesceMultiSurface 
 						|| TrafoConfigNames.MULTISURFACE_TRAFO_COALESCE.equals(trafoConfig.getAttrConfig(attr,TrafoConfigNames.MULTISURFACE_TRAFO)))){
+					multiSurfaceAttrs.addMultiSurfaceAttr(attr);
+					MultiSurfaceMapping attrMapping=multiSurfaceAttrs.getMapping(attr);
 					DbColGeometry ret=new DbColGeometry();
 					boolean curvePolygon=false;
 					if(!strokeArcs){
@@ -487,7 +491,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 					// TODO get crs from ili
 					ret.setSrsAuth(defaultCrsAuthority);
 					ret.setSrsId(defaultCrsCode);
-					SurfaceType surface=((SurfaceType) ((AttributeDef) ((CompositionType) ((AttributeDef) ((CompositionType) type).getComponentType().getElement(AttributeDef.class, IliNames.CHBASE1_GEOMETRY_MULTISURFACE_SURFACES)).getDomain()).getComponentType().getElement(AttributeDef.class,IliNames.CHBASE1_GEOMETRY_SURFACESTRUCTURE_SURFACE)).getDomainResolvingAliases());
+					SurfaceType surface=((SurfaceType) ((AttributeDef) ((CompositionType) ((AttributeDef) ((CompositionType) type).getComponentType().getElement(AttributeDef.class, attrMapping.getBagOfSurfacesAttrName())).getDomain()).getComponentType().getElement(AttributeDef.class,attrMapping.getSurfaceAttrName())).getDomainResolvingAliases());
 					CoordType coord=(CoordType)surface.getControlPointDomain().getType();
 					ret.setDimension(coord.getDimensions().length);
 					setBB(ret, coord,attr.getContainer().getScopedName(null)+"."+attr.getName());
@@ -616,12 +620,19 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 		}
 		return false;
 	}
-	private boolean isChbaseMultiSurface(TransferDescription td,
+	private boolean isMultiSurfaceAttr(TransferDescription td,
 			AttributeDef attr) {
-		if(Ili2cUtility.isPureChbaseMultiSuface(td, attr)){
+		Type typeo=attr.getDomain();
+		if(typeo instanceof CompositionType){
 			CompositionType type=(CompositionType)attr.getDomain();
 			if(type.getCardinality().getMaximum()==1){
-				return true;
+				if(Ili2cUtility.isPureChbaseMultiSuface(td, attr)){
+					return true;
+				}
+				Table struct=type.getComponentType();
+				if(IliMetaAttrNames.METAATTR_MAPPING_MULTISURFACE.equals(struct.getMetaValue(IliMetaAttrNames.METAATTR_MAPPING))){
+					return true;
+				}
 			}
 		}
 		return false;

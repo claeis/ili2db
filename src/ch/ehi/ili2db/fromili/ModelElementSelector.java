@@ -145,12 +145,14 @@ public class ModelElementSelector {
 						Viewable rest=(Viewable)resti.next();
 						visitViewable(visitedElements,accuScope,rest);
 					}
-				}else if(type instanceof TypeAlias){
-					visitDomain(visitedElements,accuScope,((TypeAlias)type).getAliasing());
 				}else if(createItfLineTables && attr.getDomainResolvingAll() instanceof SurfaceOrAreaType){
 					visitItfLineTable(visitedElements,accuScope,attr);
 				}else if(includeEnums && attr.getDomainResolvingAll() instanceof EnumerationType){
 					visitAttributeDef(visitedElements,accuScope,attr);
+				}
+				// collect referenced domains
+				if(type instanceof TypeAlias){
+					visitDomain(visitedElements,accuScope,((TypeAlias)type).getAliasing());
 				}
 			}
 		}

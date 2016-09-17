@@ -706,7 +706,9 @@ TODO
 Strukturattribute
 ~~~~~~~~~~~~~~~~~
 
-Strukturen werden im Allgemeinen abgebildet wie Klassen.
+Strukturen werden im Allgemeinen abgebildet wie Klassen (siehe Kapitel zu der Abbildung von Klassen). Strukturattribute (also wenn eine Struktur
+als Attributstyp verwendet wird, z.B. bei BAG OF oder LIST OF) werden unabhängig von der Kardinalität durch einen Fremdschlüssel bei 
+der Tabelle der Struktur abgebildet. Bei gewissen Strukturen wird bei Smart-Mapping eine alternative Abbildung verwendet.
 
 +--------------+-------------------------+--------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | Nummer       | Beispiel INTERLIS       | Beispiel SQL                         | Kommentare                                                                                                                                                                                                                                    |
@@ -808,6 +810,22 @@ Beispiel für Abbildungsvariante 2:
 +-------------+---------------+
 | 6           | 2             |
 +-------------+---------------+
+
+Bei den folgenden Strukturen wird bei Smart-Mapping für die Strukturattribute eine alternative Abbildung verwendet:
+
+- Strukturen mit dem Interlis Metaattribut ili2db.mapping=MultiSurface
+
+- GeometryCHLV03_V1.MultiSurface
+
+- GeometryCHLV95_V1.MultiSurface
+
+- CatalogueObjects_V1.Catalogues.CatalogueReference
+
+- CatalogueObjects_V1.Catalogues.MandatoryCatalogueReference
+
+- LocalisationCH_V1.MultilingualMText
+
+- LocalisationCH_V1.MultilingualText
 
 Aufzählungen
 ~~~~~~~~~~~~
