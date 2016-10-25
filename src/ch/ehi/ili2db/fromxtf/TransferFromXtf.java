@@ -147,6 +147,12 @@ public class TransferFromXtf {
 	public void doit(IoxReader reader,Config config,HashSet<BasketStat> stat)
 	throws IoxException, Ili2dbException
 	{
+		if(functionCode==Config.FC_UPDATE || functionCode==Config.FC_REPLACE){
+			if(!createBasketCol){
+				throw new Ili2dbException("update/replace requires a basket column");
+			}
+		}
+
 		basketStat=stat;
 		today=new java.sql.Timestamp(System.currentTimeMillis());
 		if(doItfLineTables){
@@ -617,8 +623,9 @@ public class TransferFromXtf {
 					// if table exists?
 					if(DbUtility.tableExists(conn,sqlName)){
 						// dump it
+						ViewableWrapper wrapper=recConv.getViewableWrapper(sqlName.getName());
 						EhiLogger.logState(aclass.getScopedName(null)+" read ids...");
-						readObjectSqlIds(isItf,sqlName.getQName(),basketSqlId);
+						readObjectSqlIds(!wrapper.includesMultipleTypes(),sqlName,basketSqlId);
 					}else{
 						// skip it
 						EhiLogger.traceUnusualState(aclass.getScopedName(null)+"...skipped; no table "+sqlName+" in db");
@@ -635,7 +642,7 @@ public class TransferFromXtf {
 					if(DbUtility.tableExists(conn,sqlName)){
 						// dump it
 						EhiLogger.logState(attr.getContainer().getScopedName(null)+"_"+attr.getName()+" read ids...");
-						readObjectSqlIds(isItf,sqlName.getQName(),basketSqlId);
+						readObjectSqlIds(isItf,sqlName,basketSqlId);
 					}else{
 						// skip it
 						EhiLogger.traceUnusualState(attr.getScopedName(null)+"...skipped; no table "+sqlName+" in db");
@@ -1027,8 +1034,8 @@ public class TransferFromXtf {
 		ret.append(" WHERE r0."+DbNames.T_ILI_TID_COL+"=?");
 		return ret.toString();
 	}
-	private void readObjectSqlIds(boolean isItf,String sqltablename, long basketsqlid) {
-		String stmt = createQueryStmt4sqlids(isItf,sqltablename);
+	private void readObjectSqlIds(boolean noTypeCol,DbTableName sqltablename, long basketsqlid) {
+		String stmt = createQueryStmt4sqlids(noTypeCol,sqltablename.getQName());
 		EhiLogger.traceBackendCmd(stmt);
 		java.sql.PreparedStatement dbstmt = null;
 		try {
@@ -1041,11 +1048,11 @@ public class TransferFromXtf {
 				long sqlid = rs.getLong(1);
 				String xtfid=rs.getString(2);
 				String sqlType=null;
-				if(!isItf){
+				if(!noTypeCol){
 					sqlType=rs.getString(3);
 					//Viewable aclass=(Viewable) tag2class.get(ili2sqlName.mapSqlTableName(type));
 				}else{
-					sqlType=sqltablename;
+					sqlType=sqltablename.getName();
 				}
 				oidPool.putXtfid2sqlid(xtfid, sqlid);
 				addExistingObjects(sqlType,sqlid);
@@ -1087,11 +1094,11 @@ public class TransferFromXtf {
 		return;
 	}
 
-	private String createQueryStmt4sqlids(boolean isItf,String sqltablename){
+	private String createQueryStmt4sqlids(boolean noTypeCol,String sqltablename){
 		StringBuffer ret = new StringBuffer();
 		ret.append("SELECT r0."+colT_ID);
 		ret.append(", r0."+DbNames.T_ILI_TID_COL);
-		if(!isItf){
+		if(!noTypeCol){
 			ret.append(", r0."+DbNames.T_TYPE_COL);
 		}
 		ret.append(" FROM ");

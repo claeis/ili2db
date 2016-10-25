@@ -12,6 +12,10 @@ ideas/open issues/questions
 - einfache Liste mit den neu erzeugten Vertexpunkte (aufgrund der Overlap-Bereinigung)
 - Schalter für das "disablen" der Overlaps-Bereinigung. Bei vorhandenen gueltigen Overlaps erfolgen: a) Import mit NULL als Polygon, ohne Fehlermeldung, b) Import mit NULL als Polygon, mit Warning, c) kein Import, Fehlermeldung
 
+ili2pg 3.4.1 (2016-10-xx)
+-----------------------------
+- fixed sql statement to query existing oids from a table without a t_type column
+
 ili2pg 3.4.0 (2016-09-17)
 -----------------------------
 - support ili meta attr ili2db.mapping=MultiSurface
