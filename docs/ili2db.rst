@@ -646,7 +646,7 @@ Attribute (allgemein)
 |              |  mtextLimited : MTEXT*10;                                     |  mtextLimited varchar(10) NULL       |                                                                                   |
 |              |  mtextUnlimited : MTEXT;                                      |  mtextUnlimited text NULL            |                                                                                   |
 +--------------+---------------------------------------------------------------+--------------------------------------+-----------------------------------------------------------------------------------+
-| 2            | ::                                                            | ::                                   |                                                                                   |
+| 2            | ::                                                            | ::                                   | Je nach Option, sind andere Abbildungen möglich. Siehe Kapitel Aufzählungen.      |
 |              |                                                               |                                      |                                                                                   |
 |              |  aufzaehlung : (null, eins, zwei,                             |  aufzaehlung varchar(255) NULL       |                                                                                   |
 |              |     drei, mehr (                                              |                                      |                                                                                   |
@@ -833,9 +833,59 @@ Bei den folgenden Strukturen wird bei Smart-Mapping für die Strukturattribute e
 Aufzählungen
 ~~~~~~~~~~~~
 
-TODO
+Für die Abbildung von Aufzählungen gibt es zwei Varianten und verschiedene Optionen. 
+- Variante 1 bei der der Aufzählwert als XTF-Code gespeichert wird
+- Variante 2 bei der der Aufzählwert als ITF-Code gespeichert wird
+- Optional kann eine zusätzliche Spalte erzeugt werden, die den Anzeigtext enthalten kann
+- Optional können zusätzliche Tabellen erzeugt werden, die alle Aufzählwerte enthalten.
 
-Wie erfolgt die Nummerierung/Codierung?
++--------------+---------------------------------------------------------------+--------------------------------------+-----------------------------------------------------------------------------------+
+| Nummer       | Beispiel INTERLIS                                             | Beispiel SQL                         | Kommentare                                                                        |
++==============+===============================================================+======================================+===================================================================================+
+| 1            | ::                                                            | ::                                   | Default-Abbilung. Der XTF-Code (der Code wie er in der XTF-Transferdatei steht)   |
+|              |                                                               |                                      | wird als Aufzählwert in der Datenbank verwendet. Im Beispiel also:                |
+|              |  farbe : (rot, blau, gruen);                                  |  farbe varchar(255) NULL             | rot, blau oder gruen                                                              |
++--------------+---------------------------------------------------------------+--------------------------------------+-----------------------------------------------------------------------------------+
+| 2            | ::                                                            | ::                                   | Abbilung mit der Option ``--createEnumColAsItfCode``. Der ITF-Code (der Code      |
+|              |                                                               |                                      | wie er in der ITF-Transferdatei steht) wird als Aufzählwert in der Datenbank      |
+|              |  farbe : (rot, blau, gruen);                                  |  farbe integer NULL                  | verwendet. Im Beispiel also: 0, 1 oder 2. Diese Option ist nur zulässig, wenn im  |
+|              |                                                               |                                      | Modell keine Erweiterungen von Aufzählungen vorkommen.                            |
++--------------+---------------------------------------------------------------+--------------------------------------+-----------------------------------------------------------------------------------+
+| 3            | ::                                                            | ::                                   | Abbilung mit der Option ``--createEnumTxtCol``. Es wird eine zusätzliche Spalte   |
+|              |                                                               |                                      | mit dem Attributnamen+``_txt`` erstellt (Im Besipiel ``art_txt``).                |
+|              |  farbe : (rot, blau, gruen);                                  |  farbe varchar(255) NULL,            | Die zusätzliche Spalte kann einen beliebigen Wert enthalten, der als Anzeigetext  |
+|              |                                                               |  farbe_txt varchar(255) NULL         | gedacht ist. Beim Import wird die Spalte mit dem XTF-Code befüllt.                |
+|              |                                                               |                                      | Die Option kann bei Variante 1 oder 2 benutzt werden.                             |
++--------------+---------------------------------------------------------------+--------------------------------------+-----------------------------------------------------------------------------------+
+| 4            | ::                                                            | ::                                   | Abbildung mit der Option ``--createEnumTabs``. Es wird pro Aufzählungsdefinition  |
+|              |                                                               |                                      | eine Tabelle mit den einzelnen Aufzählwerten erstellt.                            |
+|              |  DOMAIN                                                       |  CREATE TABLE Farbe (                |                                                                                   |
+|              |    Farbe : (rot, blau, gruen);                                |   itfCode integer PRIMARY KEY,       | itfCode ist der ITF-Code des Aufzählwertes.                                       |
+|              |                                                               |   iliCode varchar(1024) NOT NULL,    |                                                                                   |
+|              |                                                               |   seq integer NULL,                  | iliCode ist der qualifizierte Elementnamen (=XTF-Code) des Aufzählwertes.         |
+|              |                                                               |   dispName varchar(250) NOT NULL,    |                                                                                   |
+|              |                                                               |  );                                  | seq Definiert die Reihenfolge der Aufzählelemente.                                |
+|              |                                                               |                                      |                                                                                   |
+|              |                                                               |                                      | dispName definiert den Anzeigetext für das Aufzählelement. Beim Import wird die   |
+|              |                                                               |                                      | Spalte mit dem XTF-Code befüllt.                                                  |
++--------------+---------------------------------------------------------------+--------------------------------------+-----------------------------------------------------------------------------------+
+| 5            | ::                                                            | ::                                   | Abbildung mit der Option ``--createSingleEnumTab``. Es wird                       |
+|              |                                                               |                                      | eine einzige Tabelle für die Aufzählwerte aller Aufzählungen erstellt.            |
+|              |  DOMAIN                                                       |  CREATE TABLE T_ILI2DB_ENUM (        |                                                                                   |
+|              |    Farbe : (rot, blau, gruen);                                |   thisClass varchar(1024) NOT NULL,  | thisClass ist der qualifizierte Namen der Aufzählungsdefinition.                  |
+|              |                                                               |   baseClass varchar(1024) NOT NULL,  |                                                                                   |
+|              |                                                               |   itfCode integer NOT NULL,          | baseClass ist der qualifizierte Namen der Basis-Aufzählungsdefinition             |
+|              |                                                               |   iliCode varchar(1024) NOT NULL,    |                                                                                   |
+|              |                                                               |   seq integer NULL,                  | itfCode ist der ITF-Code des Aufzählwertes.                                       |
+|              |                                                               |   dispName varchar(250) NOT NULL,    |                                                                                   |
+|              |                                                               |  );                                  | iliCode ist der qualifizierte Elementnamen (=XTF-Code) des Aufzählwertes.         |
+|              |                                                               |                                      |                                                                                   |
+|              |                                                               |                                      | seq Definiert die Reihenfolge der Aufzählelemente.                                |
+|              |                                                               |                                      |                                                                                   |
+|              |                                                               |                                      | dispName definiert den Anzeigetext für das Aufzählelement. Beim Import wird die   |
+|              |                                                               |                                      | Spalte mit dem XTF-Code befüllt.                                                  |
++--------------+---------------------------------------------------------------+--------------------------------------+-----------------------------------------------------------------------------------+
+
 
 Metadaten
 ~~~~~~~~~
