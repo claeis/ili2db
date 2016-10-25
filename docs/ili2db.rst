@@ -58,7 +58,10 @@ Laufzeitanforderungen
 Das Programm setzt Java 1.6 voraus.
 
 **PostGIS:** Als Datenbank muss mindestens PostgreSQL 8.3 und PostGIS
-1.5 vorhanden sein.
+1.5 vorhanden sein. Falls das Interlis Datenmodell INTERLIS.UUIDOID als 
+OID verwendet, wird die Funktion uuid_generate_v4() verwendet. 
+Dazu muss die PostgreSQL-Erweiterung uuid-ossp konfiguriert sein
+(``CREATE EXTENSION "uuid-ossp";``).
 
 Lizenz
 ------
