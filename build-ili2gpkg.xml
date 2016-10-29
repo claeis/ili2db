@@ -85,14 +85,14 @@
   </target>
 
   <target depends="init,compile" name="fatjar">
-    <property file="ili2pg/src/ch/ehi/ili2pg/Version.properties" prefix="buildnr."/>
+    <property file="ili2gpkg/src/ch/ehi/ili2gpkg/Version.properties" prefix="buildnr."/>
 	<property name="buildnr" value="${buildnr.versionMajor}.${buildnr.versionMinor}.${buildnr.versionMicro}"/>
 
 	<delete file="${build}/jar/${ant.project.name}-${buildnr}.jar" quiet="true"/>
 
     <jar jarfile="${build}/jar/${ant.project.name}-${buildnr}.jar" basedir="${build}/classes">
 	    <manifest>
-	      <attribute name="Main-Class" value="ch.ehi.ili2pg.PgMain"/>
+	      <attribute name="Main-Class" value="ch.ehi.ili2gpkg.GpkgMain"/>
 	    </manifest>
 
 		<zipgroupfileset dir="libs">
@@ -110,7 +110,7 @@
 		</zipgroupfileset>
 
 		<fileset dir="${src}" includes="**/*.properties"/>
-		<fileset dir="ili2pg/src" includes="**/*.properties"/>
+		<fileset dir="ili2gpkg/src" includes="**/*.properties"/>
     </jar>
   </target>
   
