@@ -106,10 +106,11 @@
 			<include name ="jts-core-1.14.0.jar"/>
 			<include name ="toml4j-0.5.1.jar"/>
 			<include name ="ehisqlgen.jar"/>
-			<include name ="${lib}/${sqlite}"/>
+			<include name ="${sqlite}"/>
 		</zipgroupfileset>
 
 		<fileset dir="${src}" includes="**/*.properties"/>
+		<fileset dir="ili2gpkg/src" includes="**/*.sql"/>
 		<fileset dir="ili2gpkg/src" includes="**/*.properties"/>
     </jar>
   </target>
