@@ -834,9 +834,13 @@ Aufzählungen
 ~~~~~~~~~~~~
 
 Für die Abbildung von Aufzählungen gibt es zwei Varianten und verschiedene Optionen. 
+
 - Variante 1 bei der der Aufzählwert als XTF-Code gespeichert wird
+
 - Variante 2 bei der der Aufzählwert als ITF-Code gespeichert wird
+
 - Optional kann eine zusätzliche Spalte erzeugt werden, die den Anzeigtext enthalten kann
+
 - Optional können zusätzliche Tabellen erzeugt werden, die alle Aufzählwerte enthalten.
 
 +--------------+---------------------------------------------------------------+--------------------------------------+-----------------------------------------------------------------------------------+
