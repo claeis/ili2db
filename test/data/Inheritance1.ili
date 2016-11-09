@@ -151,5 +151,20 @@ MODEL Inheritance1
       x2 -- {1..*} ClassD1x;
     END d2x;
   END TestD;
+
+  TOPIC TestE =
+    CLASS ClassE0 (ABSTRACT) =
+      attrE0 : TEXT*30;
+    END ClassE0;
+    CLASS ClassE1 EXTENDS ClassE0 =
+      attrE1 : TEXT*30;
+    END ClassE1;
+    CLASS ClassE1a EXTENDS ClassE1 =
+      attrEx : TEXT*30;
+    END ClassE1a;
+    CLASS ClassE1b EXTENDS ClassE1 =
+      attrEx : TEXT*30;  !! Namenskonflikt mit ClassA1a.attrEx
+    END ClassE1b;
+  END TestE;
   
 END Inheritance1.
