@@ -11,24 +11,21 @@ import ch.ehi.ili2db.base.Ili2dbException;
 import ch.ehi.ili2db.gui.Config;
 import ch.ehi.ili2db.mapping.NameMapping;
 
+//-Ddburl=jdbc:postgresql:dbname -Ddbusr=usrname -Ddbpwd=1234
 public class Dataset1smart1Test {
 	private static final String DBSCHEMA = "Dataset1smart1";
 	private static final String DATASETNAME_A = "Testset1_a";
 	private static final String DATASETNAME_B = "Testset1_b";
-	String dbhost=null;
-	String dbport=null;
-	String dbname="ili2db";
-	String dbuser="postgres";
-	String dbpwd="ola2011";
+	String dburl=System.getProperty("dburl"); 
+	String dbuser=System.getProperty("dbusr");
+	String dbpwd=System.getProperty("dbpwd"); 
 
 	public Config initConfig(String xtfFilename,String dbschema,String logfile) {
 		Config config=new Config();
 		new ch.ehi.ili2pg.PgMain().initConfig(config);
 		
 		
-		config.setDbhost(dbhost);
-		config.setDbport(dbport);
-		config.setDbdatabase(dbname);
+		config.setDburl(dburl);
 		config.setDbusr(dbuser);
 		config.setDbpwd(dbpwd);
 		if(dbschema!=null){
@@ -37,7 +34,6 @@ public class Dataset1smart1Test {
 		if(logfile!=null){
 			config.setLogfile(logfile);
 		}
-		config.setDburl(getDbUrlConverter().makeUrl(config));
 
 
 		config.setXtffile(xtfFilename);
@@ -46,27 +42,6 @@ public class Dataset1smart1Test {
 		}
 		return config;
 		
-	}
-	protected DbUrlConverter getDbUrlConverter() {
-		return new DbUrlConverter(){
-			public String makeUrl(Config config) {
-				/*
-				    * jdbc:postgresql:database
-				    * jdbc:postgresql://host/database
-				    * jdbc:postgresql://host:port/database
-				    */
-				if(config.getDbdatabase()!=null){
-					if(config.getDbhost()!=null){
-						if(config.getDbport()!=null){
-							return "jdbc:postgresql://"+config.getDbhost()+":"+config.getDbport()+"/"+config.getDbdatabase();
-						}
-						return "jdbc:postgresql://"+config.getDbhost()+"/"+config.getDbdatabase();
-					}
-					return "jdbc:postgresql:"+config.getDbdatabase();
-				}
-				return null;
-			}
-		};
 	}
 
 	//config.setDeleteMode(Config.DELETE_DATA);
