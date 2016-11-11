@@ -15,6 +15,7 @@ ideas/open issues/questions
 ili2pg 3.4.1 (2016-10-xx)
 -----------------------------
 - fixed sql statement to query existing oids from a table without a t_type column
+- fixed missing/wrong references when importing ITF files with TIDs unique only per table
 
 ili2pg 3.4.0 (2016-09-17)
 -----------------------------

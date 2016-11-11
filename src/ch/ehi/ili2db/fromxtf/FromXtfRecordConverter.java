@@ -213,19 +213,15 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 								//ret.setStringAttribute(roleName, refoid);
 							 }
 						 }
-						String targetClass=null;
-						if(refoid!=null){
-							targetClass=oidPool.getXtfObjTag(refoid);
-							if(targetClass==null){
-								// should not happen, because objects with forward references are buffered, 
-								// until all other objects are processed
-								throw new IllegalStateException("unknown class of TID "+refoid);
-							}
-						}
 						ArrayList<ViewableWrapper> targetTables = getTargetTables(role.getDestination());
 						  for(ViewableWrapper targetTable : targetTables){
-							  if(targetTable==class2wrapper.get((Viewable) tag2class.get(targetClass)) && refoid!=null){
-								   long refsqlId=oidPool.getObjSqlId(refoid);
+							  	Viewable rootClass=(Viewable)targetTable.getViewable().getRootExtending();
+							  	if(rootClass==null){
+							  		rootClass=targetTable.getViewable();
+							  	}
+							  	String targetClassName=rootClass.getScopedName(null);
+							  	if(refoid!=null && oidPool.containsXtfid(targetClassName,refoid)){
+								   long refsqlId=oidPool.getObjSqlId(targetClassName,refoid);
 								   ps.setLong(valuei, refsqlId);
 								}else{
 									ps.setNull(valuei, Types.BIGINT);
@@ -789,7 +785,8 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 							 }
 						 }
 						 if(refoid!=null){
-								long refsqlId=oidPool.getObjSqlId(refoid);
+							 	String targetClassName=IliNames.CHBASE1_CATALOGUEOBJECTS+"."+IliNames.CHBASE1_ITEM;
+								long refsqlId=oidPool.getObjSqlId(targetClassName,refoid);
 								ps.setLong(valuei, refsqlId);
 						 }else{
 								ps.setNull(valuei,Types.BIGINT);
@@ -957,7 +954,8 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 						 refoid=structvalue.getobjectrefoid();
 					 }
 					 if(refoid!=null){
-							long refsqlId=oidPool.getObjSqlId(refoid);
+						 	String targetClassName=Ili2cUtility.getRootViewable(((ReferenceType) type).getReferred()).getScopedName(null);
+							long refsqlId=oidPool.getObjSqlId(targetClassName,refoid);
 							ps.setLong(valuei, refsqlId);
 					 }else{
 							ps.setNull(valuei,Types.BIGINT);

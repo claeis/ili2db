@@ -284,7 +284,7 @@ public class TransferFromXtf {
 								existingBasketSqlId=readExistingSqlObjIds(reader instanceof ItfReader,basket.getBid());
 								if(existingBasketSqlId==null){
 									// new basket 
-									basketSqlId=oidPool.getObjSqlId(basket.getBid());
+									basketSqlId=oidPool.getObjSqlId(null,basket.getBid());
 								}else{
 									// existing basket
 									basketSqlId=existingBasketSqlId;
@@ -292,7 +292,7 @@ public class TransferFromXtf {
 									dropExistingStructEles(basket.getType(),basketSqlId);
 								}
 							}else{
-								basketSqlId=oidPool.getObjSqlId(basket.getBid());
+								basketSqlId=oidPool.getObjSqlId(null,basket.getBid());
 							}
 							if(attachmentKey==null){
 								if(xtffilename!=null){
@@ -331,11 +331,12 @@ public class TransferFromXtf {
 							boolean skipObj=false;
 							for(IomObject ref:fixref.getRefs()){
 								String xtfid=ref.getobjectrefoid();
-								if(oidPool.containsXtfid(xtfid)){
+								Viewable aclass=fixref.getTargetClass(ref);
+								String rootClassName=Ili2cUtility.getRootViewable(aclass).getScopedName(null);
+								if(oidPool.containsXtfid(rootClassName,xtfid)){
 									// skip it; now resolvable
 								}else{
 									// object in another basket
-									Viewable aclass=fixref.getTargetClass(ref);
 									if(readIliTid || (aclass instanceof AbstractClassDef && ((AbstractClassDef) aclass).getOid()!=null)){
 										// read object
 										Long sqlid=readObjectSqlid(aclass,xtfid);
@@ -345,7 +346,7 @@ public class TransferFromXtf {
 											skipObj=true;
 										}else{
 											// remember found sqlid
-											oidPool.putXtfid2sqlid(xtfid, sqlid);
+											oidPool.putXtfid2sqlid(rootClassName,xtfid, sqlid);
 										}
 									}else{
 										EhiLogger.logError("unknown referenced object "+aclass.getScopedName(null)+" TID "+xtfid+" referenced from "+fixref.getRootTag()+" TID "+fixref.getRootTid());
@@ -930,16 +931,18 @@ public class TransferFromXtf {
 									}
 									if(structvalue!=null){
 										String refoid=structvalue.getobjectrefoid();
-										if(!oidPool.containsXtfid(refoid)){
-											extref.addFix(structvalue, role.getDestination());
+										Viewable targetClass=role.getDestination();
+										if(!oidPool.containsXtfid(Ili2cUtility.getRootViewable(targetClass).getScopedName(null),refoid)){
+											extref.addFix(structvalue, targetClass);
 										}
 									}
 								}
 							 }else{
 								 IomObject structvalue=iomObj.getattrobj(roleName,0);
 								 String refoid=structvalue.getobjectrefoid();
-								if(!oidPool.containsXtfid(refoid)){
-									extref.addFix(structvalue, role.getDestination());
+									Viewable targetClass=role.getDestination();
+								if(!oidPool.containsXtfid(Ili2cUtility.getRootViewable(targetClass).getScopedName(null),refoid)){
+									extref.addFix(structvalue, targetClass);
 								}
 								
 							 }
@@ -978,8 +981,9 @@ public class TransferFromXtf {
 						 refoid=structvalue.getobjectrefoid();
 					 }
 					 if(refoid!=null){
-							if(!oidPool.containsXtfid(refoid)){
-								extref.addFix(structvalue, ((ReferenceType)type).getReferred());
+						 	Viewable targetClass=((ReferenceType)type).getReferred();
+							if(!oidPool.containsXtfid(Ili2cUtility.getRootViewable(targetClass).getScopedName(null),refoid)){
+								extref.addFix(structvalue, targetClass);
 							}
 					 }
 				}else{
@@ -1050,11 +1054,11 @@ public class TransferFromXtf {
 				String sqlType=null;
 				if(!noTypeCol){
 					sqlType=rs.getString(3);
-					//Viewable aclass=(Viewable) tag2class.get(ili2sqlName.mapSqlTableName(type));
 				}else{
 					sqlType=sqltablename.getName();
 				}
-				oidPool.putXtfid2sqlid(xtfid, sqlid);
+				Viewable aclass=(Viewable) tag2class.get(ili2sqlName.mapSqlTableName(sqlType));
+				oidPool.putXtfid2sqlid(Ili2cUtility.getRootViewable(aclass).getScopedName(null),xtfid, sqlid);
 				addExistingObjects(sqlType,sqlid);
 			}
 		} catch (java.sql.SQLException ex) {
@@ -1207,7 +1211,7 @@ public class TransferFromXtf {
 		Table lineAttrTable=type.getLineAttributeStructure();
 		
 		// map oid of transfer file to a sql id
-		long sqlId=oidPool.getObjSqlId(iomObj.getobjectoid());
+		long sqlId=oidPool.getObjSqlId(attrDef.getContainer().getScopedName(null)+"."+attrDef.getName(),iomObj.getobjectoid());
 		
 		String sqlTableName=getSqlTableNameItfLineTable(attrDef).getQName();
 		String insert=createItfLineTableInsertStmt(attrDef);
@@ -1243,8 +1247,7 @@ public class TransferFromXtf {
 			if (type instanceof SurfaceType) {
 				IomObject structvalue = iomObj.getattrobj(refAttrName, 0);
 				String refoid = structvalue.getobjectrefoid();
-				long refsqlId = oidPool.getObjSqlId(refoid); // TODO handle non unique
-													// tids
+				long refsqlId = oidPool.getObjSqlId(attrDef.getContainer().getScopedName(null),refoid); 
 				ps.setLong(valuei, refsqlId);
 				valuei++;
 			}

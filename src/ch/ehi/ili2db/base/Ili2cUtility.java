@@ -62,6 +62,13 @@ public class Ili2cUtility {
 		}
 		return false;
 	}
+	public static Viewable getRootViewable(Viewable def) {
+		Viewable root=(Viewable) def.getRootExtending();
+		if(root==null){
+			root=def;
+		}
+		return root;
+	}
 
 	public static boolean isPureChbaseCatalogueRef(TransferDescription td,AttributeDef attr) {
 		Type typeo=attr.getDomain();
