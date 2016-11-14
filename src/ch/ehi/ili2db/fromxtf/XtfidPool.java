@@ -5,15 +5,24 @@ import java.util.HashMap;
 import ch.ehi.ili2db.base.DbIdGen;
 
 public class XtfidPool {
-	private HashMap<String,Long> xtfId2sqlId=new HashMap<String,Long>();
-	private HashMap<String,String> xtfId2tag=new HashMap<String,String>();
+	private HashMap<String,HashMap<String,Long>> xtfIdByTag2sqlId=new HashMap<String,HashMap<String,Long>>();
 	private DbIdGen idGen=null;
 	public XtfidPool(DbIdGen idGen1) {
 		idGen=idGen1;
 	}
-	/** maps the xtfId to a sqlId.
+	/** maps an xtfId to a sqlId.
+	 * xtfIds are qualified with the qualified name of the ili-class, so that non-unique TIDs
+	 * of ITF files can be handled. For Ili2 models the root class of the class inheritance is
+	 * used.
 	 */
-	public long getObjSqlId(String xtfId){
+	public long getObjSqlId(String tag,String xtfId){
+		HashMap<String,Long> xtfId2sqlId=null;
+		if(xtfIdByTag2sqlId.containsKey(tag)){
+			xtfId2sqlId=xtfIdByTag2sqlId.get(tag);
+		}else{
+			xtfId2sqlId=new HashMap<String,Long>(); 
+			xtfIdByTag2sqlId.put(tag,xtfId2sqlId);
+		}
 		if(xtfId2sqlId.containsKey(xtfId)){
 			return xtfId2sqlId.get(xtfId).longValue();
 		}
@@ -21,16 +30,18 @@ public class XtfidPool {
 		xtfId2sqlId.put(xtfId,new Long(ret));
 		return ret;
 	}
-	public long getObjSqlId(String tag,String xtfId){
-		if(tag!=null && !xtfId2tag.containsKey(xtfId)){
-			xtfId2tag.put(xtfId,tag);
+	public boolean containsXtfid(String tag,String xtfid) {
+		HashMap<String,Long> xtfId2sqlId=null;
+		if(xtfIdByTag2sqlId.containsKey(tag)){
+			xtfId2sqlId=xtfIdByTag2sqlId.get(tag);
+		}else{
+			xtfId2sqlId=new HashMap<String,Long>(); 
+			xtfIdByTag2sqlId.put(tag,xtfId2sqlId);
 		}
-		if(xtfId2sqlId.containsKey(xtfId)){
-			return xtfId2sqlId.get(xtfId).longValue();
+		if(xtfId2sqlId.containsKey(xtfid)){
+			return true;
 		}
-		long ret=newObjSqlId();
-		xtfId2sqlId.put(xtfId,new Long(ret));
-		return ret;
+		return false;
 	}
 	/** gets a new obj id.
 	 */
@@ -41,14 +52,15 @@ public class XtfidPool {
 	{
 		return idGen.getLastSqlId();
 	}
-	public boolean containsXtfid(String xtfid) {
-		return xtfId2sqlId.containsKey(xtfid);
-	}
-	public void putXtfid2sqlid(String xtfid, Long sqlid) {
+	public void putXtfid2sqlid(String tag,String xtfid, Long sqlid) {
+		HashMap<String,Long> xtfId2sqlId=null;
+		if(xtfIdByTag2sqlId.containsKey(tag)){
+			xtfId2sqlId=xtfIdByTag2sqlId.get(tag);
+		}else{
+			xtfId2sqlId=new HashMap<String,Long>(); 
+			xtfIdByTag2sqlId.put(tag,xtfId2sqlId);
+		}
 		xtfId2sqlId.put(xtfid, sqlid);
-	}
-	public String getXtfObjTag(String refoid) {
-		return xtfId2tag.get(refoid);
 	}
 
 }

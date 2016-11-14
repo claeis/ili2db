@@ -18,6 +18,7 @@ public class IliNames {
 	public static final String CHBASE1_CATALOGUEOBJECTS = "CatalogueObjects_V1";
 	public static final String CHBASE1_CATALOGUEOBJECTS_CATALOGUES = CHBASE1_CATALOGUEOBJECTS+".Catalogues";
 	public static final String CHBASE1_CATALOGUEREFERENCE = "CatalogueReference";
+	public static final String CHBASE1_ITEM = "Item";
 	public static final String CHBASE1_CATALOGUEREFERENCE_REFERENCE ="Reference";
 	public static final String CHBASE1_MANDATORYCATALOGUEREFERENCE = "MandatoryCatalogueReference";
 	public static final String CHBASE1_LOCALISATIONCH = "LocalisationCH_V1";
