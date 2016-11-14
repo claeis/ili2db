@@ -860,6 +860,7 @@ public class TransferFromXtf {
 	 	if((tid==null || tid.length()==0) && modelele instanceof AssociationDef){
 	 		Iterator<ViewableTransferElement> rolei=((AssociationDef)modelele).getAttributesAndRoles2();
 	 		String sep="";
+	 		tid="";
 	 		while(rolei.hasNext()){
 	 			ViewableTransferElement prop=rolei.next();
 	 			if(prop.obj instanceof RoleDef && !prop.embedded){
@@ -879,7 +880,7 @@ public class TransferFromXtf {
 	 		}
 	 	}
 	 	if(tid!=null && tid.length()>0){
-			oidPool.getObjSqlId(tag,tid);
+			oidPool.getObjSqlId(Ili2cUtility.getRootViewable((Viewable) modelele).getScopedName(null),tid);
 	 	}
 		FixIomObjectExtRefs extref=new FixIomObjectExtRefs(tag,tid);
 		allReferencesKnownHelper(iomObj, extref);
@@ -1141,7 +1142,7 @@ public class TransferFromXtf {
 				// map oid of transfer file to a sql id
 			 	String tid=iomObj.getobjectoid();
 			 	if(tid!=null && tid.length()>0){
-					sqlId=oidPool.getObjSqlId(tag,tid);
+					sqlId=oidPool.getObjSqlId(Ili2cUtility.getRootViewable(aclass1).getScopedName(null),tid);
 			 		if(functionCode==Config.FC_UPDATE && existingObjectsContains(sqlType,sqlId)){
 			 			updateObj=true;
 			 			existingObjectsRemove(sqlType,sqlId);
