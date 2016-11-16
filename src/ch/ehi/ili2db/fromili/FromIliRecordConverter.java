@@ -502,7 +502,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 					for(String sfx:DbNames.MULTILINGUAL_TXT_COL_SUFFIXS){
 						DbColVarchar ret=new DbColVarchar();
 						ret.setName(getSqlAttrName(attr,dbTable.getName().getName(),null)+sfx);
-						ret.setSize(255);
+						ret.setSize(DbColVarchar.UNLIMITED);
 						ret.setNotNull(false);
 						ret.setPrimaryKey(false);
 						dbColExts.add(ret);
@@ -576,7 +576,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 			if(((TextType)type).getMaxLength()>0){
 				ret.setSize(((TextType)type).getMaxLength());
 			}else{
-				ret.setSize(-1);
+				ret.setSize(DbColVarchar.UNLIMITED);
 			}
 			dbCol=ret;
 		}else{

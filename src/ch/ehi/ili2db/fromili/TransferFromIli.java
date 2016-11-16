@@ -354,12 +354,12 @@ public class TransferFromIli {
 		DbColVarchar importsCol=new DbColVarchar();
 		importsCol.setName(DbNames.MODELS_TAB_MODELNAME_COL);
 		importsCol.setNotNull(true);
-		importsCol.setSize(-1);
+		importsCol.setSize(DbColVarchar.UNLIMITED);
 		tab.addColumn(importsCol);
 		DbColVarchar contentCol=new DbColVarchar();
 		contentCol.setName(DbNames.MODELS_TAB_CONTENT_COL);
 		contentCol.setNotNull(true);
-		contentCol.setSize(-1);
+		contentCol.setSize(DbColVarchar.UNLIMITED);
 		tab.addColumn(contentCol);
 		DbColDateTime importDateCol=new DbColDateTime();
 		importDateCol.setName(DbNames.MODELS_TAB_IMPORTDATE_COL);
