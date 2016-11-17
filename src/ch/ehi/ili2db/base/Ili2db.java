@@ -1420,7 +1420,7 @@ public class Ili2db {
 			getstmt=conn.prepareStatement(stmt);
 			getstmt.setLong(1,datasetId);
 			java.sql.ResultSet res=getstmt.executeQuery();
-			if(res.next()){
+			while(res.next()){
 				long sqlId=res.getLong(1);
 				String topicQName=res.getString(2);
 				String topicName[]=splitIliQName(topicQName.toString());

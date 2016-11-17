@@ -15,6 +15,7 @@ ideas/open issues/questions
 ili2pg/ili2gpkg 3.5.0 (2016-11-xx)
 -----------------------------
 - import: map LocalisedText to unlimited text
+- export: failed to export all baskets of a dataset
 
 ili2pg/ili2gpkg 3.4.1 (2016-11-14)
 -----------------------------
