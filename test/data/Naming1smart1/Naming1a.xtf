@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TRANSFER xmlns="http://www.interlis.ch/INTERLIS2.3">
+	<HEADERSECTION SENDER="ili2pg-3.5.0-20161114" VERSION="2.3">
+		<MODELS>
+			<MODEL NAME="Naming1" VERSION="2016-11-17" URI="mailto:ce@eisenhutinformatik.ch"></MODEL>
+		</MODELS>
+	</HEADERSECTION>
+	<DATASECTION>
+		<Naming1.TestAttr BID="1">
+			<Naming1.TestAttr.ClassA1 TID="a1">
+				<attr1>a1 first</attr1>
+				<Attr1>a1 second</Attr1>
+			</Naming1.TestAttr.ClassA1>
+			<Naming1.TestAttr.ClassA1a TID="a2">
+				<attr1>a2 first</attr1>
+				<Attr1>a2 second</Attr1>
+				<attrA>a2</attrA>
+			</Naming1.TestAttr.ClassA1a>
+			<Naming1.TestAttr.ClassA1b TID="a3">
+				<attr1>a3 first</attr1>
+				<Attr1>a3 second</Attr1>
+				<attrA>a3</attrA>
+			</Naming1.TestAttr.ClassA1b>
+		</Naming1.TestAttr>
+		<Naming1.TestClass BID="2">
+			<Naming1.TestClass.ClassA1 TID="c1">
+				<attr1>attr1</attr1>
+			</Naming1.TestClass.ClassA1>
+			<Naming1.TestClass.Classa1 TID="c2">
+				<attrA>attrA'</attrA>
+			</Naming1.TestClass.Classa1>
+		</Naming1.TestClass>
+	</DATASECTION>
+</TRANSFER>

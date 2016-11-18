@@ -43,7 +43,7 @@ public class NameMapping {
 	 */
 	private HashMap<String,String> classNameIli2sql=new HashMap<String,String>();
 	/** mapping from a sql table name to a qualified interlis viewable or attribute name.
-	 * Maintained by addMApping().
+	 * Maintained by addMapping().
 	 */
 	private HashMap<String,String> classNameSql2ili=new HashMap<String,String>();
 	private ColumnNameMapping columnMapping=new ColumnNameMapping();
@@ -99,7 +99,7 @@ public class NameMapping {
 			ret.append(shortcutName(attrSqlName,maxSqlNameLength-ret.length()));
 		}
 		String sqlTableName=ret.toString();
-		if((nameing!=FULL_QUALIFIED_NAMES) && classNameSql2ili.containsKey(sqlTableName)){
+		if((nameing!=FULL_QUALIFIED_NAMES) && existsSqlTableName(sqlTableName)){
 			// try full qualified name
 			// reset ret to empty string
 			ret.setLength(0);
@@ -121,18 +121,32 @@ public class NameMapping {
 			}
 			sqlTableName=ret.toString();
 		}
-		if(classNameSql2ili.containsKey(sqlTableName)){
+		if(existsSqlTableName(sqlTableName)){
 			sqlTableName=makeSqlTableNameUnique(sqlTableName);
 		}
 		return sqlTableName;
 	}
 	public String mapSqlTableName(String sqlname){
-		return (String)classNameSql2ili.get(sqlname);
+		sqlname = normalizeSqlName(sqlname);
+		return classNameSql2ili.get(sqlname);
 	}
 	private void addTableNameMapping(String iliname,String sqlname)
 	{
+		sqlname = normalizeSqlName(sqlname);
 		classNameIli2sql.put(iliname,sqlname);
 		classNameSql2ili.put(sqlname,iliname);
+	}
+	private boolean existsSqlTableName(String sqlname)
+	{
+		sqlname = normalizeSqlName(sqlname);
+		return classNameSql2ili.containsKey(sqlname);
+	}
+	private String normalizeSqlName(String sqlname) {
+		if(sqlname.length()>getMaxSqlNameLength()){
+			sqlname=sqlname.substring(0,getMaxSqlNameLength());
+		}
+		sqlname=sqlname.toLowerCase();
+		return sqlname;
 	}
 	public String mapIliClassDef(ch.interlis.ili2c.metamodel.Viewable def)
 	{
@@ -263,6 +277,7 @@ public class NameMapping {
 		return sqlname;
 	}
 	private String makeSqlColNameUnique(String ownerSqlTablename, String sqlname) {
+		sqlname=normalizeSqlName(sqlname);
 		String base=sqlname;
 		int c=1;
 		while(columnMapping.existsSqlName(ownerSqlTablename,sqlname)){
@@ -273,7 +288,7 @@ public class NameMapping {
 	private String makeSqlTableNameUnique(String sqlname) {
 		String base=sqlname;
 		int c=1;
-		while(classNameSql2ili.containsKey(sqlname)){
+		while(existsSqlTableName(sqlname)){
 			sqlname=base+Integer.toString(c++);
 		}
 		return sqlname;

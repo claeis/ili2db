@@ -1,0 +1,33 @@
+INTERLIS 2.3;
+
+MODEL Naming1
+  AT "mailto:ce@eisenhutinformatik.ch" VERSION "2016-11-17" =
+    
+  TOPIC TestAttr =
+    
+    CLASS ClassA1 =
+    	attr1 : TEXT*60;
+    	Attr1 : TEXT*10;
+    END ClassA1;
+    CLASS ClassA1a EXTENDS ClassA1 =
+    	attrA : TEXT*10;
+    END ClassA1a;
+    CLASS ClassA1b EXTENDS ClassA1 =
+    	attrA : TEXT*10;
+    END ClassA1b;
+    
+  END TestAttr;
+
+  TOPIC TestClass =
+    
+    CLASS ClassA1 =
+    	attr1 : TEXT*60;
+    END ClassA1;
+    CLASS Classa1  =
+    	attrA : TEXT*10;
+    END Classa1;
+    
+  END TestClass;
+  
+  
+END Naming1.
