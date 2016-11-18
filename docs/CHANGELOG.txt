@@ -16,6 +16,8 @@ ili2pg/ili2gpkg 3.5.0 (2016-11-xx)
 -----------------------------
 - import: map LocalisedText to unlimited text
 - export: failed to export all baskets of a dataset
+- fixed db table/column name conflict if only case differs in ili
+- ehisqlgen-1.7.0
 
 ili2pg/ili2gpkg 3.4.1 (2016-11-14)
 -----------------------------
