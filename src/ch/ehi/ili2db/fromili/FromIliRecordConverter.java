@@ -242,7 +242,13 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 							  DbTableName targetSqlTableName=targetTable.getSqlTable();
 							  String roleSqlName=ili2sqlName.mapIliRoleDef(role,sqlName.getName(),targetSqlTableName.getName(),targetTables.size()>1);
 							  dbColId.setName(roleSqlName);
-							  dbColId.setNotNull(true);
+							  boolean notNull=false;
+							  if(targetTables.size()>1){
+								  notNull=false; // multiple alternative FK columns
+							  }else{
+								  notNull=true;
+							  }
+							  dbColId.setNotNull(notNull);
 							  dbColId.setPrimaryKey(false);
 							  if(createFk){
 								  dbColId.setReferencedTable(targetSqlTableName);
@@ -256,7 +262,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 									// add seqeunce attr
 									DbColId dbSeq=new DbColId();
 									dbSeq.setName(roleSqlName+"_"+DbNames.T_SEQ_COL);
-									dbSeq.setNotNull(true);
+									dbSeq.setNotNull(notNull);
 									dbSeq.setPrimaryKey(false);
 									dbTable.addColumn(dbSeq);
 							  }
@@ -274,6 +280,11 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 								  String roleSqlName=ili2sqlName.mapIliRoleDef(role,sqlName.getName(),targetSqlTableName.getName(),targetTables.size()>1);
 								  dbColId.setName(roleSqlName);
 								  boolean notNull=false;
+								  if(targetTables.size()>1){
+									  notNull=false; // multiple alternative FK columns
+								  }else{
+									  notNull=true;
+								  }
 								  dbColId.setNotNull(notNull);
 								  dbColId.setPrimaryKey(false);
 								  if(createFk){

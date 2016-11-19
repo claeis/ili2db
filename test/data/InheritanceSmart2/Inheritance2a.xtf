@@ -7,6 +7,9 @@
 <Inheritance2.TestA.ClassB TID="3"><attrB>attrb-30</attrB><a REF="1"></a></Inheritance2.TestA.ClassB>
 <Inheritance2.TestA.ClassB TID="4"><attrB>attrb-40</attrB><a REF="2"></a></Inheritance2.TestA.ClassB>
 <Inheritance2.TestA.ClassB TID="5"><attrB>attrb-50</attrB><a REF="1"></a></Inheritance2.TestA.ClassB>
+<Inheritance2.TestA.aa2bb><aa REF="1"/><bb REF="4"/></Inheritance2.TestA.aa2bb>
+<Inheritance2.TestA.aa2bb><aa REF="2"/><bb REF="4"/></Inheritance2.TestA.aa2bb>
+<Inheritance2.TestA.aa2bb><aa REF="1"/><bb REF="5"/></Inheritance2.TestA.aa2bb>
 </Inheritance2.TestA>
 </DATASECTION>
 </TRANSFER>

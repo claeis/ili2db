@@ -1,0 +1,170 @@
+INTERLIS 2.3;
+
+MODEL Inheritance1
+  AT "mailto:ce@eisenhutinformatik.ch" VERSION "2015-12-22" =
+    
+  !! Erweiterung von CLASS, aber ohne Strukturattribute, STRUCTURE
+  TOPIC TestA =
+  
+    !! ohne Erweiterung
+    CLASS ClassA1 =   !! newClass
+      attrA1 : TEXT*30;
+    END ClassA1;
+    !! Abstrakte Basis (ohne Referenz)
+    CLASS ClassA2 (ABSTRACT)= !! subClass
+      attrA2 : TEXT*30;
+    END ClassA2;
+    CLASS ClassA2b EXTENDS ClassA2 = !! newClass
+      attrA2b : TEXT*30;
+    END ClassA2b;
+    !! Konkrete Erweiterung
+    CLASS ClassA3 =  !! newClass
+      attrA3 : TEXT*40;
+    END ClassA3;
+    CLASS ClassA3b EXTENDS ClassA3 = !! superClass
+      attrA3 (EXTENDED): TEXT*30;
+      attrA3b : MANDATORY TEXT*30;  !! NULL
+    END ClassA3b;
+    !! Abstrakte Basis (mit Referenz)
+    CLASS ClassA4 (ABSTRACT)=  !! newClass (wegen Referenz von A4x)
+      attrA4 : TEXT*30;
+    END ClassA4;
+    CLASS ClassA4b EXTENDS ClassA4 = !! superClass (weil ClassA4 newClass ist)
+      attrA4b : TEXT*30;
+    END ClassA4b;
+    CLASS ClassA4x=
+      attrA4x : TEXT*30;
+    END ClassA4x;
+    ASSOCIATION a2x =
+      a -- {1} ClassA4;
+      x -- {1..*} ClassA4x;
+    END a2x;
+    
+  END TestA;
+  
+  !! Erweiterung von STRUCTURE
+  TOPIC TestB =
+  
+    !! ohne Erweiterung
+    STRUCTURE StructB1 =   !! newClass
+      attrB1 : TEXT*30;
+    END StructB1;
+    !! Abstrakte Basis
+    STRUCTURE StructB2 (ABSTRACT)= !! subClass
+      attrB2 : TEXT*30;
+    END StructB2;
+    STRUCTURE StructB2b EXTENDS StructB2 = !! newClass
+      attrB2b : TEXT*30;
+    END StructB2b;
+    !! Konkrete Erweiterung
+    STRUCTURE StructB3 =  !! newClass
+      attrB3 : TEXT*40;
+    END StructB3;
+    STRUCTURE StructB3b EXTENDS StructB3 = !! superClass
+      attrB3 (EXTENDED): TEXT*30;
+      attrB3b : MANDATORY TEXT*30;  !! NULL
+    END StructB3b;
+    
+    CLASS ClassB1 =
+      	attrB1 : TEXT*30;
+    	s1 : BAG OF StructB1;
+    	s2 : BAG OF StructB2b;
+    	s3a : BAG OF StructB3;
+    	s3b : BAG OF StructB3b;
+    END ClassB1;
+    
+    CLASS ClassB1b EXTENDS ClassB1 =
+    END ClassB1b;
+    
+  END TestB;
+  
+  !! Erweiterung von CLASS, mit Strukturattributen, mit STRUCTURE Erweiterungen
+  TOPIC TestC =
+  
+    STRUCTURE StructC1 =   !! newClass
+      attrStrC1 : TEXT*30;
+    END StructC1;
+    
+    CLASS ClassC1 (ABSTRACT) = !! subClass
+      	attrC1 : TEXT*30;
+    	s1 : BAG OF StructC1;
+    END ClassC1;
+    
+    CLASS ClassC1a EXTENDS ClassC1 = !! newClass
+      attrC1a : TEXT*30;
+      s1a : BAG OF StructC1;
+    END ClassC1a;
+
+    CLASS ClassC1b EXTENDS ClassC1 = !! newClass
+      attrC1b : TEXT*30;
+      s1b : BAG OF StructC1;
+    END ClassC1b;
+
+    STRUCTURE StructC2 =   !! newClass
+      attrStrC2 : TEXT*30;
+    END StructC2;
+    
+    CLASS ClassC1ax EXTENDS ClassC1a = !! superClass
+      attrC1ax : TEXT*30;
+      s1ax : BAG OF StructC2; !! Struktur fuer Strukturattribut ist nach der Basisklasse (die newClass hat) definiert
+    END ClassC1ax;
+
+    STRUCTURE StructC3 (ABSTRACT) =   !! subClass
+    END StructC3;
+    STRUCTURE StructC3a EXTENDS StructC3 =   !! newClass
+      attrStrC3a : TEXT*30;
+    END StructC3a;
+    STRUCTURE StructC3b EXTENDS StructC3 =   !! newClass
+      attrStrC3b : TEXT*30;
+    END StructC3b;
+    STRUCTURE StructC3bb EXTENDS StructC3b =   !! superClass
+    END StructC3bb;
+    
+    CLASS ClassC3 (ABSTRACT) = !! subClass
+      	attrC3 : TEXT*30;
+    	s3 : BAG OF StructC3;
+    END ClassC3;
+    
+    CLASS ClassC3a EXTENDS ClassC3 = !! newClass
+      s3a : BAG OF StructC3;
+    END ClassC3a;
+
+    
+  END TestC;
+  
+  TOPIC TestD =
+    CLASS ClassD1 =  !! newClass
+      attrD1 : TEXT*30;
+    END ClassD1;
+    CLASS ClassD1b EXTENDS ClassD1 = !! superClass (weil ClassD1 newClass ist)
+      attrD1b : TEXT*30;
+    END ClassD1b;
+    CLASS ClassD1x=
+      attrD1x : TEXT*30;
+    END ClassD1x;
+    ASSOCIATION d1x =
+      d1 -- {1} ClassD1b;
+      x1 -- {1..*} ClassD1x;
+    END d1x;
+    ASSOCIATION d2x =
+      d2 -- {1..*} ClassD1b;
+      x2 -- {1..*} ClassD1x;
+    END d2x;
+  END TestD;
+
+  TOPIC TestE =
+    CLASS ClassE0 (ABSTRACT) =
+      attrE0 : TEXT*30;
+    END ClassE0;
+    CLASS ClassE1 EXTENDS ClassE0 =
+      attrE1 : TEXT*30;
+    END ClassE1;
+    CLASS ClassE1a EXTENDS ClassE1 =
+      attrEx : TEXT*30;
+    END ClassE1a;
+    CLASS ClassE1b EXTENDS ClassE1 =
+      attrEx : TEXT*30;  !! Namenskonflikt mit ClassA1a.attrEx
+    END ClassE1b;
+  END TestE;
+  
+END Inheritance1.

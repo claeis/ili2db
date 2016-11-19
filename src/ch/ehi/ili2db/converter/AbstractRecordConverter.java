@@ -172,16 +172,16 @@ public class AbstractRecordConverter {
 				dbTable.addColumn(dbColIliTid);
 			}
 		}
-		private HashMap<AbstractClassDef,ArrayList<ViewableWrapper>> targetTablesPool=new HashMap<AbstractClassDef,ArrayList<ViewableWrapper>>(); 
-		protected ArrayList<ViewableWrapper> getTargetTables(AbstractClassDef destination) {
+		private HashMap<Viewable,ArrayList<ViewableWrapper>> targetTablesPool=new HashMap<Viewable,ArrayList<ViewableWrapper>>(); 
+		public ArrayList<ViewableWrapper> getTargetTables(Viewable destination) {
 			if(targetTablesPool.containsKey(destination)){
 				return targetTablesPool.get(destination);
 			}
 			ArrayList<ViewableWrapper> ret=new ArrayList<ViewableWrapper>(); 
-			ArrayList<AbstractClassDef> candids=new ArrayList<AbstractClassDef>();
+			ArrayList<Viewable> candids=new ArrayList<Viewable>();
 			candids.add(destination);
 			while(!candids.isEmpty()){
-				AbstractClassDef candid=candids.remove(0);
+				Viewable candid=candids.remove(0);
 				String inheritanceStrategy = trafoConfig.getViewableConfig(candid, TrafoConfigNames.INHERITANCE_TRAFO);
 				if(TrafoConfigNames.INHERITANCE_TRAFO_SUPERCLASS.equals(inheritanceStrategy)){
 					ret.add(class2wrapper.get(candid)); // ViewableWrapper of base
@@ -298,6 +298,9 @@ public class AbstractRecordConverter {
 			}
 		}
 		return ret;
+	}
+	public boolean createTypeDiscriminator() {
+		return createTypeDiscriminator;
 	}
 	
 }

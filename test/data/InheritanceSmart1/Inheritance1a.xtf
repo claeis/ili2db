@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TRANSFER xmlns="http://www.interlis.ch/INTERLIS2.3">
+	<HEADERSECTION SENDER="ili2pg-2.5.0-20151209" VERSION="2.3">
+		<MODELS>
+			<MODEL NAME="Inheritance1" VERSION="2015-12-22" URI="mailto:ce@eisenhutinformatik.ch"></MODEL>
+		</MODELS>
+	</HEADERSECTION>
+	<DATASECTION>
+		<Inheritance1.TestA BID="Inheritance1.TestA">
+			<Inheritance1.TestA.ClassA1 TID="4">
+				<attrA1>a1</attrA1>
+			</Inheritance1.TestA.ClassA1>
+			<Inheritance1.TestA.ClassA2b TID="5">
+				<attrA2>a2</attrA2>
+				<attrA2b>a2b</attrA2b>
+			</Inheritance1.TestA.ClassA2b>
+			<Inheritance1.TestA.ClassA3 TID="6">
+				<attrA3>a3</attrA3>
+			</Inheritance1.TestA.ClassA3>
+			<Inheritance1.TestA.ClassA3b TID="7">
+				<attrA3>a3</attrA3>
+				<attrA3b>a3b</attrA3b>
+			</Inheritance1.TestA.ClassA3b>
+			<Inheritance1.TestA.ClassA4b TID="8">
+				<attrA4>a4</attrA4>
+				<attrA4b>a4b</attrA4b>
+			</Inheritance1.TestA.ClassA4b>
+			<Inheritance1.TestA.ClassA4x TID="9">
+				<attrA4x>a4x</attrA4x>
+				<a REF="8"></a>
+			</Inheritance1.TestA.ClassA4x>
+		</Inheritance1.TestA>
+		<Inheritance1.TestB BID="Inheritance1.TestB">
+			<Inheritance1.TestB.ClassB1 TID="17">
+				<attrB1>v1</attrB1>
+				<s1>
+					<Inheritance1.TestB.StructB1>
+						<attrB1>b1</attrB1>
+					</Inheritance1.TestB.StructB1>
+				</s1>
+				<s2>
+					<Inheritance1.TestB.StructB2b>
+						<attrB2>b2</attrB2>
+						<attrB2b>b2</attrB2b>
+					</Inheritance1.TestB.StructB2b>
+					<Inheritance1.TestB.StructB2b>
+						<attrB2b>b2b</attrB2b>
+					</Inheritance1.TestB.StructB2b>
+				</s2>
+				<s3a>
+					<Inheritance1.TestB.StructB3>
+						<attrB3>b3a</attrB3>
+					</Inheritance1.TestB.StructB3>
+					<Inheritance1.TestB.StructB3b>
+						<attrB3>b3b</attrB3>
+						<attrB3b>x</attrB3b>
+					</Inheritance1.TestB.StructB3b>
+				</s3a>
+				<s3b>
+					<Inheritance1.TestB.StructB3b>
+						<attrB3b>x2</attrB3b>
+					</Inheritance1.TestB.StructB3b>
+				</s3b>
+			</Inheritance1.TestB.ClassB1>
+			<Inheritance1.TestB.ClassB1b TID="18">
+				<attrB1>18_v1</attrB1>
+				<s1>
+					<Inheritance1.TestB.StructB1>
+						<attrB1>18_b1</attrB1>
+					</Inheritance1.TestB.StructB1>
+				</s1>
+				<s2>
+					<Inheritance1.TestB.StructB2b>
+						<attrB2>18_b2</attrB2>
+						<attrB2b>18_b2</attrB2b>
+					</Inheritance1.TestB.StructB2b>
+					<Inheritance1.TestB.StructB2b>
+						<attrB2b>18_b2b</attrB2b>
+					</Inheritance1.TestB.StructB2b>
+				</s2>
+				<s3a>
+					<Inheritance1.TestB.StructB3>
+						<attrB3>18_b3a</attrB3>
+					</Inheritance1.TestB.StructB3>
+					<Inheritance1.TestB.StructB3b>
+						<attrB3>18_b3b</attrB3>
+						<attrB3b>18_x</attrB3b>
+					</Inheritance1.TestB.StructB3b>
+				</s3a>
+				<s3b>
+					<Inheritance1.TestB.StructB3b>
+						<attrB3b>18_x2</attrB3b>
+					</Inheritance1.TestB.StructB3b>
+				</s3b>
+			</Inheritance1.TestB.ClassB1b>
+		</Inheritance1.TestB>
+		<Inheritance1.TestC BID="Inheritance1.TestC">
+			<Inheritance1.TestC.ClassC1a TID="19">
+				<attrC1>19_c1</attrC1>
+				<s1>
+					<Inheritance1.TestC.StructC1>
+						<attrStrC1>18_b1</attrStrC1>
+					</Inheritance1.TestC.StructC1>
+				</s1>
+				<attrC1a>19_c1a</attrC1a>
+			</Inheritance1.TestC.ClassC1a>
+			<Inheritance1.TestC.ClassC3a TID="22">
+				<attrC3>22_c3</attrC3>
+				<s3>
+					<Inheritance1.TestC.StructC3a>
+						<attrStrC3a>22_s3_3a</attrStrC3a>
+					</Inheritance1.TestC.StructC3a>
+				</s3>
+				<s3>
+					<Inheritance1.TestC.StructC3bb>
+						<attrStrC3b>22_s3_3b</attrStrC3b>
+					</Inheritance1.TestC.StructC3bb>
+				</s3>
+				<s3a>
+					<Inheritance1.TestC.StructC3a>
+						<attrStrC3a>22_s3a_3a</attrStrC3a>
+					</Inheritance1.TestC.StructC3a>
+				</s3a>
+				<s3a>
+					<Inheritance1.TestC.StructC3bb>
+						<attrStrC3b>22_s3a_3b</attrStrC3b>
+					</Inheritance1.TestC.StructC3bb>
+				</s3a>
+			</Inheritance1.TestC.ClassC3a>
+		</Inheritance1.TestC>
+		<Inheritance1.TestD BID="Inheritance1.TestD">
+			<Inheritance1.TestD.ClassD1b TID="20">
+				<attrD1>20_d1</attrD1>
+				<attrD1b>20_d1b</attrD1b>
+			</Inheritance1.TestD.ClassD1b>
+			<Inheritance1.TestD.ClassD1x TID="21">
+				<attrD1x>21_d1x</attrD1x>
+				<d1 REF="20"></d1>
+			</Inheritance1.TestD.ClassD1x>
+			<Inheritance1.TestD.d2x>
+				<d2 REF="20"/>
+				<x2 REF="21"/>
+			</Inheritance1.TestD.d2x>
+		</Inheritance1.TestD>
+	</DATASECTION>
+</TRANSFER>
