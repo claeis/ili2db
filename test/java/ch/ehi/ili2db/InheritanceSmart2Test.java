@@ -11,6 +11,7 @@ import org.junit.Test;
 
 import ch.ehi.basics.logging.EhiLogger;
 import ch.ehi.ili2db.base.DbUrlConverter;
+import ch.ehi.ili2db.base.DbUtility;
 import ch.ehi.ili2db.base.Ili2db;
 import ch.ehi.ili2db.base.Ili2dbException;
 import ch.ehi.ili2db.gui.Config;
@@ -106,14 +107,115 @@ public class InheritanceSmart2Test {
 	        
 	}
 	@Test
-	public void importSmart2x() throws Exception
+	public void updateSmart2New() throws Exception
 	{
-		EhiLogger.getInstance().setTraceFilter(false);
 		Connection jdbcConnection=null;
 		try{
 	        Class driverClass = Class.forName("org.postgresql.Driver");
 	        jdbcConnection = DriverManager.getConnection(
 	        		dburl, dbuser, dbpwd);
+	        DbUtility.executeSqlScript(jdbcConnection, new java.io.FileReader("test/data/InheritanceSmart2/InitInheritanceSmart2Schema.sql"));
+
+			File data=new File("test/data/InheritanceSmart2/Inheritance2a.xtf");
+			Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+			config.setFunction(Config.FC_UPDATE);
+			config.setCreateFk(Config.CREATE_FK_YES);
+			config.setInheritanceTrafo(Config.INHERITANCE_TRAFO_SMART2);
+			config.setDatasetName(DATASETNAME);
+			config.setTidHandling(Config.TID_HANDLING_PROPERTY);
+			config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
+			config.setCreatescript(data.getPath()+".sql");
+			Ili2db.readSettingsFromDb(config);
+			Ili2db.run(config,null);
+	        
+	        Statement stmt=jdbcConnection.createStatement();
+			Assert.assertTrue(stmt.execute("SELECT attra3,attra3b,attra3c FROM "+DBSCHEMA+".classa3c WHERE t_ili_tid='2'"));
+			{
+				ResultSet rs=stmt.getResultSet();
+				Assert.assertTrue(rs.next());
+				Assert.assertEquals("attra3-20",rs.getString(1));
+				Assert.assertEquals("attra3b-20",rs.getString(2));
+				Assert.assertEquals("attra3c-20",rs.getString(3));
+			}
+
+			Assert.assertTrue(stmt.execute("SELECT a_classa3b,a_classa3c FROM "+DBSCHEMA+".classb WHERE t_ili_tid='4'"));
+			{
+				ResultSet rs=stmt.getResultSet();
+				Assert.assertTrue(rs.next());
+				Assert.assertNotNull(rs.getObject("a_classa3c"));
+				Assert.assertNull(rs.getObject("a_classa3b"));
+			}
+			
+		}finally{
+			if(jdbcConnection!=null){
+				jdbcConnection.close();
+			}
+		}
+	        
+	        
+	}
+	@Test
+	public void updateSmart2Existing() throws Exception
+	{
+		Connection jdbcConnection=null;
+		try{
+	        Class driverClass = Class.forName("org.postgresql.Driver");
+	        jdbcConnection = DriverManager.getConnection(
+	        		dburl, dbuser, dbpwd);
+	        DbUtility.executeSqlScript(jdbcConnection, new java.io.FileReader("test/data/InheritanceSmart2/InitInheritanceSmart2Schema.sql"));
+	        DbUtility.executeSqlScript(jdbcConnection, new java.io.FileReader("test/data/InheritanceSmart2/InitInheritanceSmart2a.sql"));
+
+			File data=new File("test/data/InheritanceSmart2/Inheritance2aUpdate.xtf");
+			Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+			config.setFunction(Config.FC_UPDATE);
+			config.setCreateFk(Config.CREATE_FK_YES);
+			config.setInheritanceTrafo(Config.INHERITANCE_TRAFO_SMART2);
+			config.setDatasetName(DATASETNAME);
+			config.setTidHandling(Config.TID_HANDLING_PROPERTY);
+			config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
+			config.setCreatescript(data.getPath()+".sql");
+			Ili2db.readSettingsFromDb(config);
+			Ili2db.run(config,null);
+	        
+	        Statement stmt=jdbcConnection.createStatement();
+			Assert.assertTrue(stmt.execute("SELECT t_id,attra3,attra3b,attra3c FROM "+DBSCHEMA+".classa3c WHERE t_ili_tid='2'"));
+			{
+				ResultSet rs=stmt.getResultSet();
+				Assert.assertTrue(rs.next());
+				Assert.assertEquals(5,rs.getLong(1));
+				Assert.assertEquals("attra3-20u",rs.getString(2));
+				Assert.assertEquals("attra3b-20u",rs.getString(3));
+				Assert.assertEquals("attra3c-20u",rs.getString(4));
+			}
+
+			Assert.assertTrue(stmt.execute("SELECT a_classa3b,a_classa3c FROM "+DBSCHEMA+".classb WHERE t_ili_tid='4'"));
+			{
+				ResultSet rs=stmt.getResultSet();
+				Assert.assertTrue(rs.next());
+				Assert.assertNotNull(rs.getObject("a_classa3c"));
+				Assert.assertNull(rs.getObject("a_classa3b"));
+			}
+			
+		}finally{
+			if(jdbcConnection!=null){
+				jdbcConnection.close();
+			}
+		}
+	        
+	        
+	}
+	
+	@Test
+	public void importSmart2ExtRef() throws Exception
+	{
+		Connection jdbcConnection=null;
+		try{
+	        Class driverClass = Class.forName("org.postgresql.Driver");
+	        jdbcConnection = DriverManager.getConnection(
+	        		dburl, dbuser, dbpwd);
+	        DbUtility.executeSqlScript(jdbcConnection, new java.io.FileReader("test/data/InheritanceSmart2/InitInheritanceSmart2Schema.sql"));
+	        DbUtility.executeSqlScript(jdbcConnection, new java.io.FileReader("test/data/InheritanceSmart2/InitInheritanceSmart2a.sql"));
+	        
 	        Statement stmt=jdbcConnection.createStatement();
 
 			File data=new File("test/data/InheritanceSmart2/Inheritance2b.xtf");
@@ -143,13 +245,30 @@ public class InheritanceSmart2Test {
 	        
 	}
 	@Test
-	public void exportSmart2() throws Ili2dbException
+	public void exportSmart2() throws Exception
 	{
-		File data=new File("test/data/InheritanceSmart2/Inheritance2a-out.xtf");
-		Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
-		config.setDatasetName(DATASETNAME);
-		config.setFunction(Config.FC_EXPORT);
-		Ili2db.readSettingsFromDb(config);
-		Ili2db.run(config,null);
+		Connection jdbcConnection=null;
+		try{
+	        Class driverClass = Class.forName("org.postgresql.Driver");
+	        jdbcConnection = DriverManager.getConnection(
+	        		dburl, dbuser, dbpwd);
+
+	        DbUtility.executeSqlScript(jdbcConnection, new java.io.FileReader("test/data/InheritanceSmart2/InitInheritanceSmart2Schema.sql"));
+	        DbUtility.executeSqlScript(jdbcConnection, new java.io.FileReader("test/data/InheritanceSmart2/InitInheritanceSmart2a.sql"));
+			
+			File data=new File("test/data/InheritanceSmart2/Inheritance2a-out.xtf");
+			Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+			config.setDatasetName(DATASETNAME);
+			config.setFunction(Config.FC_EXPORT);
+			Ili2db.readSettingsFromDb(config);
+			Ili2db.run(config,null);
+	        
+		}finally{
+			if(jdbcConnection!=null){
+				jdbcConnection.close();
+			}
+		}
+		
+		
 	}
 }

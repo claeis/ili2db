@@ -3,7 +3,7 @@
 <DATASECTION>
 <Inheritance2.TestA BID="Inheritance2.TestAx">
 <Inheritance2.TestA.ClassB TID="x1"><attrB>attrb-x1</attrB><a REF="1"></a></Inheritance2.TestA.ClassB>
-<Inheritance2.TestA.ClassB TID="x2"><attrB>attrb-x2x</attrB><a REF="2"></a></Inheritance2.TestA.ClassB>
+<Inheritance2.TestA.ClassB TID="x2"><attrB>attrb-x2</attrB><a REF="2"></a></Inheritance2.TestA.ClassB>
 </Inheritance2.TestA>
 </DATASECTION>
 </TRANSFER>
