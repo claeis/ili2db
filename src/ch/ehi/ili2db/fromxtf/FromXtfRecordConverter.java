@@ -216,8 +216,11 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 							 }
 						 }
 					  	String targetRootClassName=Ili2cUtility.getRootViewable(role.getDestination()).getScopedName(null);
-					  	String targetObjClass=oidPool.getObjecttag(targetRootClassName,refoid);
-					  	ViewableWrapper targetObjTable=getViewableWrapper(getSqlType((Viewable) tag2class.get(targetObjClass)).getName());
+					  	ViewableWrapper targetObjTable=null;
+					  	if(refoid!=null){
+						  	String targetObjClass=oidPool.getObjecttag(targetRootClassName,refoid);
+						  	targetObjTable=getViewableWrapper(getSqlType((Viewable) tag2class.get(targetObjClass)).getName());
+					  	}
 						ArrayList<ViewableWrapper> targetTables = getTargetTables(role.getDestination());
 						  for(ViewableWrapper targetTable : targetTables){
 							  	if(refoid!=null && targetTable==targetObjTable){

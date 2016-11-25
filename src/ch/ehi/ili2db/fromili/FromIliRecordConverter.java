@@ -282,7 +282,11 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 								  if(targetTables.size()>1){
 									  notNull=false; // multiple alternative FK columns
 								  }else{
-									  notNull=true;
+									  if(role.getCardinality().getMinimum()==0){
+										  notNull=false;
+									  }else{
+										  notNull=true;
+									  }
 								  }
 								  dbColId.setNotNull(notNull);
 								  dbColId.setPrimaryKey(false);

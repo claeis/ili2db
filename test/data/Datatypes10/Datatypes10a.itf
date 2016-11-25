@@ -1,0 +1,27 @@
+SCNT
+////
+MTID Ili1FmtTest
+MODL Datatypes10
+TOPI Topic
+TABL Table_area
+ETAB
+TABL Table
+OBJE 10 @ @ @ @ @ @ @ @ @ @ @ obj10 @ @ @ @ @ @
+ELIN
+OBJE 11 @ @ @ @ @ @ @ @ @ @ @ obj11 @ @ @ @ @ @
+ELIN
+ETAB
+TABL Table_surface
+ETAB
+TABL OtherTable
+OBJE 10 Other10
+OBJE 11 Other11
+ETAB
+TABL SubTable
+OBJE 30 11
+OBJE 31 10
+OBJE 32 @
+ETAB
+ETOP
+EMOD
+ENDE

@@ -1,0 +1,56 @@
+TRANSFER Ili1FmtTest;
+
+MODEL Datatypes10
+	TOPIC Topic=
+		DOMAIN Lkoord = COORD2 1.00 100.0 9.99 999.9;
+		TABLE Table =
+			!! Koord2
+			koord2 : OPTIONAL COORD2 1.00 100.0 9.99 999.9;
+			!! Koord3
+			koord3 : OPTIONAL COORD3 1.00 100.0 1000 9.99 999.9 9999;
+			!! Laenge
+			dim1 : OPTIONAL DIM1 1.0 9.9;
+			!! Flaechenmass
+			dim2 : OPTIONAL DIM2 1.0 9.9;
+			!! Winkel
+			radians : OPTIONAL RADIANS 0.0 6.2;
+			grads : OPTIONAL GRADS 0.0 399.9;
+			degrees : OPTIONAL DEGREES 0.0 359.9;
+			!! Bereich
+			bereich : OPTIONAL [0.0 .. 9.9 ];
+			!! Text
+			text : OPTIONAL TEXT*10;
+			!! Datum
+			datum : OPTIONAL DATE;
+			!! Aufzaehlung
+			aufzaehlung : OPTIONAL (null, eins, zwei, drei, mehr ( vier, fuenf, sechs, sieben, acht ,neun, zehn)); !! == zwei Stellen
+			!! HorizAlignment
+			horizAlignment : OPTIONAL HALIGNMENT;
+			!! VertAlignment
+			vertAlignment : OPTIONAL VALIGNMENT;
+			!! Linientyp
+			linientyp : OPTIONAL POLYLINE WITH (STRAIGHTS) VERTEX Lkoord;
+			!! Flaechentyp
+			surface : OPTIONAL SURFACE WITH (STRAIGHTS,ARCS) VERTEX Lkoord;
+			area : OPTIONAL AREA WITH (STRAIGHTS,ARCS) VERTEX Lkoord WITHOUT OVERLAPS > 0.0
+					LINEATTR =
+						attr : TEXT*20;
+					END;
+		NO IDENT
+		END Table;
+		TABLE OtherTable =
+			otherAttr : OPTIONAL TEXT*30;
+		NO IDENT
+		END OtherTable;
+		TABLE SubTable =
+			!! BezAttribut
+			main : OPTIONAL -> Table;
+		NO IDENT
+		END SubTable;
+	END Topic.
+END Datatypes10.
+
+FORMAT FREE;
+CODE BLANK = DEFAULT, UNDEFINED = DEFAULT, CONTINUE = DEFAULT;
+TID = ANY;
+END.

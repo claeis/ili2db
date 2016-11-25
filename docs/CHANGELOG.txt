@@ -20,6 +20,7 @@ ili2pg/ili2gpkg 3.5.0 (2016-11-xx)
 - ehisqlgen-1.7.0
 - fixed wrong NOT NULL on FK columns with --smart2Inheritance
 - fixed --update with existing dataset
+- MultiSurface not detected as geometry column during mapping configuration
 
 ili2pg/ili2gpkg 3.4.1 (2016-11-14)
 -----------------------------
