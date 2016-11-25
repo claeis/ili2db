@@ -14,7 +14,6 @@ import ch.ehi.ili2db.base.Ili2dbException;
 import ch.ehi.ili2db.base.IliNames;
 import ch.ehi.ili2db.converter.AbstractRecordConverter;
 import ch.ehi.ili2db.gui.Config;
-import ch.ehi.ili2db.mapping.IliMetaAttrNames;
 import ch.ehi.ili2db.mapping.MultiSurfaceMapping;
 import ch.ehi.ili2db.mapping.NameMapping;
 import ch.ehi.ili2db.mapping.TrafoConfig;
@@ -489,7 +488,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 					}
 					trafoConfig.setAttrConfig(attr, TrafoConfigNames.CATALOGUE_REF_TRAFO,TrafoConfigNames.CATALOGUE_REF_TRAFO_COALESCE);
 					dbCol=ret;
-				}else if(isMultiSurfaceAttr(td, attr) && (coalesceMultiSurface 
+				}else if(Ili2cUtility.isMultiSurfaceAttr(td, attr) && (coalesceMultiSurface 
 						|| TrafoConfigNames.MULTISURFACE_TRAFO_COALESCE.equals(trafoConfig.getAttrConfig(attr,TrafoConfigNames.MULTISURFACE_TRAFO)))){
 					multiSurfaceAttrs.addMultiSurfaceAttr(attr);
 					MultiSurfaceMapping attrMapping=multiSurfaceAttrs.getMapping(attr);
@@ -631,24 +630,6 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 		}
 		return false;
 	}
-	private boolean isMultiSurfaceAttr(TransferDescription td,
-			AttributeDef attr) {
-		Type typeo=attr.getDomain();
-		if(typeo instanceof CompositionType){
-			CompositionType type=(CompositionType)attr.getDomain();
-			if(type.getCardinality().getMaximum()==1){
-				if(Ili2cUtility.isPureChbaseMultiSuface(td, attr)){
-					return true;
-				}
-				Table struct=type.getComponentType();
-				if(IliMetaAttrNames.METAATTR_MAPPING_MULTISURFACE.equals(struct.getMetaValue(IliMetaAttrNames.METAATTR_MAPPING))){
-					return true;
-				}
-			}
-		}
-		return false;
-	}
-
 	private void addParentRef(Viewable parentTable,AttributeDef attr){
 		CompositionType type = (CompositionType)attr.getDomainResolvingAll();
 		Table structClass=type.getComponentType();

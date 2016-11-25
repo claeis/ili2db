@@ -7,12 +7,14 @@ import java.util.List;
 import java.util.Set;
 
 import ch.ehi.basics.logging.EhiLogger;
+import ch.ehi.ili2db.base.Ili2cUtility;
 import ch.ehi.ili2db.gui.Config;
 import ch.interlis.ili2c.metamodel.AbstractClassDef;
 import ch.interlis.ili2c.metamodel.AssociationDef;
 import ch.interlis.ili2c.metamodel.AttributeDef;
 import ch.interlis.ili2c.metamodel.Element;
 import ch.interlis.ili2c.metamodel.RoleDef;
+import ch.interlis.ili2c.metamodel.TransferDescription;
 import ch.interlis.ili2c.metamodel.Viewable;
 import ch.interlis.ili2c.metamodel.ViewableTransferElement;
 
@@ -22,8 +24,10 @@ public class Viewable2TableMapper {
 	private String sqlSchemaname=null;
 	private TrafoConfig trafoConfig=null;
 	private NameMapping nameMapping=null;	
-	boolean singleGeom=false;
-	boolean createItfLineTables=false;
+	private boolean singleGeom=false;
+	private boolean coalesceMultiSurface=false;
+	private boolean createItfLineTables=false;
+	private TransferDescription td=null;
 	private Viewable2TableMapper(Config config1,
 			TrafoConfig trafoConfig1, NameMapping nameMapping1) {	
 		config=config1;
@@ -36,6 +40,7 @@ public class Viewable2TableMapper {
 			TrafoConfig trafoConfig, List<Element> eles,NameMapping nameMapping) {
 		Viewable2TableMapper mapper=new Viewable2TableMapper(config, trafoConfig, nameMapping);
 		mapper.singleGeom=config.isOneGeomPerTable();
+		mapper.coalesceMultiSurface=Config.MULTISURFACE_TRAFO_COALESCE.equals(config.getMultiSurfaceTrafo());
 		mapper.createItfLineTables=config.getDoItfLineTables();
 		return mapper.doit(eles);
 	}
@@ -168,6 +173,13 @@ public class Viewable2TableMapper {
 			}
 		}
 	}
+	private TransferDescription getTransferDescription(Element e)
+	{
+		if(td==null){
+			td=(TransferDescription) e.getContainer(TransferDescription.class);
+		}
+		return td;
+	}
 	private void doSmart1(List<Element> eles) {
 		/*
 		 * Fuer Klassen, die referenziert werden und deren Basisklassen nicht mit
@@ -245,7 +257,9 @@ public class Viewable2TableMapper {
 				if(attrE.obj instanceof AttributeDef){
 					AttributeDef attr=(AttributeDef) attrE.obj;
 					ch.interlis.ili2c.metamodel.Type type=attr.getDomainResolvingAliases();
-					if(type instanceof ch.interlis.ili2c.metamodel.CoordType || type instanceof ch.interlis.ili2c.metamodel.LineType){
+					if(type instanceof ch.interlis.ili2c.metamodel.CoordType || type instanceof ch.interlis.ili2c.metamodel.LineType
+							|| (Ili2cUtility.isMultiSurfaceAttr(getTransferDescription(attr), attr) && (coalesceMultiSurface 
+									|| TrafoConfigNames.MULTISURFACE_TRAFO_COALESCE.equals(trafoConfig.getAttrConfig(attr,TrafoConfigNames.MULTISURFACE_TRAFO))))){
 						hasGeometry=true;
 						break;
 					}
@@ -271,7 +285,9 @@ public class Viewable2TableMapper {
 					// only one geometry column per table?
 					if(singleGeom){
 						ch.interlis.ili2c.metamodel.Type type=attr.getDomainResolvingAliases();
-						if(type instanceof ch.interlis.ili2c.metamodel.CoordType || type instanceof ch.interlis.ili2c.metamodel.LineType){
+						if(type instanceof ch.interlis.ili2c.metamodel.CoordType || type instanceof ch.interlis.ili2c.metamodel.LineType
+							|| (Ili2cUtility.isMultiSurfaceAttr(getTransferDescription(attr), attr) && (coalesceMultiSurface 
+								|| TrafoConfigNames.MULTISURFACE_TRAFO_COALESCE.equals(trafoConfig.getAttrConfig(attr,TrafoConfigNames.MULTISURFACE_TRAFO))))){						
 							if(createItfLineTables && type instanceof ch.interlis.ili2c.metamodel.SurfaceOrAreaType){
 								// ignore it; will be created by legacy code 
 							}else{

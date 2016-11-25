@@ -1,5 +1,6 @@
 package ch.ehi.ili2db.base;
 
+import ch.ehi.ili2db.mapping.IliMetaAttrNames;
 import ch.interlis.ili2c.metamodel.AbstractClassDef;
 import ch.interlis.ili2c.metamodel.AttributeDef;
 import ch.interlis.ili2c.metamodel.CompositionType;
@@ -167,6 +168,24 @@ public class Ili2cUtility {
 						return true;
 					}
 				}
+		}
+		return false;
+	}
+
+	public static boolean isMultiSurfaceAttr(TransferDescription td,
+			AttributeDef attr) {
+		Type typeo=attr.getDomain();
+		if(typeo instanceof CompositionType){
+			CompositionType type=(CompositionType)attr.getDomain();
+			if(type.getCardinality().getMaximum()==1){
+				if(isPureChbaseMultiSuface(td, attr)){
+					return true;
+				}
+				Table struct=type.getComponentType();
+				if(IliMetaAttrNames.METAATTR_MAPPING_MULTISURFACE.equals(struct.getMetaValue(IliMetaAttrNames.METAATTR_MAPPING))){
+					return true;
+				}
+			}
 		}
 		return false;
 	}
