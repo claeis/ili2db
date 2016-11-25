@@ -570,9 +570,17 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 			}else{
 				PrecisionDecimal min=((NumericType)type).getMinimum();
 				PrecisionDecimal max=((NumericType)type).getMaximum();
+				int minLen=min.toString().length();
+				int maxLen=max.toString().length();
+				if(min.toString().startsWith("-")){
+					minLen-=1;
+				}
+				if(max.toString().startsWith("-")){
+					maxLen-=1;
+				}
 				if(min.getAccuracy()>0){
 					DbColDecimal ret=new DbColDecimal();
-					int size=Math.max(min.toString().length(),max.toString().length());
+					int size=Math.max(minLen,maxLen)-1;
 					int precision=min.getAccuracy();
 					//EhiLogger.debug("attr "+ attr.getName()+", maxStr <"+maxStr+">, size "+Integer.toString(size)+", precision "+Integer.toString(precision));
 					ret.setSize(size);
@@ -580,7 +588,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 					dbCol=ret;
 				}else{
 					DbColNumber ret=new DbColNumber();
-					int size=Math.max(min.toString().length(),max.toString().length());
+					int size=Math.max(minLen,maxLen);
 					ret.setSize(size);
 					dbCol=ret;
 				}

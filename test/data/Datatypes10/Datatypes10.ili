@@ -11,7 +11,7 @@ MODEL Datatypes10
 			!! Laenge
 			dim1 : OPTIONAL DIM1 1.0 9.9;
 			!! Flaechenmass
-			dim2 : OPTIONAL DIM2 1.0 9.9;
+			dim2 : OPTIONAL DIM2 -1.0 9.9;
 			!! Winkel
 			radians : OPTIONAL RADIANS 0.0 6.2;
 			grads : OPTIONAL GRADS 0.0 399.9;
