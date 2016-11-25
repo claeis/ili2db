@@ -447,7 +447,7 @@ public class Ili2db {
 				geomConverter.setup(conn, config);
 
 				idGen.initDb(conn,dbusr);
-				idGen.initDbDefs();
+				idGen.initDbDefs(gen);
 				
 				// create table structure
 				if(function==Config.FC_IMPORT){
@@ -971,7 +971,7 @@ public class Ili2db {
 							
 				GeneratorDriver drv=new GeneratorDriver(gen);
 				idGen.initDb(conn,dbusr);
-				idGen.initDbDefs();
+				idGen.initDbDefs(gen);
 				
 				drv.visitSchema(config,schema);
 				// is a create script requested by user?
