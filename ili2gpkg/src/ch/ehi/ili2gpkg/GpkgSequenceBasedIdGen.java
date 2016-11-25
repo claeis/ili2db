@@ -23,6 +23,8 @@ import java.sql.Connection;
 import ch.ehi.basics.logging.EhiLogger;
 import ch.ehi.ili2db.base.DbIdGen;
 import ch.ehi.ili2db.gui.Config;
+import ch.ehi.sqlgen.generator_impl.jdbc.GeneratorJdbc;
+import ch.ehi.sqlgen.generator_impl.jdbc.GeneratorJdbc.Stmt;
 import ch.ehi.sqlgen.repository.DbTableName;
 
 
@@ -95,8 +97,17 @@ public class GpkgSequenceBasedIdGen implements DbIdGen {
 	}
 	
 	@Override
-	public void initDbDefs() {
+	public void initDbDefs(ch.ehi.sqlgen.generator.Generator gen) {
 		String sqlName=SQL_ILI2DB_SEQ_NAME;
+		if(schema!=null){
+			sqlName=schema+"."+sqlName;
+		}
+		String stmt="CREATE SEQUENCE "+sqlName+";";
+		if(gen instanceof GeneratorJdbc){
+			((GeneratorJdbc) gen).addCreateLine(((GeneratorJdbc) gen).new Stmt(stmt));
+			((GeneratorJdbc) gen).addDropLine(((GeneratorJdbc) gen).new Stmt("DROP SEQUENCE "+sqlName+";"));
+		}
+
 		try {
 			if(sequenceExists(new DbTableName(schema,sqlName))){
 				return;
@@ -104,10 +115,6 @@ public class GpkgSequenceBasedIdGen implements DbIdGen {
 		} catch (IOException e) {
 			throw new IllegalStateException(e);
 		}
-		if(schema!=null){
-			sqlName=schema+"."+sqlName;
-		}
-		String stmt="CREATE SEQUENCE "+sqlName+";";
 		EhiLogger.traceBackendCmd(stmt);
 		java.sql.PreparedStatement updstmt = null;
 		try{

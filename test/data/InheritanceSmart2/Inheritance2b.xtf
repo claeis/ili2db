@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?><TRANSFER xmlns="http://www.interlis.ch/INTERLIS2.3">
+<HEADERSECTION SENDER="ili2pg-3.1.0-20160526" VERSION="2.3"><MODELS><MODEL NAME="Inheritance2" VERSION="2016-05-26" URI="mailto:ce@eisenhutinformatik.ch"></MODEL></MODELS></HEADERSECTION>
+<DATASECTION>
+<Inheritance2.TestA BID="Inheritance2.TestAx">
+<Inheritance2.TestA.ClassB TID="x1"><attrB>attrb-x1</attrB><a REF="1"></a></Inheritance2.TestA.ClassB>
+<Inheritance2.TestA.ClassB TID="x2"><attrB>attrb-x2</attrB><a REF="2"></a></Inheritance2.TestA.ClassB>
+</Inheritance2.TestA>
+</DATASECTION>
+</TRANSFER>

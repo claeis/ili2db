@@ -14,7 +14,6 @@ import ch.ehi.ili2db.base.Ili2dbException;
 import ch.ehi.ili2db.base.IliNames;
 import ch.ehi.ili2db.converter.AbstractRecordConverter;
 import ch.ehi.ili2db.gui.Config;
-import ch.ehi.ili2db.mapping.IliMetaAttrNames;
 import ch.ehi.ili2db.mapping.MultiSurfaceMapping;
 import ch.ehi.ili2db.mapping.NameMapping;
 import ch.ehi.ili2db.mapping.TrafoConfig;
@@ -242,7 +241,13 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 							  DbTableName targetSqlTableName=targetTable.getSqlTable();
 							  String roleSqlName=ili2sqlName.mapIliRoleDef(role,sqlName.getName(),targetSqlTableName.getName(),targetTables.size()>1);
 							  dbColId.setName(roleSqlName);
-							  dbColId.setNotNull(true);
+							  boolean notNull=false;
+							  if(targetTables.size()>1){
+								  notNull=false; // multiple alternative FK columns
+							  }else{
+								  notNull=true;
+							  }
+							  dbColId.setNotNull(notNull);
 							  dbColId.setPrimaryKey(false);
 							  if(createFk){
 								  dbColId.setReferencedTable(targetSqlTableName);
@@ -256,7 +261,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 									// add seqeunce attr
 									DbColId dbSeq=new DbColId();
 									dbSeq.setName(roleSqlName+"_"+DbNames.T_SEQ_COL);
-									dbSeq.setNotNull(true);
+									dbSeq.setNotNull(notNull);
 									dbSeq.setPrimaryKey(false);
 									dbTable.addColumn(dbSeq);
 							  }
@@ -274,6 +279,15 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 								  String roleSqlName=ili2sqlName.mapIliRoleDef(role,sqlName.getName(),targetSqlTableName.getName(),targetTables.size()>1);
 								  dbColId.setName(roleSqlName);
 								  boolean notNull=false;
+								  if(targetTables.size()>1){
+									  notNull=false; // multiple alternative FK columns
+								  }else{
+									  if(role.getCardinality().getMinimum()==0){
+										  notNull=false;
+									  }else{
+										  notNull=true;
+									  }
+								  }
 								  dbColId.setNotNull(notNull);
 								  dbColId.setPrimaryKey(false);
 								  if(createFk){
@@ -478,7 +492,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 					}
 					trafoConfig.setAttrConfig(attr, TrafoConfigNames.CATALOGUE_REF_TRAFO,TrafoConfigNames.CATALOGUE_REF_TRAFO_COALESCE);
 					dbCol=ret;
-				}else if(isMultiSurfaceAttr(td, attr) && (coalesceMultiSurface 
+				}else if(Ili2cUtility.isMultiSurfaceAttr(td, attr) && (coalesceMultiSurface 
 						|| TrafoConfigNames.MULTISURFACE_TRAFO_COALESCE.equals(trafoConfig.getAttrConfig(attr,TrafoConfigNames.MULTISURFACE_TRAFO)))){
 					multiSurfaceAttrs.addMultiSurfaceAttr(attr);
 					MultiSurfaceMapping attrMapping=multiSurfaceAttrs.getMapping(attr);
@@ -502,7 +516,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 					for(String sfx:DbNames.MULTILINGUAL_TXT_COL_SUFFIXS){
 						DbColVarchar ret=new DbColVarchar();
 						ret.setName(getSqlAttrName(attr,dbTable.getName().getName(),null)+sfx);
-						ret.setSize(255);
+						ret.setSize(DbColVarchar.UNLIMITED);
 						ret.setNotNull(false);
 						ret.setPrimaryKey(false);
 						dbColExts.add(ret);
@@ -556,9 +570,17 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 			}else{
 				PrecisionDecimal min=((NumericType)type).getMinimum();
 				PrecisionDecimal max=((NumericType)type).getMaximum();
+				int minLen=min.toString().length();
+				int maxLen=max.toString().length();
+				if(min.toString().startsWith("-")){
+					minLen-=1;
+				}
+				if(max.toString().startsWith("-")){
+					maxLen-=1;
+				}
 				if(min.getAccuracy()>0){
 					DbColDecimal ret=new DbColDecimal();
-					int size=Math.max(min.toString().length(),max.toString().length());
+					int size=Math.max(minLen,maxLen)-1;
 					int precision=min.getAccuracy();
 					//EhiLogger.debug("attr "+ attr.getName()+", maxStr <"+maxStr+">, size "+Integer.toString(size)+", precision "+Integer.toString(precision));
 					ret.setSize(size);
@@ -566,7 +588,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 					dbCol=ret;
 				}else{
 					DbColNumber ret=new DbColNumber();
-					int size=Math.max(min.toString().length(),max.toString().length());
+					int size=Math.max(minLen,maxLen);
 					ret.setSize(size);
 					dbCol=ret;
 				}
@@ -576,7 +598,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 			if(((TextType)type).getMaxLength()>0){
 				ret.setSize(((TextType)type).getMaxLength());
 			}else{
-				ret.setSize(-1);
+				ret.setSize(DbColVarchar.UNLIMITED);
 			}
 			dbCol=ret;
 		}else{
@@ -620,24 +642,6 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 		}
 		return false;
 	}
-	private boolean isMultiSurfaceAttr(TransferDescription td,
-			AttributeDef attr) {
-		Type typeo=attr.getDomain();
-		if(typeo instanceof CompositionType){
-			CompositionType type=(CompositionType)attr.getDomain();
-			if(type.getCardinality().getMaximum()==1){
-				if(Ili2cUtility.isPureChbaseMultiSuface(td, attr)){
-					return true;
-				}
-				Table struct=type.getComponentType();
-				if(IliMetaAttrNames.METAATTR_MAPPING_MULTISURFACE.equals(struct.getMetaValue(IliMetaAttrNames.METAATTR_MAPPING))){
-					return true;
-				}
-			}
-		}
-		return false;
-	}
-
 	private void addParentRef(Viewable parentTable,AttributeDef attr){
 		CompositionType type = (CompositionType)attr.getDomainResolvingAll();
 		Table structClass=type.getComponentType();

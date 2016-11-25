@@ -30,7 +30,7 @@ public interface DbIdGen {
 	public void init(String schema,Config config);
 	public void initDb(java.sql.Connection conn,String dbusr);
 	 
-	public void initDbDefs();
+	public void initDbDefs(ch.ehi.sqlgen.generator.Generator gen);
 	public void addMappingTable(ch.ehi.sqlgen.repository.DbSchema schema);
 	
 	/** gets a new obj id.

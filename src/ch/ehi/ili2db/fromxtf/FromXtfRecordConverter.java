@@ -70,7 +70,9 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 	
 	public FromXtfRecordConverter(TransferDescription td1, NameMapping ili2sqlName,HashMap tag2class1,
 			Config config,
-			DbIdGen idGen1,SqlColumnConverter geomConv1,Connection conn1,String dbusr1,boolean isItfReader1,XtfidPool oidPool1,TrafoConfig trafoConfig,	Viewable2TableMapping class2wrapper1) {
+			DbIdGen idGen1,SqlColumnConverter geomConv1,Connection conn1,String dbusr1,boolean isItfReader1,
+			XtfidPool oidPool1,TrafoConfig trafoConfig,	
+			Viewable2TableMapping class2wrapper1) {
 		super(td1, ili2sqlName, config, idGen1,trafoConfig,class2wrapper1);
 		conn=conn1;
 		tag2class=tag2class1;
@@ -213,10 +215,15 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 								//ret.setStringAttribute(roleName, refoid);
 							 }
 						 }
+					  	String targetRootClassName=Ili2cUtility.getRootViewable(role.getDestination()).getScopedName(null);
+					  	ViewableWrapper targetObjTable=null;
+					  	if(refoid!=null){
+						  	String targetObjClass=oidPool.getObjecttag(targetRootClassName,refoid);
+						  	targetObjTable=getViewableWrapper(getSqlType((Viewable) tag2class.get(targetObjClass)).getName());
+					  	}
 						ArrayList<ViewableWrapper> targetTables = getTargetTables(role.getDestination());
 						  for(ViewableWrapper targetTable : targetTables){
-							  	String targetRootClassName=Ili2cUtility.getRootViewable((Viewable)targetTable.getViewable()).getScopedName(null);
-							  	if(refoid!=null && oidPool.containsXtfid(targetRootClassName,refoid)){
+							  	if(refoid!=null && targetTable==targetObjTable){
 								   long refsqlId=oidPool.getObjSqlId(targetRootClassName,refoid);
 								   ps.setLong(valuei, refsqlId);
 								}else{

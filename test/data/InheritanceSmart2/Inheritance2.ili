@@ -22,9 +22,14 @@ MODEL Inheritance2
   END ClassB;
 
   ASSOCIATION a2b =
-  	a -- {1} ClassA3b;
-  	b -- {0..*} ClassB;
+  	a (EXTERNAL) -- {1} ClassA3b;
+  	b (EXTERNAL) -- {0..*} ClassB;
   END a2b;
+
+  ASSOCIATION aa2bb =
+  	aa (EXTERNAL) -- {0..*} ClassA3b;
+  	bb (EXTERNAL) -- {0..*} ClassB;
+  END aa2bb;
   
   END TestA;
   

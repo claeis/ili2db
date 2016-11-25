@@ -160,7 +160,7 @@ public class TableBasedIdGen implements DbIdGen {
 	}
 
 	@Override
-	public void initDbDefs() {
+	public void initDbDefs(ch.ehi.sqlgen.generator.Generator gen) {
 	}
 	/** gets a new obj id.
 	 */

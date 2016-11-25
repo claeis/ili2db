@@ -7,7 +7,8 @@ MODEL MultiSurface1
   TOPIC TestA =
   
     CLASS ClassA1 =
-	geom : MANDATORY GeometryCHLV03_V1.MultiSurface;    	
+	geom : MANDATORY GeometryCHLV03_V1.MultiSurface;
+	point : GeometryCHLV03_V1.Coord2;
     END ClassA1;
     
   END TestA;

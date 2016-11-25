@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?><TRANSFER xmlns="http://www.interlis.ch/INTERLIS2.3">
+<HEADERSECTION SENDER="ili2pg-3.1.0-20160526" VERSION="2.3"><MODELS><MODEL NAME="Inheritance2" VERSION="2016-05-26" URI="mailto:ce@eisenhutinformatik.ch"></MODEL></MODELS></HEADERSECTION>
+<DATASECTION>
+<Inheritance2.TestA BID="Inheritance2.TestA">
+<Inheritance2.TestA.ClassA3b TID="1"><attrA3>attra3-10</attrA3><attrA3b>attra3b-10</attrA3b></Inheritance2.TestA.ClassA3b>
+<Inheritance2.TestA.ClassA3c TID="2"><attrA3>attra3-20u</attrA3><attrA3b>attra3b-20u</attrA3b><attrA3c>attra3c-20u</attrA3c></Inheritance2.TestA.ClassA3c>
+<Inheritance2.TestA.ClassB TID="3"><attrB>attrb-30</attrB><a REF="1"></a></Inheritance2.TestA.ClassB>
+<Inheritance2.TestA.ClassB TID="4"><attrB>attrb-40</attrB><a REF="2"></a></Inheritance2.TestA.ClassB>
+<Inheritance2.TestA.ClassB TID="5"><attrB>attrb-50</attrB><a REF="1"></a></Inheritance2.TestA.ClassB>
+<Inheritance2.TestA.aa2bb><aa REF="1"/><bb REF="4"/></Inheritance2.TestA.aa2bb>
+<Inheritance2.TestA.aa2bb><aa REF="2"/><bb REF="4"/></Inheritance2.TestA.aa2bb>
+<Inheritance2.TestA.aa2bb><aa REF="1"/><bb REF="5"/></Inheritance2.TestA.aa2bb>
+</Inheritance2.TestA>
+</DATASECTION>
+</TRANSFER>

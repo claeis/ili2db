@@ -11,7 +11,7 @@
 	</HEADERSECTION>
 	<DATASECTION>
 		<MultiSurface1.TestA BID="MultiSurface1.TestA">
-			<MultiSurface1.TestA.ClassA1>
+			<MultiSurface1.TestA.ClassA1 TID="o1">
 				<geom>
 					<GeometryCHLV03_V1.MultiSurface>
 						<Surfaces>
@@ -74,6 +74,12 @@
 						</Surfaces>
 					</GeometryCHLV03_V1.MultiSurface>
 				</geom>
+				<point>
+					<COORD>
+						<C1>600031.0</C1>
+						<C2>200021.0</C2>
+					</COORD>
+				</point>
 			</MultiSurface1.TestA.ClassA1>
 		</MultiSurface1.TestA>
 	</DATASECTION>

@@ -31,6 +31,7 @@ import java.sql.Types;
 
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.XMLGregorianCalendar;
+import javax.xml.ws.Holder;
 
 import ch.ehi.basics.logging.EhiLogger;
 import ch.ehi.ili2db.base.DbIdGen;
@@ -164,7 +165,6 @@ public class TransferFromXtf {
 		unknownTypev=new HashSet();
 		structQueue=new ArrayList();
 		boolean surfaceAsPolyline=true;
-		recConv=new FromXtfRecordConverter(td,ili2sqlName,tag2class,config,idGen,geomConv,conn,dbusr,isItfReader,oidPool,trafoConfig,class2wrapper);
 
 		recman=new ObjectPoolManager();
 		try{
@@ -176,6 +176,8 @@ public class TransferFromXtf {
 			long endTid=0;
 			long objCount=0;
 			boolean referrs=false;
+			
+			recConv=new FromXtfRecordConverter(td,ili2sqlName,tag2class,config,idGen,geomConv,conn,dbusr,isItfReader,oidPool,trafoConfig,class2wrapper);
 			
 			if(functionCode==Config.FC_DELETE || functionCode==Config.FC_REPLACE){
 				// delete existing data base on basketSqlId
@@ -232,8 +234,16 @@ public class TransferFromXtf {
 				}
 			}else{
 				try {
-					datasetSqlId=oidPool.newObjSqlId();
-					writeDataset(datasetSqlId,config.getDatasetName());
+					datasetSqlId=Ili2db.getDatasetId(config.getDatasetName(),conn,config);
+					if(datasetSqlId!=null){
+						if(functionCode==Config.FC_UPDATE){
+						}else{
+							throw new Ili2dbException("dataset "+config.getDatasetName()+" already exists");
+						}
+					}else{
+						datasetSqlId=oidPool.newObjSqlId();
+						writeDataset(datasetSqlId,config.getDatasetName());
+					}
 					importSqlId=writeImportStat(datasetSqlId,xtffilename,today,dbusr);
 				} catch (SQLException e) {
 					EhiLogger.logError(e);
@@ -284,7 +294,7 @@ public class TransferFromXtf {
 								existingBasketSqlId=readExistingSqlObjIds(reader instanceof ItfReader,basket.getBid());
 								if(existingBasketSqlId==null){
 									// new basket 
-									basketSqlId=oidPool.getObjSqlId(null,basket.getBid());
+									basketSqlId=oidPool.getBasketSqlId(basket.getBid());
 								}else{
 									// existing basket
 									basketSqlId=existingBasketSqlId;
@@ -292,7 +302,7 @@ public class TransferFromXtf {
 									dropExistingStructEles(basket.getType(),basketSqlId);
 								}
 							}else{
-								basketSqlId=oidPool.getObjSqlId(null,basket.getBid());
+								basketSqlId=oidPool.getBasketSqlId(basket.getBid());
 							}
 							if(attachmentKey==null){
 								if(xtffilename!=null){
@@ -344,9 +354,6 @@ public class TransferFromXtf {
 											EhiLogger.logError("unknown referenced object "+aclass.getScopedName(null)+" TID "+xtfid+" referenced from "+fixref.getRootTag()+" TID "+fixref.getRootTid());
 											referrs=true;
 											skipObj=true;
-										}else{
-											// remember found sqlid
-											oidPool.putXtfid2sqlid(rootClassName,xtfid, sqlid);
 										}
 									}else{
 										EhiLogger.logError("unknown referenced object "+aclass.getScopedName(null)+" TID "+xtfid+" referenced from "+fixref.getRootTag()+" TID "+fixref.getRootTid());
@@ -601,7 +608,7 @@ public class TransferFromXtf {
 			ArrayList itftablev=ModelUtilities.getItfTables(td,model.getName(),topic.getName());
 			iter=itftablev.iterator();
 		}else{
-			iter=topic.getViewables().iterator();
+			iter=getXtfTables(td, topic).iterator();
 		}
 		HashSet<String> visitedTables=new HashSet<String>();
 		while (iter.hasNext())
@@ -613,18 +620,23 @@ public class TransferFromXtf {
 			  }else if (!TransferToXtf.suppressViewable ((Viewable)obj))
 			  {
 				Viewable aclass=(Viewable)obj;
-				Viewable base=(Viewable)aclass.getRootExtending();
-				if(base==null){
-					base=aclass;
+				if(aclass.isAbstract()){
+					throw new IllegalArgumentException("unexpected abstract viewable "+aclass.getScopedName(null));
 				}
 				// get sql name
-				DbTableName sqlName=recConv.getSqlType(base);
+				DbTableName sqlName=recConv.getSqlType(aclass);
+				ViewableWrapper wrapper=recConv.getViewableWrapper(sqlName.getName());
+				ViewableWrapper base=wrapper.getExtending();
+				while(base!=null){
+					wrapper=base;
+					base=wrapper.getExtending();
+				}
+				sqlName=wrapper.getSqlTable();
 				if(!visitedTables.contains(sqlName.getQName())){
 					visitedTables.add(sqlName.getQName());
 					// if table exists?
 					if(DbUtility.tableExists(conn,sqlName)){
 						// dump it
-						ViewableWrapper wrapper=recConv.getViewableWrapper(sqlName.getName());
 						EhiLogger.logState(aclass.getScopedName(null)+" read ids...");
 						readObjectSqlIds(!wrapper.includesMultipleTypes(),sqlName,basketSqlId);
 					}else{
@@ -655,6 +667,21 @@ public class TransferFromXtf {
 		}		
 		return basketSqlId;
 	}
+	static private  ArrayList<Viewable> getXtfTables(TransferDescription td, Topic topic) {
+		ArrayList<Viewable> ret= new ArrayList<Viewable>();
+	    Iterator iter = topic.getViewables().iterator();
+	    while (iter.hasNext())
+	    {
+	      Object obj = iter.next();
+	      if ((obj instanceof Viewable) && !AbstractPatternDef.suppressViewableInTransfer((Viewable)obj))
+	      {
+				Viewable v = (Viewable) obj;		
+				ret.add(v);
+	      }	
+	    }
+		return ret;
+	}
+
 	private void deleteObjectsOfExistingDataset(long datasetSqlId,Config config) throws Ili2dbException {
 		// get basket id, topicname
 		String schema=config.getDbschema();
@@ -880,7 +907,7 @@ public class TransferFromXtf {
 	 		}
 	 	}
 	 	if(tid!=null && tid.length()>0){
-			oidPool.getObjSqlId(Ili2cUtility.getRootViewable((Viewable) modelele).getScopedName(null),tid);
+			oidPool.createObjSqlId(Ili2cUtility.getRootViewable((Viewable) modelele).getScopedName(null),tag,tid);
 	 	}
 		FixIomObjectExtRefs extref=new FixIomObjectExtRefs(tag,tid);
 		allReferencesKnownHelper(iomObj, extref);
@@ -993,11 +1020,12 @@ public class TransferFromXtf {
 		}
 	}
 
-	private Long readObjectSqlid(Viewable aclass, String xtfid) {
-		String stmt = createQueryStmt4sqlid(aclass);
+	private Long readObjectSqlid(Viewable xclass, String xtfid) {
+		String stmt = createQueryStmt4sqlid(xclass);
 		EhiLogger.traceBackendCmd(stmt);
 		java.sql.PreparedStatement dbstmt = null;
 		long sqlid=0;
+		String sqlType=null;
 		try {
 
 			dbstmt = conn.prepareStatement(stmt);
@@ -1006,36 +1034,50 @@ public class TransferFromXtf {
 			java.sql.ResultSet rs = dbstmt.executeQuery();
 			if(rs.next()) {
 				sqlid = rs.getLong(1);
+				sqlType=rs.getString(3);
 			}else{
 				// unknown object
 				return null;
 			}
 		} catch (java.sql.SQLException ex) {
-			EhiLogger.logError("failed to query " + aclass.getScopedName(null),	ex);
+			EhiLogger.logError("failed to query " + xclass.getScopedName(null),	ex);
 		} finally {
 			if (dbstmt != null) {
 				try {
 					dbstmt.close();
 				} catch (java.sql.SQLException ex) {
-					EhiLogger.logError("failed to close query of "+ aclass.getScopedName(null), ex);
+					EhiLogger.logError("failed to close query of "+ xclass.getScopedName(null), ex);
 				}
 			}
 		}
+		// remember found sqlid
+		Viewable aclass=(Viewable) tag2class.get(ili2sqlName.mapSqlTableName(sqlType));
+		oidPool.putXtfid2sqlid(Ili2cUtility.getRootViewable(aclass).getScopedName(null),aclass.getScopedName(null),xtfid, sqlid);
 		return sqlid;
 	}
 	private String createQueryStmt4sqlid(Viewable aclass){
+		ArrayList<ViewableWrapper> wrappers = recConv.getTargetTables(aclass);
 		StringBuffer ret = new StringBuffer();
-		ret.append("SELECT r0."+colT_ID);
-		ret.append(", r0."+DbNames.T_ILI_TID_COL);
-		ret.append(" FROM ");
-		ArrayList tablev=new ArrayList(10);
-		tablev.add(aclass);
-		Viewable base=(Viewable)aclass.getRootExtending();
-		if(base==null){
-			base=aclass;
+		int i=1;
+		
+		ret.append("SELECT "+colT_ID+","+DbNames.T_ILI_TID_COL+","+DbNames.T_TYPE_COL+" FROM (");
+		String sep="";
+		for(ViewableWrapper wrapper:wrappers){
+			ret.append(sep);
+			ret.append("SELECT r"+i+"."+colT_ID);
+			ret.append(", r"+i+"."+DbNames.T_ILI_TID_COL);
+			if(recConv.createTypeDiscriminator() ||wrapper.includesMultipleTypes()){
+				ret.append(", r"+i+"."+DbNames.T_TYPE_COL);
+			}else{
+				ret.append(", '"+wrapper.getSqlTable().getName()+"' "+DbNames.T_TYPE_COL);
+			}
+			ret.append(" FROM ");
+			ret.append(wrapper.getSqlTable().getQName());
+			ret.append(" r"+i+"");
+			i++;
+			sep=" UNION ";
 		}
-		ret.append(recConv.getSqlType(base));
-		ret.append(" r0");
+		ret.append(") r0");
 		ret.append(" WHERE r0."+DbNames.T_ILI_TID_COL+"=?");
 		return ret.toString();
 	}
@@ -1059,7 +1101,7 @@ public class TransferFromXtf {
 					sqlType=sqltablename.getName();
 				}
 				Viewable aclass=(Viewable) tag2class.get(ili2sqlName.mapSqlTableName(sqlType));
-				oidPool.putXtfid2sqlid(Ili2cUtility.getRootViewable(aclass).getScopedName(null),xtfid, sqlid);
+				oidPool.putXtfid2sqlid(Ili2cUtility.getRootViewable(aclass).getScopedName(null),aclass.getScopedName(null),xtfid, sqlid);
 				addExistingObjects(sqlType,sqlid);
 			}
 		} catch (java.sql.SQLException ex) {
@@ -1212,7 +1254,8 @@ public class TransferFromXtf {
 		Table lineAttrTable=type.getLineAttributeStructure();
 		
 		// map oid of transfer file to a sql id
-		long sqlId=oidPool.getObjSqlId(attrDef.getContainer().getScopedName(null)+"."+attrDef.getName(),iomObj.getobjectoid());
+		String idTag=attrDef.getContainer().getScopedName(null)+"."+attrDef.getName();
+		long sqlId=oidPool.createObjSqlId(idTag,idTag,iomObj.getobjectoid());
 		
 		String sqlTableName=getSqlTableNameItfLineTable(attrDef).getQName();
 		String insert=createItfLineTableInsertStmt(attrDef);

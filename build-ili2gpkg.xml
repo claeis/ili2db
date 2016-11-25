@@ -83,6 +83,37 @@
     	<fileset dir="${src}" includes="**/*.png"/>
     </jar>
   </target>
+
+  <target depends="init,compile" name="fatjar">
+    <property file="ili2gpkg/src/ch/ehi/ili2gpkg/Version.properties" prefix="buildnr."/>
+	<property name="buildnr" value="${buildnr.versionMajor}.${buildnr.versionMinor}.${buildnr.versionMicro}"/>
+
+	<delete file="${build}/jar/${ant.project.name}-${buildnr}.jar" quiet="true"/>
+
+    <jar jarfile="${build}/jar/${ant.project.name}-${buildnr}.jar" basedir="${build}/classes">
+	    <manifest>
+	      <attribute name="Main-Class" value="ch.ehi.ili2gpkg.GpkgMain"/>
+	    </manifest>
+
+		<zipgroupfileset dir="libs">
+			<include name ="antlr.jar"/>
+			<include name ="ehibasics.jar"/>
+			<include name ="gson-2.6.2.jar"/>
+			<include name ="ili2c-core.jar"/>
+			<include name ="ili2c-tool.jar"/>
+			<include name ="iox-api.jar"/>
+			<include name ="iox-ili.jar"/>
+			<include name ="jts-core-1.14.0.jar"/>
+			<include name ="toml4j-0.5.1.jar"/>
+			<include name ="ehisqlgen.jar"/>
+			<include name ="${sqlite}"/>
+		</zipgroupfileset>
+
+		<fileset dir="${src}" includes="**/*.properties"/>
+		<fileset dir="ili2gpkg/src" includes="**/*.sql"/>
+		<fileset dir="ili2gpkg/src" includes="**/*.properties"/>
+    </jar>
+  </target>
   
   <target depends="init" name="buildnr">
     <property file="ili2gpkg/src/ch/ehi/ili2gpkg/Version.properties" prefix="buildnr."/>
