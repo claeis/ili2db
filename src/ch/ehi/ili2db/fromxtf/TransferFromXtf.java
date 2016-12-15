@@ -980,42 +980,40 @@ public class TransferFromXtf {
 	}
 	private void allReferencesKnownHelper(IomObject iomObj, AttributeDef attr,FixIomObjectExtRefs extref)
 	{
-		if(attr.getExtending()==null){
-			 String attrName=attr.getName();
-			if( attr.isDomainBoolean()) {
-			}else if( attr.isDomainIli1Date()) {
-			}else if( attr.isDomainIli2Date()) {
-			}else if( attr.isDomainIli2Time()) {
-			}else if( attr.isDomainIli2DateTime()) {
+		String attrName=attr.getName();
+		if( attr.isDomainBoolean()) {
+		}else if( attr.isDomainIli1Date()) {
+		}else if( attr.isDomainIli2Date()) {
+		}else if( attr.isDomainIli2Time()) {
+		}else if( attr.isDomainIli2DateTime()) {
+		}else{
+			Type type = attr.getDomainResolvingAliases();
+		 
+			if (type instanceof CompositionType){
+				 // enqueue struct values
+				 int structc=iomObj.getattrvaluecount(attrName);
+				 for(int structi=0;structi<structc;structi++){
+				 	IomObject struct=iomObj.getattrobj(attrName,structi);
+				 	allReferencesKnownHelper(struct, extref);
+				 }
+			}else if (type instanceof PolylineType){
+			 }else if(type instanceof SurfaceOrAreaType){
+			 }else if(type instanceof CoordType){
+			}else if(type instanceof NumericType){
+			}else if(type instanceof EnumerationType){
+			}else if(type instanceof ReferenceType){
+				 IomObject structvalue=iomObj.getattrobj(attrName,0);
+				 String refoid=null;
+				 if(structvalue!=null){
+					 refoid=structvalue.getobjectrefoid();
+				 }
+				 if(refoid!=null){
+					 	Viewable targetClass=((ReferenceType)type).getReferred();
+						if(!oidPool.containsXtfid(Ili2cUtility.getRootViewable(targetClass).getScopedName(null),refoid)){
+							extref.addFix(structvalue, targetClass);
+						}
+				 }
 			}else{
-				Type type = attr.getDomainResolvingAliases();
-			 
-				if (type instanceof CompositionType){
-					 // enqueue struct values
-					 int structc=iomObj.getattrvaluecount(attrName);
-					 for(int structi=0;structi<structc;structi++){
-					 	IomObject struct=iomObj.getattrobj(attrName,structi);
-					 	allReferencesKnownHelper(struct, extref);
-					 }
-				}else if (type instanceof PolylineType){
-				 }else if(type instanceof SurfaceOrAreaType){
-				 }else if(type instanceof CoordType){
-				}else if(type instanceof NumericType){
-				}else if(type instanceof EnumerationType){
-				}else if(type instanceof ReferenceType){
-					 IomObject structvalue=iomObj.getattrobj(attrName,0);
-					 String refoid=null;
-					 if(structvalue!=null){
-						 refoid=structvalue.getobjectrefoid();
-					 }
-					 if(refoid!=null){
-						 	Viewable targetClass=((ReferenceType)type).getReferred();
-							if(!oidPool.containsXtfid(Ili2cUtility.getRootViewable(targetClass).getScopedName(null),refoid)){
-								extref.addFix(structvalue, targetClass);
-							}
-					 }
-				}else{
-				}
 			}
 		}
 	}

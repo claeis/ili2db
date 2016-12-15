@@ -788,7 +788,7 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 							 }
 						 }
 						 if(refoid!=null){
-							 	String targetClassName=IliNames.CHBASE1_CATALOGUEOBJECTS+"."+IliNames.CHBASE1_ITEM;
+							 	String targetClassName=IliNames.CHBASE1_CATALOGUEOBJECTS_CATALOGUES+"."+IliNames.CHBASE1_ITEM;
 								long refsqlId=oidPool.getObjSqlId(targetClassName,refoid);
 								ps.setLong(valuei, refsqlId);
 						 }else{
