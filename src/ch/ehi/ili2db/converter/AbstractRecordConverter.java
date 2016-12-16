@@ -189,9 +189,17 @@ public class AbstractRecordConverter {
 					// visit all sub classes
 					candids.addAll(candid.getDirectExtensions());
 				}else if(TrafoConfigNames.INHERITANCE_TRAFO_NEWCLASS.equals(inheritanceStrategy)){
-					ret.add(class2wrapper.get(candid));
+					ViewableWrapper wrapper=class2wrapper.get(candid);
+					// classes that have no defined Wrapper are loaded by the compiler, but are not used
+					if(wrapper!=null){
+						ret.add(wrapper);
+					}
 				}else if(TrafoConfigNames.INHERITANCE_TRAFO_NEWANDSUBCLASS.equals(inheritanceStrategy)){
-					ret.add(class2wrapper.get(candid));
+					ViewableWrapper wrapper=class2wrapper.get(candid);
+					// classes that have no defined Wrapper are loaded by the compiler, but are not used
+					if(wrapper!=null){
+						ret.add(wrapper);
+					}
 					// visit all sub classes
 					candids.addAll(candid.getDirectExtensions());
 				}else{
