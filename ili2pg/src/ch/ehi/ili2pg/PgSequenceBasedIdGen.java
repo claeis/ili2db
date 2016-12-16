@@ -101,11 +101,8 @@ public class PgSequenceBasedIdGen implements DbIdGen {
 	
 	@Override
 	public void initDbDefs(ch.ehi.sqlgen.generator.Generator gen) {
-		String sqlName=SQL_ILI2DB_SEQ_NAME;
-		if(schema!=null){
-			sqlName=schema+"."+sqlName;
-		}
-		String stmt="CREATE SEQUENCE "+sqlName;
+		DbTableName sqlName=new DbTableName(schema,SQL_ILI2DB_SEQ_NAME);
+		String stmt="CREATE SEQUENCE "+sqlName.getQName();
 		if(minValue!=null){
 			stmt=stmt+" MINVALUE "+minValue;
 		}
@@ -115,10 +112,10 @@ public class PgSequenceBasedIdGen implements DbIdGen {
 		stmt=stmt+";";
 		if(gen instanceof GeneratorJdbc){
 			((GeneratorJdbc) gen).addCreateLine(((GeneratorJdbc) gen).new Stmt(stmt));
-			((GeneratorJdbc) gen).addDropLine(((GeneratorJdbc) gen).new Stmt("DROP SEQUENCE "+sqlName+";"));
+			((GeneratorJdbc) gen).addDropLine(((GeneratorJdbc) gen).new Stmt("DROP SEQUENCE "+sqlName.getQName()+";"));
 		}
 		try {
-			if(sequenceExists(new DbTableName(schema,sqlName))){
+			if(sequenceExists(sqlName)){
 				return;
 			}
 		} catch (IOException e) {
@@ -130,7 +127,7 @@ public class PgSequenceBasedIdGen implements DbIdGen {
 			updstmt = conn.prepareStatement(stmt);
 			updstmt.execute();
 		}catch(java.sql.SQLException ex){
-			EhiLogger.logError("failed to create sequence "+sqlName,ex);
+			EhiLogger.logError("failed to create sequence "+sqlName.getQName(),ex);
 		}finally{
 			if(updstmt!=null){
 				try{

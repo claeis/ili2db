@@ -15,6 +15,7 @@ ideas/open issues/questions
 ili2pg/ili2gpkg 3.5.1 (2016-11-xx)
 -----------------------------
 - import: failed to resolve EXTENDED EXTERNAL ReferenceAttr
+- import: fixed "ERROR: relation "t_ili2db_seq" already exists"
 
 ili2pg/ili2gpkg 3.5.0 (2016-11-25)
 -----------------------------
