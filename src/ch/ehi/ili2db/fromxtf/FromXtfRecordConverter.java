@@ -12,6 +12,7 @@ import java.util.Iterator;
 
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.XMLGregorianCalendar;
+import javax.xml.ws.Holder;
 
 import ch.ehi.basics.logging.EhiLogger;
 import ch.ehi.ili2db.base.DbIdGen;
@@ -32,6 +33,7 @@ import ch.ehi.ili2db.mapping.Viewable2TableMapping;
 import ch.ehi.ili2db.mapping.ViewableWrapper;
 import ch.ehi.sqlgen.repository.DbSchema;
 import ch.ehi.sqlgen.repository.DbTableName;
+import ch.interlis.ili2c.metamodel.AbstractClassDef;
 import ch.interlis.ili2c.metamodel.AreaType;
 import ch.interlis.ili2c.metamodel.AssociationDef;
 import ch.interlis.ili2c.metamodel.AttributeDef;
@@ -215,22 +217,9 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 								//ret.setStringAttribute(roleName, refoid);
 							 }
 						 }
-					  	String targetRootClassName=Ili2cUtility.getRootViewable(role.getDestination()).getScopedName(null);
-					  	ViewableWrapper targetObjTable=null;
-					  	if(refoid!=null){
-						  	String targetObjClass=oidPool.getObjecttag(targetRootClassName,refoid);
-						  	targetObjTable=getViewableWrapper(getSqlType((Viewable) tag2class.get(targetObjClass)).getName());
-					  	}
-						ArrayList<ViewableWrapper> targetTables = getTargetTables(role.getDestination());
-						  for(ViewableWrapper targetTable : targetTables){
-							  	if(refoid!=null && targetTable==targetObjTable){
-								   long refsqlId=oidPool.getObjSqlId(targetRootClassName,refoid);
-								   ps.setLong(valuei, refsqlId);
-								}else{
-									ps.setNull(valuei, Types.BIGINT);
-								}
-								valuei++;
-						  }
+						Holder<Integer> valueiRef=new Holder<Integer>(valuei);
+						setReferenceColumn(ps,role.getDestination(),refoid,valueiRef);
+						valuei=valueiRef.value;
 					}
 				}
 			 }
@@ -257,6 +246,31 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 			//ps.setInt(valuei, sqlId);
 			//valuei++;
 		}
+	}
+	private void setReferenceColumn(PreparedStatement ps,
+			AbstractClassDef destination, String refoid, Holder<Integer> valuei) throws SQLException {
+	  	String targetRootClassName=Ili2cUtility.getRootViewable(destination).getScopedName(null);
+	  	ViewableWrapper targetObjTable=null;
+		ArrayList<ViewableWrapper> targetTables = getTargetTables(destination);
+	  	if(refoid!=null){
+		  	String targetObjClass=oidPool.getObjecttag(targetRootClassName,refoid);
+		  	targetObjTable=getViewableWrapper(getSqlType((Viewable) tag2class.get(targetObjClass)).getName());
+		  	while(!targetTables.contains(targetObjTable)){
+		  		targetObjTable=targetObjTable.getExtending();
+		  	}
+		  	if(targetObjTable==null){
+		  		throw new IllegalStateException("targetObjTable==null");
+		  	}
+	  	}
+		  for(ViewableWrapper targetTable : targetTables){
+			  	if(refoid!=null && targetTable==targetObjTable){
+				   long refsqlId=oidPool.getObjSqlId(targetRootClassName,refoid);
+				   ps.setLong(valuei.value, refsqlId);
+				}else{
+					ps.setNull(valuei.value, Types.BIGINT);
+				}
+				valuei.value++;
+		  }
 	}
 	public HashSet getIomObjectAttrs(Viewable aclass) {
 		HashSet ret=new HashSet();
@@ -956,14 +970,9 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 					 if(structvalue!=null){
 						 refoid=structvalue.getobjectrefoid();
 					 }
-					 if(refoid!=null){
-						 	String targetClassName=Ili2cUtility.getRootViewable(((ReferenceType) type).getReferred()).getScopedName(null);
-							long refsqlId=oidPool.getObjSqlId(targetClassName,refoid);
-							ps.setLong(valuei, refsqlId);
-					 }else{
-							ps.setNull(valuei,Types.BIGINT);
-					 }
-					valuei++;
+					Holder<Integer> valueiRef=new Holder<Integer>(valuei);
+					setReferenceColumn(ps,((ReferenceType) type).getReferred(),refoid,valueiRef);
+					valuei=valueiRef.value;
 				}else{
 					String value=iomObj.getattrvalue(attrName);
 					if(value!=null){
