@@ -1,6 +1,10 @@
 package ch.ehi.ili2db;
 
 import java.io.File;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+import java.sql.Statement;
 
 import org.junit.Test;
 
@@ -53,32 +57,49 @@ public class Dataset1nosmartTest {
 	//config.setTidHandling(config.TID_HANDLING_PROPERTY);
 	
 	@Test
-	public void importDataset() throws Ili2dbException
+	public void importDataset() throws Exception
 	{
-		{
-			File data=new File("test/data/Dataset1a1.xtf");
-			Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
-			config.setDatasetName(DATASETNAME_A);
-			config.setFunction(Config.FC_IMPORT);
-			config.setCreateFk(config.CREATE_FK_YES);
-			config.setBasketHandling(config.BASKET_HANDLING_READWRITE);
-			config.setCatalogueRefTrafo(null);
-			config.setMultiSurfaceTrafo(null);
-			config.setMultilingualTrafo(null);
-			config.setInheritanceTrafo(null);
-			Ili2db.readSettingsFromDb(config);
-			Ili2db.run(config,null);
+		Connection jdbcConnection=null;
+		try{
+	        Class driverClass = Class.forName("org.postgresql.Driver");
+	        jdbcConnection = DriverManager.getConnection(
+	        		dburl, dbuser, dbpwd);
+	        Statement stmt=jdbcConnection.createStatement();
+	        stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");
+			{
+				File data=new File("test/data/Dataset1a1.xtf");
+				Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+				config.setDatasetName(DATASETNAME_A);
+				config.setFunction(Config.FC_IMPORT);
+				config.setCreateFk(config.CREATE_FK_YES);
+				config.setBasketHandling(config.BASKET_HANDLING_READWRITE);
+				config.setCatalogueRefTrafo(null);
+				config.setMultiSurfaceTrafo(null);
+				config.setMultilingualTrafo(null);
+				config.setInheritanceTrafo(null);
+				Ili2db.readSettingsFromDb(config);
+				Ili2db.run(config,null);
+			}
+			{
+				File data=new File("test/data/Dataset1b1.xtf");
+				Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+				config.setDatasetName(DATASETNAME_B);
+				config.setFunction(Config.FC_IMPORT);
+				Ili2db.readSettingsFromDb(config);
+				Ili2db.run(config,null);
+			}
+		}finally{
+			if(jdbcConnection!=null){
+				jdbcConnection.close();
+			}
 		}
-		{
-			File data=new File("test/data/Dataset1b1.xtf");
-			Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
-			config.setDatasetName(DATASETNAME_B);
-			config.setFunction(Config.FC_IMPORT);
-			Ili2db.readSettingsFromDb(config);
-			Ili2db.run(config,null);
-		}
+		
+		// join testcases (for now)
+		replaceDataset();
+		exportDataset();
+		deleteDataset();
 	}
-	@Test
+	//@Test
 	public void deleteDataset() throws Ili2dbException
 	{
 		{
@@ -89,7 +110,7 @@ public class Dataset1nosmartTest {
 			Ili2db.run(config,null);
 		}
 	}
-	@Test
+	//@Test
 	public void replaceDataset() throws Ili2dbException
 	{
 		{
@@ -102,7 +123,7 @@ public class Dataset1nosmartTest {
 		}
 	}
 	
-	@Test
+	//@Test
 	public void exportDataset() throws Ili2dbException
 	{
 		File data=new File("test/data/Dataset1-out.xtf");
