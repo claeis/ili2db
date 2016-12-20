@@ -17,6 +17,7 @@ ili2pg/ili2gpkg 3.5.1 (2016-11-xx)
 - import: failed to resolve EXTENDED EXTERNAL ReferenceAttr
 - import: fixed "ERROR: relation "t_ili2db_seq" already exists"
 - import: fixed java.lang.NullPointerException with CatalogueObjects_V1.Catalogues.CatalogueReference.Reference
+- schemaimport: fixed table name mapping (java.lang.NullPointerException)
 
 ili2pg/ili2gpkg 3.5.0 (2016-11-25)
 -----------------------------
