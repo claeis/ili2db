@@ -153,6 +153,30 @@ public class TransferFromXtf {
 				throw new Ili2dbException("update/replace requires a basket column");
 			}
 		}
+		// limit import to given BIDs
+		HashSet<String> limitedToBids=null;
+		{
+			String baskets=config.getBaskets();
+			if(baskets!=null){
+				String basketidv[]=baskets.split(ch.interlis.ili2c.Main.MODELS_SEPARATOR);
+				limitedToBids=new HashSet<String>();
+				for(String basketid:basketidv){
+					limitedToBids.add(basketid);
+				}
+			}
+		}
+		// limit import to given TOPICs
+		HashSet<String> limitedToTopics=null;
+		{
+			String topics=config.getTopics();
+			if(topics!=null){
+				String topicv[]=topics.split(ch.interlis.ili2c.Main.MODELS_SEPARATOR);
+				limitedToTopics=new HashSet<String>();
+				for(String topic:topicv){
+					limitedToTopics.add(topic);
+				}
+			}
+		}
 
 		basketStat=stat;
 		today=new java.sql.Timestamp(System.currentTimeMillis());
@@ -281,118 +305,134 @@ public class TransferFromXtf {
 			// more baskets?
 			IoxEvent event=reader.read();
 			try{
+				boolean skipBasket=false;
 				while(event!=null){
 					if(event instanceof StartBasketEvent){
 						basket=(StartBasketEvent)event;
-						EhiLogger.logState("Basket "+basket.getType()+"(oid "+basket.getBid()+")...");
-						try {
+						if((limitedToBids!=null && !limitedToBids.contains(basket.getBid()))
+								|| (limitedToTopics!=null && !limitedToTopics.contains(basket.getType()))){
+							skipBasket=true;
+							EhiLogger.logState("Skip Basket "+basket.getType()+"(oid "+basket.getBid()+")");
 							if(validator!=null)validator.validate(event);
-							Long existingBasketSqlId=null;
-							if(functionCode==Config.FC_UPDATE){
-								// read existing oid/sqlid mapping (but might also be a new basket)
-								existingObjects=new HashMap<String,HashSet<Long>>();
-								existingBasketSqlId=readExistingSqlObjIds(reader instanceof ItfReader,basket.getBid());
-								if(existingBasketSqlId==null){
-									// new basket 
+						}else{
+							EhiLogger.logState("Basket "+basket.getType()+"(oid "+basket.getBid()+")...");
+							skipBasket=false;
+							try {
+								if(validator!=null)validator.validate(event);
+								Long existingBasketSqlId=null;
+								if(functionCode==Config.FC_UPDATE){
+									// read existing oid/sqlid mapping (but might also be a new basket)
+									existingObjects=new HashMap<String,HashSet<Long>>();
+									existingBasketSqlId=readExistingSqlObjIds(reader instanceof ItfReader,basket.getBid());
+									if(existingBasketSqlId==null){
+										// new basket 
+										basketSqlId=oidPool.getBasketSqlId(basket.getBid());
+									}else{
+										// existing basket
+										basketSqlId=existingBasketSqlId;
+										// drop existing structeles
+										dropExistingStructEles(basket.getType(),basketSqlId);
+									}
+								}else{
 									basketSqlId=oidPool.getBasketSqlId(basket.getBid());
-								}else{
-									// existing basket
-									basketSqlId=existingBasketSqlId;
-									// drop existing structeles
-									dropExistingStructEles(basket.getType(),basketSqlId);
 								}
-							}else{
-								basketSqlId=oidPool.getBasketSqlId(basket.getBid());
-							}
-							if(attachmentKey==null){
-								if(xtffilename!=null){
-									attachmentKey=new java.io.File(xtffilename).getName()+"-"+Long.toString(basketSqlId);
-								}else{
-									attachmentKey=Long.toString(basketSqlId);
+								if(attachmentKey==null){
+									if(xtffilename!=null){
+										attachmentKey=new java.io.File(xtffilename).getName()+"-"+Long.toString(basketSqlId);
+									}else{
+										attachmentKey=Long.toString(basketSqlId);
+									}
+									config.setAttachmentKey(attachmentKey);
 								}
-								config.setAttachmentKey(attachmentKey);
+								if(existingBasketSqlId==null){
+									writeBasket(datasetSqlId,basket,basketSqlId,attachmentKey);
+								}else{
+									// TODO update attachmentKey of existing basket
+								}
+								delayedObjects=new ArrayList<FixIomObjectExtRefs>();
+							} catch (SQLException ex) {
+								EhiLogger.logError("Basket "+basket.getType()+"(oid "+basket.getBid()+")",ex);
+							} catch (ConverterException ex) {
+								EhiLogger.logError("Basket "+basket.getType()+"(oid "+basket.getBid()+")",ex);
 							}
-							if(existingBasketSqlId==null){
-								writeBasket(datasetSqlId,basket,basketSqlId,attachmentKey);
-							}else{
-								// TODO update attachmentKey of existing basket
-							}
-							delayedObjects=new ArrayList<FixIomObjectExtRefs>();
-						} catch (SQLException ex) {
-							EhiLogger.logError("Basket "+basket.getType()+"(oid "+basket.getBid()+")",ex);
-						} catch (ConverterException ex) {
-							EhiLogger.logError("Basket "+basket.getType()+"(oid "+basket.getBid()+")",ex);
+							startTid=oidPool.getLastSqlId();
+							objCount=0;
 						}
-						startTid=oidPool.getLastSqlId();
-						objCount=0;
 					}else if(event instanceof EndBasketEvent){
 						if(validator!=null)validator.validate(event);
 						if(reader instanceof ItfReader2){
 				        	ArrayList<IoxInvalidDataException> dataerrs = ((ItfReader2) reader).getDataErrs();
 				        	if(dataerrs.size()>0){
-				        		for(IoxInvalidDataException dataerr:dataerrs){
-				        			EhiLogger.logError(dataerr);
+				        		if(!skipBasket){
+					        		for(IoxInvalidDataException dataerr:dataerrs){
+					        			EhiLogger.logError(dataerr);
+					        		}
 				        		}
 				        		((ItfReader2) reader).clearDataErrs();
 				        	}
 						}
-						// fix external references
-						for(FixIomObjectExtRefs fixref : delayedObjects){
-							boolean skipObj=false;
-							for(IomObject ref:fixref.getRefs()){
-								String xtfid=ref.getobjectrefoid();
-								Viewable aclass=fixref.getTargetClass(ref);
-								String rootClassName=Ili2cUtility.getRootViewable(aclass).getScopedName(null);
-								if(oidPool.containsXtfid(rootClassName,xtfid)){
-									// skip it; now resolvable
-								}else{
-									// object in another basket
-									if(readIliTid || (aclass instanceof AbstractClassDef && ((AbstractClassDef) aclass).getOid()!=null)){
-										// read object
-										Long sqlid=readObjectSqlid(aclass,xtfid);
-										if(sqlid==null){
+						if(!skipBasket){
+							// fix external references
+							for(FixIomObjectExtRefs fixref : delayedObjects){
+								boolean skipObj=false;
+								for(IomObject ref:fixref.getRefs()){
+									String xtfid=ref.getobjectrefoid();
+									Viewable aclass=fixref.getTargetClass(ref);
+									String rootClassName=Ili2cUtility.getRootViewable(aclass).getScopedName(null);
+									if(oidPool.containsXtfid(rootClassName,xtfid)){
+										// skip it; now resolvable
+									}else{
+										// object in another basket
+										if(readIliTid || (aclass instanceof AbstractClassDef && ((AbstractClassDef) aclass).getOid()!=null)){
+											// read object
+											Long sqlid=readObjectSqlid(aclass,xtfid);
+											if(sqlid==null){
+												EhiLogger.logError("unknown referenced object "+aclass.getScopedName(null)+" TID "+xtfid+" referenced from "+fixref.getRootTag()+" TID "+fixref.getRootTid());
+												referrs=true;
+												skipObj=true;
+											}
+										}else{
 											EhiLogger.logError("unknown referenced object "+aclass.getScopedName(null)+" TID "+xtfid+" referenced from "+fixref.getRootTag()+" TID "+fixref.getRootTid());
 											referrs=true;
 											skipObj=true;
 										}
-									}else{
-										EhiLogger.logError("unknown referenced object "+aclass.getScopedName(null)+" TID "+xtfid+" referenced from "+fixref.getRootTag()+" TID "+fixref.getRootTid());
-										referrs=true;
-										skipObj=true;
 									}
+									
 								}
-								
+								if(!skipObj){
+									doObject(basketSqlId,objPool.get(fixref.getRootTid()));
+								}
 							}
-							if(!skipObj){
-								doObject(basketSqlId,objPool.get(fixref.getRootTid()));
+							if(functionCode==Config.FC_UPDATE){
+								// delete no longer existing objects
+								deleteExisitingObjects();
 							}
-						}
-						if(functionCode==Config.FC_UPDATE){
-							// delete no longer existing objects
-							deleteExisitingObjects();
+							// TODO update import counters
+							endTid=oidPool.getLastSqlId();
+							try {
+								String filename=null;
+								if(xtffilename!=null){
+									filename=new java.io.File(xtffilename).getName();
+								}
+								long importId=writeImportBasketStat(importSqlId,basketSqlId,startTid,endTid,objCount);
+								saveObjStat(importId,basket.getBid(),filename,basket.getType());
+							} catch (SQLException ex) {
+								EhiLogger.logError("Basket "+basket.getType()+"(oid "+basket.getBid()+")",ex);
+							} catch (ConverterException ex) {
+								EhiLogger.logError("Basket "+basket.getType()+"(oid "+basket.getBid()+")",ex);
+							}
 						}
 						
-						// TODO update import counters
-						endTid=oidPool.getLastSqlId();
-						try {
-							String filename=null;
-							if(xtffilename!=null){
-								filename=new java.io.File(xtffilename).getName();
-							}
-							long importId=writeImportBasketStat(importSqlId,basketSqlId,startTid,endTid,objCount);
-							saveObjStat(importId,basket.getBid(),filename,basket.getType());
-						} catch (SQLException ex) {
-							EhiLogger.logError("Basket "+basket.getType()+"(oid "+basket.getBid()+")",ex);
-						} catch (ConverterException ex) {
-							EhiLogger.logError("Basket "+basket.getType()+"(oid "+basket.getBid()+")",ex);
-						}
+						skipBasket=false;
 					}else if(event instanceof ObjectEvent){
 						if(validator!=null)validator.validate(event);
-						objCount++;
-						IomObject iomObj=((ObjectEvent)event).getIomObject();
-						if(allReferencesKnown(iomObj)){
-							// translate object
-							doObject(basketSqlId, iomObj);
+						if(!skipBasket){
+							objCount++;
+							IomObject iomObj=((ObjectEvent)event).getIomObject();
+							if(allReferencesKnown(iomObj)){
+								// translate object
+								doObject(basketSqlId, iomObj);
+							}
 						}
 					}else if(event instanceof EndTransferEvent){
 						if(validator!=null)validator.validate(event);

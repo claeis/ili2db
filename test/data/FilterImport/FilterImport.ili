@@ -1,0 +1,20 @@
+INTERLIS 2.3;
+
+MODEL FilterImport
+  AT "mailto:ce@eisenhutinformatik.ch" VERSION "2016-12-21" =
+    
+  TOPIC TestA =
+  
+    CLASS ClassA1 =
+    END ClassA1;
+    
+  END TestA;
+  
+  TOPIC TestB =
+
+    CLASS ClassB1 =
+    END ClassB1;
+    
+  END TestB;
+  
+END FilterImport.

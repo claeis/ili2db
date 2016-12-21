@@ -16,6 +16,7 @@ ili2pg/ili2gpkg 3.6.0 (2016-12-xx)
 -----------------------------
 - new option --beautifyEnumDispName to replace underscore with space from dispName 
 - new column 'inactive' in enum tables
+- import: filter data to given --topics or --baskets
 
 ili2pg/ili2gpkg 3.5.1 (2016-12-21)
 -----------------------------
