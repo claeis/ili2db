@@ -10,6 +10,8 @@ public class Config extends Settings {
 	private static final String UUID_DEFAULT_VALUE=PREFIX+".uuidDefaultValue";
 	private static final String CREATE_ENUMCOL_AS_ITFCODE=PREFIX+".createEnumColAsItfCode";
 	public static final String CREATE_ENUMCOL_AS_ITFCODE_YES="yes";
+	private static final String BEAUTIFY_ENUM_DISPNAME=PREFIX+".beautifyEnumDispName";
+	public static final String BEAUTIFY_ENUM_DISPNAME_UNDERSCORE="underscore";
 	private static final String CREATE_ENUM_DEFS=PREFIX+".createEnumDefs";
 	public static final String CREATE_ENUM_DEFS_NO="no";
 	public static final String CREATE_ENUM_DEFS_SINGLE="singleTable";
@@ -248,6 +250,12 @@ public class Config extends Settings {
 	}
 	public void setCreateEnumDefs(String value) {
 		setValue(CREATE_ENUM_DEFS,value);
+	}
+	public String getBeautifyEnumDispName() {
+		return getValue(BEAUTIFY_ENUM_DISPNAME);
+	}
+	public void setBeautifyEnumDispName(String value) {
+		setValue(BEAUTIFY_ENUM_DISPNAME,value);
 	}
 	public String getCreateEnumColAsItfCode() {
 		return getValue(CREATE_ENUMCOL_AS_ITFCODE);

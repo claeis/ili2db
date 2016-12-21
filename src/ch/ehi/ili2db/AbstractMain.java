@@ -185,6 +185,9 @@ public abstract class AbstractMain {
 			}else if(arg.equals("--createEnumColAsItfCode")){
 				argi++;
 				config.setCreateEnumColAsItfCode(config.CREATE_ENUMCOL_AS_ITFCODE_YES);
+			}else if(arg.equals("--beautifyEnumDispName")){
+				argi++;
+				config.setBeautifyEnumDispName(config.BEAUTIFY_ENUM_DISPNAME_UNDERSCORE);
 			}else if(arg.equals("--noSmartMapping")){
 				argi++;
 				config.setCatalogueRefTrafo(null);
@@ -312,6 +315,7 @@ public abstract class AbstractMain {
 					System.err.println("--createEnumTxtCol     create an additional column with the text of the enumeration value.");
 					System.err.println("--createEnumTabs       generate tables with enum definitions.");
 					System.err.println("--createSingleEnumTab  generate all enum definitions in a single table.");
+					System.err.println("--beautifyEnumDispName replace underscore with space in dispName of enum table entries");
 					System.err.println("--createStdCols        generate "+DbNames.T_USER_COL+", "+DbNames.T_CREATE_DATE_COL+", "+DbNames.T_LAST_CHANGE_COL+" columns.");
 					System.err.println("--t_id_Name name       change name of t_id column ("+DbNames.T_ID_COL+")");
 					System.err.println("--idSeqMin minValue    sets the minimum value of the id sequence generator.");

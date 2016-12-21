@@ -1174,7 +1174,7 @@ public class TransferFromIli {
 				}
 				ps.setString(2, ele);
 				ps.setInt(3, itfCode);
-				ps.setString(4, ele); // dispName
+				ps.setString(4, recConv.beautifyEnumDispName(ele)); // dispName
 				// single table for all enums?
 				if(thisClass!=null){
 					ps.setString(5, thisClass);
