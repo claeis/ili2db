@@ -140,5 +140,45 @@ public class Datatypes10Test {
 		Ili2db.readSettingsFromDb(config);
 		Ili2db.run(config,null);
 	}
+
+	@Test
+	public void importItfWithSkipPolygonBuilding() throws Exception
+	{
+        stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");
+        
+		File data=new File("test/data/Datatypes10/Datatypes10a.itf");
+		Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+		config.setFunction(Config.FC_IMPORT);
+		config.setCreateFk(config.CREATE_FK_YES);
+		config.setTidHandling(Config.TID_HANDLING_PROPERTY);
+		config.setBasketHandling(config.BASKET_HANDLING_READWRITE);
+		config.setDoItfLineTables(true);
+		config.setCatalogueRefTrafo(null);
+		config.setMultiSurfaceTrafo(null);
+		config.setMultilingualTrafo(null);
+		config.setInheritanceTrafo(null);
+		Ili2db.readSettingsFromDb(config);
+		Ili2db.run(config,null);
+
+		String stmtTxt="SELECT atext FROM "+DBSCHEMA+".table AS a INNER JOIN "+DBSCHEMA+".subtable AS b ON (a.t_id=b.main)  WHERE b.t_ili_tid='30'";
+		Assert.assertTrue(stmt.execute(stmtTxt));
+		{
+			ResultSet rs=stmt.getResultSet();
+			Assert.assertTrue(rs.next());
+			Assert.assertEquals("obj11",rs.getObject(1));
+		}
+		exportItfWithSkipPolygonBuilding();
+	}
+	
+	//@Test
+	public void exportItfWithSkipPolygonBuilding() throws Ili2dbException
+	{
+		File data=new File("test/data/Datatypes10/Datatypes10a-ltout.itf");
+		Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+		config.setModels("Datatypes10");
+		config.setFunction(Config.FC_EXPORT);
+		Ili2db.readSettingsFromDb(config);
+		Ili2db.run(config,null);
+	}
 	
 }

@@ -98,7 +98,7 @@ public class NameMapping {
 			ret.append("_");
 			ret.append(shortcutName(attrSqlName,maxSqlNameLength-ret.length()));
 		}
-		String sqlTableName=ret.toString();
+		String sqlTableName=normalizeSqlName(ret.toString());
 		if((nameing!=FULL_QUALIFIED_NAMES) && existsSqlTableName(sqlTableName)){
 			// try full qualified name
 			// reset ret to empty string
@@ -119,7 +119,7 @@ public class NameMapping {
 				ret.append("_");
 				ret.append(shortcutName(attrSqlName,maxSqlNameLength-ret.length()));
 			}
-			sqlTableName=ret.toString();
+			sqlTableName=normalizeSqlName(ret.toString());
 		}
 		if(existsSqlTableName(sqlTableName)){
 			sqlTableName=makeSqlTableNameUnique(sqlTableName);
@@ -132,7 +132,6 @@ public class NameMapping {
 	}
 	private void addTableNameMapping(String iliname,String sqlname)
 	{
-		sqlname = normalizeSqlName(sqlname);
 		classNameIli2sql.put(iliname,sqlname);
 		classNameSql2ili.put(sqlname,iliname);
 	}
@@ -425,6 +424,7 @@ public class NameMapping {
 				String sqlname=rs.getString(DbNames.CLASSNAME_TAB_SQLNAME_COL);
 				//EhiLogger.debug("map: "+iliname+"->"+sqlname);
 				if(classNameIli2sql.get(iliname)==null){
+					sqlname=normalizeSqlName(sqlname);
 					addTableNameMapping(iliname,sqlname);
 				}
 			}
