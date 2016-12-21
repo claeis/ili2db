@@ -12,6 +12,7 @@ public class DbNames {
 	public static final String ENUM_TAB_THIS_COL="thisClass";
 	public static final String ENUM_TAB_BASE_COL="baseClass";
 	public static final String ENUM_TAB_SEQ_COL="seq";
+	public static final String ENUM_TAB_INACTIVE_COL="inactive";
 	public static final String ENUM_TAB_ILICODE_COL="iliCode";
 	public static final String ENUM_TAB_ITFCODE_COL="itfCode";
 	public static final String ENUM_TAB_DISPNAME_COL="dispName";

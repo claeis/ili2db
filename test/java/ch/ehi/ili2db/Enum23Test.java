@@ -12,6 +12,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import ch.ehi.basics.logging.EhiLogger;
+import ch.ehi.ili2db.base.DbNames;
 import ch.ehi.ili2db.base.DbUrlConverter;
 import ch.ehi.ili2db.base.Ili2db;
 import ch.ehi.ili2db.base.Ili2dbException;
@@ -135,6 +136,33 @@ public class Enum23Test {
 			Assert.assertEquals("Test3.ele 2",rs.getString(1));
 		}
 		
+	}
+	@Test
+	public void importSingleTable() throws Exception
+	{
+        stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");
+        
+		File data=new File("test/data/Enum23/Enum23.ili");
+		Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+		config.setFunction(Config.FC_SCHEMAIMPORT);
+		config.setCreateFk(config.CREATE_FK_YES);
+		config.setTidHandling(Config.TID_HANDLING_PROPERTY);
+		config.setBasketHandling(config.BASKET_HANDLING_READWRITE);
+		config.setCreateEnumDefs(Config.CREATE_ENUM_DEFS_SINGLE);
+		config.setCatalogueRefTrafo(null);
+		config.setMultiSurfaceTrafo(null);
+		config.setMultilingualTrafo(null);
+		config.setInheritanceTrafo(null);
+		Ili2db.readSettingsFromDb(config);
+		Ili2db.run(config,null);
+
+		{
+			String stmtTxt="SELECT "+DbNames.ENUM_TAB_DISPNAME_COL+" FROM "+DBSCHEMA+"."+DbNames.ENUM_TAB+" WHERE "+DbNames.ENUM_TAB_ILICODE_COL+" ='Test2_ele' AND "+DbNames.ENUM_TAB_THIS_COL+"='Enum23.Enum1'";
+			Assert.assertTrue(stmt.execute(stmtTxt));
+			ResultSet rs=stmt.getResultSet();
+			Assert.assertTrue(rs.next());
+			Assert.assertEquals("Test2_ele",rs.getString(1));
+		}
 	}
 	
 }

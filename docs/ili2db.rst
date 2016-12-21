@@ -870,10 +870,13 @@ Für die Abbildung von Aufzählungen gibt es zwei Varianten und verschiedene Opt
 |              |                                                               |   iliCode varchar(1024) NOT NULL,    |                                                                                   |
 |              |                                                               |   seq integer NULL,                  | iliCode ist der qualifizierte Elementnamen (=XTF-Code) des Aufzählwertes.         |
 |              |                                                               |   dispName varchar(250) NOT NULL,    |                                                                                   |
-|              |                                                               |  );                                  | seq Definiert die Reihenfolge der Aufzählelemente.                                |
-|              |                                                               |                                      |                                                                                   |
+|              |                                                               |   inactive boolean NOT NULL          | seq Definiert die Reihenfolge der Aufzählelemente.                                |
+|              |                                                               |  );                                  |                                                                                   |
 |              |                                                               |                                      | dispName definiert den Anzeigetext für das Aufzählelement. Beim Import wird die   |
 |              |                                                               |                                      | Spalte mit dem XTF-Code befüllt.                                                  |
+|              |                                                               |                                      |                                                                                   |
+|              |                                                               |                                      | inactive TRUE um einen Aufzählwert für die Erfassung auszublenden, ohne dass      |
+|              |                                                               |                                      | er gelöscht werden muss. Wird beim Import mit FALSE befüllt.                      |
 +--------------+---------------------------------------------------------------+--------------------------------------+-----------------------------------------------------------------------------------+
 | 5            | ::                                                            | ::                                   | Abbildung mit der Option ``--createSingleEnumTab``. Es wird                       |
 |              |                                                               |                                      | eine einzige Tabelle für die Aufzählwerte aller Aufzählungen erstellt.            |
@@ -884,12 +887,15 @@ Für die Abbildung von Aufzählungen gibt es zwei Varianten und verschiedene Opt
 |              |                                                               |   iliCode varchar(1024) NOT NULL,    |                                                                                   |
 |              |                                                               |   seq integer NULL,                  | itfCode ist der ITF-Code des Aufzählwertes.                                       |
 |              |                                                               |   dispName varchar(250) NOT NULL,    |                                                                                   |
-|              |                                                               |  );                                  | iliCode ist der qualifizierte Elementnamen (=XTF-Code) des Aufzählwertes.         |
-|              |                                                               |                                      |                                                                                   |
+|              |                                                               |   inactive boolean NOT NULL          | iliCode ist der qualifizierte Elementnamen (=XTF-Code) des Aufzählwertes.         |
+|              |                                                               |  );                                  |                                                                                   |
 |              |                                                               |                                      | seq Definiert die Reihenfolge der Aufzählelemente.                                |
 |              |                                                               |                                      |                                                                                   |
 |              |                                                               |                                      | dispName definiert den Anzeigetext für das Aufzählelement. Beim Import wird die   |
 |              |                                                               |                                      | Spalte mit dem XTF-Code befüllt.                                                  |
+|              |                                                               |                                      |                                                                                   |
+|              |                                                               |                                      | inactive TRUE um einen Aufzählwert für die Erfassung auszublenden, ohne dass      |
+|              |                                                               |                                      | er gelöscht werden muss. Wird beim Import mit FALSE befüllt.                      |
 +--------------+---------------------------------------------------------------+--------------------------------------+-----------------------------------------------------------------------------------+
 
 
@@ -914,6 +920,8 @@ Metadaten
 | t\_ili2db\_import\_object   | Nicht mehr verwenden, wird entfernt. Wird beim Export nicht benötigt.                                                                                                                                                                |
 +-----------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | t\_ili2db\_inheritance      | Abbildung der Interlis Klassen Vererbungshierarchie (in der Tabellen sind die qualifizierten Interlis Klassennamen). Wird beim Export nicht benötigt.                                                                                |
++-----------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| t\_ili2db\_enum             | Aufzählwerte, falls die Option --createSingleEnumTab verwendet wird. Wird beim Export nicht benötigt.                                                                                                                                |
 +-----------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | t\_ili2db\_model            | Modelle, die beim Import benötigt wurden (so dass der Export mit denselben Modellen erfolgen kann).                                                                                                                                  |
 +-----------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
