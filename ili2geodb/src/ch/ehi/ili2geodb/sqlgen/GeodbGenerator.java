@@ -211,7 +211,7 @@ public class GeodbGenerator implements Generator {
 	}
 	public void visit2TableEnd(DbTable arg0) throws IOException {
 	}
-	public void visitColumn(DbColumn column) throws IOException {
+	public void visitColumn(DbTable dbTab,DbColumn column) throws IOException {
 		// skip this table?
 		if(fieldv==null){
 			// ignore cols

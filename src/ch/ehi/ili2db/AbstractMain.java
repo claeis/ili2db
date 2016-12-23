@@ -218,6 +218,9 @@ public abstract class AbstractMain {
 			}else if(arg.equals("--createUnique")){
 				argi++;
 				config.setCreateUniqueConstraints(true);
+			}else if(arg.equals("--createNumChecks")){
+				argi++;
+				config.setCreateNumChecks(true);
 			}else if(arg.equals("--createStdCols")){
 				argi++;
 				config.setCreateStdCols(config.CREATE_STD_COLS_ALL);

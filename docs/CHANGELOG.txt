@@ -17,6 +17,9 @@ ili2pg/ili2gpkg 3.6.0 (2016-12-xx)
 - new option --beautifyEnumDispName to replace underscore with space from dispName 
 - new column 'inactive' in enum tables
 - import: filter data to given --topics or --baskets
+- new option --createNumChecks
+- ehisqlgen-1.9.0
+- fixed GeoPackage FK constraints
 
 ili2pg/ili2gpkg 3.5.1 (2016-12-21)
 -----------------------------

@@ -3,7 +3,7 @@ TRANSFER Ili1FmtTest;
 MODEL Datatypes10
 	TOPIC Topic=
 		DOMAIN Lkoord = COORD2 1.00 100.0 9.99 999.9;
-		TABLE Table =
+		TABLE TableA =
 			!! Koord2
 			koord2 : OPTIONAL COORD2 1.00 100.0 9.99 999.9;
 			!! Koord3
@@ -18,6 +18,7 @@ MODEL Datatypes10
 			degrees : OPTIONAL DEGREES 0.0 359.9;
 			!! Bereich
 			bereich : OPTIONAL [0.0 .. 9.9 ];
+			bereichInt : OPTIONAL [0 .. 9 ];
 			!! Text
 			text : OPTIONAL TEXT*10;
 			!! Datum
@@ -37,14 +38,14 @@ MODEL Datatypes10
 						attr : TEXT*20;
 					END;
 		NO IDENT
-		END Table;
+		END TableA;
 		TABLE OtherTable =
 			otherAttr : OPTIONAL TEXT*30;
 		NO IDENT
 		END OtherTable;
 		TABLE SubTable =
 			!! BezAttribut
-			main : OPTIONAL -> Table;
+			main : OPTIONAL -> TableA;
 		NO IDENT
 		END SubTable;
 	END Topic.

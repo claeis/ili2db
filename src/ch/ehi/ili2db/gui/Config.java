@@ -41,6 +41,8 @@ public class Config extends Settings {
 	public static final String POLYGON_BUILDING_ERRORS_IGNORE="reportAndSkip";
 	public static final String UNIQUE_CONSTRAINTS=PREFIX+".uniqueConstraints";
 	public static final String UNIQUE_CONSTRAINTS_CREATE="create";
+	public static final String NUMERIC_CHECK_CONSTRAINTS=PREFIX+".numericCheckConstraints";
+	public static final String NUMERIC_CHECK_CONSTRAINTS_CREATE="create";
 	public static final String GEOMATTR_PER_TABLE=PREFIX+".geomAttrPerTable";
 	public static final String GEOMATTR_PER_TABLE_ONE="oneGeomAttrPerTable";
 	private static final String NAME_OPTIMIZATION=PREFIX+".nameOptimization";
@@ -370,6 +372,12 @@ public class Config extends Settings {
 	}
 	public boolean isCreateUniqueConstraints() {
 		return UNIQUE_CONSTRAINTS_CREATE.equals(getValue(UNIQUE_CONSTRAINTS));
+	}
+	public void setCreateNumChecks(boolean ignore) {
+		setValue(NUMERIC_CHECK_CONSTRAINTS,ignore?NUMERIC_CHECK_CONSTRAINTS_CREATE:null);
+	}
+	public boolean isCreateCreateNumChecks() {
+		return NUMERIC_CHECK_CONSTRAINTS_CREATE.equals(getValue(NUMERIC_CHECK_CONSTRAINTS));
 	}
 	public void setOneGeomPerTable(boolean onlyOne) {
 		setValue(GEOMATTR_PER_TABLE,onlyOne?GEOMATTR_PER_TABLE_ONE:null);
