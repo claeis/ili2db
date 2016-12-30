@@ -43,7 +43,8 @@ import ch.ehi.ili2db.fromili.*;
 import ch.ehi.ili2db.fromxtf.*;
 import ch.ehi.ili2db.mapping.*;
 import ch.ehi.ili2db.toxtf.*;
-import ch.interlis.iom_j.iligml.IligmlWriter;
+import ch.interlis.iom_j.iligml.Iligml20Writer;
+import ch.interlis.iom_j.iligml.Iligml10Writer;
 //import ch.interlis.iom.swig.iom_javaConstants;
 import ch.interlis.iom_j.itf.ItfReader;
 import ch.interlis.iom_j.itf.ItfReader2;
@@ -1805,17 +1806,21 @@ public class Ili2db {
 		java.io.File outfile=new java.io.File(xtffile);
 		IoxWriter ioxWriter=null;
 		try{
-			String ext=ch.ehi.basics.view.GenericFileFilter.getFileExtension(xtffile).toLowerCase();
-			if(config.isItfTransferfile()){
-				if(!config.getDoItfLineTables()){
-					ioxWriter=new ItfWriter2(outfile,td);
-				}else{
-					ioxWriter=new ItfWriter(outfile,td);
-				}
-			}else if(ext!=null && ext.equals("gml")){
-				ioxWriter=new IligmlWriter(outfile,td);
+			if(Config.ILIGML20.equals(config.getTransferFileFormat())){
+				ioxWriter=new Iligml20Writer(outfile,td);
 			}else{
-				ioxWriter=new XtfWriter(outfile,td);
+				String ext=ch.ehi.basics.view.GenericFileFilter.getFileExtension(xtffile).toLowerCase();
+				if(config.isItfTransferfile()){
+					if(!config.getDoItfLineTables()){
+						ioxWriter=new ItfWriter2(outfile,td);
+					}else{
+						ioxWriter=new ItfWriter(outfile,td);
+					}
+				}else if(ext!=null && ext.equals("gml")){
+					ioxWriter=new Iligml10Writer(outfile,td);
+				}else{
+					ioxWriter=new XtfWriter(outfile,td);
+				}
 			}
 			TransferToXtf trsfr=new TransferToXtf(ili2sqlName,td,conn,geomConv,config,trafoConfig,class2wrapper);
 			trsfr.doit(outfile.getName(),ioxWriter,sender,exportParamModelnames,basketSqlIds,stat);

@@ -96,6 +96,8 @@ public class Config extends Settings {
 	private boolean validation=false;
 	private Long minIdSeqValue=null;
 	private Long maxIdSeqValue=null;
+	private String transferFileFormat=null;
+	final static public String ILIGML20="ILIGML20"; 
 	
 	static public final int FC_IMPORT=0;
 	static public final int FC_SCHEMAIMPORT=1;
@@ -492,5 +494,11 @@ public class Config extends Settings {
 	}
 	public void setMaxIdSeqValue(Long maxIdSeqValue) {
 		this.maxIdSeqValue = maxIdSeqValue;
+	}
+	public String getTransferFileFormat() {
+		return transferFileFormat;
+	}
+	public void setTransferFileFormat(String transferFileFormat) {
+		this.transferFileFormat = transferFileFormat;
 	}
 }

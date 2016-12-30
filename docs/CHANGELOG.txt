@@ -20,6 +20,7 @@ ili2pg/ili2gpkg 3.6.0 (2016-12-xx)
 - new option --createNumChecks
 - ehisqlgen-1.9.0
 - fixed GeoPackage FK constraints
+- new option --ILIGML20 to write eCH-0118-2.0
 
 ili2pg/ili2gpkg 3.5.1 (2016-12-21)
 -----------------------------
