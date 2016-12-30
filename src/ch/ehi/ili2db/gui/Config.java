@@ -10,6 +10,8 @@ public class Config extends Settings {
 	private static final String UUID_DEFAULT_VALUE=PREFIX+".uuidDefaultValue";
 	private static final String CREATE_ENUMCOL_AS_ITFCODE=PREFIX+".createEnumColAsItfCode";
 	public static final String CREATE_ENUMCOL_AS_ITFCODE_YES="yes";
+	private static final String BEAUTIFY_ENUM_DISPNAME=PREFIX+".beautifyEnumDispName";
+	public static final String BEAUTIFY_ENUM_DISPNAME_UNDERSCORE="underscore";
 	private static final String CREATE_ENUM_DEFS=PREFIX+".createEnumDefs";
 	public static final String CREATE_ENUM_DEFS_NO="no";
 	public static final String CREATE_ENUM_DEFS_SINGLE="singleTable";
@@ -39,6 +41,8 @@ public class Config extends Settings {
 	public static final String POLYGON_BUILDING_ERRORS_IGNORE="reportAndSkip";
 	public static final String UNIQUE_CONSTRAINTS=PREFIX+".uniqueConstraints";
 	public static final String UNIQUE_CONSTRAINTS_CREATE="create";
+	public static final String NUMERIC_CHECK_CONSTRAINTS=PREFIX+".numericCheckConstraints";
+	public static final String NUMERIC_CHECK_CONSTRAINTS_CREATE="create";
 	public static final String GEOMATTR_PER_TABLE=PREFIX+".geomAttrPerTable";
 	public static final String GEOMATTR_PER_TABLE_ONE="oneGeomAttrPerTable";
 	private static final String NAME_OPTIMIZATION=PREFIX+".nameOptimization";
@@ -92,6 +96,8 @@ public class Config extends Settings {
 	private boolean validation=false;
 	private Long minIdSeqValue=null;
 	private Long maxIdSeqValue=null;
+	private String transferFileFormat=null;
+	final static public String ILIGML20="ILIGML20"; 
 	
 	static public final int FC_IMPORT=0;
 	static public final int FC_SCHEMAIMPORT=1;
@@ -249,6 +255,12 @@ public class Config extends Settings {
 	public void setCreateEnumDefs(String value) {
 		setValue(CREATE_ENUM_DEFS,value);
 	}
+	public String getBeautifyEnumDispName() {
+		return getValue(BEAUTIFY_ENUM_DISPNAME);
+	}
+	public void setBeautifyEnumDispName(String value) {
+		setValue(BEAUTIFY_ENUM_DISPNAME,value);
+	}
 	public String getCreateEnumColAsItfCode() {
 		return getValue(CREATE_ENUMCOL_AS_ITFCODE);
 	}
@@ -363,6 +375,12 @@ public class Config extends Settings {
 	public boolean isCreateUniqueConstraints() {
 		return UNIQUE_CONSTRAINTS_CREATE.equals(getValue(UNIQUE_CONSTRAINTS));
 	}
+	public void setCreateNumChecks(boolean ignore) {
+		setValue(NUMERIC_CHECK_CONSTRAINTS,ignore?NUMERIC_CHECK_CONSTRAINTS_CREATE:null);
+	}
+	public boolean isCreateCreateNumChecks() {
+		return NUMERIC_CHECK_CONSTRAINTS_CREATE.equals(getValue(NUMERIC_CHECK_CONSTRAINTS));
+	}
 	public void setOneGeomPerTable(boolean onlyOne) {
 		setValue(GEOMATTR_PER_TABLE,onlyOne?GEOMATTR_PER_TABLE_ONE:null);
 	}
@@ -476,5 +494,11 @@ public class Config extends Settings {
 	}
 	public void setMaxIdSeqValue(Long maxIdSeqValue) {
 		this.maxIdSeqValue = maxIdSeqValue;
+	}
+	public String getTransferFileFormat() {
+		return transferFileFormat;
+	}
+	public void setTransferFileFormat(String transferFileFormat) {
+		this.transferFileFormat = transferFileFormat;
 	}
 }

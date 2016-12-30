@@ -958,7 +958,7 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 					valuei++;
 					if(createEnumTxtCol){
 						if(value!=null){
-							ps.setString(valuei, value);
+							ps.setString(valuei, beautifyEnumDispName(value));
 						}else{
 							ps.setNull(valuei,Types.VARCHAR);
 						}

@@ -19,8 +19,8 @@ import ch.ehi.ili2db.gui.Config;
 import ch.ehi.ili2db.mapping.NameMapping;
 
 //-Ddburl=jdbc:postgresql:dbname -Ddbusr=usrname -Ddbpwd=1234
-public class Datatypes10Test {
-	private static final String DBSCHEMA = "Datatypes10";
+public class FilterImportTest {
+	private static final String DBSCHEMA = "FilterImport";
 	String dburl=System.getProperty("dburl"); 
 	String dbuser=System.getProperty("dbusr");
 	String dbpwd=System.getProperty("dbpwd"); 
@@ -66,49 +66,48 @@ public class Datatypes10Test {
 	}
 	
 	@Test
-	public void importIli() throws Exception
+	public void importByBID() throws Exception
 	{
         stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");
         
-		File data=new File("test/data/Datatypes10/Datatypes10.ili");
+		File data=new File("test/data/FilterImport/FilterImport1a.xtf");
 		Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
-		config.setFunction(Config.FC_SCHEMAIMPORT);
+		config.setFunction(Config.FC_IMPORT);
 		config.setCreateFk(config.CREATE_FK_YES);
-		config.setCreateNumChecks(true);
 		config.setTidHandling(Config.TID_HANDLING_PROPERTY);
 		config.setBasketHandling(config.BASKET_HANDLING_READWRITE);
 		config.setCatalogueRefTrafo(null);
 		config.setMultiSurfaceTrafo(null);
 		config.setMultilingualTrafo(null);
 		config.setInheritanceTrafo(null);
+		config.setBaskets("TestA1");
 		Ili2db.readSettingsFromDb(config);
 		Ili2db.run(config,null);
 
+		// check that only one of the two classa1 object was imported
 		{
-			String stmtTxt="SELECT numeric_precision,numeric_scale FROM information_schema.columns WHERE table_schema ='datatypes10' AND table_name = 'tablea' AND column_name = 'dim1'";
+			String stmtTxt="SELECT count(*) FROM "+DBSCHEMA+".classa1";
 			Assert.assertTrue(stmt.execute(stmtTxt));
 			ResultSet rs=stmt.getResultSet();
 			Assert.assertTrue(rs.next());
-			Assert.assertEquals(2,rs.getInt(1));
-			Assert.assertEquals(1,rs.getInt(2));
+			Assert.assertEquals(1,rs.getInt(1));
 		}
+		// check that no classb1 object was imported
 		{
-			String stmtTxt="SELECT numeric_precision,numeric_scale FROM information_schema.columns WHERE table_schema ='datatypes10' AND table_name = 'tablea' AND column_name = 'dim2'";
+			String stmtTxt="SELECT count(*) FROM "+DBSCHEMA+".classb1";
 			Assert.assertTrue(stmt.execute(stmtTxt));
 			ResultSet rs=stmt.getResultSet();
 			Assert.assertTrue(rs.next());
-			Assert.assertEquals(2,rs.getInt(1));
-			Assert.assertEquals(1,rs.getInt(2));
+			Assert.assertEquals(0,rs.getInt(1));
 		}
 		
 	}
-
 	@Test
-	public void importItf() throws Exception
+	public void importByTopic() throws Exception
 	{
         stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");
         
-		File data=new File("test/data/Datatypes10/Datatypes10a.itf");
+		File data=new File("test/data/FilterImport/FilterImport1a.xtf");
 		Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 		config.setFunction(Config.FC_IMPORT);
 		config.setCreateFk(config.CREATE_FK_YES);
@@ -118,68 +117,27 @@ public class Datatypes10Test {
 		config.setMultiSurfaceTrafo(null);
 		config.setMultilingualTrafo(null);
 		config.setInheritanceTrafo(null);
+		config.setTopics("FilterImport.TestA");
 		Ili2db.readSettingsFromDb(config);
 		Ili2db.run(config,null);
 
-		String stmtTxt="SELECT atext FROM "+DBSCHEMA+".tablea AS a INNER JOIN "+DBSCHEMA+".subtable AS b ON (a.t_id=b.main)  WHERE b.t_ili_tid='30'";
-		Assert.assertTrue(stmt.execute(stmtTxt));
+		// check that the classa1 objects from both baskets were imported
 		{
+			String stmtTxt="SELECT count(*) FROM "+DBSCHEMA+".classa1";
+			Assert.assertTrue(stmt.execute(stmtTxt));
 			ResultSet rs=stmt.getResultSet();
 			Assert.assertTrue(rs.next());
-			Assert.assertEquals("obj11",rs.getObject(1));
+			Assert.assertEquals(2,rs.getInt(1));
 		}
-		exportItf();
-	}
-	
-	//@Test
-	public void exportItf() throws Ili2dbException
-	{
-		File data=new File("test/data/Datatypes10/Datatypes10a-out.itf");
-		Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
-		config.setModels("Datatypes10");
-		config.setFunction(Config.FC_EXPORT);
-		Ili2db.readSettingsFromDb(config);
-		Ili2db.run(config,null);
-	}
-
-	@Test
-	public void importItfWithSkipPolygonBuilding() throws Exception
-	{
-        stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");
-        
-		File data=new File("test/data/Datatypes10/Datatypes10a.itf");
-		Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
-		config.setFunction(Config.FC_IMPORT);
-		config.setCreateFk(config.CREATE_FK_YES);
-		config.setTidHandling(Config.TID_HANDLING_PROPERTY);
-		config.setBasketHandling(config.BASKET_HANDLING_READWRITE);
-		config.setDoItfLineTables(true);
-		config.setCatalogueRefTrafo(null);
-		config.setMultiSurfaceTrafo(null);
-		config.setMultilingualTrafo(null);
-		config.setInheritanceTrafo(null);
-		Ili2db.readSettingsFromDb(config);
-		Ili2db.run(config,null);
-
-		String stmtTxt="SELECT atext FROM "+DBSCHEMA+".tablea AS a INNER JOIN "+DBSCHEMA+".subtable AS b ON (a.t_id=b.main)  WHERE b.t_ili_tid='30'";
-		Assert.assertTrue(stmt.execute(stmtTxt));
+		// check that no classb1 object was imported
 		{
+			String stmtTxt="SELECT count(*) FROM "+DBSCHEMA+".classb1";
+			Assert.assertTrue(stmt.execute(stmtTxt));
 			ResultSet rs=stmt.getResultSet();
 			Assert.assertTrue(rs.next());
-			Assert.assertEquals("obj11",rs.getObject(1));
+			Assert.assertEquals(0,rs.getInt(1));
 		}
-		exportItfWithSkipPolygonBuilding();
-	}
-	
-	//@Test
-	public void exportItfWithSkipPolygonBuilding() throws Ili2dbException
-	{
-		File data=new File("test/data/Datatypes10/Datatypes10a-ltout.itf");
-		Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
-		config.setModels("Datatypes10");
-		config.setFunction(Config.FC_EXPORT);
-		Ili2db.readSettingsFromDb(config);
-		Ili2db.run(config,null);
+		
 	}
 	
 }

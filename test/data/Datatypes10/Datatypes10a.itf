@@ -5,10 +5,10 @@ MODL Datatypes10
 TOPI Topic
 TABL Table_area
 ETAB
-TABL Table
-OBJE 10 @ @ @ @ @ @ @ @ @ @ @ obj10 @ @ @ @ @ @
+TABL TableA
+OBJE 10 @ @ @ @ @ @ @ @ @ @ @ @ obj10 @ @ @ @ @ @
 ELIN
-OBJE 11 @ @ @ @ @ @ @ @ @ @ @ obj11 @ @ @ @ @ @
+OBJE 11 @ @ @ @ @ @ @ @ @ @ @ @ obj11 @ @ @ @ @ @
 ELIN
 ETAB
 TABL Table_surface

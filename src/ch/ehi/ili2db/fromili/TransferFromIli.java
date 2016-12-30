@@ -864,6 +864,10 @@ public class TransferFromIli {
 			seq.setNotNull(false);
 			seq.setSize(4);
 			tab.addColumn(seq);
+			DbColBoolean inactiveCol=new DbColBoolean();
+			inactiveCol.setName(DbNames.ENUM_TAB_INACTIVE_COL);
+			inactiveCol.setNotNull(true);
+			tab.addColumn(inactiveCol);
 			DbColVarchar iliCode=new DbColVarchar();
 			iliCode.setName(DbNames.ENUM_TAB_ILICODE_COL);
 			iliCode.setNotNull(true);
@@ -917,6 +921,10 @@ public class TransferFromIli {
 					seq.setNotNull(false);
 					seq.setSize(4);
 					tab.addColumn(seq);
+					DbColBoolean inactiveCol=new DbColBoolean();
+					inactiveCol.setName(DbNames.ENUM_TAB_INACTIVE_COL);
+					inactiveCol.setNotNull(true);
+					tab.addColumn(inactiveCol);
 					DbColVarchar dispName=new DbColVarchar();
 					dispName.setName(DbNames.ENUM_TAB_DISPNAME_COL);
 					dispName.setNotNull(true);
@@ -1050,7 +1058,7 @@ public class TransferFromIli {
 		try{
 
 			// insert entries
-			String insStmt="INSERT INTO "+sqlName+" ("+DbNames.ENUM_TAB_SEQ_COL+","+DbNames.ENUM_TAB_ILICODE_COL+","+DbNames.ENUM_TAB_ITFCODE_COL+","+DbNames.ENUM_TAB_DISPNAME_COL+","+DbNames.ENUM_TAB_THIS_COL+","+DbNames.ENUM_TAB_BASE_COL+") VALUES (?,?,?,?,?,?)";
+			String insStmt="INSERT INTO "+sqlName+" ("+DbNames.ENUM_TAB_SEQ_COL+","+DbNames.ENUM_TAB_ILICODE_COL+","+DbNames.ENUM_TAB_ITFCODE_COL+","+DbNames.ENUM_TAB_DISPNAME_COL+","+DbNames.ENUM_TAB_INACTIVE_COL+","+DbNames.ENUM_TAB_THIS_COL+","+DbNames.ENUM_TAB_BASE_COL+") VALUES (?,?,?,?,?,?,?)";
 			EhiLogger.traceBackendCmd(insStmt);
 			java.sql.PreparedStatement insPrepStmt = conn.prepareStatement(insStmt);
 			String thisClass=null;
@@ -1110,7 +1118,7 @@ public class TransferFromIli {
 				try{
 
 					// insert entries
-					String stmt="INSERT INTO "+thisSqlName+" ("+DbNames.ENUM_TAB_SEQ_COL+","+DbNames.ENUM_TAB_ILICODE_COL+","+DbNames.ENUM_TAB_ITFCODE_COL+","+DbNames.ENUM_TAB_DISPNAME_COL+") VALUES (?,?,?,?)";
+					String stmt="INSERT INTO "+thisSqlName+" ("+DbNames.ENUM_TAB_SEQ_COL+","+DbNames.ENUM_TAB_ILICODE_COL+","+DbNames.ENUM_TAB_ITFCODE_COL+","+DbNames.ENUM_TAB_DISPNAME_COL+","+DbNames.ENUM_TAB_INACTIVE_COL+") VALUES (?,?,?,?,?)";
 					EhiLogger.traceBackendCmd(stmt);
 					java.sql.PreparedStatement ps = conn.prepareStatement(stmt);
 					try{
@@ -1134,7 +1142,7 @@ public class TransferFromIli {
 				try{
 
 					// insert entries
-					String stmt="INSERT INTO "+thisSqlName+" ("+DbNames.ENUM_TAB_SEQ_COL+","+DbNames.ENUM_TAB_ILICODE_COL+","+DbNames.ENUM_TAB_ITFCODE_COL+","+DbNames.ENUM_TAB_DISPNAME_COL+") VALUES (?,?,?,?)";
+					String stmt="INSERT INTO "+thisSqlName+" ("+DbNames.ENUM_TAB_SEQ_COL+","+DbNames.ENUM_TAB_ILICODE_COL+","+DbNames.ENUM_TAB_ITFCODE_COL+","+DbNames.ENUM_TAB_DISPNAME_COL+","+DbNames.ENUM_TAB_INACTIVE_COL+") VALUES (?,?,?,?,?)";
 					EhiLogger.traceBackendCmd(stmt);
 					java.sql.PreparedStatement ps = conn.prepareStatement(stmt);
 					try{
@@ -1174,14 +1182,15 @@ public class TransferFromIli {
 				}
 				ps.setString(2, ele);
 				ps.setInt(3, itfCode);
-				ps.setString(4, ele); // dispName
+				ps.setString(4, recConv.beautifyEnumDispName(ele)); // dispName
+				ps.setBoolean(5, false);  // inactive
 				// single table for all enums?
 				if(thisClass!=null){
-					ps.setString(5, thisClass);
+					ps.setString(6, thisClass);
 					if(baseClass!=null){
-						ps.setString(6, baseClass);
+						ps.setString(7, baseClass);
 					}else{
-						ps.setNull(6,java.sql.Types.VARCHAR);
+						ps.setNull(7,java.sql.Types.VARCHAR);
 					}
 				}
 				ps.executeUpdate();

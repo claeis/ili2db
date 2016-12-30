@@ -81,6 +81,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 	private boolean coalesceMultiSurface=true;
 	private boolean expandMultilingual=true;
 	private boolean createUnique=true;
+	private boolean createNumCheck=false;
 	
 
 	public FromIliRecordConverter(TransferDescription td1, NameMapping ili2sqlName,
@@ -94,6 +95,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 		coalesceMultiSurface=Config.MULTISURFACE_TRAFO_COALESCE.equals(config.getMultiSurfaceTrafo());
 		expandMultilingual=Config.MULTILINGUAL_TRAFO_EXPAND.equals(config.getMultilingualTrafo());
 		createUnique=config.isCreateUniqueConstraints();
+		createNumCheck=config.isCreateCreateNumChecks();
 	}
 
 	public void generateTable(ViewableWrapper def,int pass)
@@ -585,13 +587,22 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 					//EhiLogger.debug("attr "+ attr.getName()+", maxStr <"+maxStr+">, size "+Integer.toString(size)+", precision "+Integer.toString(precision));
 					ret.setSize(size);
 					ret.setPrecision(precision);
+					if(createNumCheck){
+						ret.setMinValue(min.doubleValue());
+						ret.setMaxValue(max.doubleValue());
+					}
 					dbCol=ret;
 				}else{
 					DbColNumber ret=new DbColNumber();
 					int size=Math.max(minLen,maxLen);
 					ret.setSize(size);
+					if(createNumCheck){
+						ret.setMinValue((int)min.doubleValue());
+						ret.setMaxValue((int)max.doubleValue());
+					}
 					dbCol=ret;
 				}
+				
 			}
 		}else if(type instanceof TextType){
 			DbColVarchar ret=new DbColVarchar();

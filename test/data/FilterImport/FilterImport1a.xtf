@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TRANSFER xmlns="http://www.interlis.ch/INTERLIS2.3">
+	<HEADERSECTION SENDER="ili2pg-2.2.0-20150910" VERSION="2.3">
+		<MODELS>
+			<MODEL NAME="FilterImport" VERSION="2016-12-21" URI="mailto:ce@eisenhutinformatik.ch"></MODEL>
+		</MODELS>
+	</HEADERSECTION>
+	<DATASECTION>
+		<FilterImport.TestA BID="TestA1">
+			<FilterImport.TestA.ClassA1 TID="a1"></FilterImport.TestA.ClassA1>
+		</FilterImport.TestA>
+		<FilterImport.TestB BID="TestB">
+			<FilterImport.TestB.ClassB1 TID="b1"></FilterImport.TestB.ClassB1>
+		</FilterImport.TestB>
+		<FilterImport.TestA BID="TestA2">
+			<FilterImport.TestA.ClassA1 TID="a2"></FilterImport.TestA.ClassA1>
+		</FilterImport.TestA>
+	</DATASECTION>
+</TRANSFER>

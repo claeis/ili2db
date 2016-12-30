@@ -19,19 +19,15 @@ import ch.ehi.ili2db.gui.Config;
 import ch.ehi.ili2db.mapping.NameMapping;
 
 //-Ddburl=jdbc:postgresql:dbname -Ddbusr=usrname -Ddbpwd=1234
-public class Datatypes10Test {
-	private static final String DBSCHEMA = "Datatypes10";
-	String dburl=System.getProperty("dburl"); 
-	String dbuser=System.getProperty("dbusr");
-	String dbpwd=System.getProperty("dbpwd"); 
+public class Datatypes10GpkgTest {
+    String gpkgFileName="test/data/Datatypes10/Datatypes10.gpkg";
 	Connection jdbcConnection=null;
 	Statement stmt=null;
-	@Before
 	public void initDb() throws Exception
 	{
-	    Class driverClass = Class.forName("org.postgresql.Driver");
+	    Class driverClass = Class.forName("org.sqlite.JDBC");
         jdbcConnection = DriverManager.getConnection(
-        		dburl, dbuser, dbpwd);
+        		"jdbc:sqlite:"+gpkgFileName, null, null);
         stmt=jdbcConnection.createStatement();
 	}
 	@After
@@ -41,17 +37,13 @@ public class Datatypes10Test {
 			jdbcConnection.close();
 		}
 	}
-	public Config initConfig(String xtfFilename,String dbschema,String logfile) {
+	public Config initConfig(String xtfFilename,String logfile) {
 		Config config=new Config();
-		new ch.ehi.ili2pg.PgMain().initConfig(config);
+		new ch.ehi.ili2gpkg.GpkgMain().initConfig(config);
 		
 		
-		config.setDburl(dburl);
-		config.setDbusr(dbuser);
-		config.setDbpwd(dbpwd);
-		if(dbschema!=null){
-			config.setDbschema(dbschema);
-		}
+		config.setDbfile(gpkgFileName);
+		config.setDburl("jdbc:sqlite:"+gpkgFileName);
 		if(logfile!=null){
 			config.setLogfile(logfile);
 		}
@@ -68,10 +60,12 @@ public class Datatypes10Test {
 	@Test
 	public void importIli() throws Exception
 	{
-        stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");
-        
+	    File gpkgFile=new File(gpkgFileName);
+        if(gpkgFile.exists()){
+            gpkgFile.delete();
+        }
 		File data=new File("test/data/Datatypes10/Datatypes10.ili");
-		Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+		Config config=initConfig(data.getPath(),data.getPath()+".log");
 		config.setFunction(Config.FC_SCHEMAIMPORT);
 		config.setCreateFk(config.CREATE_FK_YES);
 		config.setCreateNumChecks(true);
@@ -83,33 +77,19 @@ public class Datatypes10Test {
 		config.setInheritanceTrafo(null);
 		Ili2db.readSettingsFromDb(config);
 		Ili2db.run(config,null);
-
-		{
-			String stmtTxt="SELECT numeric_precision,numeric_scale FROM information_schema.columns WHERE table_schema ='datatypes10' AND table_name = 'tablea' AND column_name = 'dim1'";
-			Assert.assertTrue(stmt.execute(stmtTxt));
-			ResultSet rs=stmt.getResultSet();
-			Assert.assertTrue(rs.next());
-			Assert.assertEquals(2,rs.getInt(1));
-			Assert.assertEquals(1,rs.getInt(2));
-		}
-		{
-			String stmtTxt="SELECT numeric_precision,numeric_scale FROM information_schema.columns WHERE table_schema ='datatypes10' AND table_name = 'tablea' AND column_name = 'dim2'";
-			Assert.assertTrue(stmt.execute(stmtTxt));
-			ResultSet rs=stmt.getResultSet();
-			Assert.assertTrue(rs.next());
-			Assert.assertEquals(2,rs.getInt(1));
-			Assert.assertEquals(1,rs.getInt(2));
-		}
 		
 	}
 
 	@Test
 	public void importItf() throws Exception
 	{
-        stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");
+	    File gpkgFile=new File(gpkgFileName);
+        if(gpkgFile.exists()){
+            gpkgFile.delete();
+        }
         
 		File data=new File("test/data/Datatypes10/Datatypes10a.itf");
-		Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+		Config config=initConfig(data.getPath(),data.getPath()+".log");
 		config.setFunction(Config.FC_IMPORT);
 		config.setCreateFk(config.CREATE_FK_YES);
 		config.setTidHandling(Config.TID_HANDLING_PROPERTY);
@@ -121,7 +101,8 @@ public class Datatypes10Test {
 		Ili2db.readSettingsFromDb(config);
 		Ili2db.run(config,null);
 
-		String stmtTxt="SELECT atext FROM "+DBSCHEMA+".tablea AS a INNER JOIN "+DBSCHEMA+".subtable AS b ON (a.t_id=b.main)  WHERE b.t_ili_tid='30'";
+		initDb();
+		String stmtTxt="SELECT atext FROM tablea AS a INNER JOIN subtable AS b ON (a.t_id=b.main)  WHERE b.t_ili_tid='30'";
 		Assert.assertTrue(stmt.execute(stmtTxt));
 		{
 			ResultSet rs=stmt.getResultSet();
@@ -135,7 +116,7 @@ public class Datatypes10Test {
 	public void exportItf() throws Ili2dbException
 	{
 		File data=new File("test/data/Datatypes10/Datatypes10a-out.itf");
-		Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+		Config config=initConfig(data.getPath(),data.getPath()+".log");
 		config.setModels("Datatypes10");
 		config.setFunction(Config.FC_EXPORT);
 		Ili2db.readSettingsFromDb(config);
@@ -145,10 +126,13 @@ public class Datatypes10Test {
 	@Test
 	public void importItfWithSkipPolygonBuilding() throws Exception
 	{
-        stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");
+	    File gpkgFile=new File(gpkgFileName);
+        if(gpkgFile.exists()){
+            gpkgFile.delete();
+        }
         
 		File data=new File("test/data/Datatypes10/Datatypes10a.itf");
-		Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+		Config config=initConfig(data.getPath(),data.getPath()+".log");
 		config.setFunction(Config.FC_IMPORT);
 		config.setCreateFk(config.CREATE_FK_YES);
 		config.setTidHandling(Config.TID_HANDLING_PROPERTY);
@@ -161,7 +145,8 @@ public class Datatypes10Test {
 		Ili2db.readSettingsFromDb(config);
 		Ili2db.run(config,null);
 
-		String stmtTxt="SELECT atext FROM "+DBSCHEMA+".tablea AS a INNER JOIN "+DBSCHEMA+".subtable AS b ON (a.t_id=b.main)  WHERE b.t_ili_tid='30'";
+		initDb();
+		String stmtTxt="SELECT atext FROM tablea AS a INNER JOIN subtable AS b ON (a.t_id=b.main)  WHERE b.t_ili_tid='30'";
 		Assert.assertTrue(stmt.execute(stmtTxt));
 		{
 			ResultSet rs=stmt.getResultSet();
@@ -175,7 +160,7 @@ public class Datatypes10Test {
 	public void exportItfWithSkipPolygonBuilding() throws Ili2dbException
 	{
 		File data=new File("test/data/Datatypes10/Datatypes10a-ltout.itf");
-		Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+		Config config=initConfig(data.getPath(),data.getPath()+".log");
 		config.setModels("Datatypes10");
 		config.setFunction(Config.FC_EXPORT);
 		Ili2db.readSettingsFromDb(config);

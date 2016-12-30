@@ -51,6 +51,8 @@ import ch.interlis.iox.IoxWriter;
 import ch.interlis.iox_j.*;
 import ch.interlis.iox_j.logging.LogEventFactory;
 import ch.interlis.iox_j.validator.ValidationConfig;
+import ch.interlis.iom_j.iligml.Iligml10Writer;
+import ch.interlis.iom_j.iligml.Iligml20Writer;
 import ch.interlis.iom_j.itf.EnumCodeMapper;
 import ch.interlis.iom_j.itf.ItfWriter;
 import ch.interlis.iom_j.itf.ItfWriter2;
@@ -124,6 +126,16 @@ public class TransferToXtf {
 			errFactory.setDataSource(filename);
 			if(iomFile instanceof ItfWriter){
 				config.setValue(ch.interlis.iox_j.validator.Validator.CONFIG_DO_ITF_LINETABLES, ch.interlis.iox_j.validator.Validator.CONFIG_DO_ITF_LINETABLES_DO);
+			}else if(iomFile instanceof Iligml10Writer || iomFile instanceof Iligml20Writer){
+				String crsAuthority=config.getDefaultSrsAuthority();
+				String crsCode=config.getDefaultSrsCode();
+				if(crsAuthority!=null && crsCode!=null){
+					if(iomFile instanceof Iligml10Writer){
+						((Iligml10Writer)iomFile).setDefaultCrs(crsAuthority+":"+crsCode);
+					}else if(iomFile instanceof Iligml20Writer){
+						((Iligml20Writer)iomFile).setDefaultCrs(crsAuthority+":"+crsCode);
+					}
+				}
 			}
 			validator=new ch.interlis.iox_j.validator.Validator(td,modelConfig, errHandler, errFactory, config);
 			

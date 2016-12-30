@@ -12,6 +12,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import ch.ehi.basics.logging.EhiLogger;
+import ch.ehi.ili2db.base.DbNames;
 import ch.ehi.ili2db.base.DbUrlConverter;
 import ch.ehi.ili2db.base.Ili2db;
 import ch.ehi.ili2db.base.Ili2dbException;
@@ -19,8 +20,8 @@ import ch.ehi.ili2db.gui.Config;
 import ch.ehi.ili2db.mapping.NameMapping;
 
 //-Ddburl=jdbc:postgresql:dbname -Ddbusr=usrname -Ddbpwd=1234
-public class Datatypes10Test {
-	private static final String DBSCHEMA = "Datatypes10";
+public class Enum23Test {
+	private static final String DBSCHEMA = "Enum23";
 	String dburl=System.getProperty("dburl"); 
 	String dbuser=System.getProperty("dbusr");
 	String dbpwd=System.getProperty("dbpwd"); 
@@ -66,17 +67,17 @@ public class Datatypes10Test {
 	}
 	
 	@Test
-	public void importIli() throws Exception
+	public void importWithoutBeautify() throws Exception
 	{
         stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");
         
-		File data=new File("test/data/Datatypes10/Datatypes10.ili");
+		File data=new File("test/data/Enum23/Enum23.ili");
 		Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 		config.setFunction(Config.FC_SCHEMAIMPORT);
 		config.setCreateFk(config.CREATE_FK_YES);
-		config.setCreateNumChecks(true);
 		config.setTidHandling(Config.TID_HANDLING_PROPERTY);
 		config.setBasketHandling(config.BASKET_HANDLING_READWRITE);
+		config.setCreateEnumDefs(Config.CREATE_ENUM_DEFS_MULTI);
 		config.setCatalogueRefTrafo(null);
 		config.setMultiSurfaceTrafo(null);
 		config.setMultilingualTrafo(null);
@@ -85,35 +86,34 @@ public class Datatypes10Test {
 		Ili2db.run(config,null);
 
 		{
-			String stmtTxt="SELECT numeric_precision,numeric_scale FROM information_schema.columns WHERE table_schema ='datatypes10' AND table_name = 'tablea' AND column_name = 'dim1'";
+			String stmtTxt="SELECT dispName FROM "+DBSCHEMA+".enum1 WHERE ilicode ='Test2_ele'";
 			Assert.assertTrue(stmt.execute(stmtTxt));
 			ResultSet rs=stmt.getResultSet();
 			Assert.assertTrue(rs.next());
-			Assert.assertEquals(2,rs.getInt(1));
-			Assert.assertEquals(1,rs.getInt(2));
+			Assert.assertEquals("Test2_ele",rs.getString(1));
 		}
 		{
-			String stmtTxt="SELECT numeric_precision,numeric_scale FROM information_schema.columns WHERE table_schema ='datatypes10' AND table_name = 'tablea' AND column_name = 'dim2'";
+			String stmtTxt="SELECT dispName FROM "+DBSCHEMA+".enum1 WHERE ilicode ='Test3.ele_2'";
 			Assert.assertTrue(stmt.execute(stmtTxt));
 			ResultSet rs=stmt.getResultSet();
 			Assert.assertTrue(rs.next());
-			Assert.assertEquals(2,rs.getInt(1));
-			Assert.assertEquals(1,rs.getInt(2));
+			Assert.assertEquals("Test3.ele_2",rs.getString(1));
 		}
 		
 	}
-
 	@Test
-	public void importItf() throws Exception
+	public void importWithBeautify() throws Exception
 	{
         stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");
         
-		File data=new File("test/data/Datatypes10/Datatypes10a.itf");
+		File data=new File("test/data/Enum23/Enum23.ili");
 		Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
-		config.setFunction(Config.FC_IMPORT);
+		config.setFunction(Config.FC_SCHEMAIMPORT);
 		config.setCreateFk(config.CREATE_FK_YES);
 		config.setTidHandling(Config.TID_HANDLING_PROPERTY);
 		config.setBasketHandling(config.BASKET_HANDLING_READWRITE);
+		config.setCreateEnumDefs(Config.CREATE_ENUM_DEFS_MULTI);
+		config.setBeautifyEnumDispName(Config.BEAUTIFY_ENUM_DISPNAME_UNDERSCORE);
 		config.setCatalogueRefTrafo(null);
 		config.setMultiSurfaceTrafo(null);
 		config.setMultilingualTrafo(null);
@@ -121,39 +121,34 @@ public class Datatypes10Test {
 		Ili2db.readSettingsFromDb(config);
 		Ili2db.run(config,null);
 
-		String stmtTxt="SELECT atext FROM "+DBSCHEMA+".tablea AS a INNER JOIN "+DBSCHEMA+".subtable AS b ON (a.t_id=b.main)  WHERE b.t_ili_tid='30'";
-		Assert.assertTrue(stmt.execute(stmtTxt));
 		{
+			String stmtTxt="SELECT dispName FROM "+DBSCHEMA+".enum1 WHERE ilicode ='Test2_ele'";
+			Assert.assertTrue(stmt.execute(stmtTxt));
 			ResultSet rs=stmt.getResultSet();
 			Assert.assertTrue(rs.next());
-			Assert.assertEquals("obj11",rs.getObject(1));
+			Assert.assertEquals("Test2 ele",rs.getString(1));
 		}
-		exportItf();
+		{
+			String stmtTxt="SELECT dispName FROM "+DBSCHEMA+".enum1 WHERE ilicode ='Test3.ele_2'";
+			Assert.assertTrue(stmt.execute(stmtTxt));
+			ResultSet rs=stmt.getResultSet();
+			Assert.assertTrue(rs.next());
+			Assert.assertEquals("Test3.ele 2",rs.getString(1));
+		}
+		
 	}
-	
-	//@Test
-	public void exportItf() throws Ili2dbException
-	{
-		File data=new File("test/data/Datatypes10/Datatypes10a-out.itf");
-		Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
-		config.setModels("Datatypes10");
-		config.setFunction(Config.FC_EXPORT);
-		Ili2db.readSettingsFromDb(config);
-		Ili2db.run(config,null);
-	}
-
 	@Test
-	public void importItfWithSkipPolygonBuilding() throws Exception
+	public void importSingleTable() throws Exception
 	{
         stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");
         
-		File data=new File("test/data/Datatypes10/Datatypes10a.itf");
+		File data=new File("test/data/Enum23/Enum23.ili");
 		Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
-		config.setFunction(Config.FC_IMPORT);
+		config.setFunction(Config.FC_SCHEMAIMPORT);
 		config.setCreateFk(config.CREATE_FK_YES);
 		config.setTidHandling(Config.TID_HANDLING_PROPERTY);
 		config.setBasketHandling(config.BASKET_HANDLING_READWRITE);
-		config.setDoItfLineTables(true);
+		config.setCreateEnumDefs(Config.CREATE_ENUM_DEFS_SINGLE);
 		config.setCatalogueRefTrafo(null);
 		config.setMultiSurfaceTrafo(null);
 		config.setMultilingualTrafo(null);
@@ -161,25 +156,13 @@ public class Datatypes10Test {
 		Ili2db.readSettingsFromDb(config);
 		Ili2db.run(config,null);
 
-		String stmtTxt="SELECT atext FROM "+DBSCHEMA+".tablea AS a INNER JOIN "+DBSCHEMA+".subtable AS b ON (a.t_id=b.main)  WHERE b.t_ili_tid='30'";
-		Assert.assertTrue(stmt.execute(stmtTxt));
 		{
+			String stmtTxt="SELECT "+DbNames.ENUM_TAB_DISPNAME_COL+" FROM "+DBSCHEMA+"."+DbNames.ENUM_TAB+" WHERE "+DbNames.ENUM_TAB_ILICODE_COL+" ='Test2_ele' AND "+DbNames.ENUM_TAB_THIS_COL+"='Enum23.Enum1'";
+			Assert.assertTrue(stmt.execute(stmtTxt));
 			ResultSet rs=stmt.getResultSet();
 			Assert.assertTrue(rs.next());
-			Assert.assertEquals("obj11",rs.getObject(1));
+			Assert.assertEquals("Test2_ele",rs.getString(1));
 		}
-		exportItfWithSkipPolygonBuilding();
-	}
-	
-	//@Test
-	public void exportItfWithSkipPolygonBuilding() throws Ili2dbException
-	{
-		File data=new File("test/data/Datatypes10/Datatypes10a-ltout.itf");
-		Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
-		config.setModels("Datatypes10");
-		config.setFunction(Config.FC_EXPORT);
-		Ili2db.readSettingsFromDb(config);
-		Ili2db.run(config,null);
 	}
 	
 }

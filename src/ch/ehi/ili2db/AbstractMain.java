@@ -185,6 +185,9 @@ public abstract class AbstractMain {
 			}else if(arg.equals("--createEnumColAsItfCode")){
 				argi++;
 				config.setCreateEnumColAsItfCode(config.CREATE_ENUMCOL_AS_ITFCODE_YES);
+			}else if(arg.equals("--beautifyEnumDispName")){
+				argi++;
+				config.setBeautifyEnumDispName(config.BEAUTIFY_ENUM_DISPNAME_UNDERSCORE);
 			}else if(arg.equals("--noSmartMapping")){
 				argi++;
 				config.setCatalogueRefTrafo(null);
@@ -215,6 +218,9 @@ public abstract class AbstractMain {
 			}else if(arg.equals("--createUnique")){
 				argi++;
 				config.setCreateUniqueConstraints(true);
+			}else if(arg.equals("--createNumChecks")){
+				argi++;
+				config.setCreateNumChecks(true);
 			}else if(arg.equals("--createStdCols")){
 				argi++;
 				config.setCreateStdCols(config.CREATE_STD_COLS_ALL);
@@ -270,6 +276,9 @@ public abstract class AbstractMain {
 			}else if(arg.equals("--createBasketCol")){
 				argi++;
 				config.setBasketHandling(config.BASKET_HANDLING_READWRITE);
+			}else if(arg.equals("--ILIGML20")){
+				argi++;
+				config.setTransferFileFormat(Config.ILIGML20);
 			}else if(arg.equals("--version")){
 				printVersion();
 				return;
@@ -312,6 +321,7 @@ public abstract class AbstractMain {
 					System.err.println("--createEnumTxtCol     create an additional column with the text of the enumeration value.");
 					System.err.println("--createEnumTabs       generate tables with enum definitions.");
 					System.err.println("--createSingleEnumTab  generate all enum definitions in a single table.");
+					System.err.println("--beautifyEnumDispName replace underscore with space in dispName of enum table entries");
 					System.err.println("--createStdCols        generate "+DbNames.T_USER_COL+", "+DbNames.T_CREATE_DATE_COL+", "+DbNames.T_LAST_CHANGE_COL+" columns.");
 					System.err.println("--t_id_Name name       change name of t_id column ("+DbNames.T_ID_COL+")");
 					System.err.println("--idSeqMin minValue    sets the minimum value of the id sequence generator.");
@@ -331,6 +341,7 @@ public abstract class AbstractMain {
 					System.err.println("--createFk             generate foreign key constraints.");
 					System.err.println("--createFkIdx          create an index on foreign key columns.");
 					System.err.println("--createUnique         create UNIQUE db constraints.");
+					System.err.println("--ILIGML20             use eCH-0118-2.0 as transferformat");
 					printSpecificOptions();
 					System.err.println("--log filename         log message to given file.");
 					System.err.println("--gui                  start GUI.");
