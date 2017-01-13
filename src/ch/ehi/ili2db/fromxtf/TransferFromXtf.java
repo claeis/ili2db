@@ -925,26 +925,7 @@ public class TransferFromXtf {
 		}
 	 	String tid=iomObj.getobjectoid();
 	 	if((tid==null || tid.length()==0) && modelele instanceof AssociationDef){
-	 		Iterator<ViewableTransferElement> rolei=((AssociationDef)modelele).getAttributesAndRoles2();
-	 		String sep="";
-	 		tid="";
-	 		while(rolei.hasNext()){
-	 			ViewableTransferElement prop=rolei.next();
-	 			if(prop.obj instanceof RoleDef && !prop.embedded){
-	 				String roleName=((RoleDef) prop.obj).getName();
-	 				IomObject refObj=iomObj.getattrobj(roleName, 0);
-	 				String ref=null;
-	 				if(refObj!=null){
-		 				ref=refObj.getobjectrefoid();
-	 				}
-	 				if(ref!=null){
-		 				tid=tid+sep+ref;
-		 				sep=":";
-	 				}else{
-	 			 		throw new IllegalStateException("REF required ("+tag+"/"+roleName+")");
-	 				}
-	 			}
-	 		}
+	 		tid = getAssociationId(iomObj,(AssociationDef)modelele);
 	 	}
 	 	if(tid!=null && tid.length()>0){
 			oidPool.createObjSqlId(Ili2cUtility.getRootViewable((Viewable) modelele).getScopedName(null),tag,tid);
@@ -958,6 +939,32 @@ public class TransferFromXtf {
 		delayedObjects.add(extref);
 		objPool.put(tid,iomObj);
 		return false;
+	}
+
+	private String getAssociationId(IomObject iomObj, AssociationDef modelele) {
+		String tag=modelele.getScopedName(null);
+		String tid;
+		Iterator<ViewableTransferElement> rolei=modelele.getAttributesAndRoles2();
+		String sep="";
+		tid="";
+		while(rolei.hasNext()){
+			ViewableTransferElement prop=rolei.next();
+			if(prop.obj instanceof RoleDef && !prop.embedded){
+				String roleName=((RoleDef) prop.obj).getName();
+				IomObject refObj=iomObj.getattrobj(roleName, 0);
+				String ref=null;
+				if(refObj!=null){
+					ref=refObj.getobjectrefoid();
+				}
+				if(ref!=null){
+					tid=tid+sep+ref;
+					sep=":";
+				}else{
+			 		throw new IllegalStateException("REF required ("+tag+"/"+roleName+")");
+				}
+			}
+		}
+		return tid;
 	}
 	private void allReferencesKnownHelper(IomObject iomObj,FixIomObjectExtRefs extref) {
 		
