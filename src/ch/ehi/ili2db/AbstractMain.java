@@ -28,6 +28,7 @@ import ch.ehi.ili2db.gui.AbstractDbPanelDescriptor;
 import ch.ehi.ili2db.mapping.NameMapping;
 import ch.ehi.ili2db.base.DbUrlConverter;
 import ch.ehi.sqlgen.generator.SqlConfiguration;
+import ch.interlis.ili2c.gui.UserSettings;
 
 /**
  * @author ce
@@ -249,6 +250,7 @@ public abstract class AbstractMain {
 				argi++;
 				config.setNameOptimization(config.NAME_OPTIMIZATION_TOPIC);
 			}else if(arg.equals("--maxNameLength")){
+				argi++;
 				config.setMaxSqlNameLength(args[argi]);
 				argi++;
 			}else if(arg.equals("--structWithGenericRef")){
@@ -279,6 +281,14 @@ public abstract class AbstractMain {
 			}else if(arg.equals("--ILIGML20")){
 				argi++;
 				config.setTransferFileFormat(Config.ILIGML20);
+			}else if(arg.equals("--proxy")){
+				argi++;
+				config.setValue(UserSettings.HTTP_PROXY_HOST,args[argi]);
+				argi++;
+			}else if(arg.equals("--proxyPort")){
+				argi++;
+				config.setValue(UserSettings.HTTP_PROXY_PORT,args[argi]);
+				argi++;
 			}else if(arg.equals("--version")){
 				printVersion();
 				return;
@@ -343,6 +353,8 @@ public abstract class AbstractMain {
 					System.err.println("--createUnique         create UNIQUE db constraints.");
 					System.err.println("--ILIGML20             use eCH-0118-2.0 as transferformat");
 					printSpecificOptions();
+				    System.err.println("--proxy host           proxy server to access model repositories.");
+				    System.err.println("--proxyPort port       proxy port to access model repositories.");
 					System.err.println("--log filename         log message to given file.");
 					System.err.println("--gui                  start GUI.");
 					System.err.println("--trace                enable trace messages.");
