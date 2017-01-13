@@ -15,6 +15,7 @@ ideas/open issues/questions
 ili2pg/ili2gpkg 3.6.1 (2017-01-xx)
 -----------------------------
 - fixed export of references to a class with subClass mapping
+- add docu from ili to fk columns
 
 ili2pg/ili2gpkg 3.6.0 (2016-12-30)
 -----------------------------

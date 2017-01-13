@@ -116,19 +116,21 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 		DbTableName sqlName=new DbTableName(schema.getName(),def.getSqlTablename());
 		DbTable dbTable=schema.findTable(sqlName);
 		ViewableWrapper base=def.getExtending();
-		StringBuffer cmt=new StringBuffer();
-		String cmtSep="";
-		if(!def.isSecondaryTable()){
-			dbTable.setIliName(def.getViewable().getScopedName(null));
-			if(def.getViewable().getDocumentation()!=null){
-				cmt.append(cmtSep+def.getViewable().getDocumentation());
+		{
+			StringBuffer cmt=new StringBuffer();
+			String cmtSep="";
+			if(!def.isSecondaryTable()){
+				dbTable.setIliName(def.getViewable().getScopedName(null));
+				if(def.getViewable().getDocumentation()!=null){
+					cmt.append(cmtSep+def.getViewable().getDocumentation());
+					cmtSep=nl;
+				}
+				cmt.append(cmtSep+"@iliname "+def.getViewable().getScopedName(null));
 				cmtSep=nl;
 			}
-			cmt.append(cmtSep+"@iliname "+def.getViewable().getScopedName(null));
-			cmtSep=nl;
-		}
-		if(cmt.length()>0){
-			dbTable.setComment(cmt.toString());
+			if(cmt.length()>0){
+				dbTable.setComment(cmt.toString());
+			}
 		}
 		
 		if(deleteExistingData){
@@ -257,6 +259,10 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 								if(createFkIdx){
 									dbColId.setIndex(true);
 								}
+								String cmt=role.getDocumentation();
+								if(cmt!=null && cmt.length()>0){
+									dbColId.setComment(cmt);									
+								}
 							  dbTable.addColumn(dbColId);
 							  // handle ordered
 							  if(role.isOrdered()){
@@ -297,6 +303,10 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 								  }
 									if(createFkIdx){
 										dbColId.setIndex(true);
+									}
+									String cmt=role.getDocumentation();
+									if(cmt!=null && cmt.length()>0){
+										dbColId.setComment(cmt);									
 									}
 								  customMapping.fixupEmbeddedLink(dbTable,dbColId,roleOwner,role,targetSqlTableName,colT_ID);
 								  dbTable.addColumn(dbColId);
