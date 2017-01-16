@@ -1,7 +1,8 @@
 
 # ili2db Suite
 
-Ili2db is a suite of DB tool for managing interlis import/export to relational databases.
+Ili2db is a suite of tools for relational databases like postgres, oracle and mysql, aimed to manage interlis 2 language
+ for the definition of data model.
 
 ## Table of contents
 - [ili2geodb](#ili2geodb)
@@ -9,7 +10,6 @@ Ili2db is a suite of DB tool for managing interlis import/export to relational d
 - [ili2mdb](#ili2mdb)
 - [ili2ora](#ili2ora)
 - [ili2pg](#ili2pg)
-
 
 ## ili2geodb 
 TBD
@@ -31,7 +31,20 @@ TBD
 
 Ili2pg is an interlis 2 loader for postgis DB, it translates the intelis 2 data model definitions to a postgis schema. There are several feature for import and export of data from the DB.
 
-### USAGE
+### Build process
+
+There is a global ant file to build the entire workspace, if you like to build projects separately you can set the specific taget:
+
+#### Build process with Apache Ant:
+```
+1. ant -f build-ili2pg.xml
+2. copy ili2pg.jar from build/jar to . OR copy libs/* to build/jar/libs
+3. type java -jar ili2pg.jar --help in cmdline
+```
+
+If everything is fine you should see the USAGE description.
+
+### Usage
 
 java -jar ili2pg.jar [Options] [file.xtf|file.ili]
   
