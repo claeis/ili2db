@@ -5,4 +5,5 @@ support/
 .settings/
 .project
 .classpath
+.idea/
 *~
