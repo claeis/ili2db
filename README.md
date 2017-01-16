@@ -1,7 +1,7 @@
 
 # ili2db Suite
 
-Ili2db is a suite of tools for relational databases like postgres, oracle and mysql, aimed to manage interlis 2 language
+Ili2db is a suite of tools for relational databases like postgres, oracle and mysql, aimed to manage Interlis 2 language
  for the definition of data model.
 
 ## Table of contents
@@ -29,7 +29,7 @@ TBD
 
 ## ili2pg
 
-Ili2pg is an interlis 2 loader for postgis DB, it translates the intelis 2 data model definitions to a postgis schema. There are several feature for import and export of data from the DB.
+Ili2pg is an Interlis 2 loader for postgis DB, it translates the intelis 2 data model definitions to a postgis schema. There are several feature for import and export of data from the DB.
 
 ### Build process
 
