@@ -21,10 +21,10 @@
     <mkdir dir="${build}/classes"/>
     <javac destdir="${build}/classes" includes="**/*.java" excludes="**/test/*.java" source="1.4" target="1.4">
       <classpath>
-        <pathelement location="lib/ehisqlgen.jar"/>
-        <pathelement location="lib/ili2c.jar"/>
-        <pathelement location="lib/iox.jar"/>
-        <pathelement location="lib/iox-api.jar"/>
+        <pathelement location="libs/ehisqlgen.jar"/>
+        <pathelement location="libs/ili2c.jar"/>
+        <pathelement location="libs/iox.jar"/>
+        <pathelement location="libs/iox-api.jar"/>
       </classpath>
     	<src path="${src}" />
     	<!-- <src path="${build}/src"/> -->
@@ -49,17 +49,17 @@
     <delete file="${projectjar}" quiet="true"/>
 
     <jar jarfile="${projectjar}" manifest="other/manifest-ili2db">
-	<fileset dir="${build}/classes" includes="**/*.class"/>
+	    <fileset dir="${build}/classes" includes="**/*.class"/>
     	<fileset dir="${src}" includes="**/*.properties"/>
     	<!-- <fileset dir="resources/de" includes="**/*.properties"/>
     	<fileset dir="resources/fr" includes="**/*.properties"/>
-	<fileset dir="resources/it" includes="**/*.properties"/> -->
+	    <fileset dir="resources/it" includes="**/*.properties"/> -->
     	<fileset dir="${src}" includes="**/*.gif"/>
     	<fileset dir="${src}" includes="**/*.jpg"/>
     	<fileset dir="${src}" includes="**/*.png"/>
-    	<zipfileset src="lib/ehisqlgen.jar"/>
-    	<zipfileset src="lib/iox.jar"/>
-    	<zipfileset src="lib/iox-api.jar"/>
+    	<zipfileset src="libs/ehisqlgen.jar"/>
+    	<zipfileset src="libs/iox.jar"/>
+    	<zipfileset src="libs/iox-api.jar"/>
     </jar>
   </target>
   
@@ -75,7 +75,7 @@
     	<zipfileset dir="${build}/jar" prefix="${ant.project.name}-${buildnr}">
 	    	<patternset includes="${ant.project.name}.jar"/>
     	</zipfileset>
-    	<zipfileset dir="${basedir}/lib" prefix="${ant.project.name}-${buildnr}">
+    	<zipfileset dir="${basedir}/libs" prefix="${ant.project.name}-${buildnr}">
 	    	<patternset includes="ili2c.jar"/>
     	</zipfileset>
     	<zipfileset dir="${basedir}/other" prefix="${ant.project.name}-${buildnr}">
@@ -110,13 +110,13 @@
 		<patternset includes="resources/de/**/*.properties"/>
 		<patternset includes="resources/fr/**/*.properties"/>
 		<patternset includes="resources/it/**/*.properties"/>
-	    	<patternset includes="lib/ojdbc14.jar"/>
-	    	<patternset includes="lib/ili2c.jar"/>
-	    	<patternset includes="lib/iom_java.dll"/>
-	    	<patternset includes="lib/xerces-c_2_6.dll"/>
-		<patternset includes="lib/ehisqlgen.jar"/>
-		<patternset includes="lib/sdoapi.jar"/>
-		<patternset includes="lib/iom_java.jar"/>
+	    	<patternset includes="libs/ojdbc14.jar"/>
+	    	<patternset includes="libs/ili2c.jar"/>
+	    	<patternset includes="libs/iom_java.dll"/>
+	    	<patternset includes="libs/xerces-c_2_6.dll"/>
+		<patternset includes="libs/ehisqlgen.jar"/>
+		<patternset includes="libs/sdoapi.jar"/>
+		<patternset includes="libs/iom_java.jar"/>
     	</zipfileset>
     </zip>
   </target>
