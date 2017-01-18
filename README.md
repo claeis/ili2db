@@ -144,11 +144,11 @@ java -jar ili2pg.jar [Options] [file.xtf|file.ili]
 ### Examples
 Very important to be sure that everything went well, user the --trace option if not sure about the command you want to perform.  
 #### Import schema
-java -jar ili2pg-3.6.0.jar --schemaimport --dbdatabase dbname --dbusr user --dbpwd password --createNumChecks --strokeArcs --createGeomIdx --defaultSrsAuth EPSG --defaultSrsCode 21781 --createscript createSchema_script.sql interlis_model.ili
+`java -jar ili2pg-3.6.0.jar --schemaimport --dbdatabase dbname --dbusr user --dbpwd password --createNumChecks --strokeArcs --createGeomIdx --defaultSrsAuth EPSG --defaultSrsCode 21781 --createscript createSchema_script.sql interlis_model.ili`
 #### Import data
-java -jar ili2pg-3.6.0.jar --import --dbdatabase dbname --dbusr user --dbpwd password "import_file.xtf"  
+`java -jar ili2pg-3.6.0.jar --import --dbdatabase dbname --dbusr user --dbpwd password "import_file.xtf"`  
 #### Export data
-java -jar ili2pg-3.6.0.jar --export --models ili_model_name --dbdatabase dbname --dbusr user --dbpwd password "export_file.xtf"  
+`java -jar ili2pg-3.6.0.jar --export --models ili_model_name --dbdatabase dbname --dbusr user --dbpwd password "export_file.xtf"`  
   
 ### Options
 ```
