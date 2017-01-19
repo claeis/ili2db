@@ -3,7 +3,6 @@ package ch.ehi.ili2db.mapping;
 import java.util.HashMap;
 import java.util.Iterator;
 
-import ch.ehi.ili2db.base.IliNames;
 import ch.interlis.ili2c.metamodel.AttributeDef;
 import ch.interlis.ili2c.metamodel.CompositionType;
 import ch.interlis.ili2c.metamodel.SurfaceType;

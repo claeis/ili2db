@@ -17,16 +17,13 @@
  */
 package ch.ehi.ili2db;
 
-import java.io.File;
-
 import ch.ehi.basics.logging.EhiLogger;
 import ch.ehi.ili2db.base.DbNames;
-import ch.ehi.ili2db.base.Ili2db;
-import ch.ehi.ili2db.base.Ili2dbException;
-import ch.ehi.ili2db.gui.Config;
-import ch.ehi.ili2db.gui.AbstractDbPanelDescriptor;
-import ch.ehi.ili2db.mapping.NameMapping;
 import ch.ehi.ili2db.base.DbUrlConverter;
+import ch.ehi.ili2db.base.Ili2db;
+import ch.ehi.ili2db.gui.AbstractDbPanelDescriptor;
+import ch.ehi.ili2db.gui.Config;
+import ch.ehi.ili2db.mapping.NameMapping;
 import ch.ehi.sqlgen.generator.SqlConfiguration;
 
 /**

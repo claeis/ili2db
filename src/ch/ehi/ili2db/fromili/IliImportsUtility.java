@@ -1,7 +1,5 @@
 package ch.ehi.ili2db.fromili;
 
-import java.util.Iterator;
-
 import ch.interlis.ili2c.modelscan.IliFile;
 import ch.interlis.ili2c.modelscan.IliModel;
 

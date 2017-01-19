@@ -17,31 +17,46 @@
  */
 package ch.ehi.ili2db.fromili;
 
-import ch.ehi.basics.logging.EhiLogger;
-import ch.interlis.ili2c.ModelScan;
-import ch.interlis.ili2c.metamodel.*;
-import ch.interlis.ilirepository.IliFiles;
-import ch.interlis.iom_j.itf.ModelUtilities;
-
 import java.io.IOException;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 
-import ch.ehi.sqlgen.repository.*;
+import ch.ehi.basics.logging.EhiLogger;
 import ch.ehi.ili2db.base.DbIdGen;
 import ch.ehi.ili2db.base.DbNames;
 import ch.ehi.ili2db.base.DbUtility;
-import ch.ehi.ili2db.base.Ili2cUtility;
 import ch.ehi.ili2db.base.Ili2dbException;
 import ch.ehi.ili2db.converter.AbstractRecordConverter;
 import ch.ehi.ili2db.gui.Config;
-import ch.ehi.ili2db.mapping.NameMapping;
 import ch.ehi.ili2db.mapping.TrafoConfig;
 import ch.ehi.ili2db.mapping.Viewable2TableMapping;
 import ch.ehi.ili2db.mapping.ViewableWrapper;
+import ch.ehi.sqlgen.repository.DbColBoolean;
+import ch.ehi.sqlgen.repository.DbColDateTime;
+import ch.ehi.sqlgen.repository.DbColGeometry;
+import ch.ehi.sqlgen.repository.DbColId;
+import ch.ehi.sqlgen.repository.DbColNumber;
+import ch.ehi.sqlgen.repository.DbColVarchar;
+import ch.ehi.sqlgen.repository.DbIndex;
+import ch.ehi.sqlgen.repository.DbSchema;
+import ch.ehi.sqlgen.repository.DbTable;
+import ch.ehi.sqlgen.repository.DbTableName;
+import ch.interlis.ili2c.metamodel.AssociationDef;
+import ch.interlis.ili2c.metamodel.AttributeDef;
+import ch.interlis.ili2c.metamodel.Domain;
+import ch.interlis.ili2c.metamodel.Element;
+import ch.interlis.ili2c.metamodel.EnumerationType;
+import ch.interlis.ili2c.metamodel.Model;
+import ch.interlis.ili2c.metamodel.SurfaceOrAreaType;
+import ch.interlis.ili2c.metamodel.SurfaceType;
+import ch.interlis.ili2c.metamodel.Table;
+import ch.interlis.ili2c.metamodel.Topic;
+import ch.interlis.ili2c.metamodel.TransferDescription;
+import ch.interlis.ili2c.metamodel.View;
+import ch.interlis.ili2c.metamodel.Viewable;
+import ch.interlis.ilirepository.IliFiles;
 
 /**
  * @author ce

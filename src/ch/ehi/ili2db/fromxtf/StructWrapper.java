@@ -17,8 +17,8 @@
  */
 package ch.ehi.ili2db.fromxtf;
 
-import ch.interlis.iom.IomObject;
 import ch.interlis.ili2c.metamodel.AttributeDef;
+import ch.interlis.iom.IomObject;
 
 /**
  * @author ce

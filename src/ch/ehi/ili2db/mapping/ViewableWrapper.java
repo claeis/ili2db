@@ -1,15 +1,17 @@
 package ch.ehi.ili2db.mapping;
 
-import ch.ehi.sqlgen.repository.DbTableName;
-import ch.interlis.ili2c.metamodel.*;
-import ch.interlis.ili2c.metamodel.AttributeDef;
-
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
-import java.util.ListIterator;
+
+import ch.ehi.sqlgen.repository.DbTableName;
+import ch.interlis.ili2c.metamodel.AbstractClassDef;
+import ch.interlis.ili2c.metamodel.AssociationDef;
+import ch.interlis.ili2c.metamodel.AttributeDef;
+import ch.interlis.ili2c.metamodel.Domain;
+import ch.interlis.ili2c.metamodel.Table;
+import ch.interlis.ili2c.metamodel.Viewable;
+import ch.interlis.ili2c.metamodel.ViewableTransferElement;
 
 /** Wrapper around a Viewable to  
  * make it aware of all attributes of all specializations.

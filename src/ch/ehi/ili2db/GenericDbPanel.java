@@ -1,12 +1,13 @@
 package ch.ehi.ili2db;
 
-import java.awt.GridBagLayout;
-import javax.swing.JPanel;
-import javax.swing.JTextField;
 import java.awt.GridBagConstraints;
-import javax.swing.JLabel;
+import java.awt.GridBagLayout;
+
 import javax.swing.JButton;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
 import javax.swing.JPasswordField;
+import javax.swing.JTextField;
 
 public class GenericDbPanel extends JPanel {
 

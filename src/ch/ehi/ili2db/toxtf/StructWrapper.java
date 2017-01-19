@@ -18,8 +18,8 @@
 package ch.ehi.ili2db.toxtf;
 
 import ch.ehi.ili2db.mapping.ViewableWrapper;
-import ch.interlis.iom.IomObject;
 import ch.interlis.ili2c.metamodel.AttributeDef;
+import ch.interlis.iom.IomObject;
 
 /**
  * @author ce
