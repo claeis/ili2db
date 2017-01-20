@@ -246,6 +246,7 @@ public abstract class AbstractMain {
 				argi++;
 				config.setNameOptimization(config.NAME_OPTIMIZATION_TOPIC);
 			}else if(arg.equals("--maxNameLength")){
+				argi++;
 				config.setMaxSqlNameLength(args[argi]);
 				argi++;
 			}else if(arg.equals("--structWithGenericRef")){
