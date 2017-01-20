@@ -1,11 +1,6 @@
 package ch.ehi.ili2db.gui;
 
-import ch.ehi.basics.wizard.*;
-import ch.ehi.ili2db.base.DbUrlConverter;
-
-import java.awt.*;
-import java.awt.event.*;
-import javax.swing.*;
+import ch.ehi.basics.wizard.WizardPanelDescriptor;
 
 
 public class WorkPanelDescriptor extends WizardPanelDescriptor {

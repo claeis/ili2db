@@ -17,11 +17,10 @@
  */
 package ch.ehi.ili2db.converter;
 
+import java.sql.Connection;
 import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.sql.Struct;
-import java.sql.Connection;
 import java.sql.Time;
 import java.sql.Timestamp;
 

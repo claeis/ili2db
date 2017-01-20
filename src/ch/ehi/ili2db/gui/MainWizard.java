@@ -1,9 +1,6 @@
 package ch.ehi.ili2db.gui;
 
 
-import ch.ehi.basics.logging.EhiLogger;
-import ch.ehi.basics.wizard.Wizard;
-import ch.ehi.basics.wizard.WizardPanelDescriptor;
 import ch.ehi.ili2db.base.DbUrlConverter;
 
 public class MainWizard {

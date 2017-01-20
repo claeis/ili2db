@@ -1,11 +1,10 @@
 package ch.ehi.ili2db;
 
-import ch.ehi.basics.wizard.*;
+import javax.swing.JPanel;
 
-import java.awt.*;
-import java.awt.event.*;
-import javax.swing.*;
-import ch.ehi.ili2db.gui.*;
+import ch.ehi.ili2db.gui.AbstractDbPanelDescriptor;
+import ch.ehi.ili2db.gui.Config;
+import ch.ehi.ili2db.gui.Ili2dbWizard;
 
 public class GenericDbPanelDescriptor extends AbstractDbPanelDescriptor {
     

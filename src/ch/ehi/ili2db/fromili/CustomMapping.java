@@ -3,13 +3,13 @@ package ch.ehi.ili2db.fromili;
 import java.sql.Connection;
 
 import ch.ehi.ili2db.gui.Config;
-import ch.ehi.sqlgen.repository.DbTable;
 import ch.ehi.sqlgen.repository.DbColumn;
+import ch.ehi.sqlgen.repository.DbTable;
 import ch.ehi.sqlgen.repository.DbTableName;
-import ch.interlis.ili2c.metamodel.Viewable;
-import ch.interlis.ili2c.metamodel.AttributeDef;
 import ch.interlis.ili2c.metamodel.AssociationDef;
+import ch.interlis.ili2c.metamodel.AttributeDef;
 import ch.interlis.ili2c.metamodel.RoleDef;
+import ch.interlis.ili2c.metamodel.Viewable;
 
 public interface CustomMapping {
 	public void fromIliInit(ch.ehi.ili2db.gui.Config config);
