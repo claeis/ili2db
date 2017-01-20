@@ -1,10 +1,8 @@
 package ch.ehi.ili2db.gui;
 
-import ch.ehi.basics.wizard.*;
+import javax.swing.JPanel;
 
-import java.awt.*;
-import java.awt.event.*;
-import javax.swing.*;
+import ch.ehi.basics.wizard.WizardPanelDescriptor;
 
 
 public abstract class AbstractDbPanelDescriptor extends WizardPanelDescriptor {

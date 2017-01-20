@@ -17,17 +17,11 @@
  */
 package ch.ehi.ili2db.mapping;
 
-import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
 import ch.ehi.basics.logging.EhiLogger;
-import ch.interlis.ili2c.metamodel.Viewable;
-import ch.interlis.iom.IomObject;
-import ch.interlis.iom_j.xtf.XtfReader;
-import ch.interlis.iox.*;
-import ch.ehi.ili2db.mapping.*;
 import ch.ehi.ili2db.base.DbNames;
 import ch.ehi.ili2db.base.Ili2dbException;
 

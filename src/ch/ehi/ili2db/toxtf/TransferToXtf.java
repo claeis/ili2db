@@ -17,47 +17,67 @@
  */
 package ch.ehi.ili2db.toxtf;
 
-import java.util.ArrayList;
-import java.util.GregorianCalendar;
-import java.util.HashSet;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.sql.Connection;
-import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 
 import ch.ehi.basics.logging.EhiLogger;
 import ch.ehi.ili2db.base.DbNames;
 import ch.ehi.ili2db.base.DbUtility;
 import ch.ehi.ili2db.base.Ili2cUtility;
-import ch.ehi.ili2db.base.Ili2dbException;
-import ch.ehi.ili2db.converter.*;
+import ch.ehi.ili2db.converter.ConverterException;
+import ch.ehi.ili2db.converter.SqlColumnConverter;
 import ch.ehi.ili2db.fromili.TransferFromIli;
 import ch.ehi.ili2db.fromxtf.BasketStat;
 import ch.ehi.ili2db.fromxtf.ClassStat;
+import ch.ehi.ili2db.gui.Config;
 import ch.ehi.ili2db.mapping.NameMapping;
 import ch.ehi.ili2db.mapping.TrafoConfig;
 import ch.ehi.ili2db.mapping.Viewable2TableMapping;
 import ch.ehi.ili2db.mapping.ViewableWrapper;
-import ch.ehi.ili2db.gui.Config;
 import ch.ehi.sqlgen.repository.DbTableName;
-import ch.interlis.ili2c.metamodel.*;
+import ch.interlis.ili2c.metamodel.AbstractClassDef;
+import ch.interlis.ili2c.metamodel.AssociationDef;
+import ch.interlis.ili2c.metamodel.AttributeDef;
+import ch.interlis.ili2c.metamodel.CompositionType;
+import ch.interlis.ili2c.metamodel.CoordType;
+import ch.interlis.ili2c.metamodel.Domain;
+import ch.interlis.ili2c.metamodel.EnumerationType;
+import ch.interlis.ili2c.metamodel.Model;
+import ch.interlis.ili2c.metamodel.PolylineType;
+import ch.interlis.ili2c.metamodel.PredefinedModel;
+import ch.interlis.ili2c.metamodel.RoleDef;
+import ch.interlis.ili2c.metamodel.SurfaceOrAreaType;
+import ch.interlis.ili2c.metamodel.SurfaceType;
+import ch.interlis.ili2c.metamodel.Table;
+import ch.interlis.ili2c.metamodel.Topic;
+import ch.interlis.ili2c.metamodel.TransferDescription;
+import ch.interlis.ili2c.metamodel.Type;
+import ch.interlis.ili2c.metamodel.TypeAlias;
+import ch.interlis.ili2c.metamodel.TypeModel;
+import ch.interlis.ili2c.metamodel.View;
+import ch.interlis.ili2c.metamodel.Viewable;
+import ch.interlis.ili2c.metamodel.ViewableTransferElement;
 import ch.interlis.iom.IomObject;
 import ch.interlis.iom_j.Iom_jObject;
+import ch.interlis.iom_j.iligml.Iligml10Writer;
+import ch.interlis.iom_j.iligml.Iligml20Writer;
+import ch.interlis.iom_j.itf.ItfWriter;
+import ch.interlis.iom_j.itf.ModelUtilities;
 import ch.interlis.iox.IoxException;
 import ch.interlis.iox.IoxLogging;
 import ch.interlis.iox.IoxWriter;
-import ch.interlis.iox_j.*;
+import ch.interlis.iox_j.EndBasketEvent;
+import ch.interlis.iox_j.EndTransferEvent;
+import ch.interlis.iox_j.ObjectEvent;
+import ch.interlis.iox_j.StartBasketEvent;
+import ch.interlis.iox_j.StartTransferEvent;
 import ch.interlis.iox_j.logging.LogEventFactory;
 import ch.interlis.iox_j.validator.ValidationConfig;
-import ch.interlis.iom_j.iligml.Iligml10Writer;
-import ch.interlis.iom_j.iligml.Iligml20Writer;
-import ch.interlis.iom_j.itf.EnumCodeMapper;
-import ch.interlis.iom_j.itf.ItfWriter;
-import ch.interlis.iom_j.itf.ItfWriter2;
-import ch.interlis.iom_j.itf.ModelUtilities;
-import ch.interlis.iom_j.xtf.XtfWriter;
 
 
 /**
@@ -1049,28 +1069,18 @@ public class TransferToXtf {
 		return ret.toString();
 	}
 	private String createQueryStmt4xtfid(Viewable aclass){
-		ArrayList<ViewableWrapper> wrappers = recConv.getTargetTables(aclass);
 		StringBuffer ret = new StringBuffer();
-		int i=1;
-		
-		ret.append("SELECT "+colT_ID+","+DbNames.T_ILI_TID_COL+","+DbNames.T_TYPE_COL+" FROM (");
-		String sep="";
-		for(ViewableWrapper wrapper:wrappers){
-			ret.append(sep);
-			ret.append("SELECT r"+i+"."+colT_ID);
-			ret.append(", r"+i+"."+DbNames.T_ILI_TID_COL);
-			if(recConv.createTypeDiscriminator() ||wrapper.includesMultipleTypes()){
-				ret.append(", r"+i+"."+DbNames.T_TYPE_COL);
-			}else{
-				ret.append(", '"+wrapper.getSqlTable().getName()+"' "+DbNames.T_TYPE_COL);
-			}
-			ret.append(" FROM ");
-			ret.append(wrapper.getSqlTable().getQName());
-			ret.append(" r"+i+"");
-			i++;
-			sep=" UNION ";
+		ret.append("SELECT r0."+colT_ID);
+		ret.append(", r0."+DbNames.T_ILI_TID_COL);
+		ret.append(" FROM ");
+		ArrayList tablev=new ArrayList(10);
+		tablev.add(aclass);
+		Viewable base=(Viewable)aclass.getRootExtending();
+		if(base==null){
+			base=aclass;
 		}
-		ret.append(") r0");
+		ret.append(recConv.getSqlType(base));
+		ret.append(" r0");
 		ret.append(" WHERE r0."+colT_ID+"=?");
 		return ret.toString();
 	}

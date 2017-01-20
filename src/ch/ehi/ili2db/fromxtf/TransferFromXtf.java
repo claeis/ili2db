@@ -16,22 +16,15 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 package ch.ehi.ili2db.fromxtf;
-import java.util.ArrayList;
-import java.util.GregorianCalendar;
-import java.util.Vector;
-import java.util.HashSet;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.sql.PreparedStatement;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.sql.Types;
-
-import javax.xml.datatype.DatatypeConfigurationException;
-import javax.xml.datatype.XMLGregorianCalendar;
-import javax.xml.ws.Holder;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 
 import ch.ehi.basics.logging.EhiLogger;
 import ch.ehi.ili2db.base.DbIdGen;
@@ -40,31 +33,53 @@ import ch.ehi.ili2db.base.DbUtility;
 import ch.ehi.ili2db.base.Ili2cUtility;
 import ch.ehi.ili2db.base.Ili2db;
 import ch.ehi.ili2db.base.Ili2dbException;
-import ch.ehi.ili2db.converter.*;
+import ch.ehi.ili2db.converter.ConverterException;
+import ch.ehi.ili2db.converter.SqlColumnConverter;
+import ch.ehi.ili2db.fromili.TransferFromIli;
+import ch.ehi.ili2db.gui.Config;
+import ch.ehi.ili2db.mapping.NameMapping;
 import ch.ehi.ili2db.mapping.TrafoConfig;
 import ch.ehi.ili2db.mapping.Viewable2TableMapping;
 import ch.ehi.ili2db.mapping.ViewableWrapper;
-import ch.ehi.ili2db.fromili.TransferFromIli;
-import ch.ehi.ili2db.mapping.NameMapping;
 import ch.ehi.ili2db.toxtf.TransferToXtf;
-import ch.ehi.ili2db.gui.Config;
 import ch.ehi.iox.objpool.ObjectPoolManager;
 import ch.ehi.sqlgen.repository.DbTableName;
-import ch.interlis.ili2c.metamodel.*;
-import ch.interlis.iom.IomConstants;
+import ch.interlis.ili2c.metamodel.AbstractClassDef;
+import ch.interlis.ili2c.metamodel.AbstractPatternDef;
+import ch.interlis.ili2c.metamodel.AssociationDef;
+import ch.interlis.ili2c.metamodel.AttributeDef;
+import ch.interlis.ili2c.metamodel.CompositionType;
+import ch.interlis.ili2c.metamodel.CoordType;
+import ch.interlis.ili2c.metamodel.EnumerationType;
+import ch.interlis.ili2c.metamodel.Model;
+import ch.interlis.ili2c.metamodel.NumericType;
+import ch.interlis.ili2c.metamodel.ObjectType;
+import ch.interlis.ili2c.metamodel.PolylineType;
+import ch.interlis.ili2c.metamodel.ReferenceType;
+import ch.interlis.ili2c.metamodel.RoleDef;
+import ch.interlis.ili2c.metamodel.SurfaceOrAreaType;
+import ch.interlis.ili2c.metamodel.SurfaceType;
+import ch.interlis.ili2c.metamodel.Table;
+import ch.interlis.ili2c.metamodel.Topic;
+import ch.interlis.ili2c.metamodel.TransferDescription;
+import ch.interlis.ili2c.metamodel.Type;
+import ch.interlis.ili2c.metamodel.View;
+import ch.interlis.ili2c.metamodel.Viewable;
+import ch.interlis.ili2c.metamodel.ViewableTransferElement;
 import ch.interlis.iom.IomObject;
-import ch.interlis.iom_j.itf.EnumCodeMapper;
 import ch.interlis.iom_j.itf.ItfReader;
 import ch.interlis.iom_j.itf.ItfReader2;
-import ch.interlis.iom_j.itf.ItfWriter;
 import ch.interlis.iom_j.itf.ModelUtilities;
-import ch.interlis.iom_j.xtf.XtfReader;
-import ch.interlis.iox.*;
+import ch.interlis.iox.EndBasketEvent;
+import ch.interlis.iox.EndTransferEvent;
+import ch.interlis.iox.IoxEvent;
+import ch.interlis.iox.IoxException;
+import ch.interlis.iox.IoxLogging;
+import ch.interlis.iox.IoxReader;
+import ch.interlis.iox.StartTransferEvent;
 import ch.interlis.iox_j.IoxInvalidDataException;
 import ch.interlis.iox_j.ObjectEvent;
 import ch.interlis.iox_j.StartBasketEvent;
-import ch.interlis.iox_j.jts.Iox2jts;
-import ch.interlis.iox_j.jts.Iox2jtsException;
 import ch.interlis.iox_j.logging.LogEventFactory;
 import ch.interlis.iox_j.validator.ValidationConfig;
 
@@ -925,7 +940,26 @@ public class TransferFromXtf {
 		}
 	 	String tid=iomObj.getobjectoid();
 	 	if((tid==null || tid.length()==0) && modelele instanceof AssociationDef){
-	 		tid = getAssociationId(iomObj,(AssociationDef)modelele);
+	 		Iterator<ViewableTransferElement> rolei=((AssociationDef)modelele).getAttributesAndRoles2();
+	 		String sep="";
+	 		tid="";
+	 		while(rolei.hasNext()){
+	 			ViewableTransferElement prop=rolei.next();
+	 			if(prop.obj instanceof RoleDef && !prop.embedded){
+	 				String roleName=((RoleDef) prop.obj).getName();
+	 				IomObject refObj=iomObj.getattrobj(roleName, 0);
+	 				String ref=null;
+	 				if(refObj!=null){
+		 				ref=refObj.getobjectrefoid();
+	 				}
+	 				if(ref!=null){
+		 				tid=tid+sep+ref;
+		 				sep=":";
+	 				}else{
+	 			 		throw new IllegalStateException("REF required ("+tag+"/"+roleName+")");
+	 				}
+	 			}
+	 		}
 	 	}
 	 	if(tid!=null && tid.length()>0){
 			oidPool.createObjSqlId(Ili2cUtility.getRootViewable((Viewable) modelele).getScopedName(null),tag,tid);
@@ -939,32 +973,6 @@ public class TransferFromXtf {
 		delayedObjects.add(extref);
 		objPool.put(tid,iomObj);
 		return false;
-	}
-
-	private String getAssociationId(IomObject iomObj, AssociationDef modelele) {
-		String tag=modelele.getScopedName(null);
-		String tid;
-		Iterator<ViewableTransferElement> rolei=modelele.getAttributesAndRoles2();
-		String sep="";
-		tid="";
-		while(rolei.hasNext()){
-			ViewableTransferElement prop=rolei.next();
-			if(prop.obj instanceof RoleDef && !prop.embedded){
-				String roleName=((RoleDef) prop.obj).getName();
-				IomObject refObj=iomObj.getattrobj(roleName, 0);
-				String ref=null;
-				if(refObj!=null){
-					ref=refObj.getobjectrefoid();
-				}
-				if(ref!=null){
-					tid=tid+sep+ref;
-					sep=":";
-				}else{
-			 		throw new IllegalStateException("REF required ("+tag+"/"+roleName+")");
-				}
-			}
-		}
-		return tid;
 	}
 	private void allReferencesKnownHelper(IomObject iomObj,FixIomObjectExtRefs extref) {
 		

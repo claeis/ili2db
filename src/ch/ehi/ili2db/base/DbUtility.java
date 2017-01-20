@@ -18,9 +18,7 @@
 package ch.ehi.ili2db.base;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.sql.Connection;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
@@ -75,7 +73,8 @@ public class DbUtility {
 		}
 		return false;
 	}
-	/** tests if a schema with the given name exists
+	/** 
+	 * tests if a schema with the given name exists
 	 */
 	public static boolean schemaExists(Connection conn,String schemaName)
 	{
@@ -150,8 +149,8 @@ public class DbUtility {
 				throw new IllegalStateException(e);
 			}
 		}
-		
 	}
+	
 	public static String readSqlStmt(java.io.PushbackReader reader)
 			throws IOException {
 		StringBuffer stmt=new StringBuffer();

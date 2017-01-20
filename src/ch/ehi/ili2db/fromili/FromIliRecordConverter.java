@@ -1,17 +1,14 @@
 package ch.ehi.ili2db.fromili;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 
 import ch.ehi.ili2db.base.DbIdGen;
 import ch.ehi.ili2db.base.DbNames;
 import ch.ehi.ili2db.base.Ili2cUtility;
 import ch.ehi.ili2db.base.Ili2dbException;
-import ch.ehi.ili2db.base.IliNames;
 import ch.ehi.ili2db.converter.AbstractRecordConverter;
 import ch.ehi.ili2db.gui.Config;
 import ch.ehi.ili2db.mapping.MultiSurfaceMapping;
@@ -35,8 +32,6 @@ import ch.ehi.sqlgen.repository.DbIndex;
 import ch.ehi.sqlgen.repository.DbSchema;
 import ch.ehi.sqlgen.repository.DbTable;
 import ch.ehi.sqlgen.repository.DbTableName;
-import ch.interlis.ili2c.metamodel.AbstractClassDef;
-import ch.interlis.ili2c.metamodel.AbstractLeafElement;
 import ch.interlis.ili2c.metamodel.AreaType;
 import ch.interlis.ili2c.metamodel.AssociationDef;
 import ch.interlis.ili2c.metamodel.AttributeDef;
@@ -46,8 +41,6 @@ import ch.interlis.ili2c.metamodel.CompositionType;
 import ch.interlis.ili2c.metamodel.CoordType;
 import ch.interlis.ili2c.metamodel.EnumerationType;
 import ch.interlis.ili2c.metamodel.Evaluable;
-import ch.interlis.ili2c.metamodel.ExtendableContainer;
-import ch.interlis.ili2c.metamodel.LineType;
 import ch.interlis.ili2c.metamodel.LocalAttribute;
 import ch.interlis.ili2c.metamodel.NumericType;
 import ch.interlis.ili2c.metamodel.ObjectPath;
@@ -66,10 +59,8 @@ import ch.interlis.ili2c.metamodel.TransferDescription;
 import ch.interlis.ili2c.metamodel.Type;
 import ch.interlis.ili2c.metamodel.UniqueEl;
 import ch.interlis.ili2c.metamodel.UniquenessConstraint;
-import ch.interlis.ili2c.metamodel.View;
 import ch.interlis.ili2c.metamodel.Viewable;
 import ch.interlis.ili2c.metamodel.ViewableTransferElement;
-import ch.interlis.iom_j.itf.ModelUtilities;
 
 public class FromIliRecordConverter extends AbstractRecordConverter {
 	private DbSchema schema=null;
@@ -116,21 +107,19 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 		DbTableName sqlName=new DbTableName(schema.getName(),def.getSqlTablename());
 		DbTable dbTable=schema.findTable(sqlName);
 		ViewableWrapper base=def.getExtending();
-		{
-			StringBuffer cmt=new StringBuffer();
-			String cmtSep="";
-			if(!def.isSecondaryTable()){
-				dbTable.setIliName(def.getViewable().getScopedName(null));
-				if(def.getViewable().getDocumentation()!=null){
-					cmt.append(cmtSep+def.getViewable().getDocumentation());
-					cmtSep=nl;
-				}
-				cmt.append(cmtSep+"@iliname "+def.getViewable().getScopedName(null));
+		StringBuffer cmt=new StringBuffer();
+		String cmtSep="";
+		if(!def.isSecondaryTable()){
+			dbTable.setIliName(def.getViewable().getScopedName(null));
+			if(def.getViewable().getDocumentation()!=null){
+				cmt.append(cmtSep+def.getViewable().getDocumentation());
 				cmtSep=nl;
 			}
-			if(cmt.length()>0){
-				dbTable.setComment(cmt.toString());
-			}
+			cmt.append(cmtSep+"@iliname "+def.getViewable().getScopedName(null));
+			cmtSep=nl;
+		}
+		if(cmt.length()>0){
+			dbTable.setComment(cmt.toString());
 		}
 		
 		if(deleteExistingData){
@@ -259,10 +248,6 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 								if(createFkIdx){
 									dbColId.setIndex(true);
 								}
-								String cmt=role.getDocumentation();
-								if(cmt!=null && cmt.length()>0){
-									dbColId.setComment(cmt);									
-								}
 							  dbTable.addColumn(dbColId);
 							  // handle ordered
 							  if(role.isOrdered()){
@@ -303,10 +288,6 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 								  }
 									if(createFkIdx){
 										dbColId.setIndex(true);
-									}
-									String cmt=role.getDocumentation();
-									if(cmt!=null && cmt.length()>0){
-										dbColId.setComment(cmt);									
 									}
 								  customMapping.fixupEmbeddedLink(dbTable,dbColId,roleOwner,role,targetSqlTableName,colT_ID);
 								  dbTable.addColumn(dbColId);

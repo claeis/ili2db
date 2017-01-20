@@ -17,18 +17,16 @@
  */
 package ch.ehi.ili2db.converter;
 
-import ch.ehi.basics.logging.EhiLogger;
-import ch.ehi.ili2db.gui.Config;
-
+import java.sql.Connection;
 import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.sql.Connection;
 import java.sql.Time;
 import java.sql.Timestamp;
 
 import com.vividsolutions.jts.io.ParseException;
 
+import ch.ehi.ili2db.gui.Config;
 import ch.interlis.iom.IomObject;
 import ch.interlis.iox_j.jts.Iox2jtsException;
 

@@ -1,7 +1,9 @@
 package ch.ehi.basics.wizard;
 
-import java.awt.*;
-import javax.swing.*;
+import java.awt.Component;
+
+import javax.swing.ImageIcon;
+import javax.swing.JPanel;
 
 
 /**
