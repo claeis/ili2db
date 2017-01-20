@@ -1069,18 +1069,28 @@ public class TransferToXtf {
 		return ret.toString();
 	}
 	private String createQueryStmt4xtfid(Viewable aclass){
+		ArrayList<ViewableWrapper> wrappers = recConv.getTargetTables(aclass);
 		StringBuffer ret = new StringBuffer();
-		ret.append("SELECT r0."+colT_ID);
-		ret.append(", r0."+DbNames.T_ILI_TID_COL);
+		int i=1;
+		
+		ret.append("SELECT "+colT_ID+","+DbNames.T_ILI_TID_COL+","+DbNames.T_TYPE_COL+" FROM (");
+		String sep="";
+		for(ViewableWrapper wrapper:wrappers){
+			ret.append(sep);
+			ret.append("SELECT r"+i+"."+colT_ID);
+			ret.append(", r"+i+"."+DbNames.T_ILI_TID_COL);
+			if(recConv.createTypeDiscriminator() ||wrapper.includesMultipleTypes()){
+				ret.append(", r"+i+"."+DbNames.T_TYPE_COL);
+			}else{
+				ret.append(", '"+wrapper.getSqlTable().getName()+"' "+DbNames.T_TYPE_COL);
+			}
 		ret.append(" FROM ");
-		ArrayList tablev=new ArrayList(10);
-		tablev.add(aclass);
-		Viewable base=(Viewable)aclass.getRootExtending();
-		if(base==null){
-			base=aclass;
+			ret.append(wrapper.getSqlTable().getQName());
+			ret.append(" r"+i+"");
+			i++;
+			sep=" UNION ";
 		}
-		ret.append(recConv.getSqlType(base));
-		ret.append(" r0");
+		ret.append(") r0");
 		ret.append(" WHERE r0."+colT_ID+"=?");
 		return ret.toString();
 	}

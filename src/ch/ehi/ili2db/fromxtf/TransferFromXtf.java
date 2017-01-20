@@ -940,7 +940,26 @@ public class TransferFromXtf {
 		}
 	 	String tid=iomObj.getobjectoid();
 	 	if((tid==null || tid.length()==0) && modelele instanceof AssociationDef){
-	 		Iterator<ViewableTransferElement> rolei=((AssociationDef)modelele).getAttributesAndRoles2();
+	 		tid = getAssociationId(iomObj,(AssociationDef)modelele);
+	 	}
+	 	if(tid!=null && tid.length()>0){
+			oidPool.createObjSqlId(Ili2cUtility.getRootViewable((Viewable) modelele).getScopedName(null),tag,tid);
+	 	}
+		FixIomObjectExtRefs extref=new FixIomObjectExtRefs(tag,tid);
+		allReferencesKnownHelper(iomObj, extref);
+		if(!extref.needsFixing()){
+			return true;
+		}
+		//EhiLogger.debug("needs fixing "+iomObj.getobjectoid());
+		delayedObjects.add(extref);
+		objPool.put(tid,iomObj);
+		return false;
+	}
+
+	private String getAssociationId(IomObject iomObj, AssociationDef modelele) {
+		String tag=modelele.getScopedName(null);
+		String tid;
+		Iterator<ViewableTransferElement> rolei=modelele.getAttributesAndRoles2();
 	 		String sep="";
 	 		tid="";
 	 		while(rolei.hasNext()){
@@ -960,20 +979,8 @@ public class TransferFromXtf {
 	 				}
 	 			}
 	 		}
+		return tid;
 	 	}
-	 	if(tid!=null && tid.length()>0){
-			oidPool.createObjSqlId(Ili2cUtility.getRootViewable((Viewable) modelele).getScopedName(null),tag,tid);
-	 	}
-		FixIomObjectExtRefs extref=new FixIomObjectExtRefs(tag,tid);
-		allReferencesKnownHelper(iomObj, extref);
-		if(!extref.needsFixing()){
-			return true;
-		}
-		//EhiLogger.debug("needs fixing "+iomObj.getobjectoid());
-		delayedObjects.add(extref);
-		objPool.put(tid,iomObj);
-		return false;
-	}
 	private void allReferencesKnownHelper(IomObject iomObj,FixIomObjectExtRefs extref) {
 		
 		String tag=iomObj.getobjecttag();
