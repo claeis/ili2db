@@ -2,6 +2,11 @@ package ch.ehi.ili2db.base;
 
 public class Ili2dbException extends Exception {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
 	public Ili2dbException() {
 	}
 

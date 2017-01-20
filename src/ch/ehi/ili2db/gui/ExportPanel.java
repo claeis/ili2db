@@ -1,12 +1,12 @@
 package ch.ehi.ili2db.gui;
 
-import java.awt.GridBagLayout;
-import javax.swing.JPanel;
-import javax.swing.JLabel;
 import java.awt.GridBagConstraints;
-import javax.swing.JRadioButton;
-import javax.swing.JTextField;
+import java.awt.GridBagLayout;
+
 import javax.swing.JButton;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
 
 import ch.ehi.basics.view.FileChooser;
 import ch.ehi.basics.view.GenericFileFilter;

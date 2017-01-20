@@ -1,10 +1,6 @@
 package ch.ehi.ili2db.gui;
 
-import ch.ehi.basics.wizard.*;
-
-import java.awt.*;
-import java.awt.event.*;
-import javax.swing.*;
+import ch.ehi.basics.wizard.WizardPanelDescriptor;
 
 
 public class FunctionChoosePanelDescriptor extends WizardPanelDescriptor {
