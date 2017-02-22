@@ -237,10 +237,12 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 							  String roleSqlName=ili2sqlName.mapIliRoleDef(role,sqlName.getName(),targetSqlTableName.getName(),targetTables.size()>1);
 							  dbColId.setName(roleSqlName);
 							  boolean notNull=false;
-							  if(targetTables.size()>1){
-								  notNull=false; // multiple alternative FK columns
-							  }else{
-								  notNull=true;
+							  if(!sqlEnableNull){
+								  if(targetTables.size()>1){
+									  notNull=false; // multiple alternative FK columns
+								  }else{
+									  notNull=true;
+								  }
 							  }
 							  dbColId.setNotNull(notNull);
 							  dbColId.setPrimaryKey(false);
@@ -278,13 +280,15 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 								  String roleSqlName=ili2sqlName.mapIliRoleDef(role,sqlName.getName(),targetSqlTableName.getName(),targetTables.size()>1);
 								  dbColId.setName(roleSqlName);
 								  boolean notNull=false;
-								  if(targetTables.size()>1){
-									  notNull=false; // multiple alternative FK columns
-								  }else{
-									  if(role.getCardinality().getMinimum()==0){
-										  notNull=false;
+								  if(!sqlEnableNull){
+									  if(targetTables.size()>1){
+										  notNull=false; // multiple alternative FK columns
 									  }else{
-										  notNull=true;
+										  if(role.getCardinality().getMinimum()==0){
+											  notNull=false;
+										  }else{
+											  notNull=true;
+										  }
 									  }
 								  }
 								  dbColId.setNotNull(notNull);
