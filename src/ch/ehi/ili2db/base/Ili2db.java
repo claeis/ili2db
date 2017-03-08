@@ -586,6 +586,7 @@ public class Ili2db {
 						if(function!=config.FC_DELETE){
 							  EhiLogger.logState("data <"+inputFilename+">");
 								if(isItfFilename(inputFilename)){
+									config.setValue(ch.interlis.iox_j.validator.Validator.CONFIG_DO_ITF_OIDPERTABLE, ch.interlis.iox_j.validator.Validator.CONFIG_DO_ITF_OIDPERTABLE_DO);
 									if(config.getDoItfLineTables()){
 										ioxReader=new ItfReader(new java.io.File(inputFilename));
 										((ItfReader)ioxReader).setModel(td);		
@@ -1817,6 +1818,7 @@ public class Ili2db {
 					}else{
 						ioxWriter=new ItfWriter(outfile,td);
 					}
+					config.setValue(ch.interlis.iox_j.validator.Validator.CONFIG_DO_ITF_OIDPERTABLE, ch.interlis.iox_j.validator.Validator.CONFIG_DO_ITF_OIDPERTABLE_DO);
 				}else if(ext!=null && ext.equals("gml")){
 					ioxWriter=new Iligml10Writer(outfile,td);
 				}else{

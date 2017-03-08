@@ -15,6 +15,7 @@ ideas/open issues/questions
 ili2pg/ili2gpkg 3.6.2 (2017-02-xx)
 -----------------------------
 - fixed --sqlEnableNull on FK columns
+- itf: validate TID per table
 
 ili2pg/ili2gpkg 3.6.1 (2017-01-20)
 -----------------------------
