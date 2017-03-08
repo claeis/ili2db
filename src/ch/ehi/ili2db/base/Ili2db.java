@@ -1890,6 +1890,8 @@ public class Ili2db {
 					+ conn.getMetaData().getDatabaseProductName() + ">");
 			EhiLogger.logState("databaseVersion <"
 					+ conn.getMetaData().getDatabaseProductVersion() + ">");
+			EhiLogger.logState("driverName <"
+					+ conn.getMetaData().getDriverName() + ">");
 			EhiLogger.logState("driverVersion <"
 					+ conn.getMetaData().getDriverVersion() + ">");
 			if(conn.getMetaData().getURL().startsWith("jdbc:postgresql:")){
