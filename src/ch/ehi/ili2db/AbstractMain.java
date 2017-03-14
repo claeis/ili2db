@@ -348,10 +348,11 @@ public abstract class AbstractMain {
 					System.err.println("--createFk             generate foreign key constraints.");
 					System.err.println("--createFkIdx          create an index on foreign key columns.");
 					System.err.println("--createUnique         create UNIQUE db constraints.");
+					System.err.println("--createNumChecks      create CHECK db constraints for numeric data types.");
 					System.err.println("--ILIGML20             use eCH-0118-2.0 as transferformat");
 					printSpecificOptions();
-				    System.err.println("--proxy host           proxy server to access model repositories.");
-				    System.err.println("--proxyPort port       proxy port to access model repositories.");
+					System.err.println("--proxy host           proxy server to access model repositories.");
+					System.err.println("--proxyPort port       proxy port to access model repositories.");
 					System.err.println("--log filename         log message to given file.");
 					System.err.println("--gui                  start GUI.");
 					System.err.println("--trace                enable trace messages.");
