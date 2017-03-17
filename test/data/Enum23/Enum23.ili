@@ -11,6 +11,8 @@ MODEL Enum23
     CLASS ClassA1 =
     	attr1 : TEXT*60;
     	attr2 : Enum1;
+    	attr3 : (Test1, Test2_ele, Test3 (ele1, ele_2));
+	attr4 : BOOLEAN;
     END ClassA1;
     
   END TestA;
