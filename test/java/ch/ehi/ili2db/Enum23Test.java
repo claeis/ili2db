@@ -14,10 +14,12 @@ import org.junit.Test;
 import ch.ehi.basics.logging.EhiLogger;
 import ch.ehi.ili2db.base.DbNames;
 import ch.ehi.ili2db.base.DbUrlConverter;
+import ch.ehi.ili2db.base.DbUtility;
 import ch.ehi.ili2db.base.Ili2db;
 import ch.ehi.ili2db.base.Ili2dbException;
 import ch.ehi.ili2db.gui.Config;
 import ch.ehi.ili2db.mapping.NameMapping;
+import ch.ehi.sqlgen.repository.DbTableName;
 
 //-Ddburl=jdbc:postgresql:dbname -Ddbusr=usrname -Ddbpwd=1234
 public class Enum23Test {
@@ -135,7 +137,22 @@ public class Enum23Test {
 			Assert.assertTrue(rs.next());
 			Assert.assertEquals("Test3.ele 2",rs.getString(1));
 		}
-		
+		{
+			String stmtTxt="SELECT dispName FROM "+DBSCHEMA+".classa1_attr3 WHERE ilicode ='Test2_ele'";
+			Assert.assertTrue(stmt.execute(stmtTxt));
+			ResultSet rs=stmt.getResultSet();
+			Assert.assertTrue(rs.next());
+			Assert.assertEquals("Test2 ele",rs.getString(1));
+		}
+		{
+			String stmtTxt="SELECT dispName FROM "+DBSCHEMA+".classa1_attr3 WHERE ilicode ='Test3.ele_2'";
+			Assert.assertTrue(stmt.execute(stmtTxt));
+			ResultSet rs=stmt.getResultSet();
+			Assert.assertTrue(rs.next());
+			Assert.assertEquals("Test3.ele 2",rs.getString(1));
+		}
+		Assert.assertFalse(DbUtility.tableExists(jdbcConnection, new DbTableName(DBSCHEMA,"classa1_attr2")));
+		Assert.assertFalse(DbUtility.tableExists(jdbcConnection, new DbTableName(DBSCHEMA,"classa1_attr4")));
 	}
 	@Test
 	public void importSingleTable() throws Exception

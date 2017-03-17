@@ -65,7 +65,7 @@ import ch.interlis.ili2c.metamodel.ViewableTransferElement;
 public class FromIliRecordConverter extends AbstractRecordConverter {
 	private DbSchema schema=null;
 	private CustomMapping customMapping=null;
-	private HashSet visitedEnums=null;
+	private HashSet visitedEnumsAttrs=null;
 	private String nl=System.getProperty("line.separator");
 	private ArrayList<AttributeDef> surfaceAttrs=null; 
 	private boolean coalesceCatalogueRef=true;
@@ -77,9 +77,9 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 
 	public FromIliRecordConverter(TransferDescription td1, NameMapping ili2sqlName,
 			Config config, DbSchema schema1, CustomMapping customMapping1,
-			DbIdGen idGen1, HashSet visitedEnums1, TrafoConfig trafoConfig,	Viewable2TableMapping class2wrapper1) {
+			DbIdGen idGen1, HashSet visitedEnumsAttrs1, TrafoConfig trafoConfig,	Viewable2TableMapping class2wrapper1) {
 		super(td1, ili2sqlName, config, idGen1,trafoConfig,class2wrapper1);
-		visitedEnums=visitedEnums1;
+		visitedEnumsAttrs=visitedEnumsAttrs1;
 		customMapping=customMapping1;
 		schema=schema1;
 		coalesceCatalogueRef=Config.CATALOGUE_REF_TRAFO_COALESCE.equals(config.getCatalogueRefTrafo());
@@ -237,10 +237,12 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 							  String roleSqlName=ili2sqlName.mapIliRoleDef(role,sqlName.getName(),targetSqlTableName.getName(),targetTables.size()>1);
 							  dbColId.setName(roleSqlName);
 							  boolean notNull=false;
-							  if(targetTables.size()>1){
-								  notNull=false; // multiple alternative FK columns
-							  }else{
-								  notNull=true;
+							  if(!sqlEnableNull){
+								  if(targetTables.size()>1){
+									  notNull=false; // multiple alternative FK columns
+								  }else{
+									  notNull=true;
+								  }
 							  }
 							  dbColId.setNotNull(notNull);
 							  dbColId.setPrimaryKey(false);
@@ -278,13 +280,15 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 								  String roleSqlName=ili2sqlName.mapIliRoleDef(role,sqlName.getName(),targetSqlTableName.getName(),targetTables.size()>1);
 								  dbColId.setName(roleSqlName);
 								  boolean notNull=false;
-								  if(targetTables.size()>1){
-									  notNull=false; // multiple alternative FK columns
-								  }else{
-									  if(role.getCardinality().getMinimum()==0){
-										  notNull=false;
+								  if(!sqlEnableNull){
+									  if(targetTables.size()>1){
+										  notNull=false; // multiple alternative FK columns
 									  }else{
-										  notNull=true;
+										  if(role.getCardinality().getMinimum()==0){
+											  notNull=false;
+										  }else{
+											  notNull=true;
+										  }
 									  }
 								  }
 								  dbColId.setNotNull(notNull);
@@ -413,7 +417,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 	throws Ili2dbException
 	{
 		if(attr.getDomain() instanceof EnumerationType){
-			visitedEnums.add(attr);
+			visitedEnumsAttrs.add(attr);
 		}
 		DbColumn dbCol=null;
 		ArrayList<DbColumn> dbColExts=new ArrayList<DbColumn>();
