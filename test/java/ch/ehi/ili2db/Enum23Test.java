@@ -151,6 +151,7 @@ public class Enum23Test {
 			Assert.assertTrue(rs.next());
 			Assert.assertEquals("Test3.ele 2",rs.getString(1));
 		}
+		Assert.assertFalse(DbUtility.tableExists(jdbcConnection, new DbTableName(DBSCHEMA,"boolean")));
 		Assert.assertFalse(DbUtility.tableExists(jdbcConnection, new DbTableName(DBSCHEMA,"classa1_attr2")));
 		Assert.assertFalse(DbUtility.tableExists(jdbcConnection, new DbTableName(DBSCHEMA,"classa1_attr4")));
 	}
