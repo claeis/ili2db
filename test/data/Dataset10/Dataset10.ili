@@ -1,0 +1,21 @@
+TRANSFER Ili1FmtTest;
+
+MODEL Dataset10
+	TOPIC TopicA=
+		TABLE TableA =
+			attrA : OPTIONAL TEXT*10;
+		NO IDENT
+		END TableA;
+	END TopicA.
+	TOPIC TopicB=
+		TABLE TableB =
+			attrB : OPTIONAL TEXT*10;
+		NO IDENT
+		END TableB;
+	END TopicB.
+END Dataset10.
+
+FORMAT FREE;
+CODE BLANK = DEFAULT, UNDEFINED = DEFAULT, CONTINUE = DEFAULT;
+TID = ANY;
+END.

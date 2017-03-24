@@ -524,9 +524,11 @@ public class Ili2db {
 							if(config.getDoItfLineTables()){
 								ioxReader=new ItfReader(in);
 								((ItfReader)ioxReader).setModel(td);		
+								((ItfReader)ioxReader).setBidPrefix(config.getDatasetName());		
 							}else{
 								ioxReader=new ItfReader2(in,config.ignorePolygonBuildingErrors());
 								((ItfReader2)ioxReader).setModel(td);		
+								((ItfReader2)ioxReader).setBidPrefix(config.getDatasetName());		
 							}
 						}else{
 							ioxReader=new XtfReader(in);
@@ -590,9 +592,11 @@ public class Ili2db {
 									if(config.getDoItfLineTables()){
 										ioxReader=new ItfReader(new java.io.File(inputFilename));
 										((ItfReader)ioxReader).setModel(td);		
+										((ItfReader)ioxReader).setBidPrefix(config.getDatasetName());		
 									}else{
 										ioxReader=new ItfReader2(new java.io.File(inputFilename),config.ignorePolygonBuildingErrors());
 										((ItfReader2)ioxReader).setModel(td);		
+										((ItfReader2)ioxReader).setBidPrefix(config.getDatasetName());		
 									}
 								}else{
 									ioxReader=new XtfReader(new java.io.File(inputFilename));
