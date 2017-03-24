@@ -74,6 +74,7 @@ public class TransferFromIli {
 	private boolean createStdCols=false;
 	private boolean createIliTidCol=false;
 	private boolean createBasketCol=false;
+	private boolean createDatasetCol=false;
 	private CustomMapping customMapping=null;
 	private boolean createItfLineTables=false;
 	private boolean createFk=false;
@@ -102,6 +103,7 @@ public class TransferFromIli {
 		
 		createIliTidCol=config.TID_HANDLING_PROPERTY.equals(config.getTidHandling());
 		createBasketCol=config.BASKET_HANDLING_READWRITE.equals(config.getBasketHandling());
+		createDatasetCol=config.CREATE_DATASET_COL.equals(config.getCreateDatasetCols());
 		
 		isIli1Model=td1.getIli1Format()!=null;
 		createItfLineTables=isIli1Model && config.getDoItfLineTables();
@@ -280,6 +282,14 @@ public class TransferFromIli {
 					t_basket.setIndex(true);
 				}
 				dbTable.addColumn(t_basket);
+		  }
+		  if(createDatasetCol){
+				DbColVarchar t_dsName=new DbColVarchar();
+				t_dsName.setName(DbNames.T_DATASET_COL);
+				t_dsName.setSize(DbNames.DATASETNAME_COL_SIZE);
+				t_dsName.setNotNull(true);
+				t_dsName.setIndex(true);
+				dbTable.addColumn(t_dsName);
 		  }
 			SurfaceOrAreaType type = (SurfaceOrAreaType)attr.getDomainResolvingAll();
 			
@@ -719,7 +729,7 @@ public class TransferFromIli {
 			DbColVarchar dsNameCol=new DbColVarchar();
 			dsNameCol.setName(DbNames.DATASETS_TAB_DATASETNAME);
 			dsNameCol.setNotNull(false);
-			dsNameCol.setSize(200);
+			dsNameCol.setSize(DbNames.DATASETNAME_COL_SIZE);
 			tab.addColumn(dsNameCol);
 
 			DbIndex dbIndex=new DbIndex();

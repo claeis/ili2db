@@ -95,5 +95,34 @@ public class Dataset10Test {
 			Assert.assertEquals(datasetName+".TopicB",rs.getObject(1));
 		}
 	}
+	@Test
+	public void importItfWithDatasetCol() throws Exception
+	{
+        stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");
+        
+		File data=new File("test/data/Dataset10/Dataset10b.itf");
+		Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+		config.setFunction(Config.FC_IMPORT);
+		config.setCreateFk(config.CREATE_FK_YES);
+		config.setTidHandling(Config.TID_HANDLING_PROPERTY);
+		config.setBasketHandling(config.BASKET_HANDLING_READWRITE);
+		config.setCreateDatasetCols(Config.CREATE_DATASET_COL);
+		config.setCatalogueRefTrafo(null);
+		config.setMultiSurfaceTrafo(null);
+		config.setMultilingualTrafo(null);
+		config.setInheritanceTrafo(null);
+		final String datasetName="ceis";
+		config.setDatasetName(datasetName);
+		Ili2db.readSettingsFromDb(config);
+		Ili2db.run(config,null);
+
+		String stmtTxt="SELECT "+DbNames.T_DATASET_COL+" FROM "+DBSCHEMA+".tablea WHERE "+DbNames.T_ILI_TID_COL+"='10'";
+		Assert.assertTrue(stmt.execute(stmtTxt));
+		{
+			ResultSet rs=stmt.getResultSet();
+			Assert.assertTrue(rs.next());
+			Assert.assertEquals(datasetName,rs.getObject(1));
+		}
+	}
 	
 }

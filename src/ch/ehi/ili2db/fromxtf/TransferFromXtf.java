@@ -106,7 +106,9 @@ public class TransferFromXtf {
 	private boolean createGenericStructRef=false;
 	private boolean readIliTid=false;
 	private boolean createBasketCol=false;
+	private boolean createDatasetCol=false;
 	private String xtffilename=null;
+	private String datasetName=null;
 	private String attachmentKey=null;
 	private boolean doItfLineTables=false;
 	private boolean createItfLineTables=false;
@@ -154,10 +156,12 @@ public class TransferFromXtf {
 		createGenericStructRef=config.STRUCT_MAPPING_GENERICREF.equals(config.getStructMapping());
 		readIliTid=config.TID_HANDLING_PROPERTY.equals(config.getTidHandling());
 		createBasketCol=config.BASKET_HANDLING_READWRITE.equals(config.getBasketHandling());
+		createDatasetCol=config.CREATE_DATASET_COL.equals(config.getCreateDatasetCols());
 		doItfLineTables=config.isItfTransferfile();
 		createItfLineTables=doItfLineTables && config.getDoItfLineTables();
 		xtffilename=config.getXtffile();
 		functionCode=function;
+		datasetName=config.getDatasetName();
 	}
 		
 	public void doit(IoxReader reader,Config config,HashSet<BasketStat> stat)
@@ -216,7 +220,7 @@ public class TransferFromXtf {
 			long objCount=0;
 			boolean referrs=false;
 			
-			recConv=new FromXtfRecordConverter(td,ili2sqlName,tag2class,config,idGen,geomConv,conn,dbusr,isItfReader,oidPool,trafoConfig,class2wrapper);
+			recConv=new FromXtfRecordConverter(td,ili2sqlName,tag2class,config,idGen,geomConv,conn,dbusr,isItfReader,oidPool,trafoConfig,class2wrapper,config.getDatasetName());
 			
 			if(functionCode==Config.FC_DELETE || functionCode==Config.FC_REPLACE){
 				// delete existing data base on basketSqlId
@@ -1331,6 +1335,10 @@ public class TransferFromXtf {
 				ps.setLong(valuei, basketSqlId);
 				valuei++;
 			}
+			if (createDatasetCol) {
+				ps.setString(valuei, datasetName);
+				valuei++;
+			}
 			
 			if(readIliTid){
 				// import TID from transfer file
@@ -1637,6 +1645,12 @@ public class TransferFromXtf {
 			stmt.append(sep);
 			sep=",";
 			stmt.append(DbNames.T_BASKET_COL);
+			values.append(",?");
+		}
+		if(createDatasetCol){
+			stmt.append(sep);
+			sep=",";
+			stmt.append(DbNames.T_DATASET_COL);
 			values.append(",?");
 		}
 		

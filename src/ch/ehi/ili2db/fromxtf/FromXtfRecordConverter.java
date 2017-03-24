@@ -61,6 +61,7 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 	private int defaultSrsid=0;
 	private Connection conn=null;
 	private String dbusr=null;
+	private String datasetName=null;
 	private boolean isItfReader;
 	private XtfidPool oidPool=null;
 	private HashMap tag2class=null;
@@ -69,7 +70,7 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 			Config config,
 			DbIdGen idGen1,SqlColumnConverter geomConv1,Connection conn1,String dbusr1,boolean isItfReader1,
 			XtfidPool oidPool1,TrafoConfig trafoConfig,	
-			Viewable2TableMapping class2wrapper1) {
+			Viewable2TableMapping class2wrapper1,String datasetName) {
 		super(td1, ili2sqlName, config, idGen1,trafoConfig,class2wrapper1);
 		conn=conn1;
 		tag2class=tag2class1;
@@ -77,6 +78,7 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 		oidPool=oidPool1;
 		this.geomConv=geomConv1;
 		isItfReader=isItfReader1;
+		this.datasetName=datasetName;
 		today=new java.sql.Timestamp(System.currentTimeMillis());
 		try{
 			defaultSrsid=geomConv.getSrsid(defaultCrsAuthority,defaultCrsCode,conn);
@@ -105,6 +107,10 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 		
 		if(createBasketCol){
 			ps.setLong(valuei, basketSqlId);
+			valuei++;
+		}
+		if(createDatasetCol){
+			ps.setString(valuei, datasetName);
 			valuei++;
 		}
 		
@@ -354,6 +360,16 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 		if(createBasketCol){
 			ret.append(sep);
 			ret.append(DbNames.T_BASKET_COL);
+			if(isUpdate){
+				ret.append("=?");
+			}else{
+				values.append(",?");
+			}
+			sep=",";
+		}
+		if(createDatasetCol){
+			ret.append(sep);
+			ret.append(DbNames.T_DATASET_COL);
 			if(isUpdate){
 				ret.append("=?");
 			}else{

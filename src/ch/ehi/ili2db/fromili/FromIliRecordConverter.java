@@ -156,6 +156,14 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 				}
 				dbTable.addColumn(t_basket);
 		  }
+		  if(createDatasetCol){
+				DbColVarchar t_dsName=new DbColVarchar();
+				t_dsName.setName(DbNames.T_DATASET_COL);
+				t_dsName.setSize(DbNames.DATASETNAME_COL_SIZE);
+				t_dsName.setNotNull(true);
+				t_dsName.setIndex(true);
+				dbTable.addColumn(t_dsName);
+		  }
 		DbColumn dbCol;
 		if(base==null && !def.isSecondaryTable()){
 			if(createTypeDiscriminator || def.includesMultipleTypes()){

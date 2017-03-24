@@ -8,6 +8,7 @@ public class DbNames {
 	public static final String BASKETS_TAB_ATTACHMENT_KEY_COL="attachmentKey";
 	public static final String DATASETS_TAB="T_ILI2DB_DATASET";
 	public static final String DATASETS_TAB_DATASETNAME="datasetName";
+	public static final int DATASETNAME_COL_SIZE=200;
 	public static final String ENUM_TAB="T_ILI2DB_ENUM";
 	public static final String ENUM_TAB_THIS_COL="thisClass";
 	public static final String ENUM_TAB_BASE_COL="baseClass";
@@ -39,6 +40,7 @@ public class DbNames {
 	public static final String T_ILI_TID_COL = "T_Ili_Tid";
 	public static final String T_TYPE_COL = "T_Type";
 	public static final String T_BASKET_COL="T_basket";
+	public static final String T_DATASET_COL="T_datasetname";
 	public static final String T_USER_COL = "T_User";
 	public static final String T_CREATE_DATE_COL = "T_CreateDate";
 	public static final String T_LAST_CHANGE_COL = "T_LastChange";

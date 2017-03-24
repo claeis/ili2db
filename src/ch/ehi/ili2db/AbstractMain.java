@@ -275,6 +275,9 @@ public abstract class AbstractMain {
 			}else if(arg.equals("--createBasketCol")){
 				argi++;
 				config.setBasketHandling(config.BASKET_HANDLING_READWRITE);
+			}else if(arg.equals("--createDatasetCol")){
+				argi++;
+				config.setCreateDatasetCols(config.CREATE_DATASET_COL);
 			}else if(arg.equals("--ILIGML20")){
 				argi++;
 				config.setTransferFileFormat(Config.ILIGML20);
@@ -345,6 +348,7 @@ public abstract class AbstractMain {
 					System.err.println("--keepAreaRef          keep arreaRef as additional column on import.");
 					System.err.println("--importTid            read TID into additional column "+DbNames.T_ILI_TID_COL);
 					System.err.println("--createBasketCol      generate "+DbNames.T_BASKET_COL+" column.");
+					System.err.println("--createDatasetCol     generate "+DbNames.T_DATASET_COL+" column (Requires --dataset)");
 					System.err.println("--createFk             generate foreign key constraints.");
 					System.err.println("--createFkIdx          create an index on foreign key columns.");
 					System.err.println("--createUnique         create UNIQUE db constraints.");
