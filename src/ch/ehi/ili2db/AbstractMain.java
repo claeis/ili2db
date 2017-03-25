@@ -264,8 +264,12 @@ public abstract class AbstractMain {
 				config.setDoItfLineTables(true);
 				config.setAreaRef(config.AREA_REF_KEEP);
 			}else if(arg.equals("--skipPolygonBuildingErrors")){
+				// DEPRECATED remove option
 				argi++;
-				config.setIgnorePolygonBuildingErrors(true);
+				config.setSkipGeometryErrors(true);
+			}else if(arg.equals("--skipGeometryErrors")){
+				argi++;
+				config.setSkipGeometryErrors(true);
 			}else if(arg.equals("--keepAreaRef")){
 				argi++;
 				config.setAreaRef(config.AREA_REF_KEEP);
@@ -344,7 +348,7 @@ public abstract class AbstractMain {
 					System.err.println("--sqlEnableNull        create no NOT NULL constraints in db schema.");
 					System.err.println("--strokeArcs           stroke ARCS on import.");
 					System.err.println("--skipPolygonBuilding  keep linetables; don't build polygons on import.");
-					System.err.println("--skipPolygonBuildingErrors  report build polygon errors as info.");
+					System.err.println("--skipGeometryErrors   ignore/do not report geometry errors.");
 					System.err.println("--keepAreaRef          keep arreaRef as additional column on import.");
 					System.err.println("--importTid            read TID into additional column "+DbNames.T_ILI_TID_COL);
 					System.err.println("--createBasketCol      generate "+DbNames.T_BASKET_COL+" column.");

@@ -16,7 +16,8 @@ ili2pg/ili2gpkg 3.7.0 (2017-03-xx)
 -----------------------------
 - fixed: --createEnumTabs creates to many tables 
 - generate BID for baskets read from ITF files as $dataset.$topicname if --dataset is used
-- create dataset column in each table
+- new option --createDatasetCol to create dataset column in each table
+- new option --skipGeometryErrors to ignore geometry errors
 
 ili2pg/ili2gpkg 3.6.2 (2017-03-17)
 -----------------------------
