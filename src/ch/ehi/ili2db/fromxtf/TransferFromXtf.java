@@ -311,7 +311,7 @@ public class TransferFromXtf {
 						EhiLogger.logError("validator config file <"+configFilename+"> not found");
 					}
 				}
-				modelConfig.setConfigValue(ValidationConfig.PARAMETER, ValidationConfig.AREA_OVERLAP_VALIDATION, config.isAreaOverlapsValidation()?ValidationConfig.ON:ValidationConfig.OFF);
+				modelConfig.setConfigValue(ValidationConfig.PARAMETER, ValidationConfig.AREA_OVERLAP_VALIDATION, config.isDisableAreaValidation()?ValidationConfig.OFF:null);
 				modelConfig.setConfigValue(ValidationConfig.PARAMETER, ValidationConfig.DEFAULT_GEOMETRY_TYPE_VALIDATION, config.isSkipGeometryErrors()?ValidationConfig.OFF:null);
 				modelConfig.setConfigValue(ValidationConfig.PARAMETER, ValidationConfig.ALLOW_ONLY_MULTIPLICITY_REDUCTION, config.isOnlyMultiplicityReduction()?ValidationConfig.ON:null);
 				IoxLogging errHandler=new ch.interlis.iox_j.logging.Log2EhiLogger();

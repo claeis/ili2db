@@ -171,6 +171,9 @@ public abstract class AbstractMain {
 			}else if(arg.equals("--disableValidation")){
 				argi++;
 				config.setValidation(false);
+			}else if(arg.equals("--disableAreaValidation")){
+				argi++;
+				config.setDisableAreaValidation(true);
 			}else if(arg.equals("--createSingleEnumTab")){
 				argi++;
 				config.setCreateEnumDefs(config.CREATE_ENUM_DEFS_SINGLE);
@@ -314,6 +317,7 @@ public abstract class AbstractMain {
 					printConnectOptions();
 					System.err.println("--validConfig file     Config file for validation.");
 					System.err.println("--disableValidation    Disable validation of data.");
+					System.err.println("--disableAreaValidation Disable AREA validation.");
 					System.err.println("--deleteData           on schema/data import, delete existing data from existing tables.");
 					System.err.println("--defaultSrsAuth  auth Default SRS authority "+config.getDefaultSrsAuthority());
 					System.err.println("--defaultSrsCode  code Default SRS code "+config.getDefaultSrsCode());

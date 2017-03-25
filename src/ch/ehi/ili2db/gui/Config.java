@@ -501,13 +501,6 @@ public class Config extends Settings {
 	public void setTransferFileFormat(String transferFileFormat) {
 		this.transferFileFormat = transferFileFormat;
 	}
-	private boolean areaOverlapsValidation=true;
-	public boolean isAreaOverlapsValidation() {
-		return areaOverlapsValidation;
-	}
-	public void setAreaOverlapsValidation(boolean areaOverlapsValidation) {
-		this.areaOverlapsValidation = areaOverlapsValidation;
-	}
 	private boolean onlyMultiplicityReduction=false;
 	public boolean isOnlyMultiplicityReduction() {
 		return onlyMultiplicityReduction;
@@ -522,4 +515,11 @@ public class Config extends Settings {
 	public void setSkipGeometryErrors(boolean skipGeometryTypeValidation) {
 		this.skipGeometryErrors = skipGeometryTypeValidation;
 	}
+	public boolean isDisableAreaValidation() {
+		return disableAreaValidation;
+	}
+	public void setDisableAreaValidation(boolean disableAreaValidation) {
+		this.disableAreaValidation = disableAreaValidation;
+	}
+	private boolean disableAreaValidation=false;
 }

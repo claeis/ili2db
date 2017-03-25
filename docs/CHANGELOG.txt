@@ -18,6 +18,7 @@ ili2pg/ili2gpkg 3.7.0 (2017-03-xx)
 - generate BID for baskets read from ITF files as $dataset.$topicname if --dataset is used
 - new option --createDatasetCol to create dataset column in each table
 - new option --skipGeometryErrors to ignore geometry errors
+- new option --disableAreaValidation to disable AREA validation
 
 ili2pg/ili2gpkg 3.6.2 (2017-03-17)
 -----------------------------
