@@ -74,6 +74,7 @@ import ch.interlis.iox.IoxWriter;
 import ch.interlis.iox_j.EndBasketEvent;
 import ch.interlis.iox_j.EndTransferEvent;
 import ch.interlis.iox_j.ObjectEvent;
+import ch.interlis.iox_j.PipelinePool;
 import ch.interlis.iox_j.StartBasketEvent;
 import ch.interlis.iox_j.StartTransferEvent;
 import ch.interlis.iox_j.logging.LogEventFactory;
@@ -141,6 +142,9 @@ public class TransferToXtf {
 					EhiLogger.logError("validator config file <"+configFilename+"> not found");
 				}
 			}
+			modelConfig.setConfigValue(ValidationConfig.PARAMETER, ValidationConfig.AREA_OVERLAP_VALIDATION, config.isDisableAreaValidation()?ValidationConfig.OFF:null);
+			modelConfig.setConfigValue(ValidationConfig.PARAMETER, ValidationConfig.DEFAULT_GEOMETRY_TYPE_VALIDATION, config.isSkipGeometryErrors()?ValidationConfig.OFF:null);
+			modelConfig.setConfigValue(ValidationConfig.PARAMETER, ValidationConfig.ALLOW_ONLY_MULTIPLICITY_REDUCTION, config.isOnlyMultiplicityReduction()?ValidationConfig.ON:null);
 			IoxLogging errHandler=new ch.interlis.iox_j.logging.Log2EhiLogger();
 			LogEventFactory errFactory=new LogEventFactory();
 			errFactory.setDataSource(filename);
@@ -157,7 +161,8 @@ public class TransferToXtf {
 					}
 				}
 			}
-			validator=new ch.interlis.iox_j.validator.Validator(td,modelConfig, errHandler, errFactory, config);
+			PipelinePool pipelinePool=new PipelinePool();
+			validator=new ch.interlis.iox_j.validator.Validator(td,modelConfig, errHandler, errFactory, pipelinePool,config);
 			
 		}
 		

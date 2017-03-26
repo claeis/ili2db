@@ -19,6 +19,7 @@ ili2pg/ili2gpkg 3.7.0 (2017-03-xx)
 - new option --createDatasetCol to create dataset column in each table
 - new option --skipGeometryErrors to ignore geometry errors
 - new option --disableAreaValidation to disable AREA validation
+- new option --forceTypeValidation  to restrict customization of validation related to \"multiplicity\"
 
 ili2pg/ili2gpkg 3.6.2 (2017-03-17)
 -----------------------------
