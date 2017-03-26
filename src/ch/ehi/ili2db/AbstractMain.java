@@ -171,6 +171,12 @@ public abstract class AbstractMain {
 			}else if(arg.equals("--disableValidation")){
 				argi++;
 				config.setValidation(false);
+			}else if(arg.equals("--disableAreaValidation")){
+				argi++;
+				config.setDisableAreaValidation(true);
+			}else if(arg.equals("--forceTypeValidation")){
+				argi++;
+				config.setOnlyMultiplicityReduction(true);
 			}else if(arg.equals("--createSingleEnumTab")){
 				argi++;
 				config.setCreateEnumDefs(config.CREATE_ENUM_DEFS_SINGLE);
@@ -264,8 +270,12 @@ public abstract class AbstractMain {
 				config.setDoItfLineTables(true);
 				config.setAreaRef(config.AREA_REF_KEEP);
 			}else if(arg.equals("--skipPolygonBuildingErrors")){
+				// DEPRECATED remove option
 				argi++;
-				config.setIgnorePolygonBuildingErrors(true);
+				config.setSkipGeometryErrors(true);
+			}else if(arg.equals("--skipGeometryErrors")){
+				argi++;
+				config.setSkipGeometryErrors(true);
 			}else if(arg.equals("--keepAreaRef")){
 				argi++;
 				config.setAreaRef(config.AREA_REF_KEEP);
@@ -275,6 +285,9 @@ public abstract class AbstractMain {
 			}else if(arg.equals("--createBasketCol")){
 				argi++;
 				config.setBasketHandling(config.BASKET_HANDLING_READWRITE);
+			}else if(arg.equals("--createDatasetCol")){
+				argi++;
+				config.setCreateDatasetCols(config.CREATE_DATASET_COL);
 			}else if(arg.equals("--ILIGML20")){
 				argi++;
 				config.setTransferFileFormat(Config.ILIGML20);
@@ -307,6 +320,8 @@ public abstract class AbstractMain {
 					printConnectOptions();
 					System.err.println("--validConfig file     Config file for validation.");
 					System.err.println("--disableValidation    Disable validation of data.");
+					System.err.println("--disableAreaValidation Disable AREA validation.");
+					System.err.println("--forceTypeValidation  restrict customization of validation related to \"multiplicity\"");
 					System.err.println("--deleteData           on schema/data import, delete existing data from existing tables.");
 					System.err.println("--defaultSrsAuth  auth Default SRS authority "+config.getDefaultSrsAuthority());
 					System.err.println("--defaultSrsCode  code Default SRS code "+config.getDefaultSrsCode());
@@ -341,10 +356,11 @@ public abstract class AbstractMain {
 					System.err.println("--sqlEnableNull        create no NOT NULL constraints in db schema.");
 					System.err.println("--strokeArcs           stroke ARCS on import.");
 					System.err.println("--skipPolygonBuilding  keep linetables; don't build polygons on import.");
-					System.err.println("--skipPolygonBuildingErrors  report build polygon errors as info.");
+					System.err.println("--skipGeometryErrors   ignore/do not report geometry errors.");
 					System.err.println("--keepAreaRef          keep arreaRef as additional column on import.");
 					System.err.println("--importTid            read TID into additional column "+DbNames.T_ILI_TID_COL);
 					System.err.println("--createBasketCol      generate "+DbNames.T_BASKET_COL+" column.");
+					System.err.println("--createDatasetCol     generate "+DbNames.T_DATASET_COL+" column (Requires --dataset)");
 					System.err.println("--createFk             generate foreign key constraints.");
 					System.err.println("--createFkIdx          create an index on foreign key columns.");
 					System.err.println("--createUnique         create UNIQUE db constraints.");

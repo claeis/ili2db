@@ -51,6 +51,7 @@ public class AbstractRecordConverter {
 	protected boolean sqlEnableNull=true;
 	protected boolean strokeArcs=true;
 	protected boolean createBasketCol=false;
+	protected boolean createDatasetCol=false;
 	protected boolean createItfLineTables=false;
 	protected boolean createItfAreaRef=false;
 	protected boolean createFk=false;
@@ -95,6 +96,7 @@ public class AbstractRecordConverter {
 		createIliTidCol=config.TID_HANDLING_PROPERTY.equals(config.getTidHandling());
 		
 		createBasketCol=config.BASKET_HANDLING_READWRITE.equals(config.getBasketHandling());
+		createDatasetCol=config.CREATE_DATASET_COL.equals(config.getCreateDatasetCols());
 		
 		isIli1Model=td1.getIli1Format()!=null;
 		createItfLineTables=isIli1Model && config.getDoItfLineTables();

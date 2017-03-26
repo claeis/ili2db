@@ -524,9 +524,11 @@ public class Ili2db {
 							if(config.getDoItfLineTables()){
 								ioxReader=new ItfReader(in);
 								((ItfReader)ioxReader).setModel(td);		
+								((ItfReader)ioxReader).setBidPrefix(config.getDatasetName());		
 							}else{
-								ioxReader=new ItfReader2(in,config.ignorePolygonBuildingErrors());
+								ioxReader=new ItfReader2(in,config.isSkipGeometryErrors());
 								((ItfReader2)ioxReader).setModel(td);		
+								((ItfReader2)ioxReader).setBidPrefix(config.getDatasetName());		
 							}
 						}else{
 							ioxReader=new XtfReader(in);
@@ -590,9 +592,11 @@ public class Ili2db {
 									if(config.getDoItfLineTables()){
 										ioxReader=new ItfReader(new java.io.File(inputFilename));
 										((ItfReader)ioxReader).setModel(td);		
+										((ItfReader)ioxReader).setBidPrefix(config.getDatasetName());		
 									}else{
-										ioxReader=new ItfReader2(new java.io.File(inputFilename),config.ignorePolygonBuildingErrors());
+										ioxReader=new ItfReader2(new java.io.File(inputFilename),config.isSkipGeometryErrors());
 										((ItfReader2)ioxReader).setModel(td);		
+										((ItfReader2)ioxReader).setBidPrefix(config.getDatasetName());		
 									}
 								}else{
 									ioxReader=new XtfReader(new java.io.File(inputFilename));
@@ -1070,6 +1074,7 @@ public class Ili2db {
 	private static void logGeneralInfo(Config config) {
 		EhiLogger.logState(config.getSender());
 		EhiLogger.logState("ili2c-"+ch.interlis.ili2c.Main.getVersion());
+		EhiLogger.logState("iox-ili-"+ch.interlis.iox_j.IoxUtility.getVersion());
 		EhiLogger.logState("java.version "+System.getProperty("java.version"));
 		EhiLogger.logState("user.name <"+System.getProperty("user.name")+">");
 		EhiLogger.logState("maxMemory "+java.lang.Runtime.getRuntime().maxMemory()/1024L+" KB");

@@ -79,6 +79,7 @@ import ch.interlis.iox.IoxReader;
 import ch.interlis.iox.StartTransferEvent;
 import ch.interlis.iox_j.IoxInvalidDataException;
 import ch.interlis.iox_j.ObjectEvent;
+import ch.interlis.iox_j.PipelinePool;
 import ch.interlis.iox_j.StartBasketEvent;
 import ch.interlis.iox_j.logging.LogEventFactory;
 import ch.interlis.iox_j.validator.ValidationConfig;
@@ -106,7 +107,9 @@ public class TransferFromXtf {
 	private boolean createGenericStructRef=false;
 	private boolean readIliTid=false;
 	private boolean createBasketCol=false;
+	private boolean createDatasetCol=false;
 	private String xtffilename=null;
+	private String datasetName=null;
 	private String attachmentKey=null;
 	private boolean doItfLineTables=false;
 	private boolean createItfLineTables=false;
@@ -154,10 +157,12 @@ public class TransferFromXtf {
 		createGenericStructRef=config.STRUCT_MAPPING_GENERICREF.equals(config.getStructMapping());
 		readIliTid=config.TID_HANDLING_PROPERTY.equals(config.getTidHandling());
 		createBasketCol=config.BASKET_HANDLING_READWRITE.equals(config.getBasketHandling());
+		createDatasetCol=config.CREATE_DATASET_COL.equals(config.getCreateDatasetCols());
 		doItfLineTables=config.isItfTransferfile();
 		createItfLineTables=doItfLineTables && config.getDoItfLineTables();
 		xtffilename=config.getXtffile();
 		functionCode=function;
+		datasetName=config.getDatasetName();
 	}
 		
 	public void doit(IoxReader reader,Config config,HashSet<BasketStat> stat)
@@ -216,7 +221,7 @@ public class TransferFromXtf {
 			long objCount=0;
 			boolean referrs=false;
 			
-			recConv=new FromXtfRecordConverter(td,ili2sqlName,tag2class,config,idGen,geomConv,conn,dbusr,isItfReader,oidPool,trafoConfig,class2wrapper);
+			recConv=new FromXtfRecordConverter(td,ili2sqlName,tag2class,config,idGen,geomConv,conn,dbusr,isItfReader,oidPool,trafoConfig,class2wrapper,config.getDatasetName());
 			
 			if(functionCode==Config.FC_DELETE || functionCode==Config.FC_REPLACE){
 				// delete existing data base on basketSqlId
@@ -306,14 +311,20 @@ public class TransferFromXtf {
 						EhiLogger.logError("validator config file <"+configFilename+"> not found");
 					}
 				}
+				modelConfig.setConfigValue(ValidationConfig.PARAMETER, ValidationConfig.AREA_OVERLAP_VALIDATION, config.isDisableAreaValidation()?ValidationConfig.OFF:null);
+				modelConfig.setConfigValue(ValidationConfig.PARAMETER, ValidationConfig.DEFAULT_GEOMETRY_TYPE_VALIDATION, config.isSkipGeometryErrors()?ValidationConfig.OFF:null);
+				modelConfig.setConfigValue(ValidationConfig.PARAMETER, ValidationConfig.ALLOW_ONLY_MULTIPLICITY_REDUCTION, config.isOnlyMultiplicityReduction()?ValidationConfig.ON:null);
 				IoxLogging errHandler=new ch.interlis.iox_j.logging.Log2EhiLogger();
 				LogEventFactory errFactory=new LogEventFactory();
 				errFactory.setDataSource(xtffilename);
 				if(createItfLineTables){
 					config.setValue(ch.interlis.iox_j.validator.Validator.CONFIG_DO_ITF_LINETABLES, ch.interlis.iox_j.validator.Validator.CONFIG_DO_ITF_LINETABLES_DO);
 				}
-				validator=new ch.interlis.iox_j.validator.Validator(td,modelConfig, errHandler, errFactory, config);
-				
+				PipelinePool pipelinePool=new PipelinePool();
+				validator=new ch.interlis.iox_j.validator.Validator(td,modelConfig, errHandler, errFactory, pipelinePool,config);				
+				if(reader instanceof ItfReader2){
+					((ItfReader2) reader).setIoxDataPool(pipelinePool);
+				}
 			}
 			
 			StartBasketEvent basket=null;
@@ -379,9 +390,11 @@ public class TransferFromXtf {
 				        	ArrayList<IoxInvalidDataException> dataerrs = ((ItfReader2) reader).getDataErrs();
 				        	if(dataerrs.size()>0){
 				        		if(!skipBasket){
-					        		for(IoxInvalidDataException dataerr:dataerrs){
-					        			EhiLogger.logError(dataerr);
-					        		}
+				        			if(!config.isSkipGeometryErrors()){
+						        		for(IoxInvalidDataException dataerr:dataerrs){
+						        			EhiLogger.logError(dataerr);
+						        		}
+				        			}
 				        		}
 				        		((ItfReader2) reader).clearDataErrs();
 				        	}
@@ -1331,6 +1344,10 @@ public class TransferFromXtf {
 				ps.setLong(valuei, basketSqlId);
 				valuei++;
 			}
+			if (createDatasetCol) {
+				ps.setString(valuei, datasetName);
+				valuei++;
+			}
 			
 			if(readIliTid){
 				// import TID from transfer file
@@ -1637,6 +1654,12 @@ public class TransferFromXtf {
 			stmt.append(sep);
 			sep=",";
 			stmt.append(DbNames.T_BASKET_COL);
+			values.append(",?");
+		}
+		if(createDatasetCol){
+			stmt.append(sep);
+			sep=",";
+			stmt.append(DbNames.T_DATASET_COL);
 			values.append(",?");
 		}
 		

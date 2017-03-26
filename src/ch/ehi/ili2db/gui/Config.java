@@ -18,6 +18,8 @@ public class Config extends Settings {
 	public static final String CREATE_ENUM_DEFS_MULTI="multiTable";
 	public static final String CREATE_ENUM_COLS=PREFIX+".createEnumCols";
 	public static final String CREATE_ENUM_TXT_COL="addTxtCol";
+	public static final String CREATE_DATASET_COLS=PREFIX+".createDatasetCols";
+	public static final String CREATE_DATASET_COL="addDatasetCol";
 	private static final String CREATE_FK=PREFIX+".createForeignKey";
 	public static final String CREATE_FK_YES="yes";
 	private static final String CREATE_FKIDX=PREFIX+".createForeignKeyIndex";
@@ -37,8 +39,6 @@ public class Config extends Settings {
 	public static final String MULTISURFACE_TRAFO_COALESCE="coalesce";
 	public static final String MULTILINGUAL_TRAFO=PREFIX+".multilingualTrafo";
 	public static final String MULTILINGUAL_TRAFO_EXPAND="expand";
-	public static final String POLYGON_BUILDING_ERRORS=PREFIX+".polygonBuildingErrors";
-	public static final String POLYGON_BUILDING_ERRORS_IGNORE="reportAndSkip";
 	public static final String UNIQUE_CONSTRAINTS=PREFIX+".uniqueConstraints";
 	public static final String UNIQUE_CONSTRAINTS_CREATE="create";
 	public static final String NUMERIC_CHECK_CONSTRAINTS=PREFIX+".numericCheckConstraints";
@@ -273,6 +273,12 @@ public class Config extends Settings {
 	public void setCreateEnumCols(String value) {
 		setValue(CREATE_ENUM_COLS,value);
 	}
+	public String getCreateDatasetCols() {
+		return getValue(CREATE_DATASET_COLS);
+	}
+	public void setCreateDatasetCols(String value) {
+		setValue(CREATE_DATASET_COLS,value);
+	}
 	public String getCreateFk() {
 		return getValue(CREATE_FK);
 	}
@@ -362,12 +368,6 @@ public class Config extends Settings {
 	}
 	public void setDoItfLineTables(boolean value) {
 		setValue(DO_ITF_LINE_TABLES,value?"True":"False");
-	}
-	public void setIgnorePolygonBuildingErrors(boolean ignore) {
-		setValue(POLYGON_BUILDING_ERRORS,ignore?POLYGON_BUILDING_ERRORS_IGNORE:null);
-	}
-	public boolean ignorePolygonBuildingErrors() {
-		return POLYGON_BUILDING_ERRORS_IGNORE.equals(getValue(POLYGON_BUILDING_ERRORS));
 	}
 	public void setCreateUniqueConstraints(boolean ignore) {
 		setValue(UNIQUE_CONSTRAINTS,ignore?UNIQUE_CONSTRAINTS_CREATE:null);
@@ -501,4 +501,25 @@ public class Config extends Settings {
 	public void setTransferFileFormat(String transferFileFormat) {
 		this.transferFileFormat = transferFileFormat;
 	}
+	private boolean onlyMultiplicityReduction=false;
+	public boolean isOnlyMultiplicityReduction() {
+		return onlyMultiplicityReduction;
+	}
+	public void setOnlyMultiplicityReduction(boolean onlyMultiplicityReduction) {
+		this.onlyMultiplicityReduction = onlyMultiplicityReduction;
+	}
+	private boolean skipGeometryErrors=false;
+	public boolean isSkipGeometryErrors() {
+		return skipGeometryErrors;
+	}
+	public void setSkipGeometryErrors(boolean skipGeometryTypeValidation) {
+		this.skipGeometryErrors = skipGeometryTypeValidation;
+	}
+	public boolean isDisableAreaValidation() {
+		return disableAreaValidation;
+	}
+	public void setDisableAreaValidation(boolean disableAreaValidation) {
+		this.disableAreaValidation = disableAreaValidation;
+	}
+	private boolean disableAreaValidation=false;
 }
