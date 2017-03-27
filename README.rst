@@ -45,4 +45,4 @@ Documentation
 =============
 User documentation `<docs/ili2db.rst>`_
 
-Developer documentation `<decdocs/README.rst>`_
+Developer documentation `<devdocs/README.rst>`_
