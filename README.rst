@@ -43,4 +43,6 @@ mogis.gpkg path/to/dm01av.ili``
 
 Documentation
 =============
-`<docs/ili2db.rst>`_
+User documentation `<docs/ili2db.rst>`_
+
+Developer documentation `<decdocs/README.rst>`_
