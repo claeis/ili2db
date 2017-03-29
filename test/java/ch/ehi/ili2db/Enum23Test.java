@@ -156,6 +156,25 @@ public class Enum23Test {
 		Assert.assertFalse(DbUtility.tableExists(jdbcConnection, new DbTableName(DBSCHEMA,"classa1_attr4")));
 	}
 	@Test
+	public void importExtended() throws Exception
+	{
+        stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");
+        
+		File data=new File("test/data/Enum23/Enum23b.ili");
+		Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+		config.setFunction(Config.FC_SCHEMAIMPORT);
+		config.setCreateFk(config.CREATE_FK_YES);
+		config.setTidHandling(Config.TID_HANDLING_PROPERTY);
+		config.setBasketHandling(config.BASKET_HANDLING_READWRITE);
+		config.setCreateEnumDefs(Config.CREATE_ENUM_DEFS_MULTI);
+		config.setCatalogueRefTrafo(null);
+		config.setMultiSurfaceTrafo(null);
+		config.setMultilingualTrafo(null);
+		config.setInheritanceTrafo(Config.INHERITANCE_TRAFO_SMART1);
+		Ili2db.readSettingsFromDb(config);
+		Ili2db.run(config,null);
+	}
+	@Test
 	public void importSingleTable() throws Exception
 	{
         stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");
