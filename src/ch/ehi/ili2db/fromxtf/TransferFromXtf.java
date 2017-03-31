@@ -33,6 +33,7 @@ import ch.ehi.ili2db.base.DbUtility;
 import ch.ehi.ili2db.base.Ili2cUtility;
 import ch.ehi.ili2db.base.Ili2db;
 import ch.ehi.ili2db.base.Ili2dbException;
+import ch.ehi.ili2db.converter.AbstractRecordConverter;
 import ch.ehi.ili2db.converter.ConverterException;
 import ch.ehi.ili2db.converter.SqlColumnConverter;
 import ch.ehi.ili2db.fromili.TransferFromIli;
@@ -1151,7 +1152,11 @@ public class TransferFromXtf {
 			sep=" UNION ";
 		}
 		ret.append(") r0");
-		ret.append(" WHERE r0."+DbNames.T_ILI_TID_COL+"=?");
+		if(( aclass instanceof AbstractClassDef)  && ((AbstractClassDef) aclass).getOid()!=null && AbstractRecordConverter.isUuidOid(td, ((AbstractClassDef) aclass).getOid())){
+			ret.append(" WHERE r0."+DbNames.T_ILI_TID_COL+"=cast(? as uuid)");
+		}else{
+			ret.append(" WHERE r0."+DbNames.T_ILI_TID_COL+"=?");
+		}
 		return ret.toString();
 	}
 	private void readObjectSqlIds(boolean noTypeCol,DbTableName sqltablename, long basketsqlid) {
