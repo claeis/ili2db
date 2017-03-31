@@ -1,0 +1,23 @@
+INTERLIS 2.3;
+
+MODEL Enum23b
+  AT "mailto:ce@eisenhutinformatik.ch" VERSION "2017-03-29" =
+
+  DOMAIN
+    Enum1 = (Test1, Test2, Test3 (Test3a, Test3b));
+    Enum2 EXTENDS Enum1 = (Test2 (Test2a, Test2b));
+    
+  TOPIC TestA =
+    
+    CLASS ClassA1 =
+    	attr1 : Enum1;
+    END ClassA1;
+    
+    CLASS ClassA2 EXTENDS ClassA1 =
+    	attr1 (EXTENDED): Enum2;
+    END ClassA2;
+    
+  END TestA;
+  
+  
+END Enum23b.

@@ -3,6 +3,7 @@ package ch.ehi.ili2db.toxtf;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Iterator;
 
@@ -46,6 +47,7 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 	private Connection conn=null;
 	private SqlColumnConverter geomConv=null;
 	private SqlidPool sqlid2xtfid=null;
+	final java.util.Date PURE_GREGORIAN_CALENDAR = new java.util.Date(Long.MIN_VALUE);
 	public ToXtfRecordConverter(TransferDescription td1, NameMapping ili2sqlName,
 			Config config, DbIdGen idGen1,SqlColumnConverter geomConv1,Connection conn1,SqlidPool sqlidPool,TrafoConfig trafoConfig,Viewable2TableMapping class2wrapper1) {
 		super(td1, ili2sqlName, config, idGen1,trafoConfig,class2wrapper1);
@@ -430,6 +432,9 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 				valuei++;
 				if(!rs.wasNull()){
 					java.text.SimpleDateFormat fmt=new java.text.SimpleDateFormat("yyyyMMdd");
+					GregorianCalendar date=new GregorianCalendar();
+					date.setGregorianChange(PURE_GREGORIAN_CALENDAR);
+					fmt.setCalendar(date);
 					iomObj.setattrvalue(attrName,fmt.format(value));
 				}
 			}else if( attr.isDomainIli2Date()) {
@@ -437,6 +442,9 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 				valuei++;
 				if(!rs.wasNull()){
 					java.text.SimpleDateFormat fmt=new java.text.SimpleDateFormat("yyyy-MM-dd");
+					GregorianCalendar date=new GregorianCalendar();
+					date.setGregorianChange(PURE_GREGORIAN_CALENDAR);
+					fmt.setCalendar(date);
 					iomObj.setattrvalue(attrName,fmt.format(value));
 				}
 			}else if( attr.isDomainIli2Time()) {
@@ -451,6 +459,9 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 				valuei++;
 				if(!rs.wasNull()){
 					java.text.SimpleDateFormat fmt=new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS"); // with timezone: yyyy-MM-dd'T'HH:mm:ss.SSSZ 
+					GregorianCalendar date=new GregorianCalendar();
+					date.setGregorianChange(PURE_GREGORIAN_CALENDAR);
+					fmt.setCalendar(date);
 					iomObj.setattrvalue(attrName,fmt.format(value));
 				}
 			}else{

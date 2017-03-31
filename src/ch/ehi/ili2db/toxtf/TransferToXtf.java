@@ -242,7 +242,7 @@ public class TransferToXtf {
 		if(topicName!=null){
 			Topic topic=getTopicDef(td,topicName);
 			if(topic==null){
-				throw new IoxException("unkonw Topic "+topicName+" in table "+sqlName);
+				throw new IoxException("unknown Topic "+topicName+" in table "+sqlName);
 			}
 			basketXtfId.append(bid);
 			return topic;
