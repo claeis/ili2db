@@ -1104,7 +1104,11 @@ public class TransferFromXtf {
 
 			dbstmt = conn.prepareStatement(stmt);
 			dbstmt.clearParameters();
-			dbstmt.setString(1, xtfid);
+			if(( xclass instanceof AbstractClassDef)  && ((AbstractClassDef) xclass).getOid()!=null && AbstractRecordConverter.isUuidOid(td, ((AbstractClassDef) xclass).getOid())){
+				dbstmt.setObject(1, geomConv.fromIomUuid(xtfid));
+			}else{
+				dbstmt.setString(1, xtfid);
+			}
 			java.sql.ResultSet rs = dbstmt.executeQuery();
 			if(rs.next()) {
 				sqlid = rs.getLong(1);
@@ -1114,6 +1118,8 @@ public class TransferFromXtf {
 				return null;
 			}
 		} catch (java.sql.SQLException ex) {
+			EhiLogger.logError("failed to query " + xclass.getScopedName(null),	ex);
+		} catch (ConverterException ex) {
 			EhiLogger.logError("failed to query " + xclass.getScopedName(null),	ex);
 		} finally {
 			if (dbstmt != null) {
@@ -1152,11 +1158,7 @@ public class TransferFromXtf {
 			sep=" UNION ";
 		}
 		ret.append(") r0");
-		if(( aclass instanceof AbstractClassDef)  && ((AbstractClassDef) aclass).getOid()!=null && AbstractRecordConverter.isUuidOid(td, ((AbstractClassDef) aclass).getOid())){
-			ret.append(" WHERE r0."+DbNames.T_ILI_TID_COL+"=cast(? as uuid)");
-		}else{
-			ret.append(" WHERE r0."+DbNames.T_ILI_TID_COL+"=?");
-		}
+		ret.append(" WHERE r0."+DbNames.T_ILI_TID_COL+"=?");
 		return ret.toString();
 	}
 	private void readObjectSqlIds(boolean noTypeCol,DbTableName sqltablename, long basketsqlid) {
