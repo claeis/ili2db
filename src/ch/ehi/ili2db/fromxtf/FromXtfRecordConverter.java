@@ -34,6 +34,7 @@ import ch.interlis.ili2c.metamodel.AbstractClassDef;
 import ch.interlis.ili2c.metamodel.AreaType;
 import ch.interlis.ili2c.metamodel.AssociationDef;
 import ch.interlis.ili2c.metamodel.AttributeDef;
+import ch.interlis.ili2c.metamodel.BlackboxType;
 import ch.interlis.ili2c.metamodel.CompositionType;
 import ch.interlis.ili2c.metamodel.CoordType;
 import ch.interlis.ili2c.metamodel.EnumerationType;
@@ -984,6 +985,25 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 					Holder<Integer> valueiRef=new Holder<Integer>(valuei);
 					setReferenceColumn(ps,((ReferenceType) type).getReferred(),refoid,valueiRef);
 					valuei=valueiRef.value;
+				}else if(type instanceof BlackboxType){
+					String value=iomObj.getattrvalue(attrName);
+					if(((BlackboxType)type).getKind()==BlackboxType.eXML){
+						if(value==null){
+							 geomConv.setXmlNull(ps, valuei);
+						}else{
+							 Object toInsertXml = geomConv.fromIomXml(value);
+							 ps.setObject(valuei, toInsertXml);
+						}
+						valuei++;
+					}else{
+						if(value==null){
+							 geomConv.setBlobNull(ps, valuei);
+						}else{
+							 Object toInsertBlob = geomConv.fromIomBlob(value);
+							 ps.setObject(valuei, toInsertBlob);
+						}
+						valuei++;
+					}
 				}else{
 					String value=iomObj.getattrvalue(attrName);
 					if(value!=null){

@@ -22,12 +22,14 @@ import ch.ehi.ili2db.converter.AbstractWKBColumnConverter;
 import ch.ehi.ili2db.converter.ConverterException;
 import ch.ehi.ili2db.gui.Config;
 
+import java.io.IOException;
 import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Connection;
 import java.sql.Time;
 import java.sql.Timestamp;
+import java.sql.Types;
 
 import com.vividsolutions.jts.io.ParseException;
 
@@ -107,6 +109,25 @@ public class GpkgColumnConverter extends AbstractWKBColumnConverter {
 			throws java.sql.SQLException, ConverterException
 	{
 		return uuid;
+	}
+	@Override
+	public Object fromIomXml(String xml) 
+			throws java.sql.SQLException, ConverterException
+	{
+		return xml;
+	}
+	@Override
+	public Object fromIomBlob(String blob) 
+			throws java.sql.SQLException, ConverterException
+	{
+
+	    byte[] bytearray;
+		try {
+			bytearray = new sun.misc.BASE64Decoder().decodeBuffer(blob);
+		} catch (IOException e) {
+			throw new ConverterException(e);
+		}
+		return bytearray;
 	}
 	@Override
 	public java.lang.Object fromIomSurface(
@@ -226,6 +247,18 @@ public class GpkgColumnConverter extends AbstractWKBColumnConverter {
 					throw new ConverterException(e);
 				}
 			}
+		@Override
+		public String toIomXml(Object obj) throws java.sql.SQLException,
+				ConverterException {
+			return (String)obj;
+		}
+
+		@Override
+		public String toIomBlob(Object obj) throws java.sql.SQLException,
+				ConverterException {
+		    String s = new sun.misc.BASE64Encoder().encode((byte[])obj);
+		    return s;
+		}
 
 		@Override
 		public void setTimestamp(PreparedStatement ps, int valuei,
@@ -250,6 +283,16 @@ public class GpkgColumnConverter extends AbstractWKBColumnConverter {
 			java.text.DateFormat dfm = new java.text.SimpleDateFormat("HH:mm:ss.SSS");
 			String stmp=dfm.format(time);
 			ps.setString(valuei, stmp);
+		}
+		@Override
+		public void setXmlNull(PreparedStatement stmt, int parameterIndex)
+				throws SQLException {
+			 stmt.setNull(parameterIndex, Types.VARCHAR);
+		}
+		@Override
+		public void setBlobNull(PreparedStatement stmt, int parameterIndex)
+				throws SQLException {
+			 stmt.setNull(parameterIndex, Types.VARBINARY);
 		}
 
 }
