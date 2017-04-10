@@ -55,6 +55,7 @@ import ch.ehi.sqlgen.repository.DbSchema;
 import ch.ehi.sqlgen.repository.DbTableName;
 import ch.interlis.ili2c.config.Configuration;
 import ch.interlis.ili2c.metamodel.Element;
+import ch.interlis.ili2c.metamodel.Ili2cMetaAttrs;
 import ch.interlis.ili2c.metamodel.TransferDescription;
 import ch.interlis.ilirepository.IliFiles;
 import ch.interlis.iom_j.iligml.Iligml10Writer;
@@ -394,11 +395,20 @@ public class Ili2db {
 				
 				// compile required ili files
 				setupIli2cPathmap(config, appHome, inputFilename,conn);
+			    Ili2cMetaAttrs ili2cMetaAttrs=new Ili2cMetaAttrs();
+			    ch.interlis.ili2c.config.Configuration ili2cConfig=null;
+				try {
+					ili2cConfig = (ch.interlis.ili2c.config.Configuration)modelv.clone();
+				} catch (CloneNotSupportedException e1) {
+					throw new Ili2dbException(e1);
+				}
+			    setupIli2cMetaAttrs(ili2cMetaAttrs,config,ili2cConfig);
+				
 				EhiLogger.logState("compile models...");
-				modelv.setAutoCompleteModelList(true);
-				modelv.setGenerateWarnings(false);
-				TransferDescription td = ch.interlis.ili2c.Main.runCompiler(modelv,
-						config);
+				ili2cConfig.setAutoCompleteModelList(true);
+				ili2cConfig.setGenerateWarnings(false);
+				TransferDescription td = ch.interlis.ili2c.Main.runCompiler(ili2cConfig,
+						config,ili2cMetaAttrs);
 				if (td == null) {
 					throw new Ili2dbException("compiler failed");
 				}
@@ -424,7 +434,8 @@ public class Ili2db {
 						modelNames.add(m);				
 					}
 				}
-				java.util.List<Element> eles=ms.getModelElements(modelNames,td, td.getIli1Format()!=null && config.getDoItfLineTables(),Config.CREATE_ENUM_DEFS_MULTI.equals(config.getCreateEnumDefs()));
+				// use models explicitly given by user --models, --topics and/or as read from transferfile
+				java.util.List<Element> eles=ms.getModelElements(modelNames,td, td.getIli1Format()!=null && config.getDoItfLineTables(),Config.CREATE_ENUM_DEFS_MULTI.equals(config.getCreateEnumDefs()),config);
 				Viewable2TableMapping class2wrapper=Viewable2TableMapper.getClass2TableMapping(config,trafoConfig,eles,mapping);
 
 				Generator gen=null;
@@ -680,6 +691,23 @@ public class Ili2db {
 		
 
 	}
+	private static void setupIli2cMetaAttrs(Ili2cMetaAttrs ili2cMetaAttrs,
+			Config config,ch.interlis.ili2c.config.Configuration modelv) {
+
+		String ili2translation=config.getIli1Translation();
+		if(ili2translation!=null){
+		    String modelNames[]=ili2translation.split("=");
+		    String translatedModelName=modelNames[0];
+		    String originLanguageModelName=modelNames[1];
+		    if(translatedModelName!=null && originLanguageModelName!=null){
+		    	ili2cMetaAttrs.setMetaAttrValue(translatedModelName, Ili2cMetaAttrs.ILI2C_TRANSLATION_OF, originLanguageModelName);
+		    	if(modelv!=null){
+			    	modelv.addFileEntry(new ch.interlis.ili2c.config.FileEntry(originLanguageModelName,ch.interlis.ili2c.config.FileEntryKind.ILIMODELFILE));
+			    	modelv.addFileEntry(new ch.interlis.ili2c.config.FileEntry(translatedModelName,ch.interlis.ili2c.config.FileEntryKind.ILIMODELFILE));
+		    	}
+		    }
+		}
+	}
 	private static void logStatistics(boolean isIli1,HashSet<BasketStat> stat)
 	{
 		ArrayList<BasketStat> statv=new ArrayList<BasketStat>(stat);
@@ -864,6 +892,8 @@ public class Ili2db {
 			
 			// setup ilidirs+pathmap for ili2c
 			setupIli2cPathmap(config, appHome, ilifile,conn);
+		    Ili2cMetaAttrs ili2cMetaAttrs=new Ili2cMetaAttrs();
+		    setupIli2cMetaAttrs(ili2cMetaAttrs,config,modelv);
 			
 			// compile required ili files
 			EhiLogger.logState("compile models...");
@@ -871,7 +901,7 @@ public class Ili2db {
 			modelv.setAutoCompleteModelList(true);
 			modelv.setGenerateWarnings(false);
 			td = ch.interlis.ili2c.Main.runCompiler(modelv,
-					config);
+					config,ili2cMetaAttrs);
 			if (td == null) {
 				throw new Ili2dbException("compiler failed");
 			}
@@ -930,7 +960,8 @@ public class Ili2db {
 					}
 				}
 			}
-			java.util.List<Element> eles=ms.getModelElements(modelNames,td, td.getIli1Format()!=null && config.getDoItfLineTables(),Config.CREATE_ENUM_DEFS_MULTI.equals(config.getCreateEnumDefs()));
+			// use models explicitly given by user (or last model of given ili-file)
+			java.util.List<Element> eles=ms.getModelElements(modelNames,td, td.getIli1Format()!=null && config.getDoItfLineTables(),Config.CREATE_ENUM_DEFS_MULTI.equals(config.getCreateEnumDefs()),config);
 			Viewable2TableMapping class2wrapper=Viewable2TableMapper.getClass2TableMapping(config,trafoConfig,eles,mapping);
 
 			SqlColumnConverter geomConverter=null;
@@ -1270,11 +1301,13 @@ public class Ili2db {
 
 				// compile required ili files
 				setupIli2cPathmap(config, appHome, xtffile,conn);
+			    Ili2cMetaAttrs ili2cMetaAttrs=new Ili2cMetaAttrs();
+			    setupIli2cMetaAttrs(ili2cMetaAttrs,config,null); // don't add ili1 model translations to model list (should already be in list because of topicname in t_baskets table)
 				EhiLogger.logState("compile models...");
 				modelv.setAutoCompleteModelList(true);
 				modelv.setGenerateWarnings(false);
 				TransferDescription td = ch.interlis.ili2c.Main.runCompiler(modelv,
-						config);
+						config,ili2cMetaAttrs);
 				if (td == null) {
 					throw new Ili2dbException("compiler failed");
 				}
@@ -1308,7 +1341,8 @@ public class Ili2db {
 					}
 				}
 				
-			  java.util.List<Element> eles=ms.getModelElements(modelNames,td, td.getIli1Format()!=null && config.getDoItfLineTables(),Config.CREATE_ENUM_DEFS_MULTI.equals(config.getCreateEnumDefs()));
+				// use models explicitly given by user (--models, --baskets, --dataset, --topics)
+			  java.util.List<Element> eles=ms.getModelElements(modelNames,td, td.getIli1Format()!=null && config.getDoItfLineTables(),Config.CREATE_ENUM_DEFS_MULTI.equals(config.getCreateEnumDefs()),config);
 			  Viewable2TableMapping class2wrapper=Viewable2TableMapper.getClass2TableMapping(config,trafoConfig,eles,mapping);
 
 			  // process xtf files

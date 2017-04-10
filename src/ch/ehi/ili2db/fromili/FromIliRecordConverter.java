@@ -17,6 +17,7 @@ import ch.ehi.ili2db.mapping.TrafoConfig;
 import ch.ehi.ili2db.mapping.TrafoConfigNames;
 import ch.ehi.ili2db.mapping.Viewable2TableMapping;
 import ch.ehi.ili2db.mapping.ViewableWrapper;
+import ch.ehi.sqlgen.repository.DbColBlob;
 import ch.ehi.sqlgen.repository.DbColBoolean;
 import ch.ehi.sqlgen.repository.DbColDate;
 import ch.ehi.sqlgen.repository.DbColDateTime;
@@ -27,6 +28,7 @@ import ch.ehi.sqlgen.repository.DbColNumber;
 import ch.ehi.sqlgen.repository.DbColTime;
 import ch.ehi.sqlgen.repository.DbColUuid;
 import ch.ehi.sqlgen.repository.DbColVarchar;
+import ch.ehi.sqlgen.repository.DbColXml;
 import ch.ehi.sqlgen.repository.DbColumn;
 import ch.ehi.sqlgen.repository.DbIndex;
 import ch.ehi.sqlgen.repository.DbSchema;
@@ -37,6 +39,7 @@ import ch.interlis.ili2c.metamodel.AssociationDef;
 import ch.interlis.ili2c.metamodel.AttributeDef;
 import ch.interlis.ili2c.metamodel.AttributeRef;
 import ch.interlis.ili2c.metamodel.BasketType;
+import ch.interlis.ili2c.metamodel.BlackboxType;
 import ch.interlis.ili2c.metamodel.CompositionType;
 import ch.interlis.ili2c.metamodel.CoordType;
 import ch.interlis.ili2c.metamodel.EnumerationType;
@@ -625,6 +628,14 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 				ret.setSize(DbColVarchar.UNLIMITED);
 			}
 			dbCol=ret;
+		}else if(type instanceof BlackboxType){
+			if(((BlackboxType)type).getKind()==BlackboxType.eXML){
+				DbColXml ret=new DbColXml();
+				dbCol=ret;
+			}else{
+				DbColBlob ret=new DbColBlob();
+				dbCol=ret;
+			}
 		}else{
 			DbColVarchar ret=new DbColVarchar();
 			ret.setSize(255);

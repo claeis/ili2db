@@ -24,6 +24,8 @@ import java.sql.SQLException;
 import java.sql.Time;
 import java.sql.Timestamp;
 
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
+
 import com.vividsolutions.jts.io.ParseException;
 
 import ch.ehi.ili2db.gui.Config;
@@ -276,6 +278,34 @@ public abstract class AbstractWKBColumnConverter implements SqlColumnConverter {
 	}
 	@Override
 	public void setup(Connection conn, Config config) {
+	}
+	@Override
+	public void setBlobNull(PreparedStatement stmt, int parameterIndex)
+			throws SQLException {
+		throw new NotImplementedException();
+	}
+	@Override
+	public void setXmlNull(PreparedStatement stmt, int parameterIndex)
+			throws SQLException {
+		throw new NotImplementedException();
+	}
+	@Override
+	public Object fromIomBlob(String uuid) throws SQLException,
+			ConverterException {
+		throw new NotImplementedException();
+	}
+	@Override
+	public Object fromIomXml(String uuid) throws SQLException,
+			ConverterException {
+		throw new NotImplementedException();
+	}
+	@Override
+	public String toIomXml(Object obj) throws SQLException, ConverterException {
+		throw new NotImplementedException();
+	}
+	@Override
+	public String toIomBlob(Object obj) throws SQLException, ConverterException {
+		throw new NotImplementedException();
 	}
 
 }

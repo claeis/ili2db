@@ -1,0 +1,12 @@
+INTERLIS 2.3;
+
+MODEL BlackBoxTypes23
+  AT "mailto:ce@eisenhutinformatik.ch" VERSION "2016-03-07" =
+	TOPIC Topic=             
+		CLASS ClassA =
+		   !! BlackBoxType
+		   xmlbox : BLACKBOX XML;
+		   binbox : BLACKBOX BINARY;
+		END ClassA;
+	END Topic;
+END BlackBoxTypes23.

@@ -35,7 +35,6 @@
         <pathelement location="${lib}/iox-api.jar"/>
         <pathelement location="${lib}/iox-ili.jar"/>
         <pathelement location="${lib}/jts-core-1.14.0.jar"/>
-        <pathelement location="${lib}/jdbm-2.4.jar"/>
 	<pathelement location="${lib}/gson-2.6.2.jar"/>
 	<pathelement location="${lib}/toml4j-0.5.1.jar"/>
         <pathelement location="${lib}/ehisqlgen.jar"/>
@@ -84,7 +83,7 @@
 	      <attribute name="Url" value="${mf.url}"/>
 	      <attribute name="Version" value="${version}"/-->
 	      <attribute name="Main-Class" value="ch.ehi.ili2pg.PgMain"/>
-	      <attribute name="Class-Path" value="${lib}/antlr.jar ${lib}/ehibasics.jar ${lib}/gson-2.6.2.jar ${lib}/ili2c-core.jar ${lib}/ili2c-tool.jar ${lib}/iox-api.jar ${lib}/iox-ili.jar ${lib}/jdbm-2.4.jar ${lib}/jts-core-1.14.0.jar ${lib}/toml4j-0.5.1.jar ${lib}/ehisqlgen.jar ${lib}/${postgresql}"/>
+	      <attribute name="Class-Path" value="${lib}/antlr.jar ${lib}/ehibasics.jar ${lib}/gson-2.6.2.jar ${lib}/ili2c-core.jar ${lib}/ili2c-tool.jar ${lib}/iox-api.jar ${lib}/iox-ili.jar ${lib}/jts-core-1.14.0.jar ${lib}/toml4j-0.5.1.jar ${lib}/ehisqlgen.jar ${lib}/${postgresql}"/>
 	    </manifest>
     
 	<fileset dir="${build}/classes" includes="**/*.class"/>
@@ -118,7 +117,6 @@
 			<include name ="ili2c-tool.jar"/>
 			<include name ="iox-api.jar"/>
 			<include name ="iox-ili.jar"/>
-			<include name ="jdbm-2.4.jar"/>
 			<include name ="jts-core-1.14.0.jar"/>
 			<include name ="toml4j-0.5.1.jar"/>
 			<include name ="ehisqlgen.jar"/>
@@ -150,7 +148,6 @@
 		<patternset includes="${lib}/ili2c-tool.jar"/>
 		<patternset includes="${lib}/iox-api.jar"/>
 		<patternset includes="${lib}/iox-ili.jar"/>
-		<patternset includes="${lib}/jdbm-2.4.jar"/>
 		<patternset includes="${lib}/jts-core-1.14.0.jar"/>
 		<patternset includes="${lib}/toml4j-0.5.1.jar"/>
 		<patternset includes="${lib}/ehisqlgen.jar"/>
@@ -183,7 +180,6 @@
 		<patternset includes="${lib}/ili2c-tool.jar"/>
 		<patternset includes="${lib}/iox-api.jar"/>
 		<patternset includes="${lib}/iox-ili.jar"/>
-		<patternset includes="${lib}/jdbm-2.4.jar"/>
 		<patternset includes="${lib}/jts-core-1.14.0.jar"/>
 		<patternset includes="${lib}/toml4j-0.5.1.jar"/>
 		<patternset includes="${lib}/ehisqlgen.jar"/>

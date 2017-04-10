@@ -12,6 +12,17 @@ ideas/open issues/questions
 - einfache Liste mit den neu erzeugten Vertexpunkte (aufgrund der Overlap-Bereinigung)
 - Schalter für das "disablen" der Overlaps-Bereinigung. Bei vorhandenen gueltigen Overlaps erfolgen: a) Import mit NULL als Polygon, ohne Fehlermeldung, b) Import mit NULL als Polygon, mit Warning, c) kein Import, Fehlermeldung
 
+ili2pg/ili2gpkg 3.8.0 (2017-04-10)
+-----------------------------
+- new option --ver4-translation to support TRANSLATION OF in ili2db 4.x mode (incompatible with ili2db 3.x versions)
+- new option --translation  to assign a translated ili1 model to its orginal language equivalent
+- fixed: import of EXTERNAL references to objects with UUID as oid
+- fixed: export of pre 1582-10-15 dates
+- fixed: BLACKBOX is mapped to a wrong sql type
+- fixed: make index name unique per schema
+- iox-ili-1.17.0
+- ili2c-4.7.1
+
 ili2pg/ili2gpkg 3.7.0 (2017-03-26)
 -----------------------------
 - fixed: --createEnumTabs creates too many tables 

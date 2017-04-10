@@ -160,5 +160,30 @@ public class NullColumnConverter implements SqlColumnConverter {
 			boolean is3D) throws SQLException, ConverterException {
 		return null;
 	}
-
+	@Override
+	public void setBlobNull(PreparedStatement stmt, int parameterIndex)
+			throws SQLException {
+	}
+	@Override
+	public void setXmlNull(PreparedStatement stmt, int parameterIndex)
+			throws SQLException {
+	}
+	@Override
+	public Object fromIomBlob(String uuid) throws SQLException,
+			ConverterException {
+		return null;
+	}
+	@Override
+	public Object fromIomXml(String uuid) throws SQLException,
+			ConverterException {
+		return null;
+	}
+	@Override
+	public String toIomXml(Object obj) throws SQLException, ConverterException {
+		return null;
+	}
+	@Override
+	public String toIomBlob(Object obj) throws SQLException, ConverterException {
+		return null;
+	}
 }
