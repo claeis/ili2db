@@ -1,0 +1,27 @@
+INTERLIS 2.3;
+
+MODEL EnumOkA (de) AT "http://www.interlis.ch/ili2c/tests/" VERSION "1" =
+
+	TOPIC TopicA =
+
+		CLASS ClassA =
+			attrA : (a1,a2(a21,a22));
+		END ClassA;
+
+	END TopicA;
+
+END EnumOkA.
+
+MODEL EnumOkB (fr) AT "http://www.interlis.ch/ili2c/tests/" VERSION "1" 
+TRANSLATION OF EnumOkA [ "1"]
+=
+
+	TOPIC TopicB =
+
+		CLASS ClassB =
+			attrB : (b1,b2(b21,b22));
+		END ClassB;
+
+	END TopicB;
+
+END EnumOkB.

@@ -291,6 +291,13 @@ public abstract class AbstractMain {
 			}else if(arg.equals("--ILIGML20")){
 				argi++;
 				config.setTransferFileFormat(Config.ILIGML20);
+			}else if(arg.equals("--ver4-translation")){
+				argi++;
+				config.setVer4_translation(true);
+			}else if(arg.equals("--translation")){
+				argi++;
+				config.setIli1Translation(args[argi]);
+				argi++;
 			}else if(arg.equals("--proxy")){
 				argi++;
 				config.setValue(UserSettings.HTTP_PROXY_HOST,args[argi]);
@@ -366,6 +373,8 @@ public abstract class AbstractMain {
 					System.err.println("--createUnique         create UNIQUE db constraints.");
 					System.err.println("--createNumChecks      create CHECK db constraints for numeric data types.");
 					System.err.println("--ILIGML20             use eCH-0118-2.0 as transferformat");
+				    System.err.println("--ver4-translation     supports TRANSLATION OF in ili2db 4.x mode (incompatible with ili2db 3.x versions).");
+				    System.err.println("--translation translatedModel=originModel assigns a translated model to its orginal language equivalent.");
 					printSpecificOptions();
 					System.err.println("--proxy host           proxy server to access model repositories.");
 					System.err.println("--proxyPort port       proxy port to access model repositories.");

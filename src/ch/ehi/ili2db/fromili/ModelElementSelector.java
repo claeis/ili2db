@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 
+import ch.ehi.ili2db.gui.Config;
 import ch.interlis.ili2c.metamodel.AttributeDef;
 import ch.interlis.ili2c.metamodel.CompositionType;
 import ch.interlis.ili2c.metamodel.Domain;
@@ -23,14 +24,15 @@ public class ModelElementSelector {
 	private TransferDescription td=null;
 	private boolean createItfLineTables=false;
 	private boolean includeEnums=false;
-	public List<Element> getModelElements(List<String> modelNames,TransferDescription td,boolean createItfLineTables,boolean includeEnums)
+	public List<Element> getModelElements(List<String> modelNames,TransferDescription td,boolean createItfLineTables,boolean includeEnums,Config config)
 	{
 		this.td=td;
 		this.createItfLineTables=createItfLineTables;
 		this.includeEnums=includeEnums;
 		List<Model> models=new ArrayList<Model>();
 		if(modelNames==null || modelNames.isEmpty()){
-			models.add(td.getLastModel());
+			Model lastModel = td.getLastModel();
+			models.add(lastModel);
 		}else{
 			for(String modelName:modelNames){
 				Model model=(Model)td.getElement(Model.class, modelName);
@@ -43,9 +45,13 @@ public class ModelElementSelector {
 		HashSet<Element> accu=new HashSet<Element>();
 		HashSet<Model> accuScope=new HashSet<Model>();
 		for(Model model:models){
-			visitModel(accu,accuScope,model);
+			if(config.getVer4_translation() || config.getIli1Translation()!=null){
+				visitModel(accu,accuScope,(Model)model.getTranslationOfOrSame());
+			}else{
+				visitModel(accu,accuScope,model);
+			}
 		}
-		visitStructsInScope(accu,accuScope);
+		visitStructsInScope(accu,accuScope,config);
 		
 		ArrayList<Element> ret=new ArrayList<Element>(accu);
 		java.util.Collections.sort(ret,new java.util.Comparator<Element>(){
@@ -62,11 +68,14 @@ public class ModelElementSelector {
 		});
 		return ret;
 	}
-	private void visitStructsInScope(HashSet<Element> accu,HashSet<Model> accuScope)
+	private void visitStructsInScope(HashSet<Element> accu,HashSet<Model> accuScope,Config config)
 	{
 		Iterator<Model> modeli=accuScope.iterator();
 		while(modeli.hasNext()){
 			Model scope=modeli.next();
+			if(config.getVer4_translation() || config.getIli1Translation()!=null){
+				scope=(Model)scope.getTranslationOfOrSame();
+			}
 			Iterator topici=scope.iterator();
 			while(topici.hasNext()){
 				Object tObj=topici.next();
