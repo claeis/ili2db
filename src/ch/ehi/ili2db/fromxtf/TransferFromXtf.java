@@ -82,6 +82,7 @@ import ch.interlis.iox_j.IoxInvalidDataException;
 import ch.interlis.iox_j.ObjectEvent;
 import ch.interlis.iox_j.PipelinePool;
 import ch.interlis.iox_j.StartBasketEvent;
+import ch.interlis.iox_j.filter.TranslateToOrigin;
 import ch.interlis.iox_j.logging.LogEventFactory;
 import ch.interlis.iox_j.validator.ValidationConfig;
 
@@ -127,6 +128,7 @@ public class TransferFromXtf {
 	private TrafoConfig trafoConfig=null;
 	private FromXtfRecordConverter recConv=null;
 	private Viewable2TableMapping class2wrapper=null;
+	private TranslateToOrigin languageFilter=null;
 	/** list of not yet processed struct values
 	 */
 	private ArrayList structQueue=null;
@@ -161,9 +163,15 @@ public class TransferFromXtf {
 		createDatasetCol=config.CREATE_DATASET_COL.equals(config.getCreateDatasetCols());
 		doItfLineTables=config.isItfTransferfile();
 		createItfLineTables=doItfLineTables && config.getDoItfLineTables();
+		if(createItfLineTables){
+			config.setValue(ch.interlis.iox_j.validator.Validator.CONFIG_DO_ITF_LINETABLES, ch.interlis.iox_j.validator.Validator.CONFIG_DO_ITF_LINETABLES_DO);
+		}
 		xtffilename=config.getXtffile();
 		functionCode=function;
 		datasetName=config.getDatasetName();
+		if(config.getVer4_translation() || config.getIli1Translation()!=null){
+			languageFilter=new TranslateToOrigin(td1, config);
+		}
 	}
 		
 	public void doit(IoxReader reader,Config config,HashSet<BasketStat> stat)
@@ -318,9 +326,6 @@ public class TransferFromXtf {
 				IoxLogging errHandler=new ch.interlis.iox_j.logging.Log2EhiLogger();
 				LogEventFactory errFactory=new LogEventFactory();
 				errFactory.setDataSource(xtffilename);
-				if(createItfLineTables){
-					config.setValue(ch.interlis.iox_j.validator.Validator.CONFIG_DO_ITF_LINETABLES, ch.interlis.iox_j.validator.Validator.CONFIG_DO_ITF_LINETABLES_DO);
-				}
 				PipelinePool pipelinePool=new PipelinePool();
 				validator=new ch.interlis.iox_j.validator.Validator(td,modelConfig, errHandler, errFactory, pipelinePool,config);				
 				if(reader instanceof ItfReader2){
@@ -341,11 +346,17 @@ public class TransferFromXtf {
 							skipBasket=true;
 							EhiLogger.logState("Skip Basket "+basket.getType()+"(oid "+basket.getBid()+")");
 							if(validator!=null)validator.validate(event);
+							if(languageFilter!=null){
+								event=languageFilter.filter(event);
+							}
 						}else{
 							EhiLogger.logState("Basket "+basket.getType()+"(oid "+basket.getBid()+")...");
 							skipBasket=false;
 							try {
 								if(validator!=null)validator.validate(event);
+								if(languageFilter!=null){
+									event=languageFilter.filter(event);
+								}
 								Long existingBasketSqlId=null;
 								if(functionCode==Config.FC_UPDATE){
 									// read existing oid/sqlid mapping (but might also be a new basket)
@@ -387,6 +398,9 @@ public class TransferFromXtf {
 						}
 					}else if(event instanceof EndBasketEvent){
 						if(validator!=null)validator.validate(event);
+						if(languageFilter!=null){
+							event=languageFilter.filter(event);
+						}
 						if(reader instanceof ItfReader2){
 				        	ArrayList<IoxInvalidDataException> dataerrs = ((ItfReader2) reader).getDataErrs();
 				        	if(dataerrs.size()>0){
@@ -456,6 +470,9 @@ public class TransferFromXtf {
 					}else if(event instanceof ObjectEvent){
 						if(validator!=null)validator.validate(event);
 						if(!skipBasket){
+							if(languageFilter!=null){
+								event=languageFilter.filter(event);
+							}
 							objCount++;
 							IomObject iomObj=((ObjectEvent)event).getIomObject();
 							if(allReferencesKnown(iomObj)){
@@ -465,9 +482,15 @@ public class TransferFromXtf {
 						}
 					}else if(event instanceof EndTransferEvent){
 						if(validator!=null)validator.validate(event);
+						if(languageFilter!=null){
+							event=languageFilter.filter(event);
+						}
 						break;
 					}else if(event instanceof StartTransferEvent){
 						if(validator!=null)validator.validate(event);
+						if(languageFilter!=null){
+							event=languageFilter.filter(event);
+						}
 					}
 					event=reader.read();
 				}
@@ -478,6 +501,9 @@ public class TransferFromXtf {
 				if(validator!=null){
 					validator.close();
 					validator=null;
+				}
+				if(languageFilter!=null){
+					languageFilter.close();
 				}
 			}
 		}finally{
@@ -1104,7 +1130,11 @@ public class TransferFromXtf {
 
 			dbstmt = conn.prepareStatement(stmt);
 			dbstmt.clearParameters();
-			dbstmt.setString(1, xtfid);
+			if(( xclass instanceof AbstractClassDef)  && ((AbstractClassDef) xclass).getOid()!=null && AbstractRecordConverter.isUuidOid(td, ((AbstractClassDef) xclass).getOid())){
+				dbstmt.setObject(1, geomConv.fromIomUuid(xtfid));
+			}else{
+				dbstmt.setString(1, xtfid);
+			}
 			java.sql.ResultSet rs = dbstmt.executeQuery();
 			if(rs.next()) {
 				sqlid = rs.getLong(1);
@@ -1114,6 +1144,8 @@ public class TransferFromXtf {
 				return null;
 			}
 		} catch (java.sql.SQLException ex) {
+			EhiLogger.logError("failed to query " + xclass.getScopedName(null),	ex);
+		} catch (ConverterException ex) {
 			EhiLogger.logError("failed to query " + xclass.getScopedName(null),	ex);
 		} finally {
 			if (dbstmt != null) {
@@ -1152,11 +1184,7 @@ public class TransferFromXtf {
 			sep=" UNION ";
 		}
 		ret.append(") r0");
-		if(( aclass instanceof AbstractClassDef)  && ((AbstractClassDef) aclass).getOid()!=null && AbstractRecordConverter.isUuidOid(td, ((AbstractClassDef) aclass).getOid())){
-			ret.append(" WHERE r0."+DbNames.T_ILI_TID_COL+"=cast(? as uuid)");
-		}else{
-			ret.append(" WHERE r0."+DbNames.T_ILI_TID_COL+"=?");
-		}
+		ret.append(" WHERE r0."+DbNames.T_ILI_TID_COL+"=?");
 		return ret.toString();
 	}
 	private void readObjectSqlIds(boolean noTypeCol,DbTableName sqltablename, long basketsqlid) {

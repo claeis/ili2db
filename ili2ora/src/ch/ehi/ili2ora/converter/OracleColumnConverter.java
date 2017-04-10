@@ -36,6 +36,8 @@ import java.sql.SQLException;
 import java.sql.Time;
 import java.sql.Timestamp;
 
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
+
 /**
  * @author ce
  * @version $Revision: 1.0 $ $Date: 10.02.2007 $
@@ -621,6 +623,34 @@ public class OracleColumnConverter implements SqlColumnConverter {
 	@Override
 	public void setup(Connection conn, Config config) {
 		this.conn=conn;
+	}
+	@Override
+	public void setBlobNull(PreparedStatement stmt, int parameterIndex)
+			throws SQLException {
+		throw new NotImplementedException();
+	}
+	@Override
+	public void setXmlNull(PreparedStatement stmt, int parameterIndex)
+			throws SQLException {
+		throw new NotImplementedException();
+	}
+	@Override
+	public Object fromIomBlob(String uuid) throws SQLException,
+			ConverterException {
+		throw new NotImplementedException();
+	}
+	@Override
+	public Object fromIomXml(String uuid) throws SQLException,
+			ConverterException {
+		throw new NotImplementedException();
+	}
+	@Override
+	public String toIomXml(Object obj) throws SQLException, ConverterException {
+		throw new NotImplementedException();
+	}
+	@Override
+	public String toIomBlob(Object obj) throws SQLException, ConverterException {
+		throw new NotImplementedException();
 	}
 
 }

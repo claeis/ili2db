@@ -22,6 +22,7 @@ import ch.ehi.ili2db.converter.AbstractWKBColumnConverter;
 import ch.ehi.ili2db.converter.ConverterException;
 import ch.ehi.ili2db.gui.Config;
 
+import java.io.IOException;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Connection;
@@ -84,7 +85,6 @@ public class PostgisColumnConverter extends AbstractWKBColumnConverter {
 		return "ST_AsEWKB("+dbNativeValue+")";
 		//return "AsBinary("+dbNativeValue+")";
 	}
-	@Override
 	public Object fromIomUuid(String uuid) 
 			throws java.sql.SQLException, ConverterException
 	{
@@ -92,6 +92,28 @@ public class PostgisColumnConverter extends AbstractWKBColumnConverter {
 		 toInsertUUID.setType("uuid");
 		 toInsertUUID.setValue(uuid);	
 		return toInsertUUID;
+	}
+	@Override
+	public Object fromIomXml(String xml) 
+			throws java.sql.SQLException, ConverterException
+	{
+		 org.postgresql.util.PGobject toInsertUUID = new org.postgresql.util.PGobject();
+		 toInsertUUID.setType("xml");
+		 toInsertUUID.setValue(xml);	
+		return toInsertUUID;
+	}
+	@Override
+	public Object fromIomBlob(String blob) 
+			throws java.sql.SQLException, ConverterException
+	{
+
+	    byte[] bytearray;
+		try {
+			bytearray = new sun.misc.BASE64Decoder().decodeBuffer(blob);
+		} catch (IOException e) {
+			throw new ConverterException(e);
+		}
+		return bytearray;
 	}
 	@Override
 	public java.lang.Object fromIomSurface(
@@ -214,9 +236,32 @@ public class PostgisColumnConverter extends AbstractWKBColumnConverter {
 				}
 			}
 
+	@Override
+	public String toIomXml(Object obj) throws java.sql.SQLException,
+			ConverterException {
+		return ((java.sql.SQLXML)obj).getString();
+	}
+
+	@Override
+	public String toIomBlob(Object obj) throws java.sql.SQLException,
+			ConverterException {
+	    String s = new sun.misc.BASE64Encoder().encode((byte[])obj);
+	    return s;
+	}
+
 		@Override
 		public void setUuidNull(PreparedStatement stmt, int parameterIndex)
 				throws SQLException {
 			 stmt.setNull(parameterIndex, Types.OTHER,"uuid");
+		}
+		@Override
+		public void setXmlNull(PreparedStatement stmt, int parameterIndex)
+				throws SQLException {
+			 stmt.setNull(parameterIndex, Types.SQLXML);
+		}
+		@Override
+		public void setBlobNull(PreparedStatement stmt, int parameterIndex)
+				throws SQLException {
+			 stmt.setNull(parameterIndex, Types.BINARY);
 		}
 }

@@ -3,6 +3,8 @@ package ch.ehi.ili2db.gui;
 import ch.ehi.basics.settings.Settings;
 
 public class Config extends Settings {
+	public static final String FALSE = "False";
+	public static final String TRUE = "True";
 	public static final String PREFIX="ch.ehi.ili2db";
 	public static final String SENDER=PREFIX+".sender";
 	private static final String DEFAULT_SRS_AUTHORITY=PREFIX+".defaultSrsAuthority";
@@ -66,6 +68,8 @@ public class Config extends Settings {
 	private static final String ILI2DB_CUSTOM_STRATEGY=PREFIX+".ili2dbCustomStrategy";
 	private static final String DO_ITF_LINE_TABLES=PREFIX+".doItfLineTables";
 	private static final String COLNAME_T_ID=PREFIX+".colName_T_ID";
+	public static final String VER4_TRANSLATION=PREFIX+".ver4_translation";
+	public static final String ILI1TRANSLATION=PREFIX+".ili1translation";
 	public static final String DELETE_DATA="data";
 	private int function;
 	private String dburl;
@@ -364,10 +368,10 @@ public class Config extends Settings {
 		setValue(STROKE_ARCS,value);
 	}
 	public boolean getDoItfLineTables() {
-		return "True".equals(getValue(DO_ITF_LINE_TABLES));
+		return TRUE.equals(getValue(DO_ITF_LINE_TABLES));
 	}
 	public void setDoItfLineTables(boolean value) {
-		setValue(DO_ITF_LINE_TABLES,value?"True":"False");
+		setValue(DO_ITF_LINE_TABLES,value?TRUE:FALSE);
 	}
 	public void setCreateUniqueConstraints(boolean ignore) {
 		setValue(UNIQUE_CONSTRAINTS,ignore?UNIQUE_CONSTRAINTS_CREATE:null);
@@ -522,4 +526,16 @@ public class Config extends Settings {
 		this.disableAreaValidation = disableAreaValidation;
 	}
 	private boolean disableAreaValidation=false;
+	public void setVer4_translation(boolean b) {
+		setValue(VER4_TRANSLATION,TRUE);
+	}
+	public boolean getVer4_translation() {
+		return TRUE.equals(getValue(VER4_TRANSLATION))?true:false;
+	}
+	public void setIli1Translation(String modelMapping) {
+		setValue(ILI1TRANSLATION,modelMapping);
+	}
+	public String getIli1Translation() {
+		return getValue(ILI1TRANSLATION);
+	}
 }

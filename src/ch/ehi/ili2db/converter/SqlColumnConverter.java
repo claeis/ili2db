@@ -55,11 +55,17 @@ public interface SqlColumnConverter {
 	public abstract void setSurfaceNull(java.sql.PreparedStatement stmt,int parameterIndex)throws java.sql.SQLException;
 	public abstract void setDecimalNull(java.sql.PreparedStatement stmt,int parameterIndex)throws java.sql.SQLException;
 	public abstract void setUuidNull(java.sql.PreparedStatement stmt,int parameterIndex)throws java.sql.SQLException;
+	public abstract void setBlobNull(java.sql.PreparedStatement stmt,int parameterIndex)throws java.sql.SQLException;
+	public abstract void setXmlNull(java.sql.PreparedStatement stmt,int parameterIndex)throws java.sql.SQLException;
 	public abstract void setBoolean(java.sql.PreparedStatement stmt,int parameterIndex,boolean value)throws java.sql.SQLException;
 	public abstract void setTimestamp(PreparedStatement ps, int valuei,Timestamp datetime) throws SQLException;
 	public abstract void setDate(PreparedStatement ps, int valuei, Date date) throws SQLException;
 	public abstract void setTime(PreparedStatement ps, int valuei, Time time) throws SQLException;
 	public abstract Object fromIomUuid(String uuid)
+			throws java.sql.SQLException, ConverterException;
+	public abstract Object fromIomBlob(String uuid)
+			throws java.sql.SQLException, ConverterException;
+	public abstract Object fromIomXml(String uuid)
 			throws java.sql.SQLException, ConverterException;
 	public abstract java.lang.Object fromIomSurface(
 		IomObject obj,
@@ -100,4 +106,8 @@ public interface SqlColumnConverter {
 		String sqlAttrName,
 		boolean is3D)
 		throws java.sql.SQLException, ConverterException;
+	public String toIomXml(Object obj)
+		throws java.sql.SQLException, ConverterException;
+	public String toIomBlob(Object obj)
+			throws java.sql.SQLException, ConverterException;
 }

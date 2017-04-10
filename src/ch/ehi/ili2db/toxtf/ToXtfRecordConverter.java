@@ -24,6 +24,7 @@ import ch.ehi.ili2db.mapping.ViewableWrapper;
 import ch.interlis.ili2c.metamodel.AreaType;
 import ch.interlis.ili2c.metamodel.AssociationDef;
 import ch.interlis.ili2c.metamodel.AttributeDef;
+import ch.interlis.ili2c.metamodel.BlackboxType;
 import ch.interlis.ili2c.metamodel.CompositionType;
 import ch.interlis.ili2c.metamodel.CoordType;
 import ch.interlis.ili2c.metamodel.EnumerationType;
@@ -613,6 +614,28 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 								IomObject ref=iomObj.addattrobj(attrName,"REF");
 								mapSqlid2Xtfid(fixref,value,ref,((ReferenceType)type).getReferred());
 								refAlreadyDefined=true;
+							}
+						}
+					}
+				}else if(type instanceof BlackboxType){
+					if(((BlackboxType)type).getKind()==BlackboxType.eXML){
+						Object obj=rs.getObject(valuei);
+						valuei++;
+						if(!rs.wasNull()){
+							try {
+								iomObj.setattrvalue(attrName,geomConv.toIomXml(obj));
+							} catch (ConverterException ex) {
+								EhiLogger.logError("Object "+sqlid+": failed to convert blackbox xml",ex);
+							}
+						}
+					}else{
+						Object obj=rs.getObject(valuei);
+						valuei++;
+						if(!rs.wasNull()){
+							try {
+								iomObj.setattrvalue(attrName,geomConv.toIomBlob(obj));
+							} catch (ConverterException ex) {
+								EhiLogger.logError("Object "+sqlid+": failed to convert blackbox binary",ex);
 							}
 						}
 					}
