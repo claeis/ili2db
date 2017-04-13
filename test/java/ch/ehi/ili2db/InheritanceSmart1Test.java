@@ -110,4 +110,62 @@ public class InheritanceSmart1Test {
 		Ili2db.readSettingsFromDb(config);
 		Ili2db.run(config,null);
 	}
+	
+	@Test
+	public void importIliSubtypeFK() throws Exception
+	{
+		Connection jdbcConnection=null;
+		try{
+	        Class driverClass = Class.forName("org.postgresql.Driver");
+	        jdbcConnection = DriverManager.getConnection(
+	        		dburl, dbuser, dbpwd);
+	        Statement stmt=jdbcConnection.createStatement();
+	        stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");
+
+			File data=new File("test/data/InheritanceSmart1/SubtypeFK.ili");
+			Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+			config.setFunction(Config.FC_SCHEMAIMPORT);
+			config.setCreateFk(Config.CREATE_FK_YES);
+			config.setInheritanceTrafo(Config.INHERITANCE_TRAFO_SMART1);
+			config.setDatasetName(DATASETNAME);
+			config.setTidHandling(Config.TID_HANDLING_PROPERTY);
+			config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
+			config.setCreatescript(data.getPath()+".sql");
+			Ili2db.readSettingsFromDb(config);
+			Ili2db.run(config,null);
+		}finally{
+			if(jdbcConnection!=null){
+				jdbcConnection.close();
+			}
+		}    
+	}
+	@Test
+	public void importXtfSubtypeFK() throws Exception
+	{
+		Connection jdbcConnection=null;
+		try{
+	        Class driverClass = Class.forName("org.postgresql.Driver");
+	        jdbcConnection = DriverManager.getConnection(
+	        		dburl, dbuser, dbpwd);
+	        Statement stmt=jdbcConnection.createStatement();
+	        stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");
+
+			File data=new File("test/data/InheritanceSmart1/SubtypeFKa.xtf");
+			Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+			config.setFunction(Config.FC_IMPORT);
+			config.setCreateFk(Config.CREATE_FK_YES);
+			config.setInheritanceTrafo(Config.INHERITANCE_TRAFO_SMART1);
+			config.setDatasetName(DATASETNAME);
+			config.setTidHandling(Config.TID_HANDLING_PROPERTY);
+			config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
+			config.setCreatescript(data.getPath()+".sql");
+			Ili2db.readSettingsFromDb(config);
+			Ili2db.run(config,null);
+		}finally{
+			if(jdbcConnection!=null){
+				jdbcConnection.close();
+			}
+		}    
+	}
+
 }

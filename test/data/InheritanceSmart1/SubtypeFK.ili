@@ -1,0 +1,24 @@
+INTERLIS 2.3;
+
+MODEL SubtypeFK23 (en) AT "mailto:ce@eisenhutinformatik.ch"
+  VERSION "2017-04-13" =
+
+    TOPIC Topic =
+
+	CLASS ClassA =
+	END ClassA;
+    
+    	CLASS ClassB EXTENDS ClassA =
+    	END ClassB;
+   
+    	CLASS ClassC EXTENDS ClassA =
+    	END ClassC;
+    	
+    	ASSOCIATION bc1 =
+    		b1 -<> {1} ClassB;
+    		c1 -- {0..*} ClassC;
+    	END bc1;
+    	
+    END Topic;
+    
+  END SubtypeFK23.

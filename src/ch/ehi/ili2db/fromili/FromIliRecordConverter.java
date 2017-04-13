@@ -294,6 +294,8 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 								  if(!sqlEnableNull){
 									  if(targetTables.size()>1){
 										  notNull=false; // multiple alternative FK columns
+									  }else if(role.getOppEnd().getDestination()!=def.getViewable()){
+										  notNull=false; // other subtypes in of def don't have this FK
 									  }else{
 										  if(role.getCardinality().getMinimum()==0){
 											  notNull=false;
