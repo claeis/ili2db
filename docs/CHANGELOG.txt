@@ -15,6 +15,8 @@ ideas/open issues/questions
 ili2pg/ili2gpkg 3.8.1 (2017-04-xx)
 -----------------------------
 - fixed schema import: FK of embedded assocations in subtypes must be NULLable 
+- fixed import: failed to insert FK of structele to subtyped parents
+- ili2c-4.7.2
 
 ili2pg/ili2gpkg 3.8.0 (2017-04-10)
 -----------------------------
