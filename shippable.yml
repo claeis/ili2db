@@ -1,5 +1,5 @@
 language: java
 build:
-	ci:
-		- ant -f build-ili2pg.xml jar
-		- ant -f build-ili2gpkg.xml jar		
+  ci:
+    - ant -f build-ili2pg.xml jar
+    - ant -f build-ili2gpkg.xml jar
