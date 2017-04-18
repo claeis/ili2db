@@ -7,6 +7,9 @@
   <property name="dist" value="${basedir}/dist"/>
   <property name="lib" value="libs"/>
   <property name="postgresql" value="postgresql-9.4.1208.jre6.jar"/>
+  <property name="report.dir" value="${build}/junitreport"/>
+  <property name="junit.dir" value="${build}/junit"/>
+  <property name="junit-out.dir" value="${build}/junit/test-out"/>
   <property file="user.properties" prefix="user."/>
 
   <property name="python" value="${user.python}"/>
@@ -23,22 +26,30 @@
     <mkdir dir="${dist}"/>
   </target>
 
+	<path id="classpath">
+		<pathelement location="${lib}/antlr.jar"/>
+		<pathelement location="${lib}/ehibasics.jar"/>
+		<pathelement location="${lib}/ili2c-core.jar"/>
+		<pathelement location="${lib}/ili2c-tool.jar"/>
+		<pathelement location="${lib}/iox-api.jar"/>
+		<pathelement location="${lib}/iox-ili.jar"/>
+		<pathelement location="${lib}/jts-core-1.14.0.jar"/>
+		<pathelement location="${lib}/gson-2.6.2.jar"/>
+		<pathelement location="${lib}/toml4j-0.5.1.jar"/>
+		<pathelement location="${lib}/ehisqlgen.jar"/>
+		<pathelement location="${lib}/${postgresql}"/>
+	</path>
+	<path id="junit">
+		<pathelement location="${lib}/junit-4.11.jar"/>
+		<pathelement location="${lib}/hamcrest-core-1.3.jar"/>
+	</path>
+  
   <target depends="init" name="compile">
     <!-- Compile the java code from ${src} into ${build}/classes -->
     <mkdir dir="${build}/classes"/>
     <javac destdir="${build}/classes" includes="**/*.java" excludes="**/test/*.java"  source="1.6" target="1.6">
       <classpath>
-        <pathelement location="${lib}/antlr.jar"/>
-        <pathelement location="${lib}/ehibasics.jar"/>
-        <pathelement location="${lib}/ili2c-core.jar"/>
-        <pathelement location="${lib}/ili2c-tool.jar"/>
-        <pathelement location="${lib}/iox-api.jar"/>
-        <pathelement location="${lib}/iox-ili.jar"/>
-        <pathelement location="${lib}/jts-core-1.14.0.jar"/>
-	<pathelement location="${lib}/gson-2.6.2.jar"/>
-	<pathelement location="${lib}/toml4j-0.5.1.jar"/>
-        <pathelement location="${lib}/ehisqlgen.jar"/>
-	<pathelement location="${lib}/${postgresql}"/>
+	<path refid="classpath"/>
       </classpath>
     	<src path="${src}" />
     	<src path="ili2pg/src"/>
@@ -187,6 +198,47 @@
     	</zipfileset>
     </zip>
   </target>
+
+  <target depends="junit,junitreport" name="tests"/>
+  
+  <target name="junit">
+		<delete dir="${junit-out.dir}" quiet="true"/>
+		<delete dir="${junit.dir}" quiet="true"/>
+		<delete dir="${report.dir}" quiet="true"/>
+		<mkdir dir="${junit.dir}"/>
+		<mkdir dir="${junit-out.dir}"/>
+		<mkdir dir="${report.dir}"/>
+		<copy todir="${junit.dir}">
+			<fileset dir="${basedir}">
+				<include name="test/data/**/*"/>
+			</fileset>
+		</copy>
+		<junit printsummary="yes" dir="${junit.dir}">
+			<classpath>
+				<path refid="classpath"/>
+				<path refid="junit"/>
+				<pathelement location="${build}/classes"/>
+			</classpath>
+			<sysproperty key="dburl" value="${dburl}"/>
+			<sysproperty key="dbusr" value="${dbusr}"/>
+			<sysproperty key="dbpwd" value="${dbpwd}"/>
+			
+			<formatter type="xml"/>
+
+			<batchtest fork="yes" todir="${report.dir}">
+				<fileset dir="ili2pg/test/java" includes="**/*Test.java"/>
+			</batchtest>
+		</junit>
+	</target>
+
+	<target name="junitreport">
+		<junitreport todir="${report.dir}">
+			<fileset dir="${report.dir}" includes="TEST-*.xml"/>
+			<report todir="${report.dir}"/>
+		</junitreport>
+	</target>
+  
+  
   <target name="clean">
     <delete dir="${build}"/>
   </target>

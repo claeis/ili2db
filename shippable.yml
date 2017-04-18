@@ -1,5 +1,14 @@
 language: java
+services:
+  - postgres
 build:
   ci:
     - ant -f build-ili2pg.xml jar
     - ant -f build-ili2gpkg.xml jar
+    - psql -c 'create role shippable with superuser;' -U postgres
+    - psql -c 'create database ili2db;' -U postgres
+    - sudo apt-get install postgresql-$SHIPPABLE_POSTGRES_VERSION-postgis
+    - psql -U postgres -c 'create extension postgis;'
+    - psql -U postgres -c 'create extension "uuid-ossp";'
+    - ant -f build-ili2pg.xml tests -Ddburl=jdbc:postgresql:ili2db -Ddbusr=postgres
+    
