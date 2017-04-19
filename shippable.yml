@@ -1,6 +1,11 @@
 language: java
 services:
   - postgres
+env:
+  global:
+    # REPOPWD
+    - secure: XpQSD2GIMC6RTr+3VIROg7FIali6pX3jXySErrEbl4EvESeTKSqdh+P1HMNCoHci0ktn/n1nw/3Tc4ZxAHKKBjMgDP303ar/e7uBTHwHBD6TF8MYkAWLoxU4m+u/zurStXfvLosp6Ce4b53yAIf59eC38OrgHZ/E3NgFkZKAoGAZQYJgAvQ346cbW90sFlPv5IqEv0DwK9NsdlkyTI/YhTOtc7Uv9jm2uC0ervOx2bbVO5phCqx2h7b+aIVxQTrVkYXiaScYY+Mte+xQ7rTahTxb/+1v25bkaXHKeZ0lslAFN+hjNm//HNQ74VAR60tSqNjR3Xn2B6y8LL6DMHf80A==
+
 build:
   ci:
     - ant -f build-ili2pg.xml jar
@@ -17,6 +22,7 @@ build:
     - ant -f build-ili2pg.xml tests -Dreport.dir=shippable/testresults -Ddburl=jdbc:postgresql:ili2db -Ddbusr=postgres
     - tar -cvzf testReports.tar.gz shippable/testresults/*
     - mail  -a testReports.tar.gz -s testresults ce@eisenhutinformatik.ch < /dev/null
+    - sudo curl -T testReports.tar.gz -u umledi_0:$REPOPWD ftp://ftp.umleditor.org/
 integrations:
   notifications:
     - integrationName: email
