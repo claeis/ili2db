@@ -7,9 +7,10 @@ build:
     - ant -f build-ili2gpkg.xml jar
     - psql -c 'create role shippable with superuser;' -U postgres
     - psql -c 'create database ili2db;' -U postgres
-    - sudo apt update
-    - ls -l /usr/share/postgresql/9.4/extension
-    - sudo apt-get install postgis
+    - sudo lsb_release -a
+    - sudo apt-get update
+    - apt-cache search "postgis"
+    - sudo apt-get install postgresql-9.4-postgis-2.1
     - psql -U postgres -c 'create extension postgis;'
     - psql -U postgres -c 'create extension "uuid-ossp";'
     - ant -f build-ili2pg.xml tests -Ddburl=jdbc:postgresql:ili2db -Ddbusr=postgres
