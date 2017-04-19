@@ -9,7 +9,6 @@ build:
     - psql -c 'create database ili2db;' -U postgres
     - sudo apt update
     - ls -l /usr/share/postgresql/9.4/extension
-    - dpkg-query -l postgis
     - sudo apt-get install postgis
     - psql -U postgres -c 'create extension postgis;'
     - psql -U postgres -c 'create extension "uuid-ossp";'
