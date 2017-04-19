@@ -21,8 +21,7 @@ build:
     - mkdir -p shippable/testresults
     - ant -f build-ili2pg.xml tests -Dreport.dir=shippable/testresults -Ddburl=jdbc:postgresql:ili2db -Ddbusr=postgres
     - tar -cvzf testReports.tar.gz shippable/testresults/*
-    - mail  -a testReports.tar.gz -s testresults ce@eisenhutinformatik.ch < /dev/null
-    - sudo curl -T testReports.tar.gz -u umledi_0:$REPOPWD ftp://ftp.umleditor.org/
+    - curl -T testReports.tar.gz -u umledi_0:$REPOPWD ftp://ftp.umleditor.org/
 integrations:
   notifications:
     - integrationName: email
