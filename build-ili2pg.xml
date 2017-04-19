@@ -219,6 +219,10 @@
 				<path refid="classpath"/>
 				<path refid="junit"/>
 				<pathelement location="${build}/classes"/>
+				<pathelement location="${build}/classes"/>
+				<pathelement location="${src}" />
+				<pathelement location="ili2pg/src"/>
+				<pathelement location="ili2pg/test/java"/>
 			</classpath>
 			<sysproperty key="dburl" value="${dburl}"/>
 			<sysproperty key="dbusr" value="${dbusr}"/>
