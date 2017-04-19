@@ -53,6 +53,7 @@
       </classpath>
     	<src path="${src}" />
     	<src path="ili2pg/src"/>
+    	<src path="ili2pg/test/java"/>
     </javac>
   </target>
 

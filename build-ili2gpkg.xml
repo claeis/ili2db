@@ -37,6 +37,7 @@
       </classpath>
     	<src path="${src}" />
     	<src path="ili2gpkg/src"/>
+    	<src path="ili2gpkg/test/java"/>
     </javac>
   </target>
 
