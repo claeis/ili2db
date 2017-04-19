@@ -1,7 +1,6 @@
 language: java
 services:
   - postgres
-archive: true
 build:
   ci:
     - ant -f build-ili2pg.xml jar
@@ -16,4 +15,12 @@ build:
     - psql -U postgres -c 'create extension "uuid-ossp";'
     - mkdir -p shippable/testresults
     - ant -f build-ili2pg.xml tests -Dreport.dir=shippable/testresults -Ddburl=jdbc:postgresql:ili2db -Ddbusr=postgres
+integrations:
+  notifications:
+    - integrationName: email
+      type: email
+      recipients:
+        - ce@eisenhutinformatik.ch
+      on_success: always
+      on_failure: always
     
