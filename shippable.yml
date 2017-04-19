@@ -7,7 +7,7 @@ build:
     - ant -f build-ili2gpkg.xml jar
     - psql -c 'create role shippable with superuser;' -U postgres
     - psql -c 'create database ili2db;' -U postgres
-    - sudo lsb_release -a
+    - lsb_release -a
     - sudo apt-get update
     - apt-cache search "postgis"
     - sudo apt-get install postgresql-9.4-postgis-2.1
