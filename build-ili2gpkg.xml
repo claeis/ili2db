@@ -17,12 +17,7 @@
     <mkdir dir="${build}/jar"/>
     <mkdir dir="${dist}"/>
   </target>
-
-  <target depends="init" name="compile">
-    <!-- Compile the java code from ${src} into ${build}/classes -->
-    <mkdir dir="${build}/classes"/>
-    <javac destdir="${build}/classes" includes="**/*.java" excludes="**/test/*.java"  source="1.6" target="1.6">
-      <classpath>
+	<path id="classpath">
         <pathelement location="${lib}/antlr.jar"/>
         <pathelement location="${lib}/ehibasics.jar"/>
         <pathelement location="${lib}/ili2c-core.jar"/>
@@ -34,6 +29,19 @@
 	<pathelement location="${lib}/toml4j-0.5.1.jar"/>
         <pathelement location="${lib}/ehisqlgen.jar"/>
 	<pathelement location="${lib}/${sqlite}"/>
+	</path>
+	<path id="junit">
+		<pathelement location="${lib}/junit-4.11.jar"/>
+		<pathelement location="${lib}/hamcrest-core-1.3.jar"/>
+	</path>
+  
+  <target depends="init" name="compile">
+    <!-- Compile the java code from ${src} into ${build}/classes -->
+    <mkdir dir="${build}/classes"/>
+    <javac destdir="${build}/classes" includes="**/*.java" source="1.6" target="1.6">
+      <classpath>
+	<path refid="classpath"/>
+	<path refid="junit"/>
       </classpath>
     	<src path="${src}" />
     	<src path="ili2gpkg/src"/>

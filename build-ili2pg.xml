@@ -47,9 +47,10 @@
   <target depends="init" name="compile">
     <!-- Compile the java code from ${src} into ${build}/classes -->
     <mkdir dir="${build}/classes"/>
-    <javac destdir="${build}/classes" includes="**/*.java" excludes="**/test/*.java"  source="1.6" target="1.6">
+    <javac destdir="${build}/classes" includes="**/*.java" source="1.6" target="1.6">
       <classpath>
 	<path refid="classpath"/>
+	<path refid="junit"/>
       </classpath>
     	<src path="${src}" />
     	<src path="ili2pg/src"/>
@@ -97,7 +98,6 @@
 	      <attribute name="Main-Class" value="ch.ehi.ili2pg.PgMain"/>
 	      <attribute name="Class-Path" value="${lib}/antlr.jar ${lib}/ehibasics.jar ${lib}/gson-2.6.2.jar ${lib}/ili2c-core.jar ${lib}/ili2c-tool.jar ${lib}/iox-api.jar ${lib}/iox-ili.jar ${lib}/jts-core-1.14.0.jar ${lib}/toml4j-0.5.1.jar ${lib}/ehisqlgen.jar ${lib}/${postgresql}"/>
 	    </manifest>
-    
 	<fileset dir="${build}/classes" includes="**/*.class"/>
     	<fileset dir="${src}" includes="**/*.properties"/>
     	<fileset dir="ili2pg/src" includes="**/*.properties"/>
