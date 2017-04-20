@@ -2,6 +2,7 @@ package ch.ehi.ili2gpkg;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -60,7 +61,12 @@ public class GpkgMapping implements CustomMapping {
 			// exec init script
 			java.io.LineNumberReader reader=null;
 			try {
-				reader = new java.io.LineNumberReader(new java.io.InputStreamReader(getClass().getResourceAsStream(ch.ehi.basics.i18n.ResourceBundle.class2packagePath(getClass())+"/init.sql"), "UTF-8"));
+				String filename = ch.ehi.basics.i18n.ResourceBundle.class2packagePath(getClass())+"/init.sql";
+				InputStream initsqlStream = getClass().getResourceAsStream(filename);
+				if(initsqlStream==null){
+					throw new IllegalStateException("Resource "+filename+" not found");
+				}
+				reader = new java.io.LineNumberReader(new java.io.InputStreamReader(initsqlStream, "UTF-8"));
 			} catch (UnsupportedEncodingException e) {
 				throw new IllegalStateException(e);
 			}
