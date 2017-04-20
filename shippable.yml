@@ -21,14 +21,14 @@ build:
     - psql -c 'select postgis_full_version();' -d ili2db -U postgres
     - mkdir -p shippable/testresults
     - ant -f build-ili2pg.xml tests -Dreport.dir=shippable/testresults -Ddburl=jdbc:postgresql:ili2db -Ddbusr=postgres
-    - tar -cvzf testReports.tar.gz shippable/testresults/*
-    - curl -T testReports.tar.gz -u umledi_0:$REPOPWD ftp://ftp.umleditor.org/
+    # - tar -cvzf testReports.tar.gz shippable/testresults/*
+    # - curl -T testReports.tar.gz -u umledi_0:$REPOPWD ftp://ftp.umleditor.org/
 integrations:
   notifications:
     - integrationName: email
       type: email
       recipients:
         - ce@eisenhutinformatik.ch
-      on_success: always
+      # on_success: always
       on_failure: always
     
