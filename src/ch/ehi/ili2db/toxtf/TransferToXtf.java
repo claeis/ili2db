@@ -613,10 +613,10 @@ public class TransferToXtf {
 			dbstmt = conn.createStatement();
 			java.sql.ResultSet rs=dbstmt.executeQuery(stmt);
 			while(rs.next()){
-				String sqlid=rs.getString(colT_ID);
+				String sqlid=rs.getString(1);
 				String structEleClass=null;
 				Viewable structClass=null;
-				String structEleSqlType=rs.getString(DbNames.T_TYPE_COL);
+				String structEleSqlType=rs.getString(2);
 				structEleClass=ili2sqlName.mapSqlTableName(structEleSqlType);
 				if(structEleClass==null){
 					throw new IoxException("unknown "+DbNames.T_TYPE_COL+" '"+structEleSqlType+"' in table "+getStructRootTableName(baseClass));
