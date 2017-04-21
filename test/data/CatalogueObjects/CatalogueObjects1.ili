@@ -1,0 +1,36 @@
+INTERLIS 2.3;
+
+MODEL CatalogueObjects1 (en) AT "mailto:ce@eisenhutinformatik.ch"
+  VERSION "2017-04-21" =
+  IMPORTS CatalogueObjects_V1,LocalisationCH_V1;
+
+    TOPIC TopicA
+    	EXTENDS CatalogueObjects_V1.Catalogues =
+    	OID AS INTERLIS.UUIDOID;
+    
+    CLASS Katalog_Programm
+    EXTENDS CatalogueObjects_V1.Catalogues.Item =
+      Code : MANDATORY TEXT*20;
+      Programm : MANDATORY LocalisationCH_V1.MultilingualText;
+    END Katalog_Programm;
+
+    STRUCTURE Katalog_ProgrammRef
+    EXTENDS CatalogueObjects_V1.Catalogues.CatalogueReference =
+      Reference (EXTENDED) : MANDATORY REFERENCE TO (EXTERNAL) Katalog_Programm;
+    END Katalog_ProgrammRef;
+    END TopicA;
+    
+    TOPIC TopicB =
+    DEPENDS ON TopicA;
+
+    CLASS Katalog_OhneUuid
+    EXTENDS CatalogueObjects_V1.Catalogues.Item =
+    END Katalog_OhneUuid;
+    
+    CLASS Nutzung =
+      Programm : BAG {0..*} OF CatalogueObjects1.TopicA.Katalog_ProgrammRef;
+    END Nutzung;
+    
+    END TopicB;
+
+END CatalogueObjects1.

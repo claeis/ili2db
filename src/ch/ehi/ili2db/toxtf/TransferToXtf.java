@@ -1123,7 +1123,11 @@ public class TransferToXtf {
 		for(ViewableWrapper wrapper:wrappers){
 			ret.append(sep);
 			ret.append("SELECT r"+i+"."+colT_ID);
-			ret.append(", r"+i+"."+DbNames.T_ILI_TID_COL);
+			if(wrapper.getOid()!=null){
+				ret.append(", r"+i+"."+DbNames.T_ILI_TID_COL);
+			}else{
+				ret.append(", NULL "+DbNames.T_ILI_TID_COL);
+			}
 			if(recConv.createTypeDiscriminator() ||wrapper.includesMultipleTypes()){
 				ret.append(", r"+i+"."+DbNames.T_TYPE_COL);
 			}else{
