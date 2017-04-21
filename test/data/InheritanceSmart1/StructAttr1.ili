@@ -1,0 +1,39 @@
+INTERLIS 2.3;
+
+MODEL StructAttr1 (en) AT "mailto:ce@eisenhutinformatik.ch"
+  VERSION "2017-04-18" =
+
+    TOPIC TopicA =
+	STRUCTURE StructA =
+	 name : MANDATORY TEXT*1024;
+	END StructA;
+	CLASS ClassA =
+		attr1: MANDATORY StructA; 		
+		attr2: TEXT*1024;
+	END ClassA;
+    
+    	CLASS ClassB EXTENDS ClassA =
+    		attr3 : MANDATORY TEXT*1024;
+    	END ClassB;
+    	CLASS ClassC EXTENDS ClassB =
+    		attr4 : MANDATORY TEXT*1024;
+    	END ClassC;
+    END TopicA;
+    TOPIC TopicB =
+	STRUCTURE StructA =
+	 name : MANDATORY TEXT*1024;
+	END StructA;
+	CLASS ClassA (ABSTRACT)=
+		attr1: MANDATORY StructA; 		
+		attr2: TEXT*1024;
+	END ClassA;
+    
+    	CLASS ClassB EXTENDS ClassA =
+    		attr3 : MANDATORY TEXT*1024;
+    	END ClassB;
+    	CLASS ClassC EXTENDS ClassB =
+    		attr4 : MANDATORY TEXT*1024;
+    	END ClassC;
+    END TopicB;
+
+END StructAttr1.

@@ -1,0 +1,49 @@
+INTERLIS 2.3;
+
+MODEL RefAttr1 (en) AT "mailto:ce@eisenhutinformatik.ch"
+  VERSION "2017-04-20" =
+
+    TOPIC TopicA =
+	CLASS ClassA0 (ABSTRACT) =
+	END ClassA0;
+	
+	CLASS ClassA1 EXTENDS ClassA0=
+	END ClassA1;
+
+	CLASS ClassA11 EXTENDS ClassA1=
+	END ClassA11;
+	
+	CLASS ClassA2 EXTENDS ClassA0=
+	END ClassA2;
+	
+	STRUCTURE StructA0 (ABSTRACT) =
+	 ref : REFERENCE TO ClassA0;
+	END StructA0;
+	
+	STRUCTURE StructA1 EXTENDS StructA0 =
+	 ref (EXTENDED) : REFERENCE TO ClassA1;
+	END StructA1;
+
+	STRUCTURE StructA11 EXTENDS StructA1 =
+	 ref (EXTENDED) : REFERENCE TO ClassA11;
+	END StructA11;
+	
+	STRUCTURE StructA2 EXTENDS StructA0 =
+	 ref (EXTENDED) : REFERENCE TO ClassA2;
+	END StructA2;
+	
+	CLASS ClassB =
+		struct: MANDATORY StructA1; 		
+	END ClassB;
+
+	CLASS ClassC =
+		struct: BAG {0..*} OF StructA1; 		
+	END ClassC;
+	
+	CLASS ClassD =
+		struct: MANDATORY StructA2; 		
+	END ClassD;
+
+    END TopicA;
+
+END RefAttr1.

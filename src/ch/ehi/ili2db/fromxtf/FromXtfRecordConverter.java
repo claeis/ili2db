@@ -560,20 +560,34 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 	}
 	private ViewableWrapper getViewableWrapperOfAbstractClass(
 			Viewable abstractClass, Viewable concreteClass) {
-		ViewableWrapper ret=class2wrapper.get(abstractClass);
-		if(ret!=null){
-			return ret;
+		if(abstractClass==concreteClass){
+			return class2wrapper.get(concreteClass);
 		}
-		ret=class2wrapper.get(concreteClass);
-		concreteClass=(Viewable) concreteClass.getExtending();
-		if(concreteClass!=null && concreteClass!=abstractClass){
-			ViewableWrapper ret2=class2wrapper.get(concreteClass);
+		ArrayList<ViewableWrapper> rets=new ArrayList<ViewableWrapper>();
+		rets.add(class2wrapper.get(concreteClass));
+		Viewable superClass=(Viewable) concreteClass.getExtending();
+		while(superClass!=null){
+			ViewableWrapper ret2=class2wrapper.get(superClass);
 			if(ret2!=null){
-				ret=ret2;
+				if(!rets.contains(ret2)){
+					rets.add(0,ret2);
+				}
 			}
-			concreteClass=(Viewable) concreteClass.getExtending();
+			if(superClass==abstractClass){
+				break;
+			}
+			superClass=(Viewable) superClass.getExtending();
 		}
-		return ret;
+		for(int i=0;i<rets.size();i++){
+			ViewableWrapper ret=rets.get(i);
+			if(i==rets.size()-1){
+				return ret;
+			}
+			if(!TrafoConfigNames.INHERITANCE_TRAFO_NEWANDSUBCLASS.equals(trafoConfig.getViewableConfig(ret.getViewable(), TrafoConfigNames.INHERITANCE_TRAFO))){
+				return ret;
+			}
+		}
+		return null;
 	}
 	public ViewableWrapper getViewableWrapper(String sqlType){
 		Viewable aclass = getViewable(sqlType);

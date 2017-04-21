@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TRANSFER xmlns="http://www.interlis.ch/INTERLIS2.3">
+  <HEADERSECTION SENDER="ili2pg-3.7.0-20170326" VERSION="2.3">
+    <MODELS>
+      <MODEL NAME="SubtypeFK23" VERSION="2017-04-13" URI="mailto:ce@eisenhutinformatik.ch"/>
+    </MODELS>
+  </HEADERSECTION>
+  <DATASECTION>
+    <SubtypeFK23.Topic BID="SubtypeFK23.Topic">
+      <SubtypeFK23.Topic.ClassB TID="b100">
+      </SubtypeFK23.Topic.ClassB>
+      <SubtypeFK23.Topic.ClassC TID="c100">
+      	<b1 REF="b100"/>
+      </SubtypeFK23.Topic.ClassC>
+    </SubtypeFK23.Topic>
+  </DATASECTION>
+</TRANSFER>

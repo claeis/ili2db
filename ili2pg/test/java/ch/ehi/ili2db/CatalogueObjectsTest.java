@@ -22,8 +22,8 @@ import ch.ehi.ili2db.mapping.NameMapping;
  * jdbc:postgresql://host:port/database
  */
 // -Ddburl=jdbc:postgresql:dbname -Ddbusr=usrname -Ddbpwd=1234
-public class InheritanceSmart1Test {
-	private static final String DBSCHEMA = "InheritanceSmart1";
+public class CatalogueObjectsTest {
+	private static final String DBSCHEMA = "CatalogueObjects1";
 	private static final String DATASETNAME = "Testset1";
 	String dburl=System.getProperty("dburl"); 
 	String dbuser=System.getProperty("dbusr");
@@ -53,19 +53,9 @@ public class InheritanceSmart1Test {
 		
 	}
 
-	//config.setDeleteMode(Config.DELETE_DATA);
-	//EhiLogger.getInstance().setTraceFilter(false); 
-	// --skipPolygonBuilding
-	//config.setDoItfLineTables(true);
-	//config.setAreaRef(config.AREA_REF_KEEP);
-	// --importTid
-	//config.setTidHandling(config.TID_HANDLING_PROPERTY);
-	
 	@Test
-	public void importSmart1() throws Exception
+	public void importIliSmart1() throws Exception
 	{
-		File data=new File("test/data/InheritanceSmart1/Inheritance1a.xtf");
-		
 		Connection jdbcConnection=null;
 		try{
 	        Class driverClass = Class.forName("org.postgresql.Driver");
@@ -74,40 +64,75 @@ public class InheritanceSmart1Test {
 	        Statement stmt=jdbcConnection.createStatement();
 	        stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");
 
+			File data=new File("test/data/CatalogueObjects/CatalogueObjects1.ili");
+			Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+			config.setFunction(Config.FC_SCHEMAIMPORT);
+			config.setCreateFk(Config.CREATE_FK_YES);
+			config.setInheritanceTrafo(Config.INHERITANCE_TRAFO_SMART1);
+			config.setDatasetName(DATASETNAME);
+			config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
+			config.setNameOptimization(Config.NAME_OPTIMIZATION_TOPIC);
+			config.setCreatescript(data.getPath()+".sql");
+			Ili2db.readSettingsFromDb(config);
+			Ili2db.run(config,null);
+		}finally{
+			if(jdbcConnection!=null){
+				jdbcConnection.close();
+			}
+		}    
+	}
+	@Test
+	public void importXtfSmart1() throws Exception
+	{
+		Connection jdbcConnection=null;
+		try{
+	        Class driverClass = Class.forName("org.postgresql.Driver");
+	        jdbcConnection = DriverManager.getConnection(
+	        		dburl, dbuser, dbpwd);
+	        Statement stmt=jdbcConnection.createStatement();
+	        stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");
+
+			File data=new File("test/data/CatalogueObjects/CatalogueObjects1a.xtf");
 			Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 			config.setFunction(Config.FC_IMPORT);
 			config.setCreateFk(Config.CREATE_FK_YES);
 			config.setInheritanceTrafo(Config.INHERITANCE_TRAFO_SMART1);
 			config.setDatasetName(DATASETNAME);
-			config.setTidHandling(Config.TID_HANDLING_PROPERTY);
 			config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
+			config.setNameOptimization(Config.NAME_OPTIMIZATION_TOPIC);
 			config.setCreatescript(data.getPath()+".sql");
+			//config.setValidation(false);
 			Ili2db.readSettingsFromDb(config);
 			Ili2db.run(config,null);
-	        
-	        
-			Assert.assertTrue(stmt.execute("SELECT attra3,attra3b FROM "+DBSCHEMA+".classa3 WHERE t_ili_tid='7'"));
-			ResultSet rs=stmt.getResultSet();
-			Assert.assertTrue(rs.next());
-			Assert.assertEquals("a3",rs.getString(1));
-			Assert.assertEquals("a3b",rs.getString(2));
-	        
 		}finally{
 			if(jdbcConnection!=null){
 				jdbcConnection.close();
 			}
 		}
-		
-		exportSmart1();
+		exportXtfSmart1();
 	}
 	//@Test
-	public void exportSmart1() throws Ili2dbException
+	public void exportXtfSmart1() throws Exception
 	{
-		File data=new File("test/data/InheritanceSmart1/Inheritance1a-out.xtf");
-		Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
-		config.setDatasetName(DATASETNAME);
-		config.setFunction(Config.FC_EXPORT);
-		Ili2db.readSettingsFromDb(config);
-		Ili2db.run(config,null);
+		Connection jdbcConnection=null;
+		try{
+	        Class driverClass = Class.forName("org.postgresql.Driver");
+	        jdbcConnection = DriverManager.getConnection(
+	        		dburl, dbuser, dbpwd);
+
+			File data=new File("test/data/CatalogueObjects/CatalogueObjects1a-out.xtf");
+			Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+			config.setFunction(Config.FC_EXPORT);
+			//config.setDatasetName(DATASETNAME);
+			config.setBaskets("CatalogueObjects1.TopicB.1");
+			//config.setValidation(false);
+			Ili2db.readSettingsFromDb(config);
+			Ili2db.run(config,null);
+		}finally{
+			if(jdbcConnection!=null){
+				jdbcConnection.close();
+			}
+		}    
 	}
+
 }
