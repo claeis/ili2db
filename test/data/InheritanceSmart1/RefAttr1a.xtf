@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TRANSFER xmlns="http://www.interlis.ch/INTERLIS2.3">
+  <HEADERSECTION SENDER="ili2pg-3.7.0-20170326" VERSION="2.3">
+    <MODELS>
+      <MODEL NAME="RefAttr1" VERSION="2017-04-20" URI="mailto:ce@eisenhutinformatik.ch"/>
+    </MODELS>
+  </HEADERSECTION>
+  <DATASECTION>
+    <RefAttr1.TopicA BID="RefAttr1.TopicA">
+      <RefAttr1.TopicA.ClassA1 TID="a1.1">
+      </RefAttr1.TopicA.ClassA1>
+      <RefAttr1.TopicA.ClassA11 TID="a11.1">
+      </RefAttr1.TopicA.ClassA11>
+      <RefAttr1.TopicA.ClassA2 TID="a2.1">
+      </RefAttr1.TopicA.ClassA2>
+      <RefAttr1.TopicA.ClassB TID="b.1">
+	      <struct>
+		      <RefAttr1.TopicA.StructA1>
+		      	<ref REF="a1.1"/>
+		      </RefAttr1.TopicA.StructA1>
+	      </struct>
+      </RefAttr1.TopicA.ClassB>
+      <RefAttr1.TopicA.ClassB TID="b.2">
+	      <struct>
+		      <RefAttr1.TopicA.StructA1>
+		      	<ref REF="a11.1"/> <!-- referenz auf erweiterte  klasse -->
+		      </RefAttr1.TopicA.StructA1>
+	      </struct>
+      </RefAttr1.TopicA.ClassB>
+      <RefAttr1.TopicA.ClassB TID="b.3">
+	      <struct>
+		      <RefAttr1.TopicA.StructA11> <!-- erweiterte struktur -->
+		      	<ref REF="a11.1"/>
+		      </RefAttr1.TopicA.StructA11>
+	      </struct>
+      </RefAttr1.TopicA.ClassB>
+      <RefAttr1.TopicA.ClassC TID="c.1">
+	      <struct>
+		      <RefAttr1.TopicA.StructA1>
+		      	<ref REF="a1.1"/>
+		      </RefAttr1.TopicA.StructA1>
+		      <RefAttr1.TopicA.StructA1>
+		      	<ref REF="a11.1"/>
+		      </RefAttr1.TopicA.StructA1>
+	      </struct>
+      </RefAttr1.TopicA.ClassC>
+      <RefAttr1.TopicA.ClassD TID="d.1">
+	      <struct>
+		      <RefAttr1.TopicA.StructA2>
+		      	<ref REF="a2.1"/>
+		      </RefAttr1.TopicA.StructA2>
+	      </struct>
+      </RefAttr1.TopicA.ClassD>
+    </RefAttr1.TopicA>
+  </DATASECTION>
+</TRANSFER>

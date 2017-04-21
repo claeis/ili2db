@@ -5,6 +5,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 
 import ch.ehi.basics.logging.EhiLogger;
@@ -92,6 +93,7 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 			ret.append(", r0."+DbNames.T_SEQ_COL);
 		}
 		String sep=",";
+		HashSet<AttributeDef> visitedAttrs=new HashSet<AttributeDef>();
 		for(ViewableWrapper table:aclass.getWrappers()){
 			String sqlTableName=table.getSqlTablename();
 			Iterator iter = table.getAttrIterator();
@@ -107,12 +109,15 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 					   }
 					   baseAttr=baseAttr1;
 				   }
-					if(!baseAttr.isTransient()){
-						Type proxyType=baseAttr.getDomain();
-						if(proxyType!=null && (proxyType instanceof ObjectType)){
-							// skip implicit particles (base-viewables) of views
-						}else{
-							 sep = addAttrToQueryStmt(ret, sep, baseAttr,sqlTableName);
+					if(!visitedAttrs.contains(baseAttr)){
+						visitedAttrs.add(baseAttr);
+						if(!baseAttr.isTransient()){
+							Type proxyType=baseAttr.getDomain();
+							if(proxyType!=null && (proxyType instanceof ObjectType)){
+								// skip implicit particles (base-viewables) of views
+							}else{
+								 sep = addAttrToQueryStmt(ret, sep, baseAttr,sqlTableName);
+							}
 						}
 					}
 			   }
@@ -338,7 +343,7 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 				valuei+=2;
 			}
 		}
-		
+		HashSet<AttributeDef> visitedAttrs=new HashSet<AttributeDef>();
 		for(ViewableWrapper table:aclass.getWrappers()){
 			Iterator iter = table.getAttrIterator();
 			while (iter.hasNext()) {
@@ -353,12 +358,15 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 					   }
 					   baseAttr=baseAttr1;
 				   }
-					if(!baseAttr.isTransient()){
-						Type proxyType=baseAttr.getDomain();
-						if(proxyType!=null && (proxyType instanceof ObjectType)){
-							// skip implicit particles (base-viewables) of views
-						}else{
-							   valuei = addAttrValue(rs, valuei, sqlid, iomObj, baseAttr,structQueue,table,fixref);
+					if(!visitedAttrs.contains(baseAttr)){
+						visitedAttrs.add(baseAttr);
+						if(!baseAttr.isTransient()){
+							Type proxyType=baseAttr.getDomain();
+							if(proxyType!=null && (proxyType instanceof ObjectType)){
+								// skip implicit particles (base-viewables) of views
+							}else{
+								   valuei = addAttrValue(rs, valuei, sqlid, iomObj, baseAttr,structQueue,table,fixref);
+							}
 						}
 					}
 			   }

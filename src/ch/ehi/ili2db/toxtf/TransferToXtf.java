@@ -769,7 +769,9 @@ public class TransferToXtf {
 				ArrayList<StructWrapper> structQueue=new ArrayList<StructWrapper>();
 				long sqlid = recConv.getT_ID(rs);
 				Iom_jObject iomObj=null;
-				fixref=new FixIomObjectRefs();
+				if(structWrapper==null){
+					fixref=new FixIomObjectRefs();
+				}
 				iomObj = recConv.convertRecord(rs, aclass, fixref, structWrapper,
 						structelev, structQueue, sqlid);
 				updateObjStat(iomObj.getobjecttag(), sqlid);

@@ -247,5 +247,87 @@ public class InheritanceSmart1Test {
 			}
 		}    
 	}
+	@Test
+	public void importIliRefAttrFK() throws Exception
+	{
+		Connection jdbcConnection=null;
+		try{
+	        Class driverClass = Class.forName("org.postgresql.Driver");
+	        jdbcConnection = DriverManager.getConnection(
+	        		dburl, dbuser, dbpwd);
+	        Statement stmt=jdbcConnection.createStatement();
+	        stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");
+
+			File data=new File("test/data/InheritanceSmart1/RefAttr1.ili");
+			Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+			config.setFunction(Config.FC_SCHEMAIMPORT);
+			config.setCreateFk(Config.CREATE_FK_YES);
+			config.setInheritanceTrafo(Config.INHERITANCE_TRAFO_SMART1);
+			config.setDatasetName(DATASETNAME);
+			config.setTidHandling(Config.TID_HANDLING_PROPERTY);
+			config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
+			config.setNameOptimization(Config.NAME_OPTIMIZATION_TOPIC);
+			config.setCreatescript(data.getPath()+".sql");
+			Ili2db.readSettingsFromDb(config);
+			Ili2db.run(config,null);
+		}finally{
+			if(jdbcConnection!=null){
+				jdbcConnection.close();
+			}
+		}    
+	}
+	@Test
+	public void importXtfRefAttrFK() throws Exception
+	{
+		Connection jdbcConnection=null;
+		try{
+	        Class driverClass = Class.forName("org.postgresql.Driver");
+	        jdbcConnection = DriverManager.getConnection(
+	        		dburl, dbuser, dbpwd);
+	        Statement stmt=jdbcConnection.createStatement();
+	        stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");
+
+			File data=new File("test/data/InheritanceSmart1/RefAttr1a.xtf");
+			Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+			config.setFunction(Config.FC_IMPORT);
+			config.setCreateFk(Config.CREATE_FK_YES);
+			config.setInheritanceTrafo(Config.INHERITANCE_TRAFO_SMART1);
+			config.setDatasetName(DATASETNAME);
+			config.setTidHandling(Config.TID_HANDLING_PROPERTY);
+			config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
+			config.setNameOptimization(Config.NAME_OPTIMIZATION_TOPIC);
+			config.setCreatescript(data.getPath()+".sql");
+			//config.setValidation(false);
+			Ili2db.readSettingsFromDb(config);
+			Ili2db.run(config,null);
+		}finally{
+			if(jdbcConnection!=null){
+				jdbcConnection.close();
+			}
+		}
+		//exportXtfRefAttrFK();
+	}
+	@Test
+	public void exportXtfRefAttrFK() throws Exception
+	{
+		Connection jdbcConnection=null;
+		try{
+	        Class driverClass = Class.forName("org.postgresql.Driver");
+	        jdbcConnection = DriverManager.getConnection(
+	        		dburl, dbuser, dbpwd);
+
+			File data=new File("test/data/InheritanceSmart1/RefAttr1a-out.xtf");
+			Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+			config.setFunction(Config.FC_EXPORT);
+			config.setDatasetName(DATASETNAME);
+			//config.setValidation(false);
+			Ili2db.readSettingsFromDb(config);
+			Ili2db.run(config,null);
+		}finally{
+			if(jdbcConnection!=null){
+				jdbcConnection.close();
+			}
+		}    
+	}
 
 }
