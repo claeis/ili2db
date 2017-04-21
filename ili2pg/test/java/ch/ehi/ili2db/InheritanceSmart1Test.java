@@ -305,9 +305,9 @@ public class InheritanceSmart1Test {
 				jdbcConnection.close();
 			}
 		}
-		//exportXtfRefAttrFK();
+		exportXtfRefAttrFK();
 	}
-	@Test
+	//@Test
 	public void exportXtfRefAttrFK() throws Exception
 	{
 		Connection jdbcConnection=null;

@@ -20,7 +20,8 @@ build:
     - psql -c 'create extension "uuid-ossp";' -d ili2db -U postgres
     - psql -c 'select postgis_full_version();' -d ili2db -U postgres
     - mkdir -p shippable/testresults
-    - ant -f build-ili2pg.xml tests -Dreport.dir=shippable/testresults -Ddburl=jdbc:postgresql:ili2db -Ddbusr=postgres
+    - ant -f build-ili2pg.xml junit -Dreport.dir=shippable/testresults -Ddburl=jdbc:postgresql:ili2db -Ddbusr=postgres
+    - ant -f build-ili2gpkg.xml junit -Dreport.dir=shippable/testresults
     # - tar -cvzf testReports.tar.gz shippable/testresults/*
     # - curl -T testReports.tar.gz -u umledi_0:$REPOPWD ftp://ftp.umleditor.org/
 integrations:

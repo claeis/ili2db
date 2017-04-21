@@ -7,6 +7,9 @@
   <property name="dist" value="${basedir}/dist"/>
   <property name="lib" value="libs"/>
   <property name="sqlite" value="sqlite-jdbc-3.8.11.2.jar"/>
+  <property name="report.dir" value="${build}/junitreport"/>
+  <property name="junit.dir" value="${build}/junit"/>
+  <property name="junit-out.dir" value="${build}/junit/test-out"/>
 
   <target name="init">
     <!-- Create the time stamp -->
@@ -17,6 +20,7 @@
     <mkdir dir="${build}/jar"/>
     <mkdir dir="${dist}"/>
   </target>
+  
 	<path id="classpath">
         <pathelement location="${lib}/antlr.jar"/>
         <pathelement location="${lib}/ehibasics.jar"/>
@@ -179,6 +183,47 @@
     	</zipfileset>
     </zip>
   </target>
+  
+  <target depends="junit,junitreport" name="tests"/>
+  
+  <target name="junit">
+		<delete dir="${junit-out.dir}" quiet="true"/>
+		<delete dir="${junit.dir}" quiet="true"/>
+		<mkdir dir="${junit.dir}"/>
+		<mkdir dir="${junit-out.dir}"/>
+		<mkdir dir="${report.dir}"/>
+		<copy todir="${junit.dir}">
+			<fileset dir="${basedir}">
+				<include name="test/data/**/*"/>
+			</fileset>
+		</copy>
+		<junit printsummary="yes" dir="${junit.dir}">
+			<classpath>
+				<path refid="classpath"/>
+				<path refid="junit"/>
+				<pathelement location="${build}/classes"/>
+				<pathelement location="${build}/classes"/>
+				<pathelement location="${src}" />
+				<pathelement location="ili2gpkg/src"/>
+				<pathelement location="ili2gpkg/test/java"/>
+			</classpath>
+			
+			<formatter type="xml"/>
+
+			<batchtest fork="yes" todir="${report.dir}">
+				<fileset dir="ili2gpkg/test/java" includes="**/*Test.java"/>
+			</batchtest>
+		</junit>
+	</target>
+
+	<target name="junitreport">
+		<junitreport todir="${report.dir}">
+			<fileset dir="${report.dir}" includes="TEST-*.xml"/>
+			<report todir="${report.dir}"/>
+		</junitreport>
+	</target>
+  
+  
   <target name="clean">
     <delete dir="${build}"/>
   </target>
