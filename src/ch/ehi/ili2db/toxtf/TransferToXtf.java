@@ -432,6 +432,9 @@ public class TransferToXtf {
 				java.sql.ResultSet rs = dbstmt.executeQuery();
 				if(rs.next()) {
 					sqlIliTid = rs.getString(2);
+					if(rs.wasNull()){
+						sqlIliTid = Long.toString(sqlid);
+					}
 					sqlidPool.putSqlid2Xtfid(sqlid, sqlIliTid);
 				}else{
 					// unknown object

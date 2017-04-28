@@ -51,9 +51,11 @@
 			</CatalogueObjects1.TopicA.Katalog_Programm>
 		</CatalogueObjects1.TopicA>
 		<CatalogueObjects1.TopicB BID="CatalogueObjects1.TopicB.1">
-			<CatalogueObjects1.TopicB.Katalog_OhneUuid TID="Katalog_OhneUuid.1">
-			</CatalogueObjects1.TopicB.Katalog_OhneUuid>
-			<CatalogueObjects1.TopicB.Nutzung TID="Nutzung.1">
+			<CatalogueObjects1.TopicB.OhneUuid TID="CatalogueObjects1.TopicB.OhneUuid.1">
+			</CatalogueObjects1.TopicB.OhneUuid>
+		</CatalogueObjects1.TopicB>
+		<CatalogueObjects1.TopicC BID="CatalogueObjects1.TopicC.1">
+			<CatalogueObjects1.TopicC.Nutzung TID="Nutzung.1">
 				<Programm>
 					<CatalogueObjects1.TopicA.Katalog_ProgrammRef>
 						<Reference REF="5880375a-52cd-4b2d-af50-c3a6fc5c5352"/>
@@ -62,7 +64,12 @@
 						<Reference REF="2d9b613c-ecd1-47b9-b6b3-17116e16ffc7"/>
 					</CatalogueObjects1.TopicA.Katalog_ProgrammRef>
 				</Programm>
-			</CatalogueObjects1.TopicB.Nutzung>
-		</CatalogueObjects1.TopicB>
+				<OhneUuid>
+					<CatalogueObjects1.TopicB.OhneUuidRef>
+						<Reference REF="CatalogueObjects1.TopicB.OhneUuid.1"/>
+					</CatalogueObjects1.TopicB.OhneUuidRef>
+				</OhneUuid>
+			</CatalogueObjects1.TopicC.Nutzung>
+		</CatalogueObjects1.TopicC>
 	</DATASECTION>
 </TRANSFER>
