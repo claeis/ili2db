@@ -413,6 +413,7 @@ public abstract class AbstractMain {
 				Ili2db.run(config,getAPP_HOME());
 			} catch (Exception ex) {
 				EhiLogger.logError(ex);
+				System.exit(1);
 			}
 		}
 		
