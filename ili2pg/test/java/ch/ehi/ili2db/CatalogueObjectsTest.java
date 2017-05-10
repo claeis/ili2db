@@ -177,7 +177,7 @@ public class CatalogueObjectsTest {
 			Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 			config.setFunction(Config.FC_EXPORT);
 			//config.setDatasetName(DATASETNAME);
-			config.setBaskets("CatalogueObjects1.TopicB.1");
+			config.setBaskets("CatalogueObjects1.TopicC.1");
 			//config.setValidation(false);
 			Ili2db.readSettingsFromDb(config);
 			Ili2db.run(config,null);
