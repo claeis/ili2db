@@ -88,6 +88,8 @@ public class Config extends Settings {
 	private String createscript;
 	private String dropscript;
 	private String xtffile;
+	private String preScript;
+	private String postScript;
 	private String idGenerator=null;
 	private String geometryConverter;
 	private String jdbcDriver=null;
@@ -537,5 +539,17 @@ public class Config extends Settings {
 	}
 	public String getIli1Translation() {
 		return getValue(ILI1TRANSLATION);
+	}
+	public String getPreScript() {
+		return preScript;
+	}
+	public void setPreScript(String preScript) {
+		this.preScript = preScript;
+	}
+	public String getPostScript() {
+		return postScript;
+	}
+	public void setPostScript(String postScript) {
+		this.postScript = postScript;
 	}
 }

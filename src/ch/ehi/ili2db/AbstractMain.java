@@ -112,6 +112,9 @@ public abstract class AbstractMain {
 			}else if(arg.equals("--gui")){
 				doGui=true;
 				argi++;
+			}else if(arg.equals("--preScript")){
+				config.setPreScript(args[argi]);
+				argi++;	
 			}else if(arg.equals("--import")){
 				config.setFunction(Config.FC_IMPORT);
 				argi++;
@@ -129,6 +132,9 @@ public abstract class AbstractMain {
 				argi++;
 			}else if(arg.equals("--schemaimport")){
 				config.setFunction(Config.FC_SCHEMAIMPORT);
+				argi++;
+			}else if(arg.equals("--postScript")){
+				config.setPostScript(args[argi]);
 				argi++;
 			}else if(arg.equals("--deleteData")){
 				argi++;
@@ -324,6 +330,8 @@ public abstract class AbstractMain {
 					System.err.println("--delete               do a delete.");
 					System.err.println("--export               do an export.");
 					System.err.println("--schemaimport         do an schema import.");
+					System.err.println("--preScript            before running a function, run a script.");
+					System.err.println("--postScript           after running a function, run a script.");
 					printConnectOptions();
 					System.err.println("--validConfig file     Config file for validation.");
 					System.err.println("--disableValidation    Disable validation of data.");
