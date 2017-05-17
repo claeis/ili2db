@@ -553,7 +553,7 @@ public class OracleColumnConverter implements SqlColumnConverter {
 		}
 	}
 	@Override
-	public int getSrsid(String crsAuthority, String crsCode,Connection conn) 
+	public Integer getSrsid(String crsAuthority, String crsCode,Connection conn) 
 	throws ConverterException
 	{
 		int srsid=0;
@@ -566,7 +566,9 @@ public class OracleColumnConverter implements SqlColumnConverter {
 				qryStmt="SELECT srid FROM MDSYS.CS_SRS WHERE AUTH_NAME=\'"+crsAuthority+"\' AND AUTH_SRID="+crsCode;
 			}
 			java.sql.ResultSet ret=stmt.executeQuery(qryStmt);
-			ret.next();
+			if(!ret.next()){
+				return null;
+			}
 			srsid=ret.getInt("srid");
 		}catch(java.sql.SQLException ex){
 			throw new ConverterException("failed to query srsid from database",ex);

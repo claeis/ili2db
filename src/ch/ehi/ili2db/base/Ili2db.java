@@ -33,6 +33,7 @@ import ch.ehi.basics.logging.LogEvent;
 import ch.ehi.basics.logging.StdListener;
 import ch.ehi.basics.logging.StdLogEvent;
 import ch.ehi.basics.settings.Settings;
+import ch.ehi.ili2db.converter.ConverterException;
 import ch.ehi.ili2db.converter.SqlColumnConverter;
 import ch.ehi.ili2db.fromili.CustomMapping;
 import ch.ehi.ili2db.fromili.CustomMappingNull;
@@ -1002,6 +1003,16 @@ public class Ili2db {
 			}
 			geomConverter.setup(conn, config);
 
+			if(config.getDefaultSrsCode()!=null && config.getDefaultSrsAuthority()!=null){
+				try {
+					if(geomConverter.getSrsid(config.getDefaultSrsAuthority(), config.getDefaultSrsCode(), conn)==null){
+						throw new Ili2dbException(config.getDefaultSrsAuthority()+"/"+config.getDefaultSrsCode()+" does not exist");
+					}
+				} catch (ConverterException ex) {
+					throw new Ili2dbException("failed to query existence of SRS",ex);
+				}
+			}
+			
 			// create table structure
 			EhiLogger.logState("create table structure...");
 			try{

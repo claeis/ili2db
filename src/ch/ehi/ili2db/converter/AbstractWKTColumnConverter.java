@@ -260,7 +260,7 @@ public abstract class AbstractWKTColumnConverter implements SqlColumnConverter {
 	{
 	}
 	@Override
-	public int getSrsid(String crsAuthority, String crsCode,Connection conn) 
+	public Integer getSrsid(String crsAuthority, String crsCode,Connection conn) 
 		throws ConverterException
 	{
 		
@@ -268,7 +268,9 @@ public abstract class AbstractWKTColumnConverter implements SqlColumnConverter {
 		try{
 			java.sql.Statement stmt=conn.createStatement();
 			java.sql.ResultSet ret=stmt.executeQuery("SELECT srid FROM SPATIAL_REF_SYS WHERE AUTH_NAME=\'"+crsAuthority+"\' AND AUTH_SRID="+crsCode);
-			ret.next();
+			if(!ret.next()){
+				return null;
+			}
 			srsid=ret.getInt("srid");
 		}catch(java.sql.SQLException ex){
 			throw new ConverterException("failed to query srsid from database",ex);

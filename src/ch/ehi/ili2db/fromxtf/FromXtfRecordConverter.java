@@ -82,7 +82,12 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 		this.datasetName=datasetName;
 		today=new java.sql.Timestamp(System.currentTimeMillis());
 		try{
-			defaultSrsid=geomConv.getSrsid(defaultCrsAuthority,defaultCrsCode,conn);
+			Integer srsid=geomConv.getSrsid(defaultCrsAuthority,defaultCrsCode,conn);
+			if(srsid==null){
+				defaultSrsid=-1;
+			} else {
+				defaultSrsid = srsid;
+			}
 		}catch(UnsupportedOperationException ex){
 			EhiLogger.logAdaption("no CRS support by converter; use -1 as default srsid");
 			defaultSrsid=-1;
