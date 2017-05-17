@@ -198,11 +198,6 @@ public class Dataset1nosmartTest {
 		}
 	}
 
-	// Testen ob die Struct1 neu im attr2 der Klasse: classa1b sich befindet.
-	// Vorher war Struct1 in attr2 der Klasse: classa1.
-	// FEHLER: Struct1 ist noch in der alten Klasse vorhanden und nicht in der neuen drin.
-	// Habe in InsertIntoTable bei: t_ili2db_import_object (Zeile 27 und 28) von 8->38, 9->39 geändert.
-	// Habe in CreateTable.ili bei: t_ili_tid (Zeile 27) hinzugefügt.
 	@Test
 	public void replaceDataset() throws Exception
 	{

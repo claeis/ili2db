@@ -52,8 +52,8 @@ public class PreAndPostScriptTest {
 	
 	// tests if preValue is executed before postValue in a schemaImport-test.
 	// options:
-	// [Config.FC_SCHEMAIMPORT] run function schema import.
-	// [setDbschema(DBSCHEMA)] set schema.
+	// [Config.FC_SCHEMAIMPORT]
+	// [setDbschema(DBSCHEMA)]
 	@Test
 	public void schemaImportTest() throws Exception
 	{
@@ -104,8 +104,8 @@ public class PreAndPostScriptTest {
 	
 	// tests if preValue is executed before postValue in a import-test.
 	// options:
-	// [Config.FC_IMPORT] run function import.
-	// [setDbschema(DBSCHEMA)] set schema.
+	// [Config.FC_IMPORT]
+	// [setDbschema(DBSCHEMA)]
 	@Test
 	public void importTest() throws Exception
 	{
@@ -220,8 +220,8 @@ public class PreAndPostScriptTest {
 	
 	// tests if preValue is executed before postValue in a replace-test.
 	// options:
-	// [Config.FC_REPLACE] run function replace.
-	// [setDatasetName(DATASETA)] replace dataset a.
+	// [Config.FC_REPLACE]
+	// [setDatasetName(DATASETA)]
 	@Test
 	public void replaceTest() throws Exception
 	{
@@ -236,7 +236,7 @@ public class PreAndPostScriptTest {
 			{
 				// prescript
 				File preData=new File("test/data/PreAndPostScript/PreScriptReplace.sql");
-				// mainscript
+				// new data
 				File data=new File("test/data/PreAndPostScript/MainReplace.xtf");
 				// afterScript
 				File postData=new File("test/data/PreAndPostScript/PostScriptReplace.sql");
@@ -275,9 +275,9 @@ public class PreAndPostScriptTest {
 	
 	// tests if preValue is executed before postValue in a delete-test.
 	// options:
-	// [Config.FC_DELETE] run function delete.
-	// [setDatasetName(DATASETA)] delete dataset a.
-	// [config.BASKET_HANDLING_READWRITE] handling baskets.
+	// [Config.FC_DELETE]
+	// [setDatasetName(DATASETA)]
+	// [config.BASKET_HANDLING_READWRITE]
 	@Test
 	public void deleteTest() throws Exception
 	{
@@ -328,9 +328,9 @@ public class PreAndPostScriptTest {
 	
 	// tests if preValue is executed before postValue in a export-test.
 	// options:
-	// [Config.FC_EXPORT] run function export.
-	// [setDatasetName(DATASETA)] export data of dataset a.
-	// [config.BASKET_HANDLING_READWRITE] handling baskets.
+	// [Config.FC_EXPORT]
+	// [setDatasetName(DATASETA)]
+	// [config.BASKET_HANDLING_READWRITE]
 	@Test
 	public void exportTest() throws Exception
 	{
@@ -345,7 +345,7 @@ public class PreAndPostScriptTest {
 				DbUtility.executeSqlScript(jdbcConnection, new java.io.FileReader("test/data/PreAndPostScript/InsertIntoTableExport.sql"));
 				// prescript
 				File preData=new File("test/data/PreAndPostScript/PreScriptExport.sql");
-				// mainexports
+				// export data
 				File data=new File("test/data/PreAndPostScript/MainExport-out.xtf");
 				// afterScript
 				File postData=new File("test/data/PreAndPostScript/PostScriptExport.sql");

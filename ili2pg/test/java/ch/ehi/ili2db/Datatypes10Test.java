@@ -263,13 +263,11 @@ public class Datatypes10Test {
 		        }else if(event instanceof EndTransferEvent){
 		        }
 			 }while(!(event instanceof EndTransferEvent));
-				 // test1
 				 {
 					 IomObject obj0 = objs.get("10");
 					 Assert.assertNotNull(obj0);
 					 Assert.assertEquals("Datatypes10.Topic.OtherTable", obj0.getobjecttag());
 				 }
-				 //test2
 				 {
 					 IomObject obj1 = objs.get("11");
 					 Assert.assertNotNull(obj1);
