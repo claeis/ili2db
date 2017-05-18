@@ -135,7 +135,7 @@ public class CatalogueObjectsTest {
 					Assert.assertEquals("CatalogueObjects1.TopicA.Katalog_Programm",rs.getString(2));
 				}
 				{
-					String stmtTxt="SELECT t_ili2db_import_object.t_id, t_ili2db_import_object.class FROM "+DBSCHEMA+".t_ili2db_import_object WHERE t_ili2db_import_object.t_id = 14";
+					String stmtTxt="SELECT t_ili2db_import_object.t_id, t_ili2db_import_object.class FROM "+DBSCHEMA+".t_ili2db_import_object WHERE t_ili2db_import_object.t_id = 18";
 					Assert.assertTrue(stmt.execute(stmtTxt));
 					ResultSet rs=stmt.getResultSet();
 					Assert.assertTrue(rs.next());
@@ -176,9 +176,9 @@ public class CatalogueObjectsTest {
 			File data=new File("test/data/CatalogueObjects/CatalogueObjects1a-out.xtf");
 			Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 			config.setFunction(Config.FC_EXPORT);
-			//config.setDatasetName(DATASETNAME);
+			config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
+			config.setDatasetName(DATASETNAME);
 			config.setBaskets("CatalogueObjects1.TopicC.1");
-			//config.setValidation(false);
 			Ili2db.readSettingsFromDb(config);
 			Ili2db.run(config,null);
 			// read objects of db and write objectValue to HashMap
