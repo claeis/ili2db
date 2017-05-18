@@ -133,8 +133,8 @@ public class MultisurfaceTest {
 	        jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
 	        stmt=jdbcConnection.createStatement();
 			stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");        
-	        DbUtility.executeSqlScript(jdbcConnection, new java.io.FileReader("test/data/Multisurface/CreateTableXtf1a.sql"));
-	        DbUtility.executeSqlScript(jdbcConnection, new java.io.FileReader("test/data/Multisurface/InsertIntoTableXtf1a.sql"));
+	        DbUtility.executeSqlScript(jdbcConnection, new java.io.FileReader("test/data/MultiSurface/CreateTableXtf1a.sql"));
+	        DbUtility.executeSqlScript(jdbcConnection, new java.io.FileReader("test/data/MultiSurface/InsertIntoTableXtf1a.sql"));
 			File data=new File("test/data/MultiSurface/MultiSurface1a-out.xtf");
 			Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 			config.setModels("MultiSurface1");
