@@ -16,6 +16,7 @@ ili2pg/ili2gpkg 3.8.2 (2017-04-xx)
 -----------------------------
 - fixed export: export of objects without OID in inheritance tree mixed with/without stable OID
 - added list of reserved sqlite and postgresql keywords
+- ili2c-4.7.3
 
 ili2pg/ili2gpkg 3.8.1 (2017-04-21)
 -----------------------------
