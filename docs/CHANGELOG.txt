@@ -18,6 +18,7 @@ ili2pg/ili2gpkg 3.8.2 (2017-04-xx)
 - added list of reserved sqlite and postgresql keywords
 - added support before- and after-import custom sql
 - added verify that given --defaultSrsAuth/Code exists in DB
+- added new option to create postgresql extensions
 
 ili2pg/ili2gpkg 3.8.1 (2017-04-21)
 -----------------------------

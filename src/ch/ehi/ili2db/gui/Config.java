@@ -102,6 +102,7 @@ public class Config extends Settings {
 	private boolean validation=false;
 	private Long minIdSeqValue=null;
 	private Long maxIdSeqValue=null;
+	private boolean setupPgExt=false;
 	private String transferFileFormat=null;
 	final static public String ILIGML20="ILIGML20"; 
 	
@@ -551,5 +552,11 @@ public class Config extends Settings {
 	}
 	public void setPostScript(String postScript) {
 		this.postScript = postScript;
+	}
+	public boolean isSetupPgExt() {
+		return setupPgExt;
+	}
+	public void setSetupPgExt(boolean setupPgExt) {
+		this.setupPgExt = setupPgExt;
 	}
 }
