@@ -5,15 +5,19 @@ import static org.junit.Assert.*;
 import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.ResultSet;
 import java.sql.Statement;
+
 import junit.framework.Assert;
+
 import org.junit.Test;
+
 import ch.ehi.ili2db.gui.Config;
 
 //-Ddburl=jdbc:postgresql:dbname -Ddbusr=usrname -Ddbpwd=1234
 public class SRSVerificationTest {
 
-	private static final String DBSCHEMA = "srsVerificationSchema";
+	private static final String DBSCHEMA = "srsVerifySchema";
 	String dburl=System.getProperty("dburl"); 
 	String dbuser=System.getProperty("dbusr");
 	String dbpwd=System.getProperty("dbpwd"); 
@@ -45,7 +49,7 @@ public class SRSVerificationTest {
 		try{
 	        Class driverClass = Class.forName("org.postgresql.Driver");
 	        jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
-	        stmt=jdbcConnection.createStatement();
+	        Statement stmt=jdbcConnection.createStatement();
 	        stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");
 			{
 				File data=new File("test/data/SRSVerification/ModelA.ili");
@@ -76,7 +80,7 @@ public class SRSVerificationTest {
 		try{
 	        Class driverClass = Class.forName("org.postgresql.Driver");
 	        jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
-	        stmt=jdbcConnection.createStatement();
+	        Statement stmt=jdbcConnection.createStatement();
 	        stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");
 			{
 				File data=new File("test/data/SRSVerification/ModelA.ili");
@@ -108,7 +112,7 @@ public class SRSVerificationTest {
 		try{
 	        Class driverClass = Class.forName("org.postgresql.Driver");
 	        jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
-	        stmt=jdbcConnection.createStatement();
+	        Statement stmt=jdbcConnection.createStatement();
 	        stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");
 			{
 				File data=new File("test/data/SRSVerification/ModelA.ili");
@@ -140,7 +144,7 @@ public class SRSVerificationTest {
 		try{
 	        Class driverClass = Class.forName("org.postgresql.Driver");
 	        jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
-	        stmt=jdbcConnection.createStatement();
+	        Statement stmt=jdbcConnection.createStatement();
 	        stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");
 			{
 				File data=new File("test/data/SRSVerification/ModelA.ili");
