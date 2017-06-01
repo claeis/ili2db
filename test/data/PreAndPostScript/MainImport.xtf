@@ -6,8 +6,8 @@
 	</MODELS>
 	</HEADERSECTION>
 	<DATASECTION>
-		<ModelA.TopicA BID="b1">
-			<ModelA.TopicA.ClassA TID="o1">
+		<ModelA.TopicA BID="c34c86ec-2a75-4a89-a194-f8ebc422f7bc">
+			<ModelA.TopicA.ClassA TID="c34c86ec-2a75-4a89-a194-f8ebc422f8bc">
 				<attr1>mainValue</attr1>
 			</ModelA.TopicA.ClassA>
 		</ModelA.TopicA>
