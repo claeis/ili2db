@@ -71,6 +71,7 @@ public class Config extends Settings {
 	public static final String VER4_TRANSLATION=PREFIX+".ver4_translation";
 	public static final String ILI1TRANSLATION=PREFIX+".ili1translation";
 	public static final String DELETE_DATA="data";
+	public static final String CREATE_META_INFO=PREFIX+".createMetaInfo";
 	private int function;
 	private String dburl;
 	private String dbusr;
@@ -558,5 +559,11 @@ public class Config extends Settings {
 	}
 	public void setSetupPgExt(boolean setupPgExt) {
 		this.setupPgExt = setupPgExt;
+	}
+	public void setCreateMetaInfo(boolean value) {
+		setValue(CREATE_META_INFO,value?TRUE:FALSE);
+	}
+	public boolean getCreateMetaInfo() {
+		return TRUE.equals(getValue(CREATE_META_INFO))?true:false;
 	}
 }
