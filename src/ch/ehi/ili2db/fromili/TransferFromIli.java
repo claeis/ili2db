@@ -1309,4 +1309,75 @@ public class TransferFromIli {
 		tab.addIndex(pk);
 		schema.addTable(tab);
 	}
+	static public void addMetaInfoTables(DbSchema schema)
+	{
+		{
+			DbTable tab=new DbTable();
+			tab.setName(new DbTableName(schema.getName(),DbNames.META_INFO_COLUMN_TAB));
+			
+			// qualified name of ili table name
+			DbColVarchar tableName=new DbColVarchar();
+			tableName.setName(DbNames.META_INFO_COLUMN_TAB_TABLENAME_COL);
+			tableName.setNotNull(true);
+			tableName.setSize(255);
+			tab.addColumn(tableName);
+			
+			// name of ili subtype
+			DbColVarchar subType=new DbColVarchar();
+			subType.setName(DbNames.META_INFO_COLUMN_TAB_SUBTYPE_COL);
+			subType.setNotNull(true);
+			subType.setSize(255);
+			tab.addColumn(subType);
+			
+			// name of ili column name
+			DbColVarchar columnName=new DbColVarchar();
+			columnName.setName(DbNames.META_INFO_COLUMN_TAB_COLUMNAME_COL);
+			columnName.setNotNull(true);
+			columnName.setSize(255);
+			tab.addColumn(columnName);
+			
+			// tag
+			DbColVarchar tag=new DbColVarchar();
+			tag.setName(DbNames.META_INFO_COLUMN_TAB_TAG_COL);
+			tag.setNotNull(true);
+			tag.setSize(1024);
+			tab.addColumn(tag);
+			
+			// setting
+			DbColVarchar setting=new DbColVarchar();
+			setting.setName(DbNames.META_INFO_COLUMN_TAB_SETTING_COL);
+			setting.setNotNull(true);
+			setting.setSize(1024);
+			tab.addColumn(setting);
+			
+			schema.addTable(tab);
+		}
+		{
+			DbTable tab=new DbTable();
+			tab.setName(new DbTableName(schema.getName(),DbNames.META_INFO_TABLE_TAB));
+			
+			// qualified name of ili table name
+			DbColVarchar tableName=new DbColVarchar();
+			tableName.setName(DbNames.META_INFO_TABLE_TAB_TABLENAME_COL);
+			tableName.setNotNull(true);
+			tableName.setSize(255);
+			tab.addColumn(tableName);
+			
+			// tag
+			DbColVarchar tag=new DbColVarchar();
+			tag.setName(DbNames.META_INFO_TABLE_TAB_TAG_COL);
+			tag.setNotNull(true);
+			tag.setSize(1024);
+			tab.addColumn(tag);
+			
+			// setting
+			DbColVarchar setting=new DbColVarchar();
+			setting.setName(DbNames.META_INFO_TABLE_TAB_SETTING_COL);
+			setting.setNotNull(true);
+			setting.setSize(1024);
+			tab.addColumn(setting);
+			
+			schema.addTable(tab);
+		}
+	}
 }
