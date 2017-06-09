@@ -312,6 +312,9 @@ public abstract class AbstractMain {
 				argi++;
 				config.setValue(UserSettings.HTTP_PROXY_PORT,args[argi]);
 				argi++;
+			}else if(arg.equals("--createMetaInfo")){
+				argi++;
+				config.setCreateMetaInfo(true);
 			}else if(arg.equals("--version")){
 				printVersion();
 				return;
@@ -383,6 +386,7 @@ public abstract class AbstractMain {
 					System.err.println("--ILIGML20             use eCH-0118-2.0 as transferformat");
 				    System.err.println("--ver4-translation     supports TRANSLATION OF in ili2db 4.x mode (incompatible with ili2db 3.x versions).");
 				    System.err.println("--translation translatedModel=originModel assigns a translated model to its orginal language equivalent.");
+				    System.err.println("--createMetaInfo       Create aditional ili-model information.");
 					printSpecificOptions();
 					System.err.println("--proxy host           proxy server to access model repositories.");
 					System.err.println("--proxyPort port       proxy port to access model repositories.");
