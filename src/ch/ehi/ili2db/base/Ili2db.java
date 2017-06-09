@@ -501,6 +501,7 @@ public class Ili2db {
 						trsfFromIli.addEnumTable(schema);
 						TransferFromIli.addTableMappingTable(schema);
 						TransferFromIli.addAttrMappingTable(schema);
+						TransferFromIli.addMetaInfoTables(schema);
 						idGen.addMappingTable(schema);
 						
 						GeneratorDriver drv=new GeneratorDriver(gen);
@@ -1040,6 +1041,7 @@ public class Ili2db {
 					trsfFromIli.addEnumTable(schema);
 					TransferFromIli.addTableMappingTable(schema);
 					TransferFromIli.addAttrMappingTable(schema);
+					TransferFromIli.addMetaInfoTables(schema);
 					idGen.addMappingTable(schema);
 				}
 				
