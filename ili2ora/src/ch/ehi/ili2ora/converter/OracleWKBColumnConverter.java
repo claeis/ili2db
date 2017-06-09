@@ -70,7 +70,7 @@ public class OracleWKBColumnConverter extends AbstractWKBColumnConverter {
 		return dbNativeValue;
 	}
 	@Override
-	public int getSrsid(String crsAuthority, String crsCode, Connection conn) throws ConverterException {
+	public Integer getSrsid(String crsAuthority, String crsCode, Connection conn) throws ConverterException {
 		return -1;
 	}
 

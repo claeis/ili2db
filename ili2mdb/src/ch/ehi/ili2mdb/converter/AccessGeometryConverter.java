@@ -63,7 +63,7 @@ public class AccessGeometryConverter extends AbstractWKBColumnConverter {
 	public String getSelectValueWrapperSurface(String dbNativeValue) {
 		return dbNativeValue;
 	}
-	public int getSrsid(String crsAuthority, String crsCode, Connection conn) throws ConverterException {
+	public Integer getSrsid(String crsAuthority, String crsCode, Connection conn) throws ConverterException {
 		return -1;
 	}
 

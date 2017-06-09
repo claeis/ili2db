@@ -9,10 +9,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.HashMap;
-
 import org.junit.Assert;
 import org.junit.Test;
-
 import ch.ehi.basics.logging.EhiLogger;
 import ch.ehi.ili2db.base.DbUtility;
 import ch.ehi.ili2db.base.Ili2db;
@@ -35,12 +33,9 @@ public class Naming1smart1Test {
 	String dbuser=System.getProperty("dbusr");
 	String dbpwd=System.getProperty("dbpwd"); 
 	
-	
 	public Config initConfig(String xtfFilename,String dbschema,String logfile) {
 		Config config=new Config();
 		new ch.ehi.ili2pg.PgMain().initConfig(config);
-		
-		
 		config.setDburl(dburl);
 		config.setDbusr(dbuser);
 		config.setDbpwd(dbpwd);
@@ -50,14 +45,11 @@ public class Naming1smart1Test {
 		if(logfile!=null){
 			config.setLogfile(logfile);
 		}
-
-
 		config.setXtffile(xtfFilename);
 		if(xtfFilename!=null && Ili2db.isItfFilename(xtfFilename)){
 			config.setItfTransferfile(true);
 		}
 		return config;
-		
 	}
 
 	//config.setDeleteMode(Config.DELETE_DATA);
@@ -93,52 +85,49 @@ public class Naming1smart1Test {
 			config.setTidHandling(config.TID_HANDLING_PROPERTY);
 			Ili2db.readSettingsFromDb(config);
 			Ili2db.run(config,null);
-			
-			Assert.assertTrue(stmt.execute("SELECT attra FROM "+DBSCHEMA+".naming1testclass_classa1 WHERE t_ili_tid='c2'"));
-			ResultSet rs=stmt.getResultSet();
-			Assert.assertTrue(rs.next());
-			Assert.assertEquals("attrA'",rs.getString(1));
-	        
+			{
+				Assert.assertTrue(stmt.execute("SELECT attra FROM "+DBSCHEMA+".naming1testclass_classa1 WHERE t_ili_tid='c2'"));
+				ResultSet rs=stmt.getResultSet();
+				Assert.assertTrue(rs.next());
+				Assert.assertEquals("attrA'",rs.getString(1));
+			}
 		}finally{
 			if(jdbcConnection!=null){
 				jdbcConnection.close();
 			}
 		}
-        
-		
 	}
+	
 	@Test
 	public void exportDataset() throws Exception
 	{
 		Connection jdbcConnection=null;
 		try{
 	        Class driverClass = Class.forName("org.postgresql.Driver");
-	        jdbcConnection = DriverManager.getConnection(
-	        		dburl, dbuser, dbpwd);
-	        DbUtility.executeSqlScript(jdbcConnection, new java.io.FileReader("test/data/Naming1smart1/InitNaming1a.sql"));
-	        
+	        jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
+	        DbUtility.executeSqlScript(jdbcConnection, new java.io.FileReader("test/data/Naming1smart1/CreateTable.sql"));
+	        DbUtility.executeSqlScript(jdbcConnection, new java.io.FileReader("test/data/Naming1smart1/InsertIntoTable.sql"));
 			File data=new File("test/data/Naming1smart1/Naming1a-out.xtf");
 			Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 			config.setDatasetName(DATASETNAME);
 			config.setFunction(Config.FC_EXPORT);
 			Ili2db.readSettingsFromDb(config);
 			Ili2db.run(config,null);
-			
 			HashMap<String,IomObject> objs=new HashMap<String,IomObject>();
 			XtfReader reader=new XtfReader(data);
 			IoxEvent event=null;
 			 do{
-			        event=reader.read();
-			        if(event instanceof StartTransferEvent){
-			        }else if(event instanceof StartBasketEvent){
-			        }else if(event instanceof ObjectEvent){
-			        	IomObject iomObj=((ObjectEvent)event).getIomObject();
-			        	if(iomObj.getobjectoid()!=null){
-				        	objs.put(iomObj.getobjectoid(), iomObj);
-			        	}
-			        }else if(event instanceof EndBasketEvent){
-			        }else if(event instanceof EndTransferEvent){
-			        }
+		        event=reader.read();
+		        if(event instanceof StartTransferEvent){
+		        }else if(event instanceof StartBasketEvent){
+		        }else if(event instanceof ObjectEvent){
+		        	IomObject iomObj=((ObjectEvent)event).getIomObject();
+		        	if(iomObj.getobjectoid()!=null){
+			        	objs.put(iomObj.getobjectoid(), iomObj);
+		        	}
+		        }else if(event instanceof EndBasketEvent){
+		        }else if(event instanceof EndTransferEvent){
+		        }
 			 }while(!(event instanceof EndTransferEvent));
 			 
 			IomObject a1 = objs.get("a1");
@@ -170,12 +159,10 @@ public class Naming1smart1Test {
 			Assert.assertNotNull(c2);
 			Assert.assertEquals("Naming1.TestClass.Classa1", c2.getobjecttag());
 			Assert.assertEquals("attrA'", c2.getattrvalue("attrA"));
-	        
 		}finally{
 			if(jdbcConnection!=null){
 				jdbcConnection.close();
 			}
 		}
-		
 	}
 }

@@ -91,7 +91,7 @@ public class NullColumnConverter implements SqlColumnConverter {
 	}
 
 	@Override
-	public int getSrsid(String crsAuthority, String crsCode, Connection conn)
+	public Integer getSrsid(String crsAuthority, String crsCode, Connection conn)
 			throws ConverterException {
 		return 0;
 	}

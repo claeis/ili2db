@@ -32,7 +32,7 @@ import ch.interlis.iom.IomObject;
  */
 public interface SqlColumnConverter {
 	public void setup(Connection conn,ch.ehi.ili2db.gui.Config config);
-	public abstract int getSrsid(String crsAuthority,String crsCode,Connection conn) throws ConverterException;
+	public abstract Integer getSrsid(String crsAuthority,String crsCode,Connection conn) throws ConverterException;
 	/*
 	public abstract String getCoordSqlUDT();
 	public abstract String getPolylineSqlUDT();
