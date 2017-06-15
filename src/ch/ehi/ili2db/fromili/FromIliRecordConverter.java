@@ -10,6 +10,7 @@ import ch.ehi.ili2db.base.DbNames;
 import ch.ehi.ili2db.base.Ili2cUtility;
 import ch.ehi.ili2db.base.Ili2dbException;
 import ch.ehi.ili2db.converter.AbstractRecordConverter;
+import ch.ehi.ili2db.dbmetainfo.DbExtMetaInfo;
 import ch.ehi.ili2db.gui.Config;
 import ch.ehi.ili2db.mapping.MultiSurfaceMapping;
 import ch.ehi.ili2db.mapping.NameMapping;
@@ -62,6 +63,7 @@ import ch.interlis.ili2c.metamodel.TransferDescription;
 import ch.interlis.ili2c.metamodel.Type;
 import ch.interlis.ili2c.metamodel.UniqueEl;
 import ch.interlis.ili2c.metamodel.UniquenessConstraint;
+import ch.interlis.ili2c.metamodel.Unit;
 import ch.interlis.ili2c.metamodel.Viewable;
 import ch.interlis.ili2c.metamodel.ViewableTransferElement;
 
@@ -76,11 +78,13 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 	private boolean expandMultilingual=true;
 	private boolean createUnique=true;
 	private boolean createNumCheck=false;
-	
+	private DbExtMetaInfo metaInfo=null;
 
 	public FromIliRecordConverter(TransferDescription td1, NameMapping ili2sqlName,
 			Config config, DbSchema schema1, CustomMapping customMapping1,
-			DbIdGen idGen1, HashSet visitedEnumsAttrs1, TrafoConfig trafoConfig,	Viewable2TableMapping class2wrapper1) {
+			DbIdGen idGen1, HashSet visitedEnumsAttrs1, TrafoConfig trafoConfig,	Viewable2TableMapping class2wrapper1
+			,DbExtMetaInfo metaInfo
+			) {
 		super(td1, ili2sqlName, config, idGen1,trafoConfig,class2wrapper1);
 		visitedEnumsAttrs=visitedEnumsAttrs1;
 		customMapping=customMapping1;
@@ -90,6 +94,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 		expandMultilingual=Config.MULTILINGUAL_TRAFO_EXPAND.equals(config.getMultilingualTrafo());
 		createUnique=config.isCreateUniqueConstraints();
 		createNumCheck=config.isCreateCreateNumChecks();
+		this.metaInfo=metaInfo;
 	}
 
 	public void generateTable(ViewableWrapper def,int pass)
@@ -433,6 +438,8 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 			visitedEnumsAttrs.add(attr);
 		}
 		DbColumn dbCol=null;
+		Unit unitDef=null;
+
 		ArrayList<DbColumn> dbColExts=new ArrayList<DbColumn>();
 		Type type = attr.getDomainResolvingAll();
 		if (attr.isDomainBoolean()) {
@@ -620,7 +627,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 					}
 					dbCol=ret;
 				}
-				
+				unitDef=((NumericType)type).getUnit();
 			}
 		}else if(type instanceof TextType){
 			DbColVarchar ret=new DbColVarchar();
@@ -645,8 +652,17 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 		}
 
 		if (dbCol != null) {
-			String sqlName=getSqlAttrName(attr,dbTable.getName().getName(),null);
-			setAttrDbColProps(aclass,attr, dbCol, sqlName);
+			String sqlColName=getSqlAttrName(attr,dbTable.getName().getName(),null);
+			setAttrDbColProps(aclass,attr, dbCol, sqlColName);
+			String subType=null;
+			Viewable attrClass=(Viewable)attr.getContainer();
+			if(attrClass!=aclass && attrClass.isExtending(aclass)){
+				subType=getSqlType(attrClass).getName();
+			}
+			if(unitDef!=null){
+				String unitName=unitDef.getName();
+				metaInfo.setColumnInfo(dbTable.getName().getName(), subType,sqlColName, DbExtMetaInfo.TAG_COL_UNIT, unitName);
+			}
 			customMapping.fixupAttribute(dbTable, dbCol, attr);
 			dbTable.addColumn(dbCol);
 		}

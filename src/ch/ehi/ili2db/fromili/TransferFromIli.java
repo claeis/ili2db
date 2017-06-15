@@ -27,8 +27,10 @@ import ch.ehi.basics.logging.EhiLogger;
 import ch.ehi.ili2db.base.DbIdGen;
 import ch.ehi.ili2db.base.DbNames;
 import ch.ehi.ili2db.base.DbUtility;
+import ch.ehi.ili2db.base.Ili2cUtility;
 import ch.ehi.ili2db.base.Ili2dbException;
 import ch.ehi.ili2db.converter.AbstractRecordConverter;
+import ch.ehi.ili2db.dbmetainfo.DbExtMetaInfo;
 import ch.ehi.ili2db.gui.Config;
 import ch.ehi.ili2db.mapping.TrafoConfig;
 import ch.ehi.ili2db.mapping.Viewable2TableMapping;
@@ -84,6 +86,8 @@ public class TransferFromIli {
 	private String colT_ID=null;
 	private String nl=System.getProperty("line.separator");
 	private FromIliRecordConverter recConv=null;
+	private DbExtMetaInfo metaInfo=new DbExtMetaInfo();
+
 	public DbSchema doit(TransferDescription td1,java.util.List<Element> modelEles,ch.ehi.ili2db.mapping.NameMapping ili2sqlName,ch.ehi.ili2db.gui.Config config,DbIdGen idGen,TrafoConfig trafoConfig,Viewable2TableMapping class2wrapper1,CustomMapping customMapping1)
 	throws Ili2dbException
 	{
@@ -117,7 +121,7 @@ public class TransferFromIli {
 		class2wrapper=class2wrapper1;
 		visitedEnums=new HashSet();
 		td=td1;
-		recConv=new FromIliRecordConverter(td,ili2sqlName,config,schema,customMapping,idGen,visitedEnums,trafoConfig,class2wrapper);
+		recConv=new FromIliRecordConverter(td,ili2sqlName,config,schema,customMapping,idGen,visitedEnums,trafoConfig,class2wrapper,metaInfo);
 
 		visitedWrapper=new HashSet<ViewableWrapper>();
 		generatModelEles(modelEles,1);
@@ -960,6 +964,7 @@ public class TransferFromIli {
 					dispName.setSize(250);
 					tab.addColumn(dispName);
 					schema.addTable(tab);
+					metaInfo.setTableInfo(tab.getName().getName(), DbExtMetaInfo.TAG_TAB_TABLEKIND, DbExtMetaInfo.TAG_TAB_TABLEKIND_ENUM);
 				}
 			}
 			
@@ -1309,75 +1314,22 @@ public class TransferFromIli {
 		tab.addIndex(pk);
 		schema.addTable(tab);
 	}
-	static public void addMetaInfoTables(DbSchema schema)
+	public void updateMetaInfoTables(java.sql.Connection conn) 
+			throws Ili2dbException
 	{
-		{
-			DbTable tab=new DbTable();
-			tab.setName(new DbTableName(schema.getName(),DbNames.META_INFO_COLUMN_TAB));
-			
-			// qualified name of ili table name
-			DbColVarchar tableName=new DbColVarchar();
-			tableName.setName(DbNames.META_INFO_COLUMN_TAB_TABLENAME_COL);
-			tableName.setNotNull(true);
-			tableName.setSize(255);
-			tab.addColumn(tableName);
-			
-			// name of ili subtype
-			DbColVarchar subType=new DbColVarchar();
-			subType.setName(DbNames.META_INFO_COLUMN_TAB_SUBTYPE_COL);
-			subType.setNotNull(true);
-			subType.setSize(255);
-			tab.addColumn(subType);
-			
-			// name of ili column name
-			DbColVarchar columnName=new DbColVarchar();
-			columnName.setName(DbNames.META_INFO_COLUMN_TAB_COLUMNAME_COL);
-			columnName.setNotNull(true);
-			columnName.setSize(255);
-			tab.addColumn(columnName);
-			
-			// tag
-			DbColVarchar tag=new DbColVarchar();
-			tag.setName(DbNames.META_INFO_COLUMN_TAB_TAG_COL);
-			tag.setNotNull(true);
-			tag.setSize(1024);
-			tab.addColumn(tag);
-			
-			// setting
-			DbColVarchar setting=new DbColVarchar();
-			setting.setName(DbNames.META_INFO_COLUMN_TAB_SETTING_COL);
-			setting.setNotNull(true);
-			setting.setSize(1024);
-			tab.addColumn(setting);
-			
-			schema.addTable(tab);
+		for(ViewableWrapper v:visitedWrapper){
+			if(v.isSecondaryTable()){
+				metaInfo.setTableInfo(v.getSqlTablename(), DbExtMetaInfo.TAG_TAB_TABLEKIND, DbExtMetaInfo.TAG_TAB_TABLEKIND_SECONDARY);
+			}else if(v.getExtending()==null){
+				if(v.isStructure()){
+					metaInfo.setTableInfo(v.getSqlTablename(), DbExtMetaInfo.TAG_TAB_TABLEKIND, DbExtMetaInfo.TAG_TAB_TABLEKIND_STRUCTURE);
+				}else if(v.getViewable() instanceof AssociationDef){
+					metaInfo.setTableInfo(v.getSqlTablename(), DbExtMetaInfo.TAG_TAB_TABLEKIND, DbExtMetaInfo.TAG_TAB_TABLEKIND_ASSOCIATION);
+				}else if(Ili2cUtility.isChbaseCatalogueItem(td, v.getViewable())){
+					metaInfo.setTableInfo(v.getSqlTablename(), DbExtMetaInfo.TAG_TAB_TABLEKIND, DbExtMetaInfo.TAG_TAB_TABLEKIND_CATALOGUE);
+				}
+			}
 		}
-		{
-			DbTable tab=new DbTable();
-			tab.setName(new DbTableName(schema.getName(),DbNames.META_INFO_TABLE_TAB));
-			
-			// qualified name of ili table name
-			DbColVarchar tableName=new DbColVarchar();
-			tableName.setName(DbNames.META_INFO_TABLE_TAB_TABLENAME_COL);
-			tableName.setNotNull(true);
-			tableName.setSize(255);
-			tab.addColumn(tableName);
-			
-			// tag
-			DbColVarchar tag=new DbColVarchar();
-			tag.setName(DbNames.META_INFO_TABLE_TAB_TAG_COL);
-			tag.setNotNull(true);
-			tag.setSize(1024);
-			tab.addColumn(tag);
-			
-			// setting
-			DbColVarchar setting=new DbColVarchar();
-			setting.setName(DbNames.META_INFO_TABLE_TAB_SETTING_COL);
-			setting.setNotNull(true);
-			setting.setSize(1024);
-			tab.addColumn(setting);
-			
-			schema.addTable(tab);
-		}
+		metaInfo.updateMetaInfoTables(conn, schema.getName());
 	}
 }

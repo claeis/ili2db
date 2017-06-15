@@ -35,6 +35,7 @@ import ch.ehi.basics.logging.StdLogEvent;
 import ch.ehi.basics.settings.Settings;
 import ch.ehi.ili2db.converter.ConverterException;
 import ch.ehi.ili2db.converter.SqlColumnConverter;
+import ch.ehi.ili2db.dbmetainfo.DbExtMetaInfo;
 import ch.ehi.ili2db.fromili.CustomMapping;
 import ch.ehi.ili2db.fromili.CustomMappingNull;
 import ch.ehi.ili2db.fromili.IliFromDb;
@@ -501,7 +502,7 @@ public class Ili2db {
 						trsfFromIli.addEnumTable(schema);
 						TransferFromIli.addTableMappingTable(schema);
 						TransferFromIli.addAttrMappingTable(schema);
-						TransferFromIli.addMetaInfoTables(schema);
+						DbExtMetaInfo.addMetaInfoTables(schema);
 						idGen.addMappingTable(schema);
 						
 						GeneratorDriver drv=new GeneratorDriver(gen);
@@ -524,6 +525,7 @@ public class Ili2db {
 							trsfFromIli.updateInheritanceTable(conn,config.getDbschema());
 							// update enumerations table
 							trsfFromIli.updateEnumTable(conn);
+							trsfFromIli.updateMetaInfoTables(conn);
 							TransferFromIli.addModels(conn,td,config.getDbschema());
 							if(!config.isConfigReadFromDb()){
 								TransferFromIli.updateSettings(conn,config,config.getDbschema());
@@ -1041,7 +1043,7 @@ public class Ili2db {
 					trsfFromIli.addEnumTable(schema);
 					TransferFromIli.addTableMappingTable(schema);
 					TransferFromIli.addAttrMappingTable(schema);
-					TransferFromIli.addMetaInfoTables(schema);
+					DbExtMetaInfo.addMetaInfoTables(schema);
 					idGen.addMappingTable(schema);
 				}
 				
@@ -1075,6 +1077,7 @@ public class Ili2db {
 					trsfFromIli.updateInheritanceTable(conn,config.getDbschema());
 					// update enum table
 					trsfFromIli.updateEnumTable(conn);
+					trsfFromIli.updateMetaInfoTables(conn);
 					TransferFromIli.addModels(conn,td,config.getDbschema());
 					if(!config.isConfigReadFromDb()){
 						TransferFromIli.updateSettings(conn,config,config.getDbschema());

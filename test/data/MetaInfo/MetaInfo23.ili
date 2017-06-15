@@ -1,0 +1,51 @@
+INTERLIS 2.3;
+
+MODEL MetaInfo23
+  AT "mailto:ce@eisenhutinformatik.ch" VERSION "2017-06-13" =
+  IMPORTS CatalogueObjects_V1;
+
+  DOMAIN
+    EnumDomainA = (eleA1, eleA2);
+    NumDomainA = 1 .. 10 [INTERLIS.m]; 
+    TxtDomainA = TEXT*20;
+    MTxtDomainA = MTEXT*20;
+    
+  TOPIC TestA =
+  
+    CLASS Codelist EXTENDS CatalogueObjects_V1.Catalogues.Item =
+    END Codelist;
+
+    STRUCTURE StructA1 =
+    END StructA1;
+    
+    CLASS ClassA (ABSTRACT) =
+      num0  : NumDomainA; 
+    END ClassA;
+
+    CLASS ClassA1 EXTENDS ClassA =
+      structa : StructA1;
+      enuma : EnumDomainA;
+      enumb : (eleB1, eleB2);
+      numa  : NumDomainA; 
+      numb  : 20 .. 40 [INTERLIS.m]; 
+      texta : TxtDomainA;
+      textb : TEXT*20;
+      mtexta : MTxtDomainA;
+      mtextb : MTEXT*20;
+    END ClassA1;
+
+    CLASS ClassA1b EXTENDS ClassA1 =
+      numx  : NumDomainA; 
+    END ClassA1b;
+    
+    CLASS ClassB1 =
+    END ClassB1;
+
+    ASSOCIATION a2b=
+      a -- {0..*} ClassA1;
+      b -- {0..*} ClassB1;
+    END a2b;
+    
+  END TestA;
+    
+END MetaInfo23.
