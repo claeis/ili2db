@@ -8,6 +8,8 @@ import java.io.StringReader;
 
 import org.junit.Test;
 
+import ch.ehi.sqlgen.DbUtility;
+
 public class DbUtilityReadSqlStmtTest {
 
 	@Test
