@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TRANSFER xmlns="http://www.interlis.ch/INTERLIS2.3">
+	<HEADERSECTION SENDER="ili2pg-2.5.0-20151209" VERSION="2.3">
+		<MODELS>
+			<MODEL NAME="Units" VERSION="2012-02-20" URI="http://www.interlis.ch/models"></MODEL>
+			<MODEL NAME="CoordSys" VERSION="2005-06-16" URI="http://www.interlis.ch/models"></MODEL>
+			<MODEL NAME="GeometryCHLV03_V1" VERSION="2015-02-20" URI="http://www.geo.admin.ch"></MODEL>
+			<MODEL NAME="GeometryCHLV95_V1" VERSION="2015-02-20" URI="http://www.geo.admin.ch"></MODEL>
+			<MODEL NAME="MultiLine1" VERSION="2015-12-03" URI="mailto:ce@eisenhutinformatik.ch"></MODEL>
+		</MODELS>
+	</HEADERSECTION>
+	<DATASECTION>
+		<MultiLine1.TestA BID="MultiLine1.TestA">
+			<MultiLine1.TestA.ClassA1 TID="o1">
+				<geom>
+					<GeometryCHLV03_V1.MultiLine>
+						<Lines>
+							<GeometryCHLV03_V1.LineStructure>
+								<Line>
+											<POLYLINE>
+												<COORD>
+													<C1>600030.0</C1>
+													<C2>200020.0</C2>
+												</COORD>
+												<COORD>
+													<C1>600045.0</C1>
+													<C2>200040.0</C2>
+												</COORD>
+												<COORD>
+													<C1>600010.0</C1>
+													<C2>200040.0</C2>
+												</COORD>
+												<COORD>
+													<C1>600030.0</C1>
+													<C2>200020.0</C2>
+												</COORD>
+											</POLYLINE>
+								</Line>
+							</GeometryCHLV03_V1.LineStructure>
+							<GeometryCHLV03_V1.LineStructure>
+								<Line>
+											<POLYLINE>
+												<COORD>
+													<C1>600015.0</C1>
+													<C2>200005.0</C2>
+												</COORD>
+												<COORD>
+													<C1>600040.0</C1>
+													<C2>200010.0</C2>
+												</COORD>
+												<COORD>
+													<C1>600010.0</C1>
+													<C2>200020.0</C2>
+												</COORD>
+												<COORD>
+													<C1>600005.0</C1>
+													<C2>200010.0</C2>
+												</COORD>
+												<COORD>
+													<C1>600015.0</C1>
+													<C2>200005.0</C2>
+												</COORD>
+											</POLYLINE>
+								</Line>
+							</GeometryCHLV03_V1.LineStructure>
+						</Lines>
+					</GeometryCHLV03_V1.MultiLine>
+				</geom>
+				<point>
+					<COORD>
+						<C1>600031.0</C1>
+						<C2>200021.0</C2>
+					</COORD>
+				</point>
+			</MultiLine1.TestA.ClassA1>
+		</MultiLine1.TestA>
+	</DATASECTION>
+</TRANSFER>

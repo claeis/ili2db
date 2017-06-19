@@ -56,6 +56,11 @@ public class PostgisColumnConverter extends AbstractWKBColumnConverter {
 		//return "GeomFromWKB("+wkfValue+(srid==-1?"":","+srid)+")";
 	}
 	@Override
+	public String getInsertValueWrapperMultiPolyline(String wkfValue,int srid) {
+		return "ST_GeomFromWKB("+wkfValue+(srid==-1?"":","+srid)+")";
+		//return "GeomFromWKB("+wkfValue+(srid==-1?"":","+srid)+")";
+	}
+	@Override
 	public String getInsertValueWrapperSurface(String wkfValue,int srid) {
 		return "ST_GeomFromWKB("+wkfValue+(srid==-1?"":","+srid)+")";
 		//return "GeomFromWKB("+wkfValue+(srid==-1?"":","+srid)+")";
@@ -72,6 +77,11 @@ public class PostgisColumnConverter extends AbstractWKBColumnConverter {
 	}
 	@Override
 	public String getSelectValueWrapperPolyline(String dbNativeValue) {
+		return "ST_AsEWKB("+dbNativeValue+")";
+		//return "AsBinary("+dbNativeValue+")";
+	}
+	@Override
+	public String getSelectValueWrapperMultiPolyline(String dbNativeValue) {
 		return "ST_AsEWKB("+dbNativeValue+")";
 		//return "AsBinary("+dbNativeValue+")";
 	}
@@ -178,6 +188,19 @@ public class PostgisColumnConverter extends AbstractWKBColumnConverter {
 			return null;
 		}
 		@Override
+		public java.lang.Object fromIomMultiPolyline(IomObject value, int srid,boolean is3D,double p)
+			throws SQLException, ConverterException {
+			if(value!=null){
+				Iox2wkb conv=new Iox2wkb(is3D?3:2);
+				try {
+					return conv.multiline2wkb(value,!strokeArcs,p);
+				} catch (Iox2wkbException ex) {
+					throw new ConverterException(ex);
+				}
+			}
+			return null;
+		}
+		@Override
 		public IomObject toIomCoord(
 				Object geomobj,
 				String sqlAttrName,
@@ -235,6 +258,22 @@ public class PostgisColumnConverter extends AbstractWKBColumnConverter {
 					throw new ConverterException(e);
 				}
 			}
+		@Override
+		public IomObject toIomMultiPolyline(
+			Object geomobj,
+			String sqlAttrName,
+			boolean is3D)
+			throws SQLException, ConverterException {
+			byte bv[]=(byte [])geomobj;
+			//String v=((org.postgresql.util.PGobject)geomobj).getValue();
+			//byte bv[]=WKBReader.hexToBytes(v);
+			Wkb2iox conv=new Wkb2iox();
+			try {
+				return conv.read(bv);
+			} catch (ParseException e) {
+				throw new ConverterException(e);
+			}
+		}
 
 	@Override
 	public String toIomXml(Object obj) throws java.sql.SQLException,

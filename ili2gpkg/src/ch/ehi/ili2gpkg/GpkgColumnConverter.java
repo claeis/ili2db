@@ -69,6 +69,10 @@ public class GpkgColumnConverter extends AbstractWKBColumnConverter {
 		return wkfValue;
 	}
 	@Override
+	public String getInsertValueWrapperMultiPolyline(String wkfValue,int srid) {
+		return wkfValue;
+	}
+	@Override
 	public String getInsertValueWrapperSurface(String wkfValue,int srid) {
 		return wkfValue;
 	}
@@ -96,6 +100,10 @@ public class GpkgColumnConverter extends AbstractWKBColumnConverter {
 	}
 	@Override
 	public String getSelectValueWrapperPolyline(String dbNativeValue) {
+		return dbNativeValue;
+	}
+	@Override
+	public String getSelectValueWrapperMultiPolyline(String dbNativeValue) {
 		return dbNativeValue;
 	}
 	@Override
@@ -194,6 +202,19 @@ public class GpkgColumnConverter extends AbstractWKBColumnConverter {
 			return null;
 		}
 		@Override
+		public java.lang.Object fromIomMultiPolyline(IomObject value, int srsid,boolean is3D,double p)
+			throws SQLException, ConverterException {
+			if(value!=null){
+				Iox2gpkg conv=new Iox2gpkg(is3D?3:2);
+				try {
+					return conv.multiline2wkb(value,!strokeArcs,p,srsid);
+				} catch (Iox2wkbException ex) {
+					throw new ConverterException(ex);
+				}
+			}
+			return null;
+		}
+		@Override
 		public IomObject toIomCoord(
 				Object geomobj,
 				String sqlAttrName,
@@ -249,6 +270,20 @@ public class GpkgColumnConverter extends AbstractWKBColumnConverter {
 					throw new ConverterException(e);
 				}
 			}
+		@Override
+		public IomObject toIomMultiPolyline(
+			Object geomobj,
+			String sqlAttrName,
+			boolean is3D)
+			throws SQLException, ConverterException {
+			byte bv[]=(byte [])geomobj;
+			Gpkg2iox conv=new Gpkg2iox();
+			try {
+				return conv.read(bv);
+			} catch (ParseException e) {
+				throw new ConverterException(e);
+			}
+		}
 		@Override
 		public String toIomXml(Object obj) throws java.sql.SQLException,
 				ConverterException {

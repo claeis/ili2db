@@ -24,6 +24,7 @@ public class Viewable2TableMapper {
 	private NameMapping nameMapping=null;	
 	private boolean singleGeom=false;
 	private boolean coalesceMultiSurface=false;
+	private boolean coalesceMultiLine=false;
 	private boolean createItfLineTables=false;
 	private TransferDescription td=null;
 	private Viewable2TableMapper(Config config1,
@@ -39,6 +40,7 @@ public class Viewable2TableMapper {
 		Viewable2TableMapper mapper=new Viewable2TableMapper(config, trafoConfig, nameMapping);
 		mapper.singleGeom=config.isOneGeomPerTable();
 		mapper.coalesceMultiSurface=Config.MULTISURFACE_TRAFO_COALESCE.equals(config.getMultiSurfaceTrafo());
+		mapper.coalesceMultiLine=Config.MULTILINE_TRAFO_COALESCE.equals(config.getMultiLineTrafo());
 		mapper.createItfLineTables=config.getDoItfLineTables();
 		return mapper.doit(eles);
 	}
@@ -257,7 +259,10 @@ public class Viewable2TableMapper {
 					ch.interlis.ili2c.metamodel.Type type=attr.getDomainResolvingAliases();
 					if(type instanceof ch.interlis.ili2c.metamodel.CoordType || type instanceof ch.interlis.ili2c.metamodel.LineType
 							|| (Ili2cUtility.isMultiSurfaceAttr(getTransferDescription(attr), attr) && (coalesceMultiSurface 
-									|| TrafoConfigNames.MULTISURFACE_TRAFO_COALESCE.equals(trafoConfig.getAttrConfig(attr,TrafoConfigNames.MULTISURFACE_TRAFO))))){
+									|| TrafoConfigNames.MULTISURFACE_TRAFO_COALESCE.equals(trafoConfig.getAttrConfig(attr,TrafoConfigNames.MULTISURFACE_TRAFO))))
+							|| (Ili2cUtility.isMultiLineAttr(getTransferDescription(attr), attr) && (coalesceMultiLine 
+									|| TrafoConfigNames.MULTILINE_TRAFO_COALESCE.equals(trafoConfig.getAttrConfig(attr,TrafoConfigNames.MULTILINE_TRAFO))))
+					){
 						hasGeometry=true;
 						break;
 					}
@@ -285,7 +290,10 @@ public class Viewable2TableMapper {
 						ch.interlis.ili2c.metamodel.Type type=attr.getDomainResolvingAliases();
 						if(type instanceof ch.interlis.ili2c.metamodel.CoordType || type instanceof ch.interlis.ili2c.metamodel.LineType
 							|| (Ili2cUtility.isMultiSurfaceAttr(getTransferDescription(attr), attr) && (coalesceMultiSurface 
-								|| TrafoConfigNames.MULTISURFACE_TRAFO_COALESCE.equals(trafoConfig.getAttrConfig(attr,TrafoConfigNames.MULTISURFACE_TRAFO))))){						
+								|| TrafoConfigNames.MULTISURFACE_TRAFO_COALESCE.equals(trafoConfig.getAttrConfig(attr,TrafoConfigNames.MULTISURFACE_TRAFO))))
+							|| (Ili2cUtility.isMultiLineAttr(getTransferDescription(attr), attr) && (coalesceMultiLine 
+									|| TrafoConfigNames.MULTILINE_TRAFO_COALESCE.equals(trafoConfig.getAttrConfig(attr,TrafoConfigNames.MULTILINE_TRAFO))))
+						){						
 							if(createItfLineTables && type instanceof ch.interlis.ili2c.metamodel.SurfaceOrAreaType){
 								// ignore it; will be created by legacy code 
 							}else{

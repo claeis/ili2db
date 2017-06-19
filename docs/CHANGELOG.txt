@@ -14,12 +14,13 @@ ideas/open issues/questions
 
 ili2pg/ili2gpkg 3.9.0 (2017-06-xx)
 -----------------------------
-- fixed export: export of objects without OID in inheritance tree mixed with/without stable OID
 - added list of reserved sqlite and postgresql keywords
 - added support before- and after-import custom sql
 - added verify that given --defaultSrsAuth/Code exists in DB
 - added new option to create postgresql extensions
 - added option --createMetaInfo to create meta tables with info from model
+- added option --coalesceMultiLine
+- fixed export: export of objects without OID in inheritance tree mixed with/without stable OID
 - ili2c-4.7.3
 
 ili2pg/ili2gpkg 3.8.1 (2017-04-21)

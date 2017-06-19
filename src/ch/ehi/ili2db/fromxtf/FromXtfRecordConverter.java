@@ -23,6 +23,7 @@ import ch.ehi.ili2db.converter.AbstractRecordConverter;
 import ch.ehi.ili2db.converter.ConverterException;
 import ch.ehi.ili2db.converter.SqlColumnConverter;
 import ch.ehi.ili2db.gui.Config;
+import ch.ehi.ili2db.mapping.MultiLineMapping;
 import ch.ehi.ili2db.mapping.MultiSurfaceMapping;
 import ch.ehi.ili2db.mapping.NameMapping;
 import ch.ehi.ili2db.mapping.TrafoConfig;
@@ -55,6 +56,7 @@ import ch.interlis.ili2c.metamodel.Viewable;
 import ch.interlis.ili2c.metamodel.ViewableTransferElement;
 import ch.interlis.iom.IomObject;
 import ch.interlis.iom_j.itf.ItfReader2;
+import ch.interlis.iox_j.wkb.Wkb2iox;
 
 public class FromXtfRecordConverter extends AbstractRecordConverter {
 	private SqlColumnConverter geomConv=null;
@@ -637,6 +639,16 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 						}
 						sep=",";
 						multiSurfaceAttrs.addMultiSurfaceAttr(attr);
+				}else if(TrafoConfigNames.MULTILINE_TRAFO_COALESCE.equals(trafoConfig.getAttrConfig(attr, TrafoConfigNames.MULTILINE_TRAFO))){
+					 ret.append(sep);
+					 ret.append(attrSqlName);
+						if(isUpdate){
+							ret.append("="+geomConv.getInsertValueWrapperMultiPolyline("?",getSrsid(type)));
+						}else{
+							values.append(","+geomConv.getInsertValueWrapperMultiPolyline("?",getSrsid(type)));
+						}
+						sep=",";
+						multiLineAttrs.addMultiLineAttr(attr);
 				}else if(TrafoConfigNames.MULTILINGUAL_TRAFO_EXPAND.equals(trafoConfig.getAttrConfig(attr, TrafoConfigNames.MULTILINGUAL_TRAFO))){
 					for(String sfx:DbNames.MULTILINGUAL_TXT_COL_SUFFIXS){
 						ret.append(sep);
@@ -867,6 +879,34 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 							ps.setObject(valuei,geomObj);
 						 }else{
 							geomConv.setSurfaceNull(ps,valuei);
+						 }
+						 valuei++;
+					}else if(TrafoConfigNames.MULTILINE_TRAFO_COALESCE.equals(trafoConfig.getAttrConfig(attr, TrafoConfigNames.MULTILINE_TRAFO))){
+						 IomObject iomValue=iomObj.getattrobj(attrName,0);
+						 IomObject iomMultiline=null;
+						 MultiLineMapping attrMapping=null;
+						 if(iomValue!=null){
+							 attrMapping=multiLineAttrs.getMapping(attr);
+							 int polylinec=iomValue.getattrvaluecount(attrMapping.getBagOfLinesAttrName());
+							 for(int polylinei=0;polylinei<polylinec;polylinei++){
+								 IomObject iomPolylineStructure=iomValue.getattrobj(attrMapping.getBagOfLinesAttrName(), polylinei);
+								 IomObject iomPoly=iomPolylineStructure.getattrobj(attrMapping.getLineAttrName(), 0);
+								 if(iomMultiline==null){
+									 iomMultiline=new ch.interlis.iom_j.Iom_jObject(Wkb2iox.OBJ_MULTIPOLYLINE,null);
+								 }
+								 iomMultiline.addattrobj(Wkb2iox.ATTR_POLYLINE, iomPoly);
+							 }
+						 }
+						 if(iomMultiline!=null){
+								Table multiLineType = ((CompositionType) type).getComponentType();
+								Table lineStructureType=((CompositionType) ((AttributeDef) multiLineType.getElement(AttributeDef.class, attrMapping.getBagOfLinesAttrName())).getDomain()).getComponentType();
+								PolylineType line=((PolylineType) ((AttributeDef) lineStructureType.getElement(AttributeDef.class,attrMapping.getLineAttrName())).getDomainResolvingAliases());
+								CoordType coord=(CoordType)line.getControlPointDomain().getType();
+							 boolean is3D=coord.getDimensions().length==3;
+							 Object geomObj = geomConv.fromIomMultiPolyline(iomMultiline,getSrsid(type),is3D,getP(line));
+							ps.setObject(valuei,geomObj);
+						 }else{
+							geomConv.setPolylineNull(ps,valuei);
 						 }
 						 valuei++;
 					}else if(TrafoConfigNames.MULTILINGUAL_TRAFO_EXPAND.equals(trafoConfig.getAttrConfig(attr, TrafoConfigNames.MULTILINGUAL_TRAFO))){

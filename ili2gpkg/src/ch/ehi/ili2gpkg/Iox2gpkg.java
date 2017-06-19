@@ -23,7 +23,10 @@
 package ch.ehi.ili2gpkg;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Iterator;
+
+
 
 
 
@@ -48,6 +51,7 @@ import ch.interlis.iox_j.jts.Iox2jtsext;
 import ch.interlis.iox_j.wkb.ByteArrayOutputStream;
 import ch.interlis.iox_j.wkb.Iox2wkb;
 import ch.interlis.iox_j.wkb.Iox2wkbException;
+import ch.interlis.iox_j.wkb.Wkb2iox;
 
 public class Iox2gpkg {
 	  private int outputDimension = 2;
@@ -107,6 +111,34 @@ public class Iox2gpkg {
 	    	// wkb
 			Iox2wkb helper=new Iox2wkb(outputDimension,os.order());
 			os.write(helper.polyline2wkb(obj,isSurfaceOrArea,asCompoundCurve,p));
+		} catch (IOException e) {
+	        throw new RuntimeException("Unexpected IO exception: " + e.getMessage());
+		} catch (IoxException e) {
+	        throw new RuntimeException("Unexpected exception: " + e.getMessage());
+		}
+		return os.toByteArray();
+	}
+	public byte[] multiline2wkb(IomObject obj,boolean asCompoundCurve,double p,int srsId)
+	throws Iox2wkbException
+	{
+		if(obj==null){
+			return null;
+		}
+	    try {
+	    	os.reset();
+			int polylinec=obj.getattrvaluecount(Wkb2iox.ATTR_POLYLINE);
+	    	Envelope env=new Envelope();
+			for(int polylinei=0;polylinei<polylinec;polylinei++){
+				IomObject polyline=obj.getattrobj(Wkb2iox.ATTR_POLYLINE,polylinei);
+		    	CompoundCurve curve = Iox2jtsext.polyline2JTS(polyline,false, p);
+		    	env.expandToInclude(curve.getEnvelopeInternal());
+	    	}
+	    	writeGeoPackageBinaryHeader(srsId,env);
+			Iox2wkb helper=new Iox2wkb(outputDimension,os.order());
+			for(int polylinei=0;polylinei<polylinec;polylinei++){
+				IomObject polyline=obj.getattrobj(Wkb2iox.ATTR_POLYLINE,polylinei);
+				os.write(helper.polyline2wkb(polyline,false,asCompoundCurve,p));
+	    	}
 		} catch (IOException e) {
 	        throw new RuntimeException("Unexpected IO exception: " + e.getMessage());
 		} catch (IoxException e) {

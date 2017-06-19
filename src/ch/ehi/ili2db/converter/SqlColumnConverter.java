@@ -41,6 +41,7 @@ public interface SqlColumnConverter {
 	*/
 	public abstract String getInsertValueWrapperCoord(String wkfValue,int srid);
 	public abstract String getInsertValueWrapperPolyline(String wkfValue,int srid);
+	public abstract String getInsertValueWrapperMultiPolyline(String wkfValue,int srid);
 	public abstract String getInsertValueWrapperSurface(String wkfValue,int srid);
 	public abstract String getInsertValueWrapperMultiSurface(String wkfValue,int srid);
 	public abstract String getSelectValueWrapperDate(String sqlColName);
@@ -48,6 +49,7 @@ public interface SqlColumnConverter {
 	public abstract String getSelectValueWrapperDateTime(String sqlColName);
 	public abstract String getSelectValueWrapperCoord(String dbNativeValue);
 	public abstract String getSelectValueWrapperPolyline(String dbNativeValue);
+	public abstract String getSelectValueWrapperMultiPolyline(String dbNativeValue);
 	public abstract String getSelectValueWrapperSurface(String dbNativeValue);
 	public abstract String getSelectValueWrapperMultiSurface(String dbColName);
 	public abstract void setCoordNull(java.sql.PreparedStatement stmt,int parameterIndex) throws java.sql.SQLException;
@@ -86,6 +88,11 @@ public interface SqlColumnConverter {
 		int srid,
 		boolean is3D,double p)
 		throws java.sql.SQLException, ConverterException;
+	public abstract java.lang.Object fromIomMultiPolyline(
+			IomObject obj,
+			int srid,
+			boolean is3D,double p)
+			throws java.sql.SQLException, ConverterException;
 	public abstract IomObject toIomCoord(
 		Object geomobj,
 		String sqlAttrName,
@@ -106,6 +113,11 @@ public interface SqlColumnConverter {
 		String sqlAttrName,
 		boolean is3D)
 		throws java.sql.SQLException, ConverterException;
+	public abstract IomObject toIomMultiPolyline(
+			Object geomobj,
+			String sqlAttrName,
+			boolean is3D)
+			throws java.sql.SQLException, ConverterException;
 	public String toIomXml(Object obj)
 		throws java.sql.SQLException, ConverterException;
 	public String toIomBlob(Object obj)

@@ -51,6 +51,7 @@ public abstract class AbstractMain {
 		config.setInheritanceTrafo(config.INHERITANCE_TRAFO_SMART1);
 		config.setCatalogueRefTrafo(Config.CATALOGUE_REF_TRAFO_COALESCE);
 		config.setMultiSurfaceTrafo(Config.MULTISURFACE_TRAFO_COALESCE);
+		config.setMultiLineTrafo(Config.MULTILINE_TRAFO_COALESCE);
 		config.setMultilingualTrafo(Config.MULTILINGUAL_TRAFO_EXPAND);
 		config.setValidation(true);
 	}
@@ -202,6 +203,7 @@ public abstract class AbstractMain {
 				argi++;
 				config.setCatalogueRefTrafo(null);
 				config.setMultiSurfaceTrafo(null);
+				config.setMultiLineTrafo(null);
 				config.setMultilingualTrafo(null);
 				config.setInheritanceTrafo(null);
 			}else if(arg.equals("--smart1Inheritance")){
@@ -216,6 +218,9 @@ public abstract class AbstractMain {
 			}else if(arg.equals("--coalesceMultiSurface")){
 				argi++;
 				config.setMultiSurfaceTrafo(config.MULTISURFACE_TRAFO_COALESCE);
+			}else if(arg.equals("--coalesceMultiLine")){
+				argi++;
+				config.setMultiLineTrafo(config.MULTILINE_TRAFO_COALESCE);
 			}else if(arg.equals("--expandMultilingual")){
 				argi++;
 				config.setMultilingualTrafo(config.MULTILINGUAL_TRAFO_EXPAND);
@@ -355,6 +360,7 @@ public abstract class AbstractMain {
 					System.err.println("--smart2Inheritance     enable smart2 mapping of class/structure inheritance");
 					System.err.println("--coalesceCatalogueRef enable smart mapping of CHBase:CatalogueReference");
 					System.err.println("--coalesceMultiSurface enable smart mapping of CHBase:MultiSurface");
+					System.err.println("--coalesceMultiLine    enable smart mapping of CHBase:MultiLine");
 					System.err.println("--expandMultilingual   enable smart mapping of CHBase:MultilingualText");
 					System.err.println("--createGeomIdx        create a spatial index on geometry columns.");
 					System.err.println("--createEnumColAsItfCode create enum type column with value according to ITF (instead of XTF).");

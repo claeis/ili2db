@@ -226,6 +226,12 @@ public class OracleColumnConverter implements SqlColumnConverter {
 		}
 		return null;
 	}
+	@Override
+	public java.lang.Object fromIomMultiPolyline(IomObject obj,int srid,boolean is3D,double p)
+		throws java.sql.SQLException,ConverterException
+	{
+		throw new NotImplementedException();
+	}
 	private void addPolyline(
 		ArrayList elemInfo
 		,ArrayList ordinates
@@ -553,6 +559,14 @@ public class OracleColumnConverter implements SqlColumnConverter {
 		}
 	}
 	@Override
+	public IomObject toIomMultiPolyline(
+		Object geomobj,
+		String sqlAttrName,
+		boolean is3D)
+		throws java.sql.SQLException,ConverterException {
+		throw new NotImplementedException();
+	}
+	@Override
 	public Integer getSrsid(String crsAuthority, String crsCode,Connection conn) 
 	throws ConverterException
 	{
@@ -584,6 +598,10 @@ public class OracleColumnConverter implements SqlColumnConverter {
 		return wkfValue;
 	}
 	@Override
+	public String getInsertValueWrapperMultiPolyline(String wkfValue, int srid) {
+		return wkfValue;
+	}
+	@Override
 	public String getInsertValueWrapperSurface(String wkfValue, int srid) {
 		return wkfValue;
 	}
@@ -611,6 +629,10 @@ public class OracleColumnConverter implements SqlColumnConverter {
 	}
 	@Override
 	public String getSelectValueWrapperPolyline(String dbNativeValue) {
+		return dbNativeValue;
+	}
+	@Override
+	public String getSelectValueWrapperMultiPolyline(String dbNativeValue) {
 		return dbNativeValue;
 	}
 	@Override

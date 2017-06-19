@@ -88,6 +88,11 @@ public abstract class AbstractWKBColumnConverter implements SqlColumnConverter {
 		return "GeomFromWKB("+wkfValue+(srid==-1?"":","+srid)+")";
 	}
 	@Override
+	public String getInsertValueWrapperMultiPolyline(String wkfValue,int srid) {
+		//return "ST_GeometryFromWKB("+wkfValue+(srid==-1?"":","+srid)+")";
+		return "GeomFromWKB("+wkfValue+(srid==-1?"":","+srid)+")";
+	}
+	@Override
 	public String getInsertValueWrapperSurface(String wkfValue,int srid) {
 		//return "ST_GeometryFromWKB("+wkfValue+(srid==-1?"":","+srid)+")";
 		return "GeomFromWKB("+wkfValue+(srid==-1?"":","+srid)+")";
@@ -118,6 +123,11 @@ public abstract class AbstractWKBColumnConverter implements SqlColumnConverter {
 	}
 	@Override
 	public String getSelectValueWrapperPolyline(String dbNativeValue) {
+		//return "ST_AsBinary("+dbNativeValue+")";
+		return "AsBinary("+dbNativeValue+")";
+	}
+	@Override
+	public String getSelectValueWrapperMultiPolyline(String dbNativeValue) {
 		//return "ST_AsBinary("+dbNativeValue+")";
 		return "AsBinary("+dbNativeValue+")";
 	}
@@ -198,6 +208,14 @@ public abstract class AbstractWKBColumnConverter implements SqlColumnConverter {
 			return null;
 	}
 	@Override
+	public java.lang.Object fromIomMultiPolyline(IomObject value, int srid,boolean is3D,double p)
+		throws SQLException, ConverterException {
+			if(value!=null){
+				throw new NotImplementedException();
+			}
+			return null;
+	}
+	@Override
 	public IomObject toIomCoord(
 		Object geomobj,
 		String sqlAttrName,
@@ -256,6 +274,14 @@ public abstract class AbstractWKBColumnConverter implements SqlColumnConverter {
 			throw new ConverterException(e);
 		}
 		return ch.interlis.iox_j.jts.Jts2iox.JTS2polyline((com.vividsolutions.jts.geom.LineString)geom);
+	}
+	@Override
+	public IomObject toIomMultiPolyline(
+		Object geomobj,
+		String sqlAttrName,
+		boolean is3D)
+		throws SQLException, ConverterException {
+		throw new NotImplementedException();
 	}
 	public AbstractWKBColumnConverter()
 	{
