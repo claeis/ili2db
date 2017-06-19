@@ -23,7 +23,7 @@ ili2pg/ili2gpkg 3.9.0 (2017-06-19)
 - improve performance of db table existence check
 - fixed export: export of objects without OID in inheritance tree mixed with/without stable OID
 - ili2c-4.7.3
-- iox-ili-1.19.0
+- iox-ili-1.19.1
 - ehisqlgen-1.11.0
 
 ili2pg/ili2gpkg 3.8.1 (2017-04-21)
