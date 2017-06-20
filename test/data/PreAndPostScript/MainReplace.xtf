@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+	<TRANSFER xmlns="http://www.interlis.ch/INTERLIS2.3">
+	<HEADERSECTION SENDER="ili2pg-2.4.0-20151123" VERSION="2.3">
+	<MODELS>
+		<MODEL NAME="ModelA" VERSION="2015-12-08" URI="mailto:ce@eisenhutinformatik.ch"></MODEL>
+	</MODELS>
+	</HEADERSECTION>
+	<DATASECTION>
+		<ModelA.TopicA BID="b1">
+			<ModelA.TopicA.ClassA TID="o1">
+				<attr1>mainValueReplace</attr1>
+			</ModelA.TopicA.ClassA>
+		</ModelA.TopicA>
+	</DATASECTION>
+</TRANSFER>

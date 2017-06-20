@@ -20,17 +20,29 @@ MODEL CatalogueObjects1 (en) AT "mailto:ce@eisenhutinformatik.ch"
     END Katalog_ProgrammRef;
     END TopicA;
     
-    TOPIC TopicB =
-    DEPENDS ON TopicA;
+    TOPIC TopicB
+    	EXTENDS CatalogueObjects_V1.Catalogues =
 
-    CLASS Katalog_OhneUuid
+    CLASS OhneUuid
     EXTENDS CatalogueObjects_V1.Catalogues.Item =
-    END Katalog_OhneUuid;
+    END OhneUuid;
+    
+    STRUCTURE OhneUuidRef
+    EXTENDS CatalogueObjects_V1.Catalogues.CatalogueReference =
+      Reference (EXTENDED) : MANDATORY REFERENCE TO (EXTERNAL) OhneUuid;
+    END OhneUuidRef;
+    
+    
+    END TopicB;
+    
+    TOPIC TopicC =
+    DEPENDS ON TopicA,TopicB;
     
     CLASS Nutzung =
       Programm : BAG {0..*} OF CatalogueObjects1.TopicA.Katalog_ProgrammRef;
+      OhneUuid : BAG {0..*} OF CatalogueObjects1.TopicB.OhneUuidRef;
     END Nutzung;
     
-    END TopicB;
+    END TopicC;
 
 END CatalogueObjects1.

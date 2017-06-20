@@ -1,0 +1,17 @@
+INTERLIS 2.3;
+
+MODEL MultiLine1
+  AT "mailto:ce@eisenhutinformatik.ch" VERSION "2015-12-03" =
+  IMPORTS GeometryCHLV03_V1;
+  
+  TOPIC TestA =
+  
+    CLASS ClassA1 =
+	geom : MANDATORY GeometryCHLV03_V1.MultiLine;
+	point : GeometryCHLV03_V1.Coord2;
+    END ClassA1;
+    
+  END TestA;
+  
+  
+END MultiLine1.

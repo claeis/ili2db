@@ -51,6 +51,7 @@ public abstract class AbstractMain {
 		config.setInheritanceTrafo(config.INHERITANCE_TRAFO_SMART1);
 		config.setCatalogueRefTrafo(Config.CATALOGUE_REF_TRAFO_COALESCE);
 		config.setMultiSurfaceTrafo(Config.MULTISURFACE_TRAFO_COALESCE);
+		config.setMultiLineTrafo(Config.MULTILINE_TRAFO_COALESCE);
 		config.setMultilingualTrafo(Config.MULTILINGUAL_TRAFO_EXPAND);
 		config.setValidation(true);
 	}
@@ -130,6 +131,12 @@ public abstract class AbstractMain {
 			}else if(arg.equals("--schemaimport")){
 				config.setFunction(Config.FC_SCHEMAIMPORT);
 				argi++;
+			}else if(arg.equals("--preScript")){
+				config.setPreScript(args[argi]);
+				argi++;	
+			}else if(arg.equals("--postScript")){
+				config.setPostScript(args[argi]);
+				argi++;
 			}else if(arg.equals("--deleteData")){
 				argi++;
 				config.setDeleteMode(Config.DELETE_DATA);
@@ -196,6 +203,7 @@ public abstract class AbstractMain {
 				argi++;
 				config.setCatalogueRefTrafo(null);
 				config.setMultiSurfaceTrafo(null);
+				config.setMultiLineTrafo(null);
 				config.setMultilingualTrafo(null);
 				config.setInheritanceTrafo(null);
 			}else if(arg.equals("--smart1Inheritance")){
@@ -210,6 +218,9 @@ public abstract class AbstractMain {
 			}else if(arg.equals("--coalesceMultiSurface")){
 				argi++;
 				config.setMultiSurfaceTrafo(config.MULTISURFACE_TRAFO_COALESCE);
+			}else if(arg.equals("--coalesceMultiLine")){
+				argi++;
+				config.setMultiLineTrafo(config.MULTILINE_TRAFO_COALESCE);
 			}else if(arg.equals("--expandMultilingual")){
 				argi++;
 				config.setMultilingualTrafo(config.MULTILINGUAL_TRAFO_EXPAND);
@@ -306,6 +317,9 @@ public abstract class AbstractMain {
 				argi++;
 				config.setValue(UserSettings.HTTP_PROXY_PORT,args[argi]);
 				argi++;
+			}else if(arg.equals("--createMetaInfo")){
+				argi++;
+				config.setCreateMetaInfo(true);
 			}else if(arg.equals("--version")){
 				printVersion();
 				return;
@@ -324,6 +338,8 @@ public abstract class AbstractMain {
 					System.err.println("--delete               do a delete.");
 					System.err.println("--export               do an export.");
 					System.err.println("--schemaimport         do an schema import.");
+					System.err.println("--preScript file       before running a function, run a script.");
+					System.err.println("--postScript file      after running a function, run a script.");
 					printConnectOptions();
 					System.err.println("--validConfig file     Config file for validation.");
 					System.err.println("--disableValidation    Disable validation of data.");
@@ -344,6 +360,7 @@ public abstract class AbstractMain {
 					System.err.println("--smart2Inheritance     enable smart2 mapping of class/structure inheritance");
 					System.err.println("--coalesceCatalogueRef enable smart mapping of CHBase:CatalogueReference");
 					System.err.println("--coalesceMultiSurface enable smart mapping of CHBase:MultiSurface");
+					System.err.println("--coalesceMultiLine    enable smart mapping of CHBase:MultiLine");
 					System.err.println("--expandMultilingual   enable smart mapping of CHBase:MultilingualText");
 					System.err.println("--createGeomIdx        create a spatial index on geometry columns.");
 					System.err.println("--createEnumColAsItfCode create enum type column with value according to ITF (instead of XTF).");
@@ -375,6 +392,7 @@ public abstract class AbstractMain {
 					System.err.println("--ILIGML20             use eCH-0118-2.0 as transferformat");
 				    System.err.println("--ver4-translation     supports TRANSLATION OF in ili2db 4.x mode (incompatible with ili2db 3.x versions).");
 				    System.err.println("--translation translatedModel=originModel assigns a translated model to its orginal language equivalent.");
+				    System.err.println("--createMetaInfo       Create aditional ili-model information.");
 					printSpecificOptions();
 					System.err.println("--proxy host           proxy server to access model repositories.");
 					System.err.println("--proxyPort port       proxy port to access model repositories.");
@@ -413,6 +431,7 @@ public abstract class AbstractMain {
 				Ili2db.run(config,getAPP_HOME());
 			} catch (Exception ex) {
 				EhiLogger.logError(ex);
+				System.exit(1);
 			}
 		}
 		

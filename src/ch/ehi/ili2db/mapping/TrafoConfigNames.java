@@ -9,6 +9,8 @@ public class TrafoConfigNames {
 	public static final String CATALOGUE_REF_TRAFO_COALESCE=Config.CATALOGUE_REF_TRAFO_COALESCE;
 	public static final String MULTISURFACE_TRAFO=Config.MULTISURFACE_TRAFO;
 	public static final String MULTISURFACE_TRAFO_COALESCE=Config.MULTISURFACE_TRAFO_COALESCE;
+	public static final String MULTILINE_TRAFO=Config.MULTILINE_TRAFO;
+	public static final String MULTILINE_TRAFO_COALESCE=Config.MULTILINE_TRAFO_COALESCE;
 	public static final String MULTILINGUAL_TRAFO=Config.MULTILINGUAL_TRAFO;
 	public static final String MULTILINGUAL_TRAFO_EXPAND=Config.MULTILINGUAL_TRAFO_EXPAND;
 	public static final String INHERITANCE_TRAFO=Config.PREFIX+".inheritance";

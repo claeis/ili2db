@@ -17,6 +17,7 @@
  */
 package ch.ehi.ili2db.base;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -32,7 +33,9 @@ import ch.ehi.basics.logging.LogEvent;
 import ch.ehi.basics.logging.StdListener;
 import ch.ehi.basics.logging.StdLogEvent;
 import ch.ehi.basics.settings.Settings;
+import ch.ehi.ili2db.converter.ConverterException;
 import ch.ehi.ili2db.converter.SqlColumnConverter;
+import ch.ehi.ili2db.dbmetainfo.DbExtMetaInfo;
 import ch.ehi.ili2db.fromili.CustomMapping;
 import ch.ehi.ili2db.fromili.CustomMappingNull;
 import ch.ehi.ili2db.fromili.IliFromDb;
@@ -47,6 +50,7 @@ import ch.ehi.ili2db.mapping.TrafoConfig;
 import ch.ehi.ili2db.mapping.Viewable2TableMapper;
 import ch.ehi.ili2db.mapping.Viewable2TableMapping;
 import ch.ehi.ili2db.toxtf.TransferToXtf;
+import ch.ehi.sqlgen.DbUtility;
 import ch.ehi.sqlgen.generator.Generator;
 import ch.ehi.sqlgen.generator.GeneratorDriver;
 //import ch.ehi.sqlgen.generator_impl.oracle.GeneratorOracle;
@@ -351,6 +355,16 @@ public class Ili2db {
 				}
 			  }
 			  
+			  // run pre-script
+			  if(config.getPreScript()!=null){
+				  try {
+					  DbUtility.executeSqlScript(conn, new java.io.FileReader(config.getPreScript()));
+					  EhiLogger.logState("run update pre-script...");
+				  } catch (FileNotFoundException e) {
+					  throw new Ili2dbException("update pre-script statements failed",e);
+				  }
+			  }
+
 			  // create db schema
 				if(function==Config.FC_IMPORT){
 				  	if(config.getDbschema()!=null){
@@ -489,6 +503,7 @@ public class Ili2db {
 						trsfFromIli.addEnumTable(schema);
 						TransferFromIli.addTableMappingTable(schema);
 						TransferFromIli.addAttrMappingTable(schema);
+						DbExtMetaInfo.addMetaInfoTables(schema);
 						idGen.addMappingTable(schema);
 						
 						GeneratorDriver drv=new GeneratorDriver(gen);
@@ -511,6 +526,7 @@ public class Ili2db {
 							trsfFromIli.updateInheritanceTable(conn,config.getDbschema());
 							// update enumerations table
 							trsfFromIli.updateEnumTable(conn);
+							trsfFromIli.updateMetaInfoTables(conn);
 							TransferFromIli.addModels(conn,td,config.getDbschema());
 							if(!config.isConfigReadFromDb()){
 								TransferFromIli.updateSettings(conn,config,config.getDbschema());
@@ -625,6 +641,16 @@ public class Ili2db {
 							}
 							ioxReader=null;
 						}
+					}
+				}
+				
+				// run post-script
+				if(config.getPostScript()!=null){
+					try {
+						DbUtility.executeSqlScript(conn, new java.io.FileReader(config.getPostScript()));
+						EhiLogger.logState("run update post-script...");
+					} catch (FileNotFoundException e) {
+						throw new Ili2dbException("update post-script statements failed",e);
 					}
 				}
 				
@@ -889,6 +915,15 @@ public class Ili2db {
 				throw new Ili2dbException(ex);
 			}
 			
+			// run pre-script
+			if(config.getPreScript()!=null){
+				try {
+					EhiLogger.logState("run schemaImport pre-script...");
+					DbUtility.executeSqlScript(conn, new java.io.FileReader(config.getPreScript()));
+				} catch (FileNotFoundException e) {
+					throw new Ili2dbException("schemaImport pre-script statements failed",e);
+				}
+			}
 			
 			// setup ilidirs+pathmap for ili2c
 			setupIli2cPathmap(config, appHome, ilifile,conn);
@@ -972,6 +1007,16 @@ public class Ili2db {
 			}
 			geomConverter.setup(conn, config);
 
+			if(config.getDefaultSrsCode()!=null && config.getDefaultSrsAuthority()!=null){
+				try {
+					if(geomConverter.getSrsid(config.getDefaultSrsAuthority(), config.getDefaultSrsCode(), conn)==null){
+						throw new Ili2dbException(config.getDefaultSrsAuthority()+"/"+config.getDefaultSrsCode()+" does not exist");
+					}
+				} catch (ConverterException ex) {
+					throw new Ili2dbException("failed to query existence of SRS",ex);
+				}
+			}
+			
 			// create table structure
 			EhiLogger.logState("create table structure...");
 			try{
@@ -999,6 +1044,7 @@ public class Ili2db {
 					trsfFromIli.addEnumTable(schema);
 					TransferFromIli.addTableMappingTable(schema);
 					TransferFromIli.addAttrMappingTable(schema);
+					DbExtMetaInfo.addMetaInfoTables(schema);
 					idGen.addMappingTable(schema);
 				}
 				
@@ -1032,11 +1078,23 @@ public class Ili2db {
 					trsfFromIli.updateInheritanceTable(conn,config.getDbschema());
 					// update enum table
 					trsfFromIli.updateEnumTable(conn);
+					trsfFromIli.updateMetaInfoTables(conn);
 					TransferFromIli.addModels(conn,td,config.getDbschema());
 					if(!config.isConfigReadFromDb()){
 						TransferFromIli.updateSettings(conn,config,config.getDbschema());
 					}
 				}
+				
+				// run post-script
+				if(config.getPostScript()!=null){
+					try {
+						EhiLogger.logState("run schemaImport post-script...");
+						DbUtility.executeSqlScript(conn, new java.io.FileReader(config.getPostScript()));
+					} catch (FileNotFoundException e) {
+						throw new Ili2dbException("schemaImport post-script statements failed",e);
+					}
+				}
+				
 				//if(conn instanceof ch.ehi.ili2geodb.jdbc.GeodbConnection){
 				//	String xmlfile=null;
 				//	try{
@@ -1235,7 +1293,17 @@ public class Ili2db {
 				throw new Ili2dbException("failed to get db connection",e);
 			}
 			  logDBVersion(conn);
-			
+			  
+			// run pre-script 
+			if(config.getPreScript()!=null){
+				try {
+					EhiLogger.logState("run export pre-script...");
+					DbUtility.executeSqlScript(conn, new java.io.FileReader(config.getPreScript()));
+				} catch (FileNotFoundException e) {
+					throw new Ili2dbException("export pre-script statements failed",e);
+				}
+			}
+			  
 			ch.interlis.ili2c.config.Configuration modelv=new ch.interlis.ili2c.config.Configuration();
 			boolean createBasketCol=config.BASKET_HANDLING_READWRITE.equals(config.getBasketHandling());
 			String exportModelnames[]=null;
@@ -1359,6 +1427,17 @@ public class Ili2db {
 					EhiLogger.logState("...export done");
 				}
 			  EhiLogger.getInstance().removeListener(errs);
+			  
+			  	// run post-script
+				if(config.getPostScript()!=null){
+					try {
+						DbUtility.executeSqlScript(conn, new java.io.FileReader(config.getPostScript()));
+						EhiLogger.logState("run export post-script...");
+					} catch (FileNotFoundException e) {
+						throw new Ili2dbException("export post-script statements failed",e);
+					}
+				}
+				
 			//}catch(Exception ex){
 				//EhiLogger.logError(ex);
 			}finally{

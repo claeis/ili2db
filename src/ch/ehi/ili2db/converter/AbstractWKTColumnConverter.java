@@ -87,6 +87,11 @@ public abstract class AbstractWKTColumnConverter implements SqlColumnConverter {
 		return "GeomFromWKT("+wkfValue+(srid==-1?"":","+srid)+")";
 	}
 	@Override
+	public String getInsertValueWrapperMultiPolyline(String wkfValue,int srid) {
+		//return "ST_GeometryFromWKB("+wkfValue+(srid==-1?"":","+srid)+")";
+		return "GeomFromWKT("+wkfValue+(srid==-1?"":","+srid)+")";
+	}
+	@Override
 	public String getInsertValueWrapperSurface(String wkfValue,int srid) {
 		//return "ST_GeometryFromWKB("+wkfValue+(srid==-1?"":","+srid)+")";
 		return "GeomFromWKT("+wkfValue+(srid==-1?"":","+srid)+")";
@@ -117,6 +122,11 @@ public abstract class AbstractWKTColumnConverter implements SqlColumnConverter {
 	}
 	@Override
 	public String getSelectValueWrapperPolyline(String dbNativeValue) {
+		//return "ST_AsBinary("+dbNativeValue+")";
+		return "AsText("+dbNativeValue+")";
+	}
+	@Override
+	public String getSelectValueWrapperMultiPolyline(String dbNativeValue) {
 		//return "ST_AsBinary("+dbNativeValue+")";
 		return "AsText("+dbNativeValue+")";
 	}
@@ -162,6 +172,14 @@ public abstract class AbstractWKTColumnConverter implements SqlColumnConverter {
 				}
 				String bv=new com.vividsolutions.jts.io.WKTWriter(is3D?3:2).write(geom);
 				return bv;
+			}
+			return null;
+	}
+	@Override
+	public java.lang.Object fromIomMultiPolyline(IomObject value, int srid,boolean is3D,double p)
+		throws SQLException, ConverterException {
+			if(value!=null){
+				throw new NotImplementedException();
 			}
 			return null;
 	}
@@ -256,11 +274,19 @@ public abstract class AbstractWKTColumnConverter implements SqlColumnConverter {
 		}
 		return ch.interlis.iox_j.jts.Jts2iox.JTS2polyline((com.vividsolutions.jts.geom.LineString)geom);
 	}
+	@Override
+	public IomObject toIomMultiPolyline(
+		Object geomobj,
+		String sqlAttrName,
+		boolean is3D)
+		throws SQLException, ConverterException {
+		throw new NotImplementedException();
+	}
 	public AbstractWKTColumnConverter()
 	{
 	}
 	@Override
-	public int getSrsid(String crsAuthority, String crsCode,Connection conn) 
+	public Integer getSrsid(String crsAuthority, String crsCode,Connection conn) 
 		throws ConverterException
 	{
 		
@@ -268,7 +294,9 @@ public abstract class AbstractWKTColumnConverter implements SqlColumnConverter {
 		try{
 			java.sql.Statement stmt=conn.createStatement();
 			java.sql.ResultSet ret=stmt.executeQuery("SELECT srid FROM SPATIAL_REF_SYS WHERE AUTH_NAME=\'"+crsAuthority+"\' AND AUTH_SRID="+crsCode);
-			ret.next();
+			if(!ret.next()){
+				return null;
+			}
 			srsid=ret.getInt("srid");
 		}catch(java.sql.SQLException ex){
 			throw new ConverterException("failed to query srsid from database",ex);

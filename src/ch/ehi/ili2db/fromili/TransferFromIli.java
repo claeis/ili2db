@@ -26,13 +26,15 @@ import java.util.Iterator;
 import ch.ehi.basics.logging.EhiLogger;
 import ch.ehi.ili2db.base.DbIdGen;
 import ch.ehi.ili2db.base.DbNames;
-import ch.ehi.ili2db.base.DbUtility;
+import ch.ehi.ili2db.base.Ili2cUtility;
 import ch.ehi.ili2db.base.Ili2dbException;
 import ch.ehi.ili2db.converter.AbstractRecordConverter;
+import ch.ehi.ili2db.dbmetainfo.DbExtMetaInfo;
 import ch.ehi.ili2db.gui.Config;
 import ch.ehi.ili2db.mapping.TrafoConfig;
 import ch.ehi.ili2db.mapping.Viewable2TableMapping;
 import ch.ehi.ili2db.mapping.ViewableWrapper;
+import ch.ehi.sqlgen.DbUtility;
 import ch.ehi.sqlgen.repository.DbColBoolean;
 import ch.ehi.sqlgen.repository.DbColDateTime;
 import ch.ehi.sqlgen.repository.DbColGeometry;
@@ -84,6 +86,8 @@ public class TransferFromIli {
 	private String colT_ID=null;
 	private String nl=System.getProperty("line.separator");
 	private FromIliRecordConverter recConv=null;
+	private DbExtMetaInfo metaInfo=new DbExtMetaInfo();
+
 	public DbSchema doit(TransferDescription td1,java.util.List<Element> modelEles,ch.ehi.ili2db.mapping.NameMapping ili2sqlName,ch.ehi.ili2db.gui.Config config,DbIdGen idGen,TrafoConfig trafoConfig,Viewable2TableMapping class2wrapper1,CustomMapping customMapping1)
 	throws Ili2dbException
 	{
@@ -117,7 +121,7 @@ public class TransferFromIli {
 		class2wrapper=class2wrapper1;
 		visitedEnums=new HashSet();
 		td=td1;
-		recConv=new FromIliRecordConverter(td,ili2sqlName,config,schema,customMapping,idGen,visitedEnums,trafoConfig,class2wrapper);
+		recConv=new FromIliRecordConverter(td,ili2sqlName,config,schema,customMapping,idGen,visitedEnums,trafoConfig,class2wrapper,metaInfo);
 
 		visitedWrapper=new HashSet<ViewableWrapper>();
 		generatModelEles(modelEles,1);
@@ -960,6 +964,7 @@ public class TransferFromIli {
 					dispName.setSize(250);
 					tab.addColumn(dispName);
 					schema.addTable(tab);
+					metaInfo.setTableInfo(tab.getName().getName(), DbExtMetaInfo.TAG_TAB_TABLEKIND, DbExtMetaInfo.TAG_TAB_TABLEKIND_ENUM);
 				}
 			}
 			
@@ -1308,5 +1313,23 @@ public class TransferFromIli {
 		pk.addAttr(sqlnameCol);
 		tab.addIndex(pk);
 		schema.addTable(tab);
+	}
+	public void updateMetaInfoTables(java.sql.Connection conn) 
+			throws Ili2dbException
+	{
+		for(ViewableWrapper v:visitedWrapper){
+			if(v.isSecondaryTable()){
+				metaInfo.setTableInfo(v.getSqlTablename(), DbExtMetaInfo.TAG_TAB_TABLEKIND, DbExtMetaInfo.TAG_TAB_TABLEKIND_SECONDARY);
+			}else if(v.getExtending()==null){
+				if(v.isStructure()){
+					metaInfo.setTableInfo(v.getSqlTablename(), DbExtMetaInfo.TAG_TAB_TABLEKIND, DbExtMetaInfo.TAG_TAB_TABLEKIND_STRUCTURE);
+				}else if(v.getViewable() instanceof AssociationDef){
+					metaInfo.setTableInfo(v.getSqlTablename(), DbExtMetaInfo.TAG_TAB_TABLEKIND, DbExtMetaInfo.TAG_TAB_TABLEKIND_ASSOCIATION);
+				}else if(Ili2cUtility.isChbaseCatalogueItem(td, v.getViewable())){
+					metaInfo.setTableInfo(v.getSqlTablename(), DbExtMetaInfo.TAG_TAB_TABLEKIND, DbExtMetaInfo.TAG_TAB_TABLEKIND_CATALOGUE);
+				}
+			}
+		}
+		metaInfo.updateMetaInfoTables(conn, schema.getName());
 	}
 }

@@ -39,6 +39,8 @@ public class Config extends Settings {
 	public static final String CATALOGUE_REF_TRAFO_COALESCE="coalesce";
 	public static final String MULTISURFACE_TRAFO=PREFIX+".multiSurfaceTrafo";
 	public static final String MULTISURFACE_TRAFO_COALESCE="coalesce";
+	public static final String MULTILINE_TRAFO=PREFIX+".multiLineTrafo";
+	public static final String MULTILINE_TRAFO_COALESCE="coalesce";
 	public static final String MULTILINGUAL_TRAFO=PREFIX+".multilingualTrafo";
 	public static final String MULTILINGUAL_TRAFO_EXPAND="expand";
 	public static final String UNIQUE_CONSTRAINTS=PREFIX+".uniqueConstraints";
@@ -71,6 +73,7 @@ public class Config extends Settings {
 	public static final String VER4_TRANSLATION=PREFIX+".ver4_translation";
 	public static final String ILI1TRANSLATION=PREFIX+".ili1translation";
 	public static final String DELETE_DATA="data";
+	public static final String CREATE_META_INFO=PREFIX+".createMetaInfo";
 	private int function;
 	private String dburl;
 	private String dbusr;
@@ -88,6 +91,8 @@ public class Config extends Settings {
 	private String createscript;
 	private String dropscript;
 	private String xtffile;
+	private String preScript;
+	private String postScript;
 	private String idGenerator=null;
 	private String geometryConverter;
 	private String jdbcDriver=null;
@@ -100,6 +105,7 @@ public class Config extends Settings {
 	private boolean validation=false;
 	private Long minIdSeqValue=null;
 	private Long maxIdSeqValue=null;
+	private boolean setupPgExt=false;
 	private String transferFileFormat=null;
 	final static public String ILIGML20="ILIGML20"; 
 	
@@ -343,6 +349,12 @@ public class Config extends Settings {
 	public void setMultiSurfaceTrafo(String value) {
 		setValue(MULTISURFACE_TRAFO,value);
 	}
+	public String getMultiLineTrafo() {
+		return getValue(MULTILINE_TRAFO);
+	}
+	public void setMultiLineTrafo(String value) {
+		setValue(MULTILINE_TRAFO,value);
+	}
 	public String getMultilingualTrafo() {
 		return getValue(MULTILINGUAL_TRAFO);
 	}
@@ -537,5 +549,29 @@ public class Config extends Settings {
 	}
 	public String getIli1Translation() {
 		return getValue(ILI1TRANSLATION);
+	}
+	public String getPreScript() {
+		return preScript;
+	}
+	public void setPreScript(String preScript) {
+		this.preScript = preScript;
+	}
+	public String getPostScript() {
+		return postScript;
+	}
+	public void setPostScript(String postScript) {
+		this.postScript = postScript;
+	}
+	public boolean isSetupPgExt() {
+		return setupPgExt;
+	}
+	public void setSetupPgExt(boolean setupPgExt) {
+		this.setupPgExt = setupPgExt;
+	}
+	public void setCreateMetaInfo(boolean value) {
+		setValue(CREATE_META_INFO,value?TRUE:FALSE);
+	}
+	public boolean getCreateMetaInfo() {
+		return TRUE.equals(getValue(CREATE_META_INFO))?true:false;
 	}
 }

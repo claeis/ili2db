@@ -28,6 +28,11 @@ public class NullColumnConverter implements SqlColumnConverter {
 			throws SQLException, ConverterException {
 		return null;
 	}
+	@Override
+	public Object fromIomMultiPolyline(IomObject obj, int srid, boolean is3D,double p)
+			throws SQLException, ConverterException {
+		return null;
+	}
 
 	@Override
 	public Object fromIomSurface(IomObject obj, int srid, boolean hasLineAttr,
@@ -47,6 +52,10 @@ public class NullColumnConverter implements SqlColumnConverter {
 
 	@Override
 	public String getInsertValueWrapperPolyline(String wkfValue, int srid) {
+		return null;
+	}
+	@Override
+	public String getInsertValueWrapperMultiPolyline(String wkfValue, int srid) {
 		return null;
 	}
 
@@ -80,6 +89,10 @@ public class NullColumnConverter implements SqlColumnConverter {
 	public String getSelectValueWrapperPolyline(String dbNativeValue) {
 		return null;
 	}
+	@Override
+	public String getSelectValueWrapperMultiPolyline(String dbNativeValue) {
+		return null;
+	}
 
 	@Override
 	public String getSelectValueWrapperSurface(String dbNativeValue) {
@@ -91,7 +104,7 @@ public class NullColumnConverter implements SqlColumnConverter {
 	}
 
 	@Override
-	public int getSrsid(String crsAuthority, String crsCode, Connection conn)
+	public Integer getSrsid(String crsAuthority, String crsCode, Connection conn)
 			throws ConverterException {
 		return 0;
 	}
@@ -146,6 +159,11 @@ public class NullColumnConverter implements SqlColumnConverter {
 
 	@Override
 	public IomObject toIomPolyline(Object geomobj, String sqlAttrName,
+			boolean is3D) throws SQLException, ConverterException {
+		return null;
+	}
+	@Override
+	public IomObject toIomMultiPolyline(Object geomobj, String sqlAttrName,
 			boolean is3D) throws SQLException, ConverterException {
 		return null;
 	}

@@ -10,7 +10,9 @@ import ch.ehi.ili2db.base.DbNames;
 import ch.ehi.ili2db.base.Ili2cUtility;
 import ch.ehi.ili2db.base.Ili2dbException;
 import ch.ehi.ili2db.converter.AbstractRecordConverter;
+import ch.ehi.ili2db.dbmetainfo.DbExtMetaInfo;
 import ch.ehi.ili2db.gui.Config;
+import ch.ehi.ili2db.mapping.MultiLineMapping;
 import ch.ehi.ili2db.mapping.MultiSurfaceMapping;
 import ch.ehi.ili2db.mapping.NameMapping;
 import ch.ehi.ili2db.mapping.TrafoConfig;
@@ -62,6 +64,7 @@ import ch.interlis.ili2c.metamodel.TransferDescription;
 import ch.interlis.ili2c.metamodel.Type;
 import ch.interlis.ili2c.metamodel.UniqueEl;
 import ch.interlis.ili2c.metamodel.UniquenessConstraint;
+import ch.interlis.ili2c.metamodel.Unit;
 import ch.interlis.ili2c.metamodel.Viewable;
 import ch.interlis.ili2c.metamodel.ViewableTransferElement;
 
@@ -73,23 +76,28 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 	private ArrayList<AttributeDef> surfaceAttrs=null; 
 	private boolean coalesceCatalogueRef=true;
 	private boolean coalesceMultiSurface=true;
+	private boolean coalesceMultiLine=true;
 	private boolean expandMultilingual=true;
 	private boolean createUnique=true;
 	private boolean createNumCheck=false;
-	
+	private DbExtMetaInfo metaInfo=null;
 
 	public FromIliRecordConverter(TransferDescription td1, NameMapping ili2sqlName,
 			Config config, DbSchema schema1, CustomMapping customMapping1,
-			DbIdGen idGen1, HashSet visitedEnumsAttrs1, TrafoConfig trafoConfig,	Viewable2TableMapping class2wrapper1) {
+			DbIdGen idGen1, HashSet visitedEnumsAttrs1, TrafoConfig trafoConfig,	Viewable2TableMapping class2wrapper1
+			,DbExtMetaInfo metaInfo
+			) {
 		super(td1, ili2sqlName, config, idGen1,trafoConfig,class2wrapper1);
 		visitedEnumsAttrs=visitedEnumsAttrs1;
 		customMapping=customMapping1;
 		schema=schema1;
 		coalesceCatalogueRef=Config.CATALOGUE_REF_TRAFO_COALESCE.equals(config.getCatalogueRefTrafo());
 		coalesceMultiSurface=Config.MULTISURFACE_TRAFO_COALESCE.equals(config.getMultiSurfaceTrafo());
+		coalesceMultiLine=Config.MULTILINE_TRAFO_COALESCE.equals(config.getMultiLineTrafo());
 		expandMultilingual=Config.MULTILINGUAL_TRAFO_EXPAND.equals(config.getMultilingualTrafo());
 		createUnique=config.isCreateUniqueConstraints();
 		createNumCheck=config.isCreateCreateNumChecks();
+		this.metaInfo=metaInfo;
 	}
 
 	public void generateTable(ViewableWrapper def,int pass)
@@ -433,6 +441,8 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 			visitedEnumsAttrs.add(attr);
 		}
 		DbColumn dbCol=null;
+		Unit unitDef=null;
+
 		ArrayList<DbColumn> dbColExts=new ArrayList<DbColumn>();
 		Type type = attr.getDomainResolvingAll();
 		if (attr.isDomainBoolean()) {
@@ -531,6 +541,25 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 					setBB(ret, coord,attr.getContainer().getScopedName(null)+"."+attr.getName());
 					dbCol=ret;
 					trafoConfig.setAttrConfig(attr, TrafoConfigNames.MULTISURFACE_TRAFO,TrafoConfigNames.MULTISURFACE_TRAFO_COALESCE);
+				}else if(Ili2cUtility.isMultiLineAttr(td, attr) && (coalesceMultiLine 
+						|| TrafoConfigNames.MULTILINE_TRAFO_COALESCE.equals(trafoConfig.getAttrConfig(attr,TrafoConfigNames.MULTILINE_TRAFO)))){
+					multiLineAttrs.addMultiLineAttr(attr);
+					MultiLineMapping attrMapping=multiLineAttrs.getMapping(attr);
+					DbColGeometry ret=new DbColGeometry();
+					boolean curvePolyline=false;
+					if(!strokeArcs){
+						curvePolyline=true;
+					}
+					ret.setType(curvePolyline ? DbColGeometry.MULTICURVE : DbColGeometry.MULTILINESTRING);
+					// TODO get crs from ili
+					ret.setSrsAuth(defaultCrsAuthority);
+					ret.setSrsId(defaultCrsCode);
+					PolylineType surface=((PolylineType) ((AttributeDef) ((CompositionType) ((AttributeDef) ((CompositionType) type).getComponentType().getElement(AttributeDef.class, attrMapping.getBagOfLinesAttrName())).getDomain()).getComponentType().getElement(AttributeDef.class,attrMapping.getLineAttrName())).getDomainResolvingAliases());
+					CoordType coord=(CoordType)surface.getControlPointDomain().getType();
+					ret.setDimension(coord.getDimensions().length);
+					setBB(ret, coord,attr.getContainer().getScopedName(null)+"."+attr.getName());
+					dbCol=ret;
+					trafoConfig.setAttrConfig(attr, TrafoConfigNames.MULTILINE_TRAFO,TrafoConfigNames.MULTILINE_TRAFO_COALESCE);
 				}else if(isChbaseMultilingual(td, attr) && (expandMultilingual 
 							|| TrafoConfigNames.MULTILINGUAL_TRAFO_EXPAND.equals(trafoConfig.getAttrConfig(attr,TrafoConfigNames.MULTILINGUAL_TRAFO)))){
 					for(String sfx:DbNames.MULTILINGUAL_TXT_COL_SUFFIXS){
@@ -620,7 +649,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 					}
 					dbCol=ret;
 				}
-				
+				unitDef=((NumericType)type).getUnit();
 			}
 		}else if(type instanceof TextType){
 			DbColVarchar ret=new DbColVarchar();
@@ -645,8 +674,17 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 		}
 
 		if (dbCol != null) {
-			String sqlName=getSqlAttrName(attr,dbTable.getName().getName(),null);
-			setAttrDbColProps(aclass,attr, dbCol, sqlName);
+			String sqlColName=getSqlAttrName(attr,dbTable.getName().getName(),null);
+			setAttrDbColProps(aclass,attr, dbCol, sqlColName);
+			String subType=null;
+			Viewable attrClass=(Viewable)attr.getContainer();
+			if(attrClass!=aclass && attrClass.isExtending(aclass)){
+				subType=getSqlType(attrClass).getName();
+			}
+			if(unitDef!=null){
+				String unitName=unitDef.getName();
+				metaInfo.setColumnInfo(dbTable.getName().getName(), subType,sqlColName, DbExtMetaInfo.TAG_COL_UNIT, unitName);
+			}
 			customMapping.fixupAttribute(dbTable, dbCol, attr);
 			dbTable.addColumn(dbCol);
 		}

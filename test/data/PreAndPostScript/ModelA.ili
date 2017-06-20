@@ -1,0 +1,13 @@
+INTERLIS 2.3;
+
+MODEL ModelA
+  AT "mailto:ce@eisenhutinformatik.ch" VERSION "2016-07-07" =
+  TOPIC TopicA =
+    CLASS ClassA =
+    	attr1 : TEXT*60;
+    END ClassA;
+    CLASS ClassB =
+    	attr2 : TEXT*60;
+    END ClassB;
+  END TopicA;
+END ModelA.

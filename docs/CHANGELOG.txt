@@ -12,6 +12,20 @@ ideas/open issues/questions
 - einfache Liste mit den neu erzeugten Vertexpunkte (aufgrund der Overlap-Bereinigung)
 - Schalter für das "disablen" der Overlaps-Bereinigung. Bei vorhandenen gueltigen Overlaps erfolgen: a) Import mit NULL als Polygon, ohne Fehlermeldung, b) Import mit NULL als Polygon, mit Warning, c) kein Import, Fehlermeldung
 
+ili2pg/ili2gpkg 3.9.0 (2017-06-19)
+-----------------------------
+- added list of reserved sqlite and postgresql keywords
+- added option --preScript/--postScript to support before- and after-import custom sql
+- added verify that given --defaultSrsAuth/Code exists in DB
+- added option --setupPgExt to create postgresql extensions 'uuid-ossp' and 'postgis'
+- added option --createMetaInfo to create meta tables with info from model
+- added option --coalesceMultiLine
+- improve performance of db table existence check
+- fixed export: export of objects without OID in inheritance tree mixed with/without stable OID
+- ili2c-4.7.3
+- iox-ili-1.19.1
+- ehisqlgen-1.11.0
+
 ili2pg/ili2gpkg 3.8.1 (2017-04-21)
 -----------------------------
 - fixed schema import: FK of embedded assocations in subtypes must be NULLable 

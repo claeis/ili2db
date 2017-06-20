@@ -17,9 +17,7 @@
  */
 package ch.ehi.ili2pg;
 
-import ch.ehi.basics.logging.EhiLogger;
 import ch.ehi.ili2db.base.DbUrlConverter;
-import ch.ehi.ili2db.base.Ili2db;
 import ch.ehi.ili2db.gui.Config;
 import ch.ehi.ili2db.gui.AbstractDbPanelDescriptor;
 
@@ -37,6 +35,7 @@ public class PgMain extends ch.ehi.ili2db.AbstractMain {
 		config.setDdlGenerator(ch.ehi.sqlgen.generator_impl.jdbc.GeneratorPostgresql.class.getName());
 		config.setJdbcDriver("org.postgresql.Driver");
 		config.setIdGenerator(ch.ehi.ili2pg.PgSequenceBasedIdGen.class.getName());
+		config.setIli2dbCustomStrategy(ch.ehi.ili2pg.PgCustomStrategy.class.getName());
 		config.setUuidDefaultValue("uuid_generate_v4()");
 	}
 	@Override
@@ -102,6 +101,7 @@ public class PgMain extends ch.ehi.ili2db.AbstractMain {
 	protected void printSpecificOptions() {
 		System.err.println("--dbschema  schema     The name of the schema in the database. Defaults to not set.");
 		System.err.println("--oneGeomPerTable      If more than one geometry per table, create secondary table.");
+		System.err.println("--setupPgExt           create extensions 'uuid-ossp' and 'postgis'.");
 	}
 	@Override
 	protected int doArgs(String args[],int argi,Config config)
@@ -133,6 +133,9 @@ public class PgMain extends ch.ehi.ili2db.AbstractMain {
 			argi++;
 		}else if(arg.equals("--oneGeomPerTable")){
 			config.setOneGeomPerTable(true);
+			argi++;
+		}else if(arg.equals("--setupPgExt")){
+			config.setSetupPgExt(true);
 			argi++;
 		}
 		return argi;

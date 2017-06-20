@@ -291,6 +291,8 @@ public class NameMapping {
 	{
 		if(kws==null){
 			kws=Sql2003kw.getKeywords();			
+			kws.addAll(PostgresqlKw.getKeywords());
+			kws.addAll(SqliteKw.getKeywords());
 			kws.add("TEXT");
 		}
 		String ucname=name.toUpperCase();

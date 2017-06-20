@@ -23,6 +23,7 @@ import java.sql.Connection;
 import ch.ehi.basics.logging.EhiLogger;
 import ch.ehi.ili2db.base.DbIdGen;
 import ch.ehi.ili2db.gui.Config;
+import ch.ehi.sqlgen.DbUtility;
 import ch.ehi.sqlgen.generator_impl.jdbc.GeneratorJdbc;
 import ch.ehi.sqlgen.repository.DbTableName;
 
@@ -55,48 +56,12 @@ public class PgSequenceBasedIdGen implements DbIdGen {
 	}
 
 	/** tests if a table with the given name exists
+	 * @deprecated
 	 */
 	public boolean sequenceExists(DbTableName tableName)
 	throws IOException
 	{
-		try{
-			boolean supportsMixedCase=conn.getMetaData().supportsMixedCaseIdentifiers();
-			String catalog=conn.getCatalog();
-			java.sql.DatabaseMetaData meta=conn.getMetaData();
-			// on oracle getUserName() returns schemaname
-			// on PostgreSQL "public" is the defualt schema
-			String schema=tableName.getSchema();
-			if(schema==null){
-				if(conn.getMetaData().getURL().startsWith("jdbc:postgresql:")){
-					schema="public";
-				}else{
-					schema=meta.getUserName();
-				}
-			}
-			java.sql.ResultSet rs=null;
-			try{
-				//rs=meta.getTables(catalog,schema,tableName.toUpperCase(),null);
-				rs=meta.getTables(null,null,null,null);
-				while(rs.next()){
-					String db_catalogName=rs.getString("TABLE_CAT");
-					String db_schemaName=rs.getString("TABLE_SCHEM");
-					String db_tableName=rs.getString("TABLE_NAME");
-					//EhiLogger.debug(db_catalogName+"."+db_schemaName+"."+db_tableName);
-					if((db_schemaName==null || db_schemaName.equalsIgnoreCase(schema)) && db_tableName.equalsIgnoreCase(tableName.getName())){
-						//EhiLogger.debug(db_catalogName+"."+db_schemaName+"."+db_tableName);
-						// table exists
-						return true;
-					}
-				}
-			}finally{
-				if(rs!=null)rs.close();
-			}
-		}catch(java.sql.SQLException ex){
-			IOException iox=new IOException("failed to check if table "+tableName+" exists");
-			iox.initCause(ex);
-			throw iox;
-		}
-		return false;
+		return DbUtility.sequenceExists(conn, tableName);
 	}
 	
 	@Override
@@ -114,12 +79,8 @@ public class PgSequenceBasedIdGen implements DbIdGen {
 			((GeneratorJdbc) gen).addCreateLine(((GeneratorJdbc) gen).new Stmt(stmt));
 			((GeneratorJdbc) gen).addDropLine(((GeneratorJdbc) gen).new Stmt("DROP SEQUENCE "+sqlName.getQName()+";"));
 		}
-		try {
-			if(sequenceExists(sqlName)){
-				return;
-			}
-		} catch (IOException e) {
-			throw new IllegalStateException(e);
+		if(DbUtility.sequenceExists(conn,sqlName)){
+			return;
 		}
 		EhiLogger.traceBackendCmd(stmt);
 		java.sql.PreparedStatement updstmt = null;

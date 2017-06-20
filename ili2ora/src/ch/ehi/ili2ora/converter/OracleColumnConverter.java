@@ -226,6 +226,12 @@ public class OracleColumnConverter implements SqlColumnConverter {
 		}
 		return null;
 	}
+	@Override
+	public java.lang.Object fromIomMultiPolyline(IomObject obj,int srid,boolean is3D,double p)
+		throws java.sql.SQLException,ConverterException
+	{
+		throw new NotImplementedException();
+	}
 	private void addPolyline(
 		ArrayList elemInfo
 		,ArrayList ordinates
@@ -553,7 +559,15 @@ public class OracleColumnConverter implements SqlColumnConverter {
 		}
 	}
 	@Override
-	public int getSrsid(String crsAuthority, String crsCode,Connection conn) 
+	public IomObject toIomMultiPolyline(
+		Object geomobj,
+		String sqlAttrName,
+		boolean is3D)
+		throws java.sql.SQLException,ConverterException {
+		throw new NotImplementedException();
+	}
+	@Override
+	public Integer getSrsid(String crsAuthority, String crsCode,Connection conn) 
 	throws ConverterException
 	{
 		int srsid=0;
@@ -566,7 +580,9 @@ public class OracleColumnConverter implements SqlColumnConverter {
 				qryStmt="SELECT srid FROM MDSYS.CS_SRS WHERE AUTH_NAME=\'"+crsAuthority+"\' AND AUTH_SRID="+crsCode;
 			}
 			java.sql.ResultSet ret=stmt.executeQuery(qryStmt);
-			ret.next();
+			if(!ret.next()){
+				return null;
+			}
 			srsid=ret.getInt("srid");
 		}catch(java.sql.SQLException ex){
 			throw new ConverterException("failed to query srsid from database",ex);
@@ -579,6 +595,10 @@ public class OracleColumnConverter implements SqlColumnConverter {
 	}
 	@Override
 	public String getInsertValueWrapperPolyline(String wkfValue, int srid) {
+		return wkfValue;
+	}
+	@Override
+	public String getInsertValueWrapperMultiPolyline(String wkfValue, int srid) {
 		return wkfValue;
 	}
 	@Override
@@ -609,6 +629,10 @@ public class OracleColumnConverter implements SqlColumnConverter {
 	}
 	@Override
 	public String getSelectValueWrapperPolyline(String dbNativeValue) {
+		return dbNativeValue;
+	}
+	@Override
+	public String getSelectValueWrapperMultiPolyline(String dbNativeValue) {
 		return dbNativeValue;
 	}
 	@Override

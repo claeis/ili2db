@@ -16,6 +16,7 @@ import ch.ehi.ili2db.converter.AbstractRecordConverter;
 import ch.ehi.ili2db.converter.ConverterException;
 import ch.ehi.ili2db.converter.SqlColumnConverter;
 import ch.ehi.ili2db.gui.Config;
+import ch.ehi.ili2db.mapping.MultiLineMapping;
 import ch.ehi.ili2db.mapping.MultiSurfaceMapping;
 import ch.ehi.ili2db.mapping.NameMapping;
 import ch.ehi.ili2db.mapping.TrafoConfig;
@@ -43,6 +44,7 @@ import ch.interlis.ili2c.metamodel.ViewableTransferElement;
 import ch.interlis.iom.IomObject;
 import ch.interlis.iom_j.Iom_jObject;
 import ch.interlis.iom_j.itf.ItfWriter2;
+import ch.interlis.iox_j.wkb.Wkb2iox;
 
 public class ToXtfRecordConverter extends AbstractRecordConverter {
 	private boolean isMsAccess=false;
@@ -233,6 +235,11 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 					 sep=",";
 					 ret.append(geomConv.getSelectValueWrapperMultiSurface(attrSqlName));
 					 multiSurfaceAttrs.addMultiSurfaceAttr(attr);
+				}else if(TrafoConfigNames.MULTILINE_TRAFO_COALESCE.equals(trafoConfig.getAttrConfig(attr, TrafoConfigNames.MULTILINE_TRAFO))){
+					 ret.append(sep);
+					 sep=",";
+					 ret.append(geomConv.getSelectValueWrapperMultiPolyline(attrSqlName));
+					 multiLineAttrs.addMultiLineAttr(attr);
 				}else if(TrafoConfigNames.MULTILINGUAL_TRAFO_EXPAND.equals(trafoConfig.getAttrConfig(attr, TrafoConfigNames.MULTILINGUAL_TRAFO))){
 					for(String sfx:DbNames.MULTILINGUAL_TXT_COL_SUFFIXS){
 						 ret.append(sep);
@@ -511,6 +518,32 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 								iomObj.addattrobj(attrName,iomChbaseMultiSurface);
 							}catch(ConverterException ex){
 								EhiLogger.logError("Object "+sqlid+": failed to convert surface/area",ex);
+							}	
+						}
+					}else if(TrafoConfigNames.MULTILINE_TRAFO_COALESCE.equals(trafoConfig.getAttrConfig(attr, TrafoConfigNames.MULTILINE_TRAFO))){
+						 MultiLineMapping attrMapping=multiLineAttrs.getMapping(attr);
+						Table multiLineType = ((CompositionType) type).getComponentType();
+						Table lineStructureType=((CompositionType) ((AttributeDef) multiLineType.getElement(AttributeDef.class, attrMapping.getBagOfLinesAttrName())).getDomain()).getComponentType();
+						String multiLineQname=multiLineType.getScopedName(null);
+						String lineStructureQname=lineStructureType.getScopedName(null);
+						PolylineType surface=((PolylineType) ((AttributeDef) lineStructureType.getElement(AttributeDef.class,attrMapping.getLineAttrName())).getDomainResolvingAliases());
+						CoordType coord=(CoordType)surface.getControlPointDomain().getType();
+						boolean is3D=coord.getDimensions().length==3;
+						Object geomobj=rs.getObject(valuei);
+						valuei++;
+						if(!rs.wasNull()){
+							try{
+								IomObject iomMultiPolygon=geomConv.toIomMultiPolyline(geomobj,sqlAttrName,is3D);
+								IomObject iomChbaseMultiLine=new Iom_jObject(multiLineQname,null); 
+								int linec=iomMultiPolygon.getattrvaluecount(Wkb2iox.ATTR_POLYLINE);
+								for(int linei=0;linei<linec;linei++){
+									IomObject iomPolygon=iomMultiPolygon.getattrobj(Wkb2iox.ATTR_POLYLINE,linei);
+									IomObject iomChbaseSurfaceStructure=iomChbaseMultiLine.addattrobj(attrMapping.getBagOfLinesAttrName(), lineStructureQname);
+									iomChbaseSurfaceStructure.addattrobj(attrMapping.getLineAttrName(), iomPolygon);
+								}
+								iomObj.addattrobj(attrName,iomChbaseMultiLine);
+							}catch(ConverterException ex){
+								EhiLogger.logError("Object "+sqlid+": failed to convert polyline",ex);
 							}	
 						}
 					}else if(TrafoConfigNames.MULTILINGUAL_TRAFO_EXPAND.equals(trafoConfig.getAttrConfig(attr, TrafoConfigNames.MULTILINGUAL_TRAFO))){
