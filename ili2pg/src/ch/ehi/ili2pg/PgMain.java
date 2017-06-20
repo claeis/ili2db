@@ -101,7 +101,7 @@ public class PgMain extends ch.ehi.ili2db.AbstractMain {
 	protected void printSpecificOptions() {
 		System.err.println("--dbschema  schema     The name of the schema in the database. Defaults to not set.");
 		System.err.println("--oneGeomPerTable      If more than one geometry per table, create secondary table.");
-		System.err.println("--setupPgExt           set extensions 'uuid-ossp' to and 'postgis'.");
+		System.err.println("--setupPgExt           create extensions 'uuid-ossp' and 'postgis'.");
 	}
 	@Override
 	protected int doArgs(String args[],int argi,Config config)

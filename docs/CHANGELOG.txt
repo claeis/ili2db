@@ -15,9 +15,9 @@ ideas/open issues/questions
 ili2pg/ili2gpkg 3.9.0 (2017-06-19)
 -----------------------------
 - added list of reserved sqlite and postgresql keywords
-- added support before- and after-import custom sql
+- added option --preScript/--postScript to support before- and after-import custom sql
 - added verify that given --defaultSrsAuth/Code exists in DB
-- added new option to create postgresql extensions
+- added option --setupPgExt to create postgresql extensions 'uuid-ossp' and 'postgis'
 - added option --createMetaInfo to create meta tables with info from model
 - added option --coalesceMultiLine
 - improve performance of db table existence check
