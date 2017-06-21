@@ -442,6 +442,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 		}
 		DbColumn dbCol=null;
 		Unit unitDef=null;
+		Boolean mText=false;
 
 		ArrayList<DbColumn> dbColExts=new ArrayList<DbColumn>();
 		Type type = attr.getDomainResolvingAll();
@@ -658,6 +659,9 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 			}else{
 				ret.setSize(DbColVarchar.UNLIMITED);
 			}
+			if(!((TextType)type).isNormalized()){
+			    mText=true;
+			}
 			dbCol=ret;
 		}else if(type instanceof BlackboxType){
 			if(((BlackboxType)type).getKind()==BlackboxType.eXML){
@@ -684,6 +688,9 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 			if(unitDef!=null){
 				String unitName=unitDef.getName();
 				metaInfo.setColumnInfo(dbTable.getName().getName(), subType,sqlColName, DbExtMetaInfo.TAG_COL_UNIT, unitName);
+			}
+			if(mText){
+				metaInfo.setColumnInfo(dbTable.getName().getName(), subType,sqlColName, DbExtMetaInfo.TAG_COL_MTEXT, "True");
 			}
 			customMapping.fixupAttribute(dbTable, dbCol, attr);
 			dbTable.addColumn(dbCol);
