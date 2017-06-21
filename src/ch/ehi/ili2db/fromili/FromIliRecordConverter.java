@@ -442,7 +442,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 		}
 		DbColumn dbCol=null;
 		Unit unitDef=null;
-		Boolean mText=false;
+		boolean mText=false;
 
 		ArrayList<DbColumn> dbColExts=new ArrayList<DbColumn>();
 		Type type = attr.getDomainResolvingAll();
@@ -690,7 +690,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 				metaInfo.setColumnInfo(dbTable.getName().getName(), subType,sqlColName, DbExtMetaInfo.TAG_COL_UNIT, unitName);
 			}
 			if(mText){
-				metaInfo.setColumnInfo(dbTable.getName().getName(), subType,sqlColName, DbExtMetaInfo.TAG_COL_MTEXT, "True");
+				metaInfo.setColumnInfo(dbTable.getName().getName(), subType,sqlColName, DbExtMetaInfo.TAG_COL_TEXTKIND, DbExtMetaInfo.TAG_COL_TEXTKIND_MTEXT);
 			}
 			customMapping.fixupAttribute(dbTable, dbCol, attr);
 			dbTable.addColumn(dbCol);

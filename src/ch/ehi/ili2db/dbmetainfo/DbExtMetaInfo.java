@@ -18,7 +18,8 @@ import ch.interlis.ili2c.metamodel.EnumerationType;
 
 public class DbExtMetaInfo {
 	public static final String TAG_COL_UNIT = Config.PREFIX+".unit";
-	public static final String TAG_COL_MTEXT = Config.PREFIX+".mtext";
+	public static final String TAG_COL_TEXTKIND = Config.PREFIX+".textKind";
+	public static final String TAG_COL_TEXTKIND_MTEXT = "MTEXT";
 	public static final String TAG_TAB_TABLEKIND = Config.PREFIX+".tableKind";
 	public static final String TAG_TAB_TABLEKIND_ENUM = "ENUM";
 	public static final String TAG_TAB_TABLEKIND_SECONDARY = "SECONDARY";
