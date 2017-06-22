@@ -1232,7 +1232,7 @@ public class TransferFromIli {
 	throws SQLException 
 	{
 		java.util.List<java.util.Map.Entry<String,ch.interlis.ili2c.metamodel.Enumeration.Element>> ev=new java.util.ArrayList<java.util.Map.Entry<String,ch.interlis.ili2c.metamodel.Enumeration.Element>>();
-		ch.interlis.iom_j.itf.ModelUtilities.buildEnumList(ev,"",type.getConsolidatedEnumeration());
+		ch.interlis.iom_j.itf.ModelUtilities.buildEnumElementList(ev,"",type.getConsolidatedEnumeration());
 		boolean isOrdered=type.isOrdered();
 		int itfCode=0;
 		int seq=0;
