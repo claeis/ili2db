@@ -1,6 +1,5 @@
 package ch.ehi.ili2db.base;
 
-import static org.junit.Assert.*;
 import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -9,17 +8,12 @@ import java.sql.ResultSetMetaData;
 import java.sql.Statement;
 import java.util.HashMap;
 import java.util.Map;
+
 import org.junit.Assert;
 import org.junit.Test;
+
 import ch.ehi.ili2db.gui.Config;
-import ch.interlis.iom.IomObject;
-import ch.interlis.iom_j.xtf.XtfReader;
-import ch.interlis.iox.EndBasketEvent;
-import ch.interlis.iox.EndTransferEvent;
-import ch.interlis.iox.IoxEvent;
-import ch.interlis.iox.ObjectEvent;
-import ch.interlis.iox.StartBasketEvent;
-import ch.interlis.iox.StartTransferEvent;
+import ch.ehi.sqlgen.DbUtility;
 
 //-Ddburl=jdbc:postgresql:dbname -Ddbusr=usrname -Ddbpwd=1234
 public class PreAndPostScriptTest {
