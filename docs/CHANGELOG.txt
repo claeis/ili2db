@@ -15,7 +15,9 @@ ideas/open issues/questions
 ili2pg/ili2gpkg 3.9.1 (2017-06-xx)
 -----------------------------
 - added metaInfo/textKind=MTEXT
+- PostGIS: unique constraints changed to ST_AsBinary() for geometries 
 - iox-ili-1.19.2
+- ehisqlgen-1.11.1
 
 ili2pg/ili2gpkg 3.9.0 (2017-06-19)
 -----------------------------
