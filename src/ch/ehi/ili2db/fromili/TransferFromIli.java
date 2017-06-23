@@ -49,6 +49,7 @@ import ch.interlis.ili2c.metamodel.AssociationDef;
 import ch.interlis.ili2c.metamodel.AttributeDef;
 import ch.interlis.ili2c.metamodel.Domain;
 import ch.interlis.ili2c.metamodel.Element;
+import ch.interlis.ili2c.metamodel.Enumeration;
 import ch.interlis.ili2c.metamodel.EnumerationType;
 import ch.interlis.ili2c.metamodel.Model;
 import ch.interlis.ili2c.metamodel.SurfaceOrAreaType;
@@ -1240,6 +1241,9 @@ public class TransferFromIli {
 		while(evi.hasNext()){
 			java.util.Map.Entry<String,ch.interlis.ili2c.metamodel.Enumeration.Element> ele=evi.next();
 			String eleName=ele.getKey();
+			Enumeration.Element eleElement=ele.getValue();
+			String dispName = eleElement.getMetaValues().getValue("dispName");
+
 			// entry exists already?
 			if(!exstEntires.contains(eleName)){
 				// insert only non-existing entries
@@ -1250,7 +1254,12 @@ public class TransferFromIli {
 				}
 				ps.setString(2, eleName);
 				ps.setInt(3, itfCode);
-				ps.setString(4, recConv.beautifyEnumDispName(eleName)); // ili2db.dispName
+
+				if (dispName!=null){
+				    ps.setString(4, recConv.beautifyEnumDispName(dispName)); // ili2db.dispName
+				} else {
+				    ps.setString(4, recConv.beautifyEnumDispName(eleName)); 
+				}
 				ps.setBoolean(5, false);  // inactive
 				// single table for all enums?
 				if(thisClass!=null){
