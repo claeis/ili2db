@@ -31,6 +31,7 @@ import ch.ehi.ili2db.base.Ili2dbException;
 import ch.ehi.ili2db.converter.AbstractRecordConverter;
 import ch.ehi.ili2db.dbmetainfo.DbExtMetaInfo;
 import ch.ehi.ili2db.gui.Config;
+import ch.ehi.ili2db.mapping.IliMetaAttrNames;
 import ch.ehi.ili2db.mapping.TrafoConfig;
 import ch.ehi.ili2db.mapping.Viewable2TableMapping;
 import ch.ehi.ili2db.mapping.ViewableWrapper;
@@ -1242,7 +1243,6 @@ public class TransferFromIli {
 			java.util.Map.Entry<String,ch.interlis.ili2c.metamodel.Enumeration.Element> ele=evi.next();
 			String eleName=ele.getKey();
 			Enumeration.Element eleElement=ele.getValue();
-			String dispName = eleElement.getMetaValues().getValue("dispName");
 
 			// entry exists already?
 			if(!exstEntires.contains(eleName)){
@@ -1255,8 +1255,9 @@ public class TransferFromIli {
 				ps.setString(2, eleName);
 				ps.setInt(3, itfCode);
 
+				String dispName = eleElement.getMetaValues().getValue(IliMetaAttrNames.METAATTR_DISPNAME);
 				if (dispName!=null){
-				    ps.setString(4, recConv.beautifyEnumDispName(dispName)); // ili2db.dispName
+				    ps.setString(4, dispName); // do not beautify name provided by user
 				} else {
 				    ps.setString(4, recConv.beautifyEnumDispName(eleName)); 
 				}
