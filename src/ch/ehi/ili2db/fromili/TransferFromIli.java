@@ -1230,7 +1230,7 @@ public class TransferFromIli {
 		
 
 	}
-	private void updateEnumEntries(java.util.Set<String> exstEntires,java.sql.PreparedStatement ps, EnumerationType type, String thisClass, String baseClass) 
+	private void updateEnumEntries(java.util.Set<String> exstEntries,java.sql.PreparedStatement ps, EnumerationType type, String thisClass, String baseClass) 
 	throws SQLException 
 	{
 		java.util.List<java.util.Map.Entry<String,ch.interlis.ili2c.metamodel.Enumeration.Element>> ev=new java.util.ArrayList<java.util.Map.Entry<String,ch.interlis.ili2c.metamodel.Enumeration.Element>>();
@@ -1245,7 +1245,7 @@ public class TransferFromIli {
 			Enumeration.Element eleElement=ele.getValue();
 
 			// entry exists already?
-			if(!exstEntires.contains(eleName)){
+			if(!exstEntries.contains(eleName)){
 				// insert only non-existing entries
 				if(isOrdered){
 					ps.setInt(1, seq);
@@ -1258,7 +1258,7 @@ public class TransferFromIli {
 				String dispName = eleElement.getMetaValues().getValue(IliMetaAttrNames.METAATTR_DISPNAME);
 				if (dispName!=null){
 				    ps.setString(4, dispName); // do not beautify name provided by user
-				} else {
+				}else{
 				    ps.setString(4, recConv.beautifyEnumDispName(eleName)); 
 				}
 				ps.setBoolean(5, false);  // inactive
