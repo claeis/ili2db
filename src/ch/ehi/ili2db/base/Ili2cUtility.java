@@ -14,8 +14,6 @@ import ch.interlis.ili2c.metamodel.Viewable;
  */
 public class Ili2cUtility {
 
-	public static final String CATALOGUE_OBJECTS_V1_CATALOGUES_ITEM = "CatalogueObjects_V1.Catalogues.Item";
-
 	/** tests if a viewable has no (known) extensions.
 	 * @param def viewable to test
 	 * @return true if no subtypes known; true if subtypes known.
@@ -74,7 +72,7 @@ public class Ili2cUtility {
 
 	public static boolean isChbaseCatalogueItem(TransferDescription td,Viewable aclass) {
 		Viewable root=getRootViewable(aclass);
-		return root.getScopedName().equals(CATALOGUE_OBJECTS_V1_CATALOGUES_ITEM);
+		return root.getScopedName().equals(IliNames.CHBASE1_CATALOGUES_ITEM);
 	}
 	public static boolean isPureChbaseCatalogueRef(TransferDescription td,AttributeDef attr) {
 		Type typeo=attr.getDomain();

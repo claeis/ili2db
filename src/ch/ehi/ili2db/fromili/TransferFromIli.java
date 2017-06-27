@@ -31,6 +31,7 @@ import ch.ehi.ili2db.base.Ili2dbException;
 import ch.ehi.ili2db.converter.AbstractRecordConverter;
 import ch.ehi.ili2db.dbmetainfo.DbExtMetaInfo;
 import ch.ehi.ili2db.gui.Config;
+import ch.ehi.ili2db.mapping.IliMetaAttrNames;
 import ch.ehi.ili2db.mapping.TrafoConfig;
 import ch.ehi.ili2db.mapping.Viewable2TableMapping;
 import ch.ehi.ili2db.mapping.ViewableWrapper;
@@ -49,6 +50,7 @@ import ch.interlis.ili2c.metamodel.AssociationDef;
 import ch.interlis.ili2c.metamodel.AttributeDef;
 import ch.interlis.ili2c.metamodel.Domain;
 import ch.interlis.ili2c.metamodel.Element;
+import ch.interlis.ili2c.metamodel.Enumeration;
 import ch.interlis.ili2c.metamodel.EnumerationType;
 import ch.interlis.ili2c.metamodel.Model;
 import ch.interlis.ili2c.metamodel.SurfaceOrAreaType;
@@ -1228,28 +1230,37 @@ public class TransferFromIli {
 		
 
 	}
-	private void updateEnumEntries(HashSet exstEntires,java.sql.PreparedStatement ps, EnumerationType type, String thisClass, String baseClass) 
+	private void updateEnumEntries(java.util.Set<String> exstEntires,java.sql.PreparedStatement ps, EnumerationType type, String thisClass, String baseClass) 
 	throws SQLException 
 	{
-		java.util.ArrayList ev=new java.util.ArrayList();
-		ch.interlis.iom_j.itf.ModelUtilities.buildEnumList(ev,"",type.getConsolidatedEnumeration());
+		java.util.List<java.util.Map.Entry<String,ch.interlis.ili2c.metamodel.Enumeration.Element>> ev=new java.util.ArrayList<java.util.Map.Entry<String,ch.interlis.ili2c.metamodel.Enumeration.Element>>();
+		ch.interlis.iom_j.itf.ModelUtilities.buildEnumElementList(ev,"",type.getConsolidatedEnumeration());
 		boolean isOrdered=type.isOrdered();
 		int itfCode=0;
 		int seq=0;
-		Iterator evi=ev.iterator();
+		Iterator<java.util.Map.Entry<String,ch.interlis.ili2c.metamodel.Enumeration.Element>> evi=ev.iterator();
 		while(evi.hasNext()){
-			String ele=(String)evi.next();
+			java.util.Map.Entry<String,ch.interlis.ili2c.metamodel.Enumeration.Element> ele=evi.next();
+			String eleName=ele.getKey();
+			Enumeration.Element eleElement=ele.getValue();
+
 			// entry exists already?
-			if(!exstEntires.contains(ele)){
+			if(!exstEntires.contains(eleName)){
 				// insert only non-existing entries
 				if(isOrdered){
 					ps.setInt(1, seq);
 				}else{
 					ps.setNull(1,java.sql.Types.NUMERIC);
 				}
-				ps.setString(2, ele);
+				ps.setString(2, eleName);
 				ps.setInt(3, itfCode);
-				ps.setString(4, recConv.beautifyEnumDispName(ele)); // dispName
+
+				String dispName = eleElement.getMetaValues().getValue(IliMetaAttrNames.METAATTR_DISPNAME);
+				if (dispName!=null){
+				    ps.setString(4, dispName); // do not beautify name provided by user
+				} else {
+				    ps.setString(4, recConv.beautifyEnumDispName(eleName)); 
+				}
 				ps.setBoolean(5, false);  // inactive
 				// single table for all enums?
 				if(thisClass!=null){

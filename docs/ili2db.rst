@@ -920,14 +920,15 @@ Für die Abbildung von Aufzählungen gibt es zwei Varianten und verschiedene Opt
 | 4            | ::                                                            | ::                                   | Abbildung mit der Option ``--createEnumTabs``. Es wird pro Aufzählungsdefinition  |
 |              |                                                               |                                      | eine Tabelle mit den einzelnen Aufzählwerten erstellt.                            |
 |              |  DOMAIN                                                       |  CREATE TABLE Farbe (                |                                                                                   |
-|              |    Farbe : (rot, blau, gruen);                                |   itfCode integer PRIMARY KEY,       | itfCode ist der ITF-Code des Aufzählwertes.                                       |
-|              |                                                               |   iliCode varchar(1024) NOT NULL,    |                                                                                   |
-|              |                                                               |   seq integer NULL,                  | iliCode ist der qualifizierte Elementnamen (=XTF-Code) des Aufzählwertes.         |
-|              |                                                               |   dispName varchar(250) NOT NULL,    |                                                                                   |
+|              |    Farbe : (rot, blau,                                        |   itfCode integer PRIMARY KEY,       | itfCode ist der ITF-Code des Aufzählwertes.                                       |
+|              |               !!@ili2db.dispName=grün                         |   iliCode varchar(1024) NOT NULL,    |                                                                                   |
+|              |               gruen                                           |   seq integer NULL,                  | iliCode ist der qualifizierte Elementnamen (=XTF-Code) des Aufzählwertes.         |
+|              |            );                                                 |   dispName varchar(250) NOT NULL,    |                                                                                   |
 |              |                                                               |   inactive boolean NOT NULL          | seq Definiert die Reihenfolge der Aufzählelemente.                                |
 |              |                                                               |  );                                  |                                                                                   |
 |              |                                                               |                                      | dispName definiert den Anzeigetext für das Aufzählelement. Beim Import wird die   |
-|              |                                                               |                                      | Spalte mit dem XTF-Code befüllt.                                                  |
+|              |                                                               |                                      | Spalte mit dem XTF-Code befüllt. Falls das Aufzählelement das Metaattribut        |
+|              |                                                               |                                      | @ili2db.dispName hat, wird dessen Wert verwendet.                                 |
 |              |                                                               |                                      |                                                                                   |
 |              |                                                               |                                      | inactive TRUE um einen Aufzählwert für die Erfassung auszublenden, ohne dass      |
 |              |                                                               |                                      | er gelöscht werden muss. Wird beim Import mit FALSE befüllt.                      |
@@ -935,10 +936,10 @@ Für die Abbildung von Aufzählungen gibt es zwei Varianten und verschiedene Opt
 | 5            | ::                                                            | ::                                   | Abbildung mit der Option ``--createSingleEnumTab``. Es wird                       |
 |              |                                                               |                                      | eine einzige Tabelle für die Aufzählwerte aller Aufzählungen erstellt.            |
 |              |  DOMAIN                                                       |  CREATE TABLE T_ILI2DB_ENUM (        |                                                                                   |
-|              |    Farbe : (rot, blau, gruen);                                |   thisClass varchar(1024) NOT NULL,  | thisClass ist der qualifizierte Namen der Aufzählungsdefinition.                  |
-|              |                                                               |   baseClass varchar(1024) NOT NULL,  |                                                                                   |
-|              |                                                               |   itfCode integer NOT NULL,          | baseClass ist der qualifizierte Namen der Basis-Aufzählungsdefinition             |
-|              |                                                               |   iliCode varchar(1024) NOT NULL,    |                                                                                   |
+|              |    Farbe : (rot, blau,                                        |   thisClass varchar(1024) NOT NULL,  | thisClass ist der qualifizierte Namen der Aufzählungsdefinition.                  |
+|              |               !!@ili2db.dispName=grün                         |   baseClass varchar(1024) NOT NULL,  |                                                                                   |
+|              |               gruen                                           |   itfCode integer NOT NULL,          | baseClass ist der qualifizierte Namen der Basis-Aufzählungsdefinition             |
+|              |            );                                                 |   iliCode varchar(1024) NOT NULL,    |                                                                                   |
 |              |                                                               |   seq integer NULL,                  | itfCode ist der ITF-Code des Aufzählwertes.                                       |
 |              |                                                               |   dispName varchar(250) NOT NULL,    |                                                                                   |
 |              |                                                               |   inactive boolean NOT NULL          | iliCode ist der qualifizierte Elementnamen (=XTF-Code) des Aufzählwertes.         |
@@ -946,7 +947,8 @@ Für die Abbildung von Aufzählungen gibt es zwei Varianten und verschiedene Opt
 |              |                                                               |                                      | seq Definiert die Reihenfolge der Aufzählelemente.                                |
 |              |                                                               |                                      |                                                                                   |
 |              |                                                               |                                      | dispName definiert den Anzeigetext für das Aufzählelement. Beim Import wird die   |
-|              |                                                               |                                      | Spalte mit dem XTF-Code befüllt.                                                  |
+|              |                                                               |                                      | Spalte mit dem XTF-Code befüllt. Falls das Aufzählelement das Metaattribut        |
+|              |                                                               |                                      | @ili2db.dispName hat, wird dessen Wert verwendet.                                 |
 |              |                                                               |                                      |                                                                                   |
 |              |                                                               |                                      | inactive TRUE um einen Aufzählwert für die Erfassung auszublenden, ohne dass      |
 |              |                                                               |                                      | er gelöscht werden muss. Wird beim Import mit FALSE befüllt.                      |
