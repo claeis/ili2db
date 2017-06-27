@@ -17,6 +17,7 @@ public class DbNames {
 	public static final String ENUM_TAB_ILICODE_COL="iliCode";
 	public static final String ENUM_TAB_ITFCODE_COL="itfCode";
 	public static final String ENUM_TAB_DISPNAME_COL="dispName";
+	public static final String ENUM_TAB_DESCRIPTION_COL="description";
 	public static final String ENUM_TXT_COL_SUFFIX="_txt";
 	public static final String MULTILINGUAL_TXT_COL_SUFFIX="";
 	public static final String MULTILINGUAL_TXT_COL_PREFIX="_";
