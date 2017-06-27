@@ -924,11 +924,15 @@ Für die Abbildung von Aufzählungen gibt es zwei Varianten und verschiedene Opt
 |              |               !!@ili2db.dispName=grün                         |   iliCode varchar(1024) NOT NULL,    |                                                                                   |
 |              |               gruen                                           |   seq integer NULL,                  | iliCode ist der qualifizierte Elementnamen (=XTF-Code) des Aufzählwertes.         |
 |              |            );                                                 |   dispName varchar(250) NOT NULL,    |                                                                                   |
-|              |                                                               |   inactive boolean NOT NULL          | seq Definiert die Reihenfolge der Aufzählelemente.                                |
+|              |                                                               |   description varchar(1024) NULL,    | seq Definiert die Reihenfolge der Aufzählelemente.                                |
+|              |                                                               |   inactive boolean NOT NULL          |                                                                                   |
 |              |                                                               |  );                                  |                                                                                   |
 |              |                                                               |                                      | dispName definiert den Anzeigetext für das Aufzählelement. Beim Import wird die   |
 |              |                                                               |                                      | Spalte mit dem XTF-Code befüllt. Falls das Aufzählelement das Metaattribut        |
 |              |                                                               |                                      | @ili2db.dispName hat, wird dessen Wert verwendet.                                 |
+|              |                                                               |                                      |                                                                                   |
+|              |                                                               |                                      | description enthält die Beschreibung des Aufzählelements. Beim Import wird die    |
+|              |                                                               |                                      | Spalte mit dem ilidoc Kommentar aus dem Modell befüllt.                           |
 |              |                                                               |                                      |                                                                                   |
 |              |                                                               |                                      | inactive TRUE um einen Aufzählwert für die Erfassung auszublenden, ohne dass      |
 |              |                                                               |                                      | er gelöscht werden muss. Wird beim Import mit FALSE befüllt.                      |
@@ -942,6 +946,7 @@ Für die Abbildung von Aufzählungen gibt es zwei Varianten und verschiedene Opt
 |              |            );                                                 |   iliCode varchar(1024) NOT NULL,    |                                                                                   |
 |              |                                                               |   seq integer NULL,                  | itfCode ist der ITF-Code des Aufzählwertes.                                       |
 |              |                                                               |   dispName varchar(250) NOT NULL,    |                                                                                   |
+|              |                                                               |   description varchar(1024) NULL,    |                                                                                   |
 |              |                                                               |   inactive boolean NOT NULL          | iliCode ist der qualifizierte Elementnamen (=XTF-Code) des Aufzählwertes.         |
 |              |                                                               |  );                                  |                                                                                   |
 |              |                                                               |                                      | seq Definiert die Reihenfolge der Aufzählelemente.                                |
@@ -949,6 +954,9 @@ Für die Abbildung von Aufzählungen gibt es zwei Varianten und verschiedene Opt
 |              |                                                               |                                      | dispName definiert den Anzeigetext für das Aufzählelement. Beim Import wird die   |
 |              |                                                               |                                      | Spalte mit dem XTF-Code befüllt. Falls das Aufzählelement das Metaattribut        |
 |              |                                                               |                                      | @ili2db.dispName hat, wird dessen Wert verwendet.                                 |
+|              |                                                               |                                      |                                                                                   |
+|              |                                                               |                                      | description enthält die Beschreibung des Aufzählelements. Beim Import wird die    |
+|              |                                                               |                                      | Spalte mit dem ilidoc Kommentar aus dem Modell befüllt.                           |
 |              |                                                               |                                      |                                                                                   |
 |              |                                                               |                                      | inactive TRUE um einen Aufzählwert für die Erfassung auszublenden, ohne dass      |
 |              |                                                               |                                      | er gelöscht werden muss. Wird beim Import mit FALSE befüllt.                      |
