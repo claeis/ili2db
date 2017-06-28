@@ -68,7 +68,7 @@ public class DbExtMetaInfo {
 		try{
 
 			// insert entries
-			String insStmt="INSERT INTO "+sqlName+" ("+DbNames.META_INFO_COLUMN_TAB_TABLENAME_COL+","+DbNames.META_INFO_COLUMN_TAB_SUBTYPE_COL+","+DbNames.META_INFO_COLUMN_TAB_COLUMNAME_COL+","+DbNames.META_INFO_COLUMN_TAB_TAG_COL+","+DbNames.META_INFO_COLUMN_TAB_SETTING_COL+") VALUES (?,?,?,?,?)";
+			String insStmt="INSERT INTO "+sqlName+" ("+DbNames.META_INFO_COLUMN_TAB_TABLENAME_COL+","+DbNames.META_INFO_COLUMN_TAB_SUBTYPE_COL+","+DbNames.META_INFO_COLUMN_TAB_COLUMNNAME_COL+","+DbNames.META_INFO_COLUMN_TAB_TAG_COL+","+DbNames.META_INFO_COLUMN_TAB_SETTING_COL+") VALUES (?,?,?,?,?)";
 			EhiLogger.traceBackendCmd(insStmt);
 			java.sql.PreparedStatement insPrepStmt = conn.prepareStatement(insStmt);
 			try{
@@ -107,7 +107,7 @@ public class DbExtMetaInfo {
 		try{
 
 			// insert entries
-			String selStmt="SELECT "+DbNames.META_INFO_COLUMN_TAB_TABLENAME_COL+","+DbNames.META_INFO_COLUMN_TAB_SUBTYPE_COL+","+DbNames.META_INFO_COLUMN_TAB_COLUMNAME_COL+","+DbNames.META_INFO_COLUMN_TAB_TAG_COL+","+DbNames.META_INFO_COLUMN_TAB_SETTING_COL+" FROM "+sqlName;
+			String selStmt="SELECT "+DbNames.META_INFO_COLUMN_TAB_TABLENAME_COL+","+DbNames.META_INFO_COLUMN_TAB_SUBTYPE_COL+","+DbNames.META_INFO_COLUMN_TAB_COLUMNNAME_COL+","+DbNames.META_INFO_COLUMN_TAB_TAG_COL+","+DbNames.META_INFO_COLUMN_TAB_SETTING_COL+" FROM "+sqlName;
 			EhiLogger.traceBackendCmd(selStmt);
 			java.sql.PreparedStatement selPrepStmt = conn.prepareStatement(selStmt);
 			ResultSet rs = selPrepStmt.executeQuery();
@@ -230,7 +230,7 @@ public class DbExtMetaInfo {
 			
 			// name of ili column name
 			DbColVarchar columnName=new DbColVarchar();
-			columnName.setName(DbNames.META_INFO_COLUMN_TAB_COLUMNAME_COL);
+			columnName.setName(DbNames.META_INFO_COLUMN_TAB_COLUMNNAME_COL);
 			columnName.setNotNull(true);
 			columnName.setSize(255);
 			tab.addColumn(columnName);
