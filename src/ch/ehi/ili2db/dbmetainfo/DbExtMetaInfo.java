@@ -26,6 +26,7 @@ public class DbExtMetaInfo {
 	public static final String TAG_TAB_TABLEKIND_ASSOCIATION = "ASSOCIATION";
 	public static final String TAG_TAB_TABLEKIND_STRUCTURE = "STRUCTURE";
 	public static final String TAG_TAB_TABLEKIND_CATALOGUE = "CATALOGUE";
+	public static final String TAG_DISPNAME = Config.PREFIX+".dispName";
 	HashMap<ColKey,HashMap<String,String>> colInfo=new HashMap<ColKey,HashMap<String,String>>();
 	HashMap<String,HashMap<String,String>> tabInfo=new HashMap<String,HashMap<String,String>>();
 	

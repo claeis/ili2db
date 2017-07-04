@@ -1357,6 +1357,11 @@ public class TransferFromIli {
 					metaInfo.setTableInfo(v.getSqlTablename(), DbExtMetaInfo.TAG_TAB_TABLEKIND, DbExtMetaInfo.TAG_TAB_TABLEKIND_CATALOGUE);
 				}
 			}
+
+			String dispName = v.getViewable().getMetaValues().getValue(IliMetaAttrNames.METAATTR_DISPNAME);
+			if (dispName!=null){
+			    metaInfo.setTableInfo(v.getSqlTablename(), DbExtMetaInfo.TAG_DISPNAME, dispName);
+			}
 		}
 		metaInfo.updateMetaInfoTables(conn, schema.getName());
 	}
