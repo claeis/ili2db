@@ -12,6 +12,7 @@ import ch.ehi.ili2db.base.Ili2dbException;
 import ch.ehi.ili2db.converter.AbstractRecordConverter;
 import ch.ehi.ili2db.dbmetainfo.DbExtMetaInfo;
 import ch.ehi.ili2db.gui.Config;
+import ch.ehi.ili2db.mapping.IliMetaAttrNames;
 import ch.ehi.ili2db.mapping.MultiLineMapping;
 import ch.ehi.ili2db.mapping.MultiSurfaceMapping;
 import ch.ehi.ili2db.mapping.NameMapping;
@@ -687,10 +688,14 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 			}
 			if(unitDef!=null){
 				String unitName=unitDef.getName();
-				metaInfo.setColumnInfo(dbTable.getName().getName(), subType,sqlColName, DbExtMetaInfo.TAG_COL_UNIT, unitName);
+				metaInfo.setColumnInfo(dbTable.getName().getName(), subType, sqlColName, DbExtMetaInfo.TAG_COL_UNIT, unitName);
 			}
 			if(mText){
-				metaInfo.setColumnInfo(dbTable.getName().getName(), subType,sqlColName, DbExtMetaInfo.TAG_COL_TEXTKIND, DbExtMetaInfo.TAG_COL_TEXTKIND_MTEXT);
+				metaInfo.setColumnInfo(dbTable.getName().getName(), subType, sqlColName, DbExtMetaInfo.TAG_COL_TEXTKIND, DbExtMetaInfo.TAG_COL_TEXTKIND_MTEXT);
+			}
+			String dispName = attr.getMetaValues().getValue(IliMetaAttrNames.METAATTR_DISPNAME);
+			if (dispName!=null){
+			    metaInfo.setColumnInfo(dbTable.getName().getName(), subType, sqlColName, DbExtMetaInfo.TAG_DISPNAME, dispName);
 			}
 			customMapping.fixupAttribute(dbTable, dbCol, attr);
 			dbTable.addColumn(dbCol);
