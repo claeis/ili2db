@@ -1360,7 +1360,7 @@ public class TransferFromIli {
 
 			String dispName = v.getViewable().getMetaValues().getValue(IliMetaAttrNames.METAATTR_DISPNAME);
 			if (dispName!=null){
-			    metaInfo.setTableInfo(v.getSqlTablename(), DbExtMetaInfo.TAG_DISPNAME, dispName);
+			    metaInfo.setTableInfo(v.getSqlTablename(), DbExtMetaInfo.TAG_TAB_DISPNAME, dispName);
 			}
 		}
 		metaInfo.updateMetaInfoTables(conn, schema.getName());

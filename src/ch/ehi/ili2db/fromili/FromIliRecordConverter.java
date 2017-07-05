@@ -695,7 +695,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 			}
 			String dispName = attr.getMetaValues().getValue(IliMetaAttrNames.METAATTR_DISPNAME);
 			if (dispName!=null){
-			    metaInfo.setColumnInfo(dbTable.getName().getName(), subType, sqlColName, DbExtMetaInfo.TAG_DISPNAME, dispName);
+			    metaInfo.setColumnInfo(dbTable.getName().getName(), subType, sqlColName, DbExtMetaInfo.TAG_COL_DISPNAME, dispName);
 			}
 			customMapping.fixupAttribute(dbTable, dbCol, attr);
 			dbTable.addColumn(dbCol);

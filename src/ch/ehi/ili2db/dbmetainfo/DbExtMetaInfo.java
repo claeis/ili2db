@@ -20,13 +20,14 @@ public class DbExtMetaInfo {
 	public static final String TAG_COL_UNIT = Config.PREFIX+".unit";
 	public static final String TAG_COL_TEXTKIND = Config.PREFIX+".textKind";
 	public static final String TAG_COL_TEXTKIND_MTEXT = "MTEXT";
+	public static final String TAG_COL_DISPNAME = Config.PREFIX+".dispName";
 	public static final String TAG_TAB_TABLEKIND = Config.PREFIX+".tableKind";
 	public static final String TAG_TAB_TABLEKIND_ENUM = "ENUM";
 	public static final String TAG_TAB_TABLEKIND_SECONDARY = "SECONDARY";
 	public static final String TAG_TAB_TABLEKIND_ASSOCIATION = "ASSOCIATION";
 	public static final String TAG_TAB_TABLEKIND_STRUCTURE = "STRUCTURE";
 	public static final String TAG_TAB_TABLEKIND_CATALOGUE = "CATALOGUE";
-	public static final String TAG_DISPNAME = Config.PREFIX+".dispName";
+	public static final String TAG_TAB_DISPNAME = Config.PREFIX+".dispName";
 	HashMap<ColKey,HashMap<String,String>> colInfo=new HashMap<ColKey,HashMap<String,String>>();
 	HashMap<String,HashMap<String,String>> tabInfo=new HashMap<String,HashMap<String,String>>();
 	
