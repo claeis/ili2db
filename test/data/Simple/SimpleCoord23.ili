@@ -1,0 +1,21 @@
+INTERLIS 2.3;
+
+MODEL SimpleCoord23
+  AT "mailto:ce@eisenhutinformatik.ch" VERSION "2016-12-21" =
+  DOMAIN
+    Coord2 = COORD
+      2460000.000 .. 2870000.000,
+      1045000.000 .. 1310000.000,
+      ROTATION 2 -> 1;
+    
+  TOPIC TestA =
+    
+    CLASS ClassA1 =
+    	attr1 : TEXT*60;
+    	attr2 : Coord2;
+    END ClassA1;
+    
+  END TestA;
+  
+  
+END SimpleCoord23.

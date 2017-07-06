@@ -1,7 +1,8 @@
 package ch.ehi.ili2db.fromili;
 
-import java.sql.Connection;
+import java.sql.SQLException;
 
+import java.sql.Connection;
 import ch.ehi.ili2db.gui.Config;
 import ch.ehi.sqlgen.repository.DbColumn;
 import ch.ehi.sqlgen.repository.DbTable;
@@ -18,6 +19,7 @@ public interface CustomMapping {
 	public void fixupAttribute(DbTable sqlTableDef,DbColumn sqlColDef,AttributeDef iliAttrDef);
 	public void fixupEmbeddedLink(DbTable dbTable,DbColumn dbColId,AssociationDef roleOwner,RoleDef role,DbTableName targetTable,String targetPk);
 	public void preConnect(String url, String dbusr, String dbpwd, Config config);
+	public Connection connect(String url, String dbusr, String dbpwd, Config config) throws SQLException;
 	public void postConnect(Connection conn, Config config);
 
 }

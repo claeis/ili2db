@@ -5,7 +5,7 @@ ili2db-Anleitung
 Überblick
 =========
 
-Ili2pg bzw. ili2gpkg ist ein in Java erstelltes Programm, das eine
+Ili2pg, ili2fgdb bzw. ili2gpkg ist ein in Java erstelltes Programm, das eine
 Interlis-Transferdatei (itf oder xtf) einem Interlis-Modell entsprechend
 (ili) mittels 1:1-Transfer in eine Datenbank (PostgreSQL/Postgis bzw.
 GeoPackage) schreibt oder aus der Datenbank mittels einem 1:1-Transfer
@@ -63,6 +63,11 @@ OID verwendet, wird die Funktion uuid_generate_v4() verwendet.
 Dazu muss die PostgreSQL-Erweiterung uuid-ossp konfiguriert sein
 (``CREATE EXTENSION "uuid-ossp";``).
 
+**FileGDB:** Es muss `Visual Studio 2015 C and C++ Runtimes <https://www.microsoft.com/en-us/download/details.aspx?id=48145>`_ 
+installiert sein. Je nach Java Version (Die Java Version ist massgebend, nicht die Windows Version) muss 
+die 32-bit oder 64-bit Version dieser Laufzeitbibliothek installiert sein. Falls diese Laufzeitbibliothek nicht 
+installiert ist, gibt es einen Fehler beim laden der FileGDB.dll.
+
 Lizenz
 ------
 
@@ -89,6 +94,10 @@ werden.
 
 **GeoPackage:** ``java -jar ili2gpkg.jar --schemaimport --dbfile
 mogis.gpkg path/to/dm01av.ili``
+
+**FileGDB:** ``java -jar ili2fgdb.jar --schemaimport --dbfile
+mogis.gdb path/to/dm01av.ili``
+
 
 Es werden keine Daten importiert, sondern nur die leeren Tabellen
 angelegt.
@@ -301,6 +310,8 @@ Aufruf-Syntax
 
 **GeoPackage:** ``java -jar ili2gpkg.jar [Options] [file]``
 
+**FileGDB:** ``java -jar ili2fgdb.jar [Options] [file]``
+
 Optionen:
 
 +-------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
@@ -353,6 +364,8 @@ Optionen:
 | --dbschema schema             | **PostGIS:** Definiert den Namen des Datenbank-Schemas. Default ist kein Wert, d.h. das aktuelle Schema des Benutzers der mit –user definiert wird.                                                                                                                                                                                                                                                                                                                                                                                        |
 +-------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | --dbfile filename             | **GeoPackage:** Name der GeoPackage-Datei.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+|                               |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+|                               | **FileGDB:** Name der ESRI File Geodatabase-Datei.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
 +-------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | --setupPgExt                  | **PostGIS:** erstellt postgreql Erweiterungen 'uuid-ossp' und 'postgis' (falls noch nicht vorhanden)                                                                                                                                                                                                                                                                                                                                                                                                                                       |
 +-------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+

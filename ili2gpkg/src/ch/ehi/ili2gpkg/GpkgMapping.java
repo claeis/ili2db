@@ -9,6 +9,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 import ch.ehi.basics.logging.EhiLogger;
+import ch.ehi.ili2db.base.AbstractJdbcMapping;
 import ch.ehi.ili2db.fromili.CustomMapping;
 import ch.ehi.ili2db.gui.Config;
 import ch.ehi.sqlgen.repository.DbColumn;
@@ -19,7 +20,7 @@ import ch.interlis.ili2c.metamodel.AttributeDef;
 import ch.interlis.ili2c.metamodel.RoleDef;
 import ch.interlis.ili2c.metamodel.Viewable;
 
-public class GpkgMapping implements CustomMapping {
+public class GpkgMapping extends AbstractJdbcMapping {
 
 	private boolean isNewFile=false;
 	@Override

@@ -2,7 +2,9 @@ package ch.ehi.ili2pg;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+
 import ch.ehi.basics.logging.EhiLogger;
+import ch.ehi.ili2db.base.AbstractJdbcMapping;
 import ch.ehi.ili2db.fromili.CustomMapping;
 import ch.ehi.ili2db.gui.Config;
 import ch.ehi.sqlgen.repository.DbColumn;
@@ -13,7 +15,7 @@ import ch.interlis.ili2c.metamodel.AttributeDef;
 import ch.interlis.ili2c.metamodel.RoleDef;
 import ch.interlis.ili2c.metamodel.Viewable;
 
-public class PgCustomStrategy implements CustomMapping {
+public class PgCustomStrategy extends AbstractJdbcMapping {
 
 	@Override
 	public void fromIliInit(Config config) {

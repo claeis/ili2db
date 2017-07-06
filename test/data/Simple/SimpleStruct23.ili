@@ -1,0 +1,20 @@
+INTERLIS 2.3;
+
+MODEL SimpleStruct23
+  AT "mailto:ce@eisenhutinformatik.ch" VERSION "2016-12-21" =
+    
+  TOPIC TestA =
+    
+    STRUCTURE StructA1 =
+    	attra : TEXT*60;
+    END StructA1;
+    
+    CLASS ClassB1 =
+    	attrb1 : TEXT*60;
+    	attrb2 : BAG OF StructA1;
+    END ClassB1;
+    
+  END TestA;
+  
+  
+END SimpleStruct23.

@@ -145,6 +145,17 @@ public class Ili2db {
 				EhiLogger.logError("failed to load JDBC driver",ex);
 				return;
 			}
+			
+			Ili2dbLibraryInit ao=null;
+			try{
+				ao=getInitStrategy(config); 
+				ao.init();
+			}finally{
+				if(ao!=null){
+					ao.end();
+				}
+			}
+			
 		}
 		
 		CustomMapping customMapping=getCustomMappingStrategy(config);
@@ -788,6 +799,7 @@ public class Ili2db {
 		out.close();
 	}
 	
+	@Deprecated
 	public static Ili2dbLibraryInit getInitStrategy(Config config)
 	throws Ili2dbException
 	{
@@ -967,16 +979,14 @@ public class Ili2db {
 
 			// read mapping file
 			NameMapping mapping=new NameMapping(config);
-			if(!(conn instanceof GeodbConnection)){
-				  if(DbUtility.tableExists(conn,new DbTableName(config.getDbschema(),DbNames.CLASSNAME_TAB))){
-					  // read mapping from db
-					  mapping.readTableMappingTable(conn,config.getDbschema());
-				  }
-				  if(DbUtility.tableExists(conn,new DbTableName(config.getDbschema(),DbNames.ATTRNAME_TAB))){
-					  // read mapping from db
-					  mapping.readAttrMappingTable(conn,config.getDbschema());
-				  }
-			}
+			  if(DbUtility.tableExists(conn,new DbTableName(config.getDbschema(),DbNames.CLASSNAME_TAB))){
+				  // read mapping from db
+				  mapping.readTableMappingTable(conn,config.getDbschema());
+			  }
+			  if(DbUtility.tableExists(conn,new DbTableName(config.getDbschema(),DbNames.ATTRNAME_TAB))){
+				  // read mapping from db
+				  mapping.readAttrMappingTable(conn,config.getDbschema());
+			  }
 			  TrafoConfig trafoConfig=new TrafoConfig();
 			  trafoConfig.readTrafoConfig(conn, config.getDbschema());
 
@@ -1480,7 +1490,7 @@ public class Ili2db {
 		EhiLogger.logState("dburl <" + url + ">");
 		EhiLogger.logState("dbusr <" + dbusr + ">");
 		customMapping.preConnect(url, dbusr, dbpwd, config);
-		conn = DriverManager.getConnection(url, dbusr, dbpwd);
+		conn = customMapping.connect(url, dbusr, dbpwd,config);
 		config.setJdbcConnection(conn);
 		customMapping.postConnect(conn, config);
 		return conn;
