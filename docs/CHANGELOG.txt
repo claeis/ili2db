@@ -16,6 +16,7 @@ ili2pg/ili2gpkg 3.10.0 (2017-08-xx)
 -----------------------------
 - iox-ili 1.19.5
 - read ilidoc as enum element description
+- fixed --preScript/--postScript argument handling
 
 ili2pg/ili2gpkg 3.9.1 (2017-06-27)
 -----------------------------
