@@ -54,38 +54,54 @@ statement
                        
 
   select_statement 
-	returns [SelectStmt stmt]
+	returns [AbstractSelectStmt stmt]
 	{
-	stmt=new SelectStmt();
-	List<List<String>> fv=null;
-	List<String> w0=null;
-	List<String> w1=null;
+	stmt=null;
+	AbstractSelectStmt subselect=null;
+	List<SelectValue> fv=null;
+	SqlQname w0=null;
+	SqlQname w1=null;
+	SqlQname c=null;
 	int paramIdx=0;
+	Value v0=null;
 	}
-  : "SELECT" fv=select_list_ce {
-  				for(List<String> f:fv){
-  					stmt.addField(f.get(f.size()-1));
-  				}
-  				}
-                       "FROM" t:NAME (("AS")? NAME)? { stmt.setTableName(t.getText());}
-                       		(COMMA tablename)*
+  : "SELECT" fv=select_list_ce 
+                       "FROM" (  (t:NAME (("AS")? NAME)? { 
+                       			stmt=new FgdbSelectStmt();
+                       			stmt.setTableName(t.getText());
+					for(SelectValue f:fv){
+						stmt.addField(f);
+					}
+                       		})
+                       		| ( LPAREN subselect=select_statement RPAREN "AS" t2:NAME {
+                       			stmt=new ComplexSelectStmt(subselect);
+                       			stmt.setTableName(t2.getText());
+					for(SelectValue f:fv){
+						stmt.addField(f);
+					}
+                       		})
+                       )
                        // ("WHERE" search_condition)?
-                       ("WHERE" w0=name_chain EQUALS QUESTION
+                       ("WHERE" w0=sqlqname EQUALS ( 
+                       			(QUESTION {v0=new Param(paramIdx++);}) 
+                       			|  (n:NUMBER {v0=new IntConst(Integer.valueOf(n.getText()));})
+                       			|  (s:STRING {v0=new StringConst(s.getText());})
+                       		)
                        		{
-                           		stmt.addCond(new ColRef(w0.get(w0.size()-1)),new Param(paramIdx++));
+                           		stmt.addCond(new ColRef(w0.getLocalName()),v0);
                        		}
-                           ("AND" w1=name_chain EQUALS QUESTION 
+                           ("AND" w1=sqlqname EQUALS QUESTION 
                        		{
-                           		stmt.addCond(new ColRef(w1.get(w1.size()-1)),new Param(paramIdx++));
+                           		stmt.addCond(new ColRef(w1.getLocalName()),new Param(paramIdx++));
                        		}
                            )*
                        )?                       
                        
-                       ("ORDER" "BY" columnname (COMMA columnname)*)?;
+                       ("ORDER" "BY" c=sqlqname {stmt.orderBy(c.getLocalName());} ("ASC" {stmt.orderAsc();})?)?;
 
 sub_query 
   {
-  SelectStmt c=null;
+  AbstractSelectStmt c=null;
   }
   : 
   c=select_statement
@@ -161,20 +177,29 @@ sub_query
 
   valuelist   : value (COMMA value)*;
 
-  select_list_ce returns[List<List<String>> c]
+  select_list_ce returns[List<SelectValue> c]
   {
-  c=new ArrayList<List<String>>();
-  List<String> n0=null;
-  List<String> n1=null;
+  c=new ArrayList<SelectValue>();
+  SelectValue n0=null;
+  SelectValue n1=null;
   }
-  : n0=name_chain {c.add(n0);}
-  ( COMMA n1=name_chain {c.add(n1);}
+  : n0=select_sublist_ce {c.add(n0);}
+  ( COMMA n1=select_sublist_ce {c.add(n1);}
   )*;
   
   select_list    : "*" | select_sublist (COMMA select_sublist)*;
 
   select_sublist : expression (("AS")? columnalias)? | ((tablename | correlationname )DOT "*");
-
+  
+  select_sublist_ce returns[SelectValue c]
+  {
+  c=null;
+  SqlQname n0=null;
+  }
+  : n0=sqlqname {c=new SelectValueField(n0);}
+  | t:STRING "AS" n:NAME {c=new SelectValueString(n.getText(),t.getText());} 
+  ;
+  
   orderby            : "ORDER" "BY" sort_specification (COMMA sort_specification)*.;
 
   sort_specification : columnname ("ASC" | "DESC")?;
@@ -184,13 +209,14 @@ sub_query
   scale : numeric_literal;
   
 
-  name_chain returns[List<String> c]
+  sqlqname returns[SqlQname ret]
   {
-  c=new ArrayList<String>();
+  ArrayList<String> c=new ArrayList<String>();
+  ret=null;
   }
   : n0:NAME {c.add(n0.getText());}
   (  DOT n1:NAME {c.add(n1.getText());}
-  )*;
+  )* {ret=new SqlQname(c);};
   
   tablename: identifier;
   columnname : identifier;
@@ -300,14 +326,14 @@ protected LETTER
   
 protected ESC
   : '\\'
-    ( '"' | '\\' | 'u' HEXDIGIT HEXDIGIT HEXDIGIT HEXDIGIT )
+    ( '\'' | '\\' | 'u' HEXDIGIT HEXDIGIT HEXDIGIT HEXDIGIT )
   ;
 
 
 STRING
-  : '"'!
-    ( ESC | ~( '"' | '\\' ) )*
-    '"'!
+  : '\''!
+    ( ESC | ~( '\'' | '\\' ) )*
+    '\''!
   ;
   
 protected POSINT

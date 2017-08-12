@@ -1,43 +1,27 @@
 package ch.ehi.ili2fgdb.jdbc;
 
-import java.io.InputStream;
-import java.io.Reader;
-import java.math.BigDecimal;
-import java.net.URL;
-import java.sql.Array;
-import java.sql.Blob;
-import java.sql.Clob;
 import java.sql.Connection;
-import java.sql.Date;
-import java.sql.NClob;
-import java.sql.ParameterMetaData;
-import java.sql.PreparedStatement;
-import java.sql.Ref;
 import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.RowId;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
-import java.sql.SQLXML;
 import java.sql.Statement;
-import java.sql.Time;
-import java.sql.Timestamp;
-import java.util.Calendar;
+import java.util.List;
 
 import antlr.RecognitionException;
 import antlr.TokenStreamException;
 import ch.ehi.fgdb4j.jni.EnumRows;
-import ch.ehi.fgdb4j.jni.Row;
-import ch.ehi.fgdb4j.jni.SWIGTYPE_p_tm;
 import ch.ehi.fgdb4j.jni.Table;
 import ch.ehi.fgdb4j.jni.fgbd4j;
 import ch.ehi.ili2fgdb.jdbc.parser.SqlLexer;
 import ch.ehi.ili2fgdb.jdbc.parser.SqlSyntax;
-import ch.ehi.ili2fgdb.jdbc.sql.ColRef;
-import ch.ehi.ili2fgdb.jdbc.sql.InsertStmt;
-import ch.ehi.ili2fgdb.jdbc.sql.SelectStmt;
+import ch.ehi.ili2fgdb.jdbc.sql.AbstractSelectStmt;
+import ch.ehi.ili2fgdb.jdbc.sql.ComplexSelectStmt;
+import ch.ehi.ili2fgdb.jdbc.sql.FgdbSelectStmt;
+import ch.ehi.ili2fgdb.jdbc.sql.IntConst;
+import ch.ehi.ili2fgdb.jdbc.sql.SelectValue;
+import ch.ehi.ili2fgdb.jdbc.sql.SelectValueField;
 import ch.ehi.ili2fgdb.jdbc.sql.SqlStmt;
-import ch.ehi.ili2fgdb.jdbc.sql.UpdateStmt;
+import ch.ehi.ili2fgdb.jdbc.sql.StringConst;
 import ch.ehi.ili2fgdb.jdbc.sql.Value;
 
 public class FgdbStatement implements Statement {
@@ -123,38 +107,90 @@ public class FgdbStatement implements Statement {
 				throw new SQLException(e);
 			}
 		}
-		  EnumRows rows=new EnumRows();
+		ResultSet ret=null;
+		if(stmt instanceof ComplexSelectStmt){
+			ret = executeComplexSelectStmt((ComplexSelectStmt) stmt);
+		}else if(stmt instanceof FgdbSelectStmt){
+			ret = executeFgdbSelectStmt((FgdbSelectStmt) stmt);
+		} else {
+			ret = executeStringQuery(stmtStr);
+		}
+		return ret;
+	}
+
+	private ResultSet executeSelectStmt(AbstractSelectStmt stmt) throws SQLException {
+		ResultSet ret=null;
+		if(stmt instanceof ComplexSelectStmt){
+			ret = executeComplexSelectStmt((ComplexSelectStmt) stmt);
+		}else if(stmt instanceof FgdbSelectStmt){
+			ret = executeFgdbSelectStmt((FgdbSelectStmt) stmt);
+		} else {
+			throw new IllegalArgumentException("unexpceted type "+stmt.getClass().getName());
+		}
+		return ret;
+	}
+	private ResultSet executeComplexSelectStmt(ComplexSelectStmt stmt) throws SQLException {
+		MemResultSet ret=new MemResultSet(executeSelectStmt(stmt.getSubSelect()));
+		return ret;
+	}
+
+	private ResultSet executeStringQuery(String stmtStr) throws SQLException {
+		ResultSet ret;
+		EnumRows rows=new EnumRows();
 		  int err=0;
-			if(stmt instanceof SelectStmt){
-				SelectStmt ustmt=(SelectStmt)stmt;
-				Table table=new Table();
-				err=conn.getGeodatabase().OpenTable(ustmt.getTableName(), table);
-				if(ustmt.getConditions()!=null && ustmt.getConditions().size()>0){
-					throw new SQLException("where not yet implemented");
-				}
-				  StringBuffer where=new StringBuffer();
-				  { // TODO
-				  }
-				  StringBuffer fields=new StringBuffer();
-				  {
-					  String sep="";
-					  for(String colref:ustmt.getFields()){
-						  fields.append(sep);sep=",";
-						  fields.append(colref);
-					  }
-				  }
-				  
-				  err= table.Search(fields.toString(), where.toString(), true, rows);
-			}else{
-				err=conn.getGeodatabase().ExecuteSQL(stmtStr, true, rows);
-			}
+		err=conn.getGeodatabase().ExecuteSQL(stmtStr, true, rows);
 		if(err!=0){
 			StringBuffer errDesc=new StringBuffer();
 			fgbd4j.GetErrorDescription(err, errDesc);
 			throw new SQLException(errDesc.toString());
 		}
-		FgdbResultSet ret=new FgdbResultSet(rows);
-		
+		ret=new FgdbResultSet(rows,null);
+		return ret;
+	}
+
+	private ResultSet executeFgdbSelectStmt(FgdbSelectStmt ustmt) throws SQLException {
+		ResultSet ret;
+		EnumRows rows=new EnumRows();
+		  List<SelectValue> selectvalues = null;
+		  int err=0;
+		Table table=new Table();
+		err=conn.getGeodatabase().OpenTable(ustmt.getTableName(), table);
+		  StringBuffer where=new StringBuffer();
+		  { 
+			  String sep="";
+				for(java.util.Map.Entry<Value,Value> cond : ustmt.getConditions()){
+					where.append(((ch.ehi.ili2fgdb.jdbc.sql.ColRef)cond.getKey()).getName());
+					where.append("=");
+					Value rh = cond.getValue();
+					if(rh instanceof IntConst){
+						where.append(Integer.toString(((IntConst)rh).getValue()));
+					}else{
+						where.append("'");
+						where.append(((StringConst)rh).getValue());
+						where.append("'");
+					}
+					sep=" AND ";
+				}
+		  }
+		  StringBuffer fields=new StringBuffer();
+		  {
+			  String sep="";
+			  for(SelectValue colref:ustmt.getFields()){
+				  if(colref instanceof SelectValueField){
+					  fields.append(sep);sep=",";
+					  fields.append(colref.getColumnName());
+				  }
+			  }
+		  }
+		  
+		  err= table.Search(fields.toString(), where.toString(), true, rows);
+		  selectvalues = ustmt.getFields();
+			if(err!=0){
+				StringBuffer errDesc=new StringBuffer();
+				fgbd4j.GetErrorDescription(err, errDesc);
+				throw new SQLException(errDesc.toString());
+			}
+			ret=new FgdbResultSet(rows,selectvalues);
 		return ret;
 	}
 

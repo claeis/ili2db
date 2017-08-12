@@ -21,6 +21,7 @@ import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
+import java.util.List;
 import java.util.Map;
 
 import ch.ehi.fgdb4j.jni.ByteArray;
@@ -33,34 +34,39 @@ import ch.ehi.fgdb4j.jni.Row;
 import ch.ehi.fgdb4j.jni.ShapeBuffer;
 import ch.ehi.fgdb4j.jni.ce_time;
 import ch.ehi.fgdb4j.jni.fgbd4j;
+import ch.ehi.ili2fgdb.jdbc.sql.SelectValue;
+import ch.ehi.ili2fgdb.jdbc.sql.SelectValueField;
+import ch.ehi.ili2fgdb.jdbc.sql.SelectValueString;
+import ch.ehi.ili2fgdb.jdbc.sql.SqlQname;
 
 public class FgdbResultSet implements ResultSet {
 
 	public static final int MAGIC_HOUR_DATEONLY = 0;
 	public static final int MAGIC_YEAR_TIMEONLY = 1;
 	private EnumRows rowIterator=null;
-	private Row currentRow=null;
-	FieldInfo fieldInfo=null;
-	private int fieldCount=0;
+	private Row fgdbCurrentRow=null;
+	FieldInfo fgdbFieldInfo=null;
+	private int fgdbFieldCount=0;
 	private boolean lastGetWasNull=false;
-
-	public FgdbResultSet(EnumRows rows) throws SQLException {
+	private List<SelectValue> selectValues=null;
+	public FgdbResultSet(EnumRows rows, List<SelectValue> selectvalues) throws SQLException {
 		this.rowIterator=rows;
-		fieldInfo=new FieldInfo();
-		int err=rowIterator.GetFieldInformation(fieldInfo);
+		fgdbFieldInfo=new FieldInfo();
+		int err=rowIterator.GetFieldInformation(fgdbFieldInfo);
 		if(err!=0){
 			StringBuffer errDesc=new StringBuffer();
 			fgbd4j.GetErrorDescription(err, errDesc);
 			throw new SQLException(errDesc.toString());
 		}
 		int[] fieldCounto=new int[1];
-		err=fieldInfo.GetFieldCount(fieldCounto);
+		err=fgdbFieldInfo.GetFieldCount(fieldCounto);
 		if(err!=0){
 			StringBuffer errDesc=new StringBuffer();
 			fgbd4j.GetErrorDescription(err, errDesc);
 			throw new SQLException(errDesc.toString());
 		}
-		fieldCount=fieldCounto[0];
+		fgdbFieldCount=fieldCounto[0];
+		selectValues=selectvalues;
 	}	
 
 	@Override
@@ -111,7 +117,7 @@ public class FgdbResultSet implements ResultSet {
 			rowIterator.Close();
 			rowIterator=null;
 		}
-		currentRow=null;
+		fgdbCurrentRow=null;
 	}
 
 	@Override
@@ -122,11 +128,28 @@ public class FgdbResultSet implements ResultSet {
 
 	@Override
 	public int findColumn(String colName) throws SQLException {
-		for(int colIdx=0;colIdx<fieldCount;colIdx++){
+		if(selectValues!=null){
+			int colIdx=0;
+			for(SelectValue sv:selectValues){
+				String fieldName=null;
+				fieldName=sv.getColumnName();
+				if(fieldName.equals(colName)){
+					return colIdx+1;
+				}
+				colIdx++;
+			}
+			
+		}else{
+			return findFgdbColumn(colName)+1;
+		}
+		throw new SQLException("unknown column "+colName);
+	}
+	private int findFgdbColumn(String colName) throws SQLException {
+		for(int colIdx=0;colIdx<fgdbFieldCount;colIdx++){
 			StringBuffer fieldName=new StringBuffer();
-			fieldInfo.GetFieldName(colIdx, fieldName);
+			fgdbFieldInfo.GetFieldName(colIdx, fieldName);
 			if(fieldName.toString().equals(colName)){
-				return colIdx+1;
+				return colIdx;
 			}
 		}
 		throw new SQLException("unknown column "+colName);
@@ -305,7 +328,7 @@ public class FgdbResultSet implements ResultSet {
 
 	@Override
 	public Date getDate(String col) throws SQLException {
-		return getDate(col);
+		return getDate(findColumn(col));
 	}
 
 	@Override
@@ -376,29 +399,14 @@ public class FgdbResultSet implements ResultSet {
 
 	@Override
 	public long getLong(int colIdx) throws SQLException {
-		colIdx--;
-		boolean isNull[]=new boolean[1];
-		int err=currentRow.IsNull(colIdx, isNull);
-	    if(err!=0){
-			throw new SQLException(getErrorDescription(err));
-	    }
-		if(isNull[0]){
-			lastGetWasNull=true;
+		Object ret=getObject(colIdx);
+		if(ret==null){
 			return 0;
 		}
-		lastGetWasNull=false;
-		int value[]=new int[1];
-		int[] fieldType=new int[1];
-		fieldInfo.GetFieldType(colIdx, fieldType);
-		if(fieldType[0]==FieldType.fieldTypeOID.swigValue()){
-		    err=currentRow.GetOID(value);
-		}else{
-		    err=currentRow.GetInteger(colIdx, value);
+		if(ret instanceof Integer){
+			return (Integer) ret;
 		}
-	    if(err!=0){
-			throw new SQLException(getErrorDescription(err));
-	    }
-		return value[0];
+		throw new SQLException("unexpected type "+ret.getClass().getName());
 	}
 
 	@Override
@@ -451,8 +459,16 @@ public class FgdbResultSet implements ResultSet {
 	@Override
 	public Object getObject(int colIdx) throws SQLException {
 		colIdx--;
+		if(selectValues!=null){
+			SelectValue sv=selectValues.get(colIdx);
+			if(sv instanceof SelectValueString){
+				lastGetWasNull=false;
+				return ((SelectValueString) sv).getLiteralValue();
+			}
+			colIdx=findFgdbColumn(sv.getColumnName());
+		}
 		boolean isNull[]=new boolean[1];
-		int err=currentRow.IsNull(colIdx, isNull);
+		int err=fgdbCurrentRow.IsNull(colIdx, isNull);
 	    if(err!=0){
 			throw new SQLException(getErrorDescription(err));
 	    }
@@ -463,56 +479,56 @@ public class FgdbResultSet implements ResultSet {
 		lastGetWasNull=false;
 		Object valueo=null;
 		int[] fieldType=new int[1];
-		err=fieldInfo.GetFieldType(colIdx, fieldType);
+		err=fgdbFieldInfo.GetFieldType(colIdx, fieldType);
 	    if(err!=0){
 			throw new SQLException(getErrorDescription(err));
 	    }
 		if(fieldType[0]==FieldType.fieldTypeOID.swigValue()){
 			int value[]=new int[1];
-		    err=currentRow.GetOID(value);
+		    err=fgdbCurrentRow.GetOID(value);
 		    if(err==0){
 		    	valueo=value[0];
 		    }
 		}else if(fieldType[0]==FieldType.fieldTypeInteger.swigValue()){
 			int value[]=new int[1];
-		    err=currentRow.GetInteger(colIdx, value);
+		    err=fgdbCurrentRow.GetInteger(colIdx, value);
 		    if(err==0){
 		    	valueo=value[0];
 		    }
 		}else if(fieldType[0]==FieldType.fieldTypeSmallInteger.swigValue()){
 			short[] value=new short[1];
-		    err=currentRow.GetShort(colIdx, value);
+		    err=fgdbCurrentRow.GetShort(colIdx, value);
 		    if(err==0){
 		    	valueo=value[0];
 		    }
 		}else if(fieldType[0]==FieldType.fieldTypeDouble.swigValue()){
 			double value[]=new double[1];
-		    err=currentRow.GetDouble(colIdx, value);
+		    err=fgdbCurrentRow.GetDouble(colIdx, value);
 		    if(err==0){
 		    	valueo=value[0];
 		    }
 		}else if(fieldType[0]==FieldType.fieldTypeString.swigValue()){
 			StringBuffer value=new StringBuffer();;
-		    err=currentRow.GetString(colIdx, value);
+		    err=fgdbCurrentRow.GetString(colIdx, value);
 		    if(err==0){
 		    	valueo=value.toString();
 		    }
 		}else if(fieldType[0]==FieldType.fieldTypeGeometry.swigValue()){
 			//MultiPartShapeBuffer value=new MultiPartShapeBuffer();
 			ShapeBuffer value=new ShapeBuffer();
-		    err=currentRow.GetGeometry(value);
+		    err=fgdbCurrentRow.GetGeometry(value);
 		    if(err==0){
 		    	valueo=value.getBuffer();
 		    }
 		}else if(fieldType[0]==FieldType.fieldTypeBlob.swigValue()){
 			ByteArray value=new ByteArray();
-		    err=currentRow.GetBinary(colIdx, value);
+		    err=fgdbCurrentRow.GetBinary(colIdx, value);
 		    if(err==0){
 		    	valueo=value.getBuffer();
 		    }
 		}else if(fieldType[0]==FieldType.fieldTypeDate.swigValue()){
 			ce_time value=new ce_time();
-		    err=currentRow.getDateTime(colIdx, value);
+		    err=fgdbCurrentRow.getDateTime(colIdx, value);
 		    if(err==0){
 				GregorianCalendar time=new GregorianCalendar();
 				int year=value.getTm_year();
@@ -660,7 +676,7 @@ public class FgdbResultSet implements ResultSet {
 
 	@Override
 	public Time getTime(String col) throws SQLException {
-		return getTime(col);
+		return getTime(findColumn(col));
 	}
 
 	@Override
@@ -797,8 +813,8 @@ public class FgdbResultSet implements ResultSet {
 
 	@Override
 	public boolean next() throws SQLException {
-		currentRow=new Row();
-		return rowIterator.Next(currentRow) == 0;
+		fgdbCurrentRow=new Row();
+		return rowIterator.Next(fgdbCurrentRow) == 0;
 	}
 
 	@Override

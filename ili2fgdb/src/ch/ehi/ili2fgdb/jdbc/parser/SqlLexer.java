@@ -45,57 +45,57 @@ public SqlLexer(LexerSharedInputState state) {
 	caseSensitiveLiterals = true;
 	setCaseSensitive(true);
 	literals = new Hashtable();
-	literals.put(new ANTLRHashString("DATE", this), new Integer(56));
-	literals.put(new ANTLRHashString("SET", this), new Integer(22));
-	literals.put(new ANTLRHashString("-", this), new Integer(38));
-	literals.put(new ANTLRHashString("IS", this), new Integer(26));
-	literals.put(new ANTLRHashString("VARBINARY", this), new Integer(60));
+	literals.put(new ANTLRHashString("DATE", this), new Integer(58));
+	literals.put(new ANTLRHashString("SET", this), new Integer(25));
+	literals.put(new ANTLRHashString("-", this), new Integer(41));
+	literals.put(new ANTLRHashString("IS", this), new Integer(29));
+	literals.put(new ANTLRHashString("VARBINARY", this), new Integer(62));
 	literals.put(new ANTLRHashString("VALUES", this), new Integer(13));
-	literals.put(new ANTLRHashString("CHAR", this), new Integer(45));
-	literals.put(new ANTLRHashString("<", this), new Integer(33));
-	literals.put(new ANTLRHashString("NULL", this), new Integer(23));
-	literals.put(new ANTLRHashString("LIKE", this), new Integer(27));
-	literals.put(new ANTLRHashString("EXISTS", this), new Integer(31));
-	literals.put(new ANTLRHashString("SMALLINT", this), new Integer(49));
-	literals.put(new ANTLRHashString("ORDER", this), new Integer(19));
+	literals.put(new ANTLRHashString("CHAR", this), new Integer(47));
+	literals.put(new ANTLRHashString("<", this), new Integer(36));
+	literals.put(new ANTLRHashString("NULL", this), new Integer(26));
+	literals.put(new ANTLRHashString("LIKE", this), new Integer(30));
+	literals.put(new ANTLRHashString("EXISTS", this), new Integer(34));
+	literals.put(new ANTLRHashString("SMALLINT", this), new Integer(51));
+	literals.put(new ANTLRHashString("ORDER", this), new Integer(21));
 	literals.put(new ANTLRHashString("WHERE", this), new Integer(6));
-	literals.put(new ANTLRHashString("VARCHAR", this), new Integer(46));
+	literals.put(new ANTLRHashString("VARCHAR", this), new Integer(48));
 	literals.put(new ANTLRHashString("DELETE", this), new Integer(4));
-	literals.put(new ANTLRHashString("/", this), new Integer(40));
+	literals.put(new ANTLRHashString("/", this), new Integer(43));
 	literals.put(new ANTLRHashString("FROM", this), new Integer(5));
-	literals.put(new ANTLRHashString("DESC", this), new Integer(43));
-	literals.put(new ANTLRHashString("<>", this), new Integer(32));
+	literals.put(new ANTLRHashString("DESC", this), new Integer(45));
+	literals.put(new ANTLRHashString("<>", this), new Integer(35));
 	literals.put(new ANTLRHashString("INSERT", this), new Integer(7));
 	literals.put(new ANTLRHashString("SELECT", this), new Integer(15));
-	literals.put(new ANTLRHashString(">", this), new Integer(34));
-	literals.put(new ANTLRHashString("DECIMAL", this), new Integer(51));
-	literals.put(new ANTLRHashString(">=", this), new Integer(36));
-	literals.put(new ANTLRHashString("ASC", this), new Integer(42));
-	literals.put(new ANTLRHashString("FLOAT", this), new Integer(55));
-	literals.put(new ANTLRHashString("UPDATE", this), new Integer(21));
-	literals.put(new ANTLRHashString("NUMERIC", this), new Integer(50));
-	literals.put(new ANTLRHashString("DEFAULT", this), new Integer(44));
-	literals.put(new ANTLRHashString("+", this), new Integer(37));
-	literals.put(new ANTLRHashString("OR", this), new Integer(24));
-	literals.put(new ANTLRHashString("IN", this), new Integer(29));
-	literals.put(new ANTLRHashString("yyyy-mm-dd hh:mm:ss.ss", this), new Integer(61));
+	literals.put(new ANTLRHashString(">", this), new Integer(37));
+	literals.put(new ANTLRHashString("DECIMAL", this), new Integer(53));
+	literals.put(new ANTLRHashString(">=", this), new Integer(39));
+	literals.put(new ANTLRHashString("ASC", this), new Integer(23));
+	literals.put(new ANTLRHashString("FLOAT", this), new Integer(57));
+	literals.put(new ANTLRHashString("UPDATE", this), new Integer(24));
+	literals.put(new ANTLRHashString("NUMERIC", this), new Integer(52));
+	literals.put(new ANTLRHashString("DEFAULT", this), new Integer(46));
+	literals.put(new ANTLRHashString("+", this), new Integer(40));
+	literals.put(new ANTLRHashString("OR", this), new Integer(27));
+	literals.put(new ANTLRHashString("IN", this), new Integer(32));
+	literals.put(new ANTLRHashString("yyyy-mm-dd hh:mm:ss.ss", this), new Integer(63));
 	literals.put(new ANTLRHashString("INTO", this), new Integer(8));
-	literals.put(new ANTLRHashString("TIME", this), new Integer(57));
-	literals.put(new ANTLRHashString("TIMESTAMP", this), new Integer(58));
-	literals.put(new ANTLRHashString("REAL", this), new Integer(52));
-	literals.put(new ANTLRHashString("DOUBLE", this), new Integer(53));
-	literals.put(new ANTLRHashString("<=", this), new Integer(35));
-	literals.put(new ANTLRHashString("AND", this), new Integer(18));
-	literals.put(new ANTLRHashString("NOT", this), new Integer(25));
-	literals.put(new ANTLRHashString("INT", this), new Integer(48));
-	literals.put(new ANTLRHashString("ESCAPE", this), new Integer(28));
-	literals.put(new ANTLRHashString("BETWEEN", this), new Integer(30));
-	literals.put(new ANTLRHashString("PRECISION", this), new Integer(54));
-	literals.put(new ANTLRHashString("INTEGER", this), new Integer(47));
-	literals.put(new ANTLRHashString("BY", this), new Integer(20));
-	literals.put(new ANTLRHashString("BINARY", this), new Integer(59));
+	literals.put(new ANTLRHashString("TIME", this), new Integer(59));
+	literals.put(new ANTLRHashString("TIMESTAMP", this), new Integer(60));
+	literals.put(new ANTLRHashString("REAL", this), new Integer(54));
+	literals.put(new ANTLRHashString("DOUBLE", this), new Integer(55));
+	literals.put(new ANTLRHashString("<=", this), new Integer(38));
+	literals.put(new ANTLRHashString("AND", this), new Integer(20));
+	literals.put(new ANTLRHashString("NOT", this), new Integer(28));
+	literals.put(new ANTLRHashString("INT", this), new Integer(50));
+	literals.put(new ANTLRHashString("ESCAPE", this), new Integer(31));
+	literals.put(new ANTLRHashString("BETWEEN", this), new Integer(33));
+	literals.put(new ANTLRHashString("PRECISION", this), new Integer(56));
+	literals.put(new ANTLRHashString("INTEGER", this), new Integer(49));
+	literals.put(new ANTLRHashString("BY", this), new Integer(22));
+	literals.put(new ANTLRHashString("BINARY", this), new Integer(61));
 	literals.put(new ANTLRHashString("AS", this), new Integer(16));
-	literals.put(new ANTLRHashString("*", this), new Integer(39));
+	literals.put(new ANTLRHashString("*", this), new Integer(42));
 }
 
 public Token nextToken() throws TokenStreamException {
@@ -151,7 +151,7 @@ tryAgain:
 					theRetToken=_returnToken;
 					break;
 				}
-				case '"':
+				case '\'':
 				{
 					mSTRING(true);
 					theRetToken=_returnToken;
@@ -215,8 +215,8 @@ tryAgain:
 		int _saveIndex;
 		
 		{
-		int _cnt142=0;
-		_loop142:
+		int _cnt147=0;
+		_loop147:
 		do {
 			switch ( LA(1)) {
 			case ' ':
@@ -256,10 +256,10 @@ tryAgain:
 			}
 			default:
 			{
-				if ( _cnt142>=1 ) { break _loop142; } else {throw new NoViableAltForCharException((char)LA(1), getFilename(), getLine(), getColumn());}
+				if ( _cnt147>=1 ) { break _loop147; } else {throw new NoViableAltForCharException((char)LA(1), getFilename(), getLine(), getColumn());}
 			}
 			}
-			_cnt142++;
+			_cnt147++;
 		} while (true);
 		}
 		_ttype = Token.SKIP;
@@ -446,9 +446,9 @@ tryAgain:
 		match('\\');
 		{
 		switch ( LA(1)) {
-		case '"':
+		case '\'':
 		{
-			match('"');
+			match('\'');
 			break;
 		}
 		case '\\':
@@ -484,10 +484,10 @@ tryAgain:
 		int _saveIndex;
 		
 		_saveIndex=text.length();
-		match('"');
+		match('\'');
 		text.setLength(_saveIndex);
 		{
-		_loop157:
+		_loop162:
 		do {
 			if ((LA(1)=='\\')) {
 				mESC(false);
@@ -498,13 +498,13 @@ tryAgain:
 				}
 			}
 			else {
-				break _loop157;
+				break _loop162;
 			}
 			
 		} while (true);
 		}
 		_saveIndex=text.length();
-		match('"');
+		match('\'');
 		text.setLength(_saveIndex);
 		if ( _createToken && _token==null && _ttype!=Token.SKIP ) {
 			_token = makeToken(_ttype);
@@ -519,17 +519,17 @@ tryAgain:
 		int _saveIndex;
 		
 		{
-		int _cnt160=0;
-		_loop160:
+		int _cnt165=0;
+		_loop165:
 		do {
 			if (((LA(1) >= '0' && LA(1) <= '9'))) {
 				mDIGIT(false);
 			}
 			else {
-				if ( _cnt160>=1 ) { break _loop160; } else {throw new NoViableAltForCharException((char)LA(1), getFilename(), getLine(), getColumn());}
+				if ( _cnt165>=1 ) { break _loop165; } else {throw new NoViableAltForCharException((char)LA(1), getFilename(), getLine(), getColumn());}
 			}
 			
-			_cnt160++;
+			_cnt165++;
 		} while (true);
 		}
 		if ( _createToken && _token==null && _ttype!=Token.SKIP ) {
@@ -585,7 +585,7 @@ tryAgain:
 		
 		mLETTER(false);
 		{
-		_loop165:
+		_loop170:
 		do {
 			switch ( LA(1)) {
 			case 'A':  case 'B':  case 'C':  case 'D':
@@ -619,7 +619,7 @@ tryAgain:
 			}
 			default:
 			{
-				break _loop165;
+				break _loop170;
 			}
 			}
 		} while (true);
@@ -635,7 +635,7 @@ tryAgain:
 	
 	private static final long[] mk_tokenSet_0() {
 		long[] data = new long[8];
-		data[0]=-17179869185L;
+		data[0]=-549755813889L;
 		data[1]=-268435457L;
 		for (int i = 2; i<=3; i++) { data[i]=-1L; }
 		return data;

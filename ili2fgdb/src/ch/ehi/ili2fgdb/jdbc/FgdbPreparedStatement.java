@@ -56,9 +56,10 @@ public class FgdbPreparedStatement extends FgdbStatement implements PreparedStat
 	@Override
 	public ResultSet executeQuery() throws SQLException {
 		  EnumRows rows=new EnumRows();
+		  java.util.List<SelectValue> selectCols=null;
 		  int err=0;
-			if(stmt instanceof SelectStmt){
-				SelectStmt ustmt=(SelectStmt)stmt;
+			if(stmt instanceof FgdbSelectStmt){
+				FgdbSelectStmt ustmt=(FgdbSelectStmt)stmt;
 				Table table=new Table();
 				err=conn.getGeodatabase().OpenTable(ustmt.getTableName(), table);
 				if(err!=0){
@@ -75,26 +76,33 @@ public class FgdbPreparedStatement extends FgdbStatement implements PreparedStat
 						  ColRef colref=(ColRef)set.getKey();
 						  where.append(sep);sep=" AND ";
 						  where.append(colref.getName());
-						  Object param=params.get(paramIdx++);
-						  appendParam(where, paramIdx, param);
+						  Value rh=set.getValue();
+							if(rh instanceof IntConst){
+								where.append("=");
+								where.append(Integer.toString(((IntConst)rh).getValue()));
+							}else if(rh instanceof StringConst){
+								where.append("='");
+								where.append(((StringConst)rh).getValue());
+								where.append("'");
+							}else{
+								  Object param=params.get(paramIdx++);
+								  appendParam(where, paramIdx, param);
+							}
 					  }
 				  }
 				  StringBuffer fields=new StringBuffer();
 				  {
 					  String sep="";
-					  for(String colref:ustmt.getFields()){
-						  fields.append(sep);sep=",";
-						  fields.append(colref);
+					  selectCols=ustmt.getFields();
+					  for(SelectValue colref:selectCols){
+						  if(colref instanceof SelectValueField){
+							  fields.append(sep);sep=",";
+							  fields.append(colref.getColumnName());
+						  }
 					  }
-					  //fields.append(sep);sep=",";
-					  //fields.append(GeneratorFgdb.OBJECTOID);
 				  }
 				  
-				  //if("classattr".equals(ustmt.getTableName())){
-				//	  err= table.Search("*", where.toString(), true, rows);
-				 // }else{
-					  err= table.Search(fields.toString(), where.toString(), true, rows);
-			//	  }
+				  err= table.Search(fields.toString(), where.toString(), true, rows);
 					if(err!=0){
 						StringBuffer errDesc=new StringBuffer();
 						fgbd4j.GetErrorDescription(err, errDesc);
@@ -108,7 +116,7 @@ public class FgdbPreparedStatement extends FgdbStatement implements PreparedStat
 					throw new SQLException(errDesc.toString());
 				}
 			}
-		FgdbResultSet ret=new FgdbResultSet(rows);
+		FgdbResultSet ret=new FgdbResultSet(rows,selectCols);
 		
 		return ret;
 	}
