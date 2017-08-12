@@ -16,6 +16,8 @@ ili2fgdb 3.10.1 (2017-08-14) BETA
 -----------------------------
 - ili2fgdb: support all datatypes
 - ili2fgdb: support export of structures
+- iox-ili 1.19.5
+- fixed --preScript/--postScript argument handling
 
 ili2fgdb 3.10.0 (2017-07-06) BETA
 -----------------------------

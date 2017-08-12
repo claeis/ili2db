@@ -132,9 +132,11 @@ public abstract class AbstractMain {
 				config.setFunction(Config.FC_SCHEMAIMPORT);
 				argi++;
 			}else if(arg.equals("--preScript")){
+				argi++;	
 				config.setPreScript(args[argi]);
 				argi++;	
 			}else if(arg.equals("--postScript")){
+				argi++;	
 				config.setPostScript(args[argi]);
 				argi++;
 			}else if(arg.equals("--deleteData")){

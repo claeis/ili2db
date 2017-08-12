@@ -90,7 +90,7 @@ public class DbNames {
 	public static final String META_INFO_COLUMN_TAB="T_ILI2DB_COLUMN_PROP";
 	public static final String META_INFO_COLUMN_TAB_TABLENAME_COL="tablename";
 	public static final String META_INFO_COLUMN_TAB_SUBTYPE_COL="subtype";
-	public static final String META_INFO_COLUMN_TAB_COLUMNAME_COL="columname";
+	public static final String META_INFO_COLUMN_TAB_COLUMNNAME_COL="columnname";
 	public static final String META_INFO_COLUMN_TAB_TAG_COL="tag";
 	public static final String META_INFO_COLUMN_TAB_SETTING_COL="setting";
 	public static final String META_INFO_TABLE_TAB="T_ILI2DB_TABLE_PROP";

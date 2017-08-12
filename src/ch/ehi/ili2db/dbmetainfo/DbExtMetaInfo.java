@@ -20,12 +20,14 @@ public class DbExtMetaInfo {
 	public static final String TAG_COL_UNIT = Config.PREFIX+".unit";
 	public static final String TAG_COL_TEXTKIND = Config.PREFIX+".textKind";
 	public static final String TAG_COL_TEXTKIND_MTEXT = "MTEXT";
+	public static final String TAG_COL_DISPNAME = Config.PREFIX+".dispName";
 	public static final String TAG_TAB_TABLEKIND = Config.PREFIX+".tableKind";
 	public static final String TAG_TAB_TABLEKIND_ENUM = "ENUM";
 	public static final String TAG_TAB_TABLEKIND_SECONDARY = "SECONDARY";
 	public static final String TAG_TAB_TABLEKIND_ASSOCIATION = "ASSOCIATION";
 	public static final String TAG_TAB_TABLEKIND_STRUCTURE = "STRUCTURE";
 	public static final String TAG_TAB_TABLEKIND_CATALOGUE = "CATALOGUE";
+	public static final String TAG_TAB_DISPNAME = Config.PREFIX+".dispName";
 	HashMap<ColKey,HashMap<String,String>> colInfo=new HashMap<ColKey,HashMap<String,String>>();
 	HashMap<String,HashMap<String,String>> tabInfo=new HashMap<String,HashMap<String,String>>();
 	
@@ -68,7 +70,7 @@ public class DbExtMetaInfo {
 		try{
 
 			// insert entries
-			String insStmt="INSERT INTO "+sqlName+" ("+DbNames.META_INFO_COLUMN_TAB_TABLENAME_COL+","+DbNames.META_INFO_COLUMN_TAB_SUBTYPE_COL+","+DbNames.META_INFO_COLUMN_TAB_COLUMNAME_COL+","+DbNames.META_INFO_COLUMN_TAB_TAG_COL+","+DbNames.META_INFO_COLUMN_TAB_SETTING_COL+") VALUES (?,?,?,?,?)";
+			String insStmt="INSERT INTO "+sqlName+" ("+DbNames.META_INFO_COLUMN_TAB_TABLENAME_COL+","+DbNames.META_INFO_COLUMN_TAB_SUBTYPE_COL+","+DbNames.META_INFO_COLUMN_TAB_COLUMNNAME_COL+","+DbNames.META_INFO_COLUMN_TAB_TAG_COL+","+DbNames.META_INFO_COLUMN_TAB_SETTING_COL+") VALUES (?,?,?,?,?)";
 			EhiLogger.traceBackendCmd(insStmt);
 			java.sql.PreparedStatement insPrepStmt = conn.prepareStatement(insStmt);
 			try{
@@ -107,7 +109,7 @@ public class DbExtMetaInfo {
 		try{
 
 			// insert entries
-			String selStmt="SELECT "+DbNames.META_INFO_COLUMN_TAB_TABLENAME_COL+","+DbNames.META_INFO_COLUMN_TAB_SUBTYPE_COL+","+DbNames.META_INFO_COLUMN_TAB_COLUMNAME_COL+","+DbNames.META_INFO_COLUMN_TAB_TAG_COL+","+DbNames.META_INFO_COLUMN_TAB_SETTING_COL+" FROM "+sqlName;
+			String selStmt="SELECT "+DbNames.META_INFO_COLUMN_TAB_TABLENAME_COL+","+DbNames.META_INFO_COLUMN_TAB_SUBTYPE_COL+","+DbNames.META_INFO_COLUMN_TAB_COLUMNNAME_COL+","+DbNames.META_INFO_COLUMN_TAB_TAG_COL+","+DbNames.META_INFO_COLUMN_TAB_SETTING_COL+" FROM "+sqlName;
 			EhiLogger.traceBackendCmd(selStmt);
 			java.sql.PreparedStatement selPrepStmt = conn.prepareStatement(selStmt);
 			ResultSet rs = selPrepStmt.executeQuery();
@@ -230,7 +232,7 @@ public class DbExtMetaInfo {
 			
 			// name of ili column name
 			DbColVarchar columnName=new DbColVarchar();
-			columnName.setName(DbNames.META_INFO_COLUMN_TAB_COLUMNAME_COL);
+			columnName.setName(DbNames.META_INFO_COLUMN_TAB_COLUMNNAME_COL);
 			columnName.setNotNull(true);
 			columnName.setSize(255);
 			tab.addColumn(columnName);
