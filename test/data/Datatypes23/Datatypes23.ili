@@ -1,0 +1,100 @@
+INTERLIS 2.3;
+
+MODEL Datatypes23
+  AT "mailto:ce@eisenhutinformatik.ch" VERSION "2016-03-07" =
+	TOPIC Topic=
+		DOMAIN
+		    Lkoord = COORD
+		      2460000.000 .. 2870000.000 [INTERLIS.m] ,
+		      1045000.000 .. 1310000.000 [INTERLIS.m] ,
+		      ROTATION 2 -> 1;
+		
+		    Hkoord = COORD
+		      2460000.000 .. 2870000.000 [INTERLIS.m] ,
+		      1045000.000 .. 1310000.000 [INTERLIS.m] ,
+			 -200.000 ..   5000.000 [INTERLIS.m] ,
+		      ROTATION 2 -> 1;
+					              
+		CLASS ClassAttr =
+		   !! EnumerationType
+		   aufzaehlung : (null, eins, zwei, drei, mehr ( vier, fuenf, sechs, sieben, acht ,neun, zehn));
+		   
+		   !! OIDType
+		   aI32id : INTERLIS.I32OID;
+		   !!aAnyid : INTERLIS.ANYOID;
+		   aUuid : INTERLIS.UUIDOID;
+		   aStandardid : INTERLIS.STANDARDOID;
+		   
+		   !! TextType
+		   textLimited : TEXT*30;
+		   textUnlimited : TEXT;
+		   mtextLimited : MTEXT*30;
+		   mtextUnlimited : MTEXT;
+		   nametext : NAME;
+		   uritext : URI;
+		   
+		   !! AlignmentType
+		   horizAlignment : HALIGNMENT;
+		   vertAlignment : VALIGNMENT;
+		   
+		   !! BooleanType
+		   aBoolean : BOOLEAN;
+		   
+		   !! NumericType
+		   numericInt : 0 .. 10;
+		   numericDec : 0.0 .. 10.0;
+		   
+		   !! FormattedType
+		   
+		   !! Datum und Zeit
+		   aTime : INTERLIS.XMLTime;
+		   aDate : INTERLIS.XMLDate;
+		   aDateTime : INTERLIS.XMLDateTime;
+		   !!aDateTime2 : INTERLIS.XMLDateTime;
+		   !!aDateTime3 : INTERLIS.XMLDateTime;
+		   
+		   
+		   !! BlackBoxType
+		   binbox : BLACKBOX BINARY;
+		   xmlbox : BLACKBOX XML;
+		   
+		   !! ClassType
+		   aClass : CLASS;
+		   aAttribute : ATTRIBUTE;
+		END ClassAttr;
+		
+		CLASS ClassKoord2 =
+		   lcoord : Lkoord;
+		END ClassKoord2;
+		CLASS ClassKoord3 =
+		   hcoord : Hkoord;
+		END ClassKoord3;
+		
+		CLASS SimpleLine2 =
+		   straights2d : POLYLINE WITH (STRAIGHTS) VERTEX Lkoord;
+		END SimpleLine2;
+		CLASS SimpleLine3 =
+		   straights3d : POLYLINE WITH (STRAIGHTS) VERTEX Hkoord;
+		END SimpleLine3;
+		CLASS Line2 =
+		   straightsarcs2d : POLYLINE WITH (STRAIGHTS, ARCS) VERTEX Lkoord;
+		END Line2;
+		CLASS Line3 =
+		   straightsarcs3d : POLYLINE WITH (STRAIGHTS, ARCS) VERTEX Hkoord;
+		END Line3;
+		
+		CLASS SimpleSurface2 =
+		   surface2d : SURFACE WITH (STRAIGHTS) VERTEX Lkoord WITHOUT OVERLAPS > 0.001;
+		END SimpleSurface2;
+		CLASS SimpleSurface3 =
+		   surface3d : SURFACE WITH (STRAIGHTS) VERTEX Hkoord WITHOUT OVERLAPS > 0.001;
+		END SimpleSurface3;
+		CLASS Surface2 =
+		   surfacearcs2d : SURFACE WITH (STRAIGHTS,ARCS) VERTEX Lkoord WITHOUT OVERLAPS > 0.001;
+		END Surface2;
+		CLASS Surface3 =
+		   surfacearcs3d : SURFACE WITH (STRAIGHTS,ARCS) VERTEX Hkoord WITHOUT OVERLAPS > 0.001;
+		END Surface3;
+		
+	END Topic;
+END Datatypes23.

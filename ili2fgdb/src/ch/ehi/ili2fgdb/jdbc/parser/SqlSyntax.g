@@ -37,12 +37,20 @@ statement
 	returns [InsertStmt s]
 	{
 	s=new InsertStmt();
+	int paramIdx=0;
 	}
   : "INSERT" "INTO" t:NAME {s.setTableName(t.getText());} 
   	( LPAREN c0:NAME {s.addField(c0.getText());}
   		(COMMA c1:NAME {s.addField(c1.getText());}
   		)*  RPAREN )?
-        ( "VALUES" LPAREN QUESTION (COMMA QUESTION )* RPAREN );
+        ( "VALUES" LPAREN 
+        		(QUESTION {s.addValue(new Param(paramIdx++));}
+        		) 
+        		
+        	(COMMA  
+        		(QUESTION {s.addValue(new Param(paramIdx++));}
+        		) 
+        	)* RPAREN );
                        
 
   select_statement 

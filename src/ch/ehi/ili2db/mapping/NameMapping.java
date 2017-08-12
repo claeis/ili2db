@@ -294,6 +294,7 @@ public class NameMapping {
 			kws.addAll(PostgresqlKw.getKeywords());
 			kws.addAll(SqliteKw.getKeywords());
 			kws.add("TEXT");
+			kws.add("OBJECTID"); // ili2fgdb / common primary key column name in ESRI world
 		}
 		String ucname=name.toUpperCase();
 		while(kws.contains(ucname)){

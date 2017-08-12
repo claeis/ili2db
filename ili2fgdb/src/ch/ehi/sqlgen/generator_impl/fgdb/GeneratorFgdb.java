@@ -12,23 +12,11 @@ import ch.ehi.ili2fgdb.jdbc.FgdbConnection;
 import ch.ehi.sqlgen.DbUtility;
 import ch.ehi.sqlgen.generator.Generator;
 import ch.ehi.sqlgen.generator.SqlConfiguration;
-import ch.ehi.sqlgen.repository.DbColBoolean;
-import ch.ehi.sqlgen.repository.DbColDateTime;
-import ch.ehi.sqlgen.repository.DbColDecimal;
-import ch.ehi.sqlgen.repository.DbColGeometry;
-import ch.ehi.sqlgen.repository.DbColId;
-import ch.ehi.sqlgen.repository.DbColNumber;
-import ch.ehi.sqlgen.repository.DbColVarchar;
-import ch.ehi.sqlgen.repository.DbColumn;
-import ch.ehi.sqlgen.repository.DbConstraint;
-import ch.ehi.sqlgen.repository.DbEnumEle;
-import ch.ehi.sqlgen.repository.DbIndex;
-import ch.ehi.sqlgen.repository.DbSchema;
-import ch.ehi.sqlgen.repository.DbTable;
-import ch.ehi.sqlgen.repository.DbTableName;
+import ch.ehi.sqlgen.repository.*;
 
 public class GeneratorFgdb implements Generator {
 
+	public static final String OBJECTOID = "OBJECTID";
 	private FgdbConnection conn;
 	private Geodatabase db;
 
@@ -77,6 +65,12 @@ public class GeneratorFgdb implements Generator {
 	public void visit1TableEnd(DbTable tab) throws IOException {
 		if(fieldv!=null){
 			Table table=new Table();
+			// add OID field, so that table can be searched
+			FieldDef field = new FieldDef();
+			field.SetName(OBJECTOID);
+			field.SetType(FieldType.fieldTypeOID);
+			field.SetIsNullable(false);
+			fieldv.add(field);
 			db.CreateTable(tab.getName().getName(), fieldv, "", table);
 			db.CloseTable(table);
 		}else{
@@ -131,6 +125,10 @@ public class GeneratorFgdb implements Generator {
 			field.SetType(FieldType.fieldTypeSmallInteger);
 		}else if(column instanceof DbColDateTime){
 			field.SetType(FieldType.fieldTypeDate);
+		}else if(column instanceof DbColDate){
+			field.SetType(FieldType.fieldTypeDate);
+		}else if(column instanceof DbColTime){
+			field.SetType(FieldType.fieldTypeDate);
 		}else if(column instanceof DbColDecimal){
 			DbColDecimal col=(DbColDecimal)column;
 			field.SetType(FieldType.fieldTypeDouble);
@@ -180,8 +178,23 @@ public class GeneratorFgdb implements Generator {
 			field.SetLength(col.getSize());
 		}else if(column instanceof DbColVarchar){
 			int colsize=((DbColVarchar)column).getSize();
-			field.SetLength(colsize);
+			if(colsize==DbColVarchar.UNLIMITED){
+				field.SetLength(2147483646);
+			}else{
+				field.SetLength(colsize);
+			}
 			field.SetType(FieldType.fieldTypeString);
+		}else if(column instanceof DbColUuid){
+			//field.SetType(FieldType.fieldTypeGlobalID);
+			//field.SetType(FieldType.fieldTypeGUID);
+			field.SetType(FieldType.fieldTypeString);
+			field.SetLength(36);
+		}else if(column instanceof DbColBlob){
+			field.SetType(FieldType.fieldTypeBlob);
+		}else if(column instanceof DbColXml){
+			field.SetType(FieldType.fieldTypeString);
+			field.SetLength(2147483646);
+			//field.SetType(FieldType.fieldTypeXML);
 		}else{
 			field.SetLength(20);
 			field.SetType(FieldType.fieldTypeString);

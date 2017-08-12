@@ -24,7 +24,7 @@ import com.esri.arcgis.interop.AutomationException;
 import com.esri.arcgis.system.IName;
 
 public class FgdbDriver implements Driver {
-	public static final String BASE_URL="jdbc:fgdb4j:";
+	public static final String BASE_URL="jdbc:ili2fgdb:";
 	static {
 		  try {
 			java.sql.DriverManager.registerDriver(new FgdbDriver());

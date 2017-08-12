@@ -110,6 +110,7 @@ public SqlSyntax(ParserSharedInputState state) {
 		Token  c1 = null;
 		
 			s=new InsertStmt();
+			int paramIdx=0;
 			
 		
 		match(LITERAL_INSERT);
@@ -150,16 +151,22 @@ public SqlSyntax(ParserSharedInputState state) {
 		{
 		match(LITERAL_VALUES);
 		match(LPAREN);
-		match(QUESTION);
 		{
-		_loop10:
+		match(QUESTION);
+		s.addValue(new Param(paramIdx++));
+		}
+		{
+		_loop12:
 		do {
 			if ((LA(1)==COMMA)) {
 				match(COMMA);
+				{
 				match(QUESTION);
+				s.addValue(new Param(paramIdx++));
+				}
 			}
 			else {
-				break _loop10;
+				break _loop12;
 			}
 			
 		} while (true);
@@ -215,14 +222,14 @@ public SqlSyntax(ParserSharedInputState state) {
 		}
 		stmt.setTableName(t.getText());
 		{
-		_loop15:
+		_loop17:
 		do {
 			if ((LA(1)==COMMA)) {
 				match(COMMA);
 				tablename();
 			}
 			else {
-				break _loop15;
+				break _loop17;
 			}
 			
 		} while (true);
@@ -237,7 +244,7 @@ public SqlSyntax(ParserSharedInputState state) {
 					stmt.addCond(new ColRef(w0.get(w0.size()-1)),new Param(paramIdx++));
 					
 			{
-			_loop18:
+			_loop20:
 			do {
 				if ((LA(1)==LITERAL_AND)) {
 					match(LITERAL_AND);
@@ -249,7 +256,7 @@ public SqlSyntax(ParserSharedInputState state) {
 							
 				}
 				else {
-					break _loop18;
+					break _loop20;
 				}
 				
 			} while (true);
@@ -268,14 +275,14 @@ public SqlSyntax(ParserSharedInputState state) {
 			match(LITERAL_BY);
 			columnname();
 			{
-			_loop21:
+			_loop23:
 			do {
 				if ((LA(1)==COMMA)) {
 					match(COMMA);
 					columnname();
 				}
 				else {
-					break _loop21;
+					break _loop23;
 				}
 				
 			} while (true);
@@ -318,7 +325,7 @@ public SqlSyntax(ParserSharedInputState state) {
 					stmt.addSet(new ColRef(c0.getText()),new Param(paramIdx++));
 				
 		{
-		_loop25:
+		_loop27:
 		do {
 			if ((LA(1)==COMMA)) {
 				match(COMMA);
@@ -331,7 +338,7 @@ public SqlSyntax(ParserSharedInputState state) {
 					
 			}
 			else {
-				break _loop25;
+				break _loop27;
 			}
 			
 		} while (true);
@@ -347,7 +354,7 @@ public SqlSyntax(ParserSharedInputState state) {
 					stmt.addCond(new ColRef(w0.getText()),new Param(paramIdx++));
 					
 			{
-			_loop28:
+			_loop30:
 			do {
 				if ((LA(1)==LITERAL_AND)) {
 					match(LITERAL_AND);
@@ -360,7 +367,7 @@ public SqlSyntax(ParserSharedInputState state) {
 							
 				}
 				else {
-					break _loop28;
+					break _loop30;
 				}
 				
 			} while (true);
@@ -412,7 +419,7 @@ public SqlSyntax(ParserSharedInputState state) {
 		n0=name_chain();
 		c.add(n0);
 		{
-		_loop84:
+		_loop86:
 		do {
 			if ((LA(1)==COMMA)) {
 				match(COMMA);
@@ -420,7 +427,7 @@ public SqlSyntax(ParserSharedInputState state) {
 				c.add(n1);
 			}
 			else {
-				break _loop84;
+				break _loop86;
 			}
 			
 		} while (true);
@@ -441,7 +448,7 @@ public SqlSyntax(ParserSharedInputState state) {
 		match(NAME);
 		c.add(n0.getText());
 		{
-		_loop103:
+		_loop105:
 		do {
 			if ((LA(1)==DOT)) {
 				match(DOT);
@@ -450,7 +457,7 @@ public SqlSyntax(ParserSharedInputState state) {
 				c.add(n1.getText());
 			}
 			else {
-				break _loop103;
+				break _loop105;
 			}
 			
 		} while (true);
@@ -494,7 +501,7 @@ public SqlSyntax(ParserSharedInputState state) {
 		
 		}
 		{
-		_loop33:
+		_loop35:
 		do {
 			if ((LA(1)==COMMA)) {
 				match(COMMA);
@@ -514,7 +521,7 @@ public SqlSyntax(ParserSharedInputState state) {
 				}
 			}
 			else {
-				break _loop33;
+				break _loop35;
 			}
 			
 		} while (true);
@@ -538,7 +545,7 @@ public SqlSyntax(ParserSharedInputState state) {
 		
 		term();
 		{
-		_loop65:
+		_loop67:
 		do {
 			if ((LA(1)==37||LA(1)==38)) {
 				{
@@ -556,7 +563,7 @@ public SqlSyntax(ParserSharedInputState state) {
 				term();
 			}
 			else {
-				break _loop65;
+				break _loop67;
 			}
 			
 		} while (true);
@@ -718,14 +725,14 @@ public SqlSyntax(ParserSharedInputState state) {
 			match(LPAREN);
 			value();
 			{
-			_loop54:
+			_loop56:
 			do {
 				if ((LA(1)==COMMA)) {
 					match(COMMA);
 					value();
 				}
 				else {
-					break _loop54;
+					break _loop56;
 				}
 				
 			} while (true);
@@ -867,7 +874,7 @@ public SqlSyntax(ParserSharedInputState state) {
 		
 		factor();
 		{
-		_loop69:
+		_loop71:
 		do {
 			if ((LA(1)==39||LA(1)==40)) {
 				{
@@ -885,7 +892,7 @@ public SqlSyntax(ParserSharedInputState state) {
 				factor();
 			}
 			else {
-				break _loop69;
+				break _loop71;
 			}
 			
 		} while (true);
@@ -989,14 +996,14 @@ public SqlSyntax(ParserSharedInputState state) {
 		match(LPAREN);
 		expression();
 		{
-		_loop75:
+		_loop77:
 		do {
 			if ((LA(1)==COMMA)) {
 				match(COMMA);
 				expression();
 			}
 			else {
-				break _loop75;
+				break _loop77;
 			}
 			
 		} while (true);
@@ -1058,14 +1065,14 @@ public SqlSyntax(ParserSharedInputState state) {
 		
 		value();
 		{
-		_loop81:
+		_loop83:
 		do {
 			if ((LA(1)==COMMA)) {
 				match(COMMA);
 				value();
 			}
 			else {
-				break _loop81;
+				break _loop83;
 			}
 			
 		} while (true);
@@ -1081,14 +1088,14 @@ public SqlSyntax(ParserSharedInputState state) {
 		else if ((_tokenSet_1.member(LA(1)))) {
 			select_sublist();
 			{
-			_loop87:
+			_loop89:
 			do {
 				if ((LA(1)==COMMA)) {
 					match(COMMA);
 					select_sublist();
 				}
 				else {
-					break _loop87;
+					break _loop89;
 				}
 				
 			} while (true);
@@ -1165,14 +1172,14 @@ public SqlSyntax(ParserSharedInputState state) {
 		match(LITERAL_BY);
 		sort_specification();
 		{
-		_loop95:
+		_loop97:
 		do {
 			if ((LA(1)==COMMA)) {
 				match(COMMA);
 				sort_specification();
 			}
 			else {
-				break _loop95;
+				break _loop97;
 			}
 			
 		} while (true);

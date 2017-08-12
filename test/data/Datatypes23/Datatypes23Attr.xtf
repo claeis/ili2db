@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TRANSFER xmlns="http://www.interlis.ch/INTERLIS2.3">
+	<HEADERSECTION SENDER="ili2fgdb-3.10.0-20170630" VERSION="2.3">
+		<MODELS>
+			<MODEL NAME="Datatypes23" VERSION="2016-12-21" URI="mailto:ce@eisenhutinformatik.ch"></MODEL>
+		</MODELS>
+	</HEADERSECTION>
+	<DATASECTION>
+		<Datatypes23.Topic BID="b1">
+			<Datatypes23.Topic.ClassAttr TID="ClassAttr.1">
+				<aufzaehlung>mehr.vier</aufzaehlung>
+				<aI32id OID="22"></aI32id>
+				<aUuid OID="15B6BCCE-8772-4595-BF82-F727A665FBF3"></aUuid>
+				<aStandardid OID="chgAAAAAAAAA0azD"></aStandardid>
+				<textLimited>abc100</textLimited>
+				<textUnlimited>abc101</textUnlimited>
+				<mtextLimited>abc200
+end200</mtextLimited>
+				<mtextUnlimited>abc201
+end201</mtextUnlimited>
+				<nametext>ClassA</nametext>
+				<uritext>mailto:ceis@localhost</uritext>
+				<horizAlignment>Left</horizAlignment>
+				<vertAlignment>Top</vertAlignment>
+				<aBoolean>true</aBoolean>
+				<numericInt>5</numericInt>
+				<numericDec>6.0</numericDec>
+				<aTime>09:00:00.0</aTime>
+				<aDate>2002-09-24</aDate>
+		   <!-- aDateTime>2002-04-30T09:00:00</aDateTime -->
+				<aDateTime>1900-01-01T12:30:05</aDateTime>
+		   <!-- aDateTime3>2002-06-30T18:00:00</aDateTime3 -->
+				<binbox>
+					<BINBLBOX>AAAA</BINBLBOX>
+				</binbox>
+				<xmlbox>
+					<XMLBLBOX>
+						<x>
+							<a/>
+						</x>
+					</XMLBLBOX>
+				</xmlbox>
+				<aClass>DM01AVCH24D.FixpunkteKategorie1.LFP1</aClass>
+				<aAttribute>Grunddatensatz.Fixpunkte.LFP.Nummer</aAttribute>
+			</Datatypes23.Topic.ClassAttr>
+		</Datatypes23.Topic>
+	</DATASECTION>
+</TRANSFER>

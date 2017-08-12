@@ -35,6 +35,7 @@ import java.sql.Types;
 import com.vividsolutions.jts.io.ParseException;
 
 import ch.interlis.iom.IomObject;
+import ch.interlis.iox.IoxException;
 import ch.interlis.iox_j.wkb.Iox2wkbException;
 
 public class FgdbColumnConverter extends AbstractWKBColumnConverter {
@@ -73,17 +74,17 @@ public class FgdbColumnConverter extends AbstractWKBColumnConverter {
 	}
 	@Override
 	public String getSelectValueWrapperDate(String sqlColName) {
-		 return "strftime('%Y-%m-%d %H:%M:%fZ',"+sqlColName+")";
+		 return sqlColName;
 	}
 
 	@Override
 	public String getSelectValueWrapperTime(String sqlColName) {
-		 return "strftime('%Y-%m-%d %H:%M:%fZ',"+sqlColName+")";
+		 return sqlColName;
 	}
 
 	@Override
 	public String getSelectValueWrapperDateTime(String sqlColName) {
-		 return "strftime('%Y-%m-%d %H:%M:%fZ',"+sqlColName+")";
+		 return sqlColName;
 	}
 	@Override
 	public String getSelectValueWrapperCoord(String dbNativeValue) {
@@ -142,7 +143,7 @@ public class FgdbColumnConverter extends AbstractWKBColumnConverter {
 					//EhiLogger.debug("conv "+conv); // select st_asewkt(form) from tablea
 					try {
 						return conv.surface2wkb(value,!strokeArcs,p,srsid);
-					} catch (Iox2wkbException ex) {
+					} catch (IoxException ex) {
 						throw new ConverterException(ex);
 					}
 				}
@@ -160,7 +161,7 @@ public class FgdbColumnConverter extends AbstractWKBColumnConverter {
 					//EhiLogger.debug("conv "+conv); // select st_asewkt(form) from tablea
 					try {
 						return conv.multisurface2wkb(value,!strokeArcs,p,srsid);
-					} catch (Iox2wkbException ex) {
+					} catch (IoxException ex) {
 						throw new ConverterException(ex);
 					}
 				}
@@ -186,7 +187,7 @@ public class FgdbColumnConverter extends AbstractWKBColumnConverter {
 				Iox2fgdb conv=new Iox2fgdb(is3D?3:2);
 				try {
 					return conv.polyline2wkb(value,false,!strokeArcs,p,srsid);
-				} catch (Iox2wkbException ex) {
+				} catch (IoxException ex) {
 					throw new ConverterException(ex);
 				}
 			}
@@ -199,7 +200,7 @@ public class FgdbColumnConverter extends AbstractWKBColumnConverter {
 				Iox2fgdb conv=new Iox2fgdb(is3D?3:2);
 				try {
 					return conv.multiline2wkb(value,!strokeArcs,p,srsid);
-				} catch (Iox2wkbException ex) {
+				} catch (IoxException ex) {
 					throw new ConverterException(ex);
 				}
 			}
@@ -217,6 +218,8 @@ public class FgdbColumnConverter extends AbstractWKBColumnConverter {
 					return conv.read(bv);
 				} catch (ParseException e) {
 					throw new ConverterException(e);
+				} catch (IoxException e) {
+					throw new ConverterException(e);
 				}
 			}
 		@Override
@@ -230,6 +233,8 @@ public class FgdbColumnConverter extends AbstractWKBColumnConverter {
 				try {
 					return conv.read(bv);
 				} catch (ParseException e) {
+					throw new ConverterException(e);
+				} catch (IoxException e) {
 					throw new ConverterException(e);
 				}
 			}
@@ -245,6 +250,8 @@ public class FgdbColumnConverter extends AbstractWKBColumnConverter {
 				return conv.read(bv);
 			} catch (ParseException e) {
 				throw new ConverterException(e);
+			} catch (IoxException e) {
+				throw new ConverterException(e);
 			}
 		}
 		@Override
@@ -259,6 +266,8 @@ public class FgdbColumnConverter extends AbstractWKBColumnConverter {
 					return conv.read(bv);
 				} catch (ParseException e) {
 					throw new ConverterException(e);
+				} catch (IoxException e) {
+					throw new ConverterException(e);
 				}
 			}
 		@Override
@@ -272,6 +281,8 @@ public class FgdbColumnConverter extends AbstractWKBColumnConverter {
 			try {
 				return conv.read(bv);
 			} catch (ParseException e) {
+				throw new ConverterException(e);
+			} catch (IoxException e) {
 				throw new ConverterException(e);
 			}
 		}
@@ -288,30 +299,6 @@ public class FgdbColumnConverter extends AbstractWKBColumnConverter {
 		    return s;
 		}
 
-		@Override
-		public void setTimestamp(PreparedStatement ps, int valuei,
-				Timestamp datetime) throws SQLException {
-			java.text.DateFormat dfm = new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
-			dfm.setTimeZone(java.util.TimeZone.getTimeZone("GMT+0"));
-			String stmp=dfm.format(datetime)+"Z"; // add timesone indicator (Z)
-			ps.setString(valuei, stmp);
-		}
-
-		@Override
-		public void setDate(PreparedStatement ps, int valuei, Date date)
-				throws SQLException {
-			java.text.DateFormat dfm = new java.text.SimpleDateFormat("yyyy-MM-dd");
-			String stmp=dfm.format(date);
-			ps.setString(valuei, stmp);
-		}
-
-		@Override
-		public void setTime(PreparedStatement ps, int valuei, Time time)
-				throws SQLException {
-			java.text.DateFormat dfm = new java.text.SimpleDateFormat("HH:mm:ss.SSS");
-			String stmp=dfm.format(time);
-			ps.setString(valuei, stmp);
-		}
 		@Override
 		public void setXmlNull(PreparedStatement stmt, int parameterIndex)
 				throws SQLException {

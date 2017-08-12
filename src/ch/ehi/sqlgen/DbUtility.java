@@ -23,6 +23,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 import ch.ehi.basics.logging.EhiLogger;
+import ch.ehi.ili2fgdb.jdbc.FgdbDriver;
 import ch.ehi.sqlgen.generator_impl.fgdb.GeneratorFgdb;
 import ch.ehi.sqlgen.repository.DbTableName;
 
@@ -42,7 +43,7 @@ public class DbUtility {
 			if(meta.getURL().startsWith("jdbc:postgresql:")){
 				return pgTableExists(conn,tableName);
 			}
-			if(meta.getURL().startsWith("jdbc:fgdb4j:")){
+			if(meta.getURL().startsWith(FgdbDriver.BASE_URL)){
 				return GeneratorFgdb.tableExists(conn, tableName);
 			}
 			String catalog=conn.getCatalog();
