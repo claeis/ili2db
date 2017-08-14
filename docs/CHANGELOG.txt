@@ -17,6 +17,7 @@ ili2fgdb 3.10.2 (2017-08-14) BETA
 - ili2fgdb: fixed time import/export
 - ili2fgdb: added --fgdbXyResolution
 - ili2fgdb: added --fgdbXyTolerance
+- ili2fgdb: fixed NPE while --import
 
 ili2fgdb 3.10.1 (2017-08-14) BETA
 -----------------------------

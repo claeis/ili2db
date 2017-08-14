@@ -245,7 +245,6 @@ public class FgdbPreparedStatement extends FgdbStatement implements PreparedStat
 				this.fieldType.put(fieldName.toString(), fieldType[0]);
 				if(fieldType[0]==FieldType.fieldTypeGeometry.swigValue()){
 					geometryColumn=fieldName.toString();
-					break;
 				}
 			}
 		}
