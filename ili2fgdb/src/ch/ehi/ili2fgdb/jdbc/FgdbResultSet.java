@@ -42,7 +42,13 @@ import ch.ehi.ili2fgdb.jdbc.sql.SqlQname;
 public class FgdbResultSet implements ResultSet {
 
 	public static final int MAGIC_HOUR_DATEONLY = 0;
-	public static final int MAGIC_YEAR_TIMEONLY = 1;
+	public static final int MAGIC_YEAR_TIMEONLY = -1;
+	public static final int MAGIC_MON_TIMEONLY=11;
+	public static final int MAGIC_MDAY_TIMEONLY=30;
+	public static final int MAGIC_ISDST_TIMEONLY=-1;
+	public static final int MAGIC_WDAY_TIMEONLY=6;
+	public static final int MAGIC_YDAY_TIMEONLY=363;
+	
 	private EnumRows rowIterator=null;
 	private Row fgdbCurrentRow=null;
 	FieldInfo fgdbFieldInfo=null;
@@ -533,13 +539,21 @@ public class FgdbResultSet implements ResultSet {
 				GregorianCalendar time=new GregorianCalendar();
 				int year=value.getTm_year();
 				time.set(GregorianCalendar.YEAR,year+1900);
-				time.set(GregorianCalendar.MONTH, value.getTm_mon());
-				time.set(GregorianCalendar.DAY_OF_MONTH,value.getTm_mday());
+				int month = value.getTm_mon();
+				time.set(GregorianCalendar.MONTH, month);
+				int day = value.getTm_mday();
+				time.set(GregorianCalendar.DAY_OF_MONTH,day);
 				int hour = value.getTm_hour();
 				time.set(GregorianCalendar.HOUR_OF_DAY,hour);
-				time.set(GregorianCalendar.MINUTE,value.getTm_min());
-				time.set(GregorianCalendar.SECOND,value.getTm_sec());
-				if(year==MAGIC_YEAR_TIMEONLY){
+				int min = value.getTm_min();
+				time.set(GregorianCalendar.MINUTE,min);
+				int sec = value.getTm_sec();
+				time.set(GregorianCalendar.SECOND,sec);
+				time.set(GregorianCalendar.MILLISECOND, 0);
+				int isdst=value.getTm_isdst();
+				int wday=value.getTm_wday();
+				int yday=value.getTm_yday();
+				if(year==MAGIC_YEAR_TIMEONLY || year==1){
 			    	valueo=new java.sql.Time(time.getTimeInMillis());
 				}else{
 					if(hour==MAGIC_HOUR_DATEONLY){

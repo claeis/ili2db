@@ -320,15 +320,15 @@ public class FgdbPreparedStatement extends FgdbStatement implements PreparedStat
 				GregorianCalendar value=new GregorianCalendar();
 				value.setTimeInMillis(((java.sql.Time) val).getTime());
 				ce_time time=new ce_time();
-				time.setTm_year(FgdbResultSet.MAGIC_YEAR_TIMEONLY); // FIXME
-				time.setTm_mon(1);  // FIXME
-				time.setTm_mday(1); // FIXME
+				time.setTm_year(FgdbResultSet.MAGIC_YEAR_TIMEONLY);
+				time.setTm_mon(FgdbResultSet.MAGIC_MON_TIMEONLY);
+				time.setTm_mday(FgdbResultSet.MAGIC_MDAY_TIMEONLY);
 				time.setTm_hour(value.get(GregorianCalendar.HOUR_OF_DAY));
 				time.setTm_min(value.get(GregorianCalendar.MINUTE));
 				time.setTm_sec(value.get(GregorianCalendar.SECOND));
-				time.setTm_isdst(0);
-				time.setTm_wday(0);
-				time.setTm_yday(0);
+				time.setTm_isdst(FgdbResultSet.MAGIC_ISDST_TIMEONLY);
+				time.setTm_wday(FgdbResultSet.MAGIC_WDAY_TIMEONLY);
+				time.setTm_yday(FgdbResultSet.MAGIC_YDAY_TIMEONLY);
 				err=row.setDateTime(colName, time); 
 			}else if(val instanceof byte[]){
 				byte[] value= (byte[])val;
