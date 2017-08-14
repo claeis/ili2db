@@ -25,6 +25,7 @@ import ch.ehi.ili2db.base.Ili2db;
 import ch.ehi.ili2db.gui.Config;
 import ch.ehi.ili2db.gui.AbstractDbPanelDescriptor;
 import ch.ehi.ili2fgdb.jdbc.FgdbDriver;
+import ch.ehi.sqlgen.generator_impl.fgdb.GeneratorFgdb;
 
 
 /**
@@ -89,6 +90,9 @@ public class FgdbMain extends ch.ehi.ili2db.AbstractMain {
 	}
 	@Override
 	protected void printSpecificOptions() {
+		System.err.println("--fgdbXyResolution value  The precision with which coordinates within a feature class are recorded.");
+		System.err.println("--fgdbXyTolerance value   The cluster tolerance used to cluster features with coincident geometry.");
+		
 	}
 	@Override
 	protected int doArgs(String args[],int argi,Config config)
@@ -97,6 +101,14 @@ public class FgdbMain extends ch.ehi.ili2db.AbstractMain {
 		if(arg.equals("--dbfile")){
 			argi++;
 			config.setDbfile(args[argi]);
+			argi++;
+		}else if(arg.equals("--fgdbXyResolution")){
+			argi++;
+			config.setValue(GeneratorFgdb.XY_RESOLUTION,args[argi]);
+			argi++;
+		}else if(arg.equals("--fgdbXyTolerance")){
+			argi++;
+			config.setValue(GeneratorFgdb.XY_TOLERANCE,args[argi]);
 			argi++;
 		}
 		return argi;

@@ -6,6 +6,8 @@ import java.sql.Connection;
 import ch.ehi.ili2db.base.AbstractJdbcMapping;
 import ch.ehi.ili2db.fromili.CustomMapping;
 import ch.ehi.ili2db.gui.Config;
+import ch.ehi.sqlgen.generator_impl.fgdb.GeneratorFgdb;
+import ch.ehi.sqlgen.repository.DbColGeometry;
 import ch.ehi.sqlgen.repository.DbColumn;
 import ch.ehi.sqlgen.repository.DbTable;
 import ch.ehi.sqlgen.repository.DbTableName;
@@ -17,8 +19,13 @@ import ch.interlis.ili2c.metamodel.Viewable;
 public class FgdbMapping extends AbstractJdbcMapping {
 
 	private boolean isNewFile=false;
+	private String defaultXyResolution=null;
+	private String defaultXyTolerance=null;
+	
 	@Override
 	public void fromIliInit(Config config) {
+		defaultXyResolution=config.getValue(GeneratorFgdb.XY_RESOLUTION);
+		defaultXyTolerance=config.getValue(GeneratorFgdb.XY_TOLERANCE);
 	}
 
 	@Override
@@ -32,6 +39,10 @@ public class FgdbMapping extends AbstractJdbcMapping {
 	@Override
 	public void fixupAttribute(DbTable sqlTableDef, DbColumn sqlColDef,
 			AttributeDef iliAttrDef) {
+		if(sqlColDef instanceof DbColGeometry){
+			sqlColDef.setCustomValue(GeneratorFgdb.XY_RESOLUTION, defaultXyResolution);
+			sqlColDef.setCustomValue(GeneratorFgdb.XY_TOLERANCE, defaultXyTolerance);
+		}
 	}
 
 	@Override

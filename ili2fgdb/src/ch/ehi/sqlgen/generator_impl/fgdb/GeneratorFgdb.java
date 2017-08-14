@@ -17,6 +17,8 @@ import ch.ehi.sqlgen.repository.*;
 public class GeneratorFgdb implements Generator {
 
 	public static final String OBJECTOID = "OBJECTID";
+	public static final String XY_RESOLUTION = "ch.ehi.ilifgdb.xyResolution";
+	public static final String XY_TOLERANCE = "ch.ehi.ilifgdb.xyTolerance";
 	private FgdbConnection conn;
 	private Geodatabase db;
 
@@ -146,8 +148,32 @@ public class GeneratorFgdb implements Generator {
 				  spatialReference.SetSpatialReferenceText (srsInfo.getSrtext());
 				  spatialReference.SetSpatialReferenceID(srsInfo.getAuth_srid()); 
 				  //spatialReference.SetXYFalseOrigin(-16987000, -8615900);
-				  //spatialReference.SetXYResolution(.0001);
-				  //spatialReference.SetXYTolerance(.001);
+				  Double xyResolution=null;
+				  String val=null;
+				  try{
+					  val=col.getCustomValue(XY_RESOLUTION);
+					  if(val!=null){
+						  xyResolution=Double.valueOf(val);
+					  }
+				  }catch(NumberFormatException e){
+					  EhiLogger.logAdaption("ignore invalid xyResolution value <"+val+">");
+				  }
+				  if(xyResolution!=null){
+					  spatialReference.SetXYResolution(xyResolution);
+				  }
+				  Double xyTolerance=null;
+				  val=null;
+				  try{
+					  val=col.getCustomValue(XY_TOLERANCE);
+					  if(val!=null){
+						  xyTolerance=Double.valueOf(val);
+					  }
+				  }catch(NumberFormatException e){
+					  EhiLogger.logAdaption("ignore invalid xyTolerance value <"+val+">");
+				  }
+				  if(xyTolerance!=null){
+					  spatialReference.SetXYTolerance(xyTolerance);
+				  }
 				GeometryDef geomDef = new GeometryDef();
 				if(col.getType()==DbColGeometry.POINT){
 					geomDef.SetGeometryType(GeometryType.geometryPoint);
