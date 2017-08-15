@@ -24,8 +24,6 @@ import java.sql.SQLException;
 import java.sql.Time;
 import java.sql.Timestamp;
 
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
-
 import com.vividsolutions.jts.io.ParseException;
 
 import ch.ehi.ili2db.gui.Config;
@@ -211,7 +209,7 @@ public abstract class AbstractWKBColumnConverter implements SqlColumnConverter {
 	public java.lang.Object fromIomMultiPolyline(IomObject value, int srid,boolean is3D,double p)
 		throws SQLException, ConverterException {
 			if(value!=null){
-				throw new NotImplementedException();
+				throw new UnsupportedOperationException();
 			}
 			return null;
 	}
@@ -281,7 +279,7 @@ public abstract class AbstractWKBColumnConverter implements SqlColumnConverter {
 		String sqlAttrName,
 		boolean is3D)
 		throws SQLException, ConverterException {
-		throw new NotImplementedException();
+		throw new UnsupportedOperationException();
 	}
 	public AbstractWKBColumnConverter()
 	{
@@ -310,30 +308,30 @@ public abstract class AbstractWKBColumnConverter implements SqlColumnConverter {
 	@Override
 	public void setBlobNull(PreparedStatement stmt, int parameterIndex)
 			throws SQLException {
-		throw new NotImplementedException();
+		throw new UnsupportedOperationException();
 	}
 	@Override
 	public void setXmlNull(PreparedStatement stmt, int parameterIndex)
 			throws SQLException {
-		throw new NotImplementedException();
+		throw new UnsupportedOperationException();
 	}
 	@Override
 	public Object fromIomBlob(String uuid) throws SQLException,
 			ConverterException {
-		throw new NotImplementedException();
+		throw new UnsupportedOperationException();
 	}
 	@Override
 	public Object fromIomXml(String uuid) throws SQLException,
 			ConverterException {
-		throw new NotImplementedException();
+		throw new UnsupportedOperationException();
 	}
 	@Override
 	public String toIomXml(Object obj) throws SQLException, ConverterException {
-		throw new NotImplementedException();
+		throw new UnsupportedOperationException();
 	}
 	@Override
 	public String toIomBlob(Object obj) throws SQLException, ConverterException {
-		throw new NotImplementedException();
+		throw new UnsupportedOperationException();
 	}
 
 }

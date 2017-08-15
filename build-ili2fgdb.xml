@@ -2,6 +2,7 @@
 <project basedir="." default="jar" name="ili2fgdb">
 
   <!-- set global properties for this build -->
+  <property name="build.sysclasspath" value="ignore"/>
   <property name="src" value="${basedir}/src"/>
   <property name="build" value="${basedir}/build"/>
   <property name="dist" value="${basedir}/dist"/>
@@ -53,7 +54,7 @@
   <target depends="init" name="compile">
     <!-- Compile the java code from ${src} into ${build}/classes -->
     <mkdir dir="${build}/classes"/>
-    <javac destdir="${build}/classes" includes="**/*.java" source="1.6" target="1.6">
+    <javac destdir="${build}/classes" includes="**/*.java" source="1.6" target="1.6" > <!-- includeAntRuntime="false" -->
       <classpath>
 	<path refid="classpath"/>
 	<path refid="junit"/>

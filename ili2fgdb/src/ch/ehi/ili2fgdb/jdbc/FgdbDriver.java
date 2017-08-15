@@ -1,7 +1,5 @@
 package ch.ehi.ili2fgdb.jdbc;
 
-import java.io.IOException;
-import java.net.UnknownHostException;
 import java.sql.Connection;
 import java.sql.Driver;
 import java.sql.DriverPropertyInfo;
@@ -10,18 +8,10 @@ import java.sql.SQLFeatureNotSupportedException;
 import java.util.Properties;
 import java.util.logging.Logger;
 
-import ch.ehi.basics.logging.EhiLogger;
 import ch.ehi.fgdb4j.Fgdb4j;
 import ch.ehi.fgdb4j.Fgdb4jException;
 import ch.ehi.fgdb4j.jni.Geodatabase;
 import ch.ehi.fgdb4j.jni.fgbd4j;
-
-import com.esri.arcgis.geodatabase.IWorkspace;
-import com.esri.arcgis.geodatabase.IWorkspaceName;
-import com.esri.arcgis.geodatabase.IWorkspaceProxy;
-import com.esri.arcgis.geodatabase.Workspace;
-import com.esri.arcgis.interop.AutomationException;
-import com.esri.arcgis.system.IName;
 
 public class FgdbDriver implements Driver {
 	public static final String BASE_URL="jdbc:ili2fgdb:";

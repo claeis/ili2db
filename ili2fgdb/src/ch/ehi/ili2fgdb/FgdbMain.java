@@ -54,7 +54,7 @@ public class FgdbMain extends ch.ehi.ili2db.AbstractMain {
 				    * jdbc:fgdb4j:sample.gdb
 				    */
 				if(config.getDbfile()!=null){
-					return FgdbDriver.BASE_URL+config.getDbfile();
+					return FgdbDriver.BASE_URL+new java.io.File(config.getDbfile()).getAbsolutePath();
 				}
 				return null;
 			}
