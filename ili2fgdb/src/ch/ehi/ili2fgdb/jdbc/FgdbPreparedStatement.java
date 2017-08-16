@@ -27,6 +27,9 @@ public class FgdbPreparedStatement extends FgdbStatement implements PreparedStat
 	private FgdbConnection conn=null;
 	private String stmtStr=null;
 	private java.util.ArrayList<Object> params=null;
+	private int fieldCount=0;
+	private String geometryColumn=null;
+	private java.util.Map<String,Integer> fieldType=null;
 	
 	protected FgdbPreparedStatement(FgdbConnection conn,SqlStmt select, String stmtStr) {
 		super(conn);
@@ -56,11 +59,12 @@ public class FgdbPreparedStatement extends FgdbStatement implements PreparedStat
 	@Override
 	public ResultSet executeQuery() throws SQLException {
 		  EnumRows rows=new EnumRows();
+		  Table table=null;
 		  java.util.List<SelectValue> selectCols=null;
 		  int err=0;
 			if(stmt instanceof FgdbSelectStmt){
 				FgdbSelectStmt ustmt=(FgdbSelectStmt)stmt;
-				Table table=new Table();
+				table=new Table();
 				err=conn.getGeodatabase().OpenTable(ustmt.getTableName(), table);
 				if(err!=0){
 					StringBuffer errDesc=new StringBuffer();
@@ -116,14 +120,10 @@ public class FgdbPreparedStatement extends FgdbStatement implements PreparedStat
 					throw new SQLException(errDesc.toString());
 				}
 			}
-		FgdbResultSet ret=new FgdbResultSet(rows,selectCols);
+		FgdbResultSet ret=new FgdbResultSet(conn,table,rows,selectCols);
 		
 		return ret;
 	}
-	private FieldInfo fieldInfo=null;
-	private int fieldCount=0;
-	private String geometryColumn=null;
-	private java.util.Map<String,Integer> fieldType=new java.util.HashMap<String,Integer>();
 
 	@Override
 	public int executeUpdate() throws SQLException {
@@ -157,11 +157,21 @@ public class FgdbPreparedStatement extends FgdbStatement implements PreparedStat
 						shapeBuffer.setBuffer((byte[])val);
 					}
 					row.SetGeometry(shapeBuffer);
+					shapeBuffer.delete();
+					shapeBuffer=null;
 				}else{
 					setRowVal(row, colName, val);
 				}
 			}
 			err=table.Insert(row);
+			if(err!=0){
+				StringBuffer errDesc=new StringBuffer();
+				fgbd4j.GetErrorDescription(err, errDesc);
+				throw new SQLException(errDesc.toString());
+			}
+			row.delete();
+			row=null;
+			err=conn.getGeodatabase().CloseTable(table);
 			if(err!=0){
 				StringBuffer errDesc=new StringBuffer();
 				fgbd4j.GetErrorDescription(err, errDesc);
@@ -215,7 +225,11 @@ public class FgdbPreparedStatement extends FgdbStatement implements PreparedStat
 						throw new SQLException(errDesc.toString());
 					}
 			  }
-			  
+			  row.delete();
+			  row=null;
+			  rows.Close();
+			  rows.delete();
+			  rows=null;
 			err=conn.getGeodatabase().CloseTable(table);
 			if(err!=0){
 				StringBuffer errDesc=new StringBuffer();
@@ -230,9 +244,10 @@ public class FgdbPreparedStatement extends FgdbStatement implements PreparedStat
 
 
 	private void setupFieldInfo(Table table) {
-		if(fieldInfo==null){
+		if(fieldType==null){
+			fieldType=new java.util.HashMap<String,Integer>();
 			int err;
-			fieldInfo=new FieldInfo();
+			FieldInfo fieldInfo=new FieldInfo();
 			err=table.GetFieldInformation(fieldInfo);
 			int[] fieldCounto=new int[1];
 			err=fieldInfo.GetFieldCount(fieldCounto);
@@ -247,6 +262,8 @@ public class FgdbPreparedStatement extends FgdbStatement implements PreparedStat
 					geometryColumn=fieldName.toString();
 				}
 			}
+			fieldInfo.delete();
+			fieldInfo=null;
 		}
 	}
 

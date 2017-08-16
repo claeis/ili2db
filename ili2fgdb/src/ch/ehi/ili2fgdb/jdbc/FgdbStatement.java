@@ -144,7 +144,7 @@ public class FgdbStatement implements Statement {
 			fgbd4j.GetErrorDescription(err, errDesc);
 			throw new SQLException(errDesc.toString());
 		}
-		ret=new FgdbResultSet(rows,null);
+		ret=new FgdbResultSet(conn,null,rows,null);
 		return ret;
 	}
 
@@ -190,7 +190,7 @@ public class FgdbStatement implements Statement {
 				fgbd4j.GetErrorDescription(err, errDesc);
 				throw new SQLException(errDesc.toString());
 			}
-			ret=new FgdbResultSet(rows,selectvalues);
+			ret=new FgdbResultSet(conn,table,rows,selectvalues);
 		return ret;
 	}
 
@@ -378,6 +378,6 @@ public class FgdbStatement implements Statement {
 	public <T> T unwrap(Class<T> arg0) throws SQLException {
 		// TODO Auto-generated method stub
 		return null;
-	} // cei
+	}
 
 }

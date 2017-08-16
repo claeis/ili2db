@@ -7,6 +7,7 @@ import java.net.URL;
 import java.sql.Array;
 import java.sql.Blob;
 import java.sql.Clob;
+import java.sql.Connection;
 import java.sql.Date;
 import java.sql.NClob;
 import java.sql.Ref;
@@ -32,6 +33,7 @@ import ch.ehi.fgdb4j.jni.FieldType;
 import ch.ehi.fgdb4j.jni.MultiPartShapeBuffer;
 import ch.ehi.fgdb4j.jni.Row;
 import ch.ehi.fgdb4j.jni.ShapeBuffer;
+import ch.ehi.fgdb4j.jni.Table;
 import ch.ehi.fgdb4j.jni.ce_time;
 import ch.ehi.fgdb4j.jni.fgbd4j;
 import ch.ehi.ili2fgdb.jdbc.sql.SelectValue;
@@ -55,8 +57,13 @@ public class FgdbResultSet implements ResultSet {
 	private int fgdbFieldCount=0;
 	private boolean lastGetWasNull=false;
 	private List<SelectValue> selectValues=null;
-	public FgdbResultSet(EnumRows rows, List<SelectValue> selectvalues) throws SQLException {
+	private Table fgdbTable=null;
+	private FgdbConnection conn=null;
+	
+	public FgdbResultSet(FgdbConnection conn,Table table,EnumRows rows, List<SelectValue> selectvalues) throws SQLException {
+		this.conn=conn;
 		this.rowIterator=rows;
+		this.fgdbTable=table;
 		fgdbFieldInfo=new FieldInfo();
 		int err=rowIterator.GetFieldInformation(fgdbFieldInfo);
 		if(err!=0){
@@ -119,11 +126,24 @@ public class FgdbResultSet implements ResultSet {
 
 	@Override
 	public void close() throws SQLException {
+		if(fgdbCurrentRow!=null){
+			fgdbCurrentRow.delete();
+			fgdbCurrentRow=null;
+		}
 		if(rowIterator!=null){
 			rowIterator.Close();
+			rowIterator.delete();
 			rowIterator=null;
 		}
-		fgdbCurrentRow=null;
+		if(fgdbFieldInfo!=null){
+			fgdbFieldInfo.delete();
+			fgdbFieldInfo=null;
+		}
+		if(fgdbTable!=null){
+			conn.getGeodatabase().CloseTable(fgdbTable);
+			fgdbTable.delete();
+			fgdbTable=null;
+		}
 	}
 
 	@Override
@@ -525,12 +545,16 @@ public class FgdbResultSet implements ResultSet {
 		    err=fgdbCurrentRow.GetGeometry(value);
 		    if(err==0){
 		    	valueo=value.getBuffer();
+		    	value.delete();
+		    	value=null;
 		    }
 		}else if(fieldType[0]==FieldType.fieldTypeBlob.swigValue()){
 			ByteArray value=new ByteArray();
 		    err=fgdbCurrentRow.GetBinary(colIdx, value);
 		    if(err==0){
 		    	valueo=value.getBuffer();
+		    	value.delete();
+		    	value=null;
 		    }
 		}else if(fieldType[0]==FieldType.fieldTypeDate.swigValue()){
 			ce_time value=new ce_time();
@@ -791,8 +815,7 @@ public class FgdbResultSet implements ResultSet {
 
 	@Override
 	public boolean isClosed() throws SQLException {
-		// TODO Auto-generated method stub
-		return false;
+		return rowIterator==null;
 	}
 
 	@Override

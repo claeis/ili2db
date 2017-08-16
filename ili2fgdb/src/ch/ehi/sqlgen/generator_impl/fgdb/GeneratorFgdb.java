@@ -21,6 +21,8 @@ public class GeneratorFgdb implements Generator {
 	public static final String XY_TOLERANCE = "ch.ehi.ilifgdb.xyTolerance";
 	private FgdbConnection conn;
 	private Geodatabase db;
+	private FieldDefs fieldv = null;
+	private String geomFieldName=null;
 
 	@Override
 	public void visit1Begin() throws IOException {
@@ -33,13 +35,14 @@ public class GeneratorFgdb implements Generator {
 		// TODO Auto-generated method stub
 		
 	}
-
-	private FieldDefs fieldv = null;
-	private String geomFieldName=null;
 	
 	@Override
 	public void visit1TableBegin(DbTable tab) throws IOException {
 		if(!tableExists(db,tab.getName().getName())){
+			if(fieldv!=null){
+				fieldv.delete();
+				fieldv=null;
+			}
 			fieldv = new FieldDefs();
 		}else{
 			fieldv=null;
@@ -51,30 +54,48 @@ public class GeneratorFgdb implements Generator {
 		return tableExists(((FgdbConnection) conn).getGeodatabase(),name.getName());
 	}
 	public static boolean tableExists(Geodatabase db,String name) {
-		Table table=new Table();
-		int ret=db.OpenTable(name, table);
-		if(ret==0){
-			db.CloseTable(table);
-			return true;
+		Table table=null;
+		try{
+			table=new Table();
+			int ret=db.OpenTable(name, table);
+			if(ret==0){
+				return true;
+			}
+			if(ret!=-2147220655){
+				throw new IllegalStateException("failed to test if table exists");
+			}
+			return false;
+		}finally{
+			if(table!=null){
+				db.CloseTable(table);
+				table=null;
+			}
 		}
-		if(ret!=-2147220655){
-			throw new IllegalStateException("failed to test if table exists");
-		}
-		return false;
 	}
 
 	@Override
 	public void visit1TableEnd(DbTable tab) throws IOException {
 		if(fieldv!=null){
-			Table table=new Table();
-			// add OID field, so that table can be searched
-			FieldDef field = new FieldDef();
-			field.SetName(OBJECTOID);
-			field.SetType(FieldType.fieldTypeOID);
-			field.SetIsNullable(false);
-			fieldv.add(field);
-			db.CreateTable(tab.getName().getName(), fieldv, "", table);
-			db.CloseTable(table);
+			Table table=null;
+			try{
+				table=new Table();
+				// add OID field, so that table can be searched
+				FieldDef field = new FieldDef();
+				field.SetName(OBJECTOID);
+				field.SetType(FieldType.fieldTypeOID);
+				field.SetIsNullable(false);
+				fieldv.add(field);
+				db.CreateTable(tab.getName().getName(), fieldv, "", table);
+			}finally{
+				if(fieldv!=null){
+					fieldv.delete();
+					fieldv=null;
+				}
+				if(table!=null){
+					db.CloseTable(table);
+					table=null;
+				}
+			}
 		}else{
 			// table already exists
 			if(tab.isDeleteDataIfTableExists()){
@@ -85,6 +106,8 @@ public class GeneratorFgdb implements Generator {
 				if(err!=0){
 					throw new IllegalStateException("failed to delete data from "+tab.getName().getName());
 				}
+				rows.delete();
+				rows=null;
 			}
 		}
 	}
@@ -187,6 +210,10 @@ public class GeneratorFgdb implements Generator {
 				geomDef.SetHasM(false); //Set to true if the feature class is to be M enabled. Defaults to FALSE.
 				field.SetType(FieldType.fieldTypeGeometry);
 				field.SetGeometryDef(geomDef);
+				srsInfo.delete();
+				srsInfo=null;
+				spatialReference.delete();
+				spatialReference=null;
 				geomFieldName=col.getName();
 			}
 		}else if(column instanceof DbColId){
@@ -233,8 +260,16 @@ public class GeneratorFgdb implements Generator {
 	}
 
 	public static Integer getSrsId(String srsAuth, String srsId) {
-		SpatialReferenceInfo srsInfo=new SpatialReferenceInfo();
-		return getSrsId(srsAuth, srsId, srsInfo);
+		SpatialReferenceInfo srsInfo=null;
+		try{
+			srsInfo=new SpatialReferenceInfo();
+			return getSrsId(srsAuth, srsId, srsInfo);
+		}finally{
+			if(srsInfo!=null){
+				srsInfo.delete();
+				srsInfo=null;
+			}
+		}
 	}
 	public static Integer getSrsId(String srsAuth, String srsId, SpatialReferenceInfo srsInfo) {
 		Integer esriId=null;
