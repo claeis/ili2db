@@ -513,7 +513,7 @@ public SqlSyntax(ParserSharedInputState state) {
 		match(NAME);
 		c.add(n0.getText());
 		{
-		_loop112:
+		_loop113:
 		do {
 			if ((LA(1)==DOT)) {
 				match(DOT);
@@ -522,7 +522,7 @@ public SqlSyntax(ParserSharedInputState state) {
 				c.add(n1.getText());
 			}
 			else {
-				break _loop112;
+				break _loop113;
 			}
 			
 		} while (true);
@@ -1149,17 +1149,22 @@ public SqlSyntax(ParserSharedInputState state) {
 		SelectValue c;
 		
 		Token  t = null;
-		Token  n = null;
+		Token  n1 = null;
+		Token  n2 = null;
 		
 		c=null;
 		SqlQname n0=null;
 		
 		
-		if ((LA(1)==NAME)) {
+		switch ( LA(1)) {
+		case NAME:
+		{
 			n0=sqlqname();
 			c=new SelectValueField(n0);
+			break;
 		}
-		else if ((LA(1)==STRING)) {
+		case STRING:
+		{
 			t = LT(1);
 			match(STRING);
 			{
@@ -1173,14 +1178,35 @@ public SqlSyntax(ParserSharedInputState state) {
 			}
 			
 			}
-			n = LT(1);
+			n1 = LT(1);
 			match(NAME);
-			c=new SelectValueString(n.getText(),t.getText());
+			c=new SelectValueString(n1.getText(),t.getText());
+			break;
 		}
-		else {
+		case LITERAL_NULL:
+		{
+			match(LITERAL_NULL);
+			{
+			if ((LA(1)==LITERAL_AS)) {
+				match(LITERAL_AS);
+			}
+			else if ((LA(1)==NAME)) {
+			}
+			else {
+				throw new NoViableAltException(LT(1), getFilename());
+			}
+			
+			}
+			n2 = LT(1);
+			match(NAME);
+			c=new SelectValueNull(n2.getText());
+			break;
+		}
+		default:
+		{
 			throw new NoViableAltException(LT(1), getFilename());
 		}
-		
+		}
 		return c;
 	}
 	
@@ -1277,14 +1303,14 @@ public SqlSyntax(ParserSharedInputState state) {
 		match(LITERAL_BY);
 		sort_specification();
 		{
-		_loop104:
+		_loop105:
 		do {
 			if ((LA(1)==COMMA)) {
 				match(COMMA);
 				sort_specification();
 			}
 			else {
-				break _loop104;
+				break _loop105;
 			}
 			
 		} while (true);

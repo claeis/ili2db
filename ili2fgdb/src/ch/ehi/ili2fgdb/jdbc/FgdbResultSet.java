@@ -38,6 +38,7 @@ import ch.ehi.fgdb4j.jni.ce_time;
 import ch.ehi.fgdb4j.jni.fgbd4j;
 import ch.ehi.ili2fgdb.jdbc.sql.SelectValue;
 import ch.ehi.ili2fgdb.jdbc.sql.SelectValueField;
+import ch.ehi.ili2fgdb.jdbc.sql.SelectValueNull;
 import ch.ehi.ili2fgdb.jdbc.sql.SelectValueString;
 import ch.ehi.ili2fgdb.jdbc.sql.SqlQname;
 
@@ -490,6 +491,9 @@ public class FgdbResultSet implements ResultSet {
 			if(sv instanceof SelectValueString){
 				lastGetWasNull=false;
 				return ((SelectValueString) sv).getLiteralValue();
+			}else if(sv instanceof SelectValueNull){
+				lastGetWasNull=true;
+				return null;
 			}
 			colIdx=findFgdbColumn(sv.getColumnName());
 		}

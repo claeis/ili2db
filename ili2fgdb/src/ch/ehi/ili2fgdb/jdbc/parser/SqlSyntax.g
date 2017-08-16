@@ -197,7 +197,8 @@ sub_query
   SqlQname n0=null;
   }
   : n0=sqlqname {c=new SelectValueField(n0);}
-  | t:STRING ("AS")? n:NAME {c=new SelectValueString(n.getText(),t.getText());} 
+  | t:STRING ("AS")? n1:NAME {c=new SelectValueString(n1.getText(),t.getText());} 
+  | "NULL" ("AS")? n2:NAME {c=new SelectValueNull(n2.getText());} 
   ;
   
   orderby            : "ORDER" "BY" sort_specification (COMMA sort_specification)*.;
