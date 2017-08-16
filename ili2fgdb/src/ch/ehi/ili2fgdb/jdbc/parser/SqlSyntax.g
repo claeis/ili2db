@@ -73,7 +73,7 @@ statement
 						stmt.addField(f);
 					}
                        		})
-                       		| ( LPAREN subselect=select_statement RPAREN "AS" t2:NAME {
+                       		| ( LPAREN subselect=select_statement RPAREN ("AS")? t2:NAME {
                        			stmt=new ComplexSelectStmt(subselect);
                        			stmt.setTableName(t2.getText());
 					for(SelectValue f:fv){
@@ -197,7 +197,7 @@ sub_query
   SqlQname n0=null;
   }
   : n0=sqlqname {c=new SelectValueField(n0);}
-  | t:STRING "AS" n:NAME {c=new SelectValueString(n.getText(),t.getText());} 
+  | t:STRING ("AS")? n:NAME {c=new SelectValueString(n.getText(),t.getText());} 
   ;
   
   orderby            : "ORDER" "BY" sort_specification (COMMA sort_specification)*.;

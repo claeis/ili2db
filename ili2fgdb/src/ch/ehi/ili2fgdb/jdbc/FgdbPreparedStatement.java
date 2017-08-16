@@ -21,7 +21,7 @@ import ch.ehi.fgdb4j.jni.fgbd4j;
 import ch.ehi.ili2fgdb.jdbc.sql.*;
 import ch.ehi.sqlgen.generator_impl.fgdb.GeneratorFgdb;
 
-public class FgdbPreparedStatement extends FgdbStatement implements PreparedStatement {
+public class FgdbPreparedStatement implements PreparedStatement {
 
 	private SqlStmt stmt=null;
 	private FgdbConnection conn=null;
@@ -32,7 +32,6 @@ public class FgdbPreparedStatement extends FgdbStatement implements PreparedStat
 	private java.util.Map<String,Integer> fieldType=null;
 	
 	protected FgdbPreparedStatement(FgdbConnection conn,SqlStmt select, String stmtStr) {
-		super(conn);
 		this.stmt = select;
 		this.conn=conn;
 		this.stmtStr=stmtStr;
@@ -58,72 +57,82 @@ public class FgdbPreparedStatement extends FgdbStatement implements PreparedStat
 
 	@Override
 	public ResultSet executeQuery() throws SQLException {
+		  ResultSet ret=executeSelectStmt((AbstractSelectStmt)stmt);
+		  return ret;
+	}
+
+	private ResultSet executeSelectStmt(AbstractSelectStmt stmt) throws SQLException {
 		  EnumRows rows=new EnumRows();
 		  Table table=null;
 		  java.util.List<SelectValue> selectCols=null;
 		  int err=0;
-			if(stmt instanceof FgdbSelectStmt){
-				FgdbSelectStmt ustmt=(FgdbSelectStmt)stmt;
-				table=new Table();
-				err=conn.getGeodatabase().OpenTable(ustmt.getTableName(), table);
-				if(err!=0){
-					StringBuffer errDesc=new StringBuffer();
-					fgbd4j.GetErrorDescription(err, errDesc);
-					throw new SQLException(errDesc.toString());
-				}
-				setupFieldInfo(table);
-				  StringBuffer where=new StringBuffer();
-				  {
-					  String sep="";
-					  int paramIdx=0;
-					  for(java.util.Map.Entry<Value,Value> set:ustmt.getConditions()){
-						  ColRef colref=(ColRef)set.getKey();
-						  where.append(sep);sep=" AND ";
-						  where.append(colref.getName());
-						  Value rh=set.getValue();
-							if(rh instanceof IntConst){
-								where.append("=");
-								where.append(Integer.toString(((IntConst)rh).getValue()));
-							}else if(rh instanceof StringConst){
-								where.append("='");
-								where.append(((StringConst)rh).getValue());
-								where.append("'");
-							}else{
-								  Object param=params.get(paramIdx++);
-								  appendParam(where, paramIdx, param);
-							}
-					  }
-				  }
-				  StringBuffer fields=new StringBuffer();
-				  {
-					  String sep="";
-					  selectCols=ustmt.getFields();
-					  for(SelectValue colref:selectCols){
-						  if(colref instanceof SelectValueField){
-							  fields.append(sep);sep=",";
-							  fields.append(colref.getColumnName());
-						  }
-					  }
-				  }
-				  
-				  err= table.Search(fields.toString(), where.toString(), true, rows);
-					if(err!=0){
-						StringBuffer errDesc=new StringBuffer();
-						fgbd4j.GetErrorDescription(err, errDesc);
-						throw new SQLException(errDesc.toString());
-					}
-			}else{
-				err=conn.getGeodatabase().ExecuteSQL(stmtStr, true, rows);
-				if(err!=0){
-					StringBuffer errDesc=new StringBuffer();
-					fgbd4j.GetErrorDescription(err, errDesc);
-					throw new SQLException(errDesc.toString());
-				}
+		  ResultSet ret=null;
+		if(stmt instanceof FgdbSelectStmt){
+			FgdbSelectStmt ustmt=(FgdbSelectStmt)stmt;
+			table=new Table();
+			err=conn.getGeodatabase().OpenTable(ustmt.getTableName(), table);
+			if(err!=0){
+				StringBuffer errDesc=new StringBuffer();
+				fgbd4j.GetErrorDescription(err, errDesc);
+				throw new SQLException(errDesc.toString());
 			}
-		FgdbResultSet ret=new FgdbResultSet(conn,table,rows,selectCols);
-		
-		return ret;
+			setupFieldInfo(table);
+			  StringBuffer where=new StringBuffer();
+			  {
+				  String sep="";
+				  int paramIdx=0;
+				  for(java.util.Map.Entry<Value,Value> set:ustmt.getConditions()){
+					  ColRef colref=(ColRef)set.getKey();
+					  where.append(sep);sep=" AND ";
+					  where.append(colref.getName());
+					  Value rh=set.getValue();
+						if(rh instanceof IntConst){
+							where.append("=");
+							where.append(Integer.toString(((IntConst)rh).getValue()));
+						}else if(rh instanceof StringConst){
+							where.append("='");
+							where.append(((StringConst)rh).getValue());
+							where.append("'");
+						}else{
+							  Object param=params.get(paramIdx++);
+							  appendParam(where, paramIdx, param);
+						}
+				  }
+			  }
+			  StringBuffer fields=new StringBuffer();
+			  {
+				  String sep="";
+				  selectCols=ustmt.getFields();
+				  for(SelectValue colref:selectCols){
+					  if(colref instanceof SelectValueField){
+						  fields.append(sep);sep=",";
+						  fields.append(colref.getColumnName());
+					  }
+				  }
+			  }
+			  
+			  err= table.Search(fields.toString(), where.toString(), true, rows);
+				if(err!=0){
+					StringBuffer errDesc=new StringBuffer();
+					fgbd4j.GetErrorDescription(err, errDesc);
+					throw new SQLException(errDesc.toString());
+				}
+				ret=new FgdbResultSet(conn,table,rows,selectCols);
+		}else if(stmt instanceof ComplexSelectStmt){
+			ret=new MemResultSet(executeSelectStmt(((ComplexSelectStmt) stmt).getSubSelect()));
+		}else{
+			err=conn.getGeodatabase().ExecuteSQL(stmtStr, true, rows);
+			if(err!=0){
+				StringBuffer errDesc=new StringBuffer();
+				fgbd4j.GetErrorDescription(err, errDesc);
+				throw new SQLException(errDesc.toString());
+			}
+			ret=new FgdbResultSet(conn,table,rows,selectCols);
+		}
+	
+	return ret;
 	}
+
 
 	@Override
 	public int executeUpdate() throws SQLException {
@@ -654,6 +663,305 @@ public class FgdbPreparedStatement extends FgdbStatement implements PreparedStat
 			throws SQLException {
 		// TODO Auto-generated method stub
 
+	}
+
+
+	@Override
+	public ResultSet executeQuery(String sql) throws SQLException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+
+	@Override
+	public int executeUpdate(String sql) throws SQLException {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+
+	@Override
+	public void close() throws SQLException {
+		// TODO Auto-generated method stub
+		
+	}
+
+
+	@Override
+	public int getMaxFieldSize() throws SQLException {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+
+	@Override
+	public void setMaxFieldSize(int max) throws SQLException {
+		// TODO Auto-generated method stub
+		
+	}
+
+
+	@Override
+	public int getMaxRows() throws SQLException {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+
+	@Override
+	public void setMaxRows(int max) throws SQLException {
+		// TODO Auto-generated method stub
+		
+	}
+
+
+	@Override
+	public void setEscapeProcessing(boolean enable) throws SQLException {
+		// TODO Auto-generated method stub
+		
+	}
+
+
+	@Override
+	public int getQueryTimeout() throws SQLException {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+
+	@Override
+	public void setQueryTimeout(int seconds) throws SQLException {
+		// TODO Auto-generated method stub
+		
+	}
+
+
+	@Override
+	public void cancel() throws SQLException {
+		// TODO Auto-generated method stub
+		
+	}
+
+
+	@Override
+	public SQLWarning getWarnings() throws SQLException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+
+	@Override
+	public void clearWarnings() throws SQLException {
+		// TODO Auto-generated method stub
+		
+	}
+
+
+	@Override
+	public void setCursorName(String name) throws SQLException {
+		// TODO Auto-generated method stub
+		
+	}
+
+
+	@Override
+	public boolean execute(String sql) throws SQLException {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+
+	@Override
+	public ResultSet getResultSet() throws SQLException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+
+	@Override
+	public int getUpdateCount() throws SQLException {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+
+	@Override
+	public boolean getMoreResults() throws SQLException {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+
+	@Override
+	public void setFetchDirection(int direction) throws SQLException {
+		// TODO Auto-generated method stub
+		
+	}
+
+
+	@Override
+	public int getFetchDirection() throws SQLException {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+
+	@Override
+	public void setFetchSize(int rows) throws SQLException {
+		// TODO Auto-generated method stub
+		
+	}
+
+
+	@Override
+	public int getFetchSize() throws SQLException {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+
+	@Override
+	public int getResultSetConcurrency() throws SQLException {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+
+	@Override
+	public int getResultSetType() throws SQLException {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+
+	@Override
+	public void addBatch(String sql) throws SQLException {
+		// TODO Auto-generated method stub
+		
+	}
+
+
+	@Override
+	public void clearBatch() throws SQLException {
+		// TODO Auto-generated method stub
+		
+	}
+
+
+	@Override
+	public int[] executeBatch() throws SQLException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+
+	@Override
+	public Connection getConnection() throws SQLException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+
+	@Override
+	public boolean getMoreResults(int current) throws SQLException {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+
+	@Override
+	public ResultSet getGeneratedKeys() throws SQLException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+
+	@Override
+	public int executeUpdate(String sql, int autoGeneratedKeys)
+			throws SQLException {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+
+	@Override
+	public int executeUpdate(String sql, int[] columnIndexes)
+			throws SQLException {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+
+	@Override
+	public int executeUpdate(String sql, String[] columnNames)
+			throws SQLException {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+
+	@Override
+	public boolean execute(String sql, int autoGeneratedKeys)
+			throws SQLException {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+
+	@Override
+	public boolean execute(String sql, int[] columnIndexes) throws SQLException {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+
+	@Override
+	public boolean execute(String sql, String[] columnNames)
+			throws SQLException {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+
+	@Override
+	public int getResultSetHoldability() throws SQLException {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+
+	@Override
+	public boolean isClosed() throws SQLException {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+
+	@Override
+	public void setPoolable(boolean poolable) throws SQLException {
+		// TODO Auto-generated method stub
+		
+	}
+
+
+	@Override
+	public boolean isPoolable() throws SQLException {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+
+	@Override
+	public <T> T unwrap(Class<T> iface) throws SQLException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+
+	@Override
+	public boolean isWrapperFor(Class<?> iface) throws SQLException {
+		// TODO Auto-generated method stub
+		return false;
 	}
 
 }
