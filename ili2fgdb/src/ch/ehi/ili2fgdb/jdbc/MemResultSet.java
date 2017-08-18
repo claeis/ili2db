@@ -645,4 +645,17 @@ public class MemResultSet implements ResultSet {
 	public boolean wasNull() throws SQLException {
 		return subResultSet.wasNull();
 	}
+	// since jre 1.7
+
+	//@Override
+	public <T> T getObject(int arg0, Class<T> arg1) throws SQLException {
+		//return subResultSet.getObject(arg0, arg1);
+		return null;
+	}
+
+	//@Override
+	public <T> T getObject(String arg0, Class<T> arg1) throws SQLException {
+		//return subResultSet.getObject(arg0, arg1);
+		return null;
+	}
 }

@@ -387,5 +387,16 @@ public class FgdbStatement implements Statement {
 		// TODO Auto-generated method stub
 		return null;
 	}
+	// since jre 1.7
+	//@Override
+	public void closeOnCompletion() throws SQLException {
+		// TODO Auto-generated method stub
+		
+	}
+	//@Override
+	public boolean isCloseOnCompletion() throws SQLException {
+		// TODO Auto-generated method stub
+		return false;
+	}
 
 }

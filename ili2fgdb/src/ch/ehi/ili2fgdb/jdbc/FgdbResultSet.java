@@ -1440,5 +1440,18 @@ public class FgdbResultSet implements ResultSet {
 	public boolean wasNull() throws SQLException {
 		return lastGetWasNull;
 	}
+	// since jre 1.7
+
+	//@Override
+	public <T> T getObject(int arg0, Class<T> arg1) throws SQLException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	//@Override
+	public <T> T getObject(String arg0, Class<T> arg1) throws SQLException {
+		// TODO Auto-generated method stub
+		return null;
+	}
 
 }
