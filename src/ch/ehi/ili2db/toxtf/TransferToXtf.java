@@ -1100,7 +1100,7 @@ public class TransferToXtf {
 			    Iterator attri = lineAttrTable.getAttributes ();
 			    while(attri.hasNext()){
 					AttributeDef lineattr=(AttributeDef)attri.next();
-				   sep = recConv.addAttrToQueryStmt(ret, sep, lineattr,sqlTabName);
+				   sep = recConv.addAttrToQueryStmt(ret, sep, null,lineattr,sqlTabName);
 			    }
 			}
 		 
