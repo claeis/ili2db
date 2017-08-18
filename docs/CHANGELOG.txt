@@ -14,6 +14,7 @@ ideas/open issues/questions
 
 LATEST
 ---------------------------
+- fixed import of forward references
 
 ili2gpkg 3.10.5 (2017-08-18)
 -----------------------------

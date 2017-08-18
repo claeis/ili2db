@@ -123,7 +123,7 @@ public class TransferFromXtf {
 	private XtfidPool oidPool=null;
 	private ObjectPoolManager recman = null;
 	private java.util.Map<String, IomObject> objPool=null;
-	private HashMap<String,HashSet<Long>> existingObjects=null;
+	private HashMap<String,HashSet<Long>> existingObjectsOfCurrentBasket=null;
 	private ArrayList<FixIomObjectExtRefs> delayedObjects=null;
 	private TrafoConfig trafoConfig=null;
 	private FromXtfRecordConverter recConv=null;
@@ -341,8 +341,10 @@ public class TransferFromXtf {
 				while(event!=null){
 					if(event instanceof StartBasketEvent){
 						basket=(StartBasketEvent)event;
+						// do not import this this basket? 
 						if((limitedToBids!=null && !limitedToBids.contains(basket.getBid()))
 								|| (limitedToTopics!=null && !limitedToTopics.contains(basket.getType()))){
+							// do not import this basket
 							skipBasket=true;
 							EhiLogger.logState("Skip Basket "+basket.getType()+"(oid "+basket.getBid()+")");
 							if(validator!=null)validator.validate(event);
@@ -350,6 +352,7 @@ public class TransferFromXtf {
 								event=languageFilter.filter(event);
 							}
 						}else{
+							// import this basket
 							EhiLogger.logState("Basket "+basket.getType()+"(oid "+basket.getBid()+")...");
 							skipBasket=false;
 							try {
@@ -360,7 +363,7 @@ public class TransferFromXtf {
 								Long existingBasketSqlId=null;
 								if(functionCode==Config.FC_UPDATE){
 									// read existing oid/sqlid mapping (but might also be a new basket)
-									existingObjects=new HashMap<String,HashSet<Long>>();
+									existingObjectsOfCurrentBasket=new HashMap<String,HashSet<Long>>();
 									existingBasketSqlId=readExistingSqlObjIds(reader instanceof ItfReader,basket.getBid());
 									if(existingBasketSqlId==null){
 										// new basket 
@@ -387,6 +390,7 @@ public class TransferFromXtf {
 								}else{
 									// TODO update attachmentKey of existing basket
 								}
+								// setup list of objects that have external/forward references
 								delayedObjects=new ArrayList<FixIomObjectExtRefs>();
 							} catch (SQLException ex) {
 								EhiLogger.logError("Basket "+basket.getType()+"(oid "+basket.getBid()+")",ex);
@@ -415,7 +419,68 @@ public class TransferFromXtf {
 				        	}
 						}
 						if(!skipBasket){
-							// fix external references
+							// fix external/forward references
+							ArrayList<FixIomObjectExtRefs> fixedObjects=new ArrayList<FixIomObjectExtRefs>();
+							for(FixIomObjectExtRefs fixref : delayedObjects){
+								boolean skipObj=false;
+								for(IomObject ref:fixref.getRefs()){
+									String xtfid=ref.getobjectrefoid();
+									Viewable aclass=fixref.getTargetClass(ref);
+									String rootClassName=Ili2cUtility.getRootViewable(aclass).getScopedName(null);
+									if(oidPool.containsXtfid(rootClassName,xtfid)){
+										// reference now resolvable
+									}else{
+										// reference not yet known, try to resolve again at end of transfer
+										skipObj=true;
+									}
+								}
+								if(!skipObj){
+									doObject(basketSqlId,objPool.get(fixref.getRootTid()));
+									fixedObjects.add(fixref);
+								}
+							}
+							delayedObjects.removeAll(fixedObjects);
+							if(functionCode==Config.FC_UPDATE){
+								// delete no longer existing objects
+								deleteExisitingObjects(existingObjectsOfCurrentBasket);
+							}
+							// TODO update import counters
+							endTid=oidPool.getLastSqlId();
+							try {
+								String filename=null;
+								if(xtffilename!=null){
+									filename=new java.io.File(xtffilename).getName();
+								}
+								long importId=writeImportBasketStat(importSqlId,basketSqlId,startTid,endTid,objCount);
+								saveObjStat(importId,basket.getBid(),filename,basket.getType());
+							} catch (SQLException ex) {
+								EhiLogger.logError("Basket "+basket.getType()+"(oid "+basket.getBid()+")",ex);
+							} catch (ConverterException ex) {
+								EhiLogger.logError("Basket "+basket.getType()+"(oid "+basket.getBid()+")",ex);
+							}
+						}
+						
+						skipBasket=false;
+					}else if(event instanceof ObjectEvent){
+						if(validator!=null)validator.validate(event);
+						if(!skipBasket){
+							if(languageFilter!=null){
+								event=languageFilter.filter(event);
+							}
+							objCount++;
+							IomObject iomObj=((ObjectEvent)event).getIomObject();
+							if(allReferencesKnown(basketSqlId,iomObj)){
+								// translate object
+								doObject(basketSqlId, iomObj);
+							}
+						}
+					}else if(event instanceof EndTransferEvent){
+						if(validator!=null)validator.validate(event);
+						if(languageFilter!=null){
+							event=languageFilter.filter(event);
+						}
+						
+						{
 							for(FixIomObjectExtRefs fixref : delayedObjects){
 								boolean skipObj=false;
 								for(IomObject ref:fixref.getRefs()){
@@ -443,48 +508,11 @@ public class TransferFromXtf {
 									
 								}
 								if(!skipObj){
-									doObject(basketSqlId,objPool.get(fixref.getRootTid()));
+									doObject(fixref.getBasketSqlId(),objPool.get(fixref.getRootTid()));
 								}
-							}
-							if(functionCode==Config.FC_UPDATE){
-								// delete no longer existing objects
-								deleteExisitingObjects();
-							}
-							// TODO update import counters
-							endTid=oidPool.getLastSqlId();
-							try {
-								String filename=null;
-								if(xtffilename!=null){
-									filename=new java.io.File(xtffilename).getName();
-								}
-								long importId=writeImportBasketStat(importSqlId,basketSqlId,startTid,endTid,objCount);
-								saveObjStat(importId,basket.getBid(),filename,basket.getType());
-							} catch (SQLException ex) {
-								EhiLogger.logError("Basket "+basket.getType()+"(oid "+basket.getBid()+")",ex);
-							} catch (ConverterException ex) {
-								EhiLogger.logError("Basket "+basket.getType()+"(oid "+basket.getBid()+")",ex);
 							}
 						}
 						
-						skipBasket=false;
-					}else if(event instanceof ObjectEvent){
-						if(validator!=null)validator.validate(event);
-						if(!skipBasket){
-							if(languageFilter!=null){
-								event=languageFilter.filter(event);
-							}
-							objCount++;
-							IomObject iomObj=((ObjectEvent)event).getIomObject();
-							if(allReferencesKnown(iomObj)){
-								// translate object
-								doObject(basketSqlId, iomObj);
-							}
-						}
-					}else if(event instanceof EndTransferEvent){
-						if(validator!=null)validator.validate(event);
-						if(languageFilter!=null){
-							event=languageFilter.filter(event);
-						}
 						break;
 					}else if(event instanceof StartTransferEvent){
 						if(validator!=null)validator.validate(event);
@@ -634,7 +662,7 @@ public class TransferFromXtf {
 		}
 	}
 
-	private void deleteExisitingObjects() {
+	private void deleteExisitingObjects(HashMap<String,HashSet<Long>> existingObjects) {
 		for(String sqlType:existingObjects.keySet()){
 			HashSet<Long> objs=existingObjects.get(sqlType);
 			StringBuilder ids=new StringBuilder();
@@ -967,7 +995,7 @@ public class TransferFromXtf {
 			}
 		}
 	}
-	private boolean allReferencesKnown(IomObject iomObj) {
+	private boolean allReferencesKnown(long basketSqlId,IomObject iomObj) {
 		String tag=iomObj.getobjecttag();
 		//EhiLogger.debug("tag "+tag);
 		Object modelele=tag2class.get(tag);
@@ -985,7 +1013,7 @@ public class TransferFromXtf {
 	 	if(tid!=null && tid.length()>0){
 			oidPool.createObjSqlId(Ili2cUtility.getRootViewable((Viewable) modelele).getScopedName(null),tag,tid);
 	 	}
-		FixIomObjectExtRefs extref=new FixIomObjectExtRefs(tag,tid);
+		FixIomObjectExtRefs extref=new FixIomObjectExtRefs(basketSqlId,tag,tid);
 		allReferencesKnownHelper(iomObj, extref);
 		if(!extref.needsFixing()){
 			return true;
@@ -1224,24 +1252,24 @@ public class TransferFromXtf {
 	}
 	private void addExistingObjects(String sqlType, long sqlid) {
 		HashSet<Long> objs=null;
-		if(existingObjects.containsKey(sqlType)){
-			objs=existingObjects.get(sqlType);
+		if(existingObjectsOfCurrentBasket.containsKey(sqlType)){
+			objs=existingObjectsOfCurrentBasket.get(sqlType);
 		}else{
 			objs=new HashSet<Long>();
-			existingObjects.put(sqlType, objs);
+			existingObjectsOfCurrentBasket.put(sqlType, objs);
 		}
 		objs.add(sqlid);
 	}
 	private boolean existingObjectsContains(String sqlType, long sqlid) {
-		if(existingObjects.containsKey(sqlType)){
-			HashSet<Long> objs=existingObjects.get(sqlType);
+		if(existingObjectsOfCurrentBasket.containsKey(sqlType)){
+			HashSet<Long> objs=existingObjectsOfCurrentBasket.get(sqlType);
 			return objs.contains(sqlid);
 		}
 		return false;
 	}
 	private void existingObjectsRemove(String sqlType, long sqlid) {
-		if(existingObjects.containsKey(sqlType)){
-			HashSet<Long> objs=existingObjects.get(sqlType);
+		if(existingObjectsOfCurrentBasket.containsKey(sqlType)){
+			HashSet<Long> objs=existingObjectsOfCurrentBasket.get(sqlType);
 			objs.remove(sqlid);
 		}
 		return;
