@@ -14,6 +14,9 @@ ideas/open issues/questions
 
 LATEST
 ---------------------------
+
+ili2gpkg 3.10.5 (2017-08-18)
+-----------------------------
 - ehisqlgen-1.11.2
 - fixed export of models with identical column names in different secondary tables
 - fixed read/write of java class names to t_ili2db_settings
