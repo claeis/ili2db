@@ -155,6 +155,11 @@ public class FgdbStatement implements Statement {
 		  int err=0;
 		Table table=new Table();
 		err=conn.getGeodatabase().OpenTable(ustmt.getTableName(), table);
+		if(err!=0){
+			StringBuffer errDesc=new StringBuffer();
+			fgbd4j.GetErrorDescription(err, errDesc);
+			throw new SQLException(errDesc.toString(),"22000",err);
+		}
 		  StringBuffer where=new StringBuffer();
 		  { 
 			  String sep="";
@@ -180,6 +185,9 @@ public class FgdbStatement implements Statement {
 					  fields.append(sep);sep=",";
 					  fields.append(colref.getColumnName());
 				  }
+			  }
+			  if(fields.length()==0){
+				  fields.append("*");
 			  }
 		  }
 		  
