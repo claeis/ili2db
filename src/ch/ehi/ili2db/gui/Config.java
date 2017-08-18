@@ -66,8 +66,6 @@ public class Config extends Settings {
 	public static final String BASKET_HANDLING_READWRITE="readWrite";
 	private static final String ATTACHMENTS_PATH=PREFIX+".attachmentsPath";
 	private static final String ATTACHMENT_KEY=PREFIX+".attachmentKey";
-	private static final String INIT_STRATEGY=PREFIX+".initStrategy";
-	private static final String ILI2DB_CUSTOM_STRATEGY=PREFIX+".ili2dbCustomStrategy";
 	private static final String DO_ITF_LINE_TABLES=PREFIX+".doItfLineTables";
 	private static final String COLNAME_T_ID=PREFIX+".colName_T_ID";
 	public static final String VER4_TRANSLATION=PREFIX+".ver4_translation";
@@ -95,6 +93,8 @@ public class Config extends Settings {
 	private String postScript;
 	private String idGenerator=null;
 	private String geometryConverter;
+	private String ili2dbCustomStrategy;
+	private String initStrategy;
 	private String jdbcDriver=null;
 	private String ddlGenerator=null;
 	private String deleteMode=null;
@@ -126,6 +126,12 @@ public class Config extends Settings {
 	}
 	public void setGeometryConverter(String adapterClassName) {
 		this.geometryConverter = adapterClassName;
+	}
+	public String getIli2dbCustomStrategy() {
+		return this.ili2dbCustomStrategy;
+	}
+	public void setIli2dbCustomStrategy(String value) {
+		this.ili2dbCustomStrategy=value;
 	}
 	public String getCreatescript() {
 		return createscript;
@@ -440,16 +446,10 @@ public class Config extends Settings {
 		setTransientValue(ATTACHMENT_KEY,value);
 	}
 	public String getInitStrategy() {
-		return getValue(INIT_STRATEGY);
+		return initStrategy;
 	}
 	public void setInitStrategy(String value) {
-		setValue(INIT_STRATEGY,value);
-	}
-	public String getIli2dbCustomStrategy() {
-		return getValue(ILI2DB_CUSTOM_STRATEGY);
-	}
-	public void setIli2dbCustomStrategy(String value) {
-		setValue(ILI2DB_CUSTOM_STRATEGY,value);
+		initStrategy=value;
 	}
 	public java.sql.Connection getJdbcConnection() {
 		return (java.sql.Connection)getTransientObject(ch.ehi.sqlgen.generator.SqlConfiguration.JDBC_CONNECTION);
