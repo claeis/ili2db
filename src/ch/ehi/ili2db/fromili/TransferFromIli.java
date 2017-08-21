@@ -515,6 +515,10 @@ public class TransferFromIli {
 					for(Model importm : imports){
 						ilimodel.addDepenedency(importm.getName());
 					}
+					Model translatedModel=(Model)model.getTranslationOf();
+					if(translatedModel!=null){
+						ilimodel.addDepenedency(translatedModel.getName());
+					}
 					ilifile.addModel(ilimodel);
 				}
 			}
