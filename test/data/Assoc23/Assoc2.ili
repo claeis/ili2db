@@ -1,0 +1,51 @@
+INTERLIS 2.3;
+
+MODEL Assoc2
+  AT "mailto:ce@eisenhutinformatik.ch" VERSION "2015-11-28" =
+    
+  TOPIC TestA =
+  
+    CLASS ClassA1 =
+    END ClassA1;
+    CLASS ClassA1b EXTENDS ClassA1 =
+    END ClassA1b;
+    CLASS ClassB1 =
+    END ClassB1;
+
+    CLASS ClassA2 =
+    END ClassA2;
+
+    CLASS ClassB3 =
+    END ClassB3;
+    
+  END TestA;
+  
+  TOPIC TestB =
+  	DEPENDS ON TestA;
+  	
+    ASSOCIATION a2b1=
+      a1 (EXTERNAL) -- {0..*} Assoc2.TestA.ClassA1;
+      b1 (EXTERNAL) -- {0..*} Assoc2.TestA.ClassB1;
+    END a2b1;
+
+    STRUCTURE StructA2 =
+    	refa2 : REFERENCE TO (EXTERNAL) Assoc2.TestA.ClassA2;
+    END StructA2;
+    CLASS ClassB2 =
+    	strA2 : LIST OF StructA2;
+    END ClassB2;
+    ASSOCIATION a2b2=
+      a2 (EXTERNAL) -- {0..1} Assoc2.TestA.ClassA2;
+      b2 -- {0..1} ClassB2;
+    END a2b2;
+
+    CLASS ClassA3 =
+    END ClassA3;
+    ASSOCIATION a2b3=
+      b3 (EXTERNAL) -- {0..1} Assoc2.TestA.ClassB3;
+      a3 -- {0..1} ClassA3;
+    END a2b3;
+    
+  END TestB;
+  
+END Assoc2.

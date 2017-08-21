@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TRANSFER xmlns="http://www.interlis.ch/INTERLIS2.3">
+	<HEADERSECTION SENDER="ili2pg-2.5.0-20151209" VERSION="2.3">
+		<MODELS>
+			<MODEL NAME="MultiLine2" VERSION="2015-12-03" URI="mailto:ce@eisenhutinformatik.ch"></MODEL>
+		</MODELS>
+	</HEADERSECTION>
+	<DATASECTION>
+		<MultiLine2.TestA BID="MultiLine2.TestA">
+			<MultiLine2.TestA.ClassA1 TID="13">
+				<geom>
+					<MultiLine2.MultiLinie2D>
+						<Linien>
+							<MultiLine2.LinieStruktur2D>
+								<Linie>
+									<POLYLINE>
+										<COORD>
+											<C1>600001.000</C1>
+											<C2>205001.000</C2>
+										</COORD>
+										<COORD>
+											<C1>600020.000</C1>
+											<C2>205015.000</C2>
+										</COORD>
+										<ARC>
+											<C1>600001.000</C1>
+											<C2>205015.000</C2>
+											<A1>600010.000</A1>
+											<A2>205018.000</A2>
+										</ARC>
+										<COORD>
+											<C1>600001.000</C1>
+											<C2>205001.000</C2>
+										</COORD>
+									</POLYLINE>
+								</Linie>
+							</MultiLine2.LinieStruktur2D>
+							<MultiLine2.LinieStruktur2D>
+								<Linie>
+									<POLYLINE>
+										<COORD>
+											<C1>600005.000</C1>
+											<C2>205005.000</C2>
+										</COORD>
+										<COORD>
+											<C1>600010.000</C1>
+											<C2>205010.000</C2>
+										</COORD>
+										<ARC>
+											<C1>600005.000</C1>
+											<C2>205010.000</C2>
+											<A1>600007.000</A1>
+											<A2>205009.000</A2>
+										</ARC>
+										<COORD>
+											<C1>600005.000</C1>
+											<C2>205005.000</C2>
+										</COORD>
+									</POLYLINE>
+								</Linie>
+							</MultiLine2.LinieStruktur2D>
+						</Linien>
+					</MultiLine2.MultiLinie2D>
+				</geom>
+			</MultiLine2.TestA.ClassA1>
+		</MultiLine2.TestA>
+	</DATASECTION>
+</TRANSFER>

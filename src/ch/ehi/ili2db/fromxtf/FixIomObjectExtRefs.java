@@ -7,6 +7,7 @@ import ch.interlis.iom.IomObject;
 
 public class FixIomObjectExtRefs {
 
+	private long basketSqlId;
 	private String rootTid=null;
 	private String rootTag=null;
 	private HashMap<IomObject,Target> refs=new HashMap<IomObject,Target>();
@@ -18,9 +19,10 @@ public class FixIomObjectExtRefs {
 		Viewable aclass;
 			
 	}
-	public FixIomObjectExtRefs(String rootObjTag,String rootObjTid) {
+	public FixIomObjectExtRefs(long basketSqlId,String rootObjTag,String rootObjTid) {
 		rootTid=rootObjTid;
 		rootTag=rootObjTag;
+		this.basketSqlId=basketSqlId;
 	}
 
 	public String getRootTid(){
@@ -43,6 +45,10 @@ public class FixIomObjectExtRefs {
 
 	public Viewable getTargetClass(IomObject ref) {
 		return refs.get(ref).aclass;
+	}
+
+	public long getBasketSqlId() {
+		return basketSqlId;
 	}
 
 }

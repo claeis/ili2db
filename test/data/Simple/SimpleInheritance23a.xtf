@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TRANSFER xmlns="http://www.interlis.ch/INTERLIS2.3">
+	<HEADERSECTION SENDER="ili2fgdb-3.10.0-20170630" VERSION="2.3">
+		<MODELS>
+			<MODEL NAME="SimpleInheritance23" VERSION="2016-12-21" URI="mailto:ce@eisenhutinformatik.ch"></MODEL>
+		</MODELS>
+	</HEADERSECTION>
+	<DATASECTION>
+		<SimpleInheritance23.TestA BID="b1">
+			<SimpleInheritance23.TestA.ClassB1 TID="ClassB1.1">
+				<attrb1>gugus</attrb1>
+				<attrb2>
+					<SimpleInheritance23.TestA.StructA1>
+						<attra>me1</attra>
+					</SimpleInheritance23.TestA.StructA1>
+				</attrb2>
+				<attrb2>
+					<SimpleInheritance23.TestA.StructA1>
+						<attra>do1</attra>
+					</SimpleInheritance23.TestA.StructA1>
+				</attrb2>
+			</SimpleInheritance23.TestA.ClassB1>
+			<SimpleInheritance23.TestA.ClassC1 TID="ClassC1.2">
+				<attrb1>gugus2</attrb1>
+				<attrb2>
+					<SimpleInheritance23.TestA.StructA1>
+						<attra>me2</attra>
+					</SimpleInheritance23.TestA.StructA1>
+				</attrb2>
+				<attrb2>
+					<SimpleInheritance23.TestA.StructA1>
+						<attra>do2</attra>
+					</SimpleInheritance23.TestA.StructA1>
+				</attrb2>
+				<attrc1>fix2</attrc1>
+			</SimpleInheritance23.TestA.ClassC1>
+		</SimpleInheritance23.TestA>
+	</DATASECTION>
+</TRANSFER>

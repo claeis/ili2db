@@ -1,6 +1,7 @@
 package ch.ehi.ili2geodb;
 
 import java.sql.Connection;
+import java.sql.SQLException;
 
 import ch.ehi.ili2db.fromili.CustomMapping;
 import ch.ehi.ili2db.gui.Config;
@@ -95,6 +96,12 @@ public class GeodbMapping implements CustomMapping {
 
 	@Override
 	public void postConnect(Connection conn, Config config) {
+	}
+
+	@Override
+	public Connection connect(String url, String dbusr, String dbpwd,
+			Config config) throws SQLException {
+		return null;
 	}
 
 }

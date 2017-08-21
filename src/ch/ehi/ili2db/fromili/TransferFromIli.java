@@ -515,6 +515,10 @@ public class TransferFromIli {
 					for(Model importm : imports){
 						ilimodel.addDepenedency(importm.getName());
 					}
+					Model translatedModel=(Model)model.getTranslationOf();
+					if(translatedModel!=null){
+						ilimodel.addDepenedency(translatedModel.getName());
+					}
 					ilifile.addModel(ilimodel);
 				}
 			}
@@ -915,6 +919,11 @@ public class TransferFromIli {
 			dispName.setNotNull(true);
 			dispName.setSize(250);
 			tab.addColumn(dispName);
+			DbColVarchar description=new DbColVarchar();
+			description.setName(DbNames.ENUM_TAB_DESCRIPTION_COL);
+			description.setNotNull(false);
+			description.setSize(1024);
+			tab.addColumn(description);
 			schema.addTable(tab);
 		}else if(Config.CREATE_ENUM_DEFS_MULTI.equals(createEnumTable)){
 			addMissingEnumDomains(visitedEnums);
@@ -965,6 +974,11 @@ public class TransferFromIli {
 					dispName.setNotNull(true);
 					dispName.setSize(250);
 					tab.addColumn(dispName);
+					DbColVarchar description=new DbColVarchar();
+					description.setName(DbNames.ENUM_TAB_DESCRIPTION_COL);
+					description.setNotNull(false);
+					description.setSize(1024);
+					tab.addColumn(description);
 					schema.addTable(tab);
 					metaInfo.setTableInfo(tab.getName().getName(), DbExtMetaInfo.TAG_TAB_TABLEKIND, DbExtMetaInfo.TAG_TAB_TABLEKIND_ENUM);
 				}
@@ -1114,7 +1128,7 @@ public class TransferFromIli {
 		try{
 
 			// insert entries
-			String insStmt="INSERT INTO "+sqlName+" ("+DbNames.ENUM_TAB_SEQ_COL+","+DbNames.ENUM_TAB_ILICODE_COL+","+DbNames.ENUM_TAB_ITFCODE_COL+","+DbNames.ENUM_TAB_DISPNAME_COL+","+DbNames.ENUM_TAB_INACTIVE_COL+","+DbNames.ENUM_TAB_THIS_COL+","+DbNames.ENUM_TAB_BASE_COL+") VALUES (?,?,?,?,?,?,?)";
+			String insStmt="INSERT INTO "+sqlName+" ("+DbNames.ENUM_TAB_SEQ_COL+","+DbNames.ENUM_TAB_ILICODE_COL+","+DbNames.ENUM_TAB_ITFCODE_COL+","+DbNames.ENUM_TAB_DISPNAME_COL+","+DbNames.ENUM_TAB_INACTIVE_COL+","+DbNames.ENUM_TAB_DESCRIPTION_COL+","+DbNames.ENUM_TAB_THIS_COL+","+DbNames.ENUM_TAB_BASE_COL+") VALUES (?,?,?,?,?,?,?,?)";
 			EhiLogger.traceBackendCmd(insStmt);
 			java.sql.PreparedStatement insPrepStmt = conn.prepareStatement(insStmt);
 			String thisClass=null;
@@ -1184,7 +1198,7 @@ public class TransferFromIli {
 				try{
 
 					// insert entries
-					String stmt="INSERT INTO "+thisSqlName+" ("+DbNames.ENUM_TAB_SEQ_COL+","+DbNames.ENUM_TAB_ILICODE_COL+","+DbNames.ENUM_TAB_ITFCODE_COL+","+DbNames.ENUM_TAB_DISPNAME_COL+","+DbNames.ENUM_TAB_INACTIVE_COL+") VALUES (?,?,?,?,?)";
+					String stmt="INSERT INTO "+thisSqlName+" ("+DbNames.ENUM_TAB_SEQ_COL+","+DbNames.ENUM_TAB_ILICODE_COL+","+DbNames.ENUM_TAB_ITFCODE_COL+","+DbNames.ENUM_TAB_DISPNAME_COL+","+DbNames.ENUM_TAB_INACTIVE_COL+","+DbNames.ENUM_TAB_DESCRIPTION_COL+") VALUES (?,?,?,?,?,?)";
 					EhiLogger.traceBackendCmd(stmt);
 					java.sql.PreparedStatement ps = conn.prepareStatement(stmt);
 					try{
@@ -1211,7 +1225,7 @@ public class TransferFromIli {
 				try{
 
 					// insert entries
-					String stmt="INSERT INTO "+thisSqlName+" ("+DbNames.ENUM_TAB_SEQ_COL+","+DbNames.ENUM_TAB_ILICODE_COL+","+DbNames.ENUM_TAB_ITFCODE_COL+","+DbNames.ENUM_TAB_DISPNAME_COL+","+DbNames.ENUM_TAB_INACTIVE_COL+") VALUES (?,?,?,?,?)";
+					String stmt="INSERT INTO "+thisSqlName+" ("+DbNames.ENUM_TAB_SEQ_COL+","+DbNames.ENUM_TAB_ILICODE_COL+","+DbNames.ENUM_TAB_ITFCODE_COL+","+DbNames.ENUM_TAB_DISPNAME_COL+","+DbNames.ENUM_TAB_INACTIVE_COL+","+DbNames.ENUM_TAB_DESCRIPTION_COL+") VALUES (?,?,?,?,?,?)";
 					EhiLogger.traceBackendCmd(stmt);
 					java.sql.PreparedStatement ps = conn.prepareStatement(stmt);
 					try{
@@ -1230,7 +1244,7 @@ public class TransferFromIli {
 		
 
 	}
-	private void updateEnumEntries(java.util.Set<String> exstEntires,java.sql.PreparedStatement ps, EnumerationType type, String thisClass, String baseClass) 
+	private void updateEnumEntries(java.util.Set<String> exstEntries,java.sql.PreparedStatement ps, EnumerationType type, String thisClass, String baseClass) 
 	throws SQLException 
 	{
 		java.util.List<java.util.Map.Entry<String,ch.interlis.ili2c.metamodel.Enumeration.Element>> ev=new java.util.ArrayList<java.util.Map.Entry<String,ch.interlis.ili2c.metamodel.Enumeration.Element>>();
@@ -1245,7 +1259,7 @@ public class TransferFromIli {
 			Enumeration.Element eleElement=ele.getValue();
 
 			// entry exists already?
-			if(!exstEntires.contains(eleName)){
+			if(!exstEntries.contains(eleName)){
 				// insert only non-existing entries
 				if(isOrdered){
 					ps.setInt(1, seq);
@@ -1258,17 +1272,24 @@ public class TransferFromIli {
 				String dispName = eleElement.getMetaValues().getValue(IliMetaAttrNames.METAATTR_DISPNAME);
 				if (dispName!=null){
 				    ps.setString(4, dispName); // do not beautify name provided by user
-				} else {
+				}else{
 				    ps.setString(4, recConv.beautifyEnumDispName(eleName)); 
 				}
 				ps.setBoolean(5, false);  // inactive
+				String description = eleElement.getDocumentation();
+				if (description!=null){
+					ps.setString(6, description);
+				}else{
+					ps.setNull(6, java.sql.Types.VARCHAR);
+				}
+
 				// single table for all enums?
 				if(thisClass!=null){
-					ps.setString(6, thisClass);
+					ps.setString(7, thisClass);
 					if(baseClass!=null){
-						ps.setString(7, baseClass);
+						ps.setString(8, baseClass);
 					}else{
-						ps.setNull(7,java.sql.Types.VARCHAR);
+						ps.setNull(8,java.sql.Types.VARCHAR);
 					}
 				}
 				ps.executeUpdate();
@@ -1339,6 +1360,11 @@ public class TransferFromIli {
 				}else if(Ili2cUtility.isChbaseCatalogueItem(td, v.getViewable())){
 					metaInfo.setTableInfo(v.getSqlTablename(), DbExtMetaInfo.TAG_TAB_TABLEKIND, DbExtMetaInfo.TAG_TAB_TABLEKIND_CATALOGUE);
 				}
+			}
+
+			String dispName = v.getViewable().getMetaValues().getValue(IliMetaAttrNames.METAATTR_DISPNAME);
+			if (dispName!=null){
+			    metaInfo.setTableInfo(v.getSqlTablename(), DbExtMetaInfo.TAG_TAB_DISPNAME, dispName);
 			}
 		}
 		metaInfo.updateMetaInfoTables(conn, schema.getName());

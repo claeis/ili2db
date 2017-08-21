@@ -1,0 +1,28 @@
+INTERLIS 2.3;
+
+MODEL SimpleInheritance23
+  AT "mailto:ce@eisenhutinformatik.ch" VERSION "2016-12-21" =
+    
+  TOPIC TestA =
+    
+    STRUCTURE StructA1 =
+    	attra : TEXT*60;
+    END StructA1;
+    
+    /*STRUCTURE StructA2 EXTENDS StructA1 =
+    	attra2 : TEXT*60;
+    END StructA2;*/
+    
+    CLASS ClassB1 =
+    	attrb1 : TEXT*60;
+    	attrb2 : BAG OF StructA1;
+    END ClassB1;
+
+    CLASS ClassC1 EXTENDS ClassB1  =
+    	attrc1 : TEXT*60;
+    END ClassC1;
+    
+  END TestA;
+  
+  
+END SimpleInheritance23.

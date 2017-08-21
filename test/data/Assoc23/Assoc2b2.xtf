@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TRANSFER xmlns="http://www.interlis.ch/INTERLIS2.3">
+	<HEADERSECTION SENDER="ili2pg-2.2.0-20150910" VERSION="2.3">
+		<MODELS>
+			<MODEL NAME="Assoc2" VERSION="2015-11-28" URI="mailto:ce@eisenhutinformatik.ch"></MODEL>
+		</MODELS>
+	</HEADERSECTION>
+	<DATASECTION>
+		<!-- zweiter Basket mit Referenzen auf ersten Basket -->
+		<Assoc2.TestB BID="Assoc2.TestB">
+			<Assoc2.TestB.a2b1>
+				<a1 REF="a1"></a1>
+				<b1 REF="b1"></b1>
+			</Assoc2.TestB.a2b1>
+			<Assoc2.TestB.a2b1>
+				<a1 REF="a1b"></a1>
+				<b1 REF="b1"></b1>
+			</Assoc2.TestB.a2b1>
+			<Assoc2.TestB.ClassB2 TID="b2">
+				<strA2>
+					<Assoc2.TestB.StructA2>
+						<refa2 REF="a2"></refa2>
+					</Assoc2.TestB.StructA2>
+				</strA2>
+				<a2 REF="a2"></a2>
+			</Assoc2.TestB.ClassB2>
+			<Assoc2.TestB.ClassA3 TID="a3">
+				<b3 REF="b3"></b3>
+			</Assoc2.TestB.ClassA3>
+		</Assoc2.TestB>
+	</DATASECTION>
+</TRANSFER>

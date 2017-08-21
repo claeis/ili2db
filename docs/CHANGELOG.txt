@@ -12,6 +12,50 @@ ideas/open issues/questions
 - einfache Liste mit den neu erzeugten Vertexpunkte (aufgrund der Overlap-Bereinigung)
 - Schalter für das "disablen" der Overlaps-Bereinigung. Bei vorhandenen gueltigen Overlaps erfolgen: a) Import mit NULL als Polygon, ohne Fehlermeldung, b) Import mit NULL als Polygon, mit Warning, c) kein Import, Fehlermeldung
 
+LATEST
+---------------------------
+
+ili2pg 3.10.6 (2017-08-21)
+-----------------------------
+- fixed import of forward references
+- iox-ili 1.19.5
+- fixed missing origin model of TRANSLATION OF in t_ili2db_model.modelname 
+
+ili2gpkg 3.10.5 (2017-08-18)
+-----------------------------
+- ehisqlgen-1.11.2
+- fixed export of models with identical column names in different secondary tables
+- fixed read/write of java class names to t_ili2db_settings
+
+ili2fgdb 3.10.4 (2017-08-16) BETA
+-----------------------------
+- ili2fgdb: fixed JVM crash
+- ili2fgdb: fixed sub-selects in prepared stmts
+- ili2fgdb: fixed NULL literal in select value list
+
+ili2fgdb 3.10.3 (2017-08-15) BETA
+-----------------------------
+- ili2fgdb: fixed "failed to create folder jdbc:ili2fgdb:../file.gdb" if using forward slashes in --dbfile arg
+
+ili2fgdb 3.10.2 (2017-08-14) BETA
+-----------------------------
+- ili2fgdb: fixed time import/export
+- ili2fgdb: added --fgdbXyResolution
+- ili2fgdb: added --fgdbXyTolerance
+- ili2fgdb: fixed NPE while --import
+
+ili2fgdb 3.10.1 (2017-08-14) BETA
+-----------------------------
+- ili2fgdb: support all datatypes
+- ili2fgdb: support export of structures
+- iox-ili 1.19.5
+- fixed --preScript/--postScript argument handling
+
+ili2fgdb 3.10.0 (2017-07-06) BETA
+-----------------------------
+- initial support of ESRI FileGDB API 1.5
+- read ilidoc as enum element description
+
 ili2pg/ili2gpkg 3.9.1 (2017-06-27)
 -----------------------------
 - added metaInfo/textKind=MTEXT

@@ -1,0 +1,44 @@
+INTERLIS 2.3;
+
+MODEL Assoc1
+  AT "mailto:ce@eisenhutinformatik.ch" VERSION "2015-09-23" =
+    
+  TOPIC Test =
+  
+    CLASS ClassA1 =
+    END ClassA1;
+    CLASS ClassA1b EXTENDS ClassA1 =
+    END ClassA1b;
+    CLASS ClassB1 =
+    END ClassB1;
+    ASSOCIATION a2b1=
+      /** docu */
+      a1 -- {0..*} ClassA1;
+      b1 -- {0..*} ClassB1;
+    END a2b1;
+
+    CLASS ClassA2 =
+    END ClassA2;
+    STRUCTURE StructA2 =
+    	refa2 : REFERENCE TO ClassA2;
+    END StructA2;
+    CLASS ClassB2 =
+    	strA2 : LIST OF StructA2;
+    END ClassB2;
+    ASSOCIATION a2b2=
+      /** docu */
+      a2 -- {0..1} ClassA2;
+      b2 -- {0..1} ClassB2;
+    END a2b2;
+
+    CLASS ClassA3 =
+    END ClassA3;
+    CLASS ClassB3 =
+    END ClassB3;
+    ASSOCIATION a2b3=
+      b3 -- {0..1} ClassB3;
+      a3 -- {0..1} ClassA3;
+    END a2b3;
+    
+  END Test;
+END Assoc1.

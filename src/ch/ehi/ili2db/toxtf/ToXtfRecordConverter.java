@@ -95,8 +95,10 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 			ret.append(", r0."+DbNames.T_SEQ_COL);
 		}
 		String sep=",";
+		int tableAliasIdx=0;
 		HashSet<AttributeDef> visitedAttrs=new HashSet<AttributeDef>();
 		for(ViewableWrapper table:aclass.getWrappers()){
+			String tableAlias = "r"+tableAliasIdx;
 			String sqlTableName=table.getSqlTablename();
 			Iterator iter = table.getAttrIterator();
 			while (iter.hasNext()) {
@@ -118,7 +120,7 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 							if(proxyType!=null && (proxyType instanceof ObjectType)){
 								// skip implicit particles (base-viewables) of views
 							}else{
-								 sep = addAttrToQueryStmt(ret, sep, baseAttr,sqlTableName);
+								 sep = addAttrToQueryStmt(ret, sep, tableAlias,baseAttr,sqlTableName);
 							}
 						}
 					}
@@ -136,18 +138,19 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 										 // TODO if(orderPos!=0){
 										 ret.append(sep);
 										 sep=",";
-										 ret.append(roleSqlName);
+										 ret.append(makeColumnRef(tableAlias,roleSqlName));
 									}
 								 }else{
 									 // TODO if(orderPos!=0){
 									 ret.append(sep);
 									 sep=",";
-									 ret.append(roleSqlName);
+									 ret.append(makeColumnRef(tableAlias,roleSqlName));
 								 }
 						  }
 				   }
 				}
 			}
+			tableAliasIdx++; // next table alias
 		}
 		// stdcols
 		if(createStdCols){
@@ -205,70 +208,76 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 		}
 		return ret.toString();
 	}
-	public String addAttrToQueryStmt(StringBuffer ret, String sep, AttributeDef attr,String sqlTableName) {
+	private String makeColumnRef(String tableAlias, String columnName) {
+		if(tableAlias==null){
+			return columnName;
+		}
+		return tableAlias+"."+columnName;
+	}
+	public String addAttrToQueryStmt(StringBuffer ret, String sep, String tableAlias,AttributeDef attr,String sqlTableName) {
 		if(attr.getExtending()==null){
 			Type type = attr.getDomainResolvingAliases();
 			 String attrSqlName=ili2sqlName.mapIliAttributeDef(attr,sqlTableName,null);
 			if( attr.isDomainIli1Date()) {
 				 ret.append(sep);
 				 sep=",";
-				 ret.append(geomConv.getSelectValueWrapperDate(attrSqlName));
+				 ret.append(geomConv.getSelectValueWrapperDate(makeColumnRef(tableAlias,attrSqlName)));
 			}else if( attr.isDomainIli2Date()) {
 				 ret.append(sep);
 				 sep=",";
-				 ret.append(geomConv.getSelectValueWrapperDate(attrSqlName));
+				 ret.append(geomConv.getSelectValueWrapperDate(makeColumnRef(tableAlias,attrSqlName)));
 			}else if( attr.isDomainIli2Time()) {
 				 ret.append(sep);
 				 sep=",";
-				 ret.append(geomConv.getSelectValueWrapperTime(attrSqlName));
+				 ret.append(geomConv.getSelectValueWrapperTime(makeColumnRef(tableAlias,attrSqlName)));
 			}else if( attr.isDomainIli2DateTime()) {
 				 ret.append(sep);
 				 sep=",";
-				 ret.append(geomConv.getSelectValueWrapperDateTime(attrSqlName));
+				 ret.append(geomConv.getSelectValueWrapperDateTime(makeColumnRef(tableAlias,attrSqlName)));
 			}else if (type instanceof CompositionType){
 				if(TrafoConfigNames.CATALOGUE_REF_TRAFO_COALESCE.equals(trafoConfig.getAttrConfig(attr, TrafoConfigNames.CATALOGUE_REF_TRAFO))){
 					 ret.append(sep);
 					 sep=",";
-					 ret.append(attrSqlName);
+					 ret.append(makeColumnRef(tableAlias,attrSqlName));
 				}else if(TrafoConfigNames.MULTISURFACE_TRAFO_COALESCE.equals(trafoConfig.getAttrConfig(attr, TrafoConfigNames.MULTISURFACE_TRAFO))){
 					 ret.append(sep);
 					 sep=",";
-					 ret.append(geomConv.getSelectValueWrapperMultiSurface(attrSqlName));
+					 ret.append(geomConv.getSelectValueWrapperMultiSurface(makeColumnRef(tableAlias,attrSqlName)));
 					 multiSurfaceAttrs.addMultiSurfaceAttr(attr);
 				}else if(TrafoConfigNames.MULTILINE_TRAFO_COALESCE.equals(trafoConfig.getAttrConfig(attr, TrafoConfigNames.MULTILINE_TRAFO))){
 					 ret.append(sep);
 					 sep=",";
-					 ret.append(geomConv.getSelectValueWrapperMultiPolyline(attrSqlName));
+					 ret.append(geomConv.getSelectValueWrapperMultiPolyline(makeColumnRef(tableAlias,attrSqlName)));
 					 multiLineAttrs.addMultiLineAttr(attr);
 				}else if(TrafoConfigNames.MULTILINGUAL_TRAFO_EXPAND.equals(trafoConfig.getAttrConfig(attr, TrafoConfigNames.MULTILINGUAL_TRAFO))){
 					for(String sfx:DbNames.MULTILINGUAL_TXT_COL_SUFFIXS){
 						 ret.append(sep);
 						 sep=",";
-						 ret.append(attrSqlName+sfx);
+						 ret.append(makeColumnRef(tableAlias,attrSqlName+sfx));
 					}
 				}
 			}else if (type instanceof PolylineType){
 				 ret.append(sep);
 				 sep=",";
-				 ret.append(geomConv.getSelectValueWrapperPolyline(attrSqlName));
+				 ret.append(geomConv.getSelectValueWrapperPolyline(makeColumnRef(tableAlias,attrSqlName)));
 			 }else if(type instanceof SurfaceOrAreaType){
 				 if(createItfLineTables){
 				 }else{
 					 ret.append(sep);
 					 sep=",";
-					 ret.append(geomConv.getSelectValueWrapperSurface(attrSqlName));
+					 ret.append(geomConv.getSelectValueWrapperSurface(makeColumnRef(tableAlias,attrSqlName)));
 				 }
 				 if(createItfAreaRef){
 					 if(type instanceof AreaType){
 						 ret.append(sep);
 						 sep=",";
-						 ret.append(geomConv.getSelectValueWrapperCoord(attrSqlName+DbNames.ITF_MAINTABLE_GEOTABLEREF_COL_SUFFIX));
+						 ret.append(geomConv.getSelectValueWrapperCoord(makeColumnRef(tableAlias,attrSqlName+DbNames.ITF_MAINTABLE_GEOTABLEREF_COL_SUFFIX)));
 					 }
 				 }
 			 }else if(type instanceof CoordType){
 				 ret.append(sep);
 				 sep=",";
-				 ret.append(geomConv.getSelectValueWrapperCoord(attrSqlName));
+				 ret.append(geomConv.getSelectValueWrapperCoord(makeColumnRef(tableAlias,attrSqlName)));
 			 }else if(type instanceof ReferenceType){
 					ArrayList<ViewableWrapper> targetTables = getTargetTables(((ReferenceType)type).getReferred());
 					for(ViewableWrapper targetTable:targetTables)
@@ -276,12 +285,12 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 						attrSqlName=ili2sqlName.mapIliAttributeDef(attr,sqlTableName,targetTable.getSqlTablename(),targetTables.size()>1);
 						 ret.append(sep);
 						 sep=",";
-						 ret.append(attrSqlName);
+						 ret.append(makeColumnRef(tableAlias,attrSqlName));
 					}				 
 			}else{
 				 ret.append(sep);
 				 sep=",";
-				 ret.append(attrSqlName);
+				 ret.append(makeColumnRef(tableAlias,attrSqlName));
 			}
 		   }
 		return sep;

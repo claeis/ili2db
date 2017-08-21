@@ -5,7 +5,7 @@ ili2db-Anleitung
 Überblick
 =========
 
-Ili2pg bzw. ili2gpkg ist ein in Java erstelltes Programm, das eine
+Ili2pg, ili2fgdb bzw. ili2gpkg ist ein in Java erstelltes Programm, das eine
 Interlis-Transferdatei (itf oder xtf) einem Interlis-Modell entsprechend
 (ili) mittels 1:1-Transfer in eine Datenbank (PostgreSQL/Postgis bzw.
 GeoPackage) schreibt oder aus der Datenbank mittels einem 1:1-Transfer
@@ -63,6 +63,11 @@ OID verwendet, wird die Funktion uuid_generate_v4() verwendet.
 Dazu muss die PostgreSQL-Erweiterung uuid-ossp konfiguriert sein
 (``CREATE EXTENSION "uuid-ossp";``).
 
+**FileGDB:** Es muss `Visual Studio 2015 C and C++ Runtimes <https://www.microsoft.com/en-us/download/details.aspx?id=48145>`_ 
+installiert sein. Je nach Java Version (Die Java Version ist massgebend, nicht die Windows Version) muss 
+die 32-bit oder 64-bit Version dieser Laufzeitbibliothek installiert sein. Falls diese Laufzeitbibliothek nicht 
+installiert ist, gibt es einen Fehler beim laden der FileGDB.dll.
+
 Lizenz
 ------
 
@@ -89,6 +94,10 @@ werden.
 
 **GeoPackage:** ``java -jar ili2gpkg.jar --schemaimport --dbfile
 mogis.gpkg path/to/dm01av.ili``
+
+**FileGDB:** ``java -jar ili2fgdb.jar --schemaimport --dbfile
+mogis.gdb path/to/dm01av.ili``
+
 
 Es werden keine Daten importiert, sondern nur die leeren Tabellen
 angelegt.
@@ -301,6 +310,8 @@ Aufruf-Syntax
 
 **GeoPackage:** ``java -jar ili2gpkg.jar [Options] [file]``
 
+**FileGDB:** ``java -jar ili2fgdb.jar [Options] [file]``
+
 Optionen:
 
 +-------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
@@ -353,6 +364,8 @@ Optionen:
 | --dbschema schema             | **PostGIS:** Definiert den Namen des Datenbank-Schemas. Default ist kein Wert, d.h. das aktuelle Schema des Benutzers der mit –user definiert wird.                                                                                                                                                                                                                                                                                                                                                                                        |
 +-------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | --dbfile filename             | **GeoPackage:** Name der GeoPackage-Datei.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+|                               |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+|                               | **FileGDB:** Name der ESRI File Geodatabase-Datei.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
 +-------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | --setupPgExt                  | **PostGIS:** erstellt postgreql Erweiterungen 'uuid-ossp' und 'postgis' (falls noch nicht vorhanden)                                                                                                                                                                                                                                                                                                                                                                                                                                       |
 +-------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
@@ -361,6 +374,10 @@ Optionen:
 | --defaultSrsAuth auth         | SRS Authority für Geometriespalten, wo sich dieser Wert nicht ermitteln lässt (für ili1 und ili2.3 immer der Fall). Default ist EPSG                                                                                                                                                                                                                                                                                                                                                                                                       |
 +-------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | --defaultSrsCode code         | SRS Code für Geometriespalten, wo sich dieser Wert nicht ermitteln lässt (für ili1 und ili2.3 immer der Fall). Default ist 21781                                                                                                                                                                                                                                                                                                                                                                                                           |
++-------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| --fgdbXyResolution value      | **FileGDB:** XY-Auflösung für Geometriespalten                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
++-------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| --fgdbXyTolerance value       | **FileGDB:** XY-Toleranz für Geometriespalten                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
 +-------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | --modeldir path               | Dateipfade, die Modell-Dateien (ili-Dateien) enthalten. Mehrere Pfade können durch Semikolon ‚;‘ getrennt werden. Es sind auch URLs von Modell-Repositories möglich. Default ist                                                                                                                                                                                                                                                                                                                                                           |
 |                               |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
@@ -924,11 +941,15 @@ Für die Abbildung von Aufzählungen gibt es zwei Varianten und verschiedene Opt
 |              |               !!@ili2db.dispName=grün                         |   iliCode varchar(1024) NOT NULL,    |                                                                                   |
 |              |               gruen                                           |   seq integer NULL,                  | iliCode ist der qualifizierte Elementnamen (=XTF-Code) des Aufzählwertes.         |
 |              |            );                                                 |   dispName varchar(250) NOT NULL,    |                                                                                   |
-|              |                                                               |   inactive boolean NOT NULL          | seq Definiert die Reihenfolge der Aufzählelemente.                                |
+|              |                                                               |   description varchar(1024) NULL,    | seq Definiert die Reihenfolge der Aufzählelemente.                                |
+|              |                                                               |   inactive boolean NOT NULL          |                                                                                   |
 |              |                                                               |  );                                  |                                                                                   |
 |              |                                                               |                                      | dispName definiert den Anzeigetext für das Aufzählelement. Beim Import wird die   |
 |              |                                                               |                                      | Spalte mit dem XTF-Code befüllt. Falls das Aufzählelement das Metaattribut        |
 |              |                                                               |                                      | @ili2db.dispName hat, wird dessen Wert verwendet.                                 |
+|              |                                                               |                                      |                                                                                   |
+|              |                                                               |                                      | description enthält die Beschreibung des Aufzählelements. Beim Import wird die    |
+|              |                                                               |                                      | Spalte mit dem ilidoc Kommentar aus dem Modell befüllt.                           |
 |              |                                                               |                                      |                                                                                   |
 |              |                                                               |                                      | inactive TRUE um einen Aufzählwert für die Erfassung auszublenden, ohne dass      |
 |              |                                                               |                                      | er gelöscht werden muss. Wird beim Import mit FALSE befüllt.                      |
@@ -942,6 +963,7 @@ Für die Abbildung von Aufzählungen gibt es zwei Varianten und verschiedene Opt
 |              |            );                                                 |   iliCode varchar(1024) NOT NULL,    |                                                                                   |
 |              |                                                               |   seq integer NULL,                  | itfCode ist der ITF-Code des Aufzählwertes.                                       |
 |              |                                                               |   dispName varchar(250) NOT NULL,    |                                                                                   |
+|              |                                                               |   description varchar(1024) NULL,    |                                                                                   |
 |              |                                                               |   inactive boolean NOT NULL          | iliCode ist der qualifizierte Elementnamen (=XTF-Code) des Aufzählwertes.         |
 |              |                                                               |  );                                  |                                                                                   |
 |              |                                                               |                                      | seq Definiert die Reihenfolge der Aufzählelemente.                                |
@@ -949,6 +971,9 @@ Für die Abbildung von Aufzählungen gibt es zwei Varianten und verschiedene Opt
 |              |                                                               |                                      | dispName definiert den Anzeigetext für das Aufzählelement. Beim Import wird die   |
 |              |                                                               |                                      | Spalte mit dem XTF-Code befüllt. Falls das Aufzählelement das Metaattribut        |
 |              |                                                               |                                      | @ili2db.dispName hat, wird dessen Wert verwendet.                                 |
+|              |                                                               |                                      |                                                                                   |
+|              |                                                               |                                      | description enthält die Beschreibung des Aufzählelements. Beim Import wird die    |
+|              |                                                               |                                      | Spalte mit dem ilidoc Kommentar aus dem Modell befüllt.                           |
 |              |                                                               |                                      |                                                                                   |
 |              |                                                               |                                      | inactive TRUE um einen Aufzählwert für die Erfassung auszublenden, ohne dass      |
 |              |                                                               |                                      | er gelöscht werden muss. Wird beim Import mit FALSE befüllt.                      |

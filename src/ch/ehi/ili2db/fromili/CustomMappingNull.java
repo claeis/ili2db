@@ -1,7 +1,6 @@
 package ch.ehi.ili2db.fromili;
 
 import java.sql.Connection;
-
 import ch.ehi.ili2db.gui.Config;
 import ch.ehi.sqlgen.repository.DbColumn;
 import ch.ehi.sqlgen.repository.DbTable;
@@ -43,6 +42,12 @@ public class CustomMappingNull implements CustomMapping {
 
 	@Override
 	public void postConnect(Connection conn, Config config) {
+	}
+
+	@Override
+	public Connection connect(String url, String dbusr, String dbpwd,
+			Config config) {
+		return null;
 	}
 
 }

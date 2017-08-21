@@ -7,6 +7,9 @@ class AttrMappingKey {
 	public AttrMappingKey(String iliname, String owner, String target) {
 		this.iliname = iliname;
 		this.owner = owner;
+		if(target!=null && target.trim().length()==0){
+			target=null;
+		}
 		this.target = target;
 	}
 	public String getIliname() {
