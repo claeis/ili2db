@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TRANSFER xmlns="http://www.interlis.ch/INTERLIS2.3">
+	<HEADERSECTION SENDER="ili2pg-2.2.0-20150910" VERSION="2.3">
+		<MODELS>
+			<MODEL NAME="Assoc1" VERSION="2015-09-23" URI="mailto:ce@eisenhutinformatik.ch"></MODEL>
+		</MODELS>
+	</HEADERSECTION>
+	<DATASECTION>
+		<!-- invalider Transfer; Referenz auf nicht existierendes Objekt -->
+		<Assoc1.Test BID="Assoc1.Test">
+			<Assoc1.Test.ClassA1 TID="a1"></Assoc1.Test.ClassA1>
+			<Assoc1.Test.ClassB1 TID="b1"></Assoc1.Test.ClassB1>
+			<Assoc1.Test.a2b1>
+				<a1 REF="a1"></a1>
+				<b1 REF="b1"></b1>
+			</Assoc1.Test.a2b1>
+			<Assoc1.Test.a2b1>
+				<a1 REF="a1x"></a1> <!-- kein Objekt mit dieser TID -->
+				<b1 REF="b1"></b1>
+			</Assoc1.Test.a2b1>
+			<Assoc1.Test.ClassA2 TID="a2"></Assoc1.Test.ClassA2>
+			<Assoc1.Test.ClassB2 TID="b2">
+				<strA2>
+					<Assoc1.Test.StructA2>
+						<refa2 REF="a2x"></refa2> <!-- kein Objekt mit dieser TID -->
+					</Assoc1.Test.StructA2>
+				</strA2>
+				<a2 REF="a2"></a2>
+			</Assoc1.Test.ClassB2>
+			<Assoc1.Test.ClassA3 TID="a3">
+				<b3 REF="b3x"></b3> <!-- kein Objekt mit dieser TID -->
+			</Assoc1.Test.ClassA3>
+		</Assoc1.Test>
+	</DATASECTION>
+</TRANSFER>
