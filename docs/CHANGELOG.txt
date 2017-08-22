@@ -14,6 +14,8 @@ ideas/open issues/questions
 
 LATEST
 ---------------------------
+- fixed import of references to existing objects in db
+- fixed statistics
 
 ili2pg 3.10.6 (2017-08-21)
 -----------------------------

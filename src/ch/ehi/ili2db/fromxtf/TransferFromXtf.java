@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Map;
 
 import ch.ehi.basics.logging.EhiLogger;
 import ch.ehi.ili2db.base.DbIdGen;
@@ -174,7 +175,7 @@ public class TransferFromXtf {
 		}
 	}
 		
-	public void doit(IoxReader reader,Config config,HashSet<BasketStat> stat)
+	public void doit(IoxReader reader,Config config,Map<Long,BasketStat> stat)
 	throws IoxException, Ili2dbException
 	{
 		if(functionCode==Config.FC_UPDATE || functionCode==Config.FC_REPLACE){
@@ -207,7 +208,6 @@ public class TransferFromXtf {
 			}
 		}
 
-		basketStat=stat;
 		today=new java.sql.Timestamp(System.currentTimeMillis());
 		if(doItfLineTables){
 			tag2class=ch.interlis.iom_j.itf.ModelUtilities.getTagMap(td);
@@ -333,6 +333,9 @@ public class TransferFromXtf {
 				}
 			}
 			
+			// setup list of objects that have external/forward references
+			delayedObjects=new ArrayList<FixIomObjectExtRefs>();
+			HashMap<String, ClassStat> objStat=null;			
 			StartBasketEvent basket=null;
 			// more baskets?
 			IoxEvent event=reader.read();
@@ -390,14 +393,13 @@ public class TransferFromXtf {
 								}else{
 									// TODO update attachmentKey of existing basket
 								}
-								// setup list of objects that have external/forward references
-								delayedObjects=new ArrayList<FixIomObjectExtRefs>();
 							} catch (SQLException ex) {
 								EhiLogger.logError("Basket "+basket.getType()+"(oid "+basket.getBid()+")",ex);
 							} catch (ConverterException ex) {
 								EhiLogger.logError("Basket "+basket.getType()+"(oid "+basket.getBid()+")",ex);
 							}
 							startTid=oidPool.getLastSqlId();
+							objStat=new HashMap<String, ClassStat>();
 							objCount=0;
 						}
 					}else if(event instanceof EndBasketEvent){
@@ -435,7 +437,7 @@ public class TransferFromXtf {
 									}
 								}
 								if(!skipObj){
-									doObject(basketSqlId,objPool.get(fixref.getRootTid()));
+									doObject(basketSqlId,objPool.get(fixref.getRootTid()),objStat);
 									fixedObjects.add(fixref);
 								}
 							}
@@ -452,7 +454,7 @@ public class TransferFromXtf {
 									filename=new java.io.File(xtffilename).getName();
 								}
 								long importId=writeImportBasketStat(importSqlId,basketSqlId,startTid,endTid,objCount);
-								saveObjStat(importId,basket.getBid(),filename,basket.getType());
+								saveObjStat(stat,importId,basket.getBid(),basketSqlId,filename,basket.getType(),objStat);
 							} catch (SQLException ex) {
 								EhiLogger.logError("Basket "+basket.getType()+"(oid "+basket.getBid()+")",ex);
 							} catch (ConverterException ex) {
@@ -471,7 +473,7 @@ public class TransferFromXtf {
 							IomObject iomObj=((ObjectEvent)event).getIomObject();
 							if(allReferencesKnown(basketSqlId,iomObj)){
 								// translate object
-								doObject(basketSqlId, iomObj);
+								doObject(basketSqlId, iomObj,objStat);
 							}
 						}
 					}else if(event instanceof EndTransferEvent){
@@ -508,7 +510,8 @@ public class TransferFromXtf {
 									
 								}
 								if(!skipObj){
-									doObject(fixref.getBasketSqlId(),objPool.get(fixref.getRootTid()));
+									objStat=stat.get(fixref.getBasketSqlId()).getObjStat();
+									doObject(fixref.getBasketSqlId(),objPool.get(fixref.getRootTid()),objStat);
 								}
 							}
 						}
@@ -967,10 +970,10 @@ public class TransferFromXtf {
 		
 	}
 
-	private void doObject(long basketSqlId, IomObject iomObj) {
+	private void doObject(long basketSqlId, IomObject iomObj,Map<String, ClassStat> objStat) {
 		try{
 			//EhiLogger.debug(iomObj.toString());
-			writeObject(basketSqlId,iomObj,null);
+			writeObject(basketSqlId,iomObj,null,objStat);
 		}catch(ConverterException ex){
 			EhiLogger.debug(iomObj.toString());
 			EhiLogger.logError("Object "+iomObj.getobjectoid()+" at (line "+iomObj.getobjectline()+",col "+iomObj.getobjectcol()+")",ex);
@@ -984,7 +987,7 @@ public class TransferFromXtf {
 		while(!structQueue.isEmpty()){
 			StructWrapper struct=(StructWrapper)structQueue.remove(0); // get front
 			try{
-				writeObject(basketSqlId,struct.getStruct(),struct);
+				writeObject(basketSqlId,struct.getStruct(),struct,objStat);
 			}catch(ConverterException ex){
 				EhiLogger.logError("Object "+iomObj.getobjectoid()+"; Struct at (line "+struct.getStruct().getobjectline()+",col "+struct.getStruct().getobjectcol()+")",ex);
 			}catch(java.sql.SQLException ex){
@@ -1291,7 +1294,7 @@ public class TransferFromXtf {
 
 	/** if structEle==null, iomObj is an object. If structEle!=null iomObj is a struct value.
 	 */
-	private void writeObject(long basketSqlId,IomObject iomObj,StructWrapper structEle)
+	private void writeObject(long basketSqlId,IomObject iomObj,StructWrapper structEle,Map<String, ClassStat> objStat)
 		throws java.sql.SQLException,ConverterException
 	{
 		String tag=iomObj.getobjecttag();
@@ -1333,7 +1336,7 @@ public class TransferFromXtf {
 			 // get a new sql id
 			 sqlId=oidPool.newObjSqlId();
 		 }
-		 updateObjStat(tag,sqlId);
+		 updateObjStat(objStat,tag,sqlId);
 		 // loop over all classes; start with leaf, end with the base of the inheritance hierarchy
 		 ViewableWrapper aclass=class2wrapper.get(aclass1);
 		 while(aclass!=null){
@@ -1460,9 +1463,7 @@ public class TransferFromXtf {
 		}
 		
 	}
-	private HashSet<BasketStat> basketStat=null;
-	private HashMap<String, ClassStat> objStat=new HashMap<String, ClassStat>();
-	private void updateObjStat(String tag, long sqlId)
+	private void updateObjStat(Map<String, ClassStat> objStat,String tag, long sqlId)
 	{
 		if(objStat.containsKey(tag)){
 			ClassStat stat=objStat.get(tag);
@@ -1472,16 +1473,14 @@ public class TransferFromXtf {
 			objStat.put(tag,stat);
 		}
 	}
-	private void saveObjStat(long sqlImportId,String iliBasketId,String file,String topic) throws SQLException
+	private void saveObjStat(Map<Long,BasketStat> basketStat,long sqlImportId,String iliBasketId,long basketSqlId,String file,String topic,HashMap<String, ClassStat> objStat) throws SQLException
 	{
 		for(String className : objStat.keySet()){
 			ClassStat stat=objStat.get(className);
 			writeImportStatDetail(sqlImportId,stat.getStartid(),stat.getEndid(),stat.getObjcount(),className);
 		}
 		// save it for later output to log
-		basketStat.add(new BasketStat(file,topic,iliBasketId,objStat));
-		// setup new collection
-		objStat=new HashMap<String, ClassStat>();
+		basketStat.put(basketSqlId,new BasketStat(file,topic,iliBasketId,objStat));
 	}
 
 	private long writeImportStat(long datasetSqlId,String importFile,java.sql.Timestamp importDate,String importUsr)

@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Map;
 
 import ch.ehi.basics.logging.EhiLogger;
 import ch.ehi.basics.logging.LogEvent;
@@ -549,7 +550,7 @@ public class Ili2db {
 				
 				// process xtf files
 				EhiLogger.logState("process data file...");
-				HashSet<BasketStat> stat=new HashSet<BasketStat>();
+				Map<Long,BasketStat> stat=new HashMap<Long,BasketStat>();
 				errs=new ch.ehi.basics.logging.ErrorTracker();
 				EhiLogger.getInstance().addListener(errs);
 				if(zipXtfEntry!=null){
@@ -745,9 +746,9 @@ public class Ili2db {
 		    }
 		}
 	}
-	private static void logStatistics(boolean isIli1,HashSet<BasketStat> stat)
+	private static void logStatistics(boolean isIli1,Map<Long,BasketStat> stat)
 	{
-		ArrayList<BasketStat> statv=new ArrayList<BasketStat>(stat);
+		ArrayList<BasketStat> statv=new ArrayList<BasketStat>(stat.values());
 		java.util.Collections.sort(statv,new java.util.Comparator<BasketStat>(){
 			@Override
 			public int compare(BasketStat b0, BasketStat b1) {
@@ -1426,7 +1427,7 @@ public class Ili2db {
 			  // process xtf files
 			  EhiLogger.logState("process data...");
 			  EhiLogger.logState("data <"+xtffile+">");
-				HashSet<BasketStat> stat=new HashSet<BasketStat>();
+				Map<Long,BasketStat> stat=new HashMap<Long,BasketStat>();
 				ch.ehi.basics.logging.ErrorTracker errs=new ch.ehi.basics.logging.ErrorTracker();
 				EhiLogger.getInstance().addListener(errs);
 				transferToXtf(conn,xtffile,mapping,td,geomConverter,config.getSender(),config,exportModelnames,basketSqlIds,stat,trafoConfig,class2wrapper);
@@ -1910,7 +1911,7 @@ public class Ili2db {
 			SqlColumnConverter geomConv,
 			DbIdGen idGen,
 			Config config,
-			HashSet<BasketStat> stat,
+			Map<Long,BasketStat> stat,
 			TrafoConfig trafoConfig,Viewable2TableMapping class2wrapper){	
 		try{
 			TransferFromXtf trsfr=new TransferFromXtf(function,ili2sqlName,td,conn,dbusr,geomConv,idGen,config,trafoConfig,class2wrapper);
@@ -1929,7 +1930,7 @@ public class Ili2db {
 			,Config config
 			,String exportParamModelnames[]
 			,long basketSqlIds[]
-			,HashSet<BasketStat> stat
+			,Map<Long,BasketStat> stat
 			,TrafoConfig trafoConfig
 			,Viewable2TableMapping class2wrapper){	
 
