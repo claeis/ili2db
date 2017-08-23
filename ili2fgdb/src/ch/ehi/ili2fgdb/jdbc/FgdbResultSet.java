@@ -854,7 +854,9 @@ public class FgdbResultSet implements ResultSet {
 
 	@Override
 	public boolean next() throws SQLException {
-		fgdbCurrentRow=new Row();
+		if(fgdbCurrentRow==null){
+			fgdbCurrentRow=new Row();
+		}
 		return rowIterator.Next(fgdbCurrentRow) == 0;
 	}
 
