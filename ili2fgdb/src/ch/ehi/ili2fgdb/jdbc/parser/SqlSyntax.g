@@ -57,7 +57,7 @@ statement
 	returns [AbstractSelectStmt stmt]
 	{
 	stmt=null;
-	AbstractSelectStmt subselect=null;
+	AbstractSelectStmt stmt2=null;
 	List<SelectValue> fv=null;
 	SqlQname w0=null;
 	SqlQname w1=null;
@@ -66,21 +66,11 @@ statement
 	Value v0=null;
 	}
   : "SELECT" fv=select_list_ce 
-                       "FROM" (  (t:NAME (("AS")? NAME)? { 
-                       			stmt=new FgdbSelectStmt();
-                       			stmt.setTableName(t.getText());
-					for(SelectValue f:fv){
-						stmt.addField(f);
-					}
-                       		})
-                       		| ( LPAREN subselect=select_statement RPAREN ("AS")? t2:NAME {
-                       			stmt=new ComplexSelectStmt(subselect);
-                       			stmt.setTableName(t2.getText());
-					for(SelectValue f:fv){
-						stmt.addField(f);
-					}
-                       		})
-                       )
+                       "FROM"  (stmt=from_item[fv]
+                       		( "LEFT" "JOIN" stmt2=from_item[fv] "ON" w0=sqlqname EQUALS w1=sqlqname {
+                       			stmt=new JoinStmt(stmt,stmt2,w0,w1);
+                       		})*
+                       	)
                        // ("WHERE" search_condition)?
                        ("WHERE" w0=sqlqname EQUALS ( 
                        			(QUESTION {v0=new Param(paramIdx++);}) 
@@ -99,6 +89,29 @@ statement
                        
                        ("ORDER" "BY" c=sqlqname {stmt.orderBy(c.getLocalName());} ("ASC" {stmt.orderAsc();})?)?;
 
+from_item[List<SelectValue> fv]
+	returns [AbstractSelectStmt stmt]
+	{
+	stmt=null;
+	AbstractSelectStmt subselect=null;
+	}
+  :
+  (t:NAME (("AS")? NAME)? { 
+		stmt=new FgdbSelectStmt();
+		stmt.setTableName(t.getText());
+		for(SelectValue f:fv){
+			stmt.addField(f);
+		}
+	})
+	| ( LPAREN subselect=select_statement RPAREN ("AS")? t2:NAME {
+		stmt=new ComplexSelectStmt(subselect);
+		stmt.setTableName(t2.getText());
+		for(SelectValue f:fv){
+			stmt.addField(f);
+		}
+	})
+  ;
+  
 sub_query 
   {
   AbstractSelectStmt c=null;

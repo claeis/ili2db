@@ -13,6 +13,8 @@ public class AbstractSelectStmt extends SqlStmt {
 	public void setTableName(String tableName) {
 		this.tableName = tableName;
 	}
+	/** evtl. mehr Spalten vorhanden, als in der Tabelle vorhanden sind
+	 */
 	public List<SelectValue> getFields() {
 		return fields;
 	}
