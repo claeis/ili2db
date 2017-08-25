@@ -104,6 +104,9 @@ public class Fgdb2iox
 
     int typeInt = dis.readInt();
     int geometryType = typeInt & EsriShpConstants.shapeBasicTypeMask;
+    if(geometryType==EsriShpConstants.ShapeNull){
+    	return null;
+    }
     // determine if Z values are present
 	hasZ = geometryType == EsriShpConstants.ShapePointZM
 				|| geometryType == EsriShpConstants.ShapePointZ
