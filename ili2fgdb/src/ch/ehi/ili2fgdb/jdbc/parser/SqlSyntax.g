@@ -64,12 +64,24 @@ statement
 	SqlQname c=null;
 	int paramIdx=0;
 	Value v0=null;
+	JoinStmt jstmt=null;
 	}
   : "SELECT" fv=select_list_ce 
                        "FROM"  (stmt=from_item[fv]
                        		( "LEFT" "JOIN" stmt2=from_item[fv] "ON" w0=sqlqname EQUALS w1=sqlqname {
-                       			stmt=new JoinStmt(stmt,stmt2,w0,w1);
+                       			if(jstmt==null){
+	                       			jstmt=new JoinStmt(stmt,w0);
+	                       			stmt=jstmt;
+                       			}
+                       			jstmt.addRight(stmt2,w1);
                        		})*
+                       		{
+					if(jstmt!=null){
+						for(SelectValue f:fv){
+							stmt.addField(f);
+						}
+					}
+                       		}
                        	)
                        // ("WHERE" search_condition)?
                        ("WHERE" w0=sqlqname EQUALS ( 
@@ -96,18 +108,21 @@ from_item[List<SelectValue> fv]
 	AbstractSelectStmt subselect=null;
 	}
   :
-  (t:NAME (("AS")? NAME)? { 
+  (t:NAME (("AS")? ta:NAME)? { 
 		stmt=new FgdbSelectStmt();
 		stmt.setTableName(t.getText());
+		if(ta!=null){
+			stmt.setTableAlias(ta.getText());
+		}
 		for(SelectValue f:fv){
-			stmt.addField(f);
+			AbstractSelectStmt.addField(stmt,f);
 		}
 	})
 	| ( LPAREN subselect=select_statement RPAREN ("AS")? t2:NAME {
 		stmt=new ComplexSelectStmt(subselect);
 		stmt.setTableName(t2.getText());
 		for(SelectValue f:fv){
-			stmt.addField(f);
+			AbstractSelectStmt.addField(stmt,f);
 		}
 	})
   ;

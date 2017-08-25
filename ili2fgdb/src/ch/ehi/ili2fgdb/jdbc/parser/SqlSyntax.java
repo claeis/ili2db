@@ -190,6 +190,7 @@ public SqlSyntax(ParserSharedInputState state) {
 			SqlQname c=null;
 			int paramIdx=0;
 			Value v0=null;
+			JoinStmt jstmt=null;
 			
 		
 		match(LITERAL_SELECT);
@@ -209,7 +210,11 @@ public SqlSyntax(ParserSharedInputState state) {
 				match(EQUALS);
 				w1=sqlqname();
 				
-							stmt=new JoinStmt(stmt,stmt2,w0,w1);
+							if(jstmt==null){
+					                       			jstmt=new JoinStmt(stmt,w0);
+					                       			stmt=jstmt;
+							}
+							jstmt.addRight(stmt2,w1);
 						
 			}
 			else {
@@ -218,6 +223,13 @@ public SqlSyntax(ParserSharedInputState state) {
 			
 		} while (true);
 		}
+		
+							if(jstmt!=null){
+								for(SelectValue f:fv){
+									stmt.addField(f);
+								}
+							}
+				
 		}
 		{
 		if ((LA(1)==LITERAL_WHERE)) {
@@ -459,6 +471,7 @@ public SqlSyntax(ParserSharedInputState state) {
 		AbstractSelectStmt stmt;
 		
 		Token  t = null;
+		Token  ta = null;
 		Token  t2 = null;
 		
 			stmt=null;
@@ -482,6 +495,7 @@ public SqlSyntax(ParserSharedInputState state) {
 				}
 				
 				}
+				ta = LT(1);
 				match(NAME);
 			}
 			else if ((_tokenSet_0.member(LA(1)))) {
@@ -494,8 +508,11 @@ public SqlSyntax(ParserSharedInputState state) {
 			
 					stmt=new FgdbSelectStmt();
 					stmt.setTableName(t.getText());
+					if(ta!=null){
+						stmt.setTableAlias(ta.getText());
+					}
 					for(SelectValue f:fv){
-						stmt.addField(f);
+						AbstractSelectStmt.addField(stmt,f);
 					}
 				
 			}
@@ -522,7 +539,7 @@ public SqlSyntax(ParserSharedInputState state) {
 					stmt=new ComplexSelectStmt(subselect);
 					stmt.setTableName(t2.getText());
 					for(SelectValue f:fv){
-						stmt.addField(f);
+						AbstractSelectStmt.addField(stmt,f);
 					}
 				
 			}
