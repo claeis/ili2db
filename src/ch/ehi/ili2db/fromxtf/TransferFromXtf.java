@@ -218,7 +218,8 @@ public class TransferFromXtf {
 		unknownTypev=new HashSet();
 		structQueue=new ArrayList();
 		boolean surfaceAsPolyline=true;
-
+		boolean ignoreUnresolvedReferences=false;
+		
 		recman=new ObjectPoolManager();
 		try{
 			objPool=recman.newObjectPool();
@@ -497,14 +498,18 @@ public class TransferFromXtf {
 											// read object
 											Long sqlid=readObjectSqlid(aclass,xtfid);
 											if(sqlid==null){
+												if(!ignoreUnresolvedReferences){
+													EhiLogger.logError("unknown referenced object "+aclass.getScopedName(null)+" TID "+xtfid+" referenced from "+fixref.getRootTag()+" TID "+fixref.getRootTid());
+													referrs=true;
+													skipObj=true;
+												}
+											}
+										}else{
+											if(!ignoreUnresolvedReferences){
 												EhiLogger.logError("unknown referenced object "+aclass.getScopedName(null)+" TID "+xtfid+" referenced from "+fixref.getRootTag()+" TID "+fixref.getRootTid());
 												referrs=true;
 												skipObj=true;
 											}
-										}else{
-											EhiLogger.logError("unknown referenced object "+aclass.getScopedName(null)+" TID "+xtfid+" referenced from "+fixref.getRootTag()+" TID "+fixref.getRootTid());
-											referrs=true;
-											skipObj=true;
 										}
 									}
 									
