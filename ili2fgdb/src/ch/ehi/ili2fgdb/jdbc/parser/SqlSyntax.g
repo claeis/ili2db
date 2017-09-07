@@ -375,7 +375,7 @@ NUMBER          :
 
 
 NAME   options { testLiterals = true; }
-  :  LETTER
+  :  (LETTER | '_' )
      ( LETTER | '_' | DIGIT )*
   ;
 
