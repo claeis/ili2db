@@ -329,9 +329,6 @@ public class Fgdb2iox
 			|| geometryType == EsriShpConstants.ShapePolygonZ
 			|| geometryType == EsriShpConstants.ShapeGeneralPolygon){
 		if(cParts==1){
-			if(points.length<=3) {
-				System.out.println("Not a Ring");
-			}
 			LineString line=getPolyline(fact,0,points,partStart,arcs,true);
 			if(line.getCoordinateSequence().size()<=3) {
 				throw new IoxException("Not a Ring");
@@ -349,6 +346,9 @@ public class Fgdb2iox
 		ArrayList<LineString> holes=new ArrayList<LineString>();
 		for(int i=0;i<cParts;i++){
 			LineString line=getPolyline(fact,i,points,partStart,arcs,true);
+			if(line.getCoordinateSequence().size()<=3) {
+				throw new IoxException("Not a Ring");
+			}
 			if(CGAlgorithms.isCCW(line.getCoordinates())){
 				holes.add(line);
 			}else{
