@@ -266,6 +266,27 @@ public class Fgdb2iox
 				//double skip2=dis.readDouble();
 				//double skip3=dis.readDouble();
 				arcs.put(startPointIndex, new Arc(startPointIndex, v1, v2, bits));
+			}else if(segmentType==EsriShpConstants.segmentLine){
+				// will never appear; should be ignored
+			}else if(segmentType==EsriShpConstants.segmentSpiral){
+			}else if(segmentType==EsriShpConstants.segmentBezier3Curve){
+				// two middle control points
+				double skip1=dis.readDouble();
+				double skip2=dis.readDouble();
+				double skip3=dis.readDouble();
+				double skip4=dis.readDouble();
+			}else if(segmentType==EsriShpConstants.segmentEllipticArc){
+				// center
+				double skip1=dis.readDouble();
+				double skip2=dis.readDouble();
+				// rotation or fromV
+				double skip3=dis.readDouble();
+				// semiMajor
+				double skip4=dis.readDouble();
+				// minorMajorRatio or deltaV
+				double skip5=dis.readDouble();
+				// bits
+				int skip6=dis.readInt();
 			}else if(segmentType==0){
 				break;
 			}else{
