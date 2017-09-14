@@ -132,6 +132,8 @@ public class SimpleFgdbTest {
 		config.setMultilingualTrafo(null);
 		config.setInheritanceTrafo(null);
 		config.setDefaultSrsCode("2056");
+		config.setValue(GeneratorFgdb.XY_RESOLUTION, "0.005");
+		config.setValue(GeneratorFgdb.XY_TOLERANCE, "0.05");
 		//Ili2db.readSettingsFromDb(config);
 		Ili2db.run(config,null);
 	}

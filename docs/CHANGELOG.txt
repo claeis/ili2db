@@ -19,6 +19,7 @@ LATEST
 - ili2fgdb: fixed export of curve section (ignore Spiral, Bezier3Curve, EllipticArc)
 - ili2fgdb: close boundaries of polygons, if not yet closed
 - ili2fgdb: fixed export of Dates (if user stored timestamps)
+- ili2fgdb: fixed setting of xyResolution and xyTolerance
 
 
 ili2pg/ili2fgdb 3.10.7 (2017-08-23)
