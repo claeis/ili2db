@@ -52,6 +52,30 @@ Interlis-Transferdatei.
 Geometrien vom Typ Area und Surface werden bei Interlis 1 während dem
 Export in Linien umgewandelt.
 
+Log-Meldungen
+-------------
+Die Log-Meldungen sollen dem Benutzer zeigen, was das Programm macht.
+Am Anfang erscheinen Angaben zur Programm-Version.
+Falls das Programm ohne Fehler durchläuft, wird das am Ende ausgegeben.::
+	
+  Info: ili2fgdb-3.10.7-20170823
+  ...
+  Info: compile models...
+  ...
+  Info: ...export done
+
+Bei einem Fehler wird das am Ende des Programms vermerkt. Der eigentliche 
+Fehler wird aber in der Regel schon früher ausgegeben.::
+	
+  Info: ili2fgdb-3.10.7-20170823
+  ...
+  Info: compile models...
+  ...
+  Error: DM01.Bodenbedeckung.BoFlaeche_Geometrie: intersection tids 48, 48
+  ...
+  Error: ...import failed
+
+
 Laufzeitanforderungen
 ---------------------
 
@@ -114,6 +138,10 @@ gpkg\_contents und gpkg\_geometry\_columns registriert.
 
 Falls die Datei mogis.gpkg noch nicht existiert, wird sie erzeugt und
 mit den für GeoPackage nötigen Metatabellen initialisiert.
+Falls die Datei schon existiert, werden die Tabellen ergänzt.
+
+**FileGDB:** Falls die Datei mogis.gdb noch nicht existiert, wird sie erzeugt.
+Falls die Datei schon existiert, werden die Tabellen ergänzt.
 
 Fall 2 (nur PostGIS)
 ~~~~~~~~~~~~~~~~~~~~
@@ -135,11 +163,14 @@ Die Tabellen existieren nicht und sollen in der Datenbank angelegt
 werden und die Daten sollen importiert werden:
 
 **PostGIS:** ``java -jar ili2pg.jar --import --dbhost ofaioi4531 --dbport
-5432 --dbdatabase mogis --dbusr julia --dbpwd romeo --log
-path/to/logfile path/to/260100.itf``
+5432 --dbdatabase mogis --dbusr julia --dbpwd romeo 
+--createEnumTabs --createBasketCol --log path/to/logfile path/to/260100.itf``
 
 **GeoPackage:** ``java -jar ili2gpkg.jar --import --dbfile mogis.gpkg
---log path/to/logfile path/to/260100.itf``
+--createEnumTabs --createBasketCol --log path/to/logfile path/to/260100.itf``
+
+**FileGDB:** ``java -jar ili2fgdb.jar --import --dbfile mogis.gdb
+--createEnumTabs --createBasketCol --log path/to/logfile path/to/260100.itf``
 
 Alle Tabellen werden in der Datenbank erstellt und das Itf 260100.itf
 importiert. Die Geometrie-Spalten werden registriert. Als Primary-Key
@@ -168,6 +199,9 @@ julia --dbpwd romeo path/to/260100.itf``
 **GeoPackage:** ``java -jar ili2gpkg.jar --import --dbfile mogis.gpkg
 path/to/260100.itf``
 
+**FileGDB:** ``java -jar ili2fgdb.jar --import --dbfile mogis.gdb
+path/to/260100.itf``
+
 Das Itf 260100.itf wird importiert und die Daten den bereits vorhanden
 Tabellen hinzugefügt. Die Tabellen können zusätzliche Attribute
 enthalten (z.B. bfsnr, datum etc.), welche beim Import leer bleiben.
@@ -183,6 +217,9 @@ mogis --dbusr julia --dbpwd romeo path/to/260100.itf``
 
 **GeoPackage:** ``java -jar ili2gpkg.jar --import --deleteData --dbfile
 mogis.gpkg path/to/260100.itf``
+
+**FileGDB:** ``java -jar ili2fgdb.jar --import --deleteData --dbfile
+mogis.gdb path/to/260100.itf``
 
 Das Itf 260100.itf wird importiert und die bestehenden Daten in den
 bereits vorhanden Tabellen gelöscht. Die Tabellen können zusätzliche
@@ -200,6 +237,9 @@ Enumerations werden zusätzlich als Textattribut hinzugefügt:
 **GeoPackage:** ``java -jar ili2gpkg.jar --import --createEnumTxtCol
 --dbfile mogis.gpkg path/to/260100.itf``
 
+**FileGDB:** ``java -jar ili2fgdb.jar --import --createEnumTxtCol
+--dbfile mogis.gdb path/to/260100.itf``
+
 Das Itf wird in die Datenbank importiert. Zusätzlich werden die
 Attribute vom Typ Enumeration in ihrer Textrepräsentation (Attribut
 „art“ = 0 ⇒ „art\_txt“ = „Gebaeude“) hinzugefügt.
@@ -216,6 +256,9 @@ path/to/260100.itf``
 
 **GeoPackage:** ``java -jar ili2gpkg.jar --import --defaultSrsAuth EPSG
 --defaultSrsCode 2056 --dbfile mogis.gpkg path/to/260100.itf``
+
+**FileGDB:** ``java -jar ili2fgdb.jar --import --defaultSrsAuth EPSG
+--defaultSrsCode 2056 --dbfile mogis.gdb path/to/260100.itf``
 
 Das Itf wird in die Datenbank importiert. Zusätzlich wird jeder
 Geometrie eine SRS-ID
@@ -238,13 +281,21 @@ mogis.gpkg path/to/260100.itf``
 Das Itf wird in die Datenbank importiert. Die Geometrien werden
 indexiert.
 
+**FileGDB:** Die Geometrien sind grundsätzlich immer indexiert.
+
 Fall 9
 ~~~~~~
 
 Tauchen beim Import des Itf Fehler auf (z. B. mangelnde
 Modellkonformität oder verletzte Constraints in der DB), bricht der
-Import ab und keine Daten werden importiert. D.h. der Import in die
-Datenbank ist ein einzelner Commit.
+Import ab.
+
+**PostGIS, GeoPackage:** Bei einem Fehler werden keine Daten importiert,
+d.h. der Import in die Datenbank ist ein einzelner Commit.
+
+**FileGDB:** Da die FileGDB keine Transaktionen unterstützt, werden die Daten 
+teilweise importiert, und die FileGDB befindet sich danach evtl. in einem 
+inkonsistenten Zustand.
 
 Export-Funktionen
 -----------------
@@ -262,6 +313,9 @@ path/to/output.itf``
 **GeoPackage:** ``java -jar ili2gpkg.jar --export --models DM01AV --dbfile
 mogis.gpkg path/to/output.itf``
 
+**FileGDB:** ``java -jar ili2fgdb.jar --export --models DM01AV --dbfile
+mogis.gdb path/to/output.itf``
+
 Die Tabellen werden dem Interlis-Modell DM01AV entsprechend in die
 Interlis 1-Transferdatei output.itf geschrieben. Fehlende Tabellen in
 der Datenbank werden dementsprechend als leere Tabellen oder gar nicht
@@ -269,7 +323,7 @@ der Datenbank werden dementsprechend als leere Tabellen oder gar nicht
 Attribute in einer Datenbanktabelle werden mit einem „@“ substituiert.
 
 Anhand des Parameters --models wird definiert, welche Daten exportiert
-werden. Alternativ kann auch der Parameter --topics oder --baskets
+werden. Alternativ kann auch der Parameter --topics, --baskets oder --dataset
 verwendet werden, um die zu exportierenden Daten auszuwählen. Einer
 dieser Parameter muss also zwingend beim Export angegeben werden.
 
@@ -286,12 +340,15 @@ path/to/output.xtf``
 **GeoPackage:** ``java -jar ili2gpkg.jar --export --models DM01AV --dbfile
 mogis.gpkg path/to/output.xtf``
 
+**FileGDB:** ``java -jar ili2fgdb.jar --export --models DM01AV --dbfile
+mogis.gdb path/to/output.xtf``
+
 Die Tabellen werden dem Interlis-Modell DM01AV entsprechend in das die
 Interlis 2-Transferdatei output.xtf geschrieben. Fehlende Tabellen und
 Attribute in der Datenbank werden gar nicht in die Datei geschrieben.
 
 Anhand des Parameters --models wird definiert, welche Daten exportiert
-werden. Alternativ kann auch der Parameter --topics oder --baskets
+werden. Alternativ kann auch der Parameter --topics, --baskets oder --dataset
 verwendet werden, um die zu exportierenden Daten auszuwählen. Einer
 dieser Parameter muss also zwingend beim Export angegeben werden.
 
@@ -302,6 +359,9 @@ In den folgenden Abschnitten werden einzelne Aspekte detailliert, aber
 isoliert, beschrieben. Die Funktionsweise als Ganzes wird anhand
 einzelner Anwendungsfälle beispielhaft im Kapitel „Funktionsweise“
 (weiter oben) beschrieben.
+
+Die Dokumentation gilt grundsätzlich für alle ili2xy Varianten, ausser es 
+gibt einen spezifischen Hinweis auf PostGIS, GeoPackage oder FileGDB.
 
 Aufruf-Syntax
 -------------
@@ -383,11 +443,15 @@ Optionen:
 |                               |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
 |                               | %ILI\_FROM\_DB;%XTF\_DIR;http://models.interlis.ch/;%JAR\_DIR                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
 |                               |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+|                               | Es werden folgende Platzhalter unterstützt:                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+|                               |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
 |                               | %ILI\_FROM\_DB ist ein Platzhalter für die in der Datenbank vorhandenen Modelle (in der Tabelle t\_ili2db\_model).                                                                                                                                                                                                                                                                                                                                                                                                                         |
 |                               |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
 |                               | %XTF\_DIR ist ein Platzhalter für das Verzeichnis mit der Transferdatei.                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
 |                               |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
 |                               | %JAR\_DIR ist ein Platzhalter für das Verzeichnis des ili2db Programms (ili2pg.jar bzw. ili2gpkg.jar Datei).                                                                                                                                                                                                                                                                                                                                                                                                                               |
+|                               |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+|                               | %ILI_FROM_DB sollte i.d.R. der erste Pfad sein (damit mehrere Imports und Exports das selbe Modell verwenden).                                                                                                                                                                                                                                                                                                                                                                                                                             |
 |                               |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
 |                               | Der erste Modellname (Hauptmodell), zu dem ili2db die ili-Datei sucht, ist nicht von der INTERLIS-Sprachversion abhängig. Es wird in folgender Reihenfolge nach einer ili-Datei gesucht: zuerst INTERLIS 2.3, dann 1.0 und zuletzt 2.2.                                                                                                                                                                                                                                                                                                    |
 |                               |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
@@ -399,7 +463,7 @@ Optionen:
 +-------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | --baskets BID                 | BID der Baskets, die importiert oder exportiert werden sollen. Mehrere BIDs können durch Semikolon ‚;‘ getrennt werden.                                                                                                                                                                                                                                                                                                                                                                                                                    |
 +-------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| --topics topicname            | Topic-Namen der Baskets, die importiert oder exportiert werden sollen. Mehrere Namen können durch Semikolon ‚;‘ getrennt werden. Falls der Topic-Name in verschiedenen Modellen vorkommt, muss der qualifizierte Topic-Name verwendet werden.                                                                                                                                                                                                                                                                                              |
+| --topics topicname            | Topic-Namen der Baskets, die importiert oder exportiert werden sollen. Mehrere Namen können durch Semikolon ‚;‘ getrennt werden. Es muss der qualifizierte Topic-Name (Model.Topic) verwendet werden.                                                                                                                                                                                                                                                                                                                                      |
 +-------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | --createscript filename       | Erstellt zusätzlich zur Tabellenstruktur in der Datenbank ein SQL-Skript um die Tabellenstruktur unabhängig vom Programm erstellen zu können. Das Skript wird zusätzlich zu den Tabellen in der Datenbank erzeugt, d.h. es ist nicht möglich, nur das Skript zu erstellen (ohne Datenbank).                                                                                                                                                                                                                                                |
 +-------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
