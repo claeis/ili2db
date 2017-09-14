@@ -15,6 +15,21 @@ ideas/open issues/questions
 LATEST
 ---------------------------
 
+ili2fgdb 3.10.8 (2017-09-14)
+-----------------------------
+- ili2fgdb: fixed import/export of NULL shapes
+- ili2fgdb: fixed export of classes with multiple geometries
+- ili2fgdb: fixed export of curve section (ignore Spiral, Bezier3Curve, EllipticArc)
+- ili2fgdb: close boundaries of polygons, if not yet closed
+- ili2fgdb: fixed export of Dates (if user stored timestamps)
+- ili2fgdb: fixed setting of xyResolution and xyTolerance
+- iox-ili 1.19.7
+
+ili2pg/ili2fgdb 3.10.7 (2017-08-23)
+-----------------------------
+- fixed import of references to existing objects in db
+- fixed statistics
+
 ili2pg 3.10.6 (2017-08-21)
 -----------------------------
 - fixed import of forward references

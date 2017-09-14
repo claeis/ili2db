@@ -179,91 +179,57 @@ public SqlSyntax(ParserSharedInputState state) {
 	public final AbstractSelectStmt  select_statement() throws RecognitionException, TokenStreamException {
 		AbstractSelectStmt stmt;
 		
-		Token  t = null;
-		Token  t2 = null;
 		Token  n = null;
 		Token  s = null;
 		
 			stmt=null;
-			AbstractSelectStmt subselect=null;
+			AbstractSelectStmt stmt2=null;
 			List<SelectValue> fv=null;
 			SqlQname w0=null;
 			SqlQname w1=null;
 			SqlQname c=null;
 			int paramIdx=0;
 			Value v0=null;
+			JoinStmt jstmt=null;
 			
 		
 		match(LITERAL_SELECT);
 		fv=select_list_ce();
 		match(LITERAL_FROM);
 		{
-		if ((LA(1)==NAME)) {
-			{
-			t = LT(1);
-			match(NAME);
-			{
-			if ((LA(1)==NAME||LA(1)==LITERAL_AS)) {
-				{
-				if ((LA(1)==LITERAL_AS)) {
-					match(LITERAL_AS);
-				}
-				else if ((LA(1)==NAME)) {
-				}
-				else {
-					throw new NoViableAltException(LT(1), getFilename());
-				}
+		stmt=from_item(fv);
+		{
+		_loop16:
+		do {
+			if ((LA(1)==LITERAL_LEFT)) {
+				match(LITERAL_LEFT);
+				match(LITERAL_JOIN);
+				stmt2=from_item(fv);
+				match(LITERAL_ON);
+				w0=sqlqname();
+				match(EQUALS);
+				w1=sqlqname();
 				
-				}
-				match(NAME);
-			}
-			else if ((_tokenSet_0.member(LA(1)))) {
-			}
-			else {
-				throw new NoViableAltException(LT(1), getFilename());
-			}
-			
-			}
-			
-						stmt=new FgdbSelectStmt();
-						stmt.setTableName(t.getText());
-								for(SelectValue f:fv){
-									stmt.addField(f);
-								}
-					
-			}
-		}
-		else if ((LA(1)==LPAREN)) {
-			{
-			match(LPAREN);
-			subselect=select_statement();
-			match(RPAREN);
-			{
-			if ((LA(1)==LITERAL_AS)) {
-				match(LITERAL_AS);
-			}
-			else if ((LA(1)==NAME)) {
+							if(jstmt==null){
+					                       			jstmt=new JoinStmt(stmt,w0);
+					                       			stmt=jstmt;
+							}
+							jstmt.addRight(stmt2,w1);
+						
 			}
 			else {
-				throw new NoViableAltException(LT(1), getFilename());
+				break _loop16;
 			}
 			
-			}
-			t2 = LT(1);
-			match(NAME);
-			
-						stmt=new ComplexSelectStmt(subselect);
-						stmt.setTableName(t2.getText());
-								for(SelectValue f:fv){
-									stmt.addField(f);
-								}
-					
-			}
-		}
-		else {
-			throw new NoViableAltException(LT(1), getFilename());
+		} while (true);
 		}
 		
+							if(jstmt!=null){
+								for(SelectValue f:fv){
+									stmt.addField(f);
+								}
+							}
+				
 		}
 		{
 		if ((LA(1)==LITERAL_WHERE)) {
@@ -308,7 +274,7 @@ public SqlSyntax(ParserSharedInputState state) {
 					stmt.addCond(new ColRef(w0.getLocalName()),v0);
 					
 			{
-			_loop26:
+			_loop23:
 			do {
 				if ((LA(1)==LITERAL_AND)) {
 					match(LITERAL_AND);
@@ -320,7 +286,7 @@ public SqlSyntax(ParserSharedInputState state) {
 							
 				}
 				else {
-					break _loop26;
+					break _loop23;
 				}
 				
 			} while (true);
@@ -389,7 +355,7 @@ public SqlSyntax(ParserSharedInputState state) {
 					stmt.addSet(new ColRef(c0.getText()),new Param(paramIdx++));
 				
 		{
-		_loop32:
+		_loop35:
 		do {
 			if ((LA(1)==COMMA)) {
 				match(COMMA);
@@ -402,7 +368,7 @@ public SqlSyntax(ParserSharedInputState state) {
 					
 			}
 			else {
-				break _loop32;
+				break _loop35;
 			}
 			
 		} while (true);
@@ -418,7 +384,7 @@ public SqlSyntax(ParserSharedInputState state) {
 					stmt.addCond(new ColRef(w0.getText()),new Param(paramIdx++));
 					
 			{
-			_loop35:
+			_loop38:
 			do {
 				if ((LA(1)==LITERAL_AND)) {
 					match(LITERAL_AND);
@@ -431,7 +397,7 @@ public SqlSyntax(ParserSharedInputState state) {
 							
 				}
 				else {
-					break _loop35;
+					break _loop38;
 				}
 				
 			} while (true);
@@ -483,7 +449,7 @@ public SqlSyntax(ParserSharedInputState state) {
 		n0=select_sublist_ce();
 		c.add(n0);
 		{
-		_loop91:
+		_loop94:
 		do {
 			if ((LA(1)==COMMA)) {
 				match(COMMA);
@@ -491,12 +457,98 @@ public SqlSyntax(ParserSharedInputState state) {
 				c.add(n1);
 			}
 			else {
-				break _loop91;
+				break _loop94;
 			}
 			
 		} while (true);
 		}
 		return c;
+	}
+	
+	public final AbstractSelectStmt  from_item(
+		List<SelectValue> fv
+	) throws RecognitionException, TokenStreamException {
+		AbstractSelectStmt stmt;
+		
+		Token  t = null;
+		Token  ta = null;
+		Token  t2 = null;
+		
+			stmt=null;
+			AbstractSelectStmt subselect=null;
+			
+		
+		if ((LA(1)==NAME)) {
+			{
+			t = LT(1);
+			match(NAME);
+			{
+			if ((LA(1)==NAME||LA(1)==LITERAL_AS)) {
+				{
+				if ((LA(1)==LITERAL_AS)) {
+					match(LITERAL_AS);
+				}
+				else if ((LA(1)==NAME)) {
+				}
+				else {
+					throw new NoViableAltException(LT(1), getFilename());
+				}
+				
+				}
+				ta = LT(1);
+				match(NAME);
+			}
+			else if ((_tokenSet_0.member(LA(1)))) {
+			}
+			else {
+				throw new NoViableAltException(LT(1), getFilename());
+			}
+			
+			}
+			
+					stmt=new FgdbSelectStmt();
+					stmt.setTableName(t.getText());
+					if(ta!=null){
+						stmt.setTableAlias(ta.getText());
+					}
+					for(SelectValue f:fv){
+						AbstractSelectStmt.addField(stmt,f);
+					}
+				
+			}
+		}
+		else if ((LA(1)==LPAREN)) {
+			{
+			match(LPAREN);
+			subselect=select_statement();
+			match(RPAREN);
+			{
+			if ((LA(1)==LITERAL_AS)) {
+				match(LITERAL_AS);
+			}
+			else if ((LA(1)==NAME)) {
+			}
+			else {
+				throw new NoViableAltException(LT(1), getFilename());
+			}
+			
+			}
+			t2 = LT(1);
+			match(NAME);
+			
+					stmt=new ComplexSelectStmt(subselect);
+					stmt.setTableName(t2.getText());
+					for(SelectValue f:fv){
+						AbstractSelectStmt.addField(stmt,f);
+					}
+				
+			}
+		}
+		else {
+			throw new NoViableAltException(LT(1), getFilename());
+		}
+		
+		return stmt;
 	}
 	
 	public final SqlQname  sqlqname() throws RecognitionException, TokenStreamException {
@@ -513,7 +565,7 @@ public SqlSyntax(ParserSharedInputState state) {
 		match(NAME);
 		c.add(n0.getText());
 		{
-		_loop113:
+		_loop116:
 		do {
 			if ((LA(1)==DOT)) {
 				match(DOT);
@@ -522,7 +574,7 @@ public SqlSyntax(ParserSharedInputState state) {
 				c.add(n1.getText());
 			}
 			else {
-				break _loop113;
+				break _loop116;
 			}
 			
 		} while (true);
@@ -561,7 +613,7 @@ public SqlSyntax(ParserSharedInputState state) {
 		
 		}
 		{
-		_loop40:
+		_loop43:
 		do {
 			if ((LA(1)==COMMA)) {
 				match(COMMA);
@@ -581,7 +633,7 @@ public SqlSyntax(ParserSharedInputState state) {
 				}
 			}
 			else {
-				break _loop40;
+				break _loop43;
 			}
 			
 		} while (true);
@@ -611,15 +663,15 @@ public SqlSyntax(ParserSharedInputState state) {
 		
 		term();
 		{
-		_loop72:
+		_loop75:
 		do {
-			if ((LA(1)==40||LA(1)==41)) {
+			if ((LA(1)==43||LA(1)==44)) {
 				{
-				if ((LA(1)==40)) {
-					match(40);
+				if ((LA(1)==43)) {
+					match(43);
 				}
-				else if ((LA(1)==41)) {
-					match(41);
+				else if ((LA(1)==44)) {
+					match(44);
 				}
 				else {
 					throw new NoViableAltException(LT(1), getFilename());
@@ -629,7 +681,7 @@ public SqlSyntax(ParserSharedInputState state) {
 				term();
 			}
 			else {
-				break _loop72;
+				break _loop75;
 			}
 			
 		} while (true);
@@ -791,14 +843,14 @@ public SqlSyntax(ParserSharedInputState state) {
 			match(LPAREN);
 			value();
 			{
-			_loop61:
+			_loop64:
 			do {
 				if ((LA(1)==COMMA)) {
 					match(COMMA);
 					value();
 				}
 				else {
-					break _loop61;
+					break _loop64;
 				}
 				
 			} while (true);
@@ -903,21 +955,6 @@ public SqlSyntax(ParserSharedInputState state) {
 			match(EQUALS);
 			break;
 		}
-		case 35:
-		{
-			match(35);
-			break;
-		}
-		case 36:
-		{
-			match(36);
-			break;
-		}
-		case 37:
-		{
-			match(37);
-			break;
-		}
 		case 38:
 		{
 			match(38);
@@ -926,6 +963,21 @@ public SqlSyntax(ParserSharedInputState state) {
 		case 39:
 		{
 			match(39);
+			break;
+		}
+		case 40:
+		{
+			match(40);
+			break;
+		}
+		case 41:
+		{
+			match(41);
+			break;
+		}
+		case 42:
+		{
+			match(42);
 			break;
 		}
 		default:
@@ -940,15 +992,15 @@ public SqlSyntax(ParserSharedInputState state) {
 		
 		factor();
 		{
-		_loop76:
+		_loop79:
 		do {
-			if ((LA(1)==42||LA(1)==43)) {
+			if ((LA(1)==45||LA(1)==46)) {
 				{
-				if ((LA(1)==42)) {
-					match(42);
+				if ((LA(1)==45)) {
+					match(45);
 				}
-				else if ((LA(1)==43)) {
-					match(43);
+				else if ((LA(1)==46)) {
+					match(46);
 				}
 				else {
 					throw new NoViableAltException(LT(1), getFilename());
@@ -958,7 +1010,7 @@ public SqlSyntax(ParserSharedInputState state) {
 				factor();
 			}
 			else {
-				break _loop76;
+				break _loop79;
 			}
 			
 		} while (true);
@@ -970,14 +1022,14 @@ public SqlSyntax(ParserSharedInputState state) {
 		
 		{
 		switch ( LA(1)) {
-		case 40:
+		case 43:
 		{
-			match(40);
+			match(43);
 			break;
 		}
-		case 41:
+		case 44:
 		{
-			match(41);
+			match(44);
 			break;
 		}
 		case NAME:
@@ -1062,14 +1114,14 @@ public SqlSyntax(ParserSharedInputState state) {
 		match(LPAREN);
 		expression();
 		{
-		_loop82:
+		_loop85:
 		do {
 			if ((LA(1)==COMMA)) {
 				match(COMMA);
 				expression();
 			}
 			else {
-				break _loop82;
+				break _loop85;
 			}
 			
 		} while (true);
@@ -1099,7 +1151,7 @@ public SqlSyntax(ParserSharedInputState state) {
 		
 		
 		match(LITERAL_DATE);
-		match(63);
+		match(66);
 	}
 	
 	public final void column() throws RecognitionException, TokenStreamException {
@@ -1131,14 +1183,14 @@ public SqlSyntax(ParserSharedInputState state) {
 		
 		value();
 		{
-		_loop88:
+		_loop91:
 		do {
 			if ((LA(1)==COMMA)) {
 				match(COMMA);
 				value();
 			}
 			else {
-				break _loop88;
+				break _loop91;
 			}
 			
 		} while (true);
@@ -1213,20 +1265,20 @@ public SqlSyntax(ParserSharedInputState state) {
 	public final void select_list() throws RecognitionException, TokenStreamException {
 		
 		
-		if ((LA(1)==42)) {
-			match(42);
+		if ((LA(1)==45)) {
+			match(45);
 		}
 		else if ((_tokenSet_1.member(LA(1)))) {
 			select_sublist();
 			{
-			_loop94:
+			_loop97:
 			do {
 				if ((LA(1)==COMMA)) {
 					match(COMMA);
 					select_sublist();
 				}
 				else {
-					break _loop94;
+					break _loop97;
 				}
 				
 			} while (true);
@@ -1281,7 +1333,7 @@ public SqlSyntax(ParserSharedInputState state) {
 			
 			}
 			match(DOT);
-			match(42);
+			match(45);
 			}
 		}
 		else {
@@ -1303,14 +1355,14 @@ public SqlSyntax(ParserSharedInputState state) {
 		match(LITERAL_BY);
 		sort_specification();
 		{
-		_loop105:
+		_loop108:
 		do {
 			if ((LA(1)==COMMA)) {
 				match(COMMA);
 				sort_specification();
 			}
 			else {
-				break _loop105;
+				break _loop108;
 			}
 			
 		} while (true);
@@ -1657,7 +1709,9 @@ public SqlSyntax(ParserSharedInputState state) {
 		"\"VALUES\"",
 		"'?'",
 		"\"SELECT\"",
-		"\"AS\"",
+		"\"LEFT\"",
+		"\"JOIN\"",
+		"\"ON\"",
 		"'='",
 		"NUMBER",
 		"STRING",
@@ -1665,6 +1719,7 @@ public SqlSyntax(ParserSharedInputState state) {
 		"\"ORDER\"",
 		"\"BY\"",
 		"\"ASC\"",
+		"\"AS\"",
 		"\"UPDATE\"",
 		"\"SET\"",
 		"\"NULL\"",
@@ -1714,27 +1769,27 @@ public SqlSyntax(ParserSharedInputState state) {
 	};
 	
 	private static final long[] mk_tokenSet_0() {
-		long[] data = { 2101314L, 0L};
+		long[] data = { 8720450L, 0L};
 		return data;
 	}
 	public static final BitSet _tokenSet_0 = new BitSet(mk_tokenSet_0());
 	private static final long[] mk_tokenSet_1() {
-		long[] data = { 288233674687399424L, 0L};
+		long[] data = { 2305869397495924224L, 0L};
 		return data;
 	}
 	public static final BitSet _tokenSet_1 = new BitSet(mk_tokenSet_1());
 	private static final long[] mk_tokenSet_2() {
-		long[] data = { 288233691867268608L, 0L};
+		long[] data = { 2305869534934877696L, 0L};
 		return data;
 	}
 	public static final BitSet _tokenSet_2 = new BitSet(mk_tokenSet_2());
 	private static final long[] mk_tokenSet_3() {
-		long[] data = { 135270402L, 0L};
+		long[] data = { 1077940226L, 0L};
 		return data;
 	}
 	public static final BitSet _tokenSet_3 = new BitSet(mk_tokenSet_3());
 	private static final long[] mk_tokenSet_4() {
-		long[] data = { 70369079721986L, 0L};
+		long[] data = { 562952637775874L, 0L};
 		return data;
 	}
 	public static final BitSet _tokenSet_4 = new BitSet(mk_tokenSet_4());

@@ -19,6 +19,7 @@ import ch.ehi.ili2db.base.Ili2dbException;
 import ch.ehi.ili2db.gui.Config;
 import ch.ehi.ili2db.mapping.NameMapping;
 import ch.ehi.ili2fgdb.jdbc.FgdbDriver;
+import ch.ehi.sqlgen.generator_impl.fgdb.GeneratorFgdb;
 
 public class SimpleFgdbTest {
     String fgdbFileName="test/data/Simple/Simple.gdb";
@@ -131,6 +132,8 @@ public class SimpleFgdbTest {
 		config.setMultilingualTrafo(null);
 		config.setInheritanceTrafo(null);
 		config.setDefaultSrsCode("2056");
+		config.setValue(GeneratorFgdb.XY_RESOLUTION, "0.005");
+		config.setValue(GeneratorFgdb.XY_TOLERANCE, "0.05");
 		//Ili2db.readSettingsFromDb(config);
 		Ili2db.run(config,null);
 	}
@@ -288,6 +291,8 @@ public class SimpleFgdbTest {
 		config.setMultilingualTrafo(null);
 		config.setInheritanceTrafo(null);
 		config.setDefaultSrsCode("2056");
+		config.setValue(GeneratorFgdb.XY_RESOLUTION, "0.0005");
+		config.setValue(GeneratorFgdb.XY_TOLERANCE, "0.005");
 		//Ili2db.readSettingsFromDb(config);
 		try{
 			Ili2db.run(config,null);

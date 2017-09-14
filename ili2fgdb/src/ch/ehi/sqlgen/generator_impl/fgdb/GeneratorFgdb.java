@@ -168,9 +168,14 @@ public class GeneratorFgdb implements Generator {
 					throw new IllegalArgumentException("Unknown CRS "+col.getSrsAuth()+":"+col.getSrsId());
 				}
 				  SpatialReference spatialReference=new SpatialReference();
-				  spatialReference.SetSpatialReferenceText (srsInfo.getSrtext());
+				  String srsText = srsInfo.getSrtext();
+				spatialReference.SetSpatialReferenceText (srsText);
 				  spatialReference.SetSpatialReferenceID(srsInfo.getAuth_srid()); 
-				  //spatialReference.SetXYFalseOrigin(-16987000, -8615900);
+				  Double falseOriginX=extractWktParam(srsText,"\"False_Easting\"");
+				  Double falseOriginY=extractWktParam(srsText,"\"False_Northing\"");
+				  if(falseOriginX!=null && falseOriginY!=null) {
+					  spatialReference.SetXYFalseOrigin(falseOriginX, falseOriginY);
+				  }
 				  Double xyResolution=null;
 				  String val=null;
 				  try{
@@ -257,6 +262,27 @@ public class GeneratorFgdb implements Generator {
 		}
 		field.SetName(column.getName());
 		fieldv.add(field);
+	}
+
+	private Double extractWktParam(String srsText,String paramName) {
+		Double ret=null;
+		int idx=srsText.indexOf(paramName);
+		  String val=null;
+		  if(idx>0) {
+			  idx=srsText.indexOf(",", idx);
+			  int endIdx=srsText.indexOf("]", idx);
+			  if(idx>0 && endIdx>0) {
+				  try{
+					  val=srsText.substring(idx+1,endIdx); 
+					  if(val!=null){
+						  ret=Double.valueOf(val);
+					  }
+				  }catch(NumberFormatException e){
+					  EhiLogger.logAdaption("failed to get "+paramName+" value <"+val+">");
+				  }
+			  }
+		  }
+		  return ret;
 	}
 
 	public static Integer getSrsId(String srsAuth, String srsId) {

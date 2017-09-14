@@ -21,6 +21,7 @@ import ch.interlis.iox_j.wkb.Wkb2iox;
 
 import com.vividsolutions.jts.algorithm.CGAlgorithms;
 import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.CoordinateSequenceFactory;
 import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.LinearRing;
 import com.vividsolutions.jts.geom.Polygon;
@@ -104,6 +105,9 @@ public class Fgdb2iox
 
     int typeInt = dis.readInt();
     int geometryType = typeInt & EsriShpConstants.shapeBasicTypeMask;
+    if(geometryType==EsriShpConstants.ShapeNull){
+    	return null;
+    }
     // determine if Z values are present
 	hasZ = geometryType == EsriShpConstants.ShapePointZM
 				|| geometryType == EsriShpConstants.ShapePointZ
@@ -263,6 +267,27 @@ public class Fgdb2iox
 				//double skip2=dis.readDouble();
 				//double skip3=dis.readDouble();
 				arcs.put(startPointIndex, new Arc(startPointIndex, v1, v2, bits));
+			}else if(segmentType==EsriShpConstants.segmentLine){
+				// will never appear; should be ignored
+			}else if(segmentType==EsriShpConstants.segmentSpiral){
+			}else if(segmentType==EsriShpConstants.segmentBezier3Curve){
+				// two middle control points
+				double skip1=dis.readDouble();
+				double skip2=dis.readDouble();
+				double skip3=dis.readDouble();
+				double skip4=dis.readDouble();
+			}else if(segmentType==EsriShpConstants.segmentEllipticArc){
+				// center
+				double skip1=dis.readDouble();
+				double skip2=dis.readDouble();
+				// rotation or fromV
+				double skip3=dis.readDouble();
+				// semiMajor
+				double skip4=dis.readDouble();
+				// minorMajorRatio or deltaV
+				double skip5=dis.readDouble();
+				// bits
+				int skip6=dis.readInt();
 			}else if(segmentType==0){
 				break;
 			}else{
@@ -279,7 +304,7 @@ public class Fgdb2iox
 			|| geometryType == EsriShpConstants.ShapePolylineZ
 			|| geometryType == EsriShpConstants.ShapeGeneralPolyline){
 		if(cParts==1){
-			LineString line=getPolyline(fact,0,points,partStart,arcs);
+			LineString line=getPolyline(fact,0,points,partStart,arcs,false);
 			IomObject ret;
 			try {
 				ret = Jtsext2iox.JTS2polyline(line);
@@ -290,7 +315,7 @@ public class Fgdb2iox
 		}
 		IomObject ret=new Iom_jObject(Wkb2iox.OBJ_MULTIPOLYLINE,null);
 		for(int i=0;i<cParts;i++){
-			LineString line=getPolyline(fact,i,points,partStart,arcs);
+			LineString line=getPolyline(fact,i,points,partStart,arcs,false);
 			try {
 				IomObject lineObj = Jtsext2iox.JTS2polyline(line);
 				ret.addattrobj(Wkb2iox.ATTR_POLYLINE, lineObj);
@@ -304,7 +329,10 @@ public class Fgdb2iox
 			|| geometryType == EsriShpConstants.ShapePolygonZ
 			|| geometryType == EsriShpConstants.ShapeGeneralPolygon){
 		if(cParts==1){
-			LineString line=getPolyline(fact,0,points,partStart,arcs);
+			LineString line=getPolyline(fact,0,points,partStart,arcs,true);
+			if(line.getCoordinateSequence().size()<=3) {
+				throw new IoxException("Not a Ring");
+			}
 			Polygon polygon=fact.createCurvePolygon(fact.createRing(line));
 			IomObject ret;
 			try {
@@ -317,7 +345,10 @@ public class Fgdb2iox
 		ArrayList<LineString> shells=new ArrayList<LineString>();
 		ArrayList<LineString> holes=new ArrayList<LineString>();
 		for(int i=0;i<cParts;i++){
-			LineString line=getPolyline(fact,i,points,partStart,arcs);
+			LineString line=getPolyline(fact,i,points,partStart,arcs,true);
+			if(line.getCoordinateSequence().size()<=3) {
+				throw new IoxException("Not a Ring");
+			}
 			if(CGAlgorithms.isCCW(line.getCoordinates())){
 				holes.add(line);
 			}else{
@@ -358,7 +389,7 @@ public class Fgdb2iox
 
 
   private LineString getPolyline(JtsextGeometryFactory fact,int part, Coordinate[] points, int[] partsStart,
-		java.util.Map<Integer,Arc> arcs) {
+		java.util.Map<Integer,Arc> arcs,boolean closeIt) {
 	  int from=partsStart[part];
 	  int to=points.length;
 	  if(part<partsStart.length-1){
@@ -366,7 +397,13 @@ public class Fgdb2iox
 	  }
 	  // LineString?
 	  if(arcs==null || arcs.size()==0){
-		  Coordinate coords[]=Arrays.copyOfRange(points, from, to);
+		  Coordinate coords[]=null;
+		  if(closeIt && !points[from].equals2D(points[to-1])) {
+			  coords=Arrays.copyOfRange(points, from, to+1);
+			  coords[to]=coords[0];
+		  }else {
+			  coords=Arrays.copyOfRange(points, from, to);
+		  }
 		  return fact.createLineString(coords);
 	  }
 	  
@@ -399,6 +436,9 @@ public class Fgdb2iox
 		}
 		segs.add(seg);
 		start=end;
+	}
+	  if(closeIt && !points[from].equals2D(points[to-1])) {
+			segs.add(new StraightSegment(points[to-1],points[from]));
 	}
 	return fact.createCompoundCurve(segs);
 }

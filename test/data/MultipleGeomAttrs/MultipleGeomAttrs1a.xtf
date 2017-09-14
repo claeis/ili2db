@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TRANSFER xmlns="http://www.interlis.ch/INTERLIS2.3">
+	<HEADERSECTION SENDER="ili2fgdb-3.10.0-20170630" VERSION="2.3">
+		<MODELS>
+			<MODEL NAME="MultipleGeomAttrs1" VERSION="2016-12-21" URI="mailto:ce@eisenhutinformatik.ch"></MODEL>
+		</MODELS>
+	</HEADERSECTION>
+	<DATASECTION>
+		<MultipleGeomAttrs1.Topic BID="b1">
+			<MultipleGeomAttrs1.Topic.ClassA TID="ClassA.1">
+				<coord>
+					<COORD>
+							<C1>2460001.000</C1>
+							<C2>1045001.000</C2>
+					</COORD>
+				</coord>
+				<line>
+					<POLYLINE>
+						<COORD>
+							<C1>2460002.000</C1>
+							<C2>1045002.000</C2>
+						</COORD>
+						<COORD>
+							<C1>2460010.000</C1>
+							<C2>1045010.000</C2>
+						</COORD>
+					</POLYLINE>
+				</line>
+				<surface>
+					<SURFACE>
+						<BOUNDARY>
+							<POLYLINE>
+								<COORD>
+									<C1>2460005.000</C1>
+									<C2>1045005.000</C2>
+								</COORD>
+								<COORD>
+									<C1>2460010.000</C1>
+									<C2>1045010.000</C2>
+								</COORD>
+								<COORD>
+									<C1>2460005.000</C1>
+									<C2>1045010.000</C2>
+								</COORD>
+								<COORD>
+									<C1>2460005.000</C1>
+									<C2>1045005.000</C2>
+								</COORD>
+							</POLYLINE>
+						</BOUNDARY>
+					</SURFACE>
+				</surface>
+			</MultipleGeomAttrs1.Topic.ClassA>
+		</MultipleGeomAttrs1.Topic>
+	</DATASECTION>
+</TRANSFER>

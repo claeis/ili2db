@@ -5,6 +5,7 @@ import java.io.Reader;
 import java.math.BigDecimal;
 import java.net.URL;
 import java.sql.*;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 
@@ -22,7 +23,6 @@ import ch.ehi.ili2fgdb.jdbc.sql.*;
 import ch.ehi.sqlgen.generator_impl.fgdb.GeneratorFgdb;
 
 public class FgdbPreparedStatement implements PreparedStatement {
-
 	private SqlStmt stmt=null;
 	private FgdbConnection conn=null;
 	private String stmtStr=null;
@@ -57,11 +57,11 @@ public class FgdbPreparedStatement implements PreparedStatement {
 
 	@Override
 	public ResultSet executeQuery() throws SQLException {
-		  ResultSet ret=executeSelectStmt((AbstractSelectStmt)stmt);
+		  ResultSet ret=executeSelectStmt((AbstractSelectStmt)stmt,null);
 		  return ret;
 	}
 
-	private ResultSet executeSelectStmt(AbstractSelectStmt stmt) throws SQLException {
+	private ResultSet executeSelectStmt(AbstractSelectStmt stmt,String keyCol) throws SQLException {
 		  EnumRows rows=new EnumRows();
 		  Table table=null;
 		  java.util.List<SelectValue> selectCols=null;
@@ -106,20 +106,38 @@ public class FgdbPreparedStatement implements PreparedStatement {
 				  for(SelectValue colref:selectCols){
 					  if(colref instanceof SelectValueField){
 						  fields.append(sep);sep=",";
-						  fields.append(colref.getColumnName());
+						  String columnName = colref.getColumnName();
+						fields.append(columnName);
+						if(keyCol!=null && columnName.equals(keyCol)){
+							keyCol=null;
+						}
 					  }
+				  }
+				  if(keyCol!=null){
+					  fields.append(sep);sep=",";
+					  fields.append(keyCol);
+					  selectCols.add(new SelectValueField(new SqlQname(keyCol)));
 				  }
 			  }
 			  
-			  err= table.Search(fields.toString(), where.toString(), true, rows);
+			  err= table.Search(fields.toString(), where.toString(), false, rows);
 				if(err!=0){
 					StringBuffer errDesc=new StringBuffer();
 					fgbd4j.GetErrorDescription(err, errDesc);
 					throw new SQLException(errDesc.toString());
 				}
 				ret=new FgdbResultSet(conn,table,rows,selectCols);
+		}else if(stmt instanceof JoinStmt){
+			JoinStmt jstmt=(JoinStmt)stmt;
+			ResultSet rsLeft=executeSelectStmt(jstmt.getLeftStmt(),jstmt.getLeftKeyCol());
+			ArrayList<ResultSet> rsRight=new ArrayList<ResultSet>();
+			int rightc=jstmt.getRightStmt().size();
+			for(int i=0;i<rightc;i++){
+				rsRight.add(executeSelectStmt(jstmt.getRightStmt().get(i),jstmt.getRightKeyCol().get(i)));	
+			}
+			ret=new JoinResultSet(rsLeft,rsRight,jstmt);
 		}else if(stmt instanceof ComplexSelectStmt){
-			ret=new MemResultSet(executeSelectStmt(((ComplexSelectStmt) stmt).getSubSelect()));
+			ret=new MemResultSet(executeSelectStmt(((ComplexSelectStmt) stmt).getSubSelect(),null));
 		}else{
 			err=conn.getGeodatabase().ExecuteSQL(stmtStr, true, rows);
 			if(err!=0){
@@ -147,6 +165,7 @@ public class FgdbPreparedStatement implements PreparedStatement {
 			}
 			setupFieldInfo(table);
 			Row row=new Row();
+			ShapeBuffer shapeBuffer=null;
 			err=table.CreateRowObject(row);
 			if(err!=0){
 				StringBuffer errDesc=new StringBuffer();
@@ -157,26 +176,29 @@ public class FgdbPreparedStatement implements PreparedStatement {
 				String colName=((InsertStmt) stmt).getFields().get(i);
 				Object val=params.get(i);
 				if(colName.equals(geometryColumn)){
-				//if(((InsertStmt) stmt).getValues().get(i) instanceof ShapeParam){
-					ShapeBuffer shapeBuffer=new ShapeBuffer();
 					if(val==null){
-						//java.nio.ByteBuffer nullVal=java.nio.ByteBuffer.allocate(4).order(java.nio.ByteOrder.LITTLE_ENDIAN).putInt(0);
-						//shapeBuffer.setBuffer(nullVal.array());
+						setRowVal(row, geometryColumn, null);
 					}else{
+						shapeBuffer=new ShapeBuffer();
 						shapeBuffer.setBuffer((byte[])val);
+						row.SetGeometry(shapeBuffer);
 					}
-					row.SetGeometry(shapeBuffer);
-					shapeBuffer.delete();
-					shapeBuffer=null;
 				}else{
 					setRowVal(row, colName, val);
 				}
+			}
+			if(shapeBuffer==null && geometryColumn!=null){
+				setRowVal(row, geometryColumn, null);
 			}
 			err=table.Insert(row);
 			if(err!=0){
 				StringBuffer errDesc=new StringBuffer();
 				fgbd4j.GetErrorDescription(err, errDesc);
 				throw new SQLException(errDesc.toString());
+			}
+			if(shapeBuffer!=null){
+				shapeBuffer.delete();
+				shapeBuffer=null;
 			}
 			row.delete();
 			row=null;
@@ -211,7 +233,8 @@ public class FgdbPreparedStatement implements PreparedStatement {
 				  }
 			  }
 			  
-			  err= table.Search("*", where.toString(), true, rows);
+			  // Make sure to disable recycling when intending to edit rows.
+			  err= table.Search("*", where.toString(), false, rows);
 				if(err!=0){
 					StringBuffer errDesc=new StringBuffer();
 					fgbd4j.GetErrorDescription(err, errDesc);

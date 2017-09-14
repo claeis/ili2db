@@ -263,12 +263,17 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 		ArrayList<ViewableWrapper> targetTables = getTargetTables(destination);
 	  	if(refoid!=null){
 		  	String targetObjClass=oidPool.getObjecttag(targetRootClassName,refoid);
-		  	targetObjTable=getViewableWrapper(getSqlType((Viewable) tag2class.get(targetObjClass)).getName());
-		  	while(!targetTables.contains(targetObjTable)){
-		  		targetObjTable=targetObjTable.getExtending();
-		  	}
-		  	if(targetObjTable==null){
-		  		throw new IllegalStateException("targetObjTable==null");
+		  	if(targetObjClass==null){
+		  		// unknown object
+		  		refoid=null; // handle reference as if it is null
+		  	}else{
+			  	targetObjTable=getViewableWrapper(getSqlType((Viewable) tag2class.get(targetObjClass)).getName());
+			  	while(!targetTables.contains(targetObjTable)){
+			  		targetObjTable=targetObjTable.getExtending();
+			  	}
+			  	if(targetObjTable==null){
+			  		throw new IllegalStateException("targetObjTable==null");
+			  	}
 		  	}
 	  	}
 		  for(ViewableWrapper targetTable : targetTables){

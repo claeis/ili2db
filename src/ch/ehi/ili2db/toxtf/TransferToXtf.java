@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Map;
 
 import ch.ehi.basics.logging.EhiLogger;
 import ch.ehi.ili2db.base.DbNames;
@@ -129,7 +130,7 @@ public class TransferToXtf {
 		this.config=config;
 
 	}
-	public void doit(String filename,IoxWriter iomFile,String sender,String exportParamModelnames[],long basketSqlIds[],HashSet<BasketStat> stat)
+	public void doit(String filename,IoxWriter iomFile,String sender,String exportParamModelnames[],long basketSqlIds[],Map<Long,BasketStat> stat)
 	throws ch.interlis.iox.IoxException
 	{
 		this.basketStat=stat;
@@ -414,7 +415,7 @@ public class TransferToXtf {
 			}
 			if(validator!=null)validator.validate(endBasket);
 			iomFile.write(endBasket);
-			saveObjStat(iomBasket.getBid(),filename,iomBasket.getType());
+			saveObjStat(iomBasket.getBid(),basketSqlId,filename,iomBasket.getType());
 		}
 		return referrs;
 	}
@@ -1218,7 +1219,7 @@ public class TransferToXtf {
 		return ret.toString();
 	}
 
-	private HashSet<BasketStat> basketStat=null;
+	private Map<Long,BasketStat> basketStat=null;
 	private HashMap<String, ClassStat> objStat=new HashMap<String, ClassStat>();
 	private void updateObjStat(String tag, long sqlId)
 	{
@@ -1230,10 +1231,10 @@ public class TransferToXtf {
 			objStat.put(tag,stat);
 		}
 	}
-	private void saveObjStat(String iliBasketId,String file,String topic)
+	private void saveObjStat(String iliBasketId,Long basketSqlId,String file,String topic)
 	{
 		// save it for later output to log
-		basketStat.add(new BasketStat(file,topic,iliBasketId,objStat));
+		basketStat.put(basketSqlId,new BasketStat(file,topic,iliBasketId,objStat));
 		// setup new collection
 		objStat=new HashMap<String, ClassStat>();
 	}

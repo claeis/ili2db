@@ -7,6 +7,9 @@
 	</HEADERSECTION>
 	<DATASECTION>
 		<SimpleCoord23.TestA BID="b1">
+			<SimpleCoord23.TestA.ClassA1 TID="o3">
+				<attr1>gugus3</attr1>
+			</SimpleCoord23.TestA.ClassA1>
 			<SimpleCoord23.TestA.ClassA1 TID="o1">
 				<attr1>gugus1</attr1>
 				<attr2>

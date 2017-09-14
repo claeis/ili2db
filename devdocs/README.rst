@@ -28,6 +28,8 @@ How to build
 
 **GeoPackage:** ``ant -f build-ili2gpkg.xml jar bindist srcdist``
 
+**FileGDB:** ``ant -f build-ili2fgdb.xml jar bindist srcdist``
+
 Runtime dependencies
 ====================
 +---------------------------------------+--------------------------------+
@@ -57,6 +59,8 @@ Runtime dependencies
 +---------------------------------------+--------------------------------+
 |libs/sqlite-jdbc-3.8.11.2.jar [2]_     |                                |
 +---------------------------------------+--------------------------------+
+|libs/fgdb4j.jar [3]_                   |                                |
++---------------------------------------+--------------------------------+
 
 
 Development dependencies
@@ -72,3 +76,6 @@ TODO
 
 .. [2]
   ili2gpkg only
+
+.. [3]
+  ili2fgdb only

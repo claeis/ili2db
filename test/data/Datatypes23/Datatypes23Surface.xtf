@@ -7,6 +7,8 @@
 	</HEADERSECTION>
 	<DATASECTION>
 		<Datatypes23.Topic BID="b1">
+			<Datatypes23.Topic.SimpleSurface2 TID="SimpleSurface2.0">
+			</Datatypes23.Topic.SimpleSurface2>
 			<Datatypes23.Topic.SimpleSurface2 TID="SimpleSurface2.1">
 				<surface2d>
 					<SURFACE>
@@ -80,6 +82,8 @@
 				</surface2d>
 			</Datatypes23.Topic.SimpleSurface2>
 			
+			<Datatypes23.Topic.Surface2 TID="Surface2.0">
+			</Datatypes23.Topic.Surface2>
 			<Datatypes23.Topic.Surface2 TID="Surface2.1">
 				<surfacearcs2d>
 					<SURFACE>

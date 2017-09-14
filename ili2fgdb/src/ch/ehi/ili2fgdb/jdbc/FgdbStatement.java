@@ -191,7 +191,7 @@ public class FgdbStatement implements Statement {
 			  }
 		  }
 		  
-		  err= table.Search(fields.toString(), where.toString(), true, rows);
+		  err= table.Search(fields.toString(), where.toString(), false, rows);
 		  selectvalues = ustmt.getFields();
 			if(err!=0){
 				StringBuffer errDesc=new StringBuffer();

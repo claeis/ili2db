@@ -7,6 +7,8 @@
 	</HEADERSECTION>
 	<DATASECTION>
 		<Datatypes23.Topic BID="b1">
+			<Datatypes23.Topic.SimpleLine2 TID="SimpleLine2.0">
+			</Datatypes23.Topic.SimpleLine2>
 			<Datatypes23.Topic.SimpleLine2 TID="SimpleLine2.1">
 				<straights2d>
 					<POLYLINE>
@@ -37,6 +39,8 @@
 					</POLYLINE>
 				</straights3d>
 			</Datatypes23.Topic.SimpleLine3>
+			<Datatypes23.Topic.Line2 TID="Line2.0">
+			</Datatypes23.Topic.Line2>
 			<Datatypes23.Topic.Line2 TID="Line2.1">
 				<straightsarcs2d>
 					<POLYLINE>
