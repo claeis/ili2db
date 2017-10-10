@@ -1,6 +1,7 @@
 package ch.ehi.ili2db.gui;
 
 import ch.ehi.basics.settings.Settings;
+import ch.ehi.sqlgen.generator.SqlConfiguration;
 
 public class Config extends Settings {
 	public static final String FALSE = "False";
@@ -26,6 +27,7 @@ public class Config extends Settings {
 	public static final String CREATE_FK_YES="yes";
 	private static final String CREATE_FKIDX=PREFIX+".createForeignKeyIndex";
 	public static final String CREATE_FKIDX_YES="yes";
+	public static final String CREATE_GEOM_INDEX=SqlConfiguration.CREATE_GEOM_INDEX;
 	private static final String CREATE_STD_COLS=PREFIX+".createStdCols";
 	public static final String CREATE_STD_COLS_ALL="all";
 	private static final String CREATE_TYPE_DISCRIMINATOR=PREFIX+".typeDiscriminator";

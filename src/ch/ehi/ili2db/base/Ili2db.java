@@ -2056,5 +2056,16 @@ public class Ili2db {
 		}
 		return mapping;
 	}
+	public static void setSkipPolygonBuilding(Config config) {
+		config.setDoItfLineTables(true);
+		config.setAreaRef(config.AREA_REF_KEEP);
+	}
+	public static void setNoSmartMapping(Config config) {
+		config.setCatalogueRefTrafo(null);
+		config.setMultiSurfaceTrafo(null);
+		config.setMultiLineTrafo(null);
+		config.setMultilingualTrafo(null);
+		config.setInheritanceTrafo(null);
+	}
 
 }

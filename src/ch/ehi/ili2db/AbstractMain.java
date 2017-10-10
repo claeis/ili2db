@@ -203,11 +203,7 @@ public abstract class AbstractMain {
 				config.setBeautifyEnumDispName(config.BEAUTIFY_ENUM_DISPNAME_UNDERSCORE);
 			}else if(arg.equals("--noSmartMapping")){
 				argi++;
-				config.setCatalogueRefTrafo(null);
-				config.setMultiSurfaceTrafo(null);
-				config.setMultiLineTrafo(null);
-				config.setMultilingualTrafo(null);
-				config.setInheritanceTrafo(null);
+				Ili2db.setNoSmartMapping(config);
 			}else if(arg.equals("--smart1Inheritance")){
 				argi++;
 				config.setInheritanceTrafo(config.INHERITANCE_TRAFO_SMART1);
@@ -258,7 +254,7 @@ public abstract class AbstractMain {
 				config.setCreateTypeDiscriminator(config.CREATE_TYPE_DISCRIMINATOR_ALWAYS);
 			}else if(arg.equals("--createGeomIdx")){
 				argi++;
-				config.setValue(SqlConfiguration.CREATE_GEOM_INDEX,"True");
+				config.setValue(Config.CREATE_GEOM_INDEX,Config.TRUE);
 			}else if(arg.equals("--disableNameOptimization")){
 				argi++;
 				config.setNameOptimization(config.NAME_OPTIMIZATION_DISABLE);
@@ -280,8 +276,7 @@ public abstract class AbstractMain {
 				config.setStrokeArcs(config.STROKE_ARCS_ENABLE);
 			}else if(arg.equals("--skipPolygonBuilding")){
 				argi++;
-				config.setDoItfLineTables(true);
-				config.setAreaRef(config.AREA_REF_KEEP);
+				Ili2db.setSkipPolygonBuilding(config);
 			}else if(arg.equals("--skipPolygonBuildingErrors")){
 				// DEPRECATED remove option
 				argi++;
@@ -438,7 +433,6 @@ public abstract class AbstractMain {
 		}
 		
 	}
-
 	private void printVersion ()
 	{
 	  System.err.println("INTERLIS 2-loader for "+getDB_PRODUCT_NAME()+", Version "+getVersion());
