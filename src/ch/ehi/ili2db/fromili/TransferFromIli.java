@@ -418,7 +418,7 @@ public class TransferFromIli {
 				reposUri=reposUri+"/"+schema;
 			}
 			// select entries
-			String insStmt="SELECT "+DbNames.MODELS_TAB_FILE_COL+","+DbNames.MODELS_TAB_ILIVERSION_COL+","+DbNames.MODELS_TAB_MODELNAME_COL+" FROM "+sqlName;
+			String insStmt="SELECT \""+DbNames.MODELS_TAB_FILE_COL+"\","+DbNames.MODELS_TAB_ILIVERSION_COL+","+DbNames.MODELS_TAB_MODELNAME_COL+" FROM "+sqlName;
 			EhiLogger.traceBackendCmd(insStmt);
 			java.sql.PreparedStatement insPrepStmt = conn.prepareStatement(insStmt);
 			try{
@@ -451,7 +451,7 @@ public class TransferFromIli {
 		}
 		try{
 			// select entries
-			String selStmt="SELECT "+DbNames.MODELS_TAB_CONTENT_COL+" FROM "+sqlName+" WHERE "+DbNames.MODELS_TAB_FILE_COL+"=?";
+			String selStmt="SELECT "+DbNames.MODELS_TAB_CONTENT_COL+" FROM "+sqlName+" WHERE \""+DbNames.MODELS_TAB_FILE_COL+"\"=?";
 			EhiLogger.traceBackendCmd(selStmt);
 			java.sql.PreparedStatement selPrepStmt = conn.prepareStatement(selStmt);
 			try{
@@ -487,7 +487,7 @@ public class TransferFromIli {
 		try{
 
 			// insert entries
-			String insStmt="INSERT INTO "+sqlName+" ("+DbNames.MODELS_TAB_FILE_COL+","+DbNames.MODELS_TAB_ILIVERSION_COL+","+DbNames.MODELS_TAB_MODELNAME_COL+","+DbNames.MODELS_TAB_CONTENT_COL+","+DbNames.MODELS_TAB_IMPORTDATE_COL+") VALUES (?,?,?,?,?)";
+			String insStmt="INSERT INTO "+sqlName+" (\""+DbNames.MODELS_TAB_FILE_COL+"\","+DbNames.MODELS_TAB_ILIVERSION_COL+","+DbNames.MODELS_TAB_MODELNAME_COL+","+DbNames.MODELS_TAB_CONTENT_COL+","+DbNames.MODELS_TAB_IMPORTDATE_COL+") VALUES (?,?,?,?,?)";
 			EhiLogger.traceBackendCmd(insStmt);
 			java.sql.PreparedStatement insPrepStmt = conn.prepareStatement(insStmt);
 			java.util.Iterator entri=td.iterator();
