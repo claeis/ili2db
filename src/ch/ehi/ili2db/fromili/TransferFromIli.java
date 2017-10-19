@@ -385,7 +385,7 @@ public class TransferFromIli {
 		DbColVarchar importsCol=new DbColVarchar();
 		importsCol.setName(DbNames.MODELS_TAB_MODELNAME_COL);
 		importsCol.setNotNull(true);
-		importsCol.setSize(DbColVarchar.UNLIMITED);
+		importsCol.setSize(400);
 		tab.addColumn(importsCol);
 		DbColVarchar contentCol=new DbColVarchar();
 		contentCol.setName(DbNames.MODELS_TAB_CONTENT_COL);
