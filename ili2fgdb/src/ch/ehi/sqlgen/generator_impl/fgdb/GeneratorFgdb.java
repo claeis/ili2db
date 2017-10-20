@@ -211,7 +211,7 @@ public class GeneratorFgdb implements Generator {
 					geomDef.SetGeometryType(GeometryType.geometryPolygon);
 				}
 				geomDef.SetSpatialReference(spatialReference);
-				geomDef.SetHasZ(false); //Set to true if the feature class is to be Z enabled. Defaults to FALSE.
+				geomDef.SetHasZ(col.getDimension()==3); //Set to true if the feature class is to be Z enabled. Defaults to FALSE.
 				geomDef.SetHasM(false); //Set to true if the feature class is to be M enabled. Defaults to FALSE.
 				field.SetType(FieldType.fieldTypeGeometry);
 				field.SetGeometryDef(geomDef);
