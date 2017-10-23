@@ -16,6 +16,9 @@ import ch.ehi.sqlgen.repository.*;
 
 public class GeneratorFgdb implements Generator {
 
+	private static final String SRS_ID_LV95 = "2056";
+	private static final String SRS_ID_LV03 = "21781";
+	private static final String SRS_AUTH_EPSG = "EPSG";
 	public static final String OBJECTOID = "OBJECTID";
 	public static final String XY_RESOLUTION = "ch.ehi.ilifgdb.xyResolution";
 	public static final String XY_TOLERANCE = "ch.ehi.ilifgdb.xyTolerance";
@@ -171,8 +174,21 @@ public class GeneratorFgdb implements Generator {
 				  String srsText = srsInfo.getSrtext();
 				spatialReference.SetSpatialReferenceText (srsText);
 				  spatialReference.SetSpatialReferenceID(srsInfo.getAuth_srid()); 
-				  Double falseOriginX=extractWktParam(srsText,"\"False_Easting\"");
-				  Double falseOriginY=extractWktParam(srsText,"\"False_Northing\"");
+				  Double falseOriginX=null;
+				  Double falseOriginY=null;
+				  if(SRS_AUTH_EPSG.equals(col.getSrsAuth())) {
+					  if(SRS_ID_LV03.equals(col.getSrsId())) {
+						  falseOriginX=-29386400.0;
+						  falseOriginY=-33067900.0;
+					  }else if(SRS_ID_LV95.equals(col.getSrsId())) {
+						  falseOriginX=-27386400.0;
+						  falseOriginY=-32067900.0;					  
+					  }
+				  }
+				  if(falseOriginX==null || falseOriginY==null){
+					  falseOriginX=extractWktParam(srsText,"\"False_Easting\"");
+					  falseOriginY=extractWktParam(srsText,"\"False_Northing\"");
+				  }
 				  if(falseOriginX!=null && falseOriginY!=null) {
 					  spatialReference.SetXYFalseOrigin(falseOriginX, falseOriginY);
 				  }
