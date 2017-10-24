@@ -98,6 +98,10 @@ public abstract class AbstractMain {
 				argi++;
 				config.setModels(args[argi]);
 				argi++;
+			}else if(arg.equals("--exportModels")){
+				argi++;
+				config.setExportModels(args[argi]);
+				argi++;
 			}else if(arg.equals("--dataset")){
 				argi++;
 				config.setDatasetName(args[argi]);
@@ -387,6 +391,7 @@ public abstract class AbstractMain {
 					System.err.println("--createUnique         create UNIQUE db constraints.");
 					System.err.println("--createNumChecks      create CHECK db constraints for numeric data types.");
 					System.err.println("--ILIGML20             use eCH-0118-2.0 as transferformat");
+					System.err.println("--exportModels modelname  export data according to the given base ili-models");
 				    System.err.println("--ver4-translation     supports TRANSLATION OF in ili2db 4.x mode (incompatible with ili2db 3.x versions).");
 				    System.err.println("--translation translatedModel=originModel assigns a translated model to its orginal language equivalent.");
 				    System.err.println("--createMetaInfo       Create aditional ili-model information.");

@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import ch.ehi.basics.logging.EhiLogger;
@@ -61,6 +62,7 @@ import ch.ehi.sqlgen.repository.DbTableName;
 import ch.interlis.ili2c.config.Configuration;
 import ch.interlis.ili2c.metamodel.Element;
 import ch.interlis.ili2c.metamodel.Ili2cMetaAttrs;
+import ch.interlis.ili2c.metamodel.Model;
 import ch.interlis.ili2c.metamodel.TransferDescription;
 import ch.interlis.ilirepository.IliFiles;
 import ch.interlis.iom_j.iligml.Iligml10Writer;
@@ -274,7 +276,7 @@ public class Ili2db {
 					throw new Ili2dbException("no models given");
 				}
 				EhiLogger.traceState("models <"+models+">");
-				String modelnames[]=models.split(ch.interlis.ili2c.Main.MODELS_SEPARATOR);
+				String modelnames[]=getModelNames(models);
 				for(int modeli=0;modeli<modelnames.length;modeli++){
 					String m=modelnames[modeli];
 					if(m.equals(XTF)){
@@ -1347,10 +1349,10 @@ public class Ili2db {
 				basketSqlIds=getBasketSqlIdsFromTopic(topicv,modelv,conn,config);
 			}else{
 				if(createBasketCol){
-					String modelnames[]=models.split(ch.interlis.ili2c.Main.MODELS_SEPARATOR);
+					String[] modelnames = getModelNames(models);
 					basketSqlIds=getBasketSqlIdsFromModel(modelnames,modelv,conn,config);
 				}else{
-					exportModelnames=models.split(ch.interlis.ili2c.Main.MODELS_SEPARATOR);
+					exportModelnames=getModelNames(models);
 					for(int modeli=0;modeli<exportModelnames.length;modeli++){
 						String m=exportModelnames[modeli];
 						if(m.equals(XTF)){
@@ -1989,6 +1991,10 @@ public class Ili2db {
 		}
 		return ret;
 	}
+	public static String[] getModelNames(String models) {
+		String modelnames[]=models.split(ch.interlis.ili2c.Main.MODELS_SEPARATOR);
+		return modelnames;
+	}
 	static private void writeScript(String filename,Iterator linei)
 	throws java.io.IOException
 	{
@@ -2066,6 +2072,21 @@ public class Ili2db {
 		config.setMultiLineTrafo(null);
 		config.setMultilingualTrafo(null);
 		config.setInheritanceTrafo(null);
+	}
+	public static List<Model> getModels(String modelNames, TransferDescription td) {
+		List<Model> models=new ArrayList<Model>();
+		if(modelNames==null) {
+			return models;
+		}
+		String modelNamev[]=getModelNames(modelNames);
+		for(String modelName:modelNamev) {
+			Model model=(Model)td.getElement(Model.class, modelName);
+			if(model==null) {
+				throw new IllegalArgumentException("unknown model <"+modelName+">");
+			}
+			models.add(model);
+		}
+		return models;
 	}
 
 }

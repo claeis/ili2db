@@ -85,6 +85,7 @@ public class Config extends Settings {
 	private String dbschema=null;
 	private String modeldir;
 	private String models=null;
+	private String exportModels=null;
 	private String datasetName=null;
 	private String baskets=null;
 	private String topics=null;
@@ -176,6 +177,12 @@ public class Config extends Settings {
 	}
 	public void setModels(String models) {
 		this.models = models;
+	}
+	public String getExportModels() {
+		return exportModels;
+	}
+	public void setExportModels(String models) {
+		this.exportModels = models;
 	}
 	public String getDatasetName() {
 		return datasetName;
