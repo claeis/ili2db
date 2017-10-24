@@ -32,7 +32,7 @@ import ch.interlis.iox.StartTransferEvent;
 
 //-Ddburl=jdbc:postgresql:dbname -Ddbusr=usrname -Ddbpwd=1234
 public class ExtendedModel23Test {
-	private static final String DBSCHEMA = "ExtendedModel23x";
+	private static final String DBSCHEMA = "ExtendedModel23";
 	String dburl=System.getProperty("dburl"); 
 	String dbuser=System.getProperty("dbusr");
 	String dbpwd=System.getProperty("dbpwd"); 
@@ -95,6 +95,7 @@ public class ExtendedModel23Test {
 	@Test
 	public void exportXtfOriginal() throws Exception
 	{
+		importXtf();
 		Connection jdbcConnection=null;
 		try{
 	        Class driverClass = Class.forName("org.postgresql.Driver");
@@ -142,6 +143,7 @@ public class ExtendedModel23Test {
 	@Test
 	public void exportXtfBase() throws Exception
 	{
+		importXtf();
 		Connection jdbcConnection=null;
 		try{
 	        Class driverClass = Class.forName("org.postgresql.Driver");
