@@ -24,11 +24,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import ch.ehi.basics.logging.EhiLogger;
 import ch.ehi.ili2db.base.DbNames;
 import ch.ehi.ili2db.base.Ili2cUtility;
+import ch.ehi.ili2db.base.Ili2db;
 import ch.ehi.ili2db.converter.ConverterException;
 import ch.ehi.ili2db.converter.SqlColumnConverter;
 import ch.ehi.ili2db.fromili.TransferFromIli;
@@ -78,6 +80,7 @@ import ch.interlis.iox_j.ObjectEvent;
 import ch.interlis.iox_j.PipelinePool;
 import ch.interlis.iox_j.StartBasketEvent;
 import ch.interlis.iox_j.StartTransferEvent;
+import ch.interlis.iox_j.filter.ReduceToBaseModel;
 import ch.interlis.iox_j.filter.TranslateToOrigin;
 import ch.interlis.iox_j.filter.TranslateToTranslation;
 import ch.interlis.iox_j.logging.LogEventFactory;
@@ -111,6 +114,7 @@ public class TransferToXtf {
 	private ArrayList<FixIomObjectRefs> delayedObjects=null;
 	private ch.interlis.ili2c.generator.IndentPrintWriter expgen=null;
 	private TranslateToTranslation languageFilter=null;
+	private ReduceToBaseModel exportBaseModelFilter=null;
 	public TransferToXtf(NameMapping ili2sqlName1,TransferDescription td1,Connection conn1,SqlColumnConverter geomConv,Config config,TrafoConfig trafoConfig,Viewable2TableMapping class2wrapper1){
 		ili2sqlName=ili2sqlName1;
 		td=td1;
@@ -141,6 +145,10 @@ public class TransferToXtf {
 		}
 		if(config.getVer4_translation() || config.getIli1Translation()!=null){
 			languageFilter=new TranslateToTranslation(td, config);
+		}
+		if(config.getExportModels()!=null){
+			List<Model> exportModels=Ili2db.getModels(config.getExportModels(),td);
+			exportBaseModelFilter=new ReduceToBaseModel(exportModels,td, config);
 		}
 		if(config.isValidation()){
 			ValidationConfig modelConfig=new ValidationConfig();
@@ -179,6 +187,9 @@ public class TransferToXtf {
 		startEvent.setSender(sender);
 		if(languageFilter!=null){
 			startEvent=(StartTransferEvent) languageFilter.filter(startEvent);
+		}
+		if(exportBaseModelFilter!=null){
+			startEvent=(StartTransferEvent) exportBaseModelFilter.filter(startEvent);
 		}
 		if(validator!=null)validator.validate(startEvent);
 		iomFile.write(startEvent);
@@ -220,11 +231,17 @@ public class TransferToXtf {
 		if(languageFilter!=null){
 			endEvent=(EndTransferEvent) languageFilter.filter(endEvent);
 		}
+		if(exportBaseModelFilter!=null){
+			endEvent=(EndTransferEvent) exportBaseModelFilter.filter(endEvent);
+		}
 		if(validator!=null)validator.validate(endEvent);
 		iomFile.write(endEvent);
 		if(validator!=null)validator.close();
 		if(languageFilter!=null){
 			languageFilter.close();
+		}
+		if(exportBaseModelFilter!=null){
+			exportBaseModelFilter.close();
 		}
 	}
 	private Topic getTopicByBasketId(long basketSqlId, StringBuilder basketXtfId) throws IoxException {
@@ -339,6 +356,9 @@ public class TransferToXtf {
 						if(languageFilter!=null){
 							iomBasket=(StartBasketEvent) languageFilter.filter(iomBasket);
 						}
+						if(exportBaseModelFilter!=null) {
+							iomBasket=(StartBasketEvent) exportBaseModelFilter.filter(iomBasket);
+						}
 						if(validator!=null)validator.validate(iomBasket);
 						iomFile.write(iomBasket);
 					}
@@ -362,6 +382,9 @@ public class TransferToXtf {
 							iomBasket=new StartBasketEvent(topic.getScopedName(null),topic.getScopedName(null));
 							if(languageFilter!=null){
 								iomBasket=(StartBasketEvent) languageFilter.filter(iomBasket);
+							}
+							if(exportBaseModelFilter!=null){
+								iomBasket=(StartBasketEvent) exportBaseModelFilter.filter(iomBasket);
 							}
 							if(validator!=null)validator.validate(iomBasket);
 							iomFile.write(iomBasket);
@@ -405,13 +428,21 @@ public class TransferToXtf {
 					if(languageFilter!=null){
 						objEvent=(ObjectEvent) languageFilter.filter(objEvent);
 					}
-					if(validator!=null)validator.validate(objEvent);
-					iomFile.write(objEvent);
+					if(exportBaseModelFilter!=null){
+						objEvent=(ObjectEvent) exportBaseModelFilter.filter(objEvent);
+					}
+					if(objEvent!=null) {
+						if(validator!=null)validator.validate(objEvent);
+						iomFile.write(objEvent);
+					}
 				}
 			}
 			EndBasketEvent endBasket=new EndBasketEvent();
 			if(languageFilter!=null){
 				endBasket=(EndBasketEvent) languageFilter.filter(endBasket);
+			}
+			if(exportBaseModelFilter!=null){
+				endBasket=(EndBasketEvent) exportBaseModelFilter.filter(endBasket);
 			}
 			if(validator!=null)validator.validate(endBasket);
 			iomFile.write(endBasket);
@@ -732,6 +763,9 @@ public class TransferToXtf {
 					if(languageFilter!=null){
 						objEvent=(ObjectEvent) languageFilter.filter(objEvent);
 					}
+					if(exportBaseModelFilter!=null){
+						objEvent=(ObjectEvent) exportBaseModelFilter.filter(objEvent);
+					}
 					if(validator!=null)validator.validate(objEvent);
 					out.write(objEvent);
 				}
@@ -792,9 +826,14 @@ public class TransferToXtf {
 						if(languageFilter!=null){
 							objEvent=(ObjectEvent) languageFilter.filter(objEvent);
 						}
-						if(validator!=null)validator.validate(objEvent);
-						if(out!=null){
-							out.write(objEvent);
+						if(exportBaseModelFilter!=null){
+							objEvent=(ObjectEvent) exportBaseModelFilter.filter(objEvent);
+						}
+						if(objEvent!=null) {
+							if(validator!=null)validator.validate(objEvent);
+							if(out!=null){
+								out.write(objEvent);
+							}
 						}
 					}else{
 						delayedObjects.add(fixref);

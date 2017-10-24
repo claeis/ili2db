@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?><TRANSFER xmlns="http://www.interlis.ch/INTERLIS2.3">
+<HEADERSECTION SENDER="ili2pg-3.10.7-20170823" VERSION="2.3"><MODELS><MODEL NAME="BaseModel" VERSION="2017-10-23" URI="mailto:ce@eisenhutinformatik.ch"></MODEL><MODEL NAME="ExtendedModel" VERSION="2017-10-23" URI="mailto:ce@eisenhutinformatik.ch"></MODEL></MODELS></HEADERSECTION>
+<DATASECTION>
+<BaseModel.TestA BID="b1">
+<BaseModel.TestA.ClassA1 TID="1"></BaseModel.TestA.ClassA1>
+<BaseModel.TestA.ClassA2 TID="2"><farbe>rot</farbe><a3 REF="3"/></BaseModel.TestA.ClassA2>
+<BaseModel.TestA.ClassA3 TID="3"></BaseModel.TestA.ClassA3>
+</BaseModel.TestA>
+<BaseModel.TestB BID="b2">
+<BaseModel.TestB.ClassB1 TID="20"></BaseModel.TestB.ClassB1>
+</BaseModel.TestB>
+<ExtendedModel.TestAp BID="b3">
+<BaseModel.TestA.ClassA1 TID="31"></BaseModel.TestA.ClassA1>
+<ExtendedModel.TestAp.ClassA2 TID="32"><farbe>rot.dunkel</farbe><a3 REF="33"/><wert>1.1</wert><ap1 REF="34"/></ExtendedModel.TestAp.ClassA2>
+<BaseModel.TestA.ClassA3 TID="33"></BaseModel.TestA.ClassA3>
+<ExtendedModel.TestAp.ClassAp1 TID="34"></ExtendedModel.TestAp.ClassAp1>
+</ExtendedModel.TestAp>
+<ExtendedModel.TestBp BID="b4">
+<ExtendedModel.TestBp.ClassB1 TID="40"></ExtendedModel.TestBp.ClassB1>
+</ExtendedModel.TestBp>
+</DATASECTION>
+</TRANSFER>
