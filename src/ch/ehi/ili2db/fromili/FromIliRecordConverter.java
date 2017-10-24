@@ -693,6 +693,16 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 			if(mText){
 				metaInfo.setColumnInfo(dbTable.getName().getName(), subType, sqlColName, DbExtMetaInfo.TAG_COL_TEXTKIND, DbExtMetaInfo.TAG_COL_TEXTKIND_MTEXT);
 			}
+			if(dbCol instanceof DbColGeometry) {
+				metaInfo.setColumnInfo(dbTable.getName().getName(), subType, sqlColName, DbExtMetaInfo.TAG_COL_C1_MIN, Double.toString(((DbColGeometry) dbCol).getMin1()));
+				metaInfo.setColumnInfo(dbTable.getName().getName(), subType, sqlColName, DbExtMetaInfo.TAG_COL_C1_MAX, Double.toString(((DbColGeometry) dbCol).getMax1()));
+				metaInfo.setColumnInfo(dbTable.getName().getName(), subType, sqlColName, DbExtMetaInfo.TAG_COL_C2_MIN, Double.toString(((DbColGeometry) dbCol).getMin2()));
+				metaInfo.setColumnInfo(dbTable.getName().getName(), subType, sqlColName, DbExtMetaInfo.TAG_COL_C2_MAX, Double.toString(((DbColGeometry) dbCol).getMax2()));
+				if(((DbColGeometry) dbCol).getDimension()==3) {
+					metaInfo.setColumnInfo(dbTable.getName().getName(), subType, sqlColName, DbExtMetaInfo.TAG_COL_C3_MIN, Double.toString(((DbColGeometry) dbCol).getMin3()));
+					metaInfo.setColumnInfo(dbTable.getName().getName(), subType, sqlColName, DbExtMetaInfo.TAG_COL_C3_MAX, Double.toString(((DbColGeometry) dbCol).getMax3()));
+				}
+			}
 			String dispName = attr.getMetaValues().getValue(IliMetaAttrNames.METAATTR_DISPNAME);
 			if (dispName!=null){
 			    metaInfo.setColumnInfo(dbTable.getName().getName(), subType, sqlColName, DbExtMetaInfo.TAG_COL_DISPNAME, dispName);

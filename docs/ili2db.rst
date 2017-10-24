@@ -1084,7 +1084,43 @@ Metadaten
 | t\_key\_object              | Hilfstabelle für den ID-Generator. Wird beim Export nicht benötigt.                                                                                                                                                                  |
 +-----------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 
-TODO
+TODO alle Tabelle beschreiben
+
+t\_ili2db\_column_prop
+......................
+
+Weitere Angaben zu den DB-Spalten aus dem Interlis Modell (z.B. ob es MTEXT ist). 
+Wird nur erstellt mit Option --createMetaInfo. Die Tabelle ist so aufgabut, dass
+sie beliebige (auch zukünftige) Werte/Zusatzangaben aufnehmen kann.
+
+- tablename Name der Tabelle
+- columnname Name der Spalte
+- subtype Name des Subtyps (Inhalt der Spalte t_type), falls die Angabe nicht für alle Klassen gilt
+- tag Name des Wertes/der Zusatzinformation
+- setting Wert/Zusatzinformation
+
++------------------------------------+---------------------------------------------------------------+
+| Tag                                | Beschreibung                                                  |
++====================================+===============================================================+
+| ``ch.ehi.ili2db.c1Min``            | Bei Geometriespalten der Minimalwert der 1. Dimension         |
++------------------------------------+---------------------------------------------------------------+
+| ``ch.ehi.ili2db.c1Max``            | Bei Geometriespalten der Maximalwert der 1. Dimension         |
++------------------------------------+---------------------------------------------------------------+
+| ``ch.ehi.ili2db.c2Min``            | Bei Geometriespalten der Minimalwert der 2. Dimension         |
++------------------------------------+---------------------------------------------------------------+
+| ``ch.ehi.ili2db.c2Max``            | Bei Geometriespalten der Maximalwert der 2. Dimension         |
++------------------------------------+---------------------------------------------------------------+
+| ``ch.ehi.ili2db.c3Min``            | Bei Geometriespalten der Minimalwert der 3. Dimension         |
++------------------------------------+---------------------------------------------------------------+
+| ``ch.ehi.ili2db.c3Max``            | Bei Geometriespalten der Maximalwert der 3. Dimension         |
++------------------------------------+---------------------------------------------------------------+
+| ``ch.ehi.ili2db.dispName``         | Benutzerfreundliche Bezeichnung der Spalte (z.B. im UI)       |
++------------------------------------+---------------------------------------------------------------+
+| ``ch.ehi.ili2db.textKind``         | Falls mehrzeilige Textspalte, der Wert MTEXT                  |
++------------------------------------+---------------------------------------------------------------+
+| ``ch.ehi.ili2db.unit``             | Name der numerischen Einheit z.B. m                           |
++------------------------------------+---------------------------------------------------------------+
+
 
 Namenskonvention
 ~~~~~~~~~~~~~~~~
