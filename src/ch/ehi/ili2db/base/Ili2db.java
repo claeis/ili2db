@@ -172,6 +172,7 @@ public class Ili2db {
 			}else{
 				conn = connect(url, dbusr, dbpwd, config, customMapping);
 			}
+			customMapping.postConnect(conn, config);
 			TransferFromIli.readSettings(conn,config,config.getDbschema());
 		} catch (SQLException e) {
 			EhiLogger.logError(e);
@@ -355,6 +356,7 @@ public class Ili2db {
 					}else{
 						conn = connect(url, dbusr, dbpwd, config, customMapping);
 					}
+					customMapping.postConnect(conn, config);
 				} catch (SQLException ex) {
 					throw new Ili2dbException("failed to get db connection", ex);
 				}
@@ -919,6 +921,7 @@ public class Ili2db {
 				}else{
 					conn = connect(url, dbusr, dbpwd, config, customMapping);
 				}
+				customMapping.postConnect(conn, config);
 			  logDBVersion(conn);
 			  
 			  if(!connectionFromExtern){
@@ -1302,6 +1305,7 @@ public class Ili2db {
 				  }else{
 						conn = connect(url, dbusr, dbpwd, config, customMapping);
 				  }
+					customMapping.postConnect(conn, config);
 			} catch (SQLException e) {
 				throw new Ili2dbException("failed to get db connection",e);
 			}
@@ -1495,7 +1499,6 @@ public class Ili2db {
 		customMapping.preConnect(url, dbusr, dbpwd, config);
 		conn = customMapping.connect(url, dbusr, dbpwd,config);
 		config.setJdbcConnection(conn);
-		customMapping.postConnect(conn, config);
 		return conn;
 	}
 	public static Long getDatasetId(String datasetName,Connection conn,Config config) throws Ili2dbException {
