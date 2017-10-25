@@ -1121,6 +1121,31 @@ sie beliebige (auch zukünftige) Werte/Zusatzangaben aufnehmen kann.
 | ``ch.ehi.ili2db.unit``             | Name der numerischen Einheit z.B. m                           |
 +------------------------------------+---------------------------------------------------------------+
 
+t\_ili2db\_table_prop
+......................
+Weitere Angaben zu den DB-Tabellen aus dem Interlis Modell (z.B. ob es 
+eine Tabelle mit Aufzählwerten ist). Wird nur erstellt mit Option --createMetaInfo.
+
+- tablename Name der Tabelle
+- tag Name des Wertes/der Zusatzinformation
+- setting Wert/Zusatzinformation
+
++------------------------------------+---------------------------------------------------------------+
+| Tag                                | Beschreibung                                                  |
++====================================+===============================================================+
+| ``ch.ehi.ili2db.dispName``         | Benutzerfreundliche Bezeichnung der Tabelle (z.B. im UI)      |
++------------------------------------+---------------------------------------------------------------+
+| ``ch.ehi.ili2db.tableKind``        | Art/Zweck der Tabelle                                         |
+|                                    |                                                               |
+|                                    | - ``ENUM``  Tabelle für eine Interlis Aufzählung              |
+|                                    | - ``SECONDARY`` Hilfstabelle, falls eine Interlis Klasse      |
+|                                    |   in mehrere Tabellen unterteilt wird (z.B. wegen der         |
+|                                    |   Option --oneGeomPerTable)                                   |
+|                                    | - ``ASSOCIATION`` Tabelle für eine Interlis Beziehung         |
+|                                    | - ``STRUCTURE``  Tabelle für eine Interlis Struktur           |
+|                                    | - ``CATALOGUE`` Tabelle für eine Interlis Klasse, die direkt  |
+|                                    |   oder indirekt CatalogueObjects_V1.Catalogues.Item erweitert |
++------------------------------------+---------------------------------------------------------------+
 
 Namenskonvention
 ~~~~~~~~~~~~~~~~
