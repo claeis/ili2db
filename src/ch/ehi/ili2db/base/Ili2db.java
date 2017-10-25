@@ -1183,6 +1183,7 @@ public class Ili2db {
 		EhiLogger.logState("java.version "+System.getProperty("java.version"));
 		EhiLogger.logState("user.name <"+System.getProperty("user.name")+">");
 		EhiLogger.logState("maxMemory "+java.lang.Runtime.getRuntime().maxMemory()/1024L+" KB");
+		EhiLogger.logState("currentTime "+new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new java.util.Date()));
 	}
 	private static void setupIli2cPathmap(Config config, String appHome,
 			String xtffile,java.sql.Connection conn) throws Ili2dbException {
