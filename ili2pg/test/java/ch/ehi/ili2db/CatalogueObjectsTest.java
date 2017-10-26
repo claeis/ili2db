@@ -130,33 +130,18 @@ public class CatalogueObjectsTest {
 				Ili2db.run(config,null);
 				// object import
 				{
-					String stmtTxt="SELECT t_ili2db_import_object.t_id, t_ili2db_import_object.class FROM "+DBSCHEMA+".t_ili2db_import_object WHERE t_ili2db_import_object.t_id = 7";
+					String stmtTxt="SELECT t_ili2db_import_object.t_id, t_ili2db_import_object.objectcount FROM "+DBSCHEMA+".t_ili2db_import_object WHERE t_ili2db_import_object.class = 'CatalogueObjects1.TopicA.Katalog_Programm'";
 					Assert.assertTrue(stmt.execute(stmtTxt));
 					ResultSet rs=stmt.getResultSet();
 					Assert.assertTrue(rs.next());
-					Assert.assertEquals("CatalogueObjects1.TopicA.Katalog_Programm",rs.getString(2));
+					Assert.assertEquals(2,rs.getInt(2));
 				}
 				{
-					String stmtTxt="SELECT t_ili2db_import_object.t_id, t_ili2db_import_object.class FROM "+DBSCHEMA+".t_ili2db_import_object WHERE t_ili2db_import_object.t_id = 18";
+					String stmtTxt="SELECT t_ili2db_import_object.t_id, t_ili2db_import_object.objectcount FROM "+DBSCHEMA+".t_ili2db_import_object WHERE t_ili2db_import_object.class = 'CatalogueObjects1.TopicA.Katalog_ProgrammRef'";
 					Assert.assertTrue(stmt.execute(stmtTxt));
 					ResultSet rs=stmt.getResultSet();
 					Assert.assertTrue(rs.next());
-					Assert.assertEquals("CatalogueObjects1.TopicA.Katalog_ProgrammRef",rs.getString(2));
-				}
-				// attrname import
-				{
-					String stmtTxt="SELECT t_ili2db_attrname.iliname, t_ili2db_attrname.sqlname FROM "+DBSCHEMA+".t_ili2db_attrname WHERE t_ili2db_attrname.iliname = 'Localisation_V1.LocalisedText.Language'";
-					Assert.assertTrue(stmt.execute(stmtTxt));
-					ResultSet rs=stmt.getResultSet();
-					Assert.assertTrue(rs.next());
-					Assert.assertEquals("alanguage",rs.getString(2));
-				}
-				{
-					String stmtTxt="SELECT t_ili2db_attrname.iliname, t_ili2db_attrname.sqlname FROM "+DBSCHEMA+".t_ili2db_attrname WHERE t_ili2db_attrname.iliname = 'Localisation_V1.LocalisedText.Text'";
-					Assert.assertTrue(stmt.execute(stmtTxt));
-					ResultSet rs=stmt.getResultSet();
-					Assert.assertTrue(rs.next());
-					Assert.assertEquals("atext",rs.getString(2));
+					Assert.assertEquals(2,rs.getInt(2));
 				}
 			}
 		}finally{
