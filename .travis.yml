@@ -1,7 +1,4 @@
 language: java
-env:
-  global:
-    - secure: "2ZNezouxOw4sqC8NUpjRkk+ux9xE+aSRnwy5Fl57j7e8CdZPK7JbEHrKmajC7ZLkzcEUHXG8BpfdkvgPnhJMx7TJezFdmyEgYSpxlVHQBPaTigsbSkJRRG+uNm+VM01Z1qDFoukYgd8cJDbXkH2ulN4ECaIkthUgoIP6XtxMdeYQnfgryhoCwcrtYQoWZtEuuJHY/7QKsXM11QxAzDCEAqQM57NcM+uDP4IULiIWSrCfdTuOE0Ylc7z0IosUu2NaZvVhOz+DzkDUEbtFfqnqivkGY8eotc6CEhy7lguTPSmkTh/eaDjENluWRtGxT1sc8LwuVdB48C/WsCys4wUi8WQ4DYKrGspsU3y3cmsUK/hdCrD87LfitU5BjuseGZWo2ZYwughrtpFbOD91ZgC/OfVEgG458+o/F0xBJPM9JDeTHQBlVoE3xx7AZTsPE/CJGpXqZjB4M6zINeru3VwKS2qWgDx9ZYleB/pc039BL+9x9Z4o+nsqYiL5nFo7oAosCQbokmYGwJxVdjoV8Gc7TWFNe2w9+ugh20kIyY7SxU3abGEfTeBAU//d937eo0oFIjSfrl8ZrGT6EI27962A+OhpLjavV8PhTQyWSbWzWJuE6CCS0CmVG9JscoJcVrJyVkmn/pu7r5ezbPTXZvvSy6uQuebKzvTY77Wbbdd59Mk="
   
 branches:
   only:
@@ -29,9 +26,9 @@ script:
   - ant -f build-ili2pg.xml junit -Ddburl=jdbc:postgresql:ili2db -Ddbusr=postgres 
   - ant -f build-ili2pg.xml  junitreport
 after_success:
-  - mail -s "ili2db Testresults" -a build/test-out/junit-noframes.html ce@eisenhutinformatik.ch  </dev/null
+  - python html2text.py  build/test-out/junit-noframes.html
 after_failure:
-  - mail -s "ili2db Testresults" -a build/test-out/junit-noframes.html ce@eisenhutinformatik.ch  </dev/null
+  - python html2text.py  build/test-out/junit-noframes.html
 deploy:
   - provider: script
     skip_cleanup: true
