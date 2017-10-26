@@ -28,6 +28,10 @@ script:
   - ant -f build-ili2pg.xml jar 
   - ant -f build-ili2pg.xml junit -Ddburl=jdbc:postgresql:ili2db -Ddbusr=postgres 
   - ant -f build-ili2pg.xml  junitreport
+after_success:
+  - mail -s "ili2db Testresults" -a build/test-out/junit-noframes.html ce@eisenhutinformatik.ch  </dev/null
+after_failure:
+  - mail -s "ili2db Testresults" -a build/test-out/junit-noframes.html ce@eisenhutinformatik.ch  </dev/null
 deploy:
   - provider: script
     skip_cleanup: true

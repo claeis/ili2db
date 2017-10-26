@@ -234,18 +234,16 @@
   <target depends="junit,junitreport" name="tests"/>
   
   <target name="junit">
-		<delete dir="${junit-out.dir}" quiet="true"/>
 		<delete dir="${junit.dir}" quiet="true"/>
 		<delete dir="${report.dir}" quiet="true"/>
 		<mkdir dir="${junit.dir}"/>
-		<mkdir dir="${junit-out.dir}"/>
 		<mkdir dir="${report.dir}"/>
 		<copy todir="${junit.dir}">
 			<fileset dir="${basedir}">
 				<include name="test/data/**/*"/>
 			</fileset>
 		</copy>
-		<junit printsummary="yes" dir="${junit.dir}" haltonfailure="yes">
+		<junit printsummary="yes" dir="${junit.dir}" > <!-- haltonfailure="yes" -->
 			<classpath>
 				<path refid="classpath"/>
 				<path refid="junit"/>
@@ -268,9 +266,11 @@
 	</target>
 
 	<target name="junitreport">
+		<delete dir="${junit-out.dir}" quiet="true"/>
+		<mkdir dir="${junit-out.dir}"/>
 		<junitreport todir="${report.dir}">
 			<fileset dir="${report.dir}" includes="TEST-*.xml"/>
-			<report todir="${report.dir}"/>
+			<report todir="${junit-out.dir}" format="noframes"/>
 		</junitreport>
 	</target>
   
