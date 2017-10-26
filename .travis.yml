@@ -13,7 +13,7 @@ addons:
   apt:
     packages:
     - libmaven-ant-tasks-java
-    - postgresl-9.6-postgis-2.3
+    - postgresql-9.6-postgis-2.3
 
 install: true
 
