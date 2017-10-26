@@ -26,9 +26,9 @@ script:
   - ant -f build-ili2pg.xml junit -Ddburl=jdbc:postgresql:ili2db -Ddbusr=postgres 
   - ant -f build-ili2pg.xml  junitreport
 after_success:
-  - python html2text.py  build/test-out/junit-noframes.html
+  - python travis/html2text.py  build/test-out/junit-noframes.html
 after_failure:
-  - python html2text.py  build/test-out/junit-noframes.html
+  - python travis/html2text.py  build/test-out/junit-noframes.html
 deploy:
   - provider: script
     skip_cleanup: true
