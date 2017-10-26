@@ -14,6 +14,8 @@ ideas/open issues/questions
 
 LATEST
 ---------------------------
+- added mssql support
+- added mssql keywords to list of reserved words
 
 ili2fgdb 3.10.9 (2017-10-26)
 -----------------------------
