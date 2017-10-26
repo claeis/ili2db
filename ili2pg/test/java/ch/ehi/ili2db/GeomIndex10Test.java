@@ -68,20 +68,7 @@ public class GeomIndex10Test {
 			Ili2db.readSettingsFromDb(config);
 			Ili2db.run(config,null);
 			{
-				String stmtTxt="SELECT t_ili2db_classname.iliname FROM "+DBSCHEMA+".t_ili2db_classname";
-				Assert.assertTrue(stmt.execute(stmtTxt));
-				ResultSet rs=stmt.getResultSet();
-				Assert.assertTrue(rs.next());
-				// classname
-				Assert.assertEquals("GeomIndex10.Topic.FlaechenTable", rs.getString(1));
-			}
-			{
-				String stmtTxt="SELECT t_ili2db_attrname.sqlname FROM "+DBSCHEMA+".t_ili2db_attrname";
-				Assert.assertTrue(stmt.execute(stmtTxt));
-				ResultSet rs=stmt.getResultSet();
-				Assert.assertTrue(rs.next());
-				// attributes
-				Assert.assertEquals("_geom", rs.getString(1));
+				// FIXME test if index exists
 			}
 		}finally{
 			if(jdbcConnection!=null){
