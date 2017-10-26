@@ -51,7 +51,7 @@
   <target depends="init,buildnr" name="pom">
   	<artifact:pom id="mypomE" groupId="${groupId}" artifactId="${artifactId}" version="${buildnr}" name="ehibasics">
 			<artifact:dependency groupId="ch.interlis" artifactId="ili2c-tool" version="4.7.3"/>
-			<artifact:dependency groupId="ch.interlis" artifactId="iox-ili" version="1.19.7"/>
+			<artifact:dependency groupId="ch.interlis" artifactId="iox-ili" version="1.19.8"/>
 			<artifact:dependency groupId="ch.ehi" artifactId="ehisqlgen" version="1.11.2"/>
 	  </artifact:pom>
 	  <artifact:writepom pomRefId="mypomE" file="build/pom-ili2pg.xml"/>
@@ -245,7 +245,7 @@
 				<include name="test/data/**/*"/>
 			</fileset>
 		</copy>
-		<junit printsummary="yes" dir="${junit.dir}">
+		<junit printsummary="yes" dir="${junit.dir}" haltonfailure="yes">
 			<classpath>
 				<path refid="classpath"/>
 				<path refid="junit"/>
