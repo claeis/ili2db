@@ -15,7 +15,7 @@ ideas/open issues/questions
 LATEST
 ---------------------------
 
-ili2fgdb 3.10.9 (2017-10-xx)
+ili2fgdb 3.10.9 (2017-10-26)
 -----------------------------
 - ili2db: new option --exportModels to export according to a base model
 - ili2pg: fixed --setupPgExt if external connection
@@ -23,6 +23,7 @@ ili2fgdb 3.10.9 (2017-10-xx)
 - ili2db: add geometry extent info to t_ili2db_column_prop 
 - ili2fgdb: fixed schema import of 3D shapes (z-values)
 - ili2fgdb: hardcoded XYFalseOrigin values for LV03/LV95 
+- iox-ili 1.19.8
 
 ili2fgdb 3.10.8 (2017-09-14)
 -----------------------------
