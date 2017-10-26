@@ -515,7 +515,7 @@ public class Ili2db {
 						TransferFromIli.addInheritanceTable(schema,Integer.parseInt(config.getMaxSqlNameLength()));
 						TransferFromIli.addSettingsTable(schema);
 						TransferFromIli.addTrafoConfigTable(schema);
-						TransferFromIli.addModelsTable(schema);
+						TransferFromIli.addModelsTable(schema,config);
 						trsfFromIli.addEnumTable(schema);
 						TransferFromIli.addTableMappingTable(schema);
 						TransferFromIli.addAttrMappingTable(schema);
@@ -1056,7 +1056,7 @@ public class Ili2db {
 					TransferFromIli.addInheritanceTable(schema,Integer.parseInt(config.getMaxSqlNameLength()));
 					TransferFromIli.addSettingsTable(schema);
 					TransferFromIli.addTrafoConfigTable(schema);
-					TransferFromIli.addModelsTable(schema);
+					TransferFromIli.addModelsTable(schema,config);
 					trsfFromIli.addEnumTable(schema);
 					TransferFromIli.addTableMappingTable(schema);
 					TransferFromIli.addAttrMappingTable(schema);

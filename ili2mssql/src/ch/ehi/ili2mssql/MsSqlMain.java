@@ -19,6 +19,7 @@ public class MsSqlMain  extends ch.ehi.ili2db.AbstractMain {
 		config.setIdGenerator(ch.ehi.ili2mssql.MsSqlSequenceBasedIdGen.class.getName());
 		config.setIli2dbCustomStrategy(ch.ehi.ili2mssql.MsSqlCustomStrategy.class.getName());
 		config.setUuidDefaultValue("uuid_generate_v4()");
+		config.setValue(Config.MODELS_TAB_MODELNAME_COLSIZE, "400"); // change column size because 'SQL Server retains the 900-byte limit for the maximum total size of all index key columns'
 	}
 	
 	@Override

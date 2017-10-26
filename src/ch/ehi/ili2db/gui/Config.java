@@ -74,6 +74,7 @@ public class Config extends Settings {
 	public static final String ILI1TRANSLATION=PREFIX+".ili1translation";
 	public static final String DELETE_DATA="data";
 	public static final String CREATE_META_INFO=PREFIX+".createMetaInfo";
+	public static final String MODELS_TAB_MODELNAME_COLSIZE = PREFIX+".modelsTabModelnameColSize";
 	private int function;
 	private String dburl;
 	private String dbusr;
