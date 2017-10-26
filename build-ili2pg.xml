@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project basedir="." default="jar" name="ili2pg">
+<project basedir="." default="jar" name="ili2pg"  xmlns:artifact="antlib:org.apache.maven.artifact.ant">
 
   <!-- set global properties for this build -->
   <property name="src" value="${basedir}/src"/>
@@ -7,6 +7,10 @@
   <property name="dist" value="${basedir}/dist"/>
   <property name="lib" value="libs"/>
   <property name="postgresql" value="postgresql-9.4.1208.jre6.jar"/>
+  <property name="groupId" value="ch.interlis"/>
+  <property name="artifactId" value="${ant.project.name}"/>
+  <property name="release" value=""/>
+  
   <property name="report.dir" value="${build}/junitreport"/>
   <property name="junit.dir" value="${build}/junit"/>
   <property name="junit-out.dir" value="${build}/junit/test-out"/>
@@ -43,7 +47,31 @@
 		<pathelement location="${lib}/junit-4.11.jar"/>
 		<pathelement location="${lib}/hamcrest-core-1.3.jar"/>
 	</path>
-  
+
+  <target depends="init,buildnr" name="pom">
+  	<artifact:pom id="mypomE" groupId="${groupId}" artifactId="${artifactId}" version="${buildnr}" name="ehibasics">
+			<artifact:dependency groupId="ch.interlis" artifactId="ili2c-tool" version="4.7.3"/>
+			<artifact:dependency groupId="ch.interlis" artifactId="iox-ili" version="1.19.7"/>
+			<artifact:dependency groupId="ch.ehi" artifactId="ehisqlgen" version="1.11.2"/>
+	  </artifact:pom>
+	  <artifact:writepom pomRefId="mypomE" file="build/pom-ili2pg.xml"/>
+	<artifact:pom id="mypom" file="build/pom-ili2pg.xml" />
+  </target>
+  <target depends="init,pom" name="install">
+	  <artifact:install file="build/jar/ili2pg.jar">
+		<artifact:pom refid="mypom"/>
+	  </artifact:install>
+  </target>
+  <target depends="init,pom" name="deploy">
+	  <artifact:install-provider artifactId="wagon-ftp" version="3.0.0"/>
+  <artifact:deploy file="build/jar/ili2pg.jar">
+    <remoteRepository url="ftp://ftp.interlis.ch">
+    	<authentication username="${user.repos_usr}" password="${user.repos_pwd}"/>
+    </remoteRepository>
+    <pom refid="mypom"/>
+  </artifact:deploy>    
+  </target>
+	
   <target depends="init" name="compile">
     <!-- Compile the java code from ${src} into ${build}/classes -->
     <mkdir dir="${build}/classes"/>
@@ -142,7 +170,10 @@
   
   <target depends="init" name="buildnr">
     <property file="ili2pg/src/ch/ehi/ili2pg/Version.properties" prefix="buildnr."/>
-    <property name="buildnr" value="${buildnr.versionMajor}.${buildnr.versionMinor}.${buildnr.versionMicro}"/>
+    <condition property="SNAPSHOT" value="" else="-SNAPSHOT">
+       <length string="${release}" trim="true" when="greater" length="0"/>
+    </condition>
+    <property name="buildnr" value="${buildnr.versionMajor}.${buildnr.versionMinor}.${buildnr.versionMicro}${SNAPSHOT}"/>
     <!-- <property name="buildnr" value="${DSTAMP}"/> -->
   </target>
 

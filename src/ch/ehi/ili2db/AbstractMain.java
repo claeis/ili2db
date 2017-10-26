@@ -98,6 +98,10 @@ public abstract class AbstractMain {
 				argi++;
 				config.setModels(args[argi]);
 				argi++;
+			}else if(arg.equals("--exportModels")){
+				argi++;
+				config.setExportModels(args[argi]);
+				argi++;
 			}else if(arg.equals("--dataset")){
 				argi++;
 				config.setDatasetName(args[argi]);
@@ -203,11 +207,7 @@ public abstract class AbstractMain {
 				config.setBeautifyEnumDispName(config.BEAUTIFY_ENUM_DISPNAME_UNDERSCORE);
 			}else if(arg.equals("--noSmartMapping")){
 				argi++;
-				config.setCatalogueRefTrafo(null);
-				config.setMultiSurfaceTrafo(null);
-				config.setMultiLineTrafo(null);
-				config.setMultilingualTrafo(null);
-				config.setInheritanceTrafo(null);
+				Ili2db.setNoSmartMapping(config);
 			}else if(arg.equals("--smart1Inheritance")){
 				argi++;
 				config.setInheritanceTrafo(config.INHERITANCE_TRAFO_SMART1);
@@ -258,7 +258,7 @@ public abstract class AbstractMain {
 				config.setCreateTypeDiscriminator(config.CREATE_TYPE_DISCRIMINATOR_ALWAYS);
 			}else if(arg.equals("--createGeomIdx")){
 				argi++;
-				config.setValue(SqlConfiguration.CREATE_GEOM_INDEX,"True");
+				config.setValue(Config.CREATE_GEOM_INDEX,Config.TRUE);
 			}else if(arg.equals("--disableNameOptimization")){
 				argi++;
 				config.setNameOptimization(config.NAME_OPTIMIZATION_DISABLE);
@@ -280,8 +280,7 @@ public abstract class AbstractMain {
 				config.setStrokeArcs(config.STROKE_ARCS_ENABLE);
 			}else if(arg.equals("--skipPolygonBuilding")){
 				argi++;
-				config.setDoItfLineTables(true);
-				config.setAreaRef(config.AREA_REF_KEEP);
+				Ili2db.setSkipPolygonBuilding(config);
 			}else if(arg.equals("--skipPolygonBuildingErrors")){
 				// DEPRECATED remove option
 				argi++;
@@ -392,6 +391,7 @@ public abstract class AbstractMain {
 					System.err.println("--createUnique         create UNIQUE db constraints.");
 					System.err.println("--createNumChecks      create CHECK db constraints for numeric data types.");
 					System.err.println("--ILIGML20             use eCH-0118-2.0 as transferformat");
+					System.err.println("--exportModels modelname  export data according to the given base ili-models");
 				    System.err.println("--ver4-translation     supports TRANSLATION OF in ili2db 4.x mode (incompatible with ili2db 3.x versions).");
 				    System.err.println("--translation translatedModel=originModel assigns a translated model to its orginal language equivalent.");
 				    System.err.println("--createMetaInfo       Create aditional ili-model information.");
@@ -438,7 +438,6 @@ public abstract class AbstractMain {
 		}
 		
 	}
-
 	private void printVersion ()
 	{
 	  System.err.println("INTERLIS 2-loader for "+getDB_PRODUCT_NAME()+", Version "+getVersion());

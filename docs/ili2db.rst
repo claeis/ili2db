@@ -85,7 +85,8 @@ Das Programm setzt Java 1.6 voraus.
 1.5 vorhanden sein. Falls das Interlis Datenmodell INTERLIS.UUIDOID als 
 OID verwendet, wird die Funktion uuid_generate_v4() verwendet. 
 Dazu muss die PostgreSQL-Erweiterung uuid-ossp konfiguriert sein
-(``CREATE EXTENSION "uuid-ossp";``).
+(``CREATE EXTENSION "uuid-ossp";``). Mit der Option ``--setupPgExt``
+erstellt ili2pg die fehlenden notwendigen Erweiterungen.
 
 **FileGDB:** Es muss `Visual Studio 2015 C and C++ Runtimes <https://www.microsoft.com/en-us/download/details.aspx?id=48145>`_ 
 installiert sein. Je nach Java Version (Die Java Version ist massgebend, nicht die Windows Version) muss 
@@ -548,6 +549,8 @@ Optionen:
 | --ver4-translation            | Verwendet ili2db 4.x Abbildungsregeln für übersetzte Modelle (Inkompatibel mit ili2db 3.x Abbildungen).                                                                                                                                                                                                                                                                                                                                                                                                                                    |
 +-------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | --translation modelT=modelU   | Definiert bei übersetzten INTERLIS 1 Modellen (modelT), das Modell der Ursprungssprache (ModelU)                                                                                                                                                                                                                                                                                                                                                                                                                                           |
++-------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| --exportModels modelname      | Beim Export werden die Daten gem. dem gegebenen Basis-Modell exportiert. Ohne die Option ``--exportModels`` werden die Daten so wie sie erfasst sind, exportiert. Mehrere Modellnamen können durch Semikolon ‚;‘ getrennt werden.                                                                                                                                                                                                                                                                                                          |
 +-------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | --ILIGML20                    | Verwendet beim Export eCH-0118-2.0 als Transferformat.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 +-------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
@@ -1081,7 +1084,68 @@ Metadaten
 | t\_key\_object              | Hilfstabelle für den ID-Generator. Wird beim Export nicht benötigt.                                                                                                                                                                  |
 +-----------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 
-TODO
+TODO alle Tabelle beschreiben
+
+t\_ili2db\_column_prop
+......................
+
+Weitere Angaben zu den DB-Spalten aus dem Interlis Modell (z.B. ob es MTEXT ist). 
+Wird nur erstellt mit Option --createMetaInfo. Die Tabelle ist so aufgabut, dass
+sie beliebige (auch zukünftige) Werte/Zusatzangaben aufnehmen kann.
+
+- tablename Name der Tabelle
+- columnname Name der Spalte
+- subtype Name des Subtyps (Inhalt der Spalte t_type), falls die Angabe nicht für alle Klassen gilt
+- tag Name des Wertes/der Zusatzinformation
+- setting Wert/Zusatzinformation
+
++------------------------------------+---------------------------------------------------------------+
+| Tag                                | Beschreibung                                                  |
++====================================+===============================================================+
+| ``ch.ehi.ili2db.c1Min``            | Bei Geometriespalten der Minimalwert der 1. Dimension         |
++------------------------------------+---------------------------------------------------------------+
+| ``ch.ehi.ili2db.c1Max``            | Bei Geometriespalten der Maximalwert der 1. Dimension         |
++------------------------------------+---------------------------------------------------------------+
+| ``ch.ehi.ili2db.c2Min``            | Bei Geometriespalten der Minimalwert der 2. Dimension         |
++------------------------------------+---------------------------------------------------------------+
+| ``ch.ehi.ili2db.c2Max``            | Bei Geometriespalten der Maximalwert der 2. Dimension         |
++------------------------------------+---------------------------------------------------------------+
+| ``ch.ehi.ili2db.c3Min``            | Bei Geometriespalten der Minimalwert der 3. Dimension         |
++------------------------------------+---------------------------------------------------------------+
+| ``ch.ehi.ili2db.c3Max``            | Bei Geometriespalten der Maximalwert der 3. Dimension         |
++------------------------------------+---------------------------------------------------------------+
+| ``ch.ehi.ili2db.dispName``         | Benutzerfreundliche Bezeichnung der Spalte (z.B. im UI)       |
++------------------------------------+---------------------------------------------------------------+
+| ``ch.ehi.ili2db.textKind``         | Falls mehrzeilige Textspalte, der Wert MTEXT                  |
++------------------------------------+---------------------------------------------------------------+
+| ``ch.ehi.ili2db.unit``             | Name der numerischen Einheit z.B. m                           |
++------------------------------------+---------------------------------------------------------------+
+
+t\_ili2db\_table_prop
+......................
+Weitere Angaben zu den DB-Tabellen aus dem Interlis Modell (z.B. ob es 
+eine Tabelle mit Aufzählwerten ist). Wird nur erstellt mit Option --createMetaInfo.
+
+- tablename Name der Tabelle
+- tag Name des Wertes/der Zusatzinformation
+- setting Wert/Zusatzinformation
+
++------------------------------------+---------------------------------------------------------------+
+| Tag                                | Beschreibung                                                  |
++====================================+===============================================================+
+| ``ch.ehi.ili2db.dispName``         | Benutzerfreundliche Bezeichnung der Tabelle (z.B. im UI)      |
++------------------------------------+---------------------------------------------------------------+
+| ``ch.ehi.ili2db.tableKind``        | Art/Zweck der Tabelle                                         |
+|                                    |                                                               |
+|                                    | - ``ENUM``  Tabelle für eine Interlis Aufzählung              |
+|                                    | - ``SECONDARY`` Hilfstabelle, falls eine Interlis Klasse      |
+|                                    |   in mehrere Tabellen unterteilt wird (z.B. wegen der         |
+|                                    |   Option --oneGeomPerTable)                                   |
+|                                    | - ``ASSOCIATION`` Tabelle für eine Interlis Beziehung         |
+|                                    | - ``STRUCTURE``  Tabelle für eine Interlis Struktur           |
+|                                    | - ``CATALOGUE`` Tabelle für eine Interlis Klasse, die direkt  |
+|                                    |   oder indirekt CatalogueObjects_V1.Catalogues.Item erweitert |
++------------------------------------+---------------------------------------------------------------+
 
 Namenskonvention
 ~~~~~~~~~~~~~~~~

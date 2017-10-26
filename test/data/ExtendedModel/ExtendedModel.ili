@@ -1,0 +1,78 @@
+INTERLIS 2.3;
+
+MODEL BaseModel
+  AT "mailto:ce@eisenhutinformatik.ch" VERSION "2017-10-23" =
+    
+  DOMAIN
+  	Farbe = (rot,blau);
+  	
+  TOPIC TestA =
+  
+    CLASS ClassA1 =
+    END ClassA1;
+
+    CLASS ClassA2 =
+      farbe : Farbe;
+    END ClassA2;
+
+    CLASS ClassA3 =
+    END ClassA3;
+    
+    ASSOCIATION AssocA1 =
+      a2 -- {0..*} ClassA2;
+      a3 -- {0..1} ClassA3;
+    END AssocA1;
+    
+  END TestA;
+  
+  !! TOPIC das nicht erweitert wird
+  TOPIC TestB =
+
+    CLASS ClassB1 =
+    END ClassB1;
+    
+  END TestB;
+  
+END BaseModel.
+
+MODEL ExtendedModel
+  AT "mailto:ce@eisenhutinformatik.ch" VERSION "2017-10-23" =
+  IMPORTS BaseModel;
+  
+  DOMAIN
+  	Farbe EXTENDS BaseModel.Farbe = (rot (dunkel, hell));
+    
+  TOPIC TestAp EXTENDS BaseModel.TestA =
+  
+    !! ClassA1 unveraendert
+    
+    !! ClassA2 erweitert
+    !!   zusaetzliches Attribut
+    !!   Aufzaehlung spezialisiert
+    !!   zusaetzliche eingebettete Rolle
+	CLASS ClassA2 (EXTENDED) =
+	  farbe (EXTENDED) : ExtendedModel.Farbe;
+	  wert : 1.0 .. 100.0;
+    END ClassA2;
+    
+    !! zusaetzliche Klasse
+    CLASS ClassAp1 =
+    END ClassAp1;
+
+    !! zusaetzliche Assoc (fuer zusaetliche Rolle in ClassA2)
+    ASSOCIATION AssocAp1 =
+      ap2 -- {0..*} ClassA2;
+      ap1 -- {0..1} ClassAp1;
+    END AssocAp1;
+    
+  END TestAp;
+  
+  !! zusaetzliches TOPIC
+  TOPIC TestBp =
+
+    CLASS ClassB1 =
+    END ClassB1;
+    
+  END TestBp;
+  
+END ExtendedModel.

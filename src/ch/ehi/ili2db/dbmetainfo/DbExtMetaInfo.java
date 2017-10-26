@@ -21,6 +21,12 @@ public class DbExtMetaInfo {
 	public static final String TAG_COL_TEXTKIND = Config.PREFIX+".textKind";
 	public static final String TAG_COL_TEXTKIND_MTEXT = "MTEXT";
 	public static final String TAG_COL_DISPNAME = Config.PREFIX+".dispName";
+	public static final String TAG_COL_C1_MIN = Config.PREFIX+".c1Min";
+	public static final String TAG_COL_C1_MAX = Config.PREFIX+".c1Max";
+	public static final String TAG_COL_C2_MIN = Config.PREFIX+".c2Min";
+	public static final String TAG_COL_C2_MAX = Config.PREFIX+".c2Max";
+	public static final String TAG_COL_C3_MIN = Config.PREFIX+".c3Min";
+	public static final String TAG_COL_C3_MAX = Config.PREFIX+".c3Max";
 	public static final String TAG_TAB_TABLEKIND = Config.PREFIX+".tableKind";
 	public static final String TAG_TAB_TABLEKIND_ENUM = "ENUM";
 	public static final String TAG_TAB_TABLEKIND_SECONDARY = "SECONDARY";
