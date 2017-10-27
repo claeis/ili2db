@@ -78,7 +78,7 @@ public class CatalogueObjectsTest {
 				config.setDatasetName(DATASETNAME);
 				config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
 				config.setNameOptimization(Config.NAME_OPTIMIZATION_TOPIC);
-				config.setCreatescript(data.getPath()+".sql");
+				//config.setCreatescript(data.getPath()+".sql");
 				Ili2db.readSettingsFromDb(config);
 				Ili2db.run(config,null);
 				// import-test: attrname of catalogue
@@ -124,7 +124,7 @@ public class CatalogueObjectsTest {
 				config.setDatasetName(DATASETNAME);
 				config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
 				config.setNameOptimization(Config.NAME_OPTIMIZATION_TOPIC);
-				config.setCreatescript(data.getPath()+".sql");
+				//config.setCreatescript(data.getPath()+".sql");
 				//config.setValidation(false);
 				Ili2db.readSettingsFromDb(config);
 				Ili2db.run(config,null);

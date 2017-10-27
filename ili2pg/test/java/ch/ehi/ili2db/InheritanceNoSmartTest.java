@@ -179,7 +179,7 @@ public class InheritanceNoSmartTest {
 				config.setTidHandling(Config.TID_HANDLING_PROPERTY);
 				config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
 				config.setNameOptimization(Config.NAME_OPTIMIZATION_TOPIC);
-				config.setCreatescript(data.getPath()+".sql");
+				//config.setCreatescript(data.getPath()+".sql");
 				Ili2db.readSettingsFromDb(config);
 				Ili2db.run(config,null);
 				// FIXME check that FK exists on reference from struct table to class table
