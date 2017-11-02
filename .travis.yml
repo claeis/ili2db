@@ -23,6 +23,7 @@ before_script:
     - psql -c 'create extension postgis;' -d ili2db -U postgres
     - psql -c 'create extension "uuid-ossp";' -d ili2db -U postgres
     - psql -c 'select postgis_full_version();' -d ili2db -U postgres
+    - apt-file update
     - apt-file find rst2html.py
     
 script: 
