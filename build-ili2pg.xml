@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project basedir="." default="jar" name="ili2pg"  xmlns:artifact="antlib:org.apache.maven.artifact.ant">
+<project basedir="." default="jar" name="ili2pg"  xmlns:if="ant:if" xmlns:artifact="antlib:org.apache.maven.artifact.ant">
 
   <!-- set global properties for this build -->
   <property name="src" value="${basedir}/src"/>
@@ -97,7 +97,7 @@
   
   <target depends="init" name="usrdoc">
   	<exec dir="docs" executable="${python}">
-  		<env key="PYTHONHOME" value="${pythonhome}"/>
+  		<env key="PYTHONHOME" value="${pythonhome}" if:set="pythonhome"/>
   		<arg value="${rst2html}"/>
   		<arg value="ili2db.rst"/>
   		<arg value="ili2db.html"/>

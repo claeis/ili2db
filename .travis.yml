@@ -25,7 +25,7 @@ script:
   - ant -f build-ili2pg.xml jar 
   - ant -f build-ili2pg.xml junit -Ddburl=jdbc:postgresql:ili2db -Ddbusr=postgres 
   - ant -f build-ili2pg.xml  junitreport
-  - ant -f build-ili2pg.xml usrdoc 
+  - ant -f build-ili2pg.xml -Dpython=python -Drst2html=rst2html.py usrdoc 
 after_success:
   - python travis/html2text.py  build/test-out/junit-noframes.html
 after_failure:
