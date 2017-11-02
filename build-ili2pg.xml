@@ -69,6 +69,7 @@
     	<authentication username="${user.repos_usr}" password="${user.repos_pwd}"/>
     </remoteRepository>
     <pom refid="mypom"/>
+     <attach file="${dist}/${ant.project.name}-${buildnr}.zip" type="zip" classifier="bindist"/>
   </artifact:deploy>    
   </target>
 	
@@ -270,7 +271,7 @@
 		<mkdir dir="${junit-out.dir}"/>
 		<junitreport todir="${report.dir}">
 			<fileset dir="${report.dir}" includes="TEST-*.xml"/>
-			<report todir="${junit-out.dir}" format="noframes"/>
+			<report todir="${junit-out.dir}" format="noframes" styledir="travis"/>
 		</junitreport>
 	</target>
   

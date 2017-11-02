@@ -25,6 +25,7 @@ script:
   - ant -f build-ili2pg.xml jar 
   - ant -f build-ili2pg.xml junit -Ddburl=jdbc:postgresql:ili2db -Ddbusr=postgres 
   - ant -f build-ili2pg.xml  junitreport
+  - ant -f build-ili2pg.xml usrdoc 
 after_success:
   - python travis/html2text.py  build/test-out/junit-noframes.html
 after_failure:
@@ -32,11 +33,17 @@ after_failure:
 deploy:
   - provider: script
     skip_cleanup: true
-    script: ant -Duser.repos_pwd=${repos_pwd} -Duser.repos_usr=jql_jars-INTE -f build-ili2pg.xml  deploy
+    script: ant -Duser.repos_pwd=${repos_pwd} -Duser.repos_usr=jql_jars-INTE -f build-ili2pg.xml  bindist deploy
     on:
       branch: master
   - provider: script
     skip_cleanup: true
-    script: ant -Duser.repos_pwd=${repos_pwd} -Duser.repos_usr=jql_jars-INTE -Drelease=final -f build-ili2pg.xml deploy
+    script: ant -Duser.repos_pwd=${repos_pwd} -Duser.repos_usr=jql_jars-INTE -Drelease=final -f build-ili2pg.xml binidst deploy
     on:
       branch: stable
+notifications:
+  email:
+    recipients:
+      - ce@eisenhutinformatik.ch
+    on_success: change # default: change
+    on_failure: always # default: always
