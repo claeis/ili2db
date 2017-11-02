@@ -13,6 +13,7 @@ addons:
     - postgresql-9.6-postgis-2.3
     - python3
     - python3-docutils
+    - apt-file
     
 install: true
 
@@ -22,7 +23,8 @@ before_script:
     - psql -c 'create extension postgis;' -d ili2db -U postgres
     - psql -c 'create extension "uuid-ossp";' -d ili2db -U postgres
     - psql -c 'select postgis_full_version();' -d ili2db -U postgres
-  
+    - apt-file find rst2html.py
+    
 script: 
   - ant -f build-ili2pg.xml jar 
   - ant -f build-ili2pg.xml junit -Ddburl=jdbc:postgresql:ili2db -Ddbusr=postgres 
