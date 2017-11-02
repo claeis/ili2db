@@ -11,7 +11,8 @@ addons:
     packages:
     - libmaven-ant-tasks-java
     - postgresql-9.6-postgis-2.3
-
+    - python3
+    
 install: true
 
 before_script:
