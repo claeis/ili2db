@@ -22,8 +22,7 @@ before_script:
     - psql -c 'create extension postgis;' -d ili2db -U postgres
     - psql -c 'create extension "uuid-ossp";' -d ili2db -U postgres
     - psql -c 'select postgis_full_version();' -d ili2db -U postgres
-    - ls /Users/travis/Library/Python
-    - ls /Users/travis/Library/Python/3.5
+    - dpkg-query -L python3-docutils
     
 script: 
   - ant -f build-ili2pg.xml jar 
