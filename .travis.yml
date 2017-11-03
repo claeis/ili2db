@@ -11,6 +11,8 @@ addons:
     packages:
     - libmaven-ant-tasks-java
     - postgresql-9.6-postgis-2.3
+#    - python3
+#    - python3-docutils    
     
 install: true
 
@@ -21,15 +23,15 @@ before_script:
     - psql -c 'create extension "uuid-ossp";' -d ili2db -U postgres
     - psql -c 'select postgis_full_version();' -d ili2db -U postgres
     - # dpkg-query -L python3-docutils
-    - python --version
-    - python -m pip install docutils
+    - python3 --version
+    - python3 -m pip install docutils
     
 script: 
   - ant -f build-ili2pg.xml jar 
   - ant -f build-ili2pg.xml junit -Ddburl=jdbc:postgresql:ili2db -Ddbusr=postgres 
   - ant -f build-ili2pg.xml  junitreport
   - # ant -f build-ili2pg.xml -Dpython=python -Drst2html=/usr/share/docutils/python3/scripts/rst2html usrdoc 
-  - python -m rst2html doc/ili2db.rst doc/ili2db.html
+  - python3 -m rst2html doc/ili2db.rst doc/ili2db.html
 after_success:
   - python travis/html2text.py  build/test-out/junit-noframes.html
 after_failure:
