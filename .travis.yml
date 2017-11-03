@@ -12,7 +12,6 @@ addons:
     - libmaven-ant-tasks-java
     - postgresql-9.6-postgis-2.3
     - python3
-    - python3-docutils
     
 install: true
 
@@ -24,7 +23,7 @@ before_script:
     - psql -c 'select postgis_full_version();' -d ili2db -U postgres
     - # dpkg-query -L python3-docutils
     - python3 --version
-    - # python -m pip install docutils
+    - python3 -m pip install docutils
     
 script: 
   - ant -f build-ili2pg.xml jar 
