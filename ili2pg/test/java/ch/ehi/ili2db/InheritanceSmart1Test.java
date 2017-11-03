@@ -85,7 +85,7 @@ public class InheritanceSmart1Test {
 				config.setDatasetName(DATASETNAME);
 				config.setTidHandling(Config.TID_HANDLING_PROPERTY);
 				config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
-				config.setCreatescript(data.getPath()+".sql");
+				//config.setCreatescript(data.getPath()+".sql");
 				Ili2db.readSettingsFromDb(config);
 				Ili2db.run(config,null);
 				// base class is empty (sub struct strategy or super class strategy)
@@ -209,7 +209,7 @@ public class InheritanceSmart1Test {
 				config.setDatasetName(DATASETNAME);
 				config.setTidHandling(Config.TID_HANDLING_PROPERTY);
 				config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
-				config.setCreatescript(data.getPath()+".sql");
+				//config.setCreatescript(data.getPath()+".sql");
 				Ili2db.readSettingsFromDb(config);
 				Ili2db.run(config,null);
 				
@@ -265,7 +265,7 @@ public class InheritanceSmart1Test {
 				config.setDatasetName(DATASETNAME);
 				config.setTidHandling(Config.TID_HANDLING_PROPERTY);
 				config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
-				config.setCreatescript(data.getPath()+".sql");
+				//config.setCreatescript(data.getPath()+".sql");
 				Ili2db.readSettingsFromDb(config);
 				Ili2db.run(config,null);
 				
@@ -304,7 +304,7 @@ public class InheritanceSmart1Test {
 				config.setTidHandling(Config.TID_HANDLING_PROPERTY);
 				config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
 				config.setNameOptimization(Config.NAME_OPTIMIZATION_TOPIC);
-				config.setCreatescript(data.getPath()+".sql");
+				//config.setCreatescript(data.getPath()+".sql");
 				Ili2db.readSettingsFromDb(config);
 				Ili2db.run(config,null);
 				
@@ -349,7 +349,7 @@ public class InheritanceSmart1Test {
 				config.setTidHandling(Config.TID_HANDLING_PROPERTY);
 				config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
 				config.setNameOptimization(Config.NAME_OPTIMIZATION_TOPIC);
-				config.setCreatescript(data.getPath()+".sql");
+				//config.setCreatescript(data.getPath()+".sql");
 				Ili2db.readSettingsFromDb(config);
 				Ili2db.run(config,null);
 				
@@ -447,7 +447,7 @@ public class InheritanceSmart1Test {
 				config.setTidHandling(Config.TID_HANDLING_PROPERTY);
 				config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
 				config.setNameOptimization(Config.NAME_OPTIMIZATION_TOPIC);
-				config.setCreatescript(data.getPath()+".sql");
+				//config.setCreatescript(data.getPath()+".sql");
 				Ili2db.readSettingsFromDb(config);
 				Ili2db.run(config,null);
 				
@@ -508,7 +508,7 @@ public class InheritanceSmart1Test {
 				config.setTidHandling(Config.TID_HANDLING_PROPERTY);
 				config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
 				config.setNameOptimization(Config.NAME_OPTIMIZATION_TOPIC);
-				config.setCreatescript(data.getPath()+".sql");
+				//config.setCreatescript(data.getPath()+".sql");
 				//config.setValidation(false);
 				Ili2db.readSettingsFromDb(config);
 				Ili2db.run(config,null);

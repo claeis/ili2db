@@ -24,6 +24,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 
 import ch.ehi.basics.logging.EhiLogger;
+import ch.ehi.basics.settings.Settings;
 import ch.ehi.ili2db.base.DbIdGen;
 import ch.ehi.ili2db.base.DbNames;
 import ch.ehi.ili2db.base.Ili2cUtility;
@@ -368,7 +369,7 @@ public class TransferFromIli {
 		String sqlname=ili2sqlName.mapGeometryAsTable(def);
 		return new DbTableName(schema.getName(),sqlname);
 	}
-	static public void addModelsTable(DbSchema schema)
+	static public void addModelsTable(DbSchema schema,Settings config)
 	{
 		DbTable tab=new DbTable();
 		tab.setName(new DbTableName(schema.getName(),DbNames.MODELS_TAB));
@@ -385,7 +386,15 @@ public class TransferFromIli {
 		DbColVarchar importsCol=new DbColVarchar();
 		importsCol.setName(DbNames.MODELS_TAB_MODELNAME_COL);
 		importsCol.setNotNull(true);
-		importsCol.setSize(DbColVarchar.UNLIMITED);
+		int modelNameColSize=DbColVarchar.UNLIMITED;
+		String modelNameColSizeStr=config.getValue(Config.MODELS_TAB_MODELNAME_COLSIZE);
+		if(modelNameColSizeStr!=null) {
+			try {
+				modelNameColSize=Integer.parseInt(modelNameColSizeStr);
+			} catch (NumberFormatException e) {
+			}
+		}
+		importsCol.setSize(modelNameColSize);
 		tab.addColumn(importsCol);
 		DbColVarchar contentCol=new DbColVarchar();
 		contentCol.setName(DbNames.MODELS_TAB_CONTENT_COL);
@@ -419,6 +428,10 @@ public class TransferFromIli {
 			}
 			// select entries
 			String insStmt="SELECT "+DbNames.MODELS_TAB_FILE_COL+","+DbNames.MODELS_TAB_ILIVERSION_COL+","+DbNames.MODELS_TAB_MODELNAME_COL+" FROM "+sqlName;
+			if(conn.getMetaData().getURL().startsWith("jdbc:sqlserver:")) {
+				// 'file' is keyword in sql server
+				insStmt="SELECT \""+DbNames.MODELS_TAB_FILE_COL+"\","+DbNames.MODELS_TAB_ILIVERSION_COL+","+DbNames.MODELS_TAB_MODELNAME_COL+" FROM "+sqlName;
+			}
 			EhiLogger.traceBackendCmd(insStmt);
 			java.sql.PreparedStatement insPrepStmt = conn.prepareStatement(insStmt);
 			try{
@@ -451,7 +464,7 @@ public class TransferFromIli {
 		}
 		try{
 			// select entries
-			String selStmt="SELECT "+DbNames.MODELS_TAB_CONTENT_COL+" FROM "+sqlName+" WHERE "+DbNames.MODELS_TAB_FILE_COL+"=?";
+			String selStmt="SELECT "+DbNames.MODELS_TAB_CONTENT_COL+" FROM "+sqlName+" WHERE \""+DbNames.MODELS_TAB_FILE_COL+"\"=?";
 			EhiLogger.traceBackendCmd(selStmt);
 			java.sql.PreparedStatement selPrepStmt = conn.prepareStatement(selStmt);
 			try{
@@ -487,7 +500,7 @@ public class TransferFromIli {
 		try{
 
 			// insert entries
-			String insStmt="INSERT INTO "+sqlName+" ("+DbNames.MODELS_TAB_FILE_COL+","+DbNames.MODELS_TAB_ILIVERSION_COL+","+DbNames.MODELS_TAB_MODELNAME_COL+","+DbNames.MODELS_TAB_CONTENT_COL+","+DbNames.MODELS_TAB_IMPORTDATE_COL+") VALUES (?,?,?,?,?)";
+			String insStmt="INSERT INTO "+sqlName+" (\""+DbNames.MODELS_TAB_FILE_COL+"\","+DbNames.MODELS_TAB_ILIVERSION_COL+","+DbNames.MODELS_TAB_MODELNAME_COL+","+DbNames.MODELS_TAB_CONTENT_COL+","+DbNames.MODELS_TAB_IMPORTDATE_COL+") VALUES (?,?,?,?,?)";
 			EhiLogger.traceBackendCmd(insStmt);
 			java.sql.PreparedStatement insPrepStmt = conn.prepareStatement(insStmt);
 			java.util.Iterator entri=td.iterator();

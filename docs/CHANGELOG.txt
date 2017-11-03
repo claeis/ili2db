@@ -15,6 +15,11 @@ ideas/open issues/questions
 LATEST
 ---------------------------
 
+ili2pg 3.10.10 (2017-11-03)
+-----------------------------
+- added mssql support
+- added mssql keywords to list of reserved words
+
 ili2fgdb 3.10.9 (2017-10-26)
 -----------------------------
 - ili2db: new option --exportModels to export according to a base model

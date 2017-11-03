@@ -179,22 +179,10 @@ public class InheritanceNoSmartTest {
 				config.setTidHandling(Config.TID_HANDLING_PROPERTY);
 				config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
 				config.setNameOptimization(Config.NAME_OPTIMIZATION_TOPIC);
-				config.setCreatescript(data.getPath()+".sql");
+				//config.setCreatescript(data.getPath()+".sql");
 				Ili2db.readSettingsFromDb(config);
 				Ili2db.run(config,null);
-				
-				Assert.assertTrue(stmt.execute("SELECT t_ili2db_classname.iliname FROM "+DBSCHEMA+".t_ili2db_classname"));
-				{
-					ResultSet rs=stmt.getResultSet();
-					Assert.assertTrue(rs.next());
-					Assert.assertEquals("StructAttr1.TopicA.ClassC",rs.getString(1));
-				}
-				Assert.assertTrue(stmt.execute("SELECT t_ili2db_classname.sqlname FROM "+DBSCHEMA+".t_ili2db_classname"));
-				{
-					ResultSet rs=stmt.getResultSet();
-					Assert.assertTrue(rs.next());
-					Assert.assertEquals("topica_classc",rs.getString(1));
-				}
+				// FIXME check that FK exists on reference from struct table to class table
 	        }
 		}finally{
 			if(jdbcConnection!=null){

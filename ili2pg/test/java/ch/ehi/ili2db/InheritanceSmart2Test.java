@@ -80,7 +80,7 @@ public class InheritanceSmart2Test {
 			config.setDatasetName(DATASETNAME);
 			config.setTidHandling(Config.TID_HANDLING_PROPERTY);
 			config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
-			config.setCreatescript(data.getPath()+".sql");
+			//config.setCreatescript(data.getPath()+".sql");
 			Ili2db.readSettingsFromDb(config);
 			Ili2db.run(config,null);
 			
@@ -123,7 +123,7 @@ public class InheritanceSmart2Test {
 			config.setDatasetName(DATASETNAME);
 			config.setTidHandling(Config.TID_HANDLING_PROPERTY);
 			config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
-			config.setCreatescript(data.getPath()+".sql");
+			//config.setCreatescript(data.getPath()+".sql");
 			Ili2db.readSettingsFromDb(config);
 			Ili2db.run(config,null);
 	        
@@ -168,7 +168,7 @@ public class InheritanceSmart2Test {
 			config.setDatasetName(DATASETNAME);
 			config.setTidHandling(Config.TID_HANDLING_PROPERTY);
 			config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
-			config.setCreatescript(data.getPath()+".sql");
+			//config.setCreatescript(data.getPath()+".sql");
 			Ili2db.readSettingsFromDb(config);
 			Ili2db.run(config,null);
 	        
@@ -213,7 +213,7 @@ public class InheritanceSmart2Test {
 			Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 			config.setFunction(Config.FC_IMPORT);
 			config.setDatasetName(DATASETNAMEX);
-			config.setCreatescript(data.getPath()+".sql");
+			//config.setCreatescript(data.getPath()+".sql");
 			Ili2db.readSettingsFromDb(config);
 			Ili2db.run(config,null);
 
@@ -303,7 +303,7 @@ public class InheritanceSmart2Test {
 			config.setTidHandling(Config.TID_HANDLING_PROPERTY);
 			config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
 			config.setNameOptimization(Config.NAME_OPTIMIZATION_TOPIC);
-			config.setCreatescript(data.getPath()+".sql");
+			//config.setCreatescript(data.getPath()+".sql");
 			Ili2db.readSettingsFromDb(config);
 			Ili2db.run(config,null);
 			{
@@ -346,7 +346,7 @@ public class InheritanceSmart2Test {
 			config.setTidHandling(Config.TID_HANDLING_PROPERTY);
 			config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
 			config.setNameOptimization(Config.NAME_OPTIMIZATION_TOPIC);
-			config.setCreatescript(data.getPath()+".sql");
+			//config.setCreatescript(data.getPath()+".sql");
 			Ili2db.readSettingsFromDb(config);
 			Ili2db.run(config,null);
 			

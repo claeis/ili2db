@@ -75,50 +75,7 @@ public class MultisurfaceTest {
 			config.setInheritanceTrafo(null);
 			Ili2db.readSettingsFromDb(config);
 			Ili2db.run(config,null);
-			
-			// imported class classa1
-			Assert.assertTrue(stmt.execute("SELECT t_ili2db_import_object.class, t_ili2db_import_object.t_id FROM "+DBSCHEMA+".t_ili2db_import_object WHERE t_ili2db_import_object.t_id = '9'"));
-			{
-				ResultSet rs=stmt.getResultSet();
-				Assert.assertTrue(rs.next());
-				Assert.assertEquals("MultiSurface1.TestA.ClassA1", rs.getString(1));
-			}
-			// imported class multisurface
-			Assert.assertTrue(stmt.execute("SELECT t_ili2db_import_object.class, t_ili2db_import_object.t_id FROM "+DBSCHEMA+".t_ili2db_import_object WHERE t_ili2db_import_object.t_id = '10'"));
-			{
-				ResultSet rs=stmt.getResultSet();
-				Assert.assertTrue(rs.next());
-				Assert.assertEquals("GeometryCHLV03_V1.SurfaceStructure", rs.getString(1));
-			}
-			// imported class surfacestructure
-			Assert.assertTrue(stmt.execute("SELECT t_ili2db_import_object.class, t_ili2db_import_object.t_id FROM "+DBSCHEMA+".t_ili2db_import_object WHERE t_ili2db_import_object.t_id = '11'"));
-			{
-				ResultSet rs=stmt.getResultSet();
-				Assert.assertTrue(rs.next());
-				Assert.assertEquals("GeometryCHLV03_V1.MultiSurface", rs.getString(1));
-			}
-			// geometry of surface of classa1 has a connection to multisurface.
-			Assert.assertTrue(stmt.execute("SELECT t_ili2db_attrname.iliname, t_ili2db_attrname.sqlname, t_ili2db_attrname.owner, t_ili2db_attrname.target FROM "+DBSCHEMA+".t_ili2db_attrname WHERE t_ili2db_attrname.sqlname = 'classa1_geom'"));
-			{
-				ResultSet rs=stmt.getResultSet();
-				Assert.assertTrue(rs.next());
-				// iliname
-				Assert.assertEquals("MultiSurface1.TestA.ClassA1.geom", rs.getString(1));
-				// sqlname
-				Assert.assertEquals("classa1_geom", rs.getString(2));
-				// owner
-				Assert.assertEquals("multisurface", rs.getString(3));
-				// target
-				Assert.assertEquals("classa1", rs.getString(4));
-			}
-			// multisurface has a connection over surfacestructure to surface
-			Assert.assertTrue(stmt.execute("SELECT t_ili2db_attrname.sqlname, t_ili2db_attrname.owner, t_ili2db_attrname.target FROM "+DBSCHEMA+".t_ili2db_attrname WHERE t_ili2db_attrname.sqlname = 'multisurface_surfaces'"));
-			{
-				ResultSet rs=stmt.getResultSet();
-				Assert.assertTrue(rs.next());
-				Assert.assertEquals("surfacestructure", rs.getString(2));
-				Assert.assertEquals("multisurface", rs.getString(3));
-			}
+			// FIXME test that geometry is imported to the structure table
 		}finally{
 			if(jdbcConnection!=null){
 				jdbcConnection.close();
@@ -208,21 +165,6 @@ public class MultisurfaceTest {
 			config.setInheritanceTrafo(null);
 			Ili2db.readSettingsFromDb(config);
 			Ili2db.run(config,null);
-			
-			// count of imported objects. should be 1
-			Assert.assertTrue(stmt.execute("SELECT t_ili2db_import_object.objectcount FROM "+DBSCHEMA+".t_ili2db_import_object"));
-			{
-				ResultSet rs=stmt.getResultSet();
-				Assert.assertTrue(rs.next());
-				Assert.assertEquals(1, rs.getInt(1));
-			}
-			// imported class classa1
-			Assert.assertTrue(stmt.execute("SELECT t_ili2db_import_object.class, t_ili2db_import_object.t_id FROM "+DBSCHEMA+".t_ili2db_import_object WHERE t_ili2db_import_object.t_id = '6'"));
-			{
-				ResultSet rs=stmt.getResultSet();
-				Assert.assertTrue(rs.next());
-				Assert.assertEquals("MultiSurface1.TestA.ClassA1", rs.getString(1));
-			}
 			// imported attrValues of classa1
 			Assert.assertTrue(stmt.execute("SELECT classa1.geom, classa1.t_id, classa1.point FROM "+DBSCHEMA+".classa1 WHERE classa1.t_id = '4'"));
 			{
@@ -322,20 +264,6 @@ public class MultisurfaceTest {
 			Ili2db.readSettingsFromDb(config);
 			Ili2db.run(config,null);
 	
-			// count of imported objects. should be 1
-			Assert.assertTrue(stmt.execute("SELECT t_ili2db_import_object.objectcount FROM "+DBSCHEMA+".t_ili2db_import_object"));
-			{
-				ResultSet rs=stmt.getResultSet();
-				Assert.assertTrue(rs.next());
-				Assert.assertEquals(1, rs.getInt(1));
-			}
-			// imported class classa1
-			Assert.assertTrue(stmt.execute("SELECT t_ili2db_import_object.class, t_ili2db_import_object.t_id FROM "+DBSCHEMA+".t_ili2db_import_object WHERE t_ili2db_import_object.t_id = '6'"));
-			{
-				ResultSet rs=stmt.getResultSet();
-				Assert.assertTrue(rs.next());
-				Assert.assertEquals("MultiSurface2.TestA.ClassA1", rs.getString(1));
-			}
 			// imported attrValues of classa1
 			Assert.assertTrue(stmt.execute("SELECT classa1.geom, classa1.t_id FROM "+DBSCHEMA+".classa1 WHERE classa1.t_id = '4'"));
 			{
@@ -434,20 +362,6 @@ public class MultisurfaceTest {
 			Ili2db.readSettingsFromDb(config);
 			Ili2db.run(config,null);
 			
-			// count of imported objects. should be 1
-			Assert.assertTrue(stmt.execute("SELECT t_ili2db_import_object.objectcount FROM "+DBSCHEMA+".t_ili2db_import_object"));
-			{
-				ResultSet rs=stmt.getResultSet();
-				Assert.assertTrue(rs.next());
-				Assert.assertEquals(1, rs.getInt(1));
-			}
-			// imported class classa1
-			Assert.assertTrue(stmt.execute("SELECT t_ili2db_import_object.class, t_ili2db_import_object.t_id FROM "+DBSCHEMA+".t_ili2db_import_object WHERE t_ili2db_import_object.t_id = '6'"));
-			{
-				ResultSet rs=stmt.getResultSet();
-				Assert.assertTrue(rs.next());
-				Assert.assertEquals("MultiSurface1.TestA.ClassA1", rs.getString(1));
-			}
 			// imported attrValues of classa1
 			Assert.assertTrue(stmt.execute("SELECT classa1.geom, classa1.t_id FROM "+DBSCHEMA+".classa1 WHERE classa1.t_id = '4'"));
 			{
@@ -455,6 +369,7 @@ public class MultisurfaceTest {
 				Assert.assertTrue(rs.next());
 				Assert.assertEquals("010C0000201555000002000000010A0000000100000001090000000100000001020000000400000000000000BC4F224100000000A06A084100000000DA4F224100000000406B084100000000944F224100000000406B084100000000BC4F224100000000A06A0841010A00000001000000010900000001000000010200000005000000000000009E4F224100000000286A084100000000D04F224100000000506A084100000000944F224100000000A06A0841000000008A4F224100000000506A0841000000009E4F224100000000286A0841", rs.getString(1));
 			}
+			// FIXME test point/coord value in seconardy table 
 		}finally{
 			if(jdbcConnection!=null){
 				jdbcConnection.close();
