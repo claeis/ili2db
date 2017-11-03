@@ -32,11 +32,12 @@ before_script:
     - python -m pip install docutils # use my_py3
     - python -m pip freeze
 script: 
+  - rst2html.py doc/ili2db.rst doc/ili2db.html
   - ant -f build-ili2pg.xml jar 
   - ant -f build-ili2pg.xml junit -Ddburl=jdbc:postgresql:ili2db -Ddbusr=postgres 
   - ant -f build-ili2pg.xml  junitreport
   - # ant -f build-ili2pg.xml -Dpython=python -Drst2html=/usr/share/docutils/python3/scripts/rst2html usrdoc 
-  - python -m rst2html doc/ili2db.rst doc/ili2db.html
+  - # python -m rst2html doc/ili2db.rst doc/ili2db.html
 after_success:
   - python travis/html2text.py  build/test-out/junit-noframes.html
 after_failure:
