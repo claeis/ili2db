@@ -15,7 +15,7 @@ ideas/open issues/questions
 LATEST
 ---------------------------
 
-ili2pg 3.10.10 (2017-11-02)
+ili2pg 3.10.10 (2017-11-03)
 -----------------------------
 - added mssql support
 - added mssql keywords to list of reserved words
