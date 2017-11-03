@@ -35,14 +35,12 @@ before_script:
 script: 
   - 
   - ant -f build-ili2pg.xml jar 
-  - ant -f build-ili2pg.xml junit -Ddburl=jdbc:postgresql:ili2db -Ddbusr=postgres 
-  - ant -f build-ili2pg.xml  junitreport
+  - ant -f build-ili2pg.xml junit -Ddburl=jdbc:postgresql:ili2dbx -Ddbusr=postgres 
+  - # ant -f build-ili2pg.xml  junitreport
   - ant -f build-ili2pg.xml -Dpython=python -Drst2html=`which rst2html.py` usrdoc 
   - # rst2html.py docs/ili2db.rst docs/ili2db.html
-after_success:
-  - python travis/html2text.py  build/test-out/junit-noframes.html
 after_failure:
-  - python travis/html2text.py  build/test-out/junit-noframes.html
+  - cat  build/junitreport/TEST-*.txt
 deploy:
   - provider: script
     skip_cleanup: true

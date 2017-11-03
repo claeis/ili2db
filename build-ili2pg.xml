@@ -245,7 +245,7 @@
 				<include name="test/data/**/*"/>
 			</fileset>
 		</copy>
-		<junit printsummary="yes" dir="${junit.dir}" > <!-- haltonfailure="yes" -->
+		<junit printsummary="on" dir="${junit.dir}"> <!-- haltonfailure="yes" -->
 			<classpath>
 				<path refid="classpath"/>
 				<path refid="junit"/>
@@ -259,7 +259,7 @@
 			<sysproperty key="dbusr" value="${dbusr}"/>
 			<sysproperty key="dbpwd" value="${dbpwd}"/>
 			
-			<formatter type="xml"/>
+			<formatter type="plain"/>
 
 			<batchtest fork="yes" todir="${report.dir}">
 				<fileset dir="ili2pg/test/java" includes="**/*Test.java"/>
