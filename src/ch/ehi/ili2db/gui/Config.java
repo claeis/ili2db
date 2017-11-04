@@ -57,7 +57,7 @@ public class Config extends Settings {
 	public static final String MAX_SQLNAME_LENGTH=PREFIX+".maxSqlNameLength";
 	private static final String SQL_NULL=PREFIX+".SqlNull";
 	public static final String SQL_NULL_ENABLE="enable";
-	private static final String STROKE_ARCS=PREFIX+".StrokeArcs";
+	public static final String STROKE_ARCS=PREFIX+".StrokeArcs";
 	public static final String STROKE_ARCS_ENABLE="enable";
 	private static final String AREA_REF=PREFIX+".AreaRef";
 	public static final String AREA_REF_KEEP="keep";
@@ -389,11 +389,19 @@ public class Config extends Settings {
 	public void setSqlNull(String value) {
 		setValue(SQL_NULL,value);
 	}
+	@Deprecated
 	public String getStrokeArcs() {
 		return getValue(STROKE_ARCS);
 	}
+	public static String getStrokeArcs(Settings config) {
+		return config.getValue(STROKE_ARCS);
+	}
+	@Deprecated
 	public void setStrokeArcs(String value) {
 		setValue(STROKE_ARCS,value);
+	}
+	public static void setStrokeArcs(Settings config,String value) {
+		config.setValue(STROKE_ARCS,value);
 	}
 	public boolean getDoItfLineTables() {
 		return TRUE.equals(getValue(DO_ITF_LINE_TABLES));

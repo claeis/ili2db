@@ -6,6 +6,7 @@ import java.util.HashMap;
 import ch.ehi.basics.logging.EhiLogger;
 import ch.ehi.ili2db.base.DbIdGen;
 import ch.ehi.ili2db.base.DbNames;
+import ch.ehi.ili2db.gui.Config;
 import ch.ehi.ili2db.mapping.MultiLineMappings;
 import ch.ehi.ili2db.mapping.MultiSurfaceMappings;
 import ch.ehi.ili2db.mapping.TrafoConfig;
@@ -94,7 +95,7 @@ public class AbstractRecordConverter {
 		createTypeDiscriminator=config.CREATE_TYPE_DISCRIMINATOR_ALWAYS.equals(config.getCreateTypeDiscriminator());
 		createGenericStructRef=config.STRUCT_MAPPING_GENERICREF.equals(config.getStructMapping());
 		sqlEnableNull=config.SQL_NULL_ENABLE.equals(config.getSqlNull());
-		strokeArcs=config.STROKE_ARCS_ENABLE.equals(config.getStrokeArcs());
+		strokeArcs=config.STROKE_ARCS_ENABLE.equals(Config.getStrokeArcs(config));
 		createIliTidCol=config.TID_HANDLING_PROPERTY.equals(config.getTidHandling());
 		
 		createBasketCol=config.BASKET_HANDLING_READWRITE.equals(config.getBasketHandling());

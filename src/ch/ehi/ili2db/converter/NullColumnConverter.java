@@ -7,6 +7,7 @@ import java.sql.SQLException;
 import java.sql.Time;
 import java.sql.Timestamp;
 
+import ch.ehi.basics.settings.Settings;
 import ch.ehi.ili2db.gui.Config;
 import ch.interlis.iom.IomObject;
 
@@ -148,7 +149,7 @@ public class NullColumnConverter implements SqlColumnConverter {
 	}
 
 	@Override
-	public void setup(Connection conn, Config config) {
+	public void setup(Connection conn, Settings config) {
 	}
 
 	@Override

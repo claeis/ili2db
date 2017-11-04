@@ -277,7 +277,7 @@ public abstract class AbstractMain {
 				config.setSqlNull(config.SQL_NULL_ENABLE);
 			}else if(arg.equals("--strokeArcs")){
 				argi++;
-				config.setStrokeArcs(config.STROKE_ARCS_ENABLE);
+				Config.setStrokeArcs(config,config.STROKE_ARCS_ENABLE);
 			}else if(arg.equals("--skipPolygonBuilding")){
 				argi++;
 				Ili2db.setSkipPolygonBuilding(config);

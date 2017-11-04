@@ -26,6 +26,7 @@ import java.sql.Timestamp;
 
 import com.vividsolutions.jts.io.ParseException;
 
+import ch.ehi.basics.settings.Settings;
 import ch.ehi.ili2db.gui.Config;
 import ch.interlis.iom.IomObject;
 import ch.interlis.iox_j.jts.Iox2jtsException;
@@ -303,7 +304,7 @@ public abstract class AbstractWKBColumnConverter implements SqlColumnConverter {
 		return srsid;
 	}
 	@Override
-	public void setup(Connection conn, Config config) {
+	public void setup(Connection conn, Settings config) {
 	}
 	@Override
 	public void setBlobNull(PreparedStatement stmt, int parameterIndex)

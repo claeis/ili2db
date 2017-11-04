@@ -18,6 +18,7 @@
 package ch.ehi.ili2pg.converter;
 
 import ch.ehi.basics.logging.EhiLogger;
+import ch.ehi.basics.settings.Settings;
 import ch.ehi.ili2db.converter.AbstractWKBColumnConverter;
 import ch.ehi.ili2db.converter.ConverterException;
 import ch.ehi.ili2db.gui.Config;
@@ -40,9 +41,9 @@ import ch.interlis.iox_j.wkb.Wkb2iox;
 public class PostgisColumnConverter extends AbstractWKBColumnConverter {
 	private boolean strokeArcs=true;
 	@Override
-	public void setup(Connection conn, Config config) {
+	public void setup(Connection conn, Settings config) {
 		super.setup(conn,config);
-		strokeArcs=Config.STROKE_ARCS_ENABLE.equals(config.getStrokeArcs());
+		strokeArcs=Config.STROKE_ARCS_ENABLE.equals(Config.getStrokeArcs(config));
 	}
 	
 	@Override

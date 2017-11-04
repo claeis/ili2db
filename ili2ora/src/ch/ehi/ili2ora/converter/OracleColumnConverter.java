@@ -24,6 +24,7 @@ import ch.interlis.iom.IomConstants;
 import java.util.ArrayList;
 
 import ch.ehi.basics.logging.EhiLogger;
+import ch.ehi.basics.settings.Settings;
 import ch.ehi.ili2db.converter.ConverterException;
 import ch.ehi.ili2db.converter.SqlColumnConverter;
 import ch.ehi.ili2db.gui.Config;
@@ -645,7 +646,7 @@ public class OracleColumnConverter implements SqlColumnConverter {
 	}
 	private Connection conn=null;
 	@Override
-	public void setup(Connection conn, Config config) {
+	public void setup(Connection conn, Settings config) {
 		this.conn=conn;
 	}
 	@Override

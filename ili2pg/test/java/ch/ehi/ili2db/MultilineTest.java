@@ -326,7 +326,7 @@ public class MultilineTest {
 			File data=new File("test/data/MultiLine/MultiLine1a.xtf");
 			Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 			config.setFunction(Config.FC_IMPORT);
-			config.setStrokeArcs(Config.STROKE_ARCS_ENABLE);
+			Config.setStrokeArcs(config,Config.STROKE_ARCS_ENABLE);
 			config.setCreateFk(config.CREATE_FK_YES);
 			config.setTidHandling(Config.TID_HANDLING_PROPERTY);
 			config.setBasketHandling(config.BASKET_HANDLING_READWRITE);

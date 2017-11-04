@@ -24,6 +24,7 @@ import java.sql.SQLException;
 import java.sql.Time;
 import java.sql.Timestamp;
 
+import ch.ehi.basics.settings.Settings;
 import ch.interlis.iom.IomObject;
 
 /**
@@ -31,7 +32,7 @@ import ch.interlis.iom.IomObject;
  * @version $Revision: 1.0 $ $Date: 12.02.2007 $
  */
 public interface SqlColumnConverter {
-	public void setup(Connection conn,ch.ehi.ili2db.gui.Config config);
+	public void setup(Connection conn,Settings config);
 	public abstract Integer getSrsid(String crsAuthority,String crsCode,Connection conn) throws ConverterException;
 	/*
 	public abstract String getCoordSqlUDT();
