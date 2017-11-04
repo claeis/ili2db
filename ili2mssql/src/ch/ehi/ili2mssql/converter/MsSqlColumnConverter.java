@@ -7,7 +7,7 @@ import ch.ehi.ili2db.converter.ConverterException;
 import ch.ehi.iox.adddefval.Converter;
 
 public class MsSqlColumnConverter extends AbstractWKBColumnConverter {
-	final String defaultSrid = "3116";
+	final String defaultSrid = "3116"; // FIXME remove db specific default
 	
 	@Override
 	public String getInsertValueWrapperCoord(String wkfValue,int srid) {
