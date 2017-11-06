@@ -52,6 +52,7 @@ public abstract class AbstractMain {
 		config.setCatalogueRefTrafo(Config.CATALOGUE_REF_TRAFO_COALESCE);
 		config.setMultiSurfaceTrafo(Config.MULTISURFACE_TRAFO_COALESCE);
 		config.setMultiLineTrafo(Config.MULTILINE_TRAFO_COALESCE);
+		config.setMultiPointTrafo(Config.MULTIPOINT_TRAFO_COALESCE);
 		config.setMultilingualTrafo(Config.MULTILINGUAL_TRAFO_EXPAND);
 		config.setValidation(true);
 	}
@@ -223,6 +224,9 @@ public abstract class AbstractMain {
 			}else if(arg.equals("--coalesceMultiLine")){
 				argi++;
 				config.setMultiLineTrafo(config.MULTILINE_TRAFO_COALESCE);
+			}else if(arg.equals("--coalesceMultiPoint")){
+				argi++;
+				config.setMultiPointTrafo(config.MULTIPOINT_TRAFO_COALESCE);
 			}else if(arg.equals("--expandMultilingual")){
 				argi++;
 				config.setMultilingualTrafo(config.MULTILINGUAL_TRAFO_EXPAND);
@@ -362,6 +366,7 @@ public abstract class AbstractMain {
 					System.err.println("--coalesceCatalogueRef enable smart mapping of CHBase:CatalogueReference");
 					System.err.println("--coalesceMultiSurface enable smart mapping of CHBase:MultiSurface");
 					System.err.println("--coalesceMultiLine    enable smart mapping of CHBase:MultiLine");
+					System.err.println("--coalesceMultiPoint   enable smart mapping of MultiPoint structures");
 					System.err.println("--expandMultilingual   enable smart mapping of CHBase:MultilingualText");
 					System.err.println("--createGeomIdx        create a spatial index on geometry columns.");
 					System.err.println("--createEnumColAsItfCode create enum type column with value according to ITF (instead of XTF).");

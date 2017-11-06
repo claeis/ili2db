@@ -25,6 +25,7 @@ public class Viewable2TableMapper {
 	private boolean singleGeom=false;
 	private boolean coalesceMultiSurface=false;
 	private boolean coalesceMultiLine=false;
+	private boolean coalesceMultiPoint=false;
 	private boolean createItfLineTables=false;
 	private TransferDescription td=null;
 	private Viewable2TableMapper(Config config1,
@@ -41,6 +42,7 @@ public class Viewable2TableMapper {
 		mapper.singleGeom=config.isOneGeomPerTable();
 		mapper.coalesceMultiSurface=Config.MULTISURFACE_TRAFO_COALESCE.equals(config.getMultiSurfaceTrafo());
 		mapper.coalesceMultiLine=Config.MULTILINE_TRAFO_COALESCE.equals(config.getMultiLineTrafo());
+		mapper.coalesceMultiPoint=Config.MULTIPOINT_TRAFO_COALESCE.equals(config.getMultiPointTrafo());
 		mapper.createItfLineTables=config.getDoItfLineTables();
 		return mapper.doit(eles);
 	}
@@ -262,6 +264,8 @@ public class Viewable2TableMapper {
 									|| TrafoConfigNames.MULTISURFACE_TRAFO_COALESCE.equals(trafoConfig.getAttrConfig(attr,TrafoConfigNames.MULTISURFACE_TRAFO))))
 							|| (Ili2cUtility.isMultiLineAttr(getTransferDescription(attr), attr) && (coalesceMultiLine 
 									|| TrafoConfigNames.MULTILINE_TRAFO_COALESCE.equals(trafoConfig.getAttrConfig(attr,TrafoConfigNames.MULTILINE_TRAFO))))
+							|| (Ili2cUtility.isMultiPointAttr(getTransferDescription(attr), attr) && (coalesceMultiPoint 
+									|| TrafoConfigNames.MULTIPOINT_TRAFO_COALESCE.equals(trafoConfig.getAttrConfig(attr,TrafoConfigNames.MULTIPOINT_TRAFO))))
 					){
 						hasGeometry=true;
 						break;

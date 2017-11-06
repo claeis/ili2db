@@ -17,6 +17,7 @@ import ch.ehi.ili2db.converter.ConverterException;
 import ch.ehi.ili2db.converter.SqlColumnConverter;
 import ch.ehi.ili2db.gui.Config;
 import ch.ehi.ili2db.mapping.MultiLineMapping;
+import ch.ehi.ili2db.mapping.MultiPointMapping;
 import ch.ehi.ili2db.mapping.MultiSurfaceMapping;
 import ch.ehi.ili2db.mapping.NameMapping;
 import ch.ehi.ili2db.mapping.TrafoConfig;
@@ -249,6 +250,11 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 					 sep=",";
 					 ret.append(geomConv.getSelectValueWrapperMultiPolyline(makeColumnRef(tableAlias,attrSqlName)));
 					 multiLineAttrs.addMultiLineAttr(attr);
+				}else if(TrafoConfigNames.MULTIPOINT_TRAFO_COALESCE.equals(trafoConfig.getAttrConfig(attr, TrafoConfigNames.MULTIPOINT_TRAFO))){
+					 ret.append(sep);
+					 sep=",";
+					 ret.append(geomConv.getSelectValueWrapperMultiCoord(makeColumnRef(tableAlias,attrSqlName)));
+					 multiPointAttrs.addMultiPointAttr(attr);
 				}else if(TrafoConfigNames.MULTILINGUAL_TRAFO_EXPAND.equals(trafoConfig.getAttrConfig(attr, TrafoConfigNames.MULTILINGUAL_TRAFO))){
 					for(String sfx:DbNames.MULTILINGUAL_TXT_COL_SUFFIXS){
 						 ret.append(sep);
@@ -553,6 +559,31 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 								iomObj.addattrobj(attrName,iomChbaseMultiLine);
 							}catch(ConverterException ex){
 								EhiLogger.logError("Object "+sqlid+": failed to convert polyline",ex);
+							}	
+						}
+					}else if(TrafoConfigNames.MULTIPOINT_TRAFO_COALESCE.equals(trafoConfig.getAttrConfig(attr, TrafoConfigNames.MULTIPOINT_TRAFO))){
+						 MultiPointMapping attrMapping=multiPointAttrs.getMapping(attr);
+						Table multiPointType = ((CompositionType) type).getComponentType();
+						Table pointStructureType=((CompositionType) ((AttributeDef) multiPointType.getElement(AttributeDef.class, attrMapping.getBagOfPointsAttrName())).getDomain()).getComponentType();
+						String multiPointQname=multiPointType.getScopedName(null);
+						String pointStructureQname=pointStructureType.getScopedName(null);
+						CoordType coord=((CoordType) ((AttributeDef) pointStructureType.getElement(AttributeDef.class,attrMapping.getPointAttrName())).getDomainResolvingAliases());
+						boolean is3D=coord.getDimensions().length==3;
+						Object geomobj=rs.getObject(valuei);
+						valuei++;
+						if(!rs.wasNull()){
+							try{
+								IomObject iomMultiPoint=geomConv.toIomMultiCoord(geomobj,sqlAttrName,is3D);
+								IomObject iomChbaseMultiPoint=new Iom_jObject(multiPointQname,null); 
+								int pointc=iomMultiPoint.getattrvaluecount(Wkb2iox.ATTR_COORD);
+								for(int pointi=0;pointi<pointc;pointi++){
+									IomObject iomPoint=iomMultiPoint.getattrobj(Wkb2iox.ATTR_COORD,pointi);
+									IomObject iomChbasePointStructure=iomChbaseMultiPoint.addattrobj(attrMapping.getBagOfPointsAttrName(), pointStructureQname);
+									iomChbasePointStructure.addattrobj(attrMapping.getPointAttrName(), iomPoint);
+								}
+								iomObj.addattrobj(attrName,iomChbaseMultiPoint);
+							}catch(ConverterException ex){
+								EhiLogger.logError("Object "+sqlid+": failed to convert coord",ex);
 							}	
 						}
 					}else if(TrafoConfigNames.MULTILINGUAL_TRAFO_EXPAND.equals(trafoConfig.getAttrConfig(attr, TrafoConfigNames.MULTILINGUAL_TRAFO))){

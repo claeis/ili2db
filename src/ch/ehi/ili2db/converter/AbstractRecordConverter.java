@@ -8,6 +8,7 @@ import ch.ehi.ili2db.base.DbIdGen;
 import ch.ehi.ili2db.base.DbNames;
 import ch.ehi.ili2db.gui.Config;
 import ch.ehi.ili2db.mapping.MultiLineMappings;
+import ch.ehi.ili2db.mapping.MultiPointMappings;
 import ch.ehi.ili2db.mapping.MultiSurfaceMappings;
 import ch.ehi.ili2db.mapping.TrafoConfig;
 import ch.ehi.ili2db.mapping.TrafoConfigNames;
@@ -67,6 +68,7 @@ public class AbstractRecordConverter {
 	protected Viewable2TableMapping class2wrapper=null;
 	protected MultiSurfaceMappings multiSurfaceAttrs=new MultiSurfaceMappings();
 	protected MultiLineMappings multiLineAttrs=new MultiLineMappings();
+	protected MultiPointMappings multiPointAttrs=new MultiPointMappings();
 
 	public AbstractRecordConverter(TransferDescription td1,ch.ehi.ili2db.mapping.NameMapping ili2sqlName,ch.ehi.ili2db.gui.Config config,DbIdGen idGen1, TrafoConfig trafoConfig1,Viewable2TableMapping class2wrapper1){
 		td=td1;

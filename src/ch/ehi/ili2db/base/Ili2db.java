@@ -2074,6 +2074,7 @@ public class Ili2db {
 		config.setCatalogueRefTrafo(null);
 		config.setMultiSurfaceTrafo(null);
 		config.setMultiLineTrafo(null);
+		config.setMultiPointTrafo(null);
 		config.setMultilingualTrafo(null);
 		config.setInheritanceTrafo(null);
 	}

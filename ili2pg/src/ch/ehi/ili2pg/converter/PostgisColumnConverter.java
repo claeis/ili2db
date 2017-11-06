@@ -52,6 +52,11 @@ public class PostgisColumnConverter extends AbstractWKBColumnConverter {
 		//return "GeomFromWKB("+wkfValue+(srid==-1?"":","+srid)+")";
 	}
 	@Override
+	public String getInsertValueWrapperMultiCoord(String wkfValue,int srid) {
+		return "ST_GeomFromWKB("+wkfValue+(srid==-1?"":","+srid)+")";
+		//return "GeomFromWKB("+wkfValue+(srid==-1?"":","+srid)+")";
+	}
+	@Override
 	public String getInsertValueWrapperPolyline(String wkfValue,int srid) {
 		return "ST_GeomFromWKB("+wkfValue+(srid==-1?"":","+srid)+")";
 		//return "GeomFromWKB("+wkfValue+(srid==-1?"":","+srid)+")";
@@ -73,6 +78,11 @@ public class PostgisColumnConverter extends AbstractWKBColumnConverter {
 	}
 	@Override
 	public String getSelectValueWrapperCoord(String dbNativeValue) {
+		return "ST_AsEWKB("+dbNativeValue+")";
+		//return "AsBinary("+dbNativeValue+")";
+	}
+	@Override
+	public String getSelectValueWrapperMultiCoord(String dbNativeValue) {
 		return "ST_AsEWKB("+dbNativeValue+")";
 		//return "AsBinary("+dbNativeValue+")";
 	}
@@ -176,6 +186,19 @@ public class PostgisColumnConverter extends AbstractWKBColumnConverter {
 			return null;
 		}
 		@Override
+		public java.lang.Object fromIomMultiCoord(IomObject value, int srid,boolean is3D)
+			throws SQLException, ConverterException {
+			if(value!=null){
+				Iox2wkb conv=new Iox2wkb(is3D?3:2);
+				try {
+					return conv.multicoord2wkb(value);
+				} catch (Iox2wkbException ex) {
+					throw new ConverterException(ex);
+				}
+			}
+			return null;
+		}
+		@Override
 		public java.lang.Object fromIomPolyline(IomObject value, int srid,boolean is3D,double p)
 			throws SQLException, ConverterException {
 			if(value!=null){
@@ -203,6 +226,20 @@ public class PostgisColumnConverter extends AbstractWKBColumnConverter {
 		}
 		@Override
 		public IomObject toIomCoord(
+				Object geomobj,
+				String sqlAttrName,
+				boolean is3D)
+				throws SQLException, ConverterException {
+				byte bv[]=(byte [])geomobj;
+				Wkb2iox conv=new Wkb2iox();
+				try {
+					return conv.read(bv);
+				} catch (ParseException e) {
+					throw new ConverterException(e);
+				}
+			}
+		@Override
+		public IomObject toIomMultiCoord(
 				Object geomobj,
 				String sqlAttrName,
 				boolean is3D)

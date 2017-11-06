@@ -23,6 +23,11 @@ public class NullColumnConverter implements SqlColumnConverter {
 			throws SQLException, ConverterException {
 		return null;
 	}
+	@Override
+	public Object fromIomMultiCoord(IomObject value, int srid, boolean is3D)
+			throws SQLException, ConverterException {
+		return null;
+	}
 
 	@Override
 	public Object fromIomPolyline(IomObject obj, int srid, boolean is3D,double p)
@@ -48,6 +53,10 @@ public class NullColumnConverter implements SqlColumnConverter {
 
 	@Override
 	public String getInsertValueWrapperCoord(String wkfValue, int srid) {
+		return null;
+	}
+	@Override
+	public String getInsertValueWrapperMultiCoord(String wkfValue, int srid) {
 		return null;
 	}
 
@@ -83,6 +92,10 @@ public class NullColumnConverter implements SqlColumnConverter {
 	}
 	@Override
 	public String getSelectValueWrapperCoord(String dbNativeValue) {
+		return null;
+	}
+	@Override
+	public String getSelectValueWrapperMultiCoord(String dbNativeValue) {
 		return null;
 	}
 
@@ -154,6 +167,11 @@ public class NullColumnConverter implements SqlColumnConverter {
 
 	@Override
 	public IomObject toIomCoord(Object geomobj, String sqlAttrName, boolean is3D)
+			throws SQLException, ConverterException {
+		return null;
+	}
+	@Override
+	public IomObject toIomMultiCoord(Object geomobj, String sqlAttrName, boolean is3D)
 			throws SQLException, ConverterException {
 		return null;
 	}

@@ -43,6 +43,8 @@ public class Config extends Settings {
 	public static final String MULTISURFACE_TRAFO_COALESCE="coalesce";
 	public static final String MULTILINE_TRAFO=PREFIX+".multiLineTrafo";
 	public static final String MULTILINE_TRAFO_COALESCE="coalesce";
+	public static final String MULTIPOINT_TRAFO=PREFIX+".multiPointTrafo";
+	public static final String MULTIPOINT_TRAFO_COALESCE="coalesce";
 	public static final String MULTILINGUAL_TRAFO=PREFIX+".multilingualTrafo";
 	public static final String MULTILINGUAL_TRAFO_EXPAND="expand";
 	public static final String UNIQUE_CONSTRAINTS=PREFIX+".uniqueConstraints";
@@ -370,6 +372,12 @@ public class Config extends Settings {
 	}
 	public void setMultiLineTrafo(String value) {
 		setValue(MULTILINE_TRAFO,value);
+	}
+	public String getMultiPointTrafo() {
+		return getValue(MULTIPOINT_TRAFO);
+	}
+	public void setMultiPointTrafo(String value) {
+		setValue(MULTIPOINT_TRAFO,value);
 	}
 	public String getMultilingualTrafo() {
 		return getValue(MULTILINGUAL_TRAFO);

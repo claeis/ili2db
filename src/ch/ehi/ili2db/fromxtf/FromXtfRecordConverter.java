@@ -24,6 +24,7 @@ import ch.ehi.ili2db.converter.ConverterException;
 import ch.ehi.ili2db.converter.SqlColumnConverter;
 import ch.ehi.ili2db.gui.Config;
 import ch.ehi.ili2db.mapping.MultiLineMapping;
+import ch.ehi.ili2db.mapping.MultiPointMapping;
 import ch.ehi.ili2db.mapping.MultiSurfaceMapping;
 import ch.ehi.ili2db.mapping.NameMapping;
 import ch.ehi.ili2db.mapping.TrafoConfig;
@@ -654,6 +655,16 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 						}
 						sep=",";
 						multiLineAttrs.addMultiLineAttr(attr);
+				}else if(TrafoConfigNames.MULTIPOINT_TRAFO_COALESCE.equals(trafoConfig.getAttrConfig(attr, TrafoConfigNames.MULTIPOINT_TRAFO))){
+					 ret.append(sep);
+					 ret.append(attrSqlName);
+						if(isUpdate){
+							ret.append("="+geomConv.getInsertValueWrapperMultiCoord("?",getSrsid(type)));
+						}else{
+							values.append(","+geomConv.getInsertValueWrapperMultiCoord("?",getSrsid(type)));
+						}
+						sep=",";
+						multiPointAttrs.addMultiPointAttr(attr);
 				}else if(TrafoConfigNames.MULTILINGUAL_TRAFO_EXPAND.equals(trafoConfig.getAttrConfig(attr, TrafoConfigNames.MULTILINGUAL_TRAFO))){
 					for(String sfx:DbNames.MULTILINGUAL_TXT_COL_SUFFIXS){
 						ret.append(sep);
@@ -912,6 +923,33 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 							ps.setObject(valuei,geomObj);
 						 }else{
 							geomConv.setPolylineNull(ps,valuei);
+						 }
+						 valuei++;
+					}else if(TrafoConfigNames.MULTIPOINT_TRAFO_COALESCE.equals(trafoConfig.getAttrConfig(attr, TrafoConfigNames.MULTIPOINT_TRAFO))){
+						 IomObject iomValue=iomObj.getattrobj(attrName,0);
+						 IomObject iomMultipoint=null;
+						 MultiPointMapping attrMapping=null;
+						 if(iomValue!=null){
+							 attrMapping=multiPointAttrs.getMapping(attr);
+							 int pointc=iomValue.getattrvaluecount(attrMapping.getBagOfPointsAttrName());
+							 for(int pointi=0;pointi<pointc;pointi++){
+								 IomObject iomPointStructure=iomValue.getattrobj(attrMapping.getBagOfPointsAttrName(), pointi);
+								 IomObject iomPoint=iomPointStructure.getattrobj(attrMapping.getPointAttrName(), 0);
+								 if(iomMultipoint==null){
+									 iomMultipoint=new ch.interlis.iom_j.Iom_jObject(Wkb2iox.OBJ_MULTIPOINT,null);
+								 }
+								 iomMultipoint.addattrobj(Wkb2iox.ATTR_COORD, iomPoint);
+							 }
+						 }
+						 if(iomMultipoint!=null){
+								Table multiPointType = ((CompositionType) type).getComponentType();
+								Table pointStructureType=((CompositionType) ((AttributeDef) multiPointType.getElement(AttributeDef.class, attrMapping.getBagOfPointsAttrName())).getDomain()).getComponentType();
+								CoordType coord=((CoordType) ((AttributeDef) pointStructureType.getElement(AttributeDef.class,attrMapping.getPointAttrName())).getDomainResolvingAliases());
+							 boolean is3D=coord.getDimensions().length==3;
+							 Object geomObj = geomConv.fromIomMultiCoord(iomMultipoint,getSrsid(type),is3D);
+							ps.setObject(valuei,geomObj);
+						 }else{
+							geomConv.setCoordNull(ps,valuei);
 						 }
 						 valuei++;
 					}else if(TrafoConfigNames.MULTILINGUAL_TRAFO_EXPAND.equals(trafoConfig.getAttrConfig(attr, TrafoConfigNames.MULTILINGUAL_TRAFO))){
