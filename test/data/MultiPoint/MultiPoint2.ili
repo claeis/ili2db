@@ -1,0 +1,28 @@
+INTERLIS 2.3;
+
+MODEL MultiPoint2
+  AT "mailto:ce@eisenhutinformatik.ch" VERSION "2016-09-17" =
+  DOMAIN
+  	Lkoord = COORD 480000.000.. 850000.000 [INTERLIS.m],
+		70000.000 .. 310000.000 [INTERLIS.m],
+		ROTATION 2 -> 1;
+	
+   STRUCTURE PointStruktur2D =
+      coord: Lkoord;
+   END PointStruktur2D;
+
+   !!@ili2db.mapping=MultiPoint
+   STRUCTURE MultiPoint2D =
+      points: BAG {1..*} OF PointStruktur2D;
+   END MultiPoint2D;
+	
+  TOPIC TestA =
+  
+    CLASS ClassA1 =
+	geom : MANDATORY MultiPoint2D;    	
+    END ClassA1;
+    
+  END TestA;
+  
+  
+END MultiPoint2.
