@@ -81,6 +81,11 @@ public abstract class AbstractWKTColumnConverter implements SqlColumnConverter {
 		return "GeomFromWKT("+wkfValue+(srid==-1?"":","+srid)+")";
 	}
 	@Override
+	public String getInsertValueWrapperMultiCoord(String wkfValue,int srid) {
+		//return "ST_GeometryFromWKB("+wkfValue+(srid==-1?"":","+srid)+")";
+		return "GeomFromWKT("+wkfValue+(srid==-1?"":","+srid)+")";
+	}
+	@Override
 	public String getInsertValueWrapperPolyline(String wkfValue,int srid) {
 		//return "ST_GeometryFromWKB("+wkfValue+(srid==-1?"":","+srid)+")";
 		return "GeomFromWKT("+wkfValue+(srid==-1?"":","+srid)+")";
@@ -116,6 +121,11 @@ public abstract class AbstractWKTColumnConverter implements SqlColumnConverter {
 	}
 	@Override
 	public String getSelectValueWrapperCoord(String dbNativeValue) {
+		//return "ST_AsBinary("+dbNativeValue+")";
+		return "AsText("+dbNativeValue+")";
+	}
+	@Override
+	public String getSelectValueWrapperMultiCoord(String dbNativeValue) {
 		//return "ST_AsBinary("+dbNativeValue+")";
 		return "AsText("+dbNativeValue+")";
 	}
@@ -156,6 +166,14 @@ public abstract class AbstractWKTColumnConverter implements SqlColumnConverter {
 			}
 			String bv=new com.vividsolutions.jts.io.WKTWriter(is3D?3:2).write(geom);
 			return bv;
+		}
+		return null;
+	}
+	@Override
+	public java.lang.Object fromIomMultiCoord(IomObject value, int srid,boolean is3D)
+		throws SQLException, ConverterException {
+		if(value!=null){
+			throw new UnsupportedOperationException();
 		}
 		return null;
 	}
@@ -227,6 +245,14 @@ public abstract class AbstractWKTColumnConverter implements SqlColumnConverter {
 			throw new ConverterException(e);
 		}
 		return ch.interlis.iox_j.jts.Jts2iox.JTS2coord(geom.getCoordinate());
+	}
+	@Override
+	public IomObject toIomMultiCoord(
+		Object geomobj,
+		String sqlAttrName,
+		boolean is3D)
+		throws SQLException, ConverterException {
+		throw new UnsupportedOperationException();
 	}
 	@Override
 	public IomObject toIomSurface(

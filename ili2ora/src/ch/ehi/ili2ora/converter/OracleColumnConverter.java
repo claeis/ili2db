@@ -37,8 +37,6 @@ import java.sql.SQLException;
 import java.sql.Time;
 import java.sql.Timestamp;
 
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
-
 /**
  * @author ce
  * @version $Revision: 1.0 $ $Date: 10.02.2007 $
@@ -231,7 +229,7 @@ public class OracleColumnConverter implements SqlColumnConverter {
 	public java.lang.Object fromIomMultiPolyline(IomObject obj,int srid,boolean is3D,double p)
 		throws java.sql.SQLException,ConverterException
 	{
-		throw new NotImplementedException();
+		throw new UnsupportedOperationException();
 	}
 	private void addPolyline(
 		ArrayList elemInfo
@@ -565,7 +563,7 @@ public class OracleColumnConverter implements SqlColumnConverter {
 		String sqlAttrName,
 		boolean is3D)
 		throws java.sql.SQLException,ConverterException {
-		throw new NotImplementedException();
+		throw new UnsupportedOperationException();
 	}
 	@Override
 	public Integer getSrsid(String crsAuthority, String crsCode,Connection conn) 
@@ -652,30 +650,48 @@ public class OracleColumnConverter implements SqlColumnConverter {
 	@Override
 	public void setBlobNull(PreparedStatement stmt, int parameterIndex)
 			throws SQLException {
-		throw new NotImplementedException();
+		throw new UnsupportedOperationException();
 	}
 	@Override
 	public void setXmlNull(PreparedStatement stmt, int parameterIndex)
 			throws SQLException {
-		throw new NotImplementedException();
+		throw new UnsupportedOperationException();
 	}
 	@Override
 	public Object fromIomBlob(String uuid) throws SQLException,
 			ConverterException {
-		throw new NotImplementedException();
+		throw new UnsupportedOperationException();
 	}
 	@Override
 	public Object fromIomXml(String uuid) throws SQLException,
 			ConverterException {
-		throw new NotImplementedException();
+		throw new UnsupportedOperationException();
 	}
 	@Override
 	public String toIomXml(Object obj) throws SQLException, ConverterException {
-		throw new NotImplementedException();
+		throw new UnsupportedOperationException();
 	}
 	@Override
 	public String toIomBlob(Object obj) throws SQLException, ConverterException {
-		throw new NotImplementedException();
+		throw new UnsupportedOperationException();
+	}
+	@Override
+	public String getInsertValueWrapperMultiCoord(String wkfValue, int srid) {
+		throw new UnsupportedOperationException();
+	}
+	@Override
+	public String getSelectValueWrapperMultiCoord(String dbNativeValue) {
+		throw new UnsupportedOperationException();
+	}
+	@Override
+	public Object fromIomMultiCoord(IomObject iomMultiline, int srsid, boolean is3d)
+			throws SQLException, ConverterException {
+		throw new UnsupportedOperationException();
+	}
+	@Override
+	public IomObject toIomMultiCoord(Object geomobj, String sqlAttrName, boolean is3d)
+			throws SQLException, ConverterException {
+		throw new UnsupportedOperationException();
 	}
 
 }

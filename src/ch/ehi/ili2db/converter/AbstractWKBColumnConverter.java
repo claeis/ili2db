@@ -82,6 +82,11 @@ public abstract class AbstractWKBColumnConverter implements SqlColumnConverter {
 		return "GeomFromWKB("+wkfValue+(srid==-1?"":","+srid)+")";
 	}
 	@Override
+	public String getInsertValueWrapperMultiCoord(String wkfValue,int srid) {
+		//return "ST_GeometryFromWKB("+wkfValue+(srid==-1?"":","+srid)+")";
+		return "GeomFromWKB("+wkfValue+(srid==-1?"":","+srid)+")";
+	}
+	@Override
 	public String getInsertValueWrapperPolyline(String wkfValue,int srid) {
 		//return "ST_GeometryFromWKB("+wkfValue+(srid==-1?"":","+srid)+")";
 		return "GeomFromWKB("+wkfValue+(srid==-1?"":","+srid)+")";
@@ -117,6 +122,11 @@ public abstract class AbstractWKBColumnConverter implements SqlColumnConverter {
 	}
 	@Override
 	public String getSelectValueWrapperCoord(String dbNativeValue) {
+		//return "ST_AsBinary("+dbNativeValue+")";
+		return "AsBinary("+dbNativeValue+")";
+	}
+	@Override
+	public String getSelectValueWrapperMultiCoord(String dbNativeValue) {
 		//return "ST_AsBinary("+dbNativeValue+")";
 		return "AsBinary("+dbNativeValue+")";
 	}
@@ -192,6 +202,17 @@ public abstract class AbstractWKBColumnConverter implements SqlColumnConverter {
 		return null;
 	}
 	@Override
+	public java.lang.Object fromIomMultiCoord(
+		IomObject value,
+		int srid,
+		boolean is3D)
+		throws SQLException, ConverterException {
+			if(value!=null){			
+				throw new ConverterException("MultiCoord not supported");
+			}
+			return null;
+	}
+	@Override
 	public java.lang.Object fromIomPolyline(IomObject value, int srid,boolean is3D,double p)
 		throws SQLException, ConverterException {
 			if(value!=null){
@@ -228,6 +249,14 @@ public abstract class AbstractWKBColumnConverter implements SqlColumnConverter {
 			throw new ConverterException(e);
 		}
 		return ch.interlis.iox_j.jts.Jts2iox.JTS2coord(geom.getCoordinate());
+	}
+	@Override
+	public IomObject toIomMultiCoord(
+		Object geomobj,
+		String sqlAttrName,
+		boolean is3D)
+		throws SQLException, ConverterException {
+		throw new UnsupportedOperationException();
 	}
 	@Override
 	public IomObject toIomSurface(
