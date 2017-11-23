@@ -1516,9 +1516,14 @@ public class Ili2db {
 		java.sql.PreparedStatement getstmt=null;
 		try{
 			String stmt="SELECT "+colT_ID+" FROM "+sqlName+" WHERE "+DbNames.DATASETS_TAB_DATASETNAME+"= ?";
+			if(datasetName==null) {
+				stmt="SELECT "+colT_ID+" FROM "+sqlName+" WHERE "+DbNames.DATASETS_TAB_DATASETNAME+" IS NULL";
+			}
 			EhiLogger.traceBackendCmd(stmt);
 			getstmt=conn.prepareStatement(stmt);
-			getstmt.setString(1,datasetName);
+			if(datasetName!=null) {
+				getstmt.setString(1,datasetName);
+			}
 			java.sql.ResultSet res=getstmt.executeQuery();
 			if(res.next()){
 				long sqlId=res.getLong(1);
