@@ -112,7 +112,6 @@ public class TransferFromXtf {
 	private boolean createBasketCol=false;
 	private boolean createDatasetCol=false;
 	private String xtffilename=null;
-	private String datasetName=null;
 	private String attachmentKey=null;
 	private boolean doItfLineTables=false;
 	private boolean createItfLineTables=false;
@@ -169,7 +168,6 @@ public class TransferFromXtf {
 		}
 		xtffilename=config.getXtffile();
 		functionCode=function;
-		datasetName=config.getDatasetName();
 		if(config.getVer4_translation() || config.getIli1Translation()!=null){
 			languageFilter=new TranslateToOrigin(td1, config);
 		}
@@ -207,6 +205,8 @@ public class TransferFromXtf {
 				}
 			}
 		}
+		String datasetName=config.getDatasetName();
+		Long datasetSqlId=null;
 
 		today=new java.sql.Timestamp(System.currentTimeMillis());
 		if(doItfLineTables){
@@ -219,11 +219,11 @@ public class TransferFromXtf {
 		structQueue=new ArrayList();
 		boolean surfaceAsPolyline=true;
 		boolean ignoreUnresolvedReferences=false;
+
 		
 		recman=new ObjectPoolManager();
 		try{
 			objPool=recman.newObjectPool();
-			Long datasetSqlId=null;
 			long importSqlId=0;
 			long basketSqlId=0;
 			long startTid=0;
@@ -231,11 +231,14 @@ public class TransferFromXtf {
 			long objCount=0;
 			boolean referrs=false;
 			
-			recConv=new FromXtfRecordConverter(td,ili2sqlName,tag2class,config,idGen,geomConv,conn,dbusr,isItfReader,oidPool,trafoConfig,class2wrapper,config.getDatasetName());
+			recConv=new FromXtfRecordConverter(td,ili2sqlName,tag2class,config,idGen,geomConv,conn,dbusr,isItfReader,oidPool,trafoConfig,class2wrapper,datasetName);
 			
 			if(functionCode==Config.FC_DELETE || functionCode==Config.FC_REPLACE){
+				if(datasetName==null) {
+						throw new Ili2dbException("delete/replace requires a dataset name");
+				}
 				// delete existing data base on basketSqlId
-				datasetSqlId=Ili2db.getDatasetId(config.getDatasetName(),conn,config);
+				datasetSqlId=Ili2db.getDatasetId(datasetName,conn,config);
 				if(datasetSqlId==null){
 					if(functionCode==Config.FC_DELETE){
 						// nothing to do
@@ -243,7 +246,7 @@ public class TransferFromXtf {
 						// new dataset, not a replace!
 						datasetSqlId=oidPool.newObjSqlId();
 						try {
-							writeDataset(datasetSqlId,config.getDatasetName());
+							writeDataset(datasetSqlId,datasetName);
 							importSqlId=writeImportStat(datasetSqlId,xtffilename,today,dbusr);
 						} catch (SQLException e) {
 							EhiLogger.logError(e);
@@ -286,17 +289,16 @@ public class TransferFromXtf {
 						EhiLogger.logError(e);
 					}
 				}
-			}else{
+			}else if(functionCode==Config.FC_UPDATE){
+				if(datasetName==null) {
+					throw new Ili2dbException("update requires a dataset name");
+				}
 				try {
-					datasetSqlId=Ili2db.getDatasetId(config.getDatasetName(),conn,config);
+					datasetSqlId=Ili2db.getDatasetId(datasetName,conn,config);
 					if(datasetSqlId!=null){
-						if(functionCode==Config.FC_UPDATE){
-						}else{
-							throw new Ili2dbException("dataset "+config.getDatasetName()+" already exists");
-						}
 					}else{
 						datasetSqlId=oidPool.newObjSqlId();
-						writeDataset(datasetSqlId,config.getDatasetName());
+						writeDataset(datasetSqlId,datasetName);
 					}
 					importSqlId=writeImportStat(datasetSqlId,xtffilename,today,dbusr);
 				} catch (SQLException e) {
@@ -304,9 +306,41 @@ public class TransferFromXtf {
 				} catch (ConverterException e) {
 					EhiLogger.logError(e);
 				}
+			}else if(functionCode==Config.FC_IMPORT){
+				try {
+					if(datasetName==null) {
+						datasetSqlId=oidPool.newObjSqlId();
+						if(xtffilename!=null){
+							datasetName=new java.io.File(xtffilename).getName()+"-"+Long.toString(datasetSqlId);
+						}else{
+							datasetName=Long.toString(datasetSqlId);
+						}
+					}else {
+						datasetSqlId=Ili2db.getDatasetId(datasetName,conn,config);
+						if(datasetSqlId!=null){
+							throw new Ili2dbException("dataset "+datasetName+" already exists");
+						}else{
+							datasetSqlId=oidPool.newObjSqlId();
+						}
+					}
+					writeDataset(datasetSqlId,datasetName);
+					importSqlId=writeImportStat(datasetSqlId,xtffilename,today,dbusr);
+				} catch (SQLException e) {
+					EhiLogger.logError(e);
+				} catch (ConverterException e) {
+					EhiLogger.logError(e);
+				}
+			}else {
+				throw new IllegalArgumentException("unexpected function code "+functionCode);
 			}
 			if(functionCode==Config.FC_DELETE){
 				return;
+			}
+			
+			if(reader instanceof ItfReader) {
+				((ItfReader)reader).setBidPrefix(datasetName);		
+			}else if(reader instanceof ItfReader2) {
+				((ItfReader2)reader).setBidPrefix(datasetName);		
 			}
 
 			ch.interlis.iox_j.validator.Validator validator=null;
@@ -438,7 +472,7 @@ public class TransferFromXtf {
 									}
 								}
 								if(!skipObj){
-									doObject(basketSqlId,objPool.get(fixref.getRootTid()),objStat);
+									doObject(datasetName,basketSqlId,objPool.get(fixref.getRootTid()),objStat);
 									fixedObjects.add(fixref);
 								}
 							}
@@ -474,7 +508,7 @@ public class TransferFromXtf {
 							IomObject iomObj=((ObjectEvent)event).getIomObject();
 							if(allReferencesKnown(basketSqlId,iomObj)){
 								// translate object
-								doObject(basketSqlId, iomObj,objStat);
+								doObject(datasetName,basketSqlId, iomObj,objStat);
 							}
 						}
 					}else if(event instanceof EndTransferEvent){
@@ -516,7 +550,7 @@ public class TransferFromXtf {
 								}
 								if(!skipObj){
 									objStat=stat.get(fixref.getBasketSqlId()).getObjStat();
-									doObject(fixref.getBasketSqlId(),objPool.get(fixref.getRootTid()),objStat);
+									doObject(datasetName,fixref.getBasketSqlId(),objPool.get(fixref.getRootTid()),objStat);
 								}
 							}
 						}
@@ -975,10 +1009,10 @@ public class TransferFromXtf {
 		
 	}
 
-	private void doObject(long basketSqlId, IomObject iomObj,Map<String, ClassStat> objStat) {
+	private void doObject(String datasetName,long basketSqlId, IomObject iomObj,Map<String, ClassStat> objStat) {
 		try{
 			//EhiLogger.debug(iomObj.toString());
-			writeObject(basketSqlId,iomObj,null,objStat);
+			writeObject(datasetName,basketSqlId,iomObj,null,objStat);
 		}catch(ConverterException ex){
 			EhiLogger.debug(iomObj.toString());
 			EhiLogger.logError("Object "+iomObj.getobjectoid()+" at (line "+iomObj.getobjectline()+",col "+iomObj.getobjectcol()+")",ex);
@@ -992,7 +1026,7 @@ public class TransferFromXtf {
 		while(!structQueue.isEmpty()){
 			StructWrapper struct=(StructWrapper)structQueue.remove(0); // get front
 			try{
-				writeObject(basketSqlId,struct.getStruct(),struct,objStat);
+				writeObject(datasetName,basketSqlId,struct.getStruct(),struct,objStat);
 			}catch(ConverterException ex){
 				EhiLogger.logError("Object "+iomObj.getobjectoid()+"; Struct at (line "+struct.getStruct().getobjectline()+",col "+struct.getStruct().getobjectcol()+")",ex);
 			}catch(java.sql.SQLException ex){
@@ -1299,7 +1333,7 @@ public class TransferFromXtf {
 
 	/** if structEle==null, iomObj is an object. If structEle!=null iomObj is a struct value.
 	 */
-	private void writeObject(long basketSqlId,IomObject iomObj,StructWrapper structEle,Map<String, ClassStat> objStat)
+	private void writeObject(String datasetName,long basketSqlId,IomObject iomObj,StructWrapper structEle,Map<String, ClassStat> objStat)
 		throws java.sql.SQLException,ConverterException
 	{
 		String tag=iomObj.getobjecttag();
@@ -1313,7 +1347,7 @@ public class TransferFromXtf {
 		}
 		// is it a SURFACE or AREA line table?
 		if(createItfLineTables && modelele instanceof AttributeDef){
-			writeItfLineTableObject(basketSqlId,iomObj,(AttributeDef)modelele);
+			writeItfLineTableObject(datasetName,basketSqlId,iomObj,(AttributeDef)modelele);
 			return;
 		}
 		// ASSERT: an ordinary class/table
@@ -1384,7 +1418,7 @@ public class TransferFromXtf {
 		
 	}
 
-	private void writeItfLineTableObject(long basketSqlId,IomObject iomObj,AttributeDef attrDef)
+	private void writeItfLineTableObject(String datasetName,long basketSqlId,IomObject iomObj,AttributeDef attrDef)
 	throws java.sql.SQLException,ConverterException
 	{
 		SurfaceOrAreaType type = (SurfaceOrAreaType)attrDef.getDomainResolvingAliases();

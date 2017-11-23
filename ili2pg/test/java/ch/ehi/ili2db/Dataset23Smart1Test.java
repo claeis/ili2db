@@ -152,13 +152,13 @@ public class Dataset23Smart1Test {
 				{
 					ResultSet rs=stmt.getResultSet();
 					Assert.assertTrue(rs.next());
-					Assert.assertEquals(null,rs.getString(2));
+					Assert.assertEquals("Dataset1a1.xtf-1",rs.getString(2));
 				}
 				Assert.assertTrue(stmt.execute("SELECT t_ili2db_dataset.t_id, t_ili2db_dataset.datasetname FROM "+DBSCHEMA+".t_ili2db_dataset WHERE t_ili2db_dataset.t_id = 11"));
 				{
 					ResultSet rs=stmt.getResultSet();
 					Assert.assertTrue(rs.next());
-					Assert.assertEquals(null,rs.getString(2));
+					Assert.assertEquals("Dataset1a1.xtf-11",rs.getString(2));
 				}
 			}
 		}finally{

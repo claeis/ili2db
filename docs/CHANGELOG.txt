@@ -19,6 +19,7 @@ ili2pg 3.11.0 (2017-11-xx)
 -----------------------------
 - added MultiPoint smart mapping
 - read CRS from ili
+- create datasetName on --import
 - ili2c-4.7.5
 - iox-ili-1.20.0
 

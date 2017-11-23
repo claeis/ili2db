@@ -145,18 +145,6 @@ public class Dataset23Smart1Test {
 					Ili2db.readSettingsFromDb(config);
 					Ili2db.run(config,null);
 				}
-				Assert.assertTrue(stmt.execute("SELECT t_ili2db_dataset.t_id, t_ili2db_dataset.datasetname FROM t_ili2db_dataset WHERE t_ili2db_dataset.t_id = 1"));
-				{
-					ResultSet rs=stmt.getResultSet();
-					Assert.assertTrue(rs.next());
-					Assert.assertEquals(null,rs.getString(2));
-				}
-				Assert.assertTrue(stmt.execute("SELECT t_ili2db_dataset.t_id, t_ili2db_dataset.datasetname FROM t_ili2db_dataset WHERE t_ili2db_dataset.t_id = 11"));
-				{
-					ResultSet rs=stmt.getResultSet();
-					Assert.assertTrue(rs.next());
-					Assert.assertEquals(null,rs.getString(2));
-				}
 			}
 		}finally{
 			if(jdbcConnection!=null){

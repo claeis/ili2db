@@ -567,11 +567,9 @@ public class Ili2db {
 							if(config.getDoItfLineTables()){
 								ioxReader=new ItfReader(in);
 								((ItfReader)ioxReader).setModel(td);		
-								((ItfReader)ioxReader).setBidPrefix(config.getDatasetName());		
 							}else{
 								ioxReader=new ItfReader2(in,config.isSkipGeometryErrors());
 								((ItfReader2)ioxReader).setModel(td);		
-								((ItfReader2)ioxReader).setBidPrefix(config.getDatasetName());		
 							}
 						}else{
 							ioxReader=new XtfReader(in);
