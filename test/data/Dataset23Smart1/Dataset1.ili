@@ -1,0 +1,28 @@
+INTERLIS 2.3;
+
+MODEL Dataset1
+  AT "mailto:ce@eisenhutinformatik.ch" VERSION "2016-07-07" =
+    
+  TOPIC TestA =
+
+    STRUCTURE StructS1 =
+    END StructS1;
+
+    STRUCTURE StructS1b EXTENDS StructS1 =
+    END StructS1b;
+    
+    CLASS ClassA1 =
+    	attr1 : TEXT*60;
+    	attr2 : StructS1;
+    END ClassA1;
+    CLASS ClassA1b EXTENDS ClassA1 =
+    END ClassA1b;
+    CLASS ClassB1 =
+    END ClassB1;
+    CLASS ClassB1b EXTENDS ClassB1=
+    END ClassB1b;
+    
+  END TestA;
+  
+  
+END Dataset1.

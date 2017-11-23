@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?><TRANSFER xmlns="http://www.interlis.ch/INTERLIS2.3">
+<HEADERSECTION SENDER="ili2pg-2.4.0-20151123" VERSION="2.3"><MODELS><MODEL NAME="Dataset1" VERSION="2015-12-08" URI="mailto:ce@eisenhutinformatik.ch"></MODEL></MODELS></HEADERSECTION>
+<DATASECTION>
+<Dataset1.TestA BID="c34c86ec-2a75-4a89-a194-f9ebc422f8bc">
+<Dataset1.TestA.ClassA1 TID="9b7d4996-ddc6-4ac3-965d-41356798a6b8"><attr1>a1</attr1><attr2><Dataset1.TestA.StructS1/></attr2></Dataset1.TestA.ClassA1>
+<Dataset1.TestA.ClassA1b TID="739b67de-bcba-422d-b762-1df54c0d9fe0"><attr1>a1</attr1></Dataset1.TestA.ClassA1b>
+</Dataset1.TestA>
+</DATASECTION>
+</TRANSFER>
