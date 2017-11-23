@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TRANSFER xmlns="http://www.interlis.ch/INTERLIS2.3">
+	<HEADERSECTION SENDER="ili2fgdb-3.10.0-20170630" VERSION="2.3">
+		<MODELS>
+			<MODEL NAME="CrsCoord23" VERSION="2016-12-21" URI="mailto:ce@eisenhutinformatik.ch"></MODEL>
+		</MODELS>
+	</HEADERSECTION>
+	<DATASECTION>
+		<CrsCoord23.TestA BID="b1">
+			<CrsCoord23.TestA.ClassA1 TID="o3">
+				<attr1>gugus3</attr1>
+			</CrsCoord23.TestA.ClassA1>
+			<CrsCoord23.TestA.ClassA1 TID="o1">
+				<attr1>gugus1</attr1>
+				<attrLV03>
+					<COORD>
+					<C1>460001.000</C1>
+					<C2>45001.000</C2>
+					</COORD>
+				</attrLV03>
+				<attrLV95>
+					<POLYLINE>
+						<COORD>
+							<C1>2460003.000</C1>
+							<C2>1045003.000</C2>
+						</COORD>
+						<COORD>
+							<C1>2460004.000</C1>
+							<C2>1045004.000</C2>
+						</COORD>
+					</POLYLINE>
+				</attrLV95>
+			</CrsCoord23.TestA.ClassA1>
+			<CrsCoord23.TestA.ClassA1 TID="o2">
+				<attr1>gugus2</attr1>
+				<attrLV03>
+					<COORD>
+					<C1>460002.000</C1>
+					<C2>45002.000</C2>
+					</COORD>
+				</attrLV03>
+				<attrLV95>
+					<POLYLINE>
+						<COORD>
+							<C1>2460001.000</C1>
+							<C2>1045001.000</C2>
+						</COORD>
+						<COORD>
+							<C1>2460002.000</C1>
+							<C2>1045002.000</C2>
+						</COORD>
+					</POLYLINE>
+				</attrLV95>
+			</CrsCoord23.TestA.ClassA1>
+		</CrsCoord23.TestA>
+	</DATASECTION>
+</TRANSFER>

@@ -301,6 +301,7 @@ public class TransferFromIli {
 			SurfaceOrAreaType type = (SurfaceOrAreaType)attr.getDomainResolvingAll();
 			
 			DbColGeometry dbCol = recConv.generatePolylineType(type, attr.getContainer().getScopedName(null)+"."+attr.getName());
+			recConv.setCrs(dbCol, attr);
 			  dbCol.setName(ili2sqlName.getSqlColNameItfLineTableGeomAttr(attr,sqlName.getName()));
 			  dbCol.setNotNull(true);
 			  dbTable.addColumn(dbCol);

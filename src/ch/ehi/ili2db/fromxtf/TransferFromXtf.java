@@ -1428,7 +1428,7 @@ public class TransferFromXtf {
 			if (value != null) {
 				boolean is3D=((CoordType)(type).getControlPointDomain().getType()).getDimensions().length==3;
 				ps.setObject(valuei,
-						geomConv.fromIomPolyline(value, recConv.getSrsid(type), is3D,recConv.getP(type)));
+						geomConv.fromIomPolyline(value, recConv.getSrsid(attrDef), is3D,recConv.getP(type)));
 			} else {
 				geomConv.setPolylineNull(ps, valuei);
 			}
@@ -1739,7 +1739,7 @@ public class TransferFromXtf {
 		 stmt.append(sep);
 		 sep=",";
 		 stmt.append(ili2sqlName.getSqlColNameItfLineTableGeomAttr(attrDef,sqlTabName.getName()));
-		values.append(","+geomConv.getInsertValueWrapperPolyline("?",recConv.getSrsid(type)));
+		values.append(","+geomConv.getInsertValueWrapperPolyline("?",recConv.getSrsid(attrDef)));
 
 		// -> mainTable
 		if(type instanceof SurfaceType){

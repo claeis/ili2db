@@ -39,6 +39,7 @@ import ch.interlis.ili2c.metamodel.AttributeDef;
 import ch.interlis.ili2c.metamodel.BlackboxType;
 import ch.interlis.ili2c.metamodel.CompositionType;
 import ch.interlis.ili2c.metamodel.CoordType;
+import ch.interlis.ili2c.metamodel.Domain;
 import ch.interlis.ili2c.metamodel.EnumerationType;
 import ch.interlis.ili2c.metamodel.LineType;
 import ch.interlis.ili2c.metamodel.NumericType;
@@ -638,33 +639,36 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 				}else if(TrafoConfigNames.MULTISURFACE_TRAFO_COALESCE.equals(trafoConfig.getAttrConfig(attr, TrafoConfigNames.MULTISURFACE_TRAFO))){
 					 ret.append(sep);
 					 ret.append(attrSqlName);
+						multiSurfaceAttrs.addMultiSurfaceAttr(attr);
+						int srsid=getSrsid(getMultiSurfaceAttrDef(type,multiSurfaceAttrs.getMapping(attr)));
 						if(isUpdate){
-							ret.append("="+geomConv.getInsertValueWrapperMultiSurface("?",getSrsid(type)));
+							ret.append("="+geomConv.getInsertValueWrapperMultiSurface("?",srsid));
 						}else{
-							values.append(","+geomConv.getInsertValueWrapperMultiSurface("?",getSrsid(type)));
+							values.append(","+geomConv.getInsertValueWrapperMultiSurface("?",srsid));
 						}
 						sep=",";
-						multiSurfaceAttrs.addMultiSurfaceAttr(attr);
 				}else if(TrafoConfigNames.MULTILINE_TRAFO_COALESCE.equals(trafoConfig.getAttrConfig(attr, TrafoConfigNames.MULTILINE_TRAFO))){
 					 ret.append(sep);
 					 ret.append(attrSqlName);
+						multiLineAttrs.addMultiLineAttr(attr);
+						int srsid=getSrsid(getMultiLineAttrDef(type,multiLineAttrs.getMapping(attr)));
 						if(isUpdate){
-							ret.append("="+geomConv.getInsertValueWrapperMultiPolyline("?",getSrsid(type)));
+							ret.append("="+geomConv.getInsertValueWrapperMultiPolyline("?",srsid));
 						}else{
-							values.append(","+geomConv.getInsertValueWrapperMultiPolyline("?",getSrsid(type)));
+							values.append(","+geomConv.getInsertValueWrapperMultiPolyline("?",srsid));
 						}
 						sep=",";
-						multiLineAttrs.addMultiLineAttr(attr);
 				}else if(TrafoConfigNames.MULTIPOINT_TRAFO_COALESCE.equals(trafoConfig.getAttrConfig(attr, TrafoConfigNames.MULTIPOINT_TRAFO))){
 					 ret.append(sep);
 					 ret.append(attrSqlName);
+						multiPointAttrs.addMultiPointAttr(attr);
+						int srsid=getSrsid(getMultiPointAttrDef(type, multiPointAttrs.getMapping(attr)));
 						if(isUpdate){
-							ret.append("="+geomConv.getInsertValueWrapperMultiCoord("?",getSrsid(type)));
+							ret.append("="+geomConv.getInsertValueWrapperMultiCoord("?",srsid));
 						}else{
-							values.append(","+geomConv.getInsertValueWrapperMultiCoord("?",getSrsid(type)));
+							values.append(","+geomConv.getInsertValueWrapperMultiCoord("?",srsid));
 						}
 						sep=",";
-						multiPointAttrs.addMultiPointAttr(attr);
 				}else if(TrafoConfigNames.MULTILINGUAL_TRAFO_EXPAND.equals(trafoConfig.getAttrConfig(attr, TrafoConfigNames.MULTILINGUAL_TRAFO))){
 					for(String sfx:DbNames.MULTILINGUAL_TXT_COL_SUFFIXS){
 						ret.append(sep);
@@ -681,9 +685,9 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 				 ret.append(sep);
 				 ret.append(attrSqlName);
 					if(isUpdate){
-						ret.append("="+geomConv.getInsertValueWrapperPolyline("?",getSrsid(type)));
+						ret.append("="+geomConv.getInsertValueWrapperPolyline("?",getSrsid(attr)));
 					}else{
-						values.append(","+geomConv.getInsertValueWrapperPolyline("?",getSrsid(type)));
+						values.append(","+geomConv.getInsertValueWrapperPolyline("?",getSrsid(attr)));
 					}
 					sep=",";
 			 }else if(type instanceof SurfaceOrAreaType){
@@ -692,9 +696,9 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 					 ret.append(sep);
 					 ret.append(attrSqlName);
 						if(isUpdate){
-							ret.append("="+geomConv.getInsertValueWrapperSurface("?",getSrsid(type)));
+							ret.append("="+geomConv.getInsertValueWrapperSurface("?",getSrsid(attr)));
 						}else{
-							values.append(","+geomConv.getInsertValueWrapperSurface("?",getSrsid(type)));
+							values.append(","+geomConv.getInsertValueWrapperSurface("?",getSrsid(attr)));
 						}
 						sep=",";
 				 }
@@ -703,9 +707,9 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 						 ret.append(sep);
 						 ret.append(attrSqlName+DbNames.ITF_MAINTABLE_GEOTABLEREF_COL_SUFFIX);
 							if(isUpdate){
-								ret.append("="+geomConv.getInsertValueWrapperCoord("?",getSrsid(type)));
+								ret.append("="+geomConv.getInsertValueWrapperCoord("?",getSrsid(attr)));
 							}else{
-								 values.append(","+geomConv.getInsertValueWrapperCoord("?",getSrsid(type)));
+								 values.append(","+geomConv.getInsertValueWrapperCoord("?",getSrsid(attr)));
 							}
 							sep=",";
 					 }
@@ -714,9 +718,9 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 				 ret.append(sep);
 				 ret.append(attrSqlName);
 					if(isUpdate){
-						ret.append("="+geomConv.getInsertValueWrapperCoord("?",getSrsid(type)));
+						ret.append("="+geomConv.getInsertValueWrapperCoord("?",getSrsid(attr)));
 					}else{
-						values.append(","+geomConv.getInsertValueWrapperCoord("?",getSrsid(type)));
+						values.append(","+geomConv.getInsertValueWrapperCoord("?",getSrsid(attr)));
 					}
 					sep=",";
 			}else if(type instanceof EnumerationType){
@@ -886,12 +890,11 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 							 }
 						 }
 						 if(iomMultisurface!=null){
-								Table multiSurfaceType = ((CompositionType) type).getComponentType();
-								Table surfaceStructureType=((CompositionType) ((AttributeDef) multiSurfaceType.getElement(AttributeDef.class, attrMapping.getBagOfSurfacesAttrName())).getDomain()).getComponentType();
-								SurfaceType surface=((SurfaceType) ((AttributeDef) surfaceStructureType.getElement(AttributeDef.class,attrMapping.getSurfaceAttrName())).getDomainResolvingAliases());
+								AttributeDef surfaceAttr = getMultiSurfaceAttrDef(type, attrMapping);
+								SurfaceType surface=((SurfaceType) surfaceAttr.getDomainResolvingAliases());
 								CoordType coord=(CoordType)surface.getControlPointDomain().getType();
 							 boolean is3D=coord.getDimensions().length==3;
-							 Object geomObj = geomConv.fromIomMultiSurface(iomMultisurface,getSrsid(type),surface.getLineAttributeStructure()!=null,is3D,getP(surface));
+							 Object geomObj = geomConv.fromIomMultiSurface(iomMultisurface,getSrsid(surfaceAttr),surface.getLineAttributeStructure()!=null,is3D,getP(surface));
 							ps.setObject(valuei,geomObj);
 						 }else{
 							geomConv.setSurfaceNull(ps,valuei);
@@ -914,12 +917,11 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 							 }
 						 }
 						 if(iomMultiline!=null){
-								Table multiLineType = ((CompositionType) type).getComponentType();
-								Table lineStructureType=((CompositionType) ((AttributeDef) multiLineType.getElement(AttributeDef.class, attrMapping.getBagOfLinesAttrName())).getDomain()).getComponentType();
-								PolylineType line=((PolylineType) ((AttributeDef) lineStructureType.getElement(AttributeDef.class,attrMapping.getLineAttrName())).getDomainResolvingAliases());
+								AttributeDef polylineAttr = getMultiLineAttrDef(type, attrMapping);
+								PolylineType line=((PolylineType) polylineAttr.getDomainResolvingAliases());
 								CoordType coord=(CoordType)line.getControlPointDomain().getType();
 							 boolean is3D=coord.getDimensions().length==3;
-							 Object geomObj = geomConv.fromIomMultiPolyline(iomMultiline,getSrsid(type),is3D,getP(line));
+							 Object geomObj = geomConv.fromIomMultiPolyline(iomMultiline,getSrsid(polylineAttr),is3D,getP(line));
 							ps.setObject(valuei,geomObj);
 						 }else{
 							geomConv.setPolylineNull(ps,valuei);
@@ -942,11 +944,10 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 							 }
 						 }
 						 if(iomMultipoint!=null){
-								Table multiPointType = ((CompositionType) type).getComponentType();
-								Table pointStructureType=((CompositionType) ((AttributeDef) multiPointType.getElement(AttributeDef.class, attrMapping.getBagOfPointsAttrName())).getDomain()).getComponentType();
-								CoordType coord=((CoordType) ((AttributeDef) pointStructureType.getElement(AttributeDef.class,attrMapping.getPointAttrName())).getDomainResolvingAliases());
+								AttributeDef coordAttr = getMultiPointAttrDef(type, attrMapping);
+								CoordType coord=((CoordType) coordAttr.getDomainResolvingAliases());
 							 boolean is3D=coord.getDimensions().length==3;
-							 Object geomObj = geomConv.fromIomMultiCoord(iomMultipoint,getSrsid(type),is3D);
+							 Object geomObj = geomConv.fromIomMultiCoord(iomMultipoint,getSrsid(coordAttr),is3D);
 							ps.setObject(valuei,geomObj);
 						 }else{
 							geomConv.setCoordNull(ps,valuei);
@@ -979,7 +980,7 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 					 IomObject value=iomObj.getattrobj(attrName,0);
 					 if(value!=null){
 						boolean is3D=((CoordType)((PolylineType)type).getControlPointDomain().getType()).getDimensions().length==3;
-						ps.setObject(valuei,geomConv.fromIomPolyline(value,getSrsid(type),is3D,getP((PolylineType)type)));
+						ps.setObject(valuei,geomConv.fromIomPolyline(value,getSrsid(attr),is3D,getP((PolylineType)type)));
 					 }else{
 						geomConv.setPolylineNull(ps,valuei);
 					 }
@@ -990,7 +991,7 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 						 IomObject value=iomObj.getattrobj(attrName,0);
 						 if(value!=null){
 								boolean is3D=((CoordType)((SurfaceOrAreaType)type).getControlPointDomain().getType()).getDimensions().length==3;
-							 Object geomObj = geomConv.fromIomSurface(value,getSrsid(type),((SurfaceOrAreaType)type).getLineAttributeStructure()!=null,is3D,getP((SurfaceOrAreaType)type));
+							 Object geomObj = geomConv.fromIomSurface(value,getSrsid(attr),((SurfaceOrAreaType)type).getLineAttributeStructure()!=null,is3D,getP((SurfaceOrAreaType)type));
 							ps.setObject(valuei,geomObj);
 						 }else{
 							geomConv.setSurfaceNull(ps,valuei);
@@ -1007,7 +1008,7 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 							 }
 							 if(value!=null){
 								boolean is3D=((CoordType)((SurfaceOrAreaType)type).getControlPointDomain().getType()).getDimensions().length==3;
-								ps.setObject(valuei,geomConv.fromIomCoord(value,getSrsid(type),is3D));
+								ps.setObject(valuei,geomConv.fromIomCoord(value,getSrsid(attr),is3D));
 							 }else{
 								geomConv.setCoordNull(ps,valuei);
 							 }
@@ -1018,7 +1019,7 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 					 IomObject value=iomObj.getattrobj(attrName,0);
 					 if(value!=null){
 						boolean is3D=((CoordType)type).getDimensions().length==3;
-						ps.setObject(valuei,geomConv.fromIomCoord(value,getSrsid(type),is3D));
+						ps.setObject(valuei,geomConv.fromIomCoord(value,getSrsid(attr),is3D));
 					 }else{
 						geomConv.setCoordNull(ps,valuei);
 					 }
@@ -1119,6 +1120,24 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 		}
 		return valuei;
 	}
+	protected AttributeDef getMultiPointAttrDef(Type type, MultiPointMapping attrMapping) {
+		Table multiPointType = ((CompositionType) type).getComponentType();
+		Table pointStructureType=((CompositionType) ((AttributeDef) multiPointType.getElement(AttributeDef.class, attrMapping.getBagOfPointsAttrName())).getDomain()).getComponentType();
+		AttributeDef coordAttr = (AttributeDef) pointStructureType.getElement(AttributeDef.class,attrMapping.getPointAttrName());
+		return coordAttr;
+	}
+	protected AttributeDef getMultiLineAttrDef(Type type, MultiLineMapping attrMapping) {
+		Table multiLineType = ((CompositionType) type).getComponentType();
+		Table lineStructureType=((CompositionType) ((AttributeDef) multiLineType.getElement(AttributeDef.class, attrMapping.getBagOfLinesAttrName())).getDomain()).getComponentType();
+		AttributeDef polylineAttr = (AttributeDef) lineStructureType.getElement(AttributeDef.class,attrMapping.getLineAttrName());
+		return polylineAttr;
+	}
+	protected AttributeDef getMultiSurfaceAttrDef(Type type, MultiSurfaceMapping attrMapping) {
+		Table multiSurfaceType = ((CompositionType) type).getComponentType();
+		Table surfaceStructureType=((CompositionType) ((AttributeDef) multiSurfaceType.getElement(AttributeDef.class, attrMapping.getBagOfSurfacesAttrName())).getDomain()).getComponentType();
+		AttributeDef surfaceAttr = (AttributeDef) surfaceStructureType.getElement(AttributeDef.class,attrMapping.getSurfaceAttrName());
+		return surfaceAttr;
+	}
 	final private int  LEN_LANG_PREFIX=DbNames.MULTILINGUAL_TXT_COL_PREFIX.length();
 	private String getMultilingualText(IomObject iomMulti, String sfx) {
 		if(sfx.length()>0){
@@ -1136,8 +1155,51 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 	 	}
 		return null;
 	}
-	public int getSrsid(Type type){
-		return defaultSrsid;
+	private HashMap<AttributeDef,Integer> srsCache=new HashMap<AttributeDef,Integer>();
+	public int getSrsid(AttributeDef attr){
+		Integer srsid=srsCache.get(attr);
+		if(srsid!=null) {
+			return srsid;
+		}
+		ch.interlis.ili2c.metamodel.Element attrOrDomainDef=attr;
+		ch.interlis.ili2c.metamodel.Type attrType=attr.getDomain();
+		if(attrType instanceof ch.interlis.ili2c.metamodel.TypeAlias) {
+			attrOrDomainDef=((ch.interlis.ili2c.metamodel.TypeAlias)attrType).getAliasing();
+			attrType=((Domain) attrOrDomainDef).getType();
+		}
+		CoordType coord=null;
+		if(attrType instanceof CoordType) {
+			coord=(CoordType)attrType;
+		}else if(attrType instanceof LineType) {
+			Domain coordDomain=((LineType)attrType).getControlPointDomain();
+			if(coordDomain!=null){
+				attrOrDomainDef=coordDomain;
+				coord=(CoordType)coordDomain.getType();
+			}
+		}
+		if(coord!=null) {
+			String crs=coord.getCrs(attrOrDomainDef);
+			if(crs!=null) {
+				String crsv[]=crs.split(":");
+				String crsAuthority = crsv[0];
+				String crsCode = crsv[1];
+				try{
+					srsid=geomConv.getSrsid(crsAuthority,crsCode,conn);
+					if(srsid!=null){
+						srsCache.put(attr, srsid);
+						return srsid;
+					}
+				}catch(UnsupportedOperationException ex){
+					EhiLogger.logAdaption("no CRS support by converter; use default "+defaultSrsid);
+				}catch(ConverterException ex){
+					throw new IllegalArgumentException("failed to get srsid for "+crsAuthority+":"+crsCode+", "+ex.getLocalizedMessage());
+				}
+				
+			}
+		}
+		srsid=defaultSrsid;
+		srsCache.put(attr, srsid);
+		return srsid;
 	}
 	private HashMap<LineType,Double> typeCache=new HashMap<LineType,Double>();
 	public double getP(LineType type)

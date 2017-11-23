@@ -31,6 +31,7 @@ import ch.interlis.ili2c.metamodel.ExtendableContainer;
 import ch.interlis.ili2c.metamodel.LineType;
 import ch.interlis.ili2c.metamodel.NumericType;
 import ch.interlis.ili2c.metamodel.NumericalType;
+import ch.interlis.ili2c.metamodel.SurfaceOrAreaType;
 import ch.interlis.ili2c.metamodel.Table;
 import ch.interlis.ili2c.metamodel.TransferDescription;
 import ch.interlis.ili2c.metamodel.Viewable;
@@ -121,9 +122,6 @@ public class AbstractRecordConverter {
 			compoundCurve=true;
 		}
 		ret.setType(compoundCurve ? DbColGeometry.COMPOUNDCURVE : DbColGeometry.LINESTRING);
-		// TODO get crs from ili
-		ret.setSrsAuth(defaultCrsAuthority);
-		ret.setSrsId(defaultCrsCode);
 		Domain coordDomain=type.getControlPointDomain();
 		if(coordDomain!=null){
 			CoordType coord=(CoordType)coordDomain.getType();
@@ -131,6 +129,35 @@ public class AbstractRecordConverter {
 			setBB(ret, coord,attrName);
 		}
 		return ret;
+	}
+	public void setCrs(DbColGeometry ret,AttributeDef attr) {
+		ch.interlis.ili2c.metamodel.Element attrOrDomainDef=attr;
+		ch.interlis.ili2c.metamodel.Type attrType=attr.getDomain();
+		if(attrType instanceof ch.interlis.ili2c.metamodel.TypeAlias) {
+			attrOrDomainDef=((ch.interlis.ili2c.metamodel.TypeAlias)attrType).getAliasing();
+			attrType=((Domain) attrOrDomainDef).getType();
+		}
+		CoordType coord=null;
+		if(attrType instanceof CoordType) {
+			coord=(CoordType)attrType;
+		}else if(attrType instanceof LineType) {
+			Domain coordDomain=((LineType)attrType).getControlPointDomain();
+			if(coordDomain!=null){
+				attrOrDomainDef=coordDomain;
+				coord=(CoordType)coordDomain.getType();
+			}
+		}
+		if(coord!=null) {
+			String crs=coord.getCrs(attrOrDomainDef);
+			if(crs!=null) {
+				String crsv[]=crs.split(":");
+				ret.setSrsAuth(crsv[0]);
+				ret.setSrsId(crsv[1]);
+				return;
+			}
+		}
+		ret.setSrsAuth(defaultCrsAuthority);
+		ret.setSrsId(defaultCrsCode);
 	}
 		public DbColId addKeyCol(DbTable table) {
 			  DbColId dbColId=new DbColId();

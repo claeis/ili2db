@@ -15,6 +15,13 @@ ideas/open issues/questions
 LATEST
 ---------------------------
 
+ili2pg 3.11.0 (2017-11-xx)
+-----------------------------
+- added MultiPoint smart mapping
+- read CRS from ili
+- ili2c-4.7.5
+- iox-ili-1.20.0
+
 ili2pg 3.10.10 (2017-11-03)
 -----------------------------
 - added mssql support

@@ -465,6 +465,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 		}else if (type instanceof PolylineType){
 			String attrName=attr.getContainer().getScopedName(null)+"."+attr.getName();
 			DbColGeometry ret = generatePolylineType((PolylineType)type, attrName);
+			setCrs(ret,attr);
 			dbCol=ret;
 		}else if (type instanceof SurfaceOrAreaType){
 			if(createItfLineTables){
@@ -476,9 +477,8 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 					curvePolygon=true;
 				}
 				ret.setType(curvePolygon ? DbColGeometry.CURVEPOLYGON : DbColGeometry.POLYGON);
-				// TODO get crs from ili
-				ret.setSrsAuth(defaultCrsAuthority);
-				ret.setSrsId(defaultCrsCode);
+				// get crs from ili
+				setCrs(ret,attr);
 				CoordType coord=(CoordType)((SurfaceOrAreaType)type).getControlPointDomain().getType();
 				ret.setDimension(coord.getDimensions().length);
 				setBB(ret, coord,attr.getContainer().getScopedName(null)+"."+attr.getName());
@@ -491,9 +491,8 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 					ret.setName(sqlName);
 					ret.setType(DbColGeometry.POINT);
 					setNullable(aclass,attr, ret);
-					// TODO get crs from ili
-					ret.setSrsAuth(defaultCrsAuthority);
-					ret.setSrsId(defaultCrsCode);
+					// get crs from ili
+					setCrs(ret,attr);
 					ret.setDimension(2); // always 2 (even if defined as 3d in ili)
 					CoordType coord=(CoordType)((SurfaceOrAreaType)type).getControlPointDomain().getType();
 					setBB(ret, coord,attr.getContainer().getScopedName(null)+"."+attr.getName());
@@ -503,9 +502,8 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 		}else if (type instanceof CoordType){
 			DbColGeometry ret=new DbColGeometry();
 			ret.setType(DbColGeometry.POINT);
-			// TODO get crs from ili
-			ret.setSrsAuth(defaultCrsAuthority);
-			ret.setSrsId(defaultCrsCode);
+			// get crs from ili
+			setCrs(ret,attr);
 			CoordType coord=(CoordType)type;
 			ret.setDimension(coord.getDimensions().length);
 			setBB(ret, coord,attr.getContainer().getScopedName(null)+"."+attr.getName());
@@ -537,10 +535,10 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 						curvePolygon=true;
 					}
 					ret.setType(curvePolygon ? DbColGeometry.MULTISURFACE : DbColGeometry.MULTIPOLYGON);
-					// TODO get crs from ili
-					ret.setSrsAuth(defaultCrsAuthority);
-					ret.setSrsId(defaultCrsCode);
-					SurfaceType surface=((SurfaceType) ((AttributeDef) ((CompositionType) ((AttributeDef) ((CompositionType) type).getComponentType().getElement(AttributeDef.class, attrMapping.getBagOfSurfacesAttrName())).getDomain()).getComponentType().getElement(AttributeDef.class,attrMapping.getSurfaceAttrName())).getDomainResolvingAliases());
+					// get crs from ili
+					AttributeDef surfaceAttr = (AttributeDef) ((CompositionType) ((AttributeDef) ((CompositionType) type).getComponentType().getElement(AttributeDef.class, attrMapping.getBagOfSurfacesAttrName())).getDomain()).getComponentType().getElement(AttributeDef.class,attrMapping.getSurfaceAttrName());
+					setCrs(ret,surfaceAttr);
+					SurfaceType surface=((SurfaceType) surfaceAttr.getDomainResolvingAliases());
 					CoordType coord=(CoordType)surface.getControlPointDomain().getType();
 					ret.setDimension(coord.getDimensions().length);
 					setBB(ret, coord,attr.getContainer().getScopedName(null)+"."+attr.getName());
@@ -556,11 +554,11 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 						curvePolyline=true;
 					}
 					ret.setType(curvePolyline ? DbColGeometry.MULTICURVE : DbColGeometry.MULTILINESTRING);
-					// TODO get crs from ili
-					ret.setSrsAuth(defaultCrsAuthority);
-					ret.setSrsId(defaultCrsCode);
-					PolylineType surface=((PolylineType) ((AttributeDef) ((CompositionType) ((AttributeDef) ((CompositionType) type).getComponentType().getElement(AttributeDef.class, attrMapping.getBagOfLinesAttrName())).getDomain()).getComponentType().getElement(AttributeDef.class,attrMapping.getLineAttrName())).getDomainResolvingAliases());
-					CoordType coord=(CoordType)surface.getControlPointDomain().getType();
+					// get crs from ili
+					AttributeDef polylineAttr = (AttributeDef) ((CompositionType) ((AttributeDef) ((CompositionType) type).getComponentType().getElement(AttributeDef.class, attrMapping.getBagOfLinesAttrName())).getDomain()).getComponentType().getElement(AttributeDef.class,attrMapping.getLineAttrName());
+					setCrs(ret,polylineAttr);
+					PolylineType polylineType=((PolylineType) polylineAttr.getDomainResolvingAliases());
+					CoordType coord=(CoordType)polylineType.getControlPointDomain().getType();
 					ret.setDimension(coord.getDimensions().length);
 					setBB(ret, coord,attr.getContainer().getScopedName(null)+"."+attr.getName());
 					dbCol=ret;
@@ -571,10 +569,10 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 					MultiPointMapping attrMapping=multiPointAttrs.getMapping(attr);
 					DbColGeometry ret=new DbColGeometry();
 					ret.setType(DbColGeometry.MULTIPOINT);
-					// TODO get crs from ili
-					ret.setSrsAuth(defaultCrsAuthority);
-					ret.setSrsId(defaultCrsCode);
-					CoordType coord=(CoordType) ( ((AttributeDef) ((CompositionType) ((AttributeDef) ((CompositionType) type).getComponentType().getElement(AttributeDef.class, attrMapping.getBagOfPointsAttrName())).getDomain()).getComponentType().getElement(AttributeDef.class,attrMapping.getPointAttrName())).getDomainResolvingAliases());
+					// get crs from ili
+					AttributeDef coordAttr = (AttributeDef) ((CompositionType) ((AttributeDef) ((CompositionType) type).getComponentType().getElement(AttributeDef.class, attrMapping.getBagOfPointsAttrName())).getDomain()).getComponentType().getElement(AttributeDef.class,attrMapping.getPointAttrName());
+					setCrs(ret,coordAttr);
+					CoordType coord=(CoordType) ( coordAttr.getDomainResolvingAliases());
 					ret.setDimension(coord.getDimensions().length);
 					setBB(ret, coord,attr.getContainer().getScopedName(null)+"."+attr.getName());
 					dbCol=ret;
