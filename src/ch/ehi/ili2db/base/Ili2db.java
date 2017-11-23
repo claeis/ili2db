@@ -1923,9 +1923,9 @@ public class Ili2db {
 			TransferFromXtf trsfr=new TransferFromXtf(function,ili2sqlName,td,conn,dbusr,geomConv,idGen,config,trafoConfig,class2wrapper);
 			trsfr.doit(reader,config,stat);
 		}catch(ch.interlis.iox.IoxException ex){
-			EhiLogger.logError("failed to read data file",ex);
+			EhiLogger.logError("failed to transfer data from file to db",ex);
 		} catch (Ili2dbException ex) {
-			EhiLogger.logError("failed to read data file",ex);
+			EhiLogger.logError("failed to transfer data from file to db",ex);
 		}
 	}
 	/** transfer data from database to xml file
