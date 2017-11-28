@@ -301,6 +301,7 @@ public class TransferFromIli {
 			SurfaceOrAreaType type = (SurfaceOrAreaType)attr.getDomainResolvingAll();
 			
 			DbColGeometry dbCol = recConv.generatePolylineType(type, attr.getContainer().getScopedName(null)+"."+attr.getName());
+			recConv.setCrs(dbCol, attr);
 			  dbCol.setName(ili2sqlName.getSqlColNameItfLineTableGeomAttr(attr,sqlName.getName()));
 			  dbCol.setNotNull(true);
 			  dbTable.addColumn(dbCol);
@@ -428,7 +429,7 @@ public class TransferFromIli {
 			}
 			// select entries
 			String insStmt="SELECT "+DbNames.MODELS_TAB_FILE_COL+","+DbNames.MODELS_TAB_ILIVERSION_COL+","+DbNames.MODELS_TAB_MODELNAME_COL+" FROM "+sqlName;
-			if(conn.getMetaData().getURL().startsWith("jdbc:sqlserver:")) {
+			if(isMsSqlServer(conn)) {
 				// 'file' is keyword in sql server
 				insStmt="SELECT \""+DbNames.MODELS_TAB_FILE_COL+"\","+DbNames.MODELS_TAB_ILIVERSION_COL+","+DbNames.MODELS_TAB_MODELNAME_COL+" FROM "+sqlName;
 			}
@@ -455,6 +456,9 @@ public class TransferFromIli {
 		}
 		return ret;
 	}
+	private static boolean isMsSqlServer(java.sql.Connection conn) throws SQLException {
+		return conn.getMetaData().getURL().startsWith("jdbc:sqlserver:");
+	}
 	public static String readIliFile(java.sql.Connection conn,String schema,String filename)
 	throws Ili2dbException
 	{
@@ -464,7 +468,10 @@ public class TransferFromIli {
 		}
 		try{
 			// select entries
-			String selStmt="SELECT "+DbNames.MODELS_TAB_CONTENT_COL+" FROM "+sqlName+" WHERE \""+DbNames.MODELS_TAB_FILE_COL+"\"=?";
+			String selStmt="SELECT "+DbNames.MODELS_TAB_CONTENT_COL+" FROM "+sqlName+" WHERE "+DbNames.MODELS_TAB_FILE_COL+"=?";
+			if(isMsSqlServer(conn)) {
+				selStmt="SELECT "+DbNames.MODELS_TAB_CONTENT_COL+" FROM "+sqlName+" WHERE \""+DbNames.MODELS_TAB_FILE_COL+"\"=?";
+			}
 			EhiLogger.traceBackendCmd(selStmt);
 			java.sql.PreparedStatement selPrepStmt = conn.prepareStatement(selStmt);
 			try{
@@ -500,7 +507,11 @@ public class TransferFromIli {
 		try{
 
 			// insert entries
-			String insStmt="INSERT INTO "+sqlName+" (\""+DbNames.MODELS_TAB_FILE_COL+"\","+DbNames.MODELS_TAB_ILIVERSION_COL+","+DbNames.MODELS_TAB_MODELNAME_COL+","+DbNames.MODELS_TAB_CONTENT_COL+","+DbNames.MODELS_TAB_IMPORTDATE_COL+") VALUES (?,?,?,?,?)";
+			String insStmt="INSERT INTO "+sqlName+" ("+DbNames.MODELS_TAB_FILE_COL+","+DbNames.MODELS_TAB_ILIVERSION_COL+","+DbNames.MODELS_TAB_MODELNAME_COL+","+DbNames.MODELS_TAB_CONTENT_COL+","+DbNames.MODELS_TAB_IMPORTDATE_COL+") VALUES (?,?,?,?,?)";
+			if(isMsSqlServer(conn)) {
+				// 'file' is keyword in sql server
+				insStmt="INSERT INTO "+sqlName+" (\""+DbNames.MODELS_TAB_FILE_COL+"\","+DbNames.MODELS_TAB_ILIVERSION_COL+","+DbNames.MODELS_TAB_MODELNAME_COL+","+DbNames.MODELS_TAB_CONTENT_COL+","+DbNames.MODELS_TAB_IMPORTDATE_COL+") VALUES (?,?,?,?,?)";
+			}
 			EhiLogger.traceBackendCmd(insStmt);
 			java.sql.PreparedStatement insPrepStmt = conn.prepareStatement(insStmt);
 			java.util.Iterator entri=td.iterator();

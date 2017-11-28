@@ -84,7 +84,13 @@ statement
                        		}
                        	)
                        // ("WHERE" search_condition)?
-                       ("WHERE" w0=sqlqname EQUALS ( 
+                       ("WHERE" w0=sqlqname 
+                       		(("IS" "NULL"
+                       			{
+                           			stmt.addCond(new ColRef(w0.getLocalName()),new IsNull());
+                           		}
+                       		)
+                       		| (EQUALS ( 
                        			(QUESTION {v0=new Param(paramIdx++);}) 
                        			|  (n:NUMBER {v0=new IntConst(Integer.valueOf(n.getText()));})
                        			|  (s:STRING {v0=new StringConst(s.getText());})
@@ -92,6 +98,7 @@ statement
                        		{
                            		stmt.addCond(new ColRef(w0.getLocalName()),v0);
                        		}
+                       		))
                            ("AND" w1=sqlqname EQUALS QUESTION 
                        		{
                            		stmt.addCond(new ColRef(w1.getLocalName()),new Param(paramIdx++));

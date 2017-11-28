@@ -26,11 +26,15 @@ import java.sql.Timestamp;
 
 import com.vividsolutions.jts.io.ParseException;
 
+import ch.ehi.basics.settings.Settings;
 import ch.ehi.ili2db.gui.Config;
+import ch.interlis.ili2c.metamodel.AttributeDef;
 import ch.interlis.iom.IomObject;
+import ch.interlis.iom_j.itf.EnumCodeMapper;
 import ch.interlis.iox_j.jts.Iox2jtsException;
 
 public abstract class AbstractWKBColumnConverter implements SqlColumnConverter {
+	protected Connection conn=null;
 	@Override
 	public void setCoordNull(PreparedStatement stmt, int parameterIndex) throws SQLException {
 		stmt.setNull(parameterIndex,java.sql.Types.BINARY);
@@ -81,6 +85,11 @@ public abstract class AbstractWKBColumnConverter implements SqlColumnConverter {
 		return "GeomFromWKB("+wkfValue+(srid==-1?"":","+srid)+")";
 	}
 	@Override
+	public String getInsertValueWrapperMultiCoord(String wkfValue,int srid) {
+		//return "ST_GeometryFromWKB("+wkfValue+(srid==-1?"":","+srid)+")";
+		return "GeomFromWKB("+wkfValue+(srid==-1?"":","+srid)+")";
+	}
+	@Override
 	public String getInsertValueWrapperPolyline(String wkfValue,int srid) {
 		//return "ST_GeometryFromWKB("+wkfValue+(srid==-1?"":","+srid)+")";
 		return "GeomFromWKB("+wkfValue+(srid==-1?"":","+srid)+")";
@@ -116,6 +125,11 @@ public abstract class AbstractWKBColumnConverter implements SqlColumnConverter {
 	}
 	@Override
 	public String getSelectValueWrapperCoord(String dbNativeValue) {
+		//return "ST_AsBinary("+dbNativeValue+")";
+		return "AsBinary("+dbNativeValue+")";
+	}
+	@Override
+	public String getSelectValueWrapperMultiCoord(String dbNativeValue) {
 		//return "ST_AsBinary("+dbNativeValue+")";
 		return "AsBinary("+dbNativeValue+")";
 	}
@@ -191,6 +205,17 @@ public abstract class AbstractWKBColumnConverter implements SqlColumnConverter {
 		return null;
 	}
 	@Override
+	public java.lang.Object fromIomMultiCoord(
+		IomObject value,
+		int srid,
+		boolean is3D)
+		throws SQLException, ConverterException {
+			if(value!=null){			
+				throw new ConverterException("MultiCoord not supported");
+			}
+			return null;
+	}
+	@Override
 	public java.lang.Object fromIomPolyline(IomObject value, int srid,boolean is3D,double p)
 		throws SQLException, ConverterException {
 			if(value!=null){
@@ -227,6 +252,14 @@ public abstract class AbstractWKBColumnConverter implements SqlColumnConverter {
 			throw new ConverterException(e);
 		}
 		return ch.interlis.iox_j.jts.Jts2iox.JTS2coord(geom.getCoordinate());
+	}
+	@Override
+	public IomObject toIomMultiCoord(
+		Object geomobj,
+		String sqlAttrName,
+		boolean is3D)
+		throws SQLException, ConverterException {
+		throw new UnsupportedOperationException();
 	}
 	@Override
 	public IomObject toIomSurface(
@@ -303,7 +336,8 @@ public abstract class AbstractWKBColumnConverter implements SqlColumnConverter {
 		return srsid;
 	}
 	@Override
-	public void setup(Connection conn, Config config) {
+	public void setup(Connection conn, Settings config) {
+		this.conn=conn;
 	}
 	@Override
 	public void setBlobNull(PreparedStatement stmt, int parameterIndex)
@@ -331,6 +365,28 @@ public abstract class AbstractWKBColumnConverter implements SqlColumnConverter {
 	}
 	@Override
 	public String toIomBlob(Object obj) throws SQLException, ConverterException {
+		throw new UnsupportedOperationException();
+	}
+	@Override
+	public String getSelectValueWrapperArray(String makeColumnRef) {
+		throw new UnsupportedOperationException();
+	}
+	@Override
+	public String getInsertValueWrapperArray(String sqlColName) {
+		throw new UnsupportedOperationException();
+	}
+	@Override
+	public void setArrayNull(PreparedStatement ps, int parameterIndex) throws SQLException {
+		throw new UnsupportedOperationException();
+	}
+	@Override
+	public Object fromIomArray(AttributeDef iliEleAttr, String[] iomValues, EnumCodeMapper enumTypes)
+			throws SQLException, ConverterException {
+		throw new UnsupportedOperationException();
+	}
+	@Override
+	public String[] toIomArray(AttributeDef iliEleAttr, Object sqlArray, EnumCodeMapper enumTypes)
+			throws SQLException, ConverterException {
 		throw new UnsupportedOperationException();
 	}
 

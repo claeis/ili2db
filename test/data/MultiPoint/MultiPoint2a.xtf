@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TRANSFER xmlns="http://www.interlis.ch/INTERLIS2.3">
+	<HEADERSECTION SENDER="ili2pg-2.5.0-20151209" VERSION="2.3">
+		<MODELS>
+			<MODEL NAME="MultiPoint2" VERSION="2015-12-03" URI="mailto:ce@eisenhutinformatik.ch"></MODEL>
+		</MODELS>
+	</HEADERSECTION>
+	<DATASECTION>
+		<MultiPoint2.TestA BID="MultiPoint2.TestA">
+			<MultiPoint2.TestA.ClassA1  TID="13">
+				<geom>
+					<MultiPoint2.MultiPoint2D>
+						<points>
+							<MultiPoint2.PointStruktur2D>
+								<coord>
+												<COORD>
+													<C1>600030.0</C1>
+													<C2>200020.0</C2>
+												</COORD>
+								</coord>
+							</MultiPoint2.PointStruktur2D>
+							<MultiPoint2.PointStruktur2D>
+								<coord>
+												<COORD>
+													<C1>600015.0</C1>
+													<C2>200005.0</C2>
+												</COORD>
+								</coord>
+							</MultiPoint2.PointStruktur2D>
+						</points>
+					</MultiPoint2.MultiPoint2D>
+				</geom>
+			</MultiPoint2.TestA.ClassA1>
+		</MultiPoint2.TestA>
+	</DATASECTION>
+</TRANSFER>

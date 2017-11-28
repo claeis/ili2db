@@ -6,7 +6,10 @@ import java.util.HashMap;
 import ch.ehi.basics.logging.EhiLogger;
 import ch.ehi.ili2db.base.DbIdGen;
 import ch.ehi.ili2db.base.DbNames;
+import ch.ehi.ili2db.gui.Config;
+import ch.ehi.ili2db.mapping.ArrayMappings;
 import ch.ehi.ili2db.mapping.MultiLineMappings;
+import ch.ehi.ili2db.mapping.MultiPointMappings;
 import ch.ehi.ili2db.mapping.MultiSurfaceMappings;
 import ch.ehi.ili2db.mapping.TrafoConfig;
 import ch.ehi.ili2db.mapping.TrafoConfigNames;
@@ -29,13 +32,14 @@ import ch.interlis.ili2c.metamodel.ExtendableContainer;
 import ch.interlis.ili2c.metamodel.LineType;
 import ch.interlis.ili2c.metamodel.NumericType;
 import ch.interlis.ili2c.metamodel.NumericalType;
+import ch.interlis.ili2c.metamodel.SurfaceOrAreaType;
 import ch.interlis.ili2c.metamodel.Table;
 import ch.interlis.ili2c.metamodel.TransferDescription;
 import ch.interlis.ili2c.metamodel.Viewable;
 import ch.interlis.iom_j.itf.EnumCodeMapper;
 
 public class AbstractRecordConverter {
-	private EnumCodeMapper enumTypes=new EnumCodeMapper();
+	protected EnumCodeMapper enumTypes=new EnumCodeMapper();
 	protected TransferDescription td=null;
 	protected ch.ehi.ili2db.mapping.NameMapping ili2sqlName=null;
 	private String schemaName=null;
@@ -66,6 +70,8 @@ public class AbstractRecordConverter {
 	protected Viewable2TableMapping class2wrapper=null;
 	protected MultiSurfaceMappings multiSurfaceAttrs=new MultiSurfaceMappings();
 	protected MultiLineMappings multiLineAttrs=new MultiLineMappings();
+	protected MultiPointMappings multiPointAttrs=new MultiPointMappings();
+	protected ArrayMappings arrayAttrs=new ArrayMappings();
 
 	public AbstractRecordConverter(TransferDescription td1,ch.ehi.ili2db.mapping.NameMapping ili2sqlName,ch.ehi.ili2db.gui.Config config,DbIdGen idGen1, TrafoConfig trafoConfig1,Viewable2TableMapping class2wrapper1){
 		td=td1;
@@ -75,7 +81,7 @@ public class AbstractRecordConverter {
 		trafoConfig=trafoConfig1;
 		createEnumTable=config.getCreateEnumDefs();
 		class2wrapper=class2wrapper1;
-		createEnumColAsItfCode=config.CREATE_ENUMCOL_AS_ITFCODE_YES.equals(config.getCreateEnumColAsItfCode());
+		createEnumColAsItfCode=Config.CREATE_ENUMCOL_AS_ITFCODE_YES.equals(config.getValue(Config.CREATE_ENUMCOL_AS_ITFCODE));
 		createStdCols=config.CREATE_STD_COLS_ALL.equals(config.getCreateStdCols());
 		createEnumTxtCol=config.CREATE_ENUM_TXT_COL.equals(config.getCreateEnumCols());
 		removeUnderscoreFromEnumDispName=config.BEAUTIFY_ENUM_DISPNAME_UNDERSCORE.equals(config.getBeautifyEnumDispName());
@@ -94,7 +100,7 @@ public class AbstractRecordConverter {
 		createTypeDiscriminator=config.CREATE_TYPE_DISCRIMINATOR_ALWAYS.equals(config.getCreateTypeDiscriminator());
 		createGenericStructRef=config.STRUCT_MAPPING_GENERICREF.equals(config.getStructMapping());
 		sqlEnableNull=config.SQL_NULL_ENABLE.equals(config.getSqlNull());
-		strokeArcs=config.STROKE_ARCS_ENABLE.equals(config.getStrokeArcs());
+		strokeArcs=config.STROKE_ARCS_ENABLE.equals(Config.getStrokeArcs(config));
 		createIliTidCol=config.TID_HANDLING_PROPERTY.equals(config.getTidHandling());
 		
 		createBasketCol=config.BASKET_HANDLING_READWRITE.equals(config.getBasketHandling());
@@ -118,9 +124,6 @@ public class AbstractRecordConverter {
 			compoundCurve=true;
 		}
 		ret.setType(compoundCurve ? DbColGeometry.COMPOUNDCURVE : DbColGeometry.LINESTRING);
-		// TODO get crs from ili
-		ret.setSrsAuth(defaultCrsAuthority);
-		ret.setSrsId(defaultCrsCode);
 		Domain coordDomain=type.getControlPointDomain();
 		if(coordDomain!=null){
 			CoordType coord=(CoordType)coordDomain.getType();
@@ -128,6 +131,35 @@ public class AbstractRecordConverter {
 			setBB(ret, coord,attrName);
 		}
 		return ret;
+	}
+	public void setCrs(DbColGeometry ret,AttributeDef attr) {
+		ch.interlis.ili2c.metamodel.Element attrOrDomainDef=attr;
+		ch.interlis.ili2c.metamodel.Type attrType=attr.getDomain();
+		if(attrType instanceof ch.interlis.ili2c.metamodel.TypeAlias) {
+			attrOrDomainDef=((ch.interlis.ili2c.metamodel.TypeAlias)attrType).getAliasing();
+			attrType=((Domain) attrOrDomainDef).getType();
+		}
+		CoordType coord=null;
+		if(attrType instanceof CoordType) {
+			coord=(CoordType)attrType;
+		}else if(attrType instanceof LineType) {
+			Domain coordDomain=((LineType)attrType).getControlPointDomain();
+			if(coordDomain!=null){
+				attrOrDomainDef=coordDomain;
+				coord=(CoordType)coordDomain.getType();
+			}
+		}
+		if(coord!=null) {
+			String crs=coord.getCrs(attrOrDomainDef);
+			if(crs!=null) {
+				String crsv[]=crs.split(":");
+				ret.setSrsAuth(crsv[0]);
+				ret.setSrsId(crsv[1]);
+				return;
+			}
+		}
+		ret.setSrsAuth(defaultCrsAuthority);
+		ret.setSrsId(defaultCrsCode);
 	}
 		public DbColId addKeyCol(DbTable table) {
 			  DbColId dbColId=new DbColId();

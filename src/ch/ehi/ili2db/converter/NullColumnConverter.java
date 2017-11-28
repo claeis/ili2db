@@ -7,8 +7,11 @@ import java.sql.SQLException;
 import java.sql.Time;
 import java.sql.Timestamp;
 
+import ch.ehi.basics.settings.Settings;
 import ch.ehi.ili2db.gui.Config;
+import ch.interlis.ili2c.metamodel.AttributeDef;
 import ch.interlis.iom.IomObject;
+import ch.interlis.iom_j.itf.EnumCodeMapper;
 
 public class NullColumnConverter implements SqlColumnConverter {
 
@@ -19,6 +22,11 @@ public class NullColumnConverter implements SqlColumnConverter {
 	}
 	@Override
 	public Object fromIomCoord(IomObject value, int srid, boolean is3D)
+			throws SQLException, ConverterException {
+		return null;
+	}
+	@Override
+	public Object fromIomMultiCoord(IomObject value, int srid, boolean is3D)
 			throws SQLException, ConverterException {
 		return null;
 	}
@@ -47,6 +55,10 @@ public class NullColumnConverter implements SqlColumnConverter {
 
 	@Override
 	public String getInsertValueWrapperCoord(String wkfValue, int srid) {
+		return null;
+	}
+	@Override
+	public String getInsertValueWrapperMultiCoord(String wkfValue, int srid) {
 		return null;
 	}
 
@@ -82,6 +94,10 @@ public class NullColumnConverter implements SqlColumnConverter {
 	}
 	@Override
 	public String getSelectValueWrapperCoord(String dbNativeValue) {
+		return null;
+	}
+	@Override
+	public String getSelectValueWrapperMultiCoord(String dbNativeValue) {
 		return null;
 	}
 
@@ -148,11 +164,16 @@ public class NullColumnConverter implements SqlColumnConverter {
 	}
 
 	@Override
-	public void setup(Connection conn, Config config) {
+	public void setup(Connection conn, Settings config) {
 	}
 
 	@Override
 	public IomObject toIomCoord(Object geomobj, String sqlAttrName, boolean is3D)
+			throws SQLException, ConverterException {
+		return null;
+	}
+	@Override
+	public IomObject toIomMultiCoord(Object geomobj, String sqlAttrName, boolean is3D)
 			throws SQLException, ConverterException {
 		return null;
 	}
@@ -202,6 +223,27 @@ public class NullColumnConverter implements SqlColumnConverter {
 	}
 	@Override
 	public String toIomBlob(Object obj) throws SQLException, ConverterException {
+		return null;
+	}
+	@Override
+	public String getSelectValueWrapperArray(String makeColumnRef) {
+		return null;
+	}
+	@Override
+	public String getInsertValueWrapperArray(String sqlColName) {
+		return null;
+	}
+	@Override
+	public void setArrayNull(PreparedStatement ps, int parameterIndex) throws SQLException {
+	}
+	@Override
+	public Object fromIomArray(AttributeDef iliEleAttr, String[] iomValues, EnumCodeMapper enumTypes)
+			throws SQLException, ConverterException {
+		return null;
+	}
+	@Override
+	public String[] toIomArray(AttributeDef iliEleAttr, Object sqlArray, EnumCodeMapper enumTypes)
+			throws SQLException, ConverterException {
 		return null;
 	}
 }

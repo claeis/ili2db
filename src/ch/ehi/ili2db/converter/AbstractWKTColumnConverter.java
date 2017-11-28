@@ -26,8 +26,11 @@ import java.sql.Timestamp;
 
 import com.vividsolutions.jts.io.ParseException;
 
+import ch.ehi.basics.settings.Settings;
 import ch.ehi.ili2db.gui.Config;
+import ch.interlis.ili2c.metamodel.AttributeDef;
 import ch.interlis.iom.IomObject;
+import ch.interlis.iom_j.itf.EnumCodeMapper;
 import ch.interlis.iox_j.jts.Iox2jtsException;
 
 public abstract class AbstractWKTColumnConverter implements SqlColumnConverter {
@@ -80,6 +83,11 @@ public abstract class AbstractWKTColumnConverter implements SqlColumnConverter {
 		return "GeomFromWKT("+wkfValue+(srid==-1?"":","+srid)+")";
 	}
 	@Override
+	public String getInsertValueWrapperMultiCoord(String wkfValue,int srid) {
+		//return "ST_GeometryFromWKB("+wkfValue+(srid==-1?"":","+srid)+")";
+		return "GeomFromWKT("+wkfValue+(srid==-1?"":","+srid)+")";
+	}
+	@Override
 	public String getInsertValueWrapperPolyline(String wkfValue,int srid) {
 		//return "ST_GeometryFromWKB("+wkfValue+(srid==-1?"":","+srid)+")";
 		return "GeomFromWKT("+wkfValue+(srid==-1?"":","+srid)+")";
@@ -115,6 +123,11 @@ public abstract class AbstractWKTColumnConverter implements SqlColumnConverter {
 	}
 	@Override
 	public String getSelectValueWrapperCoord(String dbNativeValue) {
+		//return "ST_AsBinary("+dbNativeValue+")";
+		return "AsText("+dbNativeValue+")";
+	}
+	@Override
+	public String getSelectValueWrapperMultiCoord(String dbNativeValue) {
 		//return "ST_AsBinary("+dbNativeValue+")";
 		return "AsText("+dbNativeValue+")";
 	}
@@ -155,6 +168,14 @@ public abstract class AbstractWKTColumnConverter implements SqlColumnConverter {
 			}
 			String bv=new com.vividsolutions.jts.io.WKTWriter(is3D?3:2).write(geom);
 			return bv;
+		}
+		return null;
+	}
+	@Override
+	public java.lang.Object fromIomMultiCoord(IomObject value, int srid,boolean is3D)
+		throws SQLException, ConverterException {
+		if(value!=null){
+			throw new UnsupportedOperationException();
 		}
 		return null;
 	}
@@ -226,6 +247,14 @@ public abstract class AbstractWKTColumnConverter implements SqlColumnConverter {
 			throw new ConverterException(e);
 		}
 		return ch.interlis.iox_j.jts.Jts2iox.JTS2coord(geom.getCoordinate());
+	}
+	@Override
+	public IomObject toIomMultiCoord(
+		Object geomobj,
+		String sqlAttrName,
+		boolean is3D)
+		throws SQLException, ConverterException {
+		throw new UnsupportedOperationException();
 	}
 	@Override
 	public IomObject toIomSurface(
@@ -302,7 +331,7 @@ public abstract class AbstractWKTColumnConverter implements SqlColumnConverter {
 		return srsid;
 	}
 	@Override
-	public void setup(Connection conn, Config config) {
+	public void setup(Connection conn, Settings config) {
 	}
 	@Override
 	public void setBlobNull(PreparedStatement stmt, int parameterIndex)
@@ -330,6 +359,28 @@ public abstract class AbstractWKTColumnConverter implements SqlColumnConverter {
 	}
 	@Override
 	public String toIomBlob(Object obj) throws SQLException, ConverterException {
+		throw new UnsupportedOperationException();
+	}
+	@Override
+	public String getSelectValueWrapperArray(String makeColumnRef) {
+		throw new UnsupportedOperationException();
+	}
+	@Override
+	public String getInsertValueWrapperArray(String sqlColName) {
+		throw new UnsupportedOperationException();
+	}
+	@Override
+	public void setArrayNull(PreparedStatement ps, int parameterIndex) throws SQLException {
+		throw new UnsupportedOperationException();
+	}
+	@Override
+	public Object fromIomArray(AttributeDef iliEleAttr, String[] iomValues, EnumCodeMapper enumTypes)
+			throws SQLException, ConverterException {
+		throw new UnsupportedOperationException();
+	}
+	@Override
+	public String[] toIomArray(AttributeDef iliEleAttr, Object sqlArray, EnumCodeMapper enumTypes)
+			throws SQLException, ConverterException {
 		throw new UnsupportedOperationException();
 	}
 

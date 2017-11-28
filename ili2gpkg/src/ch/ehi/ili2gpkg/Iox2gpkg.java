@@ -91,6 +91,23 @@ public class Iox2gpkg {
 		}
 		return os.toByteArray();
 	}
+	public Object multicoord2wkb(IomObject obj, int srsId) 
+	throws Iox2wkbException 
+	{
+		if(obj==null){
+			return null;
+		}
+	    try {
+	    	os.reset();
+	    	writeGeoPackageBinaryHeader(srsId,null);
+	    	// wkb
+			Iox2wkb helper=new Iox2wkb(outputDimension,os.order());
+			os.write(helper.multicoord2wkb(obj));
+		} catch (IOException e) {
+	        throw new RuntimeException("Unexpected IO exception: " + e.getMessage());
+		}
+		return os.toByteArray();
+	}
 	/** Converts a POLYLINE to a JTS CoordinateList.
 	 * @param polylineObj INTERLIS POLYLINE structure
 	 * @param isSurfaceOrArea true if called as part of a SURFACE conversion.
@@ -223,5 +240,4 @@ public class Iox2gpkg {
 			os.writeDouble(envelope.getMaxY());
 		}
 	}
-
 }

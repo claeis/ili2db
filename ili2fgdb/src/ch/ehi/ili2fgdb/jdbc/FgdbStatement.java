@@ -18,6 +18,7 @@ import ch.ehi.ili2fgdb.jdbc.sql.AbstractSelectStmt;
 import ch.ehi.ili2fgdb.jdbc.sql.ComplexSelectStmt;
 import ch.ehi.ili2fgdb.jdbc.sql.FgdbSelectStmt;
 import ch.ehi.ili2fgdb.jdbc.sql.IntConst;
+import ch.ehi.ili2fgdb.jdbc.sql.IsNull;
 import ch.ehi.ili2fgdb.jdbc.sql.SelectValue;
 import ch.ehi.ili2fgdb.jdbc.sql.SelectValueField;
 import ch.ehi.ili2fgdb.jdbc.sql.SqlStmt;
@@ -165,14 +166,18 @@ public class FgdbStatement implements Statement {
 			  String sep="";
 				for(java.util.Map.Entry<Value,Value> cond : ustmt.getConditions()){
 					where.append(((ch.ehi.ili2fgdb.jdbc.sql.ColRef)cond.getKey()).getName());
-					where.append("=");
 					Value rh = cond.getValue();
-					if(rh instanceof IntConst){
-						where.append(Integer.toString(((IntConst)rh).getValue()));
-					}else{
-						where.append("'");
-						where.append(((StringConst)rh).getValue());
-						where.append("'");
+					if(rh instanceof IsNull) {
+						where.append("IS NULL");
+					}else {
+						where.append("=");
+						if(rh instanceof IntConst){
+							where.append(Integer.toString(((IntConst)rh).getValue()));
+						}else{
+							where.append("'");
+							where.append(((StringConst)rh).getValue());
+							where.append("'");
+						}
 					}
 					sep=" AND ";
 				}

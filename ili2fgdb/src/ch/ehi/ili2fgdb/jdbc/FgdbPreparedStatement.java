@@ -89,6 +89,8 @@ public class FgdbPreparedStatement implements PreparedStatement {
 						if(rh instanceof IntConst){
 							where.append("=");
 							where.append(Integer.toString(((IntConst)rh).getValue()));
+						}else if(rh instanceof IsNull){
+							where.append(" IS NULL");
 						}else if(rh instanceof StringConst){
 							where.append("='");
 							where.append(((StringConst)rh).getValue());

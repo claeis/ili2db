@@ -567,11 +567,9 @@ public class Ili2db {
 							if(config.getDoItfLineTables()){
 								ioxReader=new ItfReader(in);
 								((ItfReader)ioxReader).setModel(td);		
-								((ItfReader)ioxReader).setBidPrefix(config.getDatasetName());		
 							}else{
 								ioxReader=new ItfReader2(in,config.isSkipGeometryErrors());
 								((ItfReader2)ioxReader).setModel(td);		
-								((ItfReader2)ioxReader).setBidPrefix(config.getDatasetName());		
 							}
 						}else{
 							ioxReader=new XtfReader(in);
@@ -1516,9 +1514,14 @@ public class Ili2db {
 		java.sql.PreparedStatement getstmt=null;
 		try{
 			String stmt="SELECT "+colT_ID+" FROM "+sqlName+" WHERE "+DbNames.DATASETS_TAB_DATASETNAME+"= ?";
+			if(datasetName==null) {
+				stmt="SELECT "+colT_ID+" FROM "+sqlName+" WHERE "+DbNames.DATASETS_TAB_DATASETNAME+" IS NULL";
+			}
 			EhiLogger.traceBackendCmd(stmt);
 			getstmt=conn.prepareStatement(stmt);
-			getstmt.setString(1,datasetName);
+			if(datasetName!=null) {
+				getstmt.setString(1,datasetName);
+			}
 			java.sql.ResultSet res=getstmt.executeQuery();
 			if(res.next()){
 				long sqlId=res.getLong(1);
@@ -1923,9 +1926,9 @@ public class Ili2db {
 			TransferFromXtf trsfr=new TransferFromXtf(function,ili2sqlName,td,conn,dbusr,geomConv,idGen,config,trafoConfig,class2wrapper);
 			trsfr.doit(reader,config,stat);
 		}catch(ch.interlis.iox.IoxException ex){
-			EhiLogger.logError("failed to read data file",ex);
+			EhiLogger.logError("failed to transfer data from file to db",ex);
 		} catch (Ili2dbException ex) {
-			EhiLogger.logError("failed to read data file",ex);
+			EhiLogger.logError("failed to transfer data from file to db",ex);
 		}
 	}
 	/** transfer data from database to xml file
@@ -2074,6 +2077,8 @@ public class Ili2db {
 		config.setCatalogueRefTrafo(null);
 		config.setMultiSurfaceTrafo(null);
 		config.setMultiLineTrafo(null);
+		config.setMultiPointTrafo(null);
+		config.setArrayTrafo(null);
 		config.setMultilingualTrafo(null);
 		config.setInheritanceTrafo(null);
 	}

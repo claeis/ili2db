@@ -18,6 +18,7 @@
 package ch.ehi.ili2gpkg;
 
 import ch.ehi.basics.logging.EhiLogger;
+import ch.ehi.basics.settings.Settings;
 import ch.ehi.ili2db.converter.AbstractWKBColumnConverter;
 import ch.ehi.ili2db.converter.ConverterException;
 import ch.ehi.ili2db.gui.Config;
@@ -55,9 +56,9 @@ public class GpkgColumnConverter extends AbstractWKBColumnConverter {
 	}
 	private boolean strokeArcs=true;
 	@Override
-	public void setup(Connection conn, Config config) {
+	public void setup(Connection conn, Settings config) {
 		super.setup(conn,config);
-		strokeArcs=Config.STROKE_ARCS_ENABLE.equals(config.getStrokeArcs());
+		strokeArcs=Config.STROKE_ARCS_ENABLE.equals(Config.getStrokeArcs(config));
 	}
 	
 	@Override
@@ -96,6 +97,10 @@ public class GpkgColumnConverter extends AbstractWKBColumnConverter {
 	}
 	@Override
 	public String getSelectValueWrapperCoord(String dbNativeValue) {
+		return dbNativeValue;
+	}
+	@Override
+	public String getSelectValueWrapperMultiCoord(String dbNativeValue) {
 		return dbNativeValue;
 	}
 	@Override
@@ -189,6 +194,19 @@ public class GpkgColumnConverter extends AbstractWKBColumnConverter {
 			return null;
 		}
 		@Override
+		public java.lang.Object fromIomMultiCoord(IomObject value, int srsid,boolean is3D)
+			throws SQLException, ConverterException {
+			if(value!=null){
+				Iox2gpkg conv=new Iox2gpkg(is3D?3:2);
+				try {
+					return conv.multicoord2wkb(value,srsid);
+				} catch (Iox2wkbException ex) {
+					throw new ConverterException(ex);
+				}
+			}
+			return null;
+		}
+		@Override
 		public java.lang.Object fromIomPolyline(IomObject value, int srsid,boolean is3D,double p)
 			throws SQLException, ConverterException {
 			if(value!=null){
@@ -216,6 +234,20 @@ public class GpkgColumnConverter extends AbstractWKBColumnConverter {
 		}
 		@Override
 		public IomObject toIomCoord(
+				Object geomobj,
+				String sqlAttrName,
+				boolean is3D)
+				throws SQLException, ConverterException {
+				byte bv[]=(byte [])geomobj;
+				Gpkg2iox conv=new Gpkg2iox();
+				try {
+					return conv.read(bv);
+				} catch (ParseException e) {
+					throw new ConverterException(e);
+				}
+			}
+		@Override
+		public IomObject toIomMultiCoord(
 				Object geomobj,
 				String sqlAttrName,
 				boolean is3D)

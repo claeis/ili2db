@@ -15,6 +15,16 @@ ideas/open issues/questions
 LATEST
 ---------------------------
 
+ili2pg 3.11.0 (2017-11-28)
+-----------------------------
+- added MultiPoint smart mapping
+- added ARRAY smart mapping
+- read CRS from ili
+- create datasetName on --import
+- ili2c-4.7.5
+- iox-ili-1.20.0
+- ehisqlgen-1.12.0
+
 ili2pg 3.10.10 (2017-11-03)
 -----------------------------
 - added mssql support

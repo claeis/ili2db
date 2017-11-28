@@ -19,11 +19,14 @@ package ch.ehi.ili2ora.converter;
 
 import ch.interlis.iom.IomObject;
 import ch.interlis.iom_j.Iom_jObject;
+import ch.interlis.iom_j.itf.EnumCodeMapper;
+import ch.interlis.ili2c.metamodel.AttributeDef;
 import ch.interlis.iom.IomConstants;
 
 import java.util.ArrayList;
 
 import ch.ehi.basics.logging.EhiLogger;
+import ch.ehi.basics.settings.Settings;
 import ch.ehi.ili2db.converter.ConverterException;
 import ch.ehi.ili2db.converter.SqlColumnConverter;
 import ch.ehi.ili2db.gui.Config;
@@ -35,8 +38,6 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Time;
 import java.sql.Timestamp;
-
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 /**
  * @author ce
@@ -230,7 +231,7 @@ public class OracleColumnConverter implements SqlColumnConverter {
 	public java.lang.Object fromIomMultiPolyline(IomObject obj,int srid,boolean is3D,double p)
 		throws java.sql.SQLException,ConverterException
 	{
-		throw new NotImplementedException();
+		throw new UnsupportedOperationException();
 	}
 	private void addPolyline(
 		ArrayList elemInfo
@@ -564,7 +565,7 @@ public class OracleColumnConverter implements SqlColumnConverter {
 		String sqlAttrName,
 		boolean is3D)
 		throws java.sql.SQLException,ConverterException {
-		throw new NotImplementedException();
+		throw new UnsupportedOperationException();
 	}
 	@Override
 	public Integer getSrsid(String crsAuthority, String crsCode,Connection conn) 
@@ -645,36 +646,76 @@ public class OracleColumnConverter implements SqlColumnConverter {
 	}
 	private Connection conn=null;
 	@Override
-	public void setup(Connection conn, Config config) {
+	public void setup(Connection conn, Settings config) {
 		this.conn=conn;
 	}
 	@Override
 	public void setBlobNull(PreparedStatement stmt, int parameterIndex)
 			throws SQLException {
-		throw new NotImplementedException();
+		throw new UnsupportedOperationException();
 	}
 	@Override
 	public void setXmlNull(PreparedStatement stmt, int parameterIndex)
 			throws SQLException {
-		throw new NotImplementedException();
+		throw new UnsupportedOperationException();
 	}
 	@Override
 	public Object fromIomBlob(String uuid) throws SQLException,
 			ConverterException {
-		throw new NotImplementedException();
+		throw new UnsupportedOperationException();
 	}
 	@Override
 	public Object fromIomXml(String uuid) throws SQLException,
 			ConverterException {
-		throw new NotImplementedException();
+		throw new UnsupportedOperationException();
 	}
 	@Override
 	public String toIomXml(Object obj) throws SQLException, ConverterException {
-		throw new NotImplementedException();
+		throw new UnsupportedOperationException();
 	}
 	@Override
 	public String toIomBlob(Object obj) throws SQLException, ConverterException {
-		throw new NotImplementedException();
+		throw new UnsupportedOperationException();
+	}
+	@Override
+	public String getInsertValueWrapperMultiCoord(String wkfValue, int srid) {
+		throw new UnsupportedOperationException();
+	}
+	@Override
+	public String getSelectValueWrapperMultiCoord(String dbNativeValue) {
+		throw new UnsupportedOperationException();
+	}
+	@Override
+	public Object fromIomMultiCoord(IomObject iomMultiline, int srsid, boolean is3d)
+			throws SQLException, ConverterException {
+		throw new UnsupportedOperationException();
+	}
+	@Override
+	public IomObject toIomMultiCoord(Object geomobj, String sqlAttrName, boolean is3d)
+			throws SQLException, ConverterException {
+		throw new UnsupportedOperationException();
+	}
+	@Override
+	public String getSelectValueWrapperArray(String makeColumnRef) {
+		throw new UnsupportedOperationException();
+	}
+	@Override
+	public String getInsertValueWrapperArray(String sqlColName) {
+		throw new UnsupportedOperationException();
+	}
+	@Override
+	public void setArrayNull(PreparedStatement ps, int parameterIndex) throws SQLException {
+		throw new UnsupportedOperationException();
+	}
+	@Override
+	public Object fromIomArray(AttributeDef iliEleAttr, String[] iomValues, EnumCodeMapper enumTypes)
+			throws SQLException, ConverterException {
+		throw new UnsupportedOperationException();
+	}
+	@Override
+	public String[] toIomArray(AttributeDef iliEleAttr, Object sqlArray, EnumCodeMapper enumTypes)
+			throws SQLException, ConverterException {
+		throw new UnsupportedOperationException();
 	}
 
 }
