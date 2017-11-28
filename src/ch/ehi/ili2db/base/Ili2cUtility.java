@@ -250,6 +250,16 @@ public class Ili2cUtility {
 		}
 		return false;
 	}
+	public static boolean isArrayAttr(TransferDescription td,
+			AttributeDef attr) {
+		Type typeo=attr.getDomain();
+		if(typeo instanceof CompositionType){
+			if(IliMetaAttrNames.METAATTR_MAPPING_ARRAY.equals(attr.getMetaValue(IliMetaAttrNames.METAATTR_MAPPING))){
+				return true;
+			}
+		}
+		return false;
+	}
 
 
 }

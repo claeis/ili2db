@@ -13,6 +13,8 @@ public class TrafoConfigNames {
 	public static final String MULTILINE_TRAFO_COALESCE=Config.MULTILINE_TRAFO_COALESCE;
 	public static final String MULTIPOINT_TRAFO=Config.MULTIPOINT_TRAFO;
 	public static final String MULTIPOINT_TRAFO_COALESCE=Config.MULTIPOINT_TRAFO_COALESCE;
+	public static final String ARRAY_TRAFO=Config.ARRAY_TRAFO;
+	public static final String ARRAY_TRAFO_COALESCE=Config.ARRAY_TRAFO_COALESCE;
 	public static final String MULTILINGUAL_TRAFO=Config.MULTILINGUAL_TRAFO;
 	public static final String MULTILINGUAL_TRAFO_EXPAND=Config.MULTILINGUAL_TRAFO_EXPAND;
 	public static final String INHERITANCE_TRAFO=Config.PREFIX+".inheritance";

@@ -26,6 +26,7 @@ public class Viewable2TableMapper {
 	private boolean coalesceMultiSurface=false;
 	private boolean coalesceMultiLine=false;
 	private boolean coalesceMultiPoint=false;
+	private boolean coalesceArray=false;
 	private boolean createItfLineTables=false;
 	private TransferDescription td=null;
 	private Viewable2TableMapper(Config config1,
@@ -43,6 +44,7 @@ public class Viewable2TableMapper {
 		mapper.coalesceMultiSurface=Config.MULTISURFACE_TRAFO_COALESCE.equals(config.getMultiSurfaceTrafo());
 		mapper.coalesceMultiLine=Config.MULTILINE_TRAFO_COALESCE.equals(config.getMultiLineTrafo());
 		mapper.coalesceMultiPoint=Config.MULTIPOINT_TRAFO_COALESCE.equals(config.getMultiPointTrafo());
+		mapper.coalesceArray=Config.ARRAY_TRAFO_COALESCE.equals(config.getArrayTrafo());
 		mapper.createItfLineTables=config.getDoItfLineTables();
 		return mapper.doit(eles);
 	}

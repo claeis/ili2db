@@ -7,6 +7,7 @@ import ch.ehi.basics.logging.EhiLogger;
 import ch.ehi.ili2db.base.DbIdGen;
 import ch.ehi.ili2db.base.DbNames;
 import ch.ehi.ili2db.gui.Config;
+import ch.ehi.ili2db.mapping.ArrayMappings;
 import ch.ehi.ili2db.mapping.MultiLineMappings;
 import ch.ehi.ili2db.mapping.MultiPointMappings;
 import ch.ehi.ili2db.mapping.MultiSurfaceMappings;
@@ -38,7 +39,7 @@ import ch.interlis.ili2c.metamodel.Viewable;
 import ch.interlis.iom_j.itf.EnumCodeMapper;
 
 public class AbstractRecordConverter {
-	private EnumCodeMapper enumTypes=new EnumCodeMapper();
+	protected EnumCodeMapper enumTypes=new EnumCodeMapper();
 	protected TransferDescription td=null;
 	protected ch.ehi.ili2db.mapping.NameMapping ili2sqlName=null;
 	private String schemaName=null;
@@ -70,6 +71,7 @@ public class AbstractRecordConverter {
 	protected MultiSurfaceMappings multiSurfaceAttrs=new MultiSurfaceMappings();
 	protected MultiLineMappings multiLineAttrs=new MultiLineMappings();
 	protected MultiPointMappings multiPointAttrs=new MultiPointMappings();
+	protected ArrayMappings arrayAttrs=new ArrayMappings();
 
 	public AbstractRecordConverter(TransferDescription td1,ch.ehi.ili2db.mapping.NameMapping ili2sqlName,ch.ehi.ili2db.gui.Config config,DbIdGen idGen1, TrafoConfig trafoConfig1,Viewable2TableMapping class2wrapper1){
 		td=td1;
@@ -79,7 +81,7 @@ public class AbstractRecordConverter {
 		trafoConfig=trafoConfig1;
 		createEnumTable=config.getCreateEnumDefs();
 		class2wrapper=class2wrapper1;
-		createEnumColAsItfCode=config.CREATE_ENUMCOL_AS_ITFCODE_YES.equals(config.getCreateEnumColAsItfCode());
+		createEnumColAsItfCode=Config.CREATE_ENUMCOL_AS_ITFCODE_YES.equals(config.getValue(Config.CREATE_ENUMCOL_AS_ITFCODE));
 		createStdCols=config.CREATE_STD_COLS_ALL.equals(config.getCreateStdCols());
 		createEnumTxtCol=config.CREATE_ENUM_TXT_COL.equals(config.getCreateEnumCols());
 		removeUnderscoreFromEnumDispName=config.BEAUTIFY_ENUM_DISPNAME_UNDERSCORE.equals(config.getBeautifyEnumDispName());

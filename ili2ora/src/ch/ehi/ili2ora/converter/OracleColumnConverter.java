@@ -19,6 +19,8 @@ package ch.ehi.ili2ora.converter;
 
 import ch.interlis.iom.IomObject;
 import ch.interlis.iom_j.Iom_jObject;
+import ch.interlis.iom_j.itf.EnumCodeMapper;
+import ch.interlis.ili2c.metamodel.AttributeDef;
 import ch.interlis.iom.IomConstants;
 
 import java.util.ArrayList;
@@ -690,6 +692,28 @@ public class OracleColumnConverter implements SqlColumnConverter {
 	}
 	@Override
 	public IomObject toIomMultiCoord(Object geomobj, String sqlAttrName, boolean is3d)
+			throws SQLException, ConverterException {
+		throw new UnsupportedOperationException();
+	}
+	@Override
+	public String getSelectValueWrapperArray(String makeColumnRef) {
+		throw new UnsupportedOperationException();
+	}
+	@Override
+	public String getInsertValueWrapperArray(String sqlColName) {
+		throw new UnsupportedOperationException();
+	}
+	@Override
+	public void setArrayNull(PreparedStatement ps, int parameterIndex) throws SQLException {
+		throw new UnsupportedOperationException();
+	}
+	@Override
+	public Object fromIomArray(AttributeDef iliEleAttr, String[] iomValues, EnumCodeMapper enumTypes)
+			throws SQLException, ConverterException {
+		throw new UnsupportedOperationException();
+	}
+	@Override
+	public String[] toIomArray(AttributeDef iliEleAttr, Object sqlArray, EnumCodeMapper enumTypes)
 			throws SQLException, ConverterException {
 		throw new UnsupportedOperationException();
 	}

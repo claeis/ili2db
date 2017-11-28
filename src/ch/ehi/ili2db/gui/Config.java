@@ -11,7 +11,7 @@ public class Config extends Settings {
 	private static final String DEFAULT_SRS_AUTHORITY=PREFIX+".defaultSrsAuthority";
 	private static final String DEFAULT_SRS_CODE=PREFIX+".defaultSrsCode";
 	private static final String UUID_DEFAULT_VALUE=PREFIX+".uuidDefaultValue";
-	private static final String CREATE_ENUMCOL_AS_ITFCODE=PREFIX+".createEnumColAsItfCode";
+	public static final String CREATE_ENUMCOL_AS_ITFCODE=PREFIX+".createEnumColAsItfCode";
 	public static final String CREATE_ENUMCOL_AS_ITFCODE_YES="yes";
 	private static final String BEAUTIFY_ENUM_DISPNAME=PREFIX+".beautifyEnumDispName";
 	public static final String BEAUTIFY_ENUM_DISPNAME_UNDERSCORE="underscore";
@@ -45,6 +45,8 @@ public class Config extends Settings {
 	public static final String MULTILINE_TRAFO_COALESCE="coalesce";
 	public static final String MULTIPOINT_TRAFO=PREFIX+".multiPointTrafo";
 	public static final String MULTIPOINT_TRAFO_COALESCE="coalesce";
+	public static final String ARRAY_TRAFO=PREFIX+".arrayTrafo";
+	public static final String ARRAY_TRAFO_COALESCE="coalesce";
 	public static final String MULTILINGUAL_TRAFO=PREFIX+".multilingualTrafo";
 	public static final String MULTILINGUAL_TRAFO_EXPAND="expand";
 	public static final String UNIQUE_CONSTRAINTS=PREFIX+".uniqueConstraints";
@@ -289,9 +291,11 @@ public class Config extends Settings {
 	public void setBeautifyEnumDispName(String value) {
 		setValue(BEAUTIFY_ENUM_DISPNAME,value);
 	}
+	@Deprecated
 	public String getCreateEnumColAsItfCode() {
 		return getValue(CREATE_ENUMCOL_AS_ITFCODE);
 	}
+	@Deprecated
 	public void setCreateEnumColAsItfCode(String value) {
 		setValue(CREATE_ENUMCOL_AS_ITFCODE,value);
 	}
@@ -378,6 +382,12 @@ public class Config extends Settings {
 	}
 	public void setMultiPointTrafo(String value) {
 		setValue(MULTIPOINT_TRAFO,value);
+	}
+	public String getArrayTrafo() {
+		return getValue(ARRAY_TRAFO);
+	}
+	public void setArrayTrafo(String value) {
+		setValue(ARRAY_TRAFO,value);
 	}
 	public String getMultilingualTrafo() {
 		return getValue(MULTILINGUAL_TRAFO);

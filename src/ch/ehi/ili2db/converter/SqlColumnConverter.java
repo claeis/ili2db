@@ -26,6 +26,7 @@ import java.sql.Timestamp;
 
 import ch.ehi.basics.settings.Settings;
 import ch.interlis.iom.IomObject;
+import ch.interlis.iom_j.itf.EnumCodeMapper;
 
 /**
  * @author ce
@@ -55,6 +56,8 @@ public interface SqlColumnConverter {
 	public abstract String getSelectValueWrapperMultiPolyline(String dbNativeValue);
 	public abstract String getSelectValueWrapperSurface(String dbNativeValue);
 	public abstract String getSelectValueWrapperMultiSurface(String dbColName);
+	public abstract String getSelectValueWrapperArray(String makeColumnRef);
+	public abstract String getInsertValueWrapperArray(String sqlColName);
 	public abstract void setCoordNull(java.sql.PreparedStatement stmt,int parameterIndex) throws java.sql.SQLException;
 	public abstract void setPolylineNull(java.sql.PreparedStatement stmt,int parameterIndex)throws java.sql.SQLException;
 	public abstract void setSurfaceNull(java.sql.PreparedStatement stmt,int parameterIndex)throws java.sql.SQLException;
@@ -62,6 +65,7 @@ public interface SqlColumnConverter {
 	public abstract void setUuidNull(java.sql.PreparedStatement stmt,int parameterIndex)throws java.sql.SQLException;
 	public abstract void setBlobNull(java.sql.PreparedStatement stmt,int parameterIndex)throws java.sql.SQLException;
 	public abstract void setXmlNull(java.sql.PreparedStatement stmt,int parameterIndex)throws java.sql.SQLException;
+	public abstract void setArrayNull(PreparedStatement ps, int parameterIndex)throws java.sql.SQLException;
 	public abstract void setBoolean(java.sql.PreparedStatement stmt,int parameterIndex,boolean value)throws java.sql.SQLException;
 	public abstract void setTimestamp(PreparedStatement ps, int valuei,Timestamp datetime) throws SQLException;
 	public abstract void setDate(PreparedStatement ps, int valuei, Date date) throws SQLException;
@@ -98,6 +102,7 @@ public interface SqlColumnConverter {
 			int srid,
 			boolean is3D,double p)
 			throws java.sql.SQLException, ConverterException;
+	public abstract java.lang.Object fromIomArray(ch.interlis.ili2c.metamodel.AttributeDef iliEleAttr,String iomValues[],EnumCodeMapper enumTypes) throws java.sql.SQLException, ConverterException;
 	public abstract IomObject toIomCoord(
 		Object geomobj,
 		String sqlAttrName,
@@ -132,4 +137,5 @@ public interface SqlColumnConverter {
 		throws java.sql.SQLException, ConverterException;
 	public String toIomBlob(Object obj)
 			throws java.sql.SQLException, ConverterException;
+	public String[] toIomArray(ch.interlis.ili2c.metamodel.AttributeDef iliEleAttr,Object sqlArray,EnumCodeMapper enumTypes) throws java.sql.SQLException, ConverterException;
 }

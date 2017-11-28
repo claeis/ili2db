@@ -53,6 +53,7 @@ public abstract class AbstractMain {
 		config.setMultiSurfaceTrafo(Config.MULTISURFACE_TRAFO_COALESCE);
 		config.setMultiLineTrafo(Config.MULTILINE_TRAFO_COALESCE);
 		config.setMultiPointTrafo(Config.MULTIPOINT_TRAFO_COALESCE);
+		config.setArrayTrafo(Config.ARRAY_TRAFO_COALESCE);
 		config.setMultilingualTrafo(Config.MULTILINGUAL_TRAFO_EXPAND);
 		config.setValidation(true);
 	}
@@ -202,7 +203,7 @@ public abstract class AbstractMain {
 				config.setCreateEnumCols(config.CREATE_ENUM_TXT_COL);
 			}else if(arg.equals("--createEnumColAsItfCode")){
 				argi++;
-				config.setCreateEnumColAsItfCode(config.CREATE_ENUMCOL_AS_ITFCODE_YES);
+				config.setValue(Config.CREATE_ENUMCOL_AS_ITFCODE,Config.CREATE_ENUMCOL_AS_ITFCODE_YES);
 			}else if(arg.equals("--beautifyEnumDispName")){
 				argi++;
 				config.setBeautifyEnumDispName(config.BEAUTIFY_ENUM_DISPNAME_UNDERSCORE);
@@ -227,6 +228,9 @@ public abstract class AbstractMain {
 			}else if(arg.equals("--coalesceMultiPoint")){
 				argi++;
 				config.setMultiPointTrafo(config.MULTIPOINT_TRAFO_COALESCE);
+			}else if(arg.equals("--coalesceArray")){
+				argi++;
+				config.setArrayTrafo(config.ARRAY_TRAFO_COALESCE);
 			}else if(arg.equals("--expandMultilingual")){
 				argi++;
 				config.setMultilingualTrafo(config.MULTILINGUAL_TRAFO_EXPAND);
@@ -367,6 +371,7 @@ public abstract class AbstractMain {
 					System.err.println("--coalesceMultiSurface enable smart mapping of CHBase:MultiSurface");
 					System.err.println("--coalesceMultiLine    enable smart mapping of CHBase:MultiLine");
 					System.err.println("--coalesceMultiPoint   enable smart mapping of MultiPoint structures");
+					System.err.println("--coalesceArray        enable smart mapping of ARRAY structures");
 					System.err.println("--expandMultilingual   enable smart mapping of CHBase:MultilingualText");
 					System.err.println("--createGeomIdx        create a spatial index on geometry columns.");
 					System.err.println("--createEnumColAsItfCode create enum type column with value according to ITF (instead of XTF).");

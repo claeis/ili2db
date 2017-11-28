@@ -23,6 +23,7 @@ import ch.ehi.ili2db.converter.AbstractRecordConverter;
 import ch.ehi.ili2db.converter.ConverterException;
 import ch.ehi.ili2db.converter.SqlColumnConverter;
 import ch.ehi.ili2db.gui.Config;
+import ch.ehi.ili2db.mapping.ArrayMapping;
 import ch.ehi.ili2db.mapping.MultiLineMapping;
 import ch.ehi.ili2db.mapping.MultiPointMapping;
 import ch.ehi.ili2db.mapping.MultiSurfaceMapping;
@@ -669,6 +670,16 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 							values.append(","+geomConv.getInsertValueWrapperMultiCoord("?",srsid));
 						}
 						sep=",";
+				}else if(TrafoConfigNames.ARRAY_TRAFO_COALESCE.equals(trafoConfig.getAttrConfig(attr, TrafoConfigNames.ARRAY_TRAFO))){
+					 ret.append(sep);
+					 ret.append(attrSqlName);
+						arrayAttrs.addArrayAttr(attr);
+						if(isUpdate){
+							ret.append("="+geomConv.getInsertValueWrapperArray("?"));
+						}else{
+							values.append(","+geomConv.getInsertValueWrapperArray("?"));
+						}
+						sep=",";
 				}else if(TrafoConfigNames.MULTILINGUAL_TRAFO_EXPAND.equals(trafoConfig.getAttrConfig(attr, TrafoConfigNames.MULTILINGUAL_TRAFO))){
 					for(String sfx:DbNames.MULTILINGUAL_TXT_COL_SUFFIXS){
 						ret.append(sep);
@@ -951,6 +962,22 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 							ps.setObject(valuei,geomObj);
 						 }else{
 							geomConv.setCoordNull(ps,valuei);
+						 }
+						 valuei++;
+					}else if(TrafoConfigNames.ARRAY_TRAFO_COALESCE.equals(trafoConfig.getAttrConfig(attr, TrafoConfigNames.ARRAY_TRAFO))){
+						 int valuec=iomObj.getattrvaluecount(attrName);
+						 String iomArray[]=new String[valuec];
+						 ArrayMapping attrMapping=arrayAttrs.getMapping(attr);
+						 for(int elei=0;elei<valuec;elei++) {
+							 IomObject iomValue=iomObj.getattrobj(attrName,elei);
+							 String value=iomValue.getattrvalue(attrMapping.getValueAttr().getName());
+							 iomArray[elei]=value;
+						 }
+						 if(iomArray.length>0){
+							 Object geomObj = geomConv.fromIomArray(attrMapping.getValueAttr(),iomArray,enumTypes);
+							ps.setObject(valuei,geomObj);
+						 }else{
+							geomConv.setArrayNull(ps,valuei);
 						 }
 						 valuei++;
 					}else if(TrafoConfigNames.MULTILINGUAL_TRAFO_EXPAND.equals(trafoConfig.getAttrConfig(attr, TrafoConfigNames.MULTILINGUAL_TRAFO))){

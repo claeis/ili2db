@@ -28,7 +28,9 @@ import com.vividsolutions.jts.io.ParseException;
 
 import ch.ehi.basics.settings.Settings;
 import ch.ehi.ili2db.gui.Config;
+import ch.interlis.ili2c.metamodel.AttributeDef;
 import ch.interlis.iom.IomObject;
+import ch.interlis.iom_j.itf.EnumCodeMapper;
 import ch.interlis.iox_j.jts.Iox2jtsException;
 
 public abstract class AbstractWKTColumnConverter implements SqlColumnConverter {
@@ -357,6 +359,28 @@ public abstract class AbstractWKTColumnConverter implements SqlColumnConverter {
 	}
 	@Override
 	public String toIomBlob(Object obj) throws SQLException, ConverterException {
+		throw new UnsupportedOperationException();
+	}
+	@Override
+	public String getSelectValueWrapperArray(String makeColumnRef) {
+		throw new UnsupportedOperationException();
+	}
+	@Override
+	public String getInsertValueWrapperArray(String sqlColName) {
+		throw new UnsupportedOperationException();
+	}
+	@Override
+	public void setArrayNull(PreparedStatement ps, int parameterIndex) throws SQLException {
+		throw new UnsupportedOperationException();
+	}
+	@Override
+	public Object fromIomArray(AttributeDef iliEleAttr, String[] iomValues, EnumCodeMapper enumTypes)
+			throws SQLException, ConverterException {
+		throw new UnsupportedOperationException();
+	}
+	@Override
+	public String[] toIomArray(AttributeDef iliEleAttr, Object sqlArray, EnumCodeMapper enumTypes)
+			throws SQLException, ConverterException {
 		throw new UnsupportedOperationException();
 	}
 
