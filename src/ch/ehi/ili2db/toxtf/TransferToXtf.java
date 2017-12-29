@@ -1166,7 +1166,7 @@ public class TransferToXtf {
 		for(ViewableWrapper wrapper:wrappers){
 			ret.append(sep);
 			ret.append("SELECT r"+i+"."+colT_ID);
-			if(wrapper.getOid()!=null){
+			if(writeIliTid || wrapper.getOid()!=null){
 				ret.append(", r"+i+"."+DbNames.T_ILI_TID_COL);
 			}else{
 				ret.append(", NULL "+DbNames.T_ILI_TID_COL);
