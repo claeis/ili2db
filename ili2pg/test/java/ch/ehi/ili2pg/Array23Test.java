@@ -109,7 +109,7 @@ public class Array23Test {
 			config.setInheritanceTrafo(null);
 			Ili2db.readSettingsFromDb(config);
 			Ili2db.run(config,null);
-			//exportSmartCustom();
+			exportSmartCustom();
 		}finally{
 			if(jdbcConnection!=null){
 				jdbcConnection.close();
@@ -117,7 +117,7 @@ public class Array23Test {
 		}
 	}
 	
-	@Test
+	//@Test
 	public void exportSmartCustom() throws Exception {
 		Connection jdbcConnection = null;
 		try {
