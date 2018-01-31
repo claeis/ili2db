@@ -52,6 +52,7 @@ import ch.ehi.ili2db.mapping.TrafoConfig;
 import ch.ehi.ili2db.mapping.Viewable2TableMapper;
 import ch.ehi.ili2db.mapping.Viewable2TableMapping;
 import ch.ehi.ili2db.toxtf.TransferToXtf;
+import ch.ehi.ili2db.metaattr.MetaAttrUtility;
 import ch.ehi.sqlgen.DbUtility;
 import ch.ehi.sqlgen.generator.Generator;
 import ch.ehi.sqlgen.generator.GeneratorDriver;
@@ -663,6 +664,20 @@ public class Ili2db {
 							}
 							ioxReader=null;
 						}
+					}
+				}
+				
+				// run import meta-attributes from .toml file
+				if(config.getIliMetaAttrsFile()!=null){
+					if(config.getCreateMetaInfo()){
+						try{
+							EhiLogger.logState("run import meta-attributes from toml file");
+							MetaAttrUtility.importMetaAttrsFromToml(new java.io.FileReader(config.getIliMetaAttrsFile()), conn, config.getDbschema());
+						}catch(FileNotFoundException e){
+							throw new Ili2dbException("import meta-attributes failed",e);
+						}
+					}else{
+						throw new Ili2dbException("import meta-attributes requires --createMetaInfo option");
 					}
 				}
 				

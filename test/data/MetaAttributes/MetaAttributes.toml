@@ -1,0 +1,9 @@
+title = "Example"
+
+[Model2]
+Model2Attr1="Model2Attr1Value"
+Model2Attr2="Model2Attr2Value"
+
+[Model3]
+Model3Attr1="Model3Attr1Value"
+Model3Attr2="Model3Attr2Value"
