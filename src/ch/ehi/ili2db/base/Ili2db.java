@@ -522,6 +522,10 @@ public class Ili2db {
 						DbExtMetaInfo.addMetaInfoTables(schema);
 						idGen.addMappingTable(schema);
 						
+            if(config.getCreateMetaInfo()){
+              TransferFromIli.addMetaAttributesTable(schema);
+            }
+            
 						GeneratorDriver drv=new GeneratorDriver(gen);
 						drv.visitSchema(config,schema);
 						// create script requested by user?
@@ -543,6 +547,10 @@ public class Ili2db {
 							// update enumerations table
 							trsfFromIli.updateEnumTable(conn);
 							trsfFromIli.updateMetaInfoTables(conn);
+              //update meta attributes table
+              if(config.getCreateMetaInfo()){
+                trsfFromIli.updateMetaAttributesTable(conn, config.getDbschema(), td);
+              }
 							TransferFromIli.addModels(conn,td,config.getDbschema());
 							if(!config.isConfigReadFromDb()){
 								TransferFromIli.updateSettings(conn,config,config.getDbschema());
@@ -1060,6 +1068,10 @@ public class Ili2db {
 					TransferFromIli.addAttrMappingTable(schema);
 					DbExtMetaInfo.addMetaInfoTables(schema);
 					idGen.addMappingTable(schema);
+          
+          if(config.getCreateMetaInfo()){
+            TransferFromIli.addMetaAttributesTable(schema);
+          }
 				}
 				
 				// TODO create geodb domains
@@ -1097,6 +1109,10 @@ public class Ili2db {
 					if(!config.isConfigReadFromDb()){
 						TransferFromIli.updateSettings(conn,config,config.getDbschema());
 					}
+          //update meta attributes table
+          if(config.getCreateMetaInfo()){
+            trsfFromIli.updateMetaAttributesTable(conn, config.getDbschema(), td);
+          }
 				}
 				
 				// run post-script

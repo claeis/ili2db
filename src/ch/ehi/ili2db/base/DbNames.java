@@ -97,7 +97,10 @@ public class DbNames {
 	public static final String META_INFO_TABLE_TAB_TABLENAME_COL="tablename";
 	public static final String META_INFO_TABLE_TAB_TAG_COL="tag";
 	public static final String META_INFO_TABLE_TAB_SETTING_COL="setting";	
-
+  public static final String META_ATTRIBUTES_TAB="T_ILI2DB_META_ATTRS";
+  public static final String META_ATTRIBUTES_TAB_ILIELEMENT_COL="ilielement";
+  public static final String META_ATTRIBUTES_TAB_ATTRNAME_COL="attr_name";
+  public static final String META_ATTRIBUTES_TAB_ATTRVALUE_COL="attr_value";
 	private DbNames(){}
 
 }

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TRANSFER xmlns="http://www.interlis.ch/INTERLIS2.3">
+	<HEADERSECTION SENDER="ili2fgdb-3.10.0-20170630" VERSION="2.3">
+		<MODELS>
+			<MODEL NAME="Model1" VERSION="2018-01-30" URI="mailto:noreply@localhost"></MODEL>
+		</MODELS>
+	</HEADERSECTION>
+	<DATASECTION>
+		<Model1.Topic1 BID="b1">
+			<Model1.Topic1.Class1 TID="o1">
+				<attr1>foo</attr1>
+			</Model1.Topic1.Class1>
+		</Model1.Topic1>
+	</DATASECTION>
+</TRANSFER>
