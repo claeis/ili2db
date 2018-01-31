@@ -1438,7 +1438,7 @@ public class TransferFromIli {
 		Settings metaValues = el.getMetaValues();
 		if(metaValues.getValues().size() > 0){
 			for(String attr:metaValues.getValues()){
-				this.updateMetaAttributeEntry(conn, schema, el.getScopedName(), attr, metaValues.getValue(attr));
+				ch.ehi.ili2db.metaattr.MetaAttrUtility.insertMetaAttributeEntry(conn, schema, el.getScopedName(), attr, metaValues.getValue(attr));
 			}
 		}
 		if(o instanceof ch.interlis.ili2c.metamodel.Container){
@@ -1449,31 +1449,5 @@ public class TransferFromIli {
 			}
 		}
 	}
-
-	// Write meta-attribute into db
-	private void updateMetaAttributeEntry(java.sql.Connection conn, String schema, String ilielement, String attrname, String attrvalue)
-	throws Ili2dbException
-	{
-		String sqlName=DbNames.META_ATTRIBUTES_TAB;
-		if(schema!=null){
-			sqlName=schema+"."+sqlName;
-		}
-		try{
-			// insert entries
-			String stmt="INSERT INTO "+sqlName+" (" + 
-				DbNames.META_ATTRIBUTES_TAB_ILIELEMENT_COL + "," + 
-				DbNames.META_ATTRIBUTES_TAB_ATTRNAME_COL + "," +
-				DbNames.META_ATTRIBUTES_TAB_ATTRVALUE_COL +
-				") VALUES (?, ?, ?)";
-			EhiLogger.traceBackendCmd(stmt);
-			java.sql.PreparedStatement ps = conn.prepareStatement(stmt);
-			ps.setString(1, ilielement);
-			ps.setString(2, attrname);
-			ps.setString(3, attrvalue);
-			ps.executeUpdate();
-		}catch(java.sql.SQLException ex){
-			throw new Ili2dbException("failed to insert meta-attribute", ex);
-		}
-	} 
 
 }
