@@ -1393,4 +1393,87 @@ public class TransferFromIli {
 		}
 		metaInfo.updateMetaInfoTables(conn, schema.getName());
 	}
+	public static void addMetaAttributesTable(DbSchema schema)
+	{
+		DbTable tab=new DbTable();
+		tab.setName(new DbTableName(schema.getName(), DbNames.META_ATTRIBUTES_TAB));
+
+		DbColVarchar ilielementCol=new DbColVarchar();
+		ilielementCol.setName(DbNames.META_ATTRIBUTES_TAB_ILIELEMENT_COL);
+		ilielementCol.setNotNull(true);
+		ilielementCol.setSize(255);
+		tab.addColumn(ilielementCol);
+		DbColVarchar attrnameCol=new DbColVarchar();
+		attrnameCol.setName(DbNames.META_ATTRIBUTES_TAB_ATTRNAME_COL);
+		attrnameCol.setNotNull(true);
+		attrnameCol.setSize(1024);
+		tab.addColumn(attrnameCol);
+		DbColVarchar attrvalueCol=new DbColVarchar();
+		attrvalueCol.setName(DbNames.META_ATTRIBUTES_TAB_ATTRVALUE_COL);
+		attrvalueCol.setNotNull(true);
+		attrvalueCol.setSize(1024);
+		tab.addColumn(attrvalueCol);
+		schema.addTable(tab);
+	}
+
+	public void updateMetaAttributesTable(java.sql.Connection conn, String schema, TransferDescription td) 
+	throws Ili2dbException
+	{
+		Iterator transIter = td.iterator();
+		while(transIter.hasNext()){
+			Object transElem=transIter.next();
+			if(transElem instanceof ch.interlis.ili2c.metamodel.PredefinedModel){
+				continue;
+			}else if(transElem instanceof ch.interlis.ili2c.metamodel.DataModel){
+				this.iterateDataModel(transElem, conn, schema);
+			}
+		}
+	}
+
+	// Recursively iterate data model and write all found meta-attributes
+	private void iterateDataModel(Object o, java.sql.Connection conn, String schema)
+	throws Ili2dbException
+	{
+		Element el = (Element) o;
+		Settings metaValues = el.getMetaValues();
+		if(metaValues.getValues().size() > 0){
+			for(String attr:metaValues.getValues()){
+				this.updateMetaAttributeEntry(conn, schema, el.getScopedName(), attr, metaValues.getValue(attr));
+			}
+		}
+		if(o instanceof ch.interlis.ili2c.metamodel.Container){
+			ch.interlis.ili2c.metamodel.Container e = (ch.interlis.ili2c.metamodel.Container) o;
+			Iterator it = e.iterator();
+			while(it.hasNext()){
+				this.iterateDataModel(it.next(), conn, schema);
+			}
+		}
+	}
+
+	// Write meta-attribute into db
+	private void updateMetaAttributeEntry(java.sql.Connection conn, String schema, String ilielement, String attrname, String attrvalue)
+	throws Ili2dbException
+	{
+		String sqlName=DbNames.META_ATTRIBUTES_TAB;
+		if(schema!=null){
+			sqlName=schema+"."+sqlName;
+		}
+		try{
+			// insert entries
+			String stmt="INSERT INTO "+sqlName+" (" + 
+				DbNames.META_ATTRIBUTES_TAB_ILIELEMENT_COL + "," + 
+				DbNames.META_ATTRIBUTES_TAB_ATTRNAME_COL + "," +
+				DbNames.META_ATTRIBUTES_TAB_ATTRVALUE_COL +
+				") VALUES (?, ?, ?)";
+			EhiLogger.traceBackendCmd(stmt);
+			java.sql.PreparedStatement ps = conn.prepareStatement(stmt);
+			ps.setString(1, ilielement);
+			ps.setString(2, attrname);
+			ps.setString(3, attrvalue);
+			ps.executeUpdate();
+		}catch(java.sql.SQLException ex){
+			throw new Ili2dbException("failed to insert meta-attribute", ex);
+		}
+	} 
+
 }

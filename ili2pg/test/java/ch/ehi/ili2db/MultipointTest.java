@@ -1,9 +1,12 @@
 package ch.ehi.ili2db;
 
+import static org.junit.Assert.assertEquals;
+
 import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.Statement;
 import java.util.HashMap;
 
@@ -22,6 +25,7 @@ import ch.interlis.iom_j.xtf.XtfReader;
 import ch.interlis.iox.EndBasketEvent;
 import ch.interlis.iox.EndTransferEvent;
 import ch.interlis.iox.IoxEvent;
+import ch.interlis.iox.IoxException;
 import ch.interlis.iox.ObjectEvent;
 import ch.interlis.iox.StartBasketEvent;
 import ch.interlis.iox.StartTransferEvent;
@@ -79,7 +83,15 @@ public class MultipointTest {
 			config.setInheritanceTrafo(null);
 			Ili2db.readSettingsFromDb(config);
 			Ili2db.run(config,null);
-			//exportSmartCustom();
+			// assertions
+			ResultSet rs = stmt.executeQuery("SELECT st_asewkt(geom) FROM multipoint.classa1;");
+			ResultSetMetaData rsmd=rs.getMetaData();
+			assertEquals(1, rsmd.getColumnCount());
+			while(rs.next()){
+			  	assertEquals("SRID=21781;MULTIPOINT(600030 200020,600015 200005)", rs.getObject(1));
+			}
+		}catch(Exception e) {
+			throw new IoxException(e);
 		}finally{
 			if(jdbcConnection!=null){
 				jdbcConnection.close();
@@ -95,18 +107,17 @@ public class MultipointTest {
 		    Class driverClass = Class.forName("org.postgresql.Driver");
 	        jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
 	        stmt=jdbcConnection.createStatement();
-	        if(false){
-			stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");        
-	        DbUtility.executeSqlScript(jdbcConnection, new java.io.FileReader("test/data/MultiSurface/CreateTableMultiSurface2a.sql"));
-	        DbUtility.executeSqlScript(jdbcConnection, new java.io.FileReader("test/data/MultiSurface/InsertIntoTableMultiSurface2a.sql"));
-	        }
-			File data=new File("test/data/MultiPoint/MultiPoint2a-out.xtf");
+	        
+	        stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");        
+	        DbUtility.executeSqlScript(jdbcConnection, new java.io.FileReader("test/data/MultiPoint/CreateTableMultiPoint2a.sql"));
+	        DbUtility.executeSqlScript(jdbcConnection, new java.io.FileReader("test/data/MultiPoint/InsertIntoTableMultiPoint2a.sql"));
+			
+	        File data=new File("test/data/MultiPoint/MultiPoint2a-out.xtf");
 			Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 			config.setModels("MultiPoint2");
 			config.setFunction(Config.FC_EXPORT);
 			Ili2db.readSettingsFromDb(config);
 			Ili2db.run(config,null);
-			if(false){
 			HashMap<String,IomObject> objs=new HashMap<String,IomObject>();
 			XtfReader reader=new XtfReader(data);
 			IoxEvent event=null;
@@ -133,15 +144,16 @@ public class MultipointTest {
 			 {
 				 IomObject obj0 = objs.get("13");
 				 Assert.assertNotNull(obj0);
-				 Assert.assertEquals("MultiSurface2.TestA.ClassA1", obj0.getobjecttag());
+				 Assert.assertEquals("MultiPoint2.TestA.ClassA1", obj0.getobjecttag());
 			 }
 			 // check values of attrnames
 			 {
 				 IomObject obj0 = objs.get("13");
 				 Assert.assertNotNull(obj0);
-				 Assert.assertEquals("MultiSurface2.MultiFlaeche2D {Flaechen [MultiSurface2.FlaecheStruktur2D {Flaeche MULTISURFACE {surface SURFACE {boundary BOUNDARY {polyline POLYLINE {sequence SEGMENTS {segment [COORD {C1 600030.0, C2 200020.0}, COORD {C1 600045.0, C2 200040.0}, COORD {C1 600010.0, C2 200040.0}, COORD {C1 600030.0, C2 200020.0}]}}}}}}, MultiSurface2.FlaecheStruktur2D {Flaeche MULTISURFACE {surface SURFACE {boundary BOUNDARY {polyline POLYLINE {sequence SEGMENTS {segment [COORD {C1 600015.0, C2 200005.0}, COORD {C1 600040.0, C2 200010.0}, COORD {C1 600010.0, C2 200020.0}, COORD {C1 600005.0, C2 200010.0}, COORD {C1 600015.0, C2 200005.0}]}}}}}}]}", obj0.getattrobj("geom", 0).toString());
+				 Assert.assertEquals("MultiPoint2.MultiPoint2D {points [MultiPoint2.PointStruktur2D {coord COORD {C1 600030.0, C2 200020.0}}, MultiPoint2.PointStruktur2D {coord COORD {C1 600015.0, C2 200005.0}}]}", obj0.getattrobj("geom", 0).toString());
 			 }
-			}
+		}catch(Exception e) {
+			throw new IoxException(e);
 		}finally{
 			if(jdbcConnection!=null){
 				jdbcConnection.close();

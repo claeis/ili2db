@@ -1096,7 +1096,7 @@ t\_ili2db\_column_prop
 ......................
 
 Weitere Angaben zu den DB-Spalten aus dem Interlis Modell (z.B. ob es MTEXT ist). 
-Wird nur erstellt mit Option --createMetaInfo. Die Tabelle ist so aufgabut, dass
+Wird nur erstellt mit Option --createMetaInfo. Die Tabelle ist so aufgebaut, dass
 sie beliebige (auch zukünftige) Werte/Zusatzangaben aufnehmen kann.
 
 - tablename Name der Tabelle
