@@ -524,7 +524,7 @@ public class Ili2db {
 						idGen.addMappingTable(schema);
 						
 						if(config.getCreateMetaInfo()){
-							TransferFromIli.addMetaAttributesTable(schema);
+							MetaAttrUtility.addMetaAttributesTable(schema);
 						}
 						
 						GeneratorDriver drv=new GeneratorDriver(gen);
@@ -548,10 +548,6 @@ public class Ili2db {
 							// update enumerations table
 							trsfFromIli.updateEnumTable(conn);
 							trsfFromIli.updateMetaInfoTables(conn);
-							//update meta attributes table
-							if(config.getCreateMetaInfo()){
-								trsfFromIli.updateMetaAttributesTable(conn, config.getDbschema(), td);
-							}
 							TransferFromIli.addModels(conn,td,config.getDbschema());
 							if(!config.isConfigReadFromDb()){
 								TransferFromIli.updateSettings(conn,config,config.getDbschema());
@@ -666,13 +662,12 @@ public class Ili2db {
 						}
 					}
 				}
-				
-				// run import meta-attributes from .toml file
+				// import meta-attributes from .toml file
 				if(config.getIliMetaAttrsFile()!=null){
 					if(config.getCreateMetaInfo()){
 						try{
 							EhiLogger.logState("run import meta-attributes from toml file");
-							MetaAttrUtility.importMetaAttrsFromToml(new java.io.FileReader(config.getIliMetaAttrsFile()), conn, config.getDbschema());
+							MetaAttrUtility.importMetaAttrsFromToml(new java.io.FileReader(config.getIliMetaAttrsFile()), td);
 						}catch(FileNotFoundException e){
 							throw new Ili2dbException("import meta-attributes failed",e);
 						}
@@ -680,7 +675,12 @@ public class Ili2db {
 						throw new Ili2dbException("import meta-attributes requires --createMetaInfo option");
 					}
 				}
-				
+				if(config.getCreateMetaInfo()){
+					// update meta-attributes table
+					MetaAttrUtility.updateMetaAttributesTable(conn, config.getDbschema(), td);
+					// set elements' meta-attributes
+					MetaAttrUtility.updateElementsMetaAttributes(conn, config.getDbschema(), td);
+				}
 				// run post-script
 				if(config.getPostScript()!=null){
 					try {
@@ -1085,7 +1085,7 @@ public class Ili2db {
 					idGen.addMappingTable(schema);
 
 					if(config.getCreateMetaInfo()){
-						TransferFromIli.addMetaAttributesTable(schema);
+						MetaAttrUtility.addMetaAttributesTable(schema);
 					}
 				}
 				
@@ -1124,9 +1124,24 @@ public class Ili2db {
 					if(!config.isConfigReadFromDb()){
 						TransferFromIli.updateSettings(conn,config,config.getDbschema());
 					}
-					//update meta attributes table
+					// import meta-attributes from .toml file
+					if(config.getIliMetaAttrsFile()!=null){
+						if(config.getCreateMetaInfo()){
+							try{
+								EhiLogger.logState("run import meta-attributes from toml file");
+								MetaAttrUtility.importMetaAttrsFromToml(new java.io.FileReader(config.getIliMetaAttrsFile()), td);
+							}catch(FileNotFoundException e){
+								throw new Ili2dbException("import meta-attributes failed",e);
+							}
+						}else{
+							throw new Ili2dbException("import meta-attributes requires --createMetaInfo option");
+						}
+					}
 					if(config.getCreateMetaInfo()){
-						trsfFromIli.updateMetaAttributesTable(conn, config.getDbschema(), td);
+						// update meta-attributes table
+						MetaAttrUtility.updateMetaAttributesTable(conn, config.getDbschema(), td);
+						// set elements' meta-attributes
+						MetaAttrUtility.updateElementsMetaAttributes(conn, config.getDbschema(), td);
 					}
 				}
 				
@@ -1427,6 +1442,12 @@ public class Ili2db {
 					throw new Ili2dbException("compiler failed");
 				}
 			  
+				if(config.getCreateMetaInfo()){
+					// set elements' meta-attributes
+					if(DbUtility.tableExists(conn,new DbTableName(config.getDbschema(),DbNames.META_ATTRIBUTES_TAB))){
+						MetaAttrUtility.updateElementsMetaAttributes(conn, config.getDbschema(), td);
+					}
+				}
 			  
 			  geomConverter.setup(conn, config);
 			  
