@@ -409,7 +409,7 @@ public abstract class AbstractMain {
 					System.err.println("--ver4-translation     supports TRANSLATION OF in ili2db 4.x mode (incompatible with ili2db 3.x versions).");
 					System.err.println("--translation translatedModel=originModel assigns a translated model to its orginal language equivalent.");
 					System.err.println("--createMetaInfo       Create aditional ili-model information.");
-					System.err.println("--iilMetaAttrs file    Import meta-attributes from a .toml file (Requires --createMetaInfo)");
+					System.err.println("--iliMetaAttrs file    Import meta-attributes from a .toml file (Requires --createMetaInfo)");
 					printSpecificOptions();
 					System.err.println("--proxy host           proxy server to access model repositories.");
 					System.err.println("--proxyPort port       proxy port to access model repositories.");

@@ -667,7 +667,7 @@ public class Ili2db {
 					if(config.getCreateMetaInfo()){
 						try{
 							EhiLogger.logState("run import meta-attributes from toml file");
-							MetaAttrUtility.importMetaAttrsFromToml(new java.io.FileReader(config.getIliMetaAttrsFile()), td);
+							MetaAttrUtility.addMetaAttrsFromToml(td, new java.io.FileReader(config.getIliMetaAttrsFile()));
 						}catch(FileNotFoundException e){
 							throw new Ili2dbException("import meta-attributes failed",e);
 						}
@@ -679,7 +679,7 @@ public class Ili2db {
 					// update meta-attributes table
 					MetaAttrUtility.updateMetaAttributesTable(conn, config.getDbschema(), td);
 					// set elements' meta-attributes
-					MetaAttrUtility.updateElementsMetaAttributes(conn, config.getDbschema(), td);
+					MetaAttrUtility.addMetaAttrsFromDb(td, conn, config.getDbschema());
 				}
 				// run post-script
 				if(config.getPostScript()!=null){
@@ -1129,7 +1129,7 @@ public class Ili2db {
 						if(config.getCreateMetaInfo()){
 							try{
 								EhiLogger.logState("run import meta-attributes from toml file");
-								MetaAttrUtility.importMetaAttrsFromToml(new java.io.FileReader(config.getIliMetaAttrsFile()), td);
+								MetaAttrUtility.addMetaAttrsFromToml(td, new java.io.FileReader(config.getIliMetaAttrsFile()));
 							}catch(FileNotFoundException e){
 								throw new Ili2dbException("import meta-attributes failed",e);
 							}
@@ -1141,7 +1141,7 @@ public class Ili2db {
 						// update meta-attributes table
 						MetaAttrUtility.updateMetaAttributesTable(conn, config.getDbschema(), td);
 						// set elements' meta-attributes
-						MetaAttrUtility.updateElementsMetaAttributes(conn, config.getDbschema(), td);
+						MetaAttrUtility.addMetaAttrsFromDb(td, conn, config.getDbschema());
 					}
 				}
 				
@@ -1445,7 +1445,7 @@ public class Ili2db {
 				if(config.getCreateMetaInfo()){
 					// set elements' meta-attributes
 					if(DbUtility.tableExists(conn,new DbTableName(config.getDbschema(),DbNames.META_ATTRIBUTES_TAB))){
-						MetaAttrUtility.updateElementsMetaAttributes(conn, config.getDbschema(), td);
+						MetaAttrUtility.addMetaAttrsFromDb(td, conn, config.getDbschema());
 					}
 				}
 			  

@@ -28,30 +28,52 @@ import ch.ehi.sqlgen.repository.DbColVarchar;
 
 public class MetaAttrUtility{
 
-	// Read meta-attributes from toml file and write them inte elements
-	public static void importMetaAttrsFromToml(FileReader tomlFile, TransferDescription td)
+	/** Read meta-attributes from a toml file and add them to the ili2c metamodel.
+	 * @param td ili-model as read by the ili compiler
+	 * @param tomlFile
+	 * @throws Ili2dbException
+	 */
+	public static void addMetaAttrsFromToml(TransferDescription td, FileReader tomlFile)
 	throws Ili2dbException
 	{
 		Toml toml = new Toml().read(tomlFile);
-		for (Map.Entry<String, Object> entry : toml.entrySet()) {
-			if(!toml.containsTable(entry.getKey())){
-				continue;
-			}
-			Toml table = toml.getTable(entry.getKey());
-			for (Map.Entry<String, Object> tableEntry : table.entrySet()) {
-				
-				//TODO verify if Toml4j can read directly quoted keys and why without quotes, the dotted keys doesn't work
-				String ilielement = entry.getKey().replace("\"", "");
-				
-				// Add meta-attr to the Element
-				Element element = td.getElement(entry.getKey().replace("\"", ""));
-				element.setMetaValue(tableEntry.getKey(), (String)tableEntry.getValue());
-			}
-		}
+        for (java.util.Map.Entry<String, Object> entry : toml.entrySet()) {
+            Object entryO=entry.getValue();
+            if(entryO instanceof Toml){
+                String iliQName=stripQuotes(entry.getKey());
+                Element element = td.getElement(iliQName);
+                // known element?
+                if(element!=null) {
+                    Toml config=(Toml)entryO;
+                    for (java.util.Map.Entry<String, Object> configEntry : config.entrySet()) {
+                        String paramName=configEntry.getKey();
+                        if(configEntry.getValue() instanceof String){
+                            String paramValue=(String) configEntry.getValue();
+                            // meta attr not yet defined?
+                            if(element.getMetaValue(paramName)==null) {
+                                // define/set it
+                                element.setMetaValue(paramName, paramValue);
+                            }
+                        }
+                    }
+                }
+            }
+      }
 	}
+    private static String stripQuotes(String key) {
+        if(key.startsWith("\"") && key.endsWith("\"")){
+            return key.substring(1, key.length()-1);
+        }
+        return key;
+    }
 
-	// Update Elements meta-attributes from meta-attributes table
-	public static void updateElementsMetaAttributes(Connection conn, String schema, TransferDescription td)
+	/** Read meta-attributes from the db and add them to the ili2c metamodel.
+	 * @param td
+	 * @param conn
+	 * @param schema
+	 * @throws Ili2dbException
+	 */
+	public static void addMetaAttrsFromDb(TransferDescription td, Connection conn, String schema)
 	throws Ili2dbException
 	{
 		String sqlName=DbNames.META_ATTRIBUTES_TAB;
@@ -76,7 +98,14 @@ public class MetaAttrUtility{
 				
 				// Add meta-attr to the Element
 				Element element = td.getElement(ilielement);
-				element.setMetaValue(attrname, attrvalue);
+				// known element?
+				if(element!=null) {
+				    // meta-attr not yet set/defined?
+				    if(element.getMetaValue(attrname)==null){
+				        // set it to the read value
+	                    element.setMetaValue(attrname, attrvalue);
+				    }
+				}
 			}
 			
 		}catch(java.sql.SQLException ex){
@@ -108,37 +137,42 @@ public class MetaAttrUtility{
 		schema.addTable(tab);
 	}
 
-	// Read meta-attributes from elements and write them into table
+	/** Read meta-attributes from ili2c metamodel and write them into db table.
+	 * @param conn db connection
+	 * @param schema
+	 * @param td ili model as read by the interlis compiler
+	 * @throws Ili2dbException
+	 */
 	public static void updateMetaAttributesTable(java.sql.Connection conn, String schema, TransferDescription td) 
 	throws Ili2dbException
 	{
+	    // TODO insert/update instead of insert
 		Iterator transIter = td.iterator();
 		while(transIter.hasNext()){
 			Object transElem=transIter.next();
 			if(transElem instanceof ch.interlis.ili2c.metamodel.PredefinedModel){
 				continue;
 			}else if(transElem instanceof ch.interlis.ili2c.metamodel.DataModel){
-				iterateDataModel(transElem, conn, schema);
+				visitElement((Element)transElem, conn, schema);
 			}
 		}
 	}
 
 	// Recursively iterate data model and write all found meta-attributes
-	private static void iterateDataModel(Object o, java.sql.Connection conn, String schema)
+	private static void visitElement(Element el, java.sql.Connection conn, String schema)
 	throws Ili2dbException
 	{
-		Element el = (Element) o;
 		Settings metaValues = el.getMetaValues();
 		if(metaValues.getValues().size() > 0){
 			for(String attr:metaValues.getValues()){
 				insertMetaAttributeEntry(conn, schema, el.getScopedName(), attr, metaValues.getValue(attr));
 			}
 		}
-		if(o instanceof Container){
-			Container e = (Container) o;
+		if(el instanceof Container){
+			Container e = (Container) el;
 			Iterator it = e.iterator();
 			while(it.hasNext()){
-				iterateDataModel(it.next(), conn, schema);
+				visitElement((Element)it.next(), conn, schema);
 			}
 		}
 	}
