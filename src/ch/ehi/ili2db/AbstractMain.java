@@ -332,6 +332,10 @@ public abstract class AbstractMain {
 			}else if(arg.equals("--version")){
 				printVersion();
 				return;
+			}else if(arg.equals("--iliMetaAttrs")){
+				argi++;	
+				config.setIliMetaAttrsFile(args[argi]);
+				argi++;	
 			}else if(arg.equals("--help")){
 					printVersion ();
 					System.err.println();
@@ -402,9 +406,10 @@ public abstract class AbstractMain {
 					System.err.println("--createNumChecks      create CHECK db constraints for numeric data types.");
 					System.err.println("--ILIGML20             use eCH-0118-2.0 as transferformat");
 					System.err.println("--exportModels modelname  export data according to the given base ili-models");
-				    System.err.println("--ver4-translation     supports TRANSLATION OF in ili2db 4.x mode (incompatible with ili2db 3.x versions).");
-				    System.err.println("--translation translatedModel=originModel assigns a translated model to its orginal language equivalent.");
-				    System.err.println("--createMetaInfo       Create aditional ili-model information.");
+					System.err.println("--ver4-translation     supports TRANSLATION OF in ili2db 4.x mode (incompatible with ili2db 3.x versions).");
+					System.err.println("--translation translatedModel=originModel assigns a translated model to its orginal language equivalent.");
+					System.err.println("--createMetaInfo       Create aditional ili-model information.");
+					System.err.println("--iilMetaAttrs file    Import meta-attributes from a .toml file (Requires --createMetaInfo)");
 					printSpecificOptions();
 					System.err.println("--proxy host           proxy server to access model repositories.");
 					System.err.println("--proxyPort port       proxy port to access model repositories.");
