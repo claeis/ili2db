@@ -50,8 +50,8 @@
 
   <target depends="init,buildnr" name="pom">
   	<artifact:pom id="mypomE" groupId="${groupId}" artifactId="${artifactId}" version="${buildnr}" name="ehibasics">
-			<artifact:dependency groupId="ch.interlis" artifactId="ili2c-tool" version="4.7.6"/>
-			<artifact:dependency groupId="ch.interlis" artifactId="iox-ili" version="1.20.1"/>
+			<artifact:dependency groupId="ch.interlis" artifactId="ili2c-tool" version="4.7.7"/>
+			<artifact:dependency groupId="ch.interlis" artifactId="iox-ili" version="1.20.2"/>
 			<artifact:dependency groupId="ch.ehi" artifactId="ehisqlgen" version="1.11.2"/>
 	  </artifact:pom>
 	  <artifact:writepom pomRefId="mypomE" file="build/pom-ili2pg.xml"/>
