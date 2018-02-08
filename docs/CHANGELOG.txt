@@ -15,6 +15,14 @@ ideas/open issues/questions
 LATEST
 ---------------------------
 
+ili2pg 3.11.2 (2018-02-08)
+-----------------------------
+- added new option --iliMetaAttrs
+- read all ili-meta-attributes into a new table t_ili2db_meta_attrs
+- iox-ili-1.20.2
+- ili2c-4.7.7
+- ehisqlgen-1.13.3
+
 ili2pg 3.11.1 (2017-12-29)
 -----------------------------
 - fixed export of TIDs if CLASS is without OID but --importTid was used

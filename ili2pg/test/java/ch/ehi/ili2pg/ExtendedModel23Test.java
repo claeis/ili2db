@@ -26,6 +26,7 @@ import ch.interlis.iom_j.xtf.XtfReader;
 import ch.interlis.iox.EndBasketEvent;
 import ch.interlis.iox.EndTransferEvent;
 import ch.interlis.iox.IoxEvent;
+import ch.interlis.iox.IoxException;
 import ch.interlis.iox.ObjectEvent;
 import ch.interlis.iox.StartBasketEvent;
 import ch.interlis.iox.StartTransferEvent;
@@ -86,22 +87,24 @@ public class ExtendedModel23Test {
 		    		Ili2db.run(config,null);
 				}
 			}
+		}catch(Exception e) {
+			throw new IoxException(e);
 		}finally{
 			if(jdbcConnection!=null){
 				jdbcConnection.close();
 			}
 		}
 	}	
+	
 	@Test
 	public void exportXtfOriginal() throws Exception
 	{
-		importXtf();
 		Connection jdbcConnection=null;
 		try{
 	        Class driverClass = Class.forName("org.postgresql.Driver");
 	        jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
-	        //DbUtility.executeSqlScript(jdbcConnection, new java.io.FileReader("test/data/Dataset1NoSmart/CreateTable.sql"));
-	        //DbUtility.executeSqlScript(jdbcConnection, new java.io.FileReader("test/data/Dataset1NoSmart/InsertIntoTable.sql")); 
+	        DbUtility.executeSqlScript(jdbcConnection,new java.io.FileReader("test/data/ExtendedModel/ExtendedModelCreateTable.sql"));
+			DbUtility.executeSqlScript(jdbcConnection,new java.io.FileReader("test/data/ExtendedModel/ExtendedModelInsertIntoTable.sql"));
 			File data=new File("test/data/ExtendedModel/ExtendedModel1-out.xtf");
 			Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 			config.setModels("BaseModel;ExtendedModel");
@@ -134,23 +137,27 @@ public class ExtendedModel23Test {
 				 Assert.assertEquals("1.1", obj0.getattrvalue("wert"));
 				 Assert.assertEquals("34", obj0.getattrobj("ap1",0).getobjectrefoid());
 			 }
+		}catch(Exception e) {
+			throw new IoxException(e);
 		}finally{
 			if(jdbcConnection!=null){
 				jdbcConnection.close();
 			}
 		}
 	}
+	
 	@Test
 	public void exportXtfBase() throws Exception
 	{
-		importXtf();
 		Connection jdbcConnection=null;
 		try{
 	        Class driverClass = Class.forName("org.postgresql.Driver");
 	        jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
-	        //DbUtility.executeSqlScript(jdbcConnection, new java.io.FileReader("test/data/Dataset1NoSmart/CreateTable.sql"));
-	        //DbUtility.executeSqlScript(jdbcConnection, new java.io.FileReader("test/data/Dataset1NoSmart/InsertIntoTable.sql")); 
+	        
+	        DbUtility.executeSqlScript(jdbcConnection,new java.io.FileReader("test/data/ExtendedModel/ExtendedModelCreateTable.sql"));
+			DbUtility.executeSqlScript(jdbcConnection,new java.io.FileReader("test/data/ExtendedModel/ExtendedModelInsertIntoTable.sql"));
 			File data=new File("test/data/ExtendedModel/ExtendedModel1-out.xtf");
+			
 			Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 			config.setModels("BaseModel;ExtendedModel");
 			config.setExportModels("BaseModel");
@@ -183,6 +190,8 @@ public class ExtendedModel23Test {
 				 Assert.assertEquals(null, obj0.getattrvalue("wert"));
 				 Assert.assertEquals(null, obj0.getattrobj("ap1",0));
 			 }
+		}catch(Exception e) {
+			throw new IoxException(e);
 		}finally{
 			if(jdbcConnection!=null){
 				jdbcConnection.close();

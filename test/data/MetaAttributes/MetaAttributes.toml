@@ -1,0 +1,11 @@
+title = "Example"
+
+["Model1"]
+Model1Attr3="Model1Attr3Value"
+Model1Attr4="Model1Attr4Value"
+
+["Model1.min"]
+Unit1MetaAttr2="Unit1MetaAttr2Value"
+
+["Model1.Topic1.Structure1"]
+Structure1MetaAttr3="Structure1MetaAttr3Value"
