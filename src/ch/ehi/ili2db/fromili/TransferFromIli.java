@@ -408,6 +408,7 @@ public class TransferFromIli {
 		tab.addColumn(importDateCol);
 		DbIndex pk=new DbIndex();
 		pk.setPrimary(true);
+		pk.setUnique(false);
 		pk.addAttr(importsCol);
 		pk.addAttr(iliversionCol);
 		tab.addIndex(pk);
@@ -1365,6 +1366,7 @@ public class TransferFromIli {
 		tab.addColumn(targetCol);
 		DbIndex pk=new DbIndex();
 		pk.setPrimary(true);
+		pk.setUnique(false);
 		pk.addAttr(ownerCol);
 		pk.addAttr(sqlnameCol);
 		tab.addIndex(pk);
