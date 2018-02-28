@@ -1253,7 +1253,7 @@ public class TransferToXtf {
 			}
 			subSelectSep=" UNION ";
 		}
-		ret.append(" ) AS r0 ORDER BY "+DbNames.T_SEQ_COL+" ASC");
+		ret.append(" ) r0 ORDER BY "+DbNames.T_SEQ_COL+" ASC");
 
 		return ret.toString();
 	}
