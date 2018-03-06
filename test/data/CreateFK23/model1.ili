@@ -1,0 +1,26 @@
+INTERLIS 2.3;
+
+MODEL model1
+  AT "mailto:ce@eisenhutinformatik.ch" VERSION "2015-12-03" =
+    
+  TOPIC topic1 =
+  
+    CLASS ClassA1 =
+    END ClassA1;
+    
+    CLASS ClassB1 =
+    END ClassB1;
+    
+    ASSOCIATION a1=
+      a1_a -- {1..*} ClassA1;
+      a1_b -- {1} ClassB1;
+    END a1;
+    
+    ASSOCIATION a2 =
+      a2_a -- {1} ClassA1;
+      a2_b -- {1..*} ClassB1;
+    END a2;
+    
+  END topic1;
+ 
+END model1.
