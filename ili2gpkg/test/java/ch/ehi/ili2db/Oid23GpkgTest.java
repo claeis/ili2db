@@ -65,7 +65,7 @@ public class Oid23GpkgTest {
 	{
 	    File gpkgFile=new File(gpkgFileName);
         if(gpkgFile.exists()){
-            gpkgFile.delete();
+            Assert.assertTrue(gpkgFile.delete());
         }
         
 		File data=new File("test/data/Oid23/Oid1.ili");
@@ -87,7 +87,7 @@ public class Oid23GpkgTest {
 	{
 	    File gpkgFile=new File(gpkgFileName);
         if(gpkgFile.exists()){
-            gpkgFile.delete();
+            Assert.assertTrue(gpkgFile.delete());
         }
         {
     		File data=new File("test/data/Oid23/Oid1a.xtf");

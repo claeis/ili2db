@@ -11,7 +11,6 @@ import ch.ehi.basics.logging.EhiLogger;
 import ch.ehi.ili2db.base.Ili2db;
 import ch.ehi.ili2db.gui.Config;
 
-//-Ddburl=jdbc:postgresql:dbname -Ddbusr=usrname -Ddbpwd=1234
 public class CreateFK23GpkgTest {
 	private static final String TEST_OUT="test/data/CreateFK23/";
 	private String gpkgFileName=TEST_OUT+"test.gpkg";
@@ -71,6 +70,11 @@ public class CreateFK23GpkgTest {
 		config.setInheritanceTrafo(null);
 		config.setCreatescript(TEST_OUT+"importIli_CreateFK.sql");
 		Ili2db.readSettingsFromDb(config);
-		Ili2db.run(config,null);
+		try {
+            Ili2db.run(config,null);
+            Assert.fail();
+        } catch (Exception e) {
+            Assert.assertEquals("loop in create table statements: classb1->classa1->classb1", e.getCause().getMessage());
+        }
 	}
 }
