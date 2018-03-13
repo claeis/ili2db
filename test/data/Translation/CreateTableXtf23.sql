@@ -1,7 +1,7 @@
 DROP SCHEMA IF EXISTS Translation CASCADE;
 CREATE SCHEMA Translation;
 
-CREATE SEQUENCE Translation.t_ili2db_seq;;
+CREATE SEQUENCE Translation.t_ili2db_seq;
 -- EnumOkA.TopicA.ClassA
 CREATE TABLE Translation.classa (
   T_Id bigint PRIMARY KEY DEFAULT nextval('Translation.t_ili2db_seq')

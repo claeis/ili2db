@@ -1,46 +1,44 @@
-SET search_path = catalogueobjects1, pg_catalog;
-
-INSERT INTO t_ili2db_dataset VALUES (1, 'Testset1');
-INSERT INTO t_ili2db_basket VALUES (3, 1, 'CatalogueObjects1.TopicA', 'CatalogueObjects1.TopicA.1', 'CatalogueObjects1a.xtf-3');
-INSERT INTO t_ili2db_basket VALUES (8, 1, 'CatalogueObjects1.TopicB', 'CatalogueObjects1.TopicB.1', 'CatalogueObjects1a.xtf-3');
-INSERT INTO t_ili2db_attrname VALUES ('CatalogueObjects1.TopicA.Katalog_Programm.Code', 'code', 'topica_katalog_programm', NULL);
-INSERT INTO t_ili2db_attrname VALUES ('Localisation_V1.LocalisedText.Text', 'atext', 'localisedtext', NULL);
-INSERT INTO t_ili2db_attrname VALUES ('CatalogueObjects1.TopicB.Nutzung.Programm', 'topicb_nutzung_programm', 'topica_katalog_programmref', 'topicb_nutzung');
-INSERT INTO t_ili2db_attrname VALUES ('CatalogueObjects_V1.Catalogues.CatalogueReference.Reference', 'reference_topica_katalog_programm', 'topica_katalog_programmref', 'topica_katalog_programm');
-INSERT INTO t_ili2db_attrname VALUES ('CatalogueObjects1.TopicA.Katalog_Programm.Programm', 'programm', 'topica_katalog_programm', NULL);
-INSERT INTO t_ili2db_attrname VALUES ('CatalogueObjects_V1.Catalogues.CatalogueReference.Reference', 'reference_topicb_katalog_ohneuuid', 'topica_katalog_programmref', 'topicb_katalog_ohneuuid');
-INSERT INTO t_ili2db_attrname VALUES ('Localisation_V1.MultilingualText.LocalisedText', 'multilingualtext_localisedtext', 'localisedtext', 'multilingualtext');
-INSERT INTO t_ili2db_attrname VALUES ('Localisation_V1.LocalisedText.Language', 'alanguage', 'localisedtext', NULL);
-INSERT INTO t_ili2db_classname VALUES ('CatalogueObjects1.TopicA.Katalog_ProgrammRef', 'topica_katalog_programmref');
-INSERT INTO t_ili2db_classname VALUES ('CatalogueObjects_V1.Catalogues.Item', 'catalogues_item');
-INSERT INTO t_ili2db_classname VALUES ('CatalogueObjects_V1.Catalogues.CatalogueReference', 'catalogues_cataloguereference');
-INSERT INTO t_ili2db_classname VALUES ('LocalisationCH_V1.MultilingualText', 'localisationch_v1_multilingualtext');
-INSERT INTO t_ili2db_classname VALUES ('CatalogueObjects1.TopicA.Katalog_Programm', 'topica_katalog_programm');
-INSERT INTO t_ili2db_classname VALUES ('CatalogueObjects1.TopicB.Nutzung', 'topicb_nutzung');
-INSERT INTO t_ili2db_classname VALUES ('CatalogueObjects1.TopicB.Katalog_OhneUuid', 'topicb_katalog_ohneuuid');
-INSERT INTO t_ili2db_classname VALUES ('Localisation_V1.LocalisedText', 'localisedtext');
-INSERT INTO t_ili2db_classname VALUES ('LocalisationCH_V1.LocalisedText', 'localisationch_v1_localisedtext');
-INSERT INTO t_ili2db_classname VALUES ('Localisation_V1.MultilingualText', 'multilingualtext');
-INSERT INTO t_ili2db_classname VALUES ('CatalogueObjects_V1.Catalogues.MandatoryCatalogueReference', 'catalogues_mandatorycataloguereference');
-INSERT INTO t_ili2db_import VALUES (2, 1, '2017-05-08 09:45:53.119', 'postgres', 'test\data\CatalogueObjects\CatalogueObjects1a.xtf');
-INSERT INTO t_ili2db_import_basket VALUES (6, 2, 3, 2, 3, 5);
-INSERT INTO t_ili2db_import_basket VALUES (13, 2, 8, 2, 8, 12);
-INSERT INTO t_ili2db_import_object VALUES (7, 6, 'CatalogueObjects1.TopicA.Katalog_Programm', 2, 4, 5);
-INSERT INTO t_ili2db_import_object VALUES (14, 13, 'CatalogueObjects1.TopicA.Katalog_ProgrammRef', 2, 11, 12);
-INSERT INTO t_ili2db_import_object VALUES (15, 13, 'CatalogueObjects1.TopicB.Nutzung', 1, 10, 10);
-INSERT INTO t_ili2db_import_object VALUES (16, 13, 'CatalogueObjects1.TopicB.Katalog_OhneUuid', 1, 9, 9);
-INSERT INTO t_ili2db_inheritance VALUES ('CatalogueObjects1.TopicB.Nutzung', NULL);
-INSERT INTO t_ili2db_inheritance VALUES ('Localisation_V1.MultilingualText', NULL);
-INSERT INTO t_ili2db_inheritance VALUES ('CatalogueObjects_V1.Catalogues.MandatoryCatalogueReference', NULL);
-INSERT INTO t_ili2db_inheritance VALUES ('Localisation_V1.LocalisedText', NULL);
-INSERT INTO t_ili2db_inheritance VALUES ('CatalogueObjects1.TopicA.Katalog_ProgrammRef', 'CatalogueObjects_V1.Catalogues.CatalogueReference');
-INSERT INTO t_ili2db_inheritance VALUES ('CatalogueObjects1.TopicA.Katalog_Programm', 'CatalogueObjects_V1.Catalogues.Item');
-INSERT INTO t_ili2db_inheritance VALUES ('LocalisationCH_V1.MultilingualText', 'Localisation_V1.MultilingualText');
-INSERT INTO t_ili2db_inheritance VALUES ('LocalisationCH_V1.LocalisedText', 'Localisation_V1.LocalisedText');
-INSERT INTO t_ili2db_inheritance VALUES ('CatalogueObjects1.TopicB.Katalog_OhneUuid', 'CatalogueObjects_V1.Catalogues.Item');
-INSERT INTO t_ili2db_inheritance VALUES ('CatalogueObjects_V1.Catalogues.CatalogueReference', NULL);
-INSERT INTO t_ili2db_inheritance VALUES ('CatalogueObjects_V1.Catalogues.Item', NULL);
-INSERT INTO t_ili2db_model VALUES ('CatalogueObjects1.ili', '2.3', 'CatalogueObjects1{ LocalisationCH_V1 CatalogueObjects_V1}', 'INTERLIS 2.3;
+INSERT INTO CatalogueObjects1.t_ili2db_dataset VALUES (1, 'Testset1');
+INSERT INTO CatalogueObjects1.t_ili2db_basket VALUES (3, 1, 'CatalogueObjects1.TopicA', 'CatalogueObjects1.TopicA.1', 'CatalogueObjects1a.xtf-3');
+INSERT INTO CatalogueObjects1.t_ili2db_basket VALUES (8, 1, 'CatalogueObjects1.TopicB', 'CatalogueObjects1.TopicB.1', 'CatalogueObjects1a.xtf-3');
+INSERT INTO CatalogueObjects1.t_ili2db_attrname VALUES ('CatalogueObjects1.TopicA.Katalog_Programm.Code', 'code', 'topica_katalog_programm', NULL);
+INSERT INTO CatalogueObjects1.t_ili2db_attrname VALUES ('Localisation_V1.LocalisedText.Text', 'atext', 'localisedtext', NULL);
+INSERT INTO CatalogueObjects1.t_ili2db_attrname VALUES ('CatalogueObjects1.TopicB.Nutzung.Programm', 'topicb_nutzung_programm', 'topica_katalog_programmref', 'topicb_nutzung');
+INSERT INTO CatalogueObjects1.t_ili2db_attrname VALUES ('CatalogueObjects_V1.Catalogues.CatalogueReference.Reference', 'reference_topica_katalog_programm', 'topica_katalog_programmref', 'topica_katalog_programm');
+INSERT INTO CatalogueObjects1.t_ili2db_attrname VALUES ('CatalogueObjects1.TopicA.Katalog_Programm.Programm', 'programm', 'topica_katalog_programm', NULL);
+INSERT INTO CatalogueObjects1.t_ili2db_attrname VALUES ('CatalogueObjects_V1.Catalogues.CatalogueReference.Reference', 'reference_topicb_katalog_ohneuuid', 'topica_katalog_programmref', 'topicb_katalog_ohneuuid');
+INSERT INTO CatalogueObjects1.t_ili2db_attrname VALUES ('Localisation_V1.MultilingualText.LocalisedText', 'multilingualtext_localisedtext', 'localisedtext', 'multilingualtext');
+INSERT INTO CatalogueObjects1.t_ili2db_attrname VALUES ('Localisation_V1.LocalisedText.Language', 'alanguage', 'localisedtext', NULL);
+INSERT INTO CatalogueObjects1.t_ili2db_classname VALUES ('CatalogueObjects1.TopicA.Katalog_ProgrammRef', 'topica_katalog_programmref');
+INSERT INTO CatalogueObjects1.t_ili2db_classname VALUES ('CatalogueObjects_V1.Catalogues.Item', 'catalogues_item');
+INSERT INTO CatalogueObjects1.t_ili2db_classname VALUES ('CatalogueObjects_V1.Catalogues.CatalogueReference', 'catalogues_cataloguereference');
+INSERT INTO CatalogueObjects1.t_ili2db_classname VALUES ('LocalisationCH_V1.MultilingualText', 'localisationch_v1_multilingualtext');
+INSERT INTO CatalogueObjects1.t_ili2db_classname VALUES ('CatalogueObjects1.TopicA.Katalog_Programm', 'topica_katalog_programm');
+INSERT INTO CatalogueObjects1.t_ili2db_classname VALUES ('CatalogueObjects1.TopicB.Nutzung', 'topicb_nutzung');
+INSERT INTO CatalogueObjects1.t_ili2db_classname VALUES ('CatalogueObjects1.TopicB.Katalog_OhneUuid', 'topicb_katalog_ohneuuid');
+INSERT INTO CatalogueObjects1.t_ili2db_classname VALUES ('Localisation_V1.LocalisedText', 'localisedtext');
+INSERT INTO CatalogueObjects1.t_ili2db_classname VALUES ('LocalisationCH_V1.LocalisedText', 'localisationch_v1_localisedtext');
+INSERT INTO CatalogueObjects1.t_ili2db_classname VALUES ('Localisation_V1.MultilingualText', 'multilingualtext');
+INSERT INTO CatalogueObjects1.t_ili2db_classname VALUES ('CatalogueObjects_V1.Catalogues.MandatoryCatalogueReference', 'catalogues_mandatorycataloguereference');
+INSERT INTO CatalogueObjects1.t_ili2db_import VALUES (2, 1, '2017-05-08 09:45:53.119', 'postgres', 'test\data\CatalogueObjects\CatalogueObjects1a.xtf');
+INSERT INTO CatalogueObjects1.t_ili2db_import_basket VALUES (6, 2, 3, 2, 3, 5);
+INSERT INTO CatalogueObjects1.t_ili2db_import_basket VALUES (13, 2, 8, 2, 8, 12);
+INSERT INTO CatalogueObjects1.t_ili2db_import_object VALUES (7, 6, 'CatalogueObjects1.TopicA.Katalog_Programm', 2, 4, 5);
+INSERT INTO CatalogueObjects1.t_ili2db_import_object VALUES (14, 13, 'CatalogueObjects1.TopicA.Katalog_ProgrammRef', 2, 11, 12);
+INSERT INTO CatalogueObjects1.t_ili2db_import_object VALUES (15, 13, 'CatalogueObjects1.TopicB.Nutzung', 1, 10, 10);
+INSERT INTO CatalogueObjects1.t_ili2db_import_object VALUES (16, 13, 'CatalogueObjects1.TopicB.Katalog_OhneUuid', 1, 9, 9);
+INSERT INTO CatalogueObjects1.t_ili2db_inheritance VALUES ('CatalogueObjects1.TopicB.Nutzung', NULL);
+INSERT INTO CatalogueObjects1.t_ili2db_inheritance VALUES ('Localisation_V1.MultilingualText', NULL);
+INSERT INTO CatalogueObjects1.t_ili2db_inheritance VALUES ('CatalogueObjects_V1.Catalogues.MandatoryCatalogueReference', NULL);
+INSERT INTO CatalogueObjects1.t_ili2db_inheritance VALUES ('Localisation_V1.LocalisedText', NULL);
+INSERT INTO CatalogueObjects1.t_ili2db_inheritance VALUES ('CatalogueObjects1.TopicA.Katalog_ProgrammRef', 'CatalogueObjects_V1.Catalogues.CatalogueReference');
+INSERT INTO CatalogueObjects1.t_ili2db_inheritance VALUES ('CatalogueObjects1.TopicA.Katalog_Programm', 'CatalogueObjects_V1.Catalogues.Item');
+INSERT INTO CatalogueObjects1.t_ili2db_inheritance VALUES ('LocalisationCH_V1.MultilingualText', 'Localisation_V1.MultilingualText');
+INSERT INTO CatalogueObjects1.t_ili2db_inheritance VALUES ('LocalisationCH_V1.LocalisedText', 'Localisation_V1.LocalisedText');
+INSERT INTO CatalogueObjects1.t_ili2db_inheritance VALUES ('CatalogueObjects1.TopicB.Katalog_OhneUuid', 'CatalogueObjects_V1.Catalogues.Item');
+INSERT INTO CatalogueObjects1.t_ili2db_inheritance VALUES ('CatalogueObjects_V1.Catalogues.CatalogueReference', NULL);
+INSERT INTO CatalogueObjects1.t_ili2db_inheritance VALUES ('CatalogueObjects_V1.Catalogues.Item', NULL);
+INSERT INTO CatalogueObjects1.t_ili2db_model VALUES ('CatalogueObjects1.ili', '2.3', 'CatalogueObjects1{ LocalisationCH_V1 CatalogueObjects_V1}', 'INTERLIS 2.3;
 
 MODEL CatalogueObjects1 (en) AT "mailto:ce@eisenhutinformatik.ch"
   VERSION "2017-04-21" =
@@ -77,7 +75,7 @@ MODEL CatalogueObjects1 (en) AT "mailto:ce@eisenhutinformatik.ch"
 
 END CatalogueObjects1.
 ', '2017-05-08 09:45:53.103');
-INSERT INTO t_ili2db_model VALUES ('CHBase_Part2_LOCALISATION_20110830.ili', '2.3', 'InternationalCodes_V1 Localisation_V1{ InternationalCodes_V1} LocalisationCH_V1{ InternationalCodes_V1 Localisation_V1} Dictionaries_V1{ InternationalCodes_V1} DictionariesCH_V1{ Dictionaries_V1 InternationalCodes_V1}', '/* ########################################################################
+INSERT INTO CatalogueObjects1.t_ili2db_model VALUES ('CHBase_Part2_LOCALISATION_20110830.ili', '2.3', 'InternationalCodes_V1 Localisation_V1{ InternationalCodes_V1} LocalisationCH_V1{ InternationalCodes_V1 Localisation_V1} Dictionaries_V1{ InternationalCodes_V1} DictionariesCH_V1{ Dictionaries_V1 InternationalCodes_V1}', '/* ########################################################################
    CHBASE - BASE MODULES OF THE SWISS FEDERATION FOR MINIMAL GEODATA MODELS
    ======
    BASISMODULE DES BUNDES           MODULES DE BASE DE LA CONFEDERATION
@@ -249,7 +247,7 @@ END DictionariesCH_V1.
 
 !! ########################################################################
 ', '2017-05-08 09:45:53.103');
-INSERT INTO t_ili2db_model VALUES ('CHBase_Part3_CATALOGUEOBJECTS_20110830.ili', '2.3', 'CatalogueObjects_V1{ INTERLIS} CatalogueObjectTrees_V1{ CatalogueObjects_V1 INTERLIS}', '/* ########################################################################
+INSERT INTO CatalogueObjects1.t_ili2db_model VALUES ('CHBase_Part3_CATALOGUEOBJECTS_20110830.ili', '2.3', 'CatalogueObjects_V1{ INTERLIS} CatalogueObjectTrees_V1{ CatalogueObjects_V1 INTERLIS}', '/* ########################################################################
    CHBASE - BASE MODULES OF THE SWISS FEDERATION FOR MINIMAL GEODATA MODELS
    ======
    BASISMODULE DES BUNDES           MODULES DE BASE DE LA CONFEDERATION
@@ -338,34 +336,34 @@ END CatalogueObjectTrees_V1.
 !! ########################################################################
 ', '2017-05-08 09:45:53.103');
 
-INSERT INTO t_ili2db_settings VALUES ('ch.ehi.ili2db.uuidDefaultValue', 'uuid_generate_v4()');
-INSERT INTO t_ili2db_settings VALUES ('ch.ehi.ili2db.multilingualTrafo', 'expand');
-INSERT INTO t_ili2db_settings VALUES ('ch.ehi.ili2db.defaultSrsAuthority', 'EPSG');
-INSERT INTO t_ili2db_settings VALUES ('ch.ehi.ili2db.BasketHandling', 'readWrite');
-INSERT INTO t_ili2db_settings VALUES ('ch.ehi.ili2db.nameOptimization', 'topic');
-INSERT INTO t_ili2db_settings VALUES ('ch.ehi.ili2db.catalogueRefTrafo', 'coalesce');
-INSERT INTO t_ili2db_settings VALUES ('ch.ehi.ili2db.multiSurfaceTrafo', 'coalesce');
-INSERT INTO t_ili2db_settings VALUES ('ch.ehi.ili2db.defaultSrsCode', '21781');
-INSERT INTO t_ili2db_settings VALUES ('ch.ehi.ili2db.maxSqlNameLength', '60');
-INSERT INTO t_ili2db_settings VALUES ('ch.ehi.ili2db.sender', 'ili2pg-3.8.1-20170421');
-INSERT INTO t_ili2db_settings VALUES ('ch.ehi.ili2db.inheritanceTrafo', 'smart1');
-INSERT INTO t_ili2db_settings VALUES ('ch.interlis.ili2c.ilidirs', '%ILI_FROM_DB;%XTF_DIR;http://models.interlis.ch/;%JAR_DIR');
-INSERT INTO t_ili2db_settings VALUES ('ch.ehi.ili2db.createForeignKey', 'yes');
-INSERT INTO t_ili2db_trafo VALUES ('CatalogueObjects1.TopicA.Katalog_Programm.Programm', 'ch.ehi.ili2db.multilingualTrafo', 'expand');
-INSERT INTO t_ili2db_trafo VALUES ('CatalogueObjects1.TopicA.Katalog_ProgrammRef', 'ch.ehi.ili2db.inheritance', 'newClass');
-INSERT INTO t_ili2db_trafo VALUES ('CatalogueObjects_V1.Catalogues.Item', 'ch.ehi.ili2db.inheritance', 'subClass');
-INSERT INTO t_ili2db_trafo VALUES ('CatalogueObjects_V1.Catalogues.CatalogueReference', 'ch.ehi.ili2db.inheritance', 'subClass');
-INSERT INTO t_ili2db_trafo VALUES ('LocalisationCH_V1.MultilingualText', 'ch.ehi.ili2db.inheritance', 'superClass');
-INSERT INTO t_ili2db_trafo VALUES ('CatalogueObjects1.TopicA.Katalog_Programm', 'ch.ehi.ili2db.inheritance', 'newClass');
-INSERT INTO t_ili2db_trafo VALUES ('CatalogueObjects1.TopicB.Nutzung', 'ch.ehi.ili2db.inheritance', 'newClass');
-INSERT INTO t_ili2db_trafo VALUES ('CatalogueObjects1.TopicB.Katalog_OhneUuid', 'ch.ehi.ili2db.inheritance', 'newClass');
-INSERT INTO t_ili2db_trafo VALUES ('Localisation_V1.LocalisedText', 'ch.ehi.ili2db.inheritance', 'newClass');
-INSERT INTO t_ili2db_trafo VALUES ('LocalisationCH_V1.LocalisedText', 'ch.ehi.ili2db.inheritance', 'superClass');
-INSERT INTO t_ili2db_trafo VALUES ('Localisation_V1.MultilingualText', 'ch.ehi.ili2db.inheritance', 'newClass');
-INSERT INTO t_ili2db_trafo VALUES ('CatalogueObjects_V1.Catalogues.MandatoryCatalogueReference', 'ch.ehi.ili2db.inheritance', 'subClass');
-INSERT INTO topica_katalog_programm VALUES (4, 3, '5880375a-52cd-4b2d-af50-c3a6fc5c5352', 'Bio', NULL, 'Bioproduktion', 'Production bio', NULL, 'Agricoltura biologica', NULL);
-INSERT INTO topica_katalog_programm VALUES (5, 3, '2d9b613c-ecd1-47b9-b6b3-17116e16ffc7', 'Extenso', NULL, 'Extensoproduktion', 'Production extenso', NULL, 'Produzione extensiva', NULL);
-INSERT INTO topicb_katalog_ohneuuid VALUES (9, 8);
-INSERT INTO topicb_nutzung VALUES (10, 8);
-INSERT INTO topica_katalog_programmref VALUES (11, 8, 0, 4, NULL, 10);
-INSERT INTO topica_katalog_programmref VALUES (12, 8, 1, 5, NULL, 10);
+INSERT INTO CatalogueObjects1.t_ili2db_settings VALUES ('ch.ehi.ili2db.uuidDefaultValue', 'uuid_generate_v4()');
+INSERT INTO CatalogueObjects1.t_ili2db_settings VALUES ('ch.ehi.ili2db.multilingualTrafo', 'expand');
+INSERT INTO CatalogueObjects1.t_ili2db_settings VALUES ('ch.ehi.ili2db.defaultSrsAuthority', 'EPSG');
+INSERT INTO CatalogueObjects1.t_ili2db_settings VALUES ('ch.ehi.ili2db.BasketHandling', 'readWrite');
+INSERT INTO CatalogueObjects1.t_ili2db_settings VALUES ('ch.ehi.ili2db.nameOptimization', 'topic');
+INSERT INTO CatalogueObjects1.t_ili2db_settings VALUES ('ch.ehi.ili2db.catalogueRefTrafo', 'coalesce');
+INSERT INTO CatalogueObjects1.t_ili2db_settings VALUES ('ch.ehi.ili2db.multiSurfaceTrafo', 'coalesce');
+INSERT INTO CatalogueObjects1.t_ili2db_settings VALUES ('ch.ehi.ili2db.defaultSrsCode', '21781');
+INSERT INTO CatalogueObjects1.t_ili2db_settings VALUES ('ch.ehi.ili2db.maxSqlNameLength', '60');
+INSERT INTO CatalogueObjects1.t_ili2db_settings VALUES ('ch.ehi.ili2db.sender', 'ili2pg-3.8.1-20170421');
+INSERT INTO CatalogueObjects1.t_ili2db_settings VALUES ('ch.ehi.ili2db.inheritanceTrafo', 'smart1');
+INSERT INTO CatalogueObjects1.t_ili2db_settings VALUES ('ch.interlis.ili2c.ilidirs', '%ILI_FROM_DB;%XTF_DIR;http://models.interlis.ch/;%JAR_DIR');
+INSERT INTO CatalogueObjects1.t_ili2db_settings VALUES ('ch.ehi.ili2db.createForeignKey', 'yes');
+INSERT INTO CatalogueObjects1.t_ili2db_trafo VALUES ('CatalogueObjects1.TopicA.Katalog_Programm.Programm', 'ch.ehi.ili2db.multilingualTrafo', 'expand');
+INSERT INTO CatalogueObjects1.t_ili2db_trafo VALUES ('CatalogueObjects1.TopicA.Katalog_ProgrammRef', 'ch.ehi.ili2db.inheritance', 'newClass');
+INSERT INTO CatalogueObjects1.t_ili2db_trafo VALUES ('CatalogueObjects_V1.Catalogues.Item', 'ch.ehi.ili2db.inheritance', 'subClass');
+INSERT INTO CatalogueObjects1.t_ili2db_trafo VALUES ('CatalogueObjects_V1.Catalogues.CatalogueReference', 'ch.ehi.ili2db.inheritance', 'subClass');
+INSERT INTO CatalogueObjects1.t_ili2db_trafo VALUES ('LocalisationCH_V1.MultilingualText', 'ch.ehi.ili2db.inheritance', 'superClass');
+INSERT INTO CatalogueObjects1.t_ili2db_trafo VALUES ('CatalogueObjects1.TopicA.Katalog_Programm', 'ch.ehi.ili2db.inheritance', 'newClass');
+INSERT INTO CatalogueObjects1.t_ili2db_trafo VALUES ('CatalogueObjects1.TopicB.Nutzung', 'ch.ehi.ili2db.inheritance', 'newClass');
+INSERT INTO CatalogueObjects1.t_ili2db_trafo VALUES ('CatalogueObjects1.TopicB.Katalog_OhneUuid', 'ch.ehi.ili2db.inheritance', 'newClass');
+INSERT INTO CatalogueObjects1.t_ili2db_trafo VALUES ('Localisation_V1.LocalisedText', 'ch.ehi.ili2db.inheritance', 'newClass');
+INSERT INTO CatalogueObjects1.t_ili2db_trafo VALUES ('LocalisationCH_V1.LocalisedText', 'ch.ehi.ili2db.inheritance', 'superClass');
+INSERT INTO CatalogueObjects1.t_ili2db_trafo VALUES ('Localisation_V1.MultilingualText', 'ch.ehi.ili2db.inheritance', 'newClass');
+INSERT INTO CatalogueObjects1.t_ili2db_trafo VALUES ('CatalogueObjects_V1.Catalogues.MandatoryCatalogueReference', 'ch.ehi.ili2db.inheritance', 'subClass');
+INSERT INTO CatalogueObjects1.topica_katalog_programm VALUES (4, 3, '5880375a-52cd-4b2d-af50-c3a6fc5c5352', 'Bio', NULL, 'Bioproduktion', 'Production bio', NULL, 'Agricoltura biologica', NULL);
+INSERT INTO CatalogueObjects1.topica_katalog_programm VALUES (5, 3, '2d9b613c-ecd1-47b9-b6b3-17116e16ffc7', 'Extenso', NULL, 'Extensoproduktion', 'Production extenso', NULL, 'Produzione extensiva', NULL);
+INSERT INTO CatalogueObjects1.topicb_katalog_ohneuuid VALUES (9, 8);
+INSERT INTO CatalogueObjects1.topicb_nutzung VALUES (10, 8);
+INSERT INTO CatalogueObjects1.topica_katalog_programmref VALUES (11, 8, 0, 4, NULL, 10);
+INSERT INTO CatalogueObjects1.topica_katalog_programmref VALUES (12, 8, 1, 5, NULL, 10);

@@ -1,7 +1,7 @@
 DROP SCHEMA IF EXISTS Naming1smart1 CASCADE;
 CREATE SCHEMA Naming1smart1;
 
-CREATE SEQUENCE Naming1smart1.t_ili2db_seq;;
+CREATE SEQUENCE Naming1smart1.t_ili2db_seq;
 -- Naming1.TestAttr.ClassA1
 CREATE TABLE Naming1smart1.testattr_classa1 (
   T_Id bigint PRIMARY KEY DEFAULT nextval('Naming1smart1.t_ili2db_seq')
