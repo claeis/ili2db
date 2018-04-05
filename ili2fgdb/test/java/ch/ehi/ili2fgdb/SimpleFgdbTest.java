@@ -334,6 +334,7 @@ public class SimpleFgdbTest {
 	@Test
 	public void exportXtf() throws Exception
 	{
+		importXtf();
 		EhiLogger.getInstance().setTraceFilter(false);
 	    File fgdbFile=new File(fgdbFileName);
 	    //Fgdb4j.deleteFileGdb(fgdbFile);
@@ -354,6 +355,7 @@ public class SimpleFgdbTest {
 	@Test
 	public void exportXtfStruct() throws Exception
 	{
+		importXtfStruct();
 		EhiLogger.getInstance().setTraceFilter(false);
 	    File fgdbFile=new File(fgdbFileName);
 	    //Fgdb4j.deleteFileGdb(fgdbFile);
@@ -374,6 +376,7 @@ public class SimpleFgdbTest {
 	@Test
 	public void exportXtfInheritance() throws Exception
 	{
+		importXtfInheritanceSmart2();
 		EhiLogger.getInstance().setTraceFilter(false);
 	    File fgdbFile=new File(fgdbFileName);
 	    //Fgdb4j.deleteFileGdb(fgdbFile);
@@ -394,6 +397,7 @@ public class SimpleFgdbTest {
 	@Test
 	public void exportXtfCoord() throws Exception
 	{
+		importXtfCoord();
 		EhiLogger.getInstance().setTraceFilter(false);
 	    File fgdbFile=new File(fgdbFileName);
 	    //Fgdb4j.deleteFileGdb(fgdbFile);

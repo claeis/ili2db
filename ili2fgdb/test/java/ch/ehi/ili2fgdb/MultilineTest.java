@@ -103,6 +103,7 @@ public class MultilineTest {
 	@Test
 	public void exportXtf() throws Exception
 	{
+		importXtf();
 		EhiLogger.getInstance().setTraceFilter(false);
 	    File fgdbFile=new File(fgdbFileName);
 	    //Fgdb4j.deleteFileGdb(fgdbFile);
@@ -110,7 +111,7 @@ public class MultilineTest {
 		File data=new File("test/data/Simple/Simple23a-out.xtf");
 		Config config=initConfig(data.getPath(),data.getPath()+".log");
 		config.setFunction(Config.FC_EXPORT);
-		config.setModels("Simple23");
+		config.setModels("MultiLine2");
 		Ili2db.readSettingsFromDb(config);
 		try{
 			Ili2db.run(config,null);
