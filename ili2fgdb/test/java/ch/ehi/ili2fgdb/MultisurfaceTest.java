@@ -101,7 +101,7 @@ public class MultisurfaceTest {
 		}
 		
 	}
-	@Ignore("NullPointerException")
+	@Ignore("unexpected nullPointerException in methode: ch.ehi.ili2db.toxtf.ToXtfRecordConverter.addAttrValue")
 	@Test
 	public void exportXtf() throws Exception
 	{
