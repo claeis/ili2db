@@ -17,6 +17,8 @@
  */
 package ch.ehi.ili2db.base;
 
+import java.sql.SQLException;
+
 import ch.ehi.basics.logging.EhiLogger;
 import ch.ehi.ili2db.gui.Config;
 import ch.ehi.sqlgen.repository.DbTableName;
@@ -78,12 +80,13 @@ public class TableBasedIdGen implements DbIdGen {
 			sqlName=schema+"."+sqlName;
 		}
 		java.sql.PreparedStatement getstmt=null;
+		java.sql.ResultSet res=null;
 		try{
 			String stmt="SELECT "+SQL_T_LASTUNIQUEID+" FROM "+sqlName+" WHERE "+SQL_T_KEY+"= ?";
 			EhiLogger.traceBackendCmd(stmt);
 			getstmt=conn.prepareStatement(stmt);
 			getstmt.setString(1,key);
-			java.sql.ResultSet res=getstmt.executeQuery();
+			res=getstmt.executeQuery();
 			long ret=0;
 			if(res.next()){
 				ret=res.getLong(1);
@@ -92,6 +95,14 @@ public class TableBasedIdGen implements DbIdGen {
 		}catch(java.sql.SQLException ex){
 			EhiLogger.logError("failed to query "+sqlName,ex);
 		}finally{
+            if(res!=null) {
+                try {
+                    res.close();
+                } catch (SQLException e) {
+                    EhiLogger.logError(e);
+                }
+                res=null;
+            }
 			if(getstmt!=null){
 				try{
 					getstmt.close();

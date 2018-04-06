@@ -1564,6 +1564,7 @@ public class Ili2db {
 			sqlName=schema+"."+sqlName;
 		}
 		java.sql.PreparedStatement getstmt=null;
+        java.sql.ResultSet res=null;
 		try{
 			String stmt="SELECT "+colT_ID+" FROM "+sqlName+" WHERE "+DbNames.DATASETS_TAB_DATASETNAME+"= ?";
 			if(datasetName==null) {
@@ -1574,7 +1575,7 @@ public class Ili2db {
 			if(datasetName!=null) {
 				getstmt.setString(1,datasetName);
 			}
-			java.sql.ResultSet res=getstmt.executeQuery();
+			res=getstmt.executeQuery();
 			if(res.next()){
 				long sqlId=res.getLong(1);
 				return sqlId;
@@ -1582,6 +1583,13 @@ public class Ili2db {
 		}catch(java.sql.SQLException ex){
 			throw new Ili2dbException("failed to query "+sqlName,ex);
 		}finally{
+            if(res!=null){
+                try{
+                    res.close();
+                }catch(java.sql.SQLException ex){
+                    EhiLogger.logError(ex);
+                }
+            }
 			if(getstmt!=null){
 				try{
 					getstmt.close();
@@ -1806,11 +1814,12 @@ public class Ili2db {
 		String topicQName=null;
 		long sqlId=0;
 		java.sql.PreparedStatement getstmt=null;
+        java.sql.ResultSet res=null;
 		try{
 			String stmt="SELECT "+colT_ID+","+DbNames.BASKETS_TAB_TOPIC_COL+" FROM "+sqlName;
 			EhiLogger.traceBackendCmd(stmt);
 			getstmt=conn.prepareStatement(stmt);
-			java.sql.ResultSet res=getstmt.executeQuery();
+			res=getstmt.executeQuery();
 			while(res.next()){
 				sqlId=res.getLong(1);
 				topicQName=res.getString(2);
@@ -1837,6 +1846,14 @@ public class Ili2db {
 		}catch(java.sql.SQLException ex){
 			throw new Ili2dbException("failed to query "+sqlName,ex);
 		}finally{
+            if(res!=null){
+                try{
+                    res.close();
+                    res=null;
+                }catch(java.sql.SQLException ex){
+                    EhiLogger.logError(ex);
+                }
+            }
 			if(getstmt!=null){
 				try{
 					getstmt.close();
