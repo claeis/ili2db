@@ -101,7 +101,7 @@ public class MultisurfaceTest {
 		}
 		
 	}
-	@Ignore("unexpected nullPointerException in methode: ch.ehi.ili2db.toxtf.ToXtfRecordConverter.addAttrValue")
+	//@Ignore("unexpected nullPointerException in methode: ch.ehi.ili2db.toxtf.ToXtfRecordConverter.addAttrValue")
 	@Test
 	public void exportXtf() throws Exception
 	{
@@ -110,7 +110,7 @@ public class MultisurfaceTest {
 	    File fgdbFile=new File(fgdbFileName);
 	    //Fgdb4j.deleteFileGdb(fgdbFile);
 	    Class driverClass = Class.forName(FgdbDriver.class.getName());
-		File data=new File("test/data/Simple/Simple23a-out.xtf");
+        File data=new File("test/data/MultiSurface/MultiSurface2a-out.xtf");
 		Config config=initConfig(data.getPath(),data.getPath()+".log");
 		config.setFunction(Config.FC_EXPORT);
 		config.setModels("MultiSurface2");

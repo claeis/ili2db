@@ -16,6 +16,7 @@ LATEST
 ---------------------------
 - ehisqlgen-1.13.4
 - ili2fgdb: fixed resource leaks
+- ili2fgdb: fixed MultiSurface export
 
 ili2pg 3.11.2 (2018-02-08)
 -----------------------------
