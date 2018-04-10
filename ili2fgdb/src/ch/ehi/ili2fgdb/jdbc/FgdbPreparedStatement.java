@@ -62,93 +62,110 @@ public class FgdbPreparedStatement implements PreparedStatement {
 	}
 
 	private ResultSet executeSelectStmt(AbstractSelectStmt stmt,String keyCol) throws SQLException {
-		  EnumRows rows=new EnumRows();
 		  Table table=null;
+          EnumRows rows=null;
 		  java.util.List<SelectValue> selectCols=null;
 		  int err=0;
 		  ResultSet ret=null;
-		if(stmt instanceof FgdbSelectStmt){
-			FgdbSelectStmt ustmt=(FgdbSelectStmt)stmt;
-			table=new Table();
-			err=conn.getGeodatabase().OpenTable(ustmt.getTableName(), table);
-			if(err!=0){
-				StringBuffer errDesc=new StringBuffer();
-				fgbd4j.GetErrorDescription(err, errDesc);
-				throw new SQLException(errDesc.toString());
-			}
-			setupFieldInfo(table);
-			  StringBuffer where=new StringBuffer();
-			  {
-				  String sep="";
-				  int paramIdx=0;
-				  for(java.util.Map.Entry<Value,Value> set:ustmt.getConditions()){
-					  ColRef colref=(ColRef)set.getKey();
-					  where.append(sep);sep=" AND ";
-					  where.append(colref.getName());
-					  Value rh=set.getValue();
-						if(rh instanceof IntConst){
-							where.append("=");
-							where.append(Integer.toString(((IntConst)rh).getValue()));
-						}else if(rh instanceof IsNull){
-							where.append(" IS NULL");
-						}else if(rh instanceof StringConst){
-							where.append("='");
-							where.append(((StringConst)rh).getValue());
-							where.append("'");
-						}else{
-							  Object param=params.get(paramIdx++);
-							  appendParam(where, paramIdx, param);
-						}
-				  }
-			  }
-			  StringBuffer fields=new StringBuffer();
-			  {
-				  String sep="";
-				  selectCols=ustmt.getFields();
-				  for(SelectValue colref:selectCols){
-					  if(colref instanceof SelectValueField){
-						  fields.append(sep);sep=",";
-						  String columnName = colref.getColumnName();
-						fields.append(columnName);
-						if(keyCol!=null && columnName.equals(keyCol)){
-							keyCol=null;
-						}
-					  }
-				  }
-				  if(keyCol!=null){
-					  fields.append(sep);sep=",";
-					  fields.append(keyCol);
-					  selectCols.add(new SelectValueField(new SqlQname(keyCol)));
-				  }
-			  }
-			  
-			  err= table.Search(fields.toString(), where.toString(), false, rows);
-				if(err!=0){
-					StringBuffer errDesc=new StringBuffer();
-					fgbd4j.GetErrorDescription(err, errDesc);
-					throw new SQLException(errDesc.toString());
-				}
-				ret=new FgdbResultSet(conn,table,rows,selectCols);
-		}else if(stmt instanceof JoinStmt){
-			JoinStmt jstmt=(JoinStmt)stmt;
-			ResultSet rsLeft=executeSelectStmt(jstmt.getLeftStmt(),jstmt.getLeftKeyCol());
-			ArrayList<ResultSet> rsRight=new ArrayList<ResultSet>();
-			int rightc=jstmt.getRightStmt().size();
-			for(int i=0;i<rightc;i++){
-				rsRight.add(executeSelectStmt(jstmt.getRightStmt().get(i),jstmt.getRightKeyCol().get(i)));	
-			}
-			ret=new JoinResultSet(rsLeft,rsRight,jstmt);
-		}else if(stmt instanceof ComplexSelectStmt){
-			ret=new MemResultSet(executeSelectStmt(((ComplexSelectStmt) stmt).getSubSelect(),null));
-		}else{
-			err=conn.getGeodatabase().ExecuteSQL(stmtStr, true, rows);
-			if(err!=0){
-				StringBuffer errDesc=new StringBuffer();
-				fgbd4j.GetErrorDescription(err, errDesc);
-				throw new SQLException(errDesc.toString());
-			}
-			ret=new FgdbResultSet(conn,table,rows,selectCols);
-		}
+		  try {
+		        if(stmt instanceof FgdbSelectStmt){
+		            FgdbSelectStmt ustmt=(FgdbSelectStmt)stmt;
+		            table=new Table();
+		            err=conn.getGeodatabase().OpenTable(ustmt.getTableName(), table);
+		            if(err!=0){
+		                StringBuffer errDesc=new StringBuffer();
+		                fgbd4j.GetErrorDescription(err, errDesc);
+		                throw new SQLException(errDesc.toString());
+		            }
+		            setupFieldInfo(table);
+		              StringBuffer where=new StringBuffer();
+		              {
+		                  String sep="";
+		                  int paramIdx=0;
+		                  for(java.util.Map.Entry<Value,Value> set:ustmt.getConditions()){
+		                      ColRef colref=(ColRef)set.getKey();
+		                      where.append(sep);sep=" AND ";
+		                      where.append(colref.getName());
+		                      Value rh=set.getValue();
+		                        if(rh instanceof IntConst){
+		                            where.append("=");
+		                            where.append(Integer.toString(((IntConst)rh).getValue()));
+		                        }else if(rh instanceof IsNull){
+		                            where.append(" IS NULL");
+		                        }else if(rh instanceof StringConst){
+		                            where.append("='");
+		                            where.append(((StringConst)rh).getValue());
+		                            where.append("'");
+		                        }else{
+		                              Object param=params.get(paramIdx++);
+		                              appendParam(where, paramIdx, param);
+		                        }
+		                  }
+		              }
+		              StringBuffer fields=new StringBuffer();
+		              {
+		                  String sep="";
+		                  selectCols=ustmt.getFields();
+		                  for(SelectValue colref:selectCols){
+		                      if(colref instanceof SelectValueField){
+		                          fields.append(sep);sep=",";
+		                          String columnName = colref.getColumnName();
+		                        fields.append(columnName);
+		                        if(keyCol!=null && columnName.equals(keyCol)){
+		                            keyCol=null;
+		                        }
+		                      }
+		                  }
+		                  if(keyCol!=null){
+		                      fields.append(sep);sep=",";
+		                      fields.append(keyCol);
+		                      selectCols.add(new SelectValueField(new SqlQname(keyCol)));
+		                  }
+		              }
+		              
+		              rows=new EnumRows();
+		              err= table.Search(fields.toString(), where.toString(), false, rows);
+		                if(err!=0){
+		                    StringBuffer errDesc=new StringBuffer();
+		                    fgbd4j.GetErrorDescription(err, errDesc);
+		                    throw new SQLException(errDesc.toString());
+		                }
+		                ret=new FgdbResultSet(conn,table,rows,selectCols);
+		                rows=null;
+		                table=null;
+		        }else if(stmt instanceof JoinStmt){
+		            JoinStmt jstmt=(JoinStmt)stmt;
+		            ResultSet rsLeft=executeSelectStmt(jstmt.getLeftStmt(),jstmt.getLeftKeyCol());
+		            ArrayList<ResultSet> rsRight=new ArrayList<ResultSet>();
+		            int rightc=jstmt.getRightStmt().size();
+		            for(int i=0;i<rightc;i++){
+		                rsRight.add(executeSelectStmt(jstmt.getRightStmt().get(i),jstmt.getRightKeyCol().get(i)));  
+		            }
+		            ret=new JoinResultSet(rsLeft,rsRight,jstmt);
+		        }else if(stmt instanceof ComplexSelectStmt){
+		            ret=new MemResultSet(executeSelectStmt(((ComplexSelectStmt) stmt).getSubSelect(),null));
+		        }else{
+		            rows=new EnumRows();
+		            err=conn.getGeodatabase().ExecuteSQL(stmtStr, true, rows);
+		            if(err!=0){
+		                StringBuffer errDesc=new StringBuffer();
+		                fgbd4j.GetErrorDescription(err, errDesc);
+		                throw new SQLException(errDesc.toString());
+		            }
+		            ret=new FgdbResultSet(conn,table,rows,selectCols);
+		            rows=null;
+		            table=null;
+		        }
+		  }finally {
+		      if(rows!=null) {
+		          rows.Close();
+		          rows=null;
+		      }
+		      if(table!=null) {
+		          conn.getGeodatabase().CloseTable(table);
+		          table=null;
+		      }
+		  }
 	
 	return ret;
 	}
