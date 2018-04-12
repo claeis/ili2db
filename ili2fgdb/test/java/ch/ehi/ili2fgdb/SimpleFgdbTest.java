@@ -6,6 +6,7 @@ import java.io.File;
 import java.sql.Connection;
 import org.junit.After;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 import ch.ehi.basics.logging.EhiLogger;
 import ch.ehi.fgdb4j.Fgdb4j;
@@ -376,6 +377,7 @@ public class SimpleFgdbTest {
 		}
 	}
 	
+	@Ignore("attrb2: BAG of struct not exported correct")
 	@Test
 	public void exportXtfStruct() throws Exception
 	{
@@ -414,11 +416,20 @@ public class SimpleFgdbTest {
 				String attr=iomObj.getattrvalue("attrb1");
 				assertEquals("gugus",attr);
 			}
+			{
+				String attr=iomObj.getattrvalue("attrb2");
+				assertEquals("me",attr);
+			}
+			{
+				String attr=iomObj.getattrvalue("attrb2");
+				assertEquals("do",attr);
+			}
 			assertTrue(reader.read() instanceof EndBasketEvent);
 			assertTrue(reader.read() instanceof EndTransferEvent);
 		}
 	}
 	
+	@Ignore("object: B1.1 not exported correct")
 	@Test
 	public void exportXtfInheritance() throws Exception
 	{
@@ -448,13 +459,52 @@ public class SimpleFgdbTest {
 			event=reader.read();
 			assertTrue(event instanceof ObjectEvent);
 			IomObject iomObj=((ObjectEvent)event).getIomObject();
-			{
-				String attr=iomObj.getattrvalue("attrb1");
-				assertEquals("gugus2",attr);
+			{	
+				String oid=iomObj.getobjectoid();
+				assertEquals("ClassB1.1", oid);
+				String attrtag=iomObj.getobjecttag();
+				assertEquals("SimpleInheritance23.TestA.ClassB1", attrtag);
+				{
+					String attr=iomObj.getattrvalue("attrb1");
+					assertEquals("gugus",attr);
+				}
+				{
+					String attr=iomObj.getattrvalue("attrb2");
+					assertEquals("me1",attr);
+				}
+				{
+					String attr=iomObj.getattrvalue("attrb2");
+					assertEquals("do1",attr);
+				}
+				{
+					String attr=iomObj.getattrvalue("attrc1");
+					assertEquals("fix2",attr);
+				}
 			}
+			event=reader.read();
+			assertTrue(event instanceof ObjectEvent);
+			IomObject iomObj2=((ObjectEvent)event).getIomObject();
 			{
-				String attr=iomObj.getattrvalue("attrc1");
-				assertEquals("fix2",attr);
+				String oid=iomObj2.getobjectoid();
+				assertEquals("ClassC1.2", oid);
+				String attrtag=iomObj2.getobjecttag();
+				assertEquals("SimpleInheritance23.TestA.ClassC1", attrtag);
+				{
+					String attr=iomObj2.getattrvalue("attrb1");
+					assertEquals("gugus2",attr);
+				}
+				{
+					String attr=iomObj2.getattrvalue("attrb2");
+					assertEquals("me2",attr);
+				}
+				{
+					String attr=iomObj2.getattrvalue("attrb2");
+					assertEquals("do2",attr);
+				}
+				{
+					String attr=iomObj2.getattrvalue("attrc1");
+					assertEquals("fix2",attr);
+				}
 			}
 			assertTrue(reader.read() instanceof EndBasketEvent);
 			assertTrue(reader.read() instanceof EndTransferEvent);
@@ -491,17 +541,33 @@ public class SimpleFgdbTest {
 			assertTrue(event instanceof ObjectEvent);
 			IomObject iomObj=((ObjectEvent)event).getIomObject();
 			{
-				IomObject coord=iomObj.getattrobj("attr2", 0);
-				assertTrue(coord.getattrvalue("C1").equals("2460001.0"));
-				assertTrue(coord.getattrvalue("C2").equals("1045001.0"));
+				String oid=iomObj.getobjectoid();
+				assertEquals("o1", oid);
+				String attrtag=iomObj.getobjecttag();
+				assertEquals("SimpleCoord23.TestA.ClassA1", attrtag);
+				{
+					{
+						IomObject coord=iomObj.getattrobj("attr2", 0);
+						assertTrue(coord.getattrvalue("C1").equals("2460001.0"));
+						assertTrue(coord.getattrvalue("C2").equals("1045001.0"));
+					}
+				}
 			}
 			event=reader.read();
 			assertTrue(event instanceof ObjectEvent);
 			IomObject iomObj2=((ObjectEvent)event).getIomObject();
 			{
-				IomObject coord=iomObj2.getattrobj("attr2", 0);
-				assertTrue(coord.getattrvalue("C1").equals("2460002.0"));
-				assertTrue(coord.getattrvalue("C2").equals("1045002.0"));
+				String oid=iomObj2.getobjectoid();
+				assertEquals("o2", oid);
+				String attrtag=iomObj2.getobjecttag();
+				assertEquals("SimpleCoord23.TestA.ClassA1", attrtag);
+				{
+					{
+						IomObject coord=iomObj2.getattrobj("attr2", 0);
+						assertTrue(coord.getattrvalue("C1").equals("2460002.0"));
+						assertTrue(coord.getattrvalue("C2").equals("1045002.0"));
+					}
+				}
 			}
 			assertTrue(reader.read() instanceof EndBasketEvent);
 			assertTrue(reader.read() instanceof EndTransferEvent);

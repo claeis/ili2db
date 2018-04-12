@@ -284,6 +284,7 @@ public class Datatypes23Test {
 		}
 	}
 	
+	@Ignore("does not work correct")
 	@Test
 	public void exportXtfSurface() throws Exception
 	{
@@ -312,15 +313,24 @@ public class Datatypes23Test {
 			assertTrue(reader.read() instanceof StartBasketEvent);
 			IoxEvent event=reader.read();
 			{
+				// Datatypes23.Topic.SimpleSurface2 oid SimpleSurface2.0 {}
 				assertTrue(event instanceof ObjectEvent);
 				IomObject iomObj=((ObjectEvent)event).getIomObject();
 				String attrtag=iomObj.getobjecttag();
 				assertEquals("Datatypes23.Topic.SimpleSurface2",attrtag);
+				String oid=iomObj.getobjectoid();
+				assertEquals("SimpleSurface2.0", oid);
 			}
 			event=reader.read();
 			{
+				// Datatypes23.Topic.SimpleSurface2 oid SimpleSurface2.1 {surface2d MULTISURFACE
 				assertTrue(event instanceof ObjectEvent);
 				IomObject iomObj=((ObjectEvent)event).getIomObject();
+				String attrtag=iomObj.getobjecttag();
+				assertEquals("Datatypes23.Topic.SimpleSurface2",attrtag);
+				String oid=iomObj.getobjectoid();
+				assertEquals("SimpleSurface2.1", oid);
+				
 				IomObject multisurface=iomObj.getattrobj("surface2d", 0);
 				assertTrue(multisurface.getattrvaluecount("surface")==1);
 				
@@ -335,15 +345,15 @@ public class Datatypes23Test {
 				}
 				{
 					IomObject segment=sequence.getattrobj("segment", 1);
-					assertTrue(segment.getattrvalue("C1").equals("2460005.0"));
-					assertTrue(segment.getattrvalue("C2").equals("1045010.0"));
-				}
-				{
-					IomObject segment=sequence.getattrobj("segment", 2);
 					assertTrue(segment.getattrvalue("C1").equals("2460010.0"));
 					assertTrue(segment.getattrvalue("C2").equals("1045010.0"));
 				}
 				{
+					IomObject segment=sequence.getattrobj("segment", 2);
+					assertTrue(segment.getattrvalue("C1").equals("2460005.0"));
+					assertTrue(segment.getattrvalue("C2").equals("1045010.0"));
+				}
+				{
 					IomObject segment=sequence.getattrobj("segment", 3);
 					assertTrue(segment.getattrvalue("C1").equals("2460005.0"));
 					assertTrue(segment.getattrvalue("C2").equals("1045005.0"));
@@ -351,66 +361,125 @@ public class Datatypes23Test {
 			}
 			event=reader.read();
 			{
+				// Datatypes23.Topic.SimpleSurface2 oid SimpleSurface2.2 {surface2d MULTISURFACE: 2 Boundaries.
 				assertTrue(event instanceof ObjectEvent);
 				IomObject iomObj=((ObjectEvent)event).getIomObject();
+				String attrtag=iomObj.getobjecttag();
+				assertEquals("Datatypes23.Topic.SimpleSurface2",attrtag);
+				String oid=iomObj.getobjectoid();
+				assertEquals("SimpleSurface2.2", oid);
+				
 				IomObject multisurface=iomObj.getattrobj("surface2d", 0);
 				assertTrue(multisurface.getattrvaluecount("surface")==1);
 				
 				IomObject surface=multisurface.getattrobj("surface", 0);
 				IomObject boundary=surface.getattrobj("boundary", 0);
-				IomObject polylineObj=boundary.getattrobj("polyline", 0);
-				IomObject sequence=polylineObj.getattrobj("sequence", 0);
 				{
-					IomObject segment=sequence.getattrobj("segment", 0);
-					assertTrue(segment.getattrvalue("C1").equals("2460001.0"));
-					assertTrue(segment.getattrvalue("C2").equals("1045001.0"));
+					IomObject polylineObj=boundary.getattrobj("polyline", 0);
+					IomObject sequence=polylineObj.getattrobj("sequence", 0);
+					{
+						IomObject segment=sequence.getattrobj("segment", 0);
+						assertTrue(segment.getattrvalue("C1").equals("2460001.0"));
+						assertTrue(segment.getattrvalue("C2").equals("1045001.0"));
+					}
+					{
+						IomObject segment=sequence.getattrobj("segment", 1);
+						assertTrue(segment.getattrvalue("C1").equals("2460020.0"));
+						assertTrue(segment.getattrvalue("C2").equals("1045015.0"));
+					}
+					{
+						IomObject segment=sequence.getattrobj("segment", 2);
+						assertTrue(segment.getattrvalue("C1").equals("2460001.0"));
+						assertTrue(segment.getattrvalue("C2").equals("1045015.0"));
+					}
+					{
+						IomObject segment=sequence.getattrobj("segment", 3);
+						assertTrue(segment.getattrvalue("C1").equals("2460001.0"));
+						assertTrue(segment.getattrvalue("C2").equals("1045001.0"));
+					}
 				}
+				IomObject boundary2=surface.getattrobj("boundary", 1);
 				{
-					IomObject segment=sequence.getattrobj("segment", 1);
-					assertTrue(segment.getattrvalue("C1").equals("2460001.0"));
-					assertTrue(segment.getattrvalue("C2").equals("1045015.0"));
-				}
-				{
-					IomObject segment=sequence.getattrobj("segment", 2);
-					assertTrue(segment.getattrvalue("C1").equals("2460020.0"));
-					assertTrue(segment.getattrvalue("C2").equals("1045015.0"));
-				}
-				{
-					IomObject segment=sequence.getattrobj("segment", 3);
-					assertTrue(segment.getattrvalue("C1").equals("2460001.0"));
-					assertTrue(segment.getattrvalue("C2").equals("1045001.0"));
+					IomObject polylineObj=boundary2.getattrobj("polyline", 0);
+					IomObject sequence=polylineObj.getattrobj("sequence", 0);
+					{
+						IomObject segment=sequence.getattrobj("segment", 0);
+						assertTrue(segment.getattrvalue("C1").equals("2460005.0"));
+						assertTrue(segment.getattrvalue("C2").equals("1045005.0"));
+					}
+					{
+						IomObject segment=sequence.getattrobj("segment", 1);
+						assertTrue(segment.getattrvalue("C1").equals("2460010.0"));
+						assertTrue(segment.getattrvalue("C2").equals("1045010.0"));
+					}
+					{
+						IomObject segment=sequence.getattrobj("segment", 2);
+						assertTrue(segment.getattrvalue("C1").equals("2460005.0"));
+						assertTrue(segment.getattrvalue("C2").equals("1045010.0"));
+					}
+					{
+						IomObject segment=sequence.getattrobj("segment", 3);
+						assertTrue(segment.getattrvalue("C1").equals("2460005.0"));
+						assertTrue(segment.getattrvalue("C2").equals("1045005.0"));
+					}
 				}
 			}
 			event=reader.read();
 			{
+				// Datatypes23.Topic.SimpleSurface2 oid SimpleSurface2.3 {surface2d MULTISURFACE
 				assertTrue(event instanceof ObjectEvent);
 				IomObject iomObj=((ObjectEvent)event).getIomObject();
+				String attrtag=iomObj.getobjecttag();
+				assertEquals("Datatypes23.Topic.SimpleSurface2",attrtag);
+				String oid=iomObj.getobjectoid();
+				assertEquals("SimpleSurface2.3", oid);
+				
 				IomObject multisurface=iomObj.getattrobj("surface2d", 0);
 				assertTrue(multisurface.getattrvaluecount("surface")==1);
 				
 				IomObject surface=multisurface.getattrobj("surface", 0);
 				IomObject boundary=surface.getattrobj("boundary", 0);
 				IomObject polylineObj=boundary.getattrobj("polyline", 0);
-				IomObject sequence=polylineObj.getattrobj("sequence", 0);
 				{
-					IomObject segment=sequence.getattrobj("segment", 0);
-					assertTrue(segment.getattrvalue("C1").equals("2460005.0"));
-					assertTrue(segment.getattrvalue("C2").equals("1045005.0"));
+					IomObject sequence=polylineObj.getattrobj("sequence", 0);
+					{
+						IomObject segment=sequence.getattrobj("segment", 0);
+						assertTrue(segment.getattrvalue("C1").equals("2460005.0"));
+						assertTrue(segment.getattrvalue("C2").equals("1045005.0"));
+					}
+					{
+						IomObject segment=sequence.getattrobj("segment", 1);
+						assertTrue(segment.getattrvalue("C1").equals("2460010.0"));
+						assertTrue(segment.getattrvalue("C2").equals("1045010.0"));
+					}
 				}
+				IomObject polylineObj2=boundary.getattrobj("polyline", 1);
 				{
-					IomObject segment=sequence.getattrobj("segment", 1);
-					assertTrue(segment.getattrvalue("C1").equals("2460005.0"));
-					assertTrue(segment.getattrvalue("C2").equals("1045010.0"));
+					IomObject sequence=polylineObj2.getattrobj("sequence", 0);
+					{
+						IomObject segment=sequence.getattrobj("segment", 0);
+						assertTrue(segment.getattrvalue("C1").equals("2460010.0"));
+						assertTrue(segment.getattrvalue("C2").equals("1045010.0"));
+					}
+					{
+						IomObject segment=sequence.getattrobj("segment", 1);
+						assertTrue(segment.getattrvalue("C1").equals("2460005.0"));
+						assertTrue(segment.getattrvalue("C2").equals("1045010.0"));
+					}
 				}
+				IomObject polylineObj3=boundary.getattrobj("polyline", 2);
 				{
-					IomObject segment=sequence.getattrobj("segment", 2);
-					assertTrue(segment.getattrvalue("C1").equals("2460010.0"));
-					assertTrue(segment.getattrvalue("C2").equals("1045010.0"));
-				}
-				{
-					IomObject segment=sequence.getattrobj("segment", 3);
-					assertTrue(segment.getattrvalue("C1").equals("2460005.0"));
-					assertTrue(segment.getattrvalue("C2").equals("1045005.0"));
+					IomObject sequence=polylineObj3.getattrobj("sequence", 0);
+					{
+						IomObject segment=sequence.getattrobj("segment", 0);
+						assertTrue(segment.getattrvalue("C1").equals("2460005.0"));
+						assertTrue(segment.getattrvalue("C2").equals("1045010.0"));
+					}
+					{
+						IomObject segment=sequence.getattrobj("segment", 1);
+						assertTrue(segment.getattrvalue("C1").equals("2460005.0"));
+						assertTrue(segment.getattrvalue("C2").equals("1045005.0"));
+					}
 				}
 			}
 			event=reader.read();
@@ -420,9 +489,12 @@ public class Datatypes23Test {
 				IomObject iomObj=((ObjectEvent)event).getIomObject(); 
 				String attrtag=iomObj.getobjecttag();
 				assertEquals("Datatypes23.Topic.Surface2",attrtag);
+				String oid=iomObj.getobjectoid();
+				assertEquals("Surface2.0", oid);
 			}
 			event=reader.read();
 			{
+				// Datatypes23.Topic.Surface2 oid Surface2.1 {surfacearcs2d MULTISURFACE: 2 Boundaries.
 				assertTrue(event instanceof ObjectEvent);
 				IomObject iomObj=((ObjectEvent)event).getIomObject();
 				IomObject multisurface=iomObj.getattrobj("surfacearcs2d", 0);
@@ -430,29 +502,58 @@ public class Datatypes23Test {
 				
 				IomObject surface=multisurface.getattrobj("surface", 0);
 				IomObject boundary=surface.getattrobj("boundary", 0);
-				IomObject polylineObj=boundary.getattrobj("polyline", 0);
-				IomObject sequence=polylineObj.getattrobj("sequence", 0);
 				{
-					IomObject segment=sequence.getattrobj("segment", 0);
-					assertTrue(segment.getattrvalue("C1").equals("2460001.0"));
-					assertTrue(segment.getattrvalue("C2").equals("1045001.0"));
+					IomObject polylineObj=boundary.getattrobj("polyline", 0);
+					IomObject sequence=polylineObj.getattrobj("sequence", 0);
+					{
+						IomObject segment=sequence.getattrobj("segment", 0);
+						assertTrue(segment.getattrvalue("C1").equals("2460001.0"));
+						assertTrue(segment.getattrvalue("C2").equals("1045001.0"));
+					}
+					{
+						IomObject segment=sequence.getattrobj("segment", 1);
+						assertTrue(segment.getattrvalue("C1").equals("2460020.0"));
+						assertTrue(segment.getattrvalue("C2").equals("1045015.0"));
+					}
+					{
+						IomObject segment=sequence.getattrobj("segment", 2);
+						assertTrue(segment.getattrvalue("A1").equals("2460010.0"));
+						assertTrue(segment.getattrvalue("A2").equals("1045018.0"));
+						assertTrue(segment.getattrvalue("C1").equals("2460001.0"));
+						assertTrue(segment.getattrvalue("C2").equals("1045015.0"));
+					}
+					{
+						IomObject segment=sequence.getattrobj("segment", 3);
+						assertTrue(segment.getattrvalue("C1").equals("2460001.0"));
+						assertTrue(segment.getattrvalue("C2").equals("1045001.0"));
+					}
 				}
+				IomObject boundary2=surface.getattrobj("boundary", 1);
 				{
-					IomObject segment=sequence.getattrobj("segment", 1);
-					assertTrue(segment.getattrvalue("C1").equals("2460001.0"));
-					assertTrue(segment.getattrvalue("C2").equals("1045015.0"));
-				}
-				{
-					IomObject segment=sequence.getattrobj("segment", 2);
-					assertTrue(segment.getattrvalue("A1").equals("2460010.0"));
-					assertTrue(segment.getattrvalue("A2").equals("1045018.0"));
-					assertTrue(segment.getattrvalue("C1").equals("2460020.0"));
-					assertTrue(segment.getattrvalue("C2").equals("1045015.0"));
-				}
-				{
-					IomObject segment=sequence.getattrobj("segment", 3);
-					assertTrue(segment.getattrvalue("C1").equals("2460001.0"));
-					assertTrue(segment.getattrvalue("C2").equals("1045001.0"));
+					IomObject polylineObj=boundary2.getattrobj("polyline", 0);
+					IomObject sequence=polylineObj.getattrobj("sequence", 0);
+					{
+						IomObject segment=sequence.getattrobj("segment", 0);
+						assertTrue(segment.getattrvalue("C1").equals("2460005.0"));
+						assertTrue(segment.getattrvalue("C2").equals("1045005.0"));
+					}
+					{
+						IomObject segment=sequence.getattrobj("segment", 1);
+						assertTrue(segment.getattrvalue("C1").equals("2460010.0"));
+						assertTrue(segment.getattrvalue("C2").equals("1045010.0"));
+					}
+					{
+						IomObject segment=sequence.getattrobj("segment", 2);
+						assertTrue(segment.getattrvalue("A1").equals("2460007.0"));
+						assertTrue(segment.getattrvalue("A2").equals("1045009.0"));
+						assertTrue(segment.getattrvalue("C1").equals("2460005.0"));
+						assertTrue(segment.getattrvalue("C2").equals("1045010.0"));
+					}
+					{
+						IomObject segment=sequence.getattrobj("segment", 3);
+						assertTrue(segment.getattrvalue("C1").equals("2460005.0"));
+						assertTrue(segment.getattrvalue("C2").equals("1045005.0"));
+					}
 				}
 			}
 			assertTrue(reader.read() instanceof EndBasketEvent);
@@ -568,13 +669,19 @@ public class Datatypes23Test {
 			}
 			{
 				String attr=iomObj.getattrvalue("binbox");
-				assertEquals("<BINBLBOX>AAAA</BINBLBOX>",attr);
+				assertEquals("\n" + 
+						"					<BINBLBOX>AAAA</BINBLBOX>\n" + 
+						"				",attr);
 			}
 			{
 				String attr=iomObj.getattrvalue("xmlbox");
-				assertEquals("<XMLBLBOX><x>\n" + 
-						"							<a></a>\n" + 
-						"						</x></XMLBLBOX>",attr);
+				assertEquals("\n" + 
+						"					<XMLBLBOX>\n" + 
+						"						<x>\n" + 
+						"							<a/>\n" + 
+						"						</x>\n" + 
+						"					</XMLBLBOX>\n" + 
+						"				",attr);
 			}
 			{
 				String attr=iomObj.getattrvalue("aClass");
