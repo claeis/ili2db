@@ -6,13 +6,9 @@ import java.io.File;
 import java.sql.Connection;
 import org.junit.After;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
-
 import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.MultiPolygon;
-
+import com.vividsolutions.jts.geom.Polygon;
 import ch.ehi.basics.logging.EhiLogger;
 import ch.ehi.fgdb4j.Fgdb4j;
 import ch.ehi.ili2db.base.Ili2db;
@@ -137,33 +133,48 @@ public class MultisurfaceTest {
 				assertTrue(event instanceof ObjectEvent);
 				IomObject iomObj=((ObjectEvent)event).getIomObject();
 				String attrtag=iomObj.getobjecttag();
-				assertEquals("MultiLine2.TestA.ClassA1",attrtag);
+				assertEquals("MultiSurface2.TestA.ClassA1",attrtag);
 				
 				IomObject attrObj=iomObj.getattrobj("geom", 0);
-				
-				// convert
-				MultiPolygon jtsMultipolygon=Iox2jts.multisurface2JTS(attrObj, 0, 2056);
-				// polygon1
-				Geometry polygon1=jtsMultipolygon.getGeometryN(0);
-				assertEquals(1,polygon1.getNumGeometries());
-				Coordinate[] coords=polygon1.getCoordinates();
+				IomObject flaechen=attrObj.getattrobj("Flaechen", 0);
 				{
-					com.vividsolutions.jts.geom.Coordinate coord=new com.vividsolutions.jts.geom.Coordinate(new Double("600030.0"), new Double("200020.0"));
-					assertEquals(coord, coords[0]);
-					com.vividsolutions.jts.geom.Coordinate coord2=new com.vividsolutions.jts.geom.Coordinate(new Double("600045.0"), new Double("200040.0"));
-					assertEquals(coord2, coords[1]);
-					com.vividsolutions.jts.geom.Coordinate coord3=new com.vividsolutions.jts.geom.Coordinate(new Double("600010.0"), new Double("200040.0"));
-					assertEquals(coord3, coords[2]);
-					com.vividsolutions.jts.geom.Coordinate coord4=new com.vividsolutions.jts.geom.Coordinate(new Double("600030.0"), new Double("200020.0"));
-					assertEquals(coord4, coords[3]);
-					com.vividsolutions.jts.geom.Coordinate coord5=new com.vividsolutions.jts.geom.Coordinate(new Double("600015.0"), new Double("200005.0"));
-					assertEquals(coord5, coords[4]);
-					com.vividsolutions.jts.geom.Coordinate coord6=new com.vividsolutions.jts.geom.Coordinate(new Double("600040.0"), new Double("200010.0"));
-					assertEquals(coord6, coords[5]);
-					com.vividsolutions.jts.geom.Coordinate coord7=new com.vividsolutions.jts.geom.Coordinate(new Double("600005.0"), new Double("200010.0"));
-					assertEquals(coord7, coords[6]);
-					com.vividsolutions.jts.geom.Coordinate coord8=new com.vividsolutions.jts.geom.Coordinate(new Double("600015.0"), new Double("200005.0"));
-					assertEquals(coord8, coords[7]);
+					IomObject flaeche=flaechen.getattrobj("Flaeche", 0);
+					// convert
+					Polygon jtsPolygon=Iox2jts.surface2JTS(flaeche, 2056);
+					// polygon1
+					assertEquals(1,jtsPolygon.getNumGeometries());
+					Coordinate[] coords=jtsPolygon.getCoordinates();
+					{
+						com.vividsolutions.jts.geom.Coordinate coord=new com.vividsolutions.jts.geom.Coordinate(new Double("600030.0"), new Double("200020.0"));
+						assertEquals(coord, coords[0]);
+						com.vividsolutions.jts.geom.Coordinate coord2=new com.vividsolutions.jts.geom.Coordinate(new Double("600010.0"), new Double("200040.0"));
+						assertEquals(coord2, coords[1]);
+						com.vividsolutions.jts.geom.Coordinate coord3=new com.vividsolutions.jts.geom.Coordinate(new Double("600045.0"), new Double("200040.0"));
+						assertEquals(coord3, coords[2]);
+						com.vividsolutions.jts.geom.Coordinate coord4=new com.vividsolutions.jts.geom.Coordinate(new Double("600030.0"), new Double("200020.0"));
+						assertEquals(coord4, coords[3]);
+					}
+				}
+				IomObject flaechen2=attrObj.getattrobj("Flaechen", 1);
+				{
+					IomObject flaeche=flaechen2.getattrobj("Flaeche", 0);
+					// convert
+					Polygon jtsPolygon=Iox2jts.surface2JTS(flaeche, 2056);
+					// polygon1
+					assertEquals(1,jtsPolygon.getNumGeometries());
+					Coordinate[] coords=jtsPolygon.getCoordinates();
+					{
+						com.vividsolutions.jts.geom.Coordinate coord1=new com.vividsolutions.jts.geom.Coordinate(new Double("600015.0"), new Double("200005.0"));
+						assertEquals(coord1, coords[0]);
+						com.vividsolutions.jts.geom.Coordinate coord2=new com.vividsolutions.jts.geom.Coordinate(new Double("600005.0"), new Double("200010.0"));
+						assertEquals(coord2, coords[1]);
+						com.vividsolutions.jts.geom.Coordinate coord3=new com.vividsolutions.jts.geom.Coordinate(new Double("600010.0"), new Double("200020.0"));
+						assertEquals(coord3, coords[2]);
+						com.vividsolutions.jts.geom.Coordinate coord4=new com.vividsolutions.jts.geom.Coordinate(new Double("600040.0"), new Double("200010.0"));
+						assertEquals(coord4, coords[3]);
+						com.vividsolutions.jts.geom.Coordinate coord5=new com.vividsolutions.jts.geom.Coordinate(new Double("600015.0"), new Double("200005.0"));
+						assertEquals(coord5, coords[4]);
+					}
 				}
 				assertTrue(reader.read() instanceof EndBasketEvent);
 				assertTrue(reader.read() instanceof EndTransferEvent);
