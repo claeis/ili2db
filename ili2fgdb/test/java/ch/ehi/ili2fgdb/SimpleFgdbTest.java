@@ -377,7 +377,6 @@ public class SimpleFgdbTest {
 		}
 	}
 	
-	@Ignore("attrb2: BAG of struct not exported correct")
 	@Test
 	public void exportXtfStruct() throws Exception
 	{
@@ -406,8 +405,6 @@ public class SimpleFgdbTest {
 			IoxEvent event=reader.read();
 			assertTrue(event instanceof ObjectEvent);
 			IomObject iomObj=((ObjectEvent)event).getIomObject();
-			int attrCount=iomObj.getattrcount();
-			assertEquals(1,attrCount);
 			String oid=iomObj.getobjectoid();
 			assertEquals("o1",oid);
 			String attrtag=iomObj.getobjecttag();
@@ -416,12 +413,13 @@ public class SimpleFgdbTest {
 				String attr=iomObj.getattrvalue("attrb1");
 				assertEquals("gugus",attr);
 			}
+			assertEquals(2,iomObj.getattrvaluecount("attrb2"));
 			{
-				String attr=iomObj.getattrvalue("attrb2");
+				String attr=iomObj.getattrobj("attrb2",0).getattrvalue("attra");
 				assertEquals("me",attr);
 			}
 			{
-				String attr=iomObj.getattrvalue("attrb2");
+				String attr=iomObj.getattrobj("attrb2",1).getattrvalue("attra");
 				assertEquals("do",attr);
 			}
 			assertTrue(reader.read() instanceof EndBasketEvent);
