@@ -13,11 +13,22 @@ MODEL CatalogueObjects1 (en) AT "mailto:ce@eisenhutinformatik.ch"
       Code : MANDATORY TEXT*20;
       Programm : MANDATORY LocalisationCH_V1.MultilingualText;
     END Katalog_Programm;
+    
+    CLASS Katalog_Programm2
+    EXTENDS Katalog_Programm =
+      Titel : MANDATORY TEXT*20;
+    END Katalog_Programm2;
 
     STRUCTURE Katalog_ProgrammRef
     EXTENDS CatalogueObjects_V1.Catalogues.CatalogueReference =
       Reference (EXTENDED) : MANDATORY REFERENCE TO (EXTERNAL) Katalog_Programm;
     END Katalog_ProgrammRef;
+
+    STRUCTURE Katalog_Programm2Ref
+    EXTENDS Katalog_ProgrammRef =
+      Reference (EXTENDED) : MANDATORY REFERENCE TO (EXTERNAL) Katalog_Programm2;
+    END Katalog_Programm2Ref;
+    
     END TopicA;
     
     TOPIC TopicB
@@ -27,11 +38,19 @@ MODEL CatalogueObjects1 (en) AT "mailto:ce@eisenhutinformatik.ch"
     EXTENDS CatalogueObjects_V1.Catalogues.Item =
     END OhneUuid;
     
+    CLASS OhneUuid2
+    EXTENDS OhneUuid =
+    END OhneUuid2;
+    
     STRUCTURE OhneUuidRef
     EXTENDS CatalogueObjects_V1.Catalogues.CatalogueReference =
       Reference (EXTENDED) : MANDATORY REFERENCE TO (EXTERNAL) OhneUuid;
     END OhneUuidRef;
     
+    STRUCTURE OhneUuid2Ref
+    EXTENDS OhneUuidRef =
+      Reference (EXTENDED) : MANDATORY REFERENCE TO (EXTERNAL) OhneUuid2;
+    END OhneUuid2Ref;
     
     END TopicB;
     
@@ -39,8 +58,14 @@ MODEL CatalogueObjects1 (en) AT "mailto:ce@eisenhutinformatik.ch"
     DEPENDS ON TopicA,TopicB;
     
     CLASS Nutzung =
-      Programm : BAG {0..*} OF CatalogueObjects1.TopicA.Katalog_ProgrammRef;
-      OhneUuid : BAG {0..*} OF CatalogueObjects1.TopicB.OhneUuidRef;
+      Programm_n : BAG {0..*} OF CatalogueObjects1.TopicA.Katalog_ProgrammRef;
+      Programm2_n : BAG {0..*} OF CatalogueObjects1.TopicA.Katalog_Programm2Ref;
+      OhneUuid_n : BAG {0..*} OF CatalogueObjects1.TopicB.OhneUuidRef;
+      OhneUuid2_n : BAG {0..*} OF CatalogueObjects1.TopicB.OhneUuid2Ref;
+      Programm_1 : CatalogueObjects1.TopicA.Katalog_ProgrammRef;
+      Programm2_1 : CatalogueObjects1.TopicA.Katalog_Programm2Ref;
+      OhneUuid_1 : CatalogueObjects1.TopicB.OhneUuidRef;
+      OhneUuid2_1 : CatalogueObjects1.TopicB.OhneUuid2Ref;
     END Nutzung;
     
     END TopicC;

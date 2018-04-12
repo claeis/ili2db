@@ -629,14 +629,19 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 					sep=",";
 			}else if (type instanceof CompositionType){
 				if(TrafoConfigNames.CATALOGUE_REF_TRAFO_COALESCE.equals(trafoConfig.getAttrConfig(attr, TrafoConfigNames.CATALOGUE_REF_TRAFO))){
-					ret.append(sep);
-					ret.append(attrSqlName);
-					if(isUpdate){
-						ret.append("=?");
-					}else{
-						values.append(",?");
-					}
-					sep=",";
+	                ArrayList<ViewableWrapper> targetTables = getTargetTables(getCatalogueRefTarget(type));
+	                for(ViewableWrapper targetTable:targetTables)
+	                {
+	                    attrSqlName=ili2sqlName.mapIliAttributeDef(attr,sqlTableName,targetTable.getSqlTablename(),targetTables.size()>1);
+	                    ret.append(sep);
+	                    ret.append(attrSqlName);
+	                    if(isUpdate){
+	                        ret.append("=?");
+	                    }else{
+	                        values.append(",?");
+	                    }
+	                    sep=",";
+	                }
 				}else if(TrafoConfigNames.MULTISURFACE_TRAFO_COALESCE.equals(trafoConfig.getAttrConfig(attr, TrafoConfigNames.MULTISURFACE_TRAFO))){
 					 ret.append(sep);
 					 ret.append(attrSqlName);
@@ -867,22 +872,17 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 				if (type instanceof CompositionType){
 					 int structc=iomObj.getattrvaluecount(attrName);
 					if(TrafoConfigNames.CATALOGUE_REF_TRAFO_COALESCE.equals(trafoConfig.getAttrConfig(attr, TrafoConfigNames.CATALOGUE_REF_TRAFO))){
-						 IomObject catref=iomObj.getattrobj(attrName,0);
-						 String refoid=null;
-						 if(catref!=null){
-							 IomObject structvalue=catref.getattrobj(IliNames.CHBASE1_CATALOGUEREFERENCE_REFERENCE,0);
-							 if(structvalue!=null){
-								 refoid=structvalue.getobjectrefoid();
-							 }
-						 }
-						 if(refoid!=null){
-							 	String targetClassName=IliNames.CHBASE1_CATALOGUES_ITEM;
-								long refsqlId=oidPool.getObjSqlId(targetClassName,refoid);
-								ps.setLong(valuei, refsqlId);
-						 }else{
-								ps.setNull(valuei,Types.BIGINT);
-						 }
-						valuei++;
+                        IomObject catref=iomObj.getattrobj(attrName,0);
+                        String refoid=null;
+                        if(catref!=null){
+                            IomObject structvalue=catref.getattrobj(IliNames.CHBASE1_CATALOGUEREFERENCE_REFERENCE,0);
+                            if(structvalue!=null){
+                                refoid=structvalue.getobjectrefoid();
+                            }
+                        }
+	                    Holder<Integer> valueiRef=new Holder<Integer>(valuei);
+	                    setReferenceColumn(ps,getCatalogueRefTarget(type),refoid,valueiRef);
+	                    valuei=valueiRef.value;
 					}else if(TrafoConfigNames.MULTISURFACE_TRAFO_COALESCE.equals(trafoConfig.getAttrConfig(attr, TrafoConfigNames.MULTISURFACE_TRAFO))){
 						 IomObject iomValue=iomObj.getattrobj(attrName,0);
 						 IomObject iomMultisurface=null;
