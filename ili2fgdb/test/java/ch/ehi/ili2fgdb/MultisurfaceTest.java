@@ -8,6 +8,11 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
+
+import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.MultiPolygon;
+
 import ch.ehi.basics.logging.EhiLogger;
 import ch.ehi.fgdb4j.Fgdb4j;
 import ch.ehi.ili2db.base.Ili2db;
@@ -21,6 +26,7 @@ import ch.interlis.iox.IoxEvent;
 import ch.interlis.iox.ObjectEvent;
 import ch.interlis.iox.StartBasketEvent;
 import ch.interlis.iox.StartTransferEvent;
+import ch.interlis.iox_j.jts.Iox2jts;
 
 public class MultisurfaceTest {
 	
@@ -136,65 +142,30 @@ public class MultisurfaceTest {
 				assertEquals("MultiLine2.TestA.ClassA1",attrtag);
 				
 				IomObject attrObj=iomObj.getattrobj("geom", 0);
-				IomObject multisurface=attrObj.getattrobj("Flaechen", 0);
+				
+				// convert
+				MultiPolygon jtsMultipolygon=Iox2jts.multisurface2JTS(attrObj, 0, 2056);
+				// polygon1
+				Geometry polygon1=jtsMultipolygon.getGeometryN(0);
+				assertEquals(1,polygon1.getNumGeometries());
+				Coordinate[] coords=polygon1.getCoordinates();
 				{
-					IomObject surfaceObj=multisurface.getattrobj("Flaeche", 0);
-					{	
-						IomObject surface=surfaceObj.getattrobj("surface", 0);
-						IomObject boundary=surface.getattrobj("boundary", 0);
-						IomObject polylineObj=boundary.getattrobj("polyline", 0);
-						IomObject sequence=polylineObj.getattrobj("sequence", 0);
-						{
-							IomObject segment=sequence.getattrobj("segment", 0);
-							assertTrue(segment.getattrvalue("C1").equals("600030.0"));
-							assertTrue(segment.getattrvalue("C2").equals("200020.0"));
-						}
-						{
-							IomObject segment=sequence.getattrobj("segment", 1);
-							assertTrue(segment.getattrvalue("C1").equals("600045.0"));
-							assertTrue(segment.getattrvalue("C2").equals("200040.0"));
-						}
-						{
-							IomObject segment=sequence.getattrobj("segment", 2);
-							assertTrue(segment.getattrvalue("C1").equals("600010.0"));
-							assertTrue(segment.getattrvalue("C2").equals("200040.0"));
-						}
-						{
-							IomObject segment=sequence.getattrobj("segment", 3);
-							assertTrue(segment.getattrvalue("C1").equals("600030.0"));
-							assertTrue(segment.getattrvalue("C2").equals("200020.0"));
-						}
-					}
-				}
-				IomObject multisurface2=attrObj.getattrobj("Flaechen", 1);
-				{
-					IomObject surfaceObj=multisurface2.getattrobj("Flaeche", 0);
-					{
-						IomObject surface=surfaceObj.getattrobj("surface", 0);
-						IomObject boundary=surface.getattrobj("boundary", 0);
-						IomObject polylineObj=boundary.getattrobj("polyline", 0);
-						IomObject sequence=polylineObj.getattrobj("sequence", 0);
-						{
-							IomObject segment=sequence.getattrobj("segment", 0);
-							assertTrue(segment.getattrvalue("C1").equals("600015.0"));
-							assertTrue(segment.getattrvalue("C2").equals("200005.0"));
-						}
-						{
-							IomObject segment=sequence.getattrobj("segment", 1);
-							assertTrue(segment.getattrvalue("C1").equals("600040.0"));
-							assertTrue(segment.getattrvalue("C2").equals("200010.0"));
-						}
-						{
-							IomObject segment=sequence.getattrobj("segment", 2);
-							assertTrue(segment.getattrvalue("C1").equals("600005.0"));
-							assertTrue(segment.getattrvalue("C2").equals("200010.0"));
-						}
-						{
-							IomObject segment=sequence.getattrobj("segment", 3);
-							assertTrue(segment.getattrvalue("C1").equals("600015.0"));
-							assertTrue(segment.getattrvalue("C2").equals("200005.0"));
-						}
-					}
+					com.vividsolutions.jts.geom.Coordinate coord=new com.vividsolutions.jts.geom.Coordinate(new Double("600030.0"), new Double("200020.0"));
+					assertEquals(coord, coords[0]);
+					com.vividsolutions.jts.geom.Coordinate coord2=new com.vividsolutions.jts.geom.Coordinate(new Double("600045.0"), new Double("200040.0"));
+					assertEquals(coord2, coords[1]);
+					com.vividsolutions.jts.geom.Coordinate coord3=new com.vividsolutions.jts.geom.Coordinate(new Double("600010.0"), new Double("200040.0"));
+					assertEquals(coord3, coords[2]);
+					com.vividsolutions.jts.geom.Coordinate coord4=new com.vividsolutions.jts.geom.Coordinate(new Double("600030.0"), new Double("200020.0"));
+					assertEquals(coord4, coords[3]);
+					com.vividsolutions.jts.geom.Coordinate coord5=new com.vividsolutions.jts.geom.Coordinate(new Double("600015.0"), new Double("200005.0"));
+					assertEquals(coord5, coords[4]);
+					com.vividsolutions.jts.geom.Coordinate coord6=new com.vividsolutions.jts.geom.Coordinate(new Double("600040.0"), new Double("200010.0"));
+					assertEquals(coord6, coords[5]);
+					com.vividsolutions.jts.geom.Coordinate coord7=new com.vividsolutions.jts.geom.Coordinate(new Double("600005.0"), new Double("200010.0"));
+					assertEquals(coord7, coords[6]);
+					com.vividsolutions.jts.geom.Coordinate coord8=new com.vividsolutions.jts.geom.Coordinate(new Double("600015.0"), new Double("200005.0"));
+					assertEquals(coord8, coords[7]);
 				}
 				assertTrue(reader.read() instanceof EndBasketEvent);
 				assertTrue(reader.read() instanceof EndTransferEvent);

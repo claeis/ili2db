@@ -6,8 +6,10 @@ import java.io.File;
 import java.sql.Connection;
 import org.junit.After;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
+import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.MultiPolygon;
 import ch.ehi.basics.logging.EhiLogger;
 import ch.ehi.fgdb4j.Fgdb4j;
 import ch.ehi.ili2db.base.Ili2db;
@@ -21,6 +23,7 @@ import ch.interlis.iox.IoxEvent;
 import ch.interlis.iox.ObjectEvent;
 import ch.interlis.iox.StartBasketEvent;
 import ch.interlis.iox.StartTransferEvent;
+import ch.interlis.iox_j.jts.Iox2jts;
 
 public class MultipleGeomAttrsTest {
 	
@@ -99,7 +102,6 @@ public class MultipleGeomAttrsTest {
 		}
 	}
 	
-	@Ignore("order reversed on 2 segments on surface attribute.")
 	@Test
 	public void exportXtf() throws Exception
 	{
@@ -150,29 +152,22 @@ public class MultipleGeomAttrsTest {
 					assertTrue(segment.getattrvalue("C2").equals("1045010.0"));
 				}
 				IomObject attrObj=iomObj.getattrobj("surface", 0);
-				IomObject surface=attrObj.getattrobj("surface", 0);
-				IomObject boundary=surface.getattrobj("boundary", 0);
-				IomObject polylineObj1=boundary.getattrobj("polyline", 0);
-				IomObject sequence1=polylineObj1.getattrobj("sequence", 0);
+				
+				// convert
+				MultiPolygon jtsMultipolygon=Iox2jts.multisurface2JTS(attrObj, 0, 2056);
+				// polygon1
+				Geometry polygon1=jtsMultipolygon.getGeometryN(0);
+				assertEquals(1,polygon1.getNumGeometries());
+				Coordinate[] coords=polygon1.getCoordinates();
 				{
-					IomObject segment=sequence1.getattrobj("segment", 0);
-					assertTrue(segment.getattrvalue("C1").equals("2460005.0"));
-					assertTrue(segment.getattrvalue("C2").equals("1045005.0"));
-				}
-				{
-					IomObject segment=sequence1.getattrobj("segment", 1);
-					assertTrue(segment.getattrvalue("C1").equals("2460010.0"));
-					assertTrue(segment.getattrvalue("C2").equals("1045010.0"));
-				}
-				{
-					IomObject segment=sequence1.getattrobj("segment", 2);
-					assertTrue(segment.getattrvalue("C1").equals("2460005.0"));
-					assertTrue(segment.getattrvalue("C2").equals("1045010.0"));
-				}
-				{
-					IomObject segment=sequence1.getattrobj("segment", 3);
-					assertTrue(segment.getattrvalue("C1").equals("2460005.0"));
-					assertTrue(segment.getattrvalue("C2").equals("1045005.0"));
+					com.vividsolutions.jts.geom.Coordinate coord=new com.vividsolutions.jts.geom.Coordinate(new Double("2460005.0"), new Double("1045005.0"));
+					assertEquals(coord, coords[0]);
+					com.vividsolutions.jts.geom.Coordinate coord2=new com.vividsolutions.jts.geom.Coordinate(new Double("2460005.0"), new Double("1045010.0"));
+					assertEquals(coord2, coords[1]);
+					com.vividsolutions.jts.geom.Coordinate coord3=new com.vividsolutions.jts.geom.Coordinate(new Double("2460010.0"), new Double("1045010.0"));
+					assertEquals(coord3, coords[2]);
+					com.vividsolutions.jts.geom.Coordinate coord4=new com.vividsolutions.jts.geom.Coordinate(new Double("2460005.0"), new Double("1045005.0"));
+					assertEquals(coord4, coords[3]);
 				}
 			}
 			assertTrue(reader.read() instanceof EndBasketEvent);
