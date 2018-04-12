@@ -427,7 +427,6 @@ public class SimpleFgdbTest {
 		}
 	}
 	
-	@Ignore("object: B1.1 not exported correct")
 	@Test
 	public void exportXtfInheritance() throws Exception
 	{
@@ -454,7 +453,6 @@ public class SimpleFgdbTest {
 			assertTrue(reader.read() instanceof StartTransferEvent);
 			assertTrue(reader.read() instanceof StartBasketEvent);
 			IoxEvent event=reader.read();
-			event=reader.read();
 			assertTrue(event instanceof ObjectEvent);
 			IomObject iomObj=((ObjectEvent)event).getIomObject();
 			{	
@@ -466,41 +464,43 @@ public class SimpleFgdbTest {
 					String attr=iomObj.getattrvalue("attrb1");
 					assertEquals("gugus",attr);
 				}
+				assertEquals(2,iomObj.getattrvaluecount("attrb2"));
 				{
-					String attr=iomObj.getattrvalue("attrb2");
+					String attr=iomObj.getattrobj("attrb2",0).getattrvalue("attra");
 					assertEquals("me1",attr);
 				}
 				{
-					String attr=iomObj.getattrvalue("attrb2");
+					String attr=iomObj.getattrobj("attrb2",1).getattrvalue("attra");
 					assertEquals("do1",attr);
 				}
 				{
 					String attr=iomObj.getattrvalue("attrc1");
-					assertEquals("fix2",attr);
+					assertEquals(null,attr);
 				}
 			}
 			event=reader.read();
 			assertTrue(event instanceof ObjectEvent);
-			IomObject iomObj2=((ObjectEvent)event).getIomObject();
+			iomObj=((ObjectEvent)event).getIomObject();
 			{
-				String oid=iomObj2.getobjectoid();
+				String oid=iomObj.getobjectoid();
 				assertEquals("ClassC1.2", oid);
-				String attrtag=iomObj2.getobjecttag();
+				String attrtag=iomObj.getobjecttag();
 				assertEquals("SimpleInheritance23.TestA.ClassC1", attrtag);
 				{
-					String attr=iomObj2.getattrvalue("attrb1");
+					String attr=iomObj.getattrvalue("attrb1");
 					assertEquals("gugus2",attr);
 				}
+                assertEquals(2,iomObj.getattrvaluecount("attrb2"));
+                {
+                    String attr=iomObj.getattrobj("attrb2",0).getattrvalue("attra");
+                    assertEquals("me2",attr);
+                }
+                {
+                    String attr=iomObj.getattrobj("attrb2",1).getattrvalue("attra");
+                    assertEquals("do2",attr);
+                }
 				{
-					String attr=iomObj2.getattrvalue("attrb2");
-					assertEquals("me2",attr);
-				}
-				{
-					String attr=iomObj2.getattrvalue("attrb2");
-					assertEquals("do2",attr);
-				}
-				{
-					String attr=iomObj2.getattrvalue("attrc1");
+					String attr=iomObj.getattrvalue("attrc1");
 					assertEquals("fix2",attr);
 				}
 			}
