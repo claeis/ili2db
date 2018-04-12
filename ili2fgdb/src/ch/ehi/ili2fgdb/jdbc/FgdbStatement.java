@@ -207,6 +207,8 @@ public class FgdbStatement implements Statement {
 	                throw new SQLException(errDesc.toString());
 	            }
 	            ret=new FgdbResultSet(conn,table,rows,selectvalues);
+	            rows=null;
+	            table=null;
 	        return ret;
 		}finally {
 		    if(rows!=null) {
