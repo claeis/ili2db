@@ -52,7 +52,7 @@
   	<artifact:pom id="mypomE" groupId="${groupId}" artifactId="${artifactId}" version="${buildnr}" name="ehibasics">
 			<artifact:dependency groupId="ch.interlis" artifactId="ili2c-tool" version="4.7.7"/>
 			<artifact:dependency groupId="ch.interlis" artifactId="iox-ili" version="1.20.2"/>
-			<artifact:dependency groupId="ch.ehi" artifactId="ehisqlgen" version="1.13.3"/>
+			<artifact:dependency groupId="ch.ehi" artifactId="ehisqlgen" version="1.13.4"/>
 	  </artifact:pom>
 	  <artifact:writepom pomRefId="mypomE" file="build/pom-ili2pg.xml"/>
 	<artifact:pom id="mypom" file="build/pom-ili2pg.xml" />
