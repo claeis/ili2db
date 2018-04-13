@@ -7,6 +7,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.Statement;
+import java.util.HashMap;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;
@@ -128,84 +129,25 @@ public class Datatypes10GpkgTest {
 			assertTrue(reader.read() instanceof StartBasketEvent);
 			
 			IoxEvent event=reader.read();
-			{
-				assertTrue(event instanceof ObjectEvent);
-				IomObject iomObj1=((ObjectEvent)event).getIomObject();
-				{
-					String oid=iomObj1.getobjectoid();
-					assertEquals("11",oid);
-					String attrtag=iomObj1.getobjecttag();
-					assertEquals("Datatypes10.Topic.TableA",attrtag);
-				}
-			}
-			{
+			HashMap<String, Integer> objects=new HashMap<String, Integer>();
+			int objectCount=0;
+			while(!(event instanceof EndBasketEvent)) {
+				IomObject iomObj=((ObjectEvent)event).getIomObject();
+				String objName=iomObj.getobjecttag()+","+iomObj.getobjectoid();
+				objects.put(objName,1);
+				objectCount+=1;
 				event=reader.read();
-				assertTrue(event instanceof ObjectEvent);
-				IomObject iomObj1=((ObjectEvent)event).getIomObject();
-				{
-					String oid=iomObj1.getobjectoid();
-					assertEquals("10",oid);
-					String attrtag=iomObj1.getobjecttag();
-					assertEquals("Datatypes10.Topic.TableA",attrtag);
-				}
 			}
-			{
-				event=reader.read();
-				assertTrue(event instanceof ObjectEvent);
-				IomObject iomObj1=((ObjectEvent)event).getIomObject();
-				{
-					String oid=iomObj1.getobjectoid();
-					assertEquals("11",oid);
-					String attrtag=iomObj1.getobjecttag();
-					assertEquals("Datatypes10.Topic.OtherTable",attrtag);
-				}
-			}
-			{
-				event=reader.read();
-				assertTrue(event instanceof ObjectEvent);
-				IomObject iomObj1=((ObjectEvent)event).getIomObject();
-				{
-					String oid=iomObj1.getobjectoid();
-					assertEquals("10",oid);
-					String attrtag=iomObj1.getobjecttag();
-					assertEquals("Datatypes10.Topic.OtherTable",attrtag);
-				}
-			}
-			{
-				event=reader.read();
-				assertTrue(event instanceof ObjectEvent);
-				IomObject iomObj1=((ObjectEvent)event).getIomObject();
-				{
-					String oid=iomObj1.getobjectoid();
-					assertEquals("30",oid);
-					String attrtag=iomObj1.getobjecttag();
-					assertEquals("Datatypes10.Topic.SubTable",attrtag);
-				}
-			}
-			{
-				event=reader.read();
-				assertTrue(event instanceof ObjectEvent);
-				IomObject iomObj1=((ObjectEvent)event).getIomObject();
-				{
-					String oid=iomObj1.getobjectoid();
-					assertEquals("31",oid);
-					String attrtag=iomObj1.getobjecttag();
-					assertEquals("Datatypes10.Topic.SubTable",attrtag);
-				}
-			}
-			{
-				event=reader.read();
-				assertTrue(event instanceof ObjectEvent);
-				IomObject iomObj1=((ObjectEvent)event).getIomObject();
-				{
-					String oid=iomObj1.getobjectoid();
-					assertEquals("32",oid);
-					String attrtag=iomObj1.getobjecttag();
-					assertEquals("Datatypes10.Topic.SubTable",attrtag);
-				}
-			}
-			assertTrue(reader.read() instanceof EndBasketEvent);
+			assertTrue(event instanceof EndBasketEvent);
 			assertTrue(reader.read() instanceof EndTransferEvent);
+			assertEquals(7,objectCount);
+			assertEquals(1,objects.get("Datatypes10.Topic.TableA,11").intValue());
+			assertEquals(1,objects.get("Datatypes10.Topic.TableA,10").intValue());
+			assertEquals(1,objects.get("Datatypes10.Topic.OtherTable,11").intValue());
+			assertEquals(1,objects.get("Datatypes10.Topic.OtherTable,10").intValue());
+			assertEquals(1,objects.get("Datatypes10.Topic.SubTable,30").intValue());
+			assertEquals(1,objects.get("Datatypes10.Topic.SubTable,31").intValue());
+			assertEquals(1,objects.get("Datatypes10.Topic.SubTable,31").intValue());
 		}
 	}
 
