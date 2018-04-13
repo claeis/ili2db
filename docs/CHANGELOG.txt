@@ -15,7 +15,7 @@ ideas/open issues/questions
 LATEST
 ---------------------------
 
-ili2fgdb 3.11.3 (2018-04-12)
+ili2fgdb/ili2pg/ili2gpkg 3.11.3 (2018-04-12)
 -----------------------------
 - ehisqlgen-1.13.4
 - ili2fgdb: fixed resource leaks

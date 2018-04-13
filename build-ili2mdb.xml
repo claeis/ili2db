@@ -42,7 +42,7 @@
 
 
   <target depends="init,compile" name="jar">
-    <propertyfile file="${src}/ch/ehi/ili2mdb/Version.properties">
+    <propertyfile file="${src}/ch/ehi/ili2db/Version.properties">
 	<!-- <entry  key="versionMicro" type="int" value="1" operation="+"/> -->
 	<entry  key="versionDate" type="date" value="now" pattern="yyyyMMdd"/>
     </propertyfile>
@@ -66,7 +66,7 @@
   </target>
   
   <target depends="init" name="buildnr">
-    <property file="${src}/ch/ehi/ili2mdb/Version.properties" prefix="buildnr."/>
+    <property file="${src}/ch/ehi/ili2db/Version.properties" prefix="buildnr."/>
     <property name="buildnr" value="${buildnr.versionMajor}.${buildnr.versionMinor}.${buildnr.versionMicro}"/>
     <!-- <property name="buildnr" value="${DSTAMP}"/> -->
   </target>
