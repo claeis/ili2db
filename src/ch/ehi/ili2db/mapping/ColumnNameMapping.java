@@ -56,8 +56,9 @@ public class ColumnNameMapping {
 			exstStmt="SELECT "+DbNames.ATTRNAME_TAB_ILINAME_COL+","+DbNames.ATTRNAME_TAB_OWNER_COL+","+DbNames.ATTRNAME_TAB_TARGET_COL+" FROM "+sqlName;
 			EhiLogger.traceBackendCmd(exstStmt);
 			java.sql.PreparedStatement exstPrepStmt = conn.prepareStatement(exstStmt);
+            java.sql.ResultSet rs=null;
 			try{
-				java.sql.ResultSet rs=exstPrepStmt.executeQuery();
+				rs=exstPrepStmt.executeQuery();
 				while(rs.next()){
 					String iliCode=rs.getString(1);
 					String owner=rs.getString(2);
@@ -65,7 +66,12 @@ public class ColumnNameMapping {
 					ret.add(new AttrMappingKey(iliCode,owner,target));
 				}
 			}finally{
+			    if(rs!=null) {
+	                rs.close();
+	                rs=null;
+			    }
 				exstPrepStmt.close();
+				exstPrepStmt=null;
 			}
 		}catch(java.sql.SQLException ex){		
 			throw new Ili2dbException("failed to read attr-mapping-table "+sqlName,ex);
@@ -120,10 +126,11 @@ public class ColumnNameMapping {
 		// create table
 		String stmt="SELECT "+DbNames.ATTRNAME_TAB_ILINAME_COL+", "+DbNames.ATTRNAME_TAB_SQLNAME_COL+", "+DbNames.ATTRNAME_TAB_OWNER_COL+", "+DbNames.ATTRNAME_TAB_TARGET_COL+" FROM "+mapTableName;
 		java.sql.Statement dbstmt = null;
+        java.sql.ResultSet rs=null;
 		try{
 			
 			dbstmt = conn.createStatement();
-			java.sql.ResultSet rs=dbstmt.executeQuery(stmt);
+			rs=dbstmt.executeQuery(stmt);
 			while(rs.next()){
 				String iliname=rs.getString(DbNames.ATTRNAME_TAB_ILINAME_COL);
 				String sqlname=rs.getString(DbNames.ATTRNAME_TAB_SQLNAME_COL);
@@ -135,6 +142,14 @@ public class ColumnNameMapping {
 		}catch(java.sql.SQLException ex){		
 			throw new Ili2dbException("failed to query mapping-table "+mapTableName,ex);
 		}finally{
+            if(rs!=null){
+                try{
+                    rs.close();
+                    rs=null;
+                }catch(java.sql.SQLException ex){       
+                    throw new Ili2dbException("failed to close query of "+mapTableName,ex);
+                }
+            }
 			if(dbstmt!=null){
 				try{
 					dbstmt.close();

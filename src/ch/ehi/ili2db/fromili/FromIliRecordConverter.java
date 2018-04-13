@@ -41,6 +41,7 @@ import ch.ehi.sqlgen.repository.DbIndex;
 import ch.ehi.sqlgen.repository.DbSchema;
 import ch.ehi.sqlgen.repository.DbTable;
 import ch.ehi.sqlgen.repository.DbTableName;
+import ch.interlis.ili2c.metamodel.AbstractClassDef;
 import ch.interlis.ili2c.metamodel.AreaType;
 import ch.interlis.ili2c.metamodel.AssociationDef;
 import ch.interlis.ili2c.metamodel.AttributeDef;
@@ -504,18 +505,22 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 			if(!createGenericStructRef){
 				if(isChbaseCatalogueRef(td, attr) && (coalesceCatalogueRef 
 						|| TrafoConfigNames.CATALOGUE_REF_TRAFO_COALESCE.equals(trafoConfig.getAttrConfig(attr,TrafoConfigNames.CATALOGUE_REF_TRAFO)))){
-					
-					DbColId ret=new DbColId();
-					ret.setNotNull(false);
-					ret.setPrimaryKey(false);
-					if(createFk){
-						ret.setReferencedTable(getSqlType(((ReferenceType) ((AttributeDef)((CompositionType)type).getComponentType().getAttributes().next()).getDomain()).getReferred()));
-					}
-					if(createFkIdx){
-						ret.setIndex(true);
-					}
-					trafoConfig.setAttrConfig(attr, TrafoConfigNames.CATALOGUE_REF_TRAFO,TrafoConfigNames.CATALOGUE_REF_TRAFO_COALESCE);
-					dbCol.value=ret;
+                    ArrayList<ViewableWrapper> targetTables = getTargetTables(getCatalogueRefTarget(type));
+                    for(ViewableWrapper targetTable:targetTables)
+                    {
+                        DbColId ret=new DbColId();
+                        ret.setName(ili2sqlName.mapIliAttributeDef(attr,dbTable.getName().getName(),targetTable.getSqlTablename(),targetTables.size()>1));
+                        ret.setNotNull(false);
+                        ret.setPrimaryKey(false);
+                        if(createFk){
+                            ret.setReferencedTable(targetTable.getSqlTable());
+                        }
+                        if(createFkIdx){
+                            ret.setIndex(true);
+                        }
+                        dbColExts.add(ret);
+                    }
+                    trafoConfig.setAttrConfig(attr, TrafoConfigNames.CATALOGUE_REF_TRAFO,TrafoConfigNames.CATALOGUE_REF_TRAFO_COALESCE);
 				}else if(Ili2cUtility.isMultiSurfaceAttr(td, attr) && (coalesceMultiSurface 
 						|| TrafoConfigNames.MULTISURFACE_TRAFO_COALESCE.equals(trafoConfig.getAttrConfig(attr,TrafoConfigNames.MULTISURFACE_TRAFO)))){
 					multiSurfaceAttrs.addMultiSurfaceAttr(attr);

@@ -481,7 +481,7 @@ public abstract class AbstractMain {
 	private  String version=null;
 	public String getVersion() {
 		  if(version==null){
-		java.util.ResourceBundle resVersion = java.util.ResourceBundle.getBundle(ch.ehi.basics.i18n.ResourceBundle.class2qpackageName(this.getClass())+".Version");
+		java.util.ResourceBundle resVersion = java.util.ResourceBundle.getBundle(ch.ehi.basics.i18n.ResourceBundle.class2qpackageName(AbstractMain.class)+".Version");
 		//java.util.ResourceBundle resVersion = java.util.ResourceBundle.getBundle("ch/ehi/ili2db/Version");
 			// Major version numbers identify significant functional changes.
 			// Minor version numbers identify smaller extensions to the functionality.

@@ -1,7 +1,7 @@
 DROP SCHEMA IF EXISTS Datatypes10 CASCADE;
 CREATE SCHEMA Datatypes10;
 
-CREATE SEQUENCE Datatypes10.t_ili2db_seq;;
+CREATE SEQUENCE Datatypes10.t_ili2db_seq;
 -- Datatypes10.Topic.TableA
 CREATE TABLE Datatypes10.tablea (
   T_Id bigint PRIMARY KEY DEFAULT nextval('Datatypes10.t_ili2db_seq')

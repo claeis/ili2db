@@ -1,7 +1,7 @@
 DROP SCHEMA IF EXISTS CatalogueObjects1 CASCADE;
 CREATE SCHEMA CatalogueObjects1;
 
-CREATE SEQUENCE CatalogueObjects1.t_ili2db_seq;;
+CREATE SEQUENCE CatalogueObjects1.t_ili2db_seq;
 -- Localisation_V1.LocalisedText
 CREATE TABLE CatalogueObjects1.localisedtext (
   T_Id bigint PRIMARY KEY DEFAULT nextval('CatalogueObjects1.t_ili2db_seq')

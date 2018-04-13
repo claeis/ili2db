@@ -52,7 +52,7 @@
   	<artifact:pom id="mypomE" groupId="${groupId}" artifactId="${artifactId}" version="${buildnr}" name="ehibasics">
 			<artifact:dependency groupId="ch.interlis" artifactId="ili2c-tool" version="4.7.7"/>
 			<artifact:dependency groupId="ch.interlis" artifactId="iox-ili" version="1.20.2"/>
-			<artifact:dependency groupId="ch.ehi" artifactId="ehisqlgen" version="1.13.3"/>
+			<artifact:dependency groupId="ch.ehi" artifactId="ehisqlgen" version="1.13.4"/>
 	  </artifact:pom>
 	  <artifact:writepom pomRefId="mypomE" file="build/pom-ili2pg.xml"/>
 	<artifact:pom id="mypom" file="build/pom-ili2pg.xml" />
@@ -106,7 +106,7 @@
 
 
   <target depends="init,compile" name="jar">
-    <propertyfile file="ili2pg/src/ch/ehi/ili2pg/Version.properties">
+    <propertyfile file="src/ch/ehi/ili2db/Version.properties">
 	<!-- <entry  key="versionMicro" type="int" value="1" operation="+"/> -->
 	<entry  key="versionDate" type="date" value="now" pattern="yyyyMMdd"/>
     </propertyfile>
@@ -140,7 +140,7 @@
   </target>
 
   <target depends="init,compile" name="fatjar">
-    <property file="ili2pg/src/ch/ehi/ili2pg/Version.properties" prefix="buildnr."/>
+    <property file="src/ch/ehi/ili2db/Version.properties" prefix="buildnr."/>
 	<property name="buildnr" value="${buildnr.versionMajor}.${buildnr.versionMinor}.${buildnr.versionMicro}"/>
 
 	<delete file="${build}/jar/${ant.project.name}-${buildnr}.jar" quiet="true"/>
@@ -170,7 +170,7 @@
   </target>
   
   <target depends="init" name="buildnr">
-    <property file="ili2pg/src/ch/ehi/ili2pg/Version.properties" prefix="buildnr."/>
+    <property file="src/ch/ehi/ili2db/Version.properties" prefix="buildnr."/>
     <condition property="SNAPSHOT" value="" else="-SNAPSHOT">
        <length string="${release}" trim="true" when="greater" length="0"/>
     </condition>
