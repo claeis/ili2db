@@ -6,21 +6,11 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.HashMap;
-
-import org.junit.After;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
-
 import ch.ehi.basics.logging.EhiLogger;
-import ch.ehi.ili2db.base.DbNames;
-import ch.ehi.ili2db.base.DbUrlConverter;
 import ch.ehi.ili2db.base.Ili2db;
-import ch.ehi.ili2db.base.Ili2dbException;
 import ch.ehi.ili2db.gui.Config;
-import ch.ehi.ili2db.mapping.NameMapping;
-import ch.ehi.sqlgen.DbUtility;
-import ch.ehi.sqlgen.repository.DbTableName;
 import ch.interlis.iom.IomObject;
 import ch.interlis.iom_j.itf.ItfReader;
 import ch.interlis.iom_j.xtf.XtfReader;
@@ -34,11 +24,13 @@ import ch.interlis.iox.StartTransferEvent;
 //-Ddburl=jdbc:postgresql:dbname -Ddbusr=usrname -Ddbpwd=1234
 public class TranslationTest {
 	private static final String DBSCHEMA = "Translation";
-	String dburl=System.getProperty("dburl"); 
-	String dbuser=System.getProperty("dbusr");
-	String dbpwd=System.getProperty("dbpwd"); 
+	private static final String TEST_OUT = "test/data/Translation/";
 	Connection jdbcConnection=null;
 	Statement stmt=null;
+	
+	String dburl=System.getProperty("dburl");
+	String dbuser=System.getProperty("dbusr");
+	String dbpwd=System.getProperty("dbpwd");
 
 	public Config initConfig(String xtfFilename,String dbschema,String logfile) {
 		Config config=new Config();
@@ -70,7 +62,7 @@ public class TranslationTest {
 	        Statement stmt=jdbcConnection.createStatement();
 	        stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");
 	        {       
-				File data=new File("test/data/Translation/EnumOk.ili");
+				File data=new File(TEST_OUT,"EnumOk.ili");
 				Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 				config.setFunction(Config.FC_SCHEMAIMPORT);
 				config.setCreateFk(config.CREATE_FK_YES);
@@ -116,7 +108,7 @@ public class TranslationTest {
 	        Statement stmt=jdbcConnection.createStatement();
 	        stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");
 	        {
-				File data=new File("test/data/Translation/ModelBsimple10.ili");
+				File data=new File(TEST_OUT,"ModelBsimple10.ili");
 				Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 				config.setFunction(Config.FC_SCHEMAIMPORT);
 				config.setCreateFk(config.CREATE_FK_YES);
@@ -162,7 +154,7 @@ public class TranslationTest {
 	        Statement stmt=jdbcConnection.createStatement();
 	        stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");
 	        {
-				File data=new File("test/data/Translation/ModelBsimple10.ili");
+				File data=new File(TEST_OUT,"ModelBsimple10.ili");
 				Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 				config.setFunction(Config.FC_SCHEMAIMPORT);
 				config.setCreateFk(config.CREATE_FK_YES);
@@ -177,7 +169,6 @@ public class TranslationTest {
 				config.setIli1Translation("ModelBsimple10=ModelAsimple10");
 				Ili2db.readSettingsFromDb(config);
 				Ili2db.run(config,null);
-				
 				// class[a2] is imported
 				Assert.assertTrue(stmt.execute("SELECT t_ili2db_classname.iliname, t_ili2db_classname.sqlname FROM "+DBSCHEMA+".t_ili2db_classname WHERE t_ili2db_classname.iliname = 'ModelAsimple10.TopicA.ClassA2'"));
 				{
@@ -210,7 +201,7 @@ public class TranslationTest {
 	        Statement stmt=jdbcConnection.createStatement();
 	        stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");
 	        {
-	    		File data=new File("test/data/Translation/EnumOka.xtf");
+	    		File data=new File(TEST_OUT,"EnumOka.xtf");
 	    		Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 	    		config.setFunction(Config.FC_IMPORT);
 	    		config.setCreateFk(config.CREATE_FK_YES);
@@ -275,17 +266,17 @@ public class TranslationTest {
 	public void exportXtf23() throws Exception
 	{
 		Connection jdbcConnection=null;
+		{
+			importXtf23();
+		}
 		try{
 	        Class driverClass = Class.forName("org.postgresql.Driver");
 	        jdbcConnection = DriverManager.getConnection(
 	        		dburl, dbuser, dbpwd);
 	        Statement stmt=jdbcConnection.createStatement();
-	        stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");
-	        DbUtility.executeSqlScript(jdbcConnection, new java.io.FileReader("test/data/Translation/CreateTableXtf23.sql"));
-	        DbUtility.executeSqlScript(jdbcConnection, new java.io.FileReader("test/data/Translation/InsertIntoTableXtf23.sql"));
 			
 			EhiLogger.getInstance().setTraceFilter(false);
-			File data=new File("test/data/Translation/EnumOka-out.xtf");
+			File data=new File(TEST_OUT,"EnumOka-out.xtf");
 			Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 			config.setFunction(Config.FC_EXPORT);
 			config.setCreateFk(config.CREATE_FK_YES);
@@ -355,7 +346,7 @@ public class TranslationTest {
 	        Statement stmt=jdbcConnection.createStatement();
 	        stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");
 	        {
-	    		File data=new File("test/data/Translation/ModelAsimple10a.itf");
+	    		File data=new File(TEST_OUT,"ModelAsimple10a.itf");
 	    		Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 	    		config.setFunction(Config.FC_IMPORT);
 	    		config.setCreateFk(config.CREATE_FK_YES);
@@ -371,7 +362,7 @@ public class TranslationTest {
 	    		Ili2db.run(config,null);
 	        }
 	        {
-	        	File data=new File("test/data/Translation/ModelBsimple10a.itf");
+	        	File data=new File(TEST_OUT,"ModelBsimple10a.itf");
 	    		Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 	    		config.setFunction(Config.FC_IMPORT);
 	    		config.setDatasetName("ModelBsimple10");
@@ -415,7 +406,7 @@ public class TranslationTest {
 	        stmt=jdbcConnection.createStatement();
 	        stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");
 	        {
-	    		File data=new File("test/data/Translation/ModelAsimple10a.itf");
+	    		File data=new File(TEST_OUT,"ModelAsimple10a.itf");
 	    		Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 	    		config.setFunction(Config.FC_IMPORT);
 	    		config.setCreateFk(config.CREATE_FK_YES);
@@ -433,7 +424,7 @@ public class TranslationTest {
 	    		Ili2db.run(config,null);
 	        }
 	        {
-	        	File data=new File("test/data/Translation/ModelBsimple10a.itf");
+	        	File data=new File(TEST_OUT,"ModelBsimple10a.itf");
 	    		Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 	    		config.setFunction(Config.FC_IMPORT);
 	    		config.setDatasetName("ModelBsimple10");
@@ -476,75 +467,124 @@ public class TranslationTest {
 	public void exportItf10() throws Exception
 	{
 		Connection jdbcConnection=null;
+		{
+			importItf10();
+		}
 		try{
 	        Class driverClass = Class.forName("org.postgresql.Driver");
 	        jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
 	        stmt=jdbcConnection.createStatement();
-	        stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");
-	        DbUtility.executeSqlScript(jdbcConnection, new java.io.FileReader("test/data/Translation/CreateTableItf10.sql"));
-	        DbUtility.executeSqlScript(jdbcConnection, new java.io.FileReader("test/data/Translation/InsertIntoTableItf10.sql"));
-	        
 	        {
-	    		File data=new File("test/data/Translation/ModelAsimple10a-out.itf");
-	    		Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
-	    		config.setFunction(Config.FC_EXPORT);
-	    		config.setDatasetName("ModelAsimple10");
-	    		Ili2db.readSettingsFromDb(config);
-	    		Ili2db.run(config,null);
-	    		
-	    		data=new File("test/data/Translation/ModelBsimple10a-out.itf");
-	    		config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
-	    		config.setFunction(Config.FC_EXPORT);
-	    		config.setDatasetName("ModelBsimple10");
-	    		Ili2db.readSettingsFromDb(config);
-	    		Ili2db.run(config,null);
-	    		
-	    		HashMap<String,IomObject> objs=new HashMap<String,IomObject>();
-	    		ItfReader reader=new ItfReader(data);
-	    		IoxEvent event=null;
-	    		do{
-	    			event=reader.read();
-	    			if(event instanceof StartTransferEvent){
-	    			}else if(event instanceof StartBasketEvent){
-	    			}else if(event instanceof ObjectEvent){
-	    				IomObject iomObj=((ObjectEvent)event).getIomObject();
-	    				if(iomObj.getobjectoid()!=null){
-	    					objs.put(iomObj.getobjectoid(), iomObj);
-	    				}
-	    			}else if(event instanceof EndBasketEvent){
-	    			}else if(event instanceof EndTransferEvent){
-	    			}
-	    		}while(!(event instanceof EndTransferEvent));
-	    		 {
-					 IomObject obj0 = objs.get("21");
-					 Assert.assertNotNull(obj0);
-					 Assert.assertEquals("ModelBsimple10.TopicB.ClassB", obj0.getobjecttag());
-				 }
-	    		 {
-					 IomObject obj0 = objs.get("20");
-					 Assert.assertNotNull(obj0);
-					 Assert.assertEquals("ModelBsimple10.TopicB.ClassB", obj0.getobjecttag());
-				 }
-				 {
-					 IomObject obj0 = objs.get("22");
-					 Assert.assertNotNull(obj0);
-					 Assert.assertEquals("ModelBsimple10.TopicB.ClassB2", obj0.getobjecttag());
-				 }
-				 {
-					 IomObject obj0 = objs.get("25");
-					 Assert.assertNotNull(obj0);
-					 Assert.assertEquals("ModelBsimple10.TopicB.ClassB3", obj0.getobjecttag());
-				 }
-				 {
-					 IomObject obj0 = objs.get("26");
-					 Assert.assertNotNull(obj0);
-					 Assert.assertEquals("ModelBsimple10.TopicB.ClassB2_geomB", obj0.getobjecttag());
-				 }
-				 {
-					 IomObject obj0 = objs.get("27");
-					 Assert.assertNotNull(obj0);
-					 Assert.assertEquals("ModelBsimple10.TopicB.ClassB3_geomB", obj0.getobjecttag());
-				 }
+	        	{
+		    		File data=new File(TEST_OUT,"ModelAsimple10a-out.itf");
+		    		Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+		    		config.setFunction(Config.FC_EXPORT);
+		    		config.setDatasetName("ModelAsimple10");
+		    		Ili2db.readSettingsFromDb(config);
+		    		Ili2db.run(config,null);
+		    		
+		    		HashMap<String,IomObject> objs=new HashMap<String,IomObject>();
+		    		ItfReader reader=new ItfReader(data);
+		    		IoxEvent event=null;
+		    		do{
+		    			event=reader.read();
+		    			if(event instanceof StartTransferEvent){
+		    			}else if(event instanceof StartBasketEvent){
+		    			}else if(event instanceof ObjectEvent){
+		    				IomObject iomObj=((ObjectEvent)event).getIomObject();
+		    				if(iomObj.getobjectoid()!=null){
+		    					objs.put(iomObj.getobjectoid(), iomObj);
+		    				}
+		    			}else if(event instanceof EndBasketEvent){
+		    			}else if(event instanceof EndTransferEvent){
+		    			}
+		    		}while(!(event instanceof EndTransferEvent));
+		    		{
+						 IomObject obj0 = objs.get("10");
+						 Assert.assertNotNull(obj0);
+						 Assert.assertEquals("ModelAsimple10.TopicA.ClassA", obj0.getobjecttag());
+					 }
+		    		 {
+						 IomObject obj0 = objs.get("11");
+						 Assert.assertNotNull(obj0);
+						 Assert.assertEquals("ModelAsimple10.TopicA.ClassA", obj0.getobjecttag());
+					 }
+					 {
+						 IomObject obj0 = objs.get("12");
+						 Assert.assertNotNull(obj0);
+						 Assert.assertEquals("ModelAsimple10.TopicA.ClassA2", obj0.getobjecttag());
+					 }
+					 {
+						 IomObject obj0 = objs.get("17");
+						 Assert.assertNotNull(obj0);
+						 Assert.assertEquals("ModelAsimple10.TopicA.ClassA3_geomA", obj0.getobjecttag());
+					 }
+					 {
+						 IomObject obj0 = objs.get("16");
+						 Assert.assertNotNull(obj0);
+						 Assert.assertEquals("ModelAsimple10.TopicA.ClassA2_geomA", obj0.getobjecttag());
+					 }
+					 {
+						 IomObject obj0 = objs.get("15");
+						 Assert.assertNotNull(obj0);
+						 Assert.assertEquals("ModelAsimple10.TopicA.ClassA3", obj0.getobjecttag());
+					 }
+		        }
+		        {
+					File data2=new File(TEST_OUT,"ModelBsimple10a-out.itf");
+					Config config=initConfig(data2.getPath(),DBSCHEMA,data2.getPath()+".log");
+		    		config.setFunction(Config.FC_EXPORT);
+		    		config.setDatasetName("ModelBsimple10");
+		    		Ili2db.readSettingsFromDb(config);
+		    		Ili2db.run(config,null);
+		    		
+		    		HashMap<String,IomObject> objs=new HashMap<String,IomObject>();
+		    		ItfReader reader=new ItfReader(data2);
+		    		IoxEvent event=null;
+		    		do{
+		    			event=reader.read();
+		    			if(event instanceof StartTransferEvent){
+		    			}else if(event instanceof StartBasketEvent){
+		    			}else if(event instanceof ObjectEvent){
+		    				IomObject iomObj=((ObjectEvent)event).getIomObject();
+		    				if(iomObj.getobjectoid()!=null){
+		    					objs.put(iomObj.getobjectoid(), iomObj);
+		    				}
+		    			}else if(event instanceof EndBasketEvent){
+		    			}else if(event instanceof EndTransferEvent){
+		    			}
+		    		}while(!(event instanceof EndTransferEvent));
+		    		{
+						 IomObject obj0 = objs.get("21");
+						 Assert.assertNotNull(obj0);
+						 Assert.assertEquals("ModelBsimple10.TopicB.ClassB", obj0.getobjecttag());
+					 }
+		    		 {
+						 IomObject obj0 = objs.get("20");
+						 Assert.assertNotNull(obj0);
+						 Assert.assertEquals("ModelBsimple10.TopicB.ClassB", obj0.getobjecttag());
+					 }
+					 {
+						 IomObject obj0 = objs.get("22");
+						 Assert.assertNotNull(obj0);
+						 Assert.assertEquals("ModelBsimple10.TopicB.ClassB2", obj0.getobjecttag());
+					 }
+					 {
+						 IomObject obj0 = objs.get("25");
+						 Assert.assertNotNull(obj0);
+						 Assert.assertEquals("ModelBsimple10.TopicB.ClassB3", obj0.getobjecttag());
+					 }
+					 {
+						 IomObject obj0 = objs.get("26");
+						 Assert.assertNotNull(obj0);
+						 Assert.assertEquals("ModelBsimple10.TopicB.ClassB2_geomB", obj0.getobjecttag());
+					 }
+					 {
+						 IomObject obj0 = objs.get("27");
+						 Assert.assertNotNull(obj0);
+						 Assert.assertEquals("ModelBsimple10.TopicB.ClassB3_geomB", obj0.getobjecttag());
+					 }
+		        }
 	        }
 		}finally{
 			if(jdbcConnection!=null){
@@ -553,20 +593,20 @@ public class TranslationTest {
 		}
 	}
     
-	//@Test
+	@Test
 	public void exportItf10lineTable() throws Exception
 	{
 		Connection jdbcConnection=null;
+		{
+			importItf10lineTable();
+		}
 		try{
 			EhiLogger.getInstance().setTraceFilter(false);
 	        Class driverClass = Class.forName("org.postgresql.Driver");
 	        jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
 	        Statement stmt=jdbcConnection.createStatement();
-	        stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");
-	        DbUtility.executeSqlScript(jdbcConnection, new java.io.FileReader("test/data/Translation/CreateTableItf10LineTable.sql"));
-	        DbUtility.executeSqlScript(jdbcConnection, new java.io.FileReader("test/data/Translation/InsertIntoTableItf10LineTable.sql"));
 	        {
-	        	File data=new File("test/data/Translation/ModelAsimple10a-out.itf");
+	        	File data=new File(TEST_OUT,"ModelAsimple10a-out.itf");
 	    		Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 	    		config.setFunction(Config.FC_EXPORT);
 	    		config.setDatasetName("ModelAsimple10");
@@ -574,7 +614,7 @@ public class TranslationTest {
 	    		Ili2db.run(config,null);
 	        }
 	        {
-	        	File data=new File("test/data/Translation/ModelBsimple10a-out.itf");
+	        	File data=new File(TEST_OUT,"ModelBsimple10a-out.itf");
 	    		Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 	    		config.setFunction(Config.FC_EXPORT);
 	    		config.setDatasetName("ModelBsimple10");
@@ -616,16 +656,6 @@ public class TranslationTest {
 					 IomObject obj0 = objs.get("25");
 					 Assert.assertNotNull(obj0);
 					 Assert.assertEquals("ModelBsimple10.TopicB.ClassB3", obj0.getobjecttag());
-				 }
-				 {
-					 IomObject obj0 = objs.get("26");
-					 Assert.assertNotNull(obj0);
-					 Assert.assertEquals("ModelBsimple10.TopicB.ClassB2_geomB", obj0.getobjecttag());
-				 }
-				 {
-					 IomObject obj0 = objs.get("27");
-					 Assert.assertNotNull(obj0);
-					 Assert.assertEquals("ModelBsimple10.TopicB.ClassB3_geomB", obj0.getobjecttag());
 				 }
 	        }
 		}finally{

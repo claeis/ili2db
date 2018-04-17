@@ -6,22 +6,12 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.HashMap;
-
-import org.junit.After;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
-
-import ch.ehi.basics.logging.EhiLogger;
-import ch.ehi.ili2db.base.DbUrlConverter;
 import ch.ehi.ili2db.base.Ili2db;
-import ch.ehi.ili2db.base.Ili2dbException;
 import ch.ehi.ili2db.gui.Config;
-import ch.ehi.ili2db.mapping.NameMapping;
-import ch.ehi.sqlgen.DbUtility;
 import ch.interlis.iom.IomObject;
 import ch.interlis.iom_j.itf.ItfReader;
-import ch.interlis.iom_j.xtf.XtfReader;
 import ch.interlis.iox.EndBasketEvent;
 import ch.interlis.iox.EndTransferEvent;
 import ch.interlis.iox.IoxEvent;
@@ -31,13 +21,16 @@ import ch.interlis.iox.StartTransferEvent;
 
 //-Ddburl=jdbc:postgresql:dbname -Ddbusr=usrname -Ddbpwd=1234
 public class Datatypes10Test {
+	
 	private static final String DBSCHEMA = "Datatypes10";
+	private static final String TEST_OUT="test/data/Datatypes10/";
+	Connection jdbcConnection=null;
+	Statement stmt=null;
+	
 	String dburl=System.getProperty("dburl"); 
 	String dbuser=System.getProperty("dbusr");
 	String dbpwd=System.getProperty("dbpwd"); 
-	Connection jdbcConnection=null;
-	Statement stmt=null;
-
+	
 	public Config initConfig(String xtfFilename,String dbschema,String logfile) {
 		Config config=new Config();
 		new ch.ehi.ili2pg.PgMain().initConfig(config);
@@ -67,7 +60,7 @@ public class Datatypes10Test {
 	        stmt=jdbcConnection.createStatement();
 	        stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");
 	        {
-				File data=new File("test/data/Datatypes10/Datatypes10.ili");
+				File data=new File(TEST_OUT,"Datatypes10.ili");
 				Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 				config.setFunction(Config.FC_SCHEMAIMPORT);
 				config.setCreateFk(config.CREATE_FK_YES);
@@ -114,7 +107,7 @@ public class Datatypes10Test {
 	        stmt=jdbcConnection.createStatement();
 	        stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");
 	        {     
-				File data=new File("test/data/Datatypes10/Datatypes10a.itf");
+				File data=new File(TEST_OUT,"Datatypes10a.itf");
 				Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 				config.setFunction(Config.FC_IMPORT);
 				config.setCreateFk(config.CREATE_FK_YES);
@@ -145,15 +138,15 @@ public class Datatypes10Test {
 	@Test
 	public void exportItf() throws Exception
 	{
+		{
+			importItf();
+		}
 		Connection jdbcConnection=null;
 		try{
 	        Class driverClass = Class.forName("org.postgresql.Driver");
 	        jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
 	        stmt=jdbcConnection.createStatement();
-	        stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");
-	        DbUtility.executeSqlScript(jdbcConnection, new java.io.FileReader("test/data/Datatypes10/CreateTable.sql"));
-	        DbUtility.executeSqlScript(jdbcConnection, new java.io.FileReader("test/data/Datatypes10/InsertIntoTable.sql"));
-			File data=new File("test/data/Datatypes10/Datatypes10a-out.itf");
+			File data=new File(TEST_OUT,"Datatypes10a-out.itf");
 			Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 			config.setModels("Datatypes10");
 			config.setFunction(Config.FC_EXPORT);
@@ -186,6 +179,21 @@ public class Datatypes10Test {
 				 Assert.assertNotNull(obj1);
 				 Assert.assertEquals("Datatypes10.Topic.OtherTable", obj1.getobjecttag());
 			 }
+			 {
+				 IomObject obj0 = objs.get("30");
+				 Assert.assertNotNull(obj0);
+				 Assert.assertEquals("Datatypes10.Topic.SubTable", obj0.getobjecttag());
+			 }
+			 {
+				 IomObject obj1 = objs.get("31");
+				 Assert.assertNotNull(obj1);
+				 Assert.assertEquals("Datatypes10.Topic.SubTable", obj1.getobjecttag());
+			 }
+			 {
+				 IomObject obj1 = objs.get("32");
+				 Assert.assertNotNull(obj1);
+				 Assert.assertEquals("Datatypes10.Topic.SubTable", obj1.getobjecttag());
+			 }
 		}finally{
 			if(jdbcConnection!=null){
 				jdbcConnection.close();
@@ -203,7 +211,7 @@ public class Datatypes10Test {
 	        stmt=jdbcConnection.createStatement();
 	        stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");
 	        {    
-				File data=new File("test/data/Datatypes10/Datatypes10a.itf");
+				File data=new File(TEST_OUT,"Datatypes10a.itf");
 				Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 				config.setFunction(Config.FC_IMPORT);
 				config.setCreateFk(config.CREATE_FK_YES);
@@ -234,15 +242,15 @@ public class Datatypes10Test {
 	@Test
 	public void exportItfWithSkipPolygonBuilding() throws Exception
 	{
+		{
+			importItfWithSkipPolygonBuilding();
+		}
 		Connection jdbcConnection=null;
 		try{
 	        Class driverClass = Class.forName("org.postgresql.Driver");
 	        jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
 	        stmt=jdbcConnection.createStatement();
-	        stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");
-	        DbUtility.executeSqlScript(jdbcConnection, new java.io.FileReader("test/data/Datatypes10/CreateTable.sql"));
-	        DbUtility.executeSqlScript(jdbcConnection, new java.io.FileReader("test/data/Datatypes10/InsertIntoTable.sql"));
-	        File data=new File("test/data/Datatypes10/Datatypes10a-ltout.itf");
+	        File data=new File(TEST_OUT,"Datatypes10a-ltout.itf");
 			Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 			config.setModels("Datatypes10");
 			config.setFunction(Config.FC_EXPORT);
@@ -265,16 +273,31 @@ public class Datatypes10Test {
 		        }else if(event instanceof EndTransferEvent){
 		        }
 			 }while(!(event instanceof EndTransferEvent));
-				 {
-					 IomObject obj0 = objs.get("10");
-					 Assert.assertNotNull(obj0);
-					 Assert.assertEquals("Datatypes10.Topic.OtherTable", obj0.getobjecttag());
-				 }
-				 {
-					 IomObject obj1 = objs.get("11");
-					 Assert.assertNotNull(obj1);
-					 Assert.assertEquals("Datatypes10.Topic.OtherTable", obj1.getobjecttag());
-				 }
+			 {
+				 IomObject obj0 = objs.get("10");
+				 Assert.assertNotNull(obj0);
+				 Assert.assertEquals("Datatypes10.Topic.OtherTable", obj0.getobjecttag());
+			 }
+			 {
+				 IomObject obj1 = objs.get("11");
+				 Assert.assertNotNull(obj1);
+				 Assert.assertEquals("Datatypes10.Topic.OtherTable", obj1.getobjecttag());
+			 }
+			 {
+				 IomObject obj0 = objs.get("30");
+				 Assert.assertNotNull(obj0);
+				 Assert.assertEquals("Datatypes10.Topic.SubTable", obj0.getobjecttag());
+			 }
+			 {
+				 IomObject obj1 = objs.get("31");
+				 Assert.assertNotNull(obj1);
+				 Assert.assertEquals("Datatypes10.Topic.SubTable", obj1.getobjecttag());
+			 }
+			 {
+				 IomObject obj1 = objs.get("32");
+				 Assert.assertNotNull(obj1);
+				 Assert.assertEquals("Datatypes10.Topic.SubTable", obj1.getobjecttag());
+			 }
 		}finally{
 			if(jdbcConnection!=null){
 				jdbcConnection.close();

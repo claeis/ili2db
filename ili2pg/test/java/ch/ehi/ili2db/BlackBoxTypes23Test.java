@@ -1,23 +1,24 @@
 package ch.ehi.ili2db;
 
+import static org.junit.Assert.assertTrue;
 import java.io.File;
-import java.math.BigDecimal;
+import java.io.StringReader;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
-import java.sql.RowId;
 import java.sql.Statement;
 import java.util.HashMap;
-
-import org.junit.After;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
-
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.InputSource;
 import ch.ehi.basics.logging.EhiLogger;
 import ch.ehi.ili2db.base.Ili2db;
 import ch.ehi.ili2db.gui.Config;
-import ch.ehi.sqlgen.DbUtility;
 import ch.interlis.iom.IomObject;
 import ch.interlis.iom_j.xtf.XtfReader;
 import ch.interlis.iox.EndBasketEvent;
@@ -28,12 +29,15 @@ import ch.interlis.iox.StartBasketEvent;
 import ch.interlis.iox.StartTransferEvent;
 
 public class BlackBoxTypes23Test {
+	
 	private static final String DBSCHEMA = "BlackBoxTypes23";
+	private static final String TEST_OUT="test/data/BlackBoxTypes23/";
+	Connection jdbcConnection=null;
+	Statement stmt=null;
+	
 	String dburl=System.getProperty("dburl"); 
 	String dbuser=System.getProperty("dbusr");
 	String dbpwd=System.getProperty("dbpwd");
-	Connection jdbcConnection=null;
-	Statement stmt=null;
 
 	public Config initConfig(String xtfFilename,String dbschema,String logfile) {
 		Config config=new Config();
@@ -65,7 +69,7 @@ public class BlackBoxTypes23Test {
 	        stmt=jdbcConnection.createStatement();
 			stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");
 			{
-				File data=new File("test/data/BlackBoxTypes23/BlackBoxTypes23.ili");
+				File data=new File(TEST_OUT,"BlackBoxTypes23.ili");
 				Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 				config.setFunction(Config.FC_SCHEMAIMPORT);
 				config.setCreateFk(config.CREATE_FK_YES);
@@ -110,7 +114,7 @@ public class BlackBoxTypes23Test {
 	        stmt=jdbcConnection.createStatement();
 			stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");
 			{
-				File data=new File("test/data/BlackBoxTypes23/BlackBoxTypes23a.xtf");
+				File data=new File(TEST_OUT,"BlackBoxTypes23a.xtf");
 				Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 				config.setFunction(Config.FC_IMPORT);
 				config.setCreateFk(config.CREATE_FK_YES);
@@ -148,15 +152,15 @@ public class BlackBoxTypes23Test {
 	@Test
 	public void exportXtf() throws Exception
 	{
+		{
+			importXtf();
+		}
 		Connection jdbcConnection=null;
 		try{
 	        Class driverClass = Class.forName("org.postgresql.Driver");
 	        jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
 	        stmt=jdbcConnection.createStatement();
-	        stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");
-	        DbUtility.executeSqlScript(jdbcConnection, new java.io.FileReader("test/data/BlackBoxTypes23/CreateTable.sql"));
-	        DbUtility.executeSqlScript(jdbcConnection, new java.io.FileReader("test/data/BlackBoxTypes23/InsertIntoTable.sql"));
-	        File data=new File("test/data/BlackBoxTypes23/BlackBoxTypes23a-out.xtf");
+	        File data=new File(TEST_OUT,"BlackBoxTypes23a-out.xtf");
 			Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 			config.setModels("BlackBoxTypes23");
 			config.setFunction(Config.FC_EXPORT);
@@ -189,6 +193,17 @@ public class BlackBoxTypes23Test {
 				 Assert.assertNotNull(obj1);
 				 Assert.assertEquals("BlackBoxTypes23.Topic.ClassA", obj1.getobjecttag());
 				 Assert.assertEquals("AAAA", obj1.getattrvalue("binbox"));
+				 {
+					DocumentBuilderFactory dbf=DocumentBuilderFactory.newInstance();
+					DocumentBuilder db = dbf.newDocumentBuilder();
+					InputSource is = new InputSource();
+					String attr=obj1.getattrvalue("xmlbox");
+					is.setCharacterStream(new StringReader(attr));
+					Document doc = db.parse(is);
+					NodeList nodes = doc.getElementsByTagName("document");
+					Node node=nodes.item(0);
+					assertTrue(node==null);
+				}
 			 }
 		}finally{
 			if(jdbcConnection!=null){
