@@ -1,22 +1,20 @@
-SET search_path = multisurface, pg_catalog;
-
-INSERT INTO t_ili2db_dataset VALUES (1, NULL);
-INSERT INTO t_ili2db_basket VALUES (3, 1, 'MultiSurface1.TestA', 'MultiSurface1.TestA', 'MultiSurface1a.xtf-3');
-INSERT INTO classa1 VALUES (4, 3, 'o1', '010C0000201555000002000000010A0000000100000001090000000100000001020000000400000000000000BC4F224100000000A06A084100000000DA4F224100000000406B084100000000944F224100000000406B084100000000BC4F224100000000A06A0841010A00000001000000010900000001000000010200000005000000000000009E4F224100000000286A084100000000D04F224100000000506A084100000000944F224100000000A06A0841000000008A4F224100000000506A0841000000009E4F224100000000286A0841', '01010000201555000000000000BE4F224100000000A86A0841');
-INSERT INTO t_ili2db_attrname VALUES ('MultiSurface1.TestA.ClassA1.geom', 'geom', 'classa1', NULL);
-INSERT INTO t_ili2db_attrname VALUES ('GeometryCHLV03_V1.SurfaceStructure.Surface', 'surface', 'surfacestructure', NULL);
-INSERT INTO t_ili2db_attrname VALUES ('GeometryCHLV03_V1.MultiSurface.Surfaces', 'multisurface_surfaces', 'surfacestructure', 'multisurface');
-INSERT INTO t_ili2db_attrname VALUES ('MultiSurface1.TestA.ClassA1.point', 'point', 'classa1', NULL);
-INSERT INTO t_ili2db_classname VALUES ('MultiSurface1.TestA.ClassA1', 'classa1');
-INSERT INTO t_ili2db_classname VALUES ('GeometryCHLV03_V1.SurfaceStructure', 'surfacestructure');
-INSERT INTO t_ili2db_classname VALUES ('GeometryCHLV03_V1.MultiSurface', 'multisurface');
-INSERT INTO t_ili2db_import VALUES (2, 1, '2017-05-04 17:26:26.377', 'postgres', 'test\data\MultiSurface\MultiSurface1a.xtf');
-INSERT INTO t_ili2db_import_basket VALUES (5, 2, 3, 1, 3, 4);
-INSERT INTO t_ili2db_import_object VALUES (6, 5, 'MultiSurface1.TestA.ClassA1', 1, 4, 4);
-INSERT INTO t_ili2db_inheritance VALUES ('GeometryCHLV03_V1.MultiSurface', NULL);
-INSERT INTO t_ili2db_inheritance VALUES ('MultiSurface1.TestA.ClassA1', NULL);
-INSERT INTO t_ili2db_inheritance VALUES ('GeometryCHLV03_V1.SurfaceStructure', NULL);
-INSERT INTO t_ili2db_model VALUES ('CoordSys-20151124.ili', '2.3', 'CoordSys', '!! File CoordSys.ili Release 2015-11-24
+INSERT INTO multisurface.t_ili2db_dataset VALUES (1, NULL);
+INSERT INTO multisurface.t_ili2db_basket VALUES (3, 1, 'MultiSurface1.TestA', 'MultiSurface1.TestA', 'MultiSurface1a.xtf-3');
+INSERT INTO multisurface.classa1 VALUES (4, 3, 'o1', '010C0000201555000002000000010A0000000100000001090000000100000001020000000400000000000000BC4F224100000000A06A084100000000DA4F224100000000406B084100000000944F224100000000406B084100000000BC4F224100000000A06A0841010A00000001000000010900000001000000010200000005000000000000009E4F224100000000286A084100000000D04F224100000000506A084100000000944F224100000000A06A0841000000008A4F224100000000506A0841000000009E4F224100000000286A0841', '01010000201555000000000000BE4F224100000000A86A0841');
+INSERT INTO multisurface.t_ili2db_attrname VALUES ('MultiSurface1.TestA.ClassA1.geom', 'geom', 'classa1', NULL);
+INSERT INTO multisurface.t_ili2db_attrname VALUES ('GeometryCHLV03_V1.SurfaceStructure.Surface', 'surface', 'surfacestructure', NULL);
+INSERT INTO multisurface.t_ili2db_attrname VALUES ('GeometryCHLV03_V1.MultiSurface.Surfaces', 'multisurface_surfaces', 'surfacestructure', 'multisurface');
+INSERT INTO multisurface.t_ili2db_attrname VALUES ('MultiSurface1.TestA.ClassA1.point', 'point', 'classa1', NULL);
+INSERT INTO multisurface.t_ili2db_classname VALUES ('MultiSurface1.TestA.ClassA1', 'classa1');
+INSERT INTO multisurface.t_ili2db_classname VALUES ('GeometryCHLV03_V1.SurfaceStructure', 'surfacestructure');
+INSERT INTO multisurface.t_ili2db_classname VALUES ('GeometryCHLV03_V1.MultiSurface', 'multisurface');
+INSERT INTO multisurface.t_ili2db_import VALUES (2, 1, '2017-05-04 17:26:26.377', 'postgres', 'test\data\MultiSurface\MultiSurface1a.xtf');
+INSERT INTO multisurface.t_ili2db_import_basket VALUES (5, 2, 3, 1, 3, 4);
+INSERT INTO multisurface.t_ili2db_import_object VALUES (6, 5, 'MultiSurface1.TestA.ClassA1', 1, 4, 4);
+INSERT INTO multisurface.t_ili2db_inheritance VALUES ('GeometryCHLV03_V1.MultiSurface', NULL);
+INSERT INTO multisurface.t_ili2db_inheritance VALUES ('MultiSurface1.TestA.ClassA1', NULL);
+INSERT INTO multisurface.t_ili2db_inheritance VALUES ('GeometryCHLV03_V1.SurfaceStructure', NULL);
+INSERT INTO multisurface.t_ili2db_model VALUES ('CoordSys-20151124.ili', '2.3', 'CoordSys', '!! File CoordSys.ili Release 2015-11-24
 
 INTERLIS 2.3;
 
@@ -231,7 +229,7 @@ REFSYSTEM MODEL CoordSys (en) AT "http://www.interlis.ch/models"
 END CoordSys.
 
 ', '2017-05-04 17:26:26.361');
-INSERT INTO t_ili2db_model VALUES ('CHBase_Part1_GEOMETRY_20110830.ili', '2.3', 'GeometryCHLV03_V1{ INTERLIS CoordSys Units} GeometryCHLV95_V1{ INTERLIS CoordSys Units}', '/* ########################################################################
+INSERT INTO multisurface.t_ili2db_model VALUES ('CHBase_Part1_GEOMETRY_20110830.ili', '2.3', 'GeometryCHLV03_V1{ INTERLIS CoordSys Units} GeometryCHLV95_V1{ INTERLIS CoordSys Units}', '/* ########################################################################
    CHBASE - BASE MODULES OF THE SWISS FEDERATION FOR MINIMAL GEODATA MODELS
    ======
    BASISMODULE DES BUNDES           MODULES DE BASE DE LA CONFEDERATION
@@ -401,7 +399,7 @@ END GeometryCHLV95_V1.
 
 !! ########################################################################
 ', '2017-05-04 17:26:26.361');
-INSERT INTO t_ili2db_model VALUES ('MultiSurface1.ili', '2.3', 'MultiSurface1{ GeometryCHLV03_V1}', 'INTERLIS 2.3;
+INSERT INTO multisurface.t_ili2db_model VALUES ('MultiSurface1.ili', '2.3', 'MultiSurface1{ GeometryCHLV03_V1}', 'INTERLIS 2.3;
 
 MODEL MultiSurface1
   AT "mailto:ce@eisenhutinformatik.ch" VERSION "2015-12-03" =
@@ -419,7 +417,7 @@ MODEL MultiSurface1
   
 END MultiSurface1.
 ', '2017-05-04 17:26:26.361');
-INSERT INTO t_ili2db_model VALUES ('Units-20120220.ili', '2.3', 'Units', '!! File Units.ili Release 2012-02-20
+INSERT INTO multisurface.t_ili2db_model VALUES ('Units-20120220.ili', '2.3', 'Units', '!! File Units.ili Release 2012-02-20
 
 INTERLIS 2.3;
 
@@ -518,17 +516,17 @@ END Units.
 
 ', '2017-05-04 17:26:26.361');
 
-INSERT INTO t_ili2db_settings VALUES ('ch.ehi.ili2db.multiSurfaceTrafo', 'coalesce');
-INSERT INTO t_ili2db_settings VALUES ('ch.ehi.ili2db.maxSqlNameLength', '60');
-INSERT INTO t_ili2db_settings VALUES ('ch.ehi.ili2db.defaultSrsCode', '21781');
-INSERT INTO t_ili2db_settings VALUES ('ch.ehi.ili2db.uuidDefaultValue', 'uuid_generate_v4()');
-INSERT INTO t_ili2db_settings VALUES ('ch.ehi.ili2db.sender', 'ili2pg-3.8.1-20170421');
-INSERT INTO t_ili2db_settings VALUES ('ch.interlis.ili2c.ilidirs', '%ILI_FROM_DB;%XTF_DIR;http://models.interlis.ch/;%JAR_DIR');
-INSERT INTO t_ili2db_settings VALUES ('ch.ehi.ili2db.BasketHandling', 'readWrite');
-INSERT INTO t_ili2db_settings VALUES ('ch.ehi.ili2db.createForeignKey', 'yes');
-INSERT INTO t_ili2db_settings VALUES ('ch.ehi.ili2db.defaultSrsAuthority', 'EPSG');
-INSERT INTO t_ili2db_settings VALUES ('ch.ehi.ili2db.TidHandling', 'property');
-INSERT INTO t_ili2db_trafo VALUES ('MultiSurface1.TestA.ClassA1', 'ch.ehi.ili2db.inheritance', 'newClass');
-INSERT INTO t_ili2db_trafo VALUES ('GeometryCHLV03_V1.SurfaceStructure', 'ch.ehi.ili2db.inheritance', 'newClass');
-INSERT INTO t_ili2db_trafo VALUES ('MultiSurface1.TestA.ClassA1.geom', 'ch.ehi.ili2db.multiSurfaceTrafo', 'coalesce');
-INSERT INTO t_ili2db_trafo VALUES ('GeometryCHLV03_V1.MultiSurface', 'ch.ehi.ili2db.inheritance', 'newClass');
+INSERT INTO multisurface.t_ili2db_settings VALUES ('ch.ehi.ili2db.multiSurfaceTrafo', 'coalesce');
+INSERT INTO multisurface.t_ili2db_settings VALUES ('ch.ehi.ili2db.maxSqlNameLength', '60');
+INSERT INTO multisurface.t_ili2db_settings VALUES ('ch.ehi.ili2db.defaultSrsCode', '21781');
+INSERT INTO multisurface.t_ili2db_settings VALUES ('ch.ehi.ili2db.uuidDefaultValue', 'uuid_generate_v4()');
+INSERT INTO multisurface.t_ili2db_settings VALUES ('ch.ehi.ili2db.sender', 'ili2pg-3.8.1-20170421');
+INSERT INTO multisurface.t_ili2db_settings VALUES ('ch.interlis.ili2c.ilidirs', '%ILI_FROM_DB;%XTF_DIR;http://models.interlis.ch/;%JAR_DIR');
+INSERT INTO multisurface.t_ili2db_settings VALUES ('ch.ehi.ili2db.BasketHandling', 'readWrite');
+INSERT INTO multisurface.t_ili2db_settings VALUES ('ch.ehi.ili2db.createForeignKey', 'yes');
+INSERT INTO multisurface.t_ili2db_settings VALUES ('ch.ehi.ili2db.defaultSrsAuthority', 'EPSG');
+INSERT INTO multisurface.t_ili2db_settings VALUES ('ch.ehi.ili2db.TidHandling', 'property');
+INSERT INTO multisurface.t_ili2db_trafo VALUES ('MultiSurface1.TestA.ClassA1', 'ch.ehi.ili2db.inheritance', 'newClass');
+INSERT INTO multisurface.t_ili2db_trafo VALUES ('GeometryCHLV03_V1.SurfaceStructure', 'ch.ehi.ili2db.inheritance', 'newClass');
+INSERT INTO multisurface.t_ili2db_trafo VALUES ('MultiSurface1.TestA.ClassA1.geom', 'ch.ehi.ili2db.multiSurfaceTrafo', 'coalesce');
+INSERT INTO multisurface.t_ili2db_trafo VALUES ('GeometryCHLV03_V1.MultiSurface', 'ch.ehi.ili2db.inheritance', 'newClass');

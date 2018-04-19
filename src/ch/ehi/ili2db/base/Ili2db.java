@@ -52,6 +52,7 @@ import ch.ehi.ili2db.mapping.TrafoConfig;
 import ch.ehi.ili2db.mapping.Viewable2TableMapper;
 import ch.ehi.ili2db.mapping.Viewable2TableMapping;
 import ch.ehi.ili2db.toxtf.TransferToXtf;
+import ch.ehi.ili2db.metaattr.MetaAttrUtility;
 import ch.ehi.sqlgen.DbUtility;
 import ch.ehi.sqlgen.generator.Generator;
 import ch.ehi.sqlgen.generator.GeneratorDriver;
@@ -522,6 +523,10 @@ public class Ili2db {
 						DbExtMetaInfo.addMetaInfoTables(schema);
 						idGen.addMappingTable(schema);
 						
+						if(config.getCreateMetaInfo()){
+							MetaAttrUtility.addMetaAttributesTable(schema);
+						}
+						
 						GeneratorDriver drv=new GeneratorDriver(gen);
 						drv.visitSchema(config,schema);
 						// create script requested by user?
@@ -657,7 +662,25 @@ public class Ili2db {
 						}
 					}
 				}
-				
+				// import meta-attributes from .toml file
+				if(config.getIliMetaAttrsFile()!=null){
+					if(config.getCreateMetaInfo()){
+						try{
+							EhiLogger.logState("run import meta-attributes from toml file");
+							MetaAttrUtility.addMetaAttrsFromToml(td, new java.io.FileReader(config.getIliMetaAttrsFile()));
+						}catch(FileNotFoundException e){
+							throw new Ili2dbException("import meta-attributes failed",e);
+						}
+					}else{
+						throw new Ili2dbException("import meta-attributes requires --createMetaInfo option");
+					}
+				}
+				if(config.getCreateMetaInfo()){
+					// update meta-attributes table
+					MetaAttrUtility.updateMetaAttributesTable(conn, config.getDbschema(), td);
+					// set elements' meta-attributes
+					MetaAttrUtility.addMetaAttrsFromDb(td, conn, config.getDbschema());
+				}
 				// run post-script
 				if(config.getPostScript()!=null){
 					try {
@@ -1060,6 +1083,10 @@ public class Ili2db {
 					TransferFromIli.addAttrMappingTable(schema);
 					DbExtMetaInfo.addMetaInfoTables(schema);
 					idGen.addMappingTable(schema);
+
+					if(config.getCreateMetaInfo()){
+						MetaAttrUtility.addMetaAttributesTable(schema);
+					}
 				}
 				
 				// TODO create geodb domains
@@ -1096,6 +1123,25 @@ public class Ili2db {
 					TransferFromIli.addModels(conn,td,config.getDbschema());
 					if(!config.isConfigReadFromDb()){
 						TransferFromIli.updateSettings(conn,config,config.getDbschema());
+					}
+					// import meta-attributes from .toml file
+					if(config.getIliMetaAttrsFile()!=null){
+						if(config.getCreateMetaInfo()){
+							try{
+								EhiLogger.logState("run import meta-attributes from toml file");
+								MetaAttrUtility.addMetaAttrsFromToml(td, new java.io.FileReader(config.getIliMetaAttrsFile()));
+							}catch(FileNotFoundException e){
+								throw new Ili2dbException("import meta-attributes failed",e);
+							}
+						}else{
+							throw new Ili2dbException("import meta-attributes requires --createMetaInfo option");
+						}
+					}
+					if(config.getCreateMetaInfo()){
+						// update meta-attributes table
+						MetaAttrUtility.updateMetaAttributesTable(conn, config.getDbschema(), td);
+						// set elements' meta-attributes
+						MetaAttrUtility.addMetaAttrsFromDb(td, conn, config.getDbschema());
 					}
 				}
 				
@@ -1396,6 +1442,12 @@ public class Ili2db {
 					throw new Ili2dbException("compiler failed");
 				}
 			  
+				if(config.getCreateMetaInfo()){
+					// set elements' meta-attributes
+					if(DbUtility.tableExists(conn,new DbTableName(config.getDbschema(),DbNames.META_ATTRIBUTES_TAB))){
+						MetaAttrUtility.addMetaAttrsFromDb(td, conn, config.getDbschema());
+					}
+				}
 			  
 			  geomConverter.setup(conn, config);
 			  
@@ -1512,6 +1564,7 @@ public class Ili2db {
 			sqlName=schema+"."+sqlName;
 		}
 		java.sql.PreparedStatement getstmt=null;
+        java.sql.ResultSet res=null;
 		try{
 			String stmt="SELECT "+colT_ID+" FROM "+sqlName+" WHERE "+DbNames.DATASETS_TAB_DATASETNAME+"= ?";
 			if(datasetName==null) {
@@ -1522,7 +1575,7 @@ public class Ili2db {
 			if(datasetName!=null) {
 				getstmt.setString(1,datasetName);
 			}
-			java.sql.ResultSet res=getstmt.executeQuery();
+			res=getstmt.executeQuery();
 			if(res.next()){
 				long sqlId=res.getLong(1);
 				return sqlId;
@@ -1530,6 +1583,13 @@ public class Ili2db {
 		}catch(java.sql.SQLException ex){
 			throw new Ili2dbException("failed to query "+sqlName,ex);
 		}finally{
+            if(res!=null){
+                try{
+                    res.close();
+                }catch(java.sql.SQLException ex){
+                    EhiLogger.logError(ex);
+                }
+            }
 			if(getstmt!=null){
 				try{
 					getstmt.close();
@@ -1754,11 +1814,12 @@ public class Ili2db {
 		String topicQName=null;
 		long sqlId=0;
 		java.sql.PreparedStatement getstmt=null;
+        java.sql.ResultSet res=null;
 		try{
 			String stmt="SELECT "+colT_ID+","+DbNames.BASKETS_TAB_TOPIC_COL+" FROM "+sqlName;
 			EhiLogger.traceBackendCmd(stmt);
 			getstmt=conn.prepareStatement(stmt);
-			java.sql.ResultSet res=getstmt.executeQuery();
+			res=getstmt.executeQuery();
 			while(res.next()){
 				sqlId=res.getLong(1);
 				topicQName=res.getString(2);
@@ -1785,6 +1846,14 @@ public class Ili2db {
 		}catch(java.sql.SQLException ex){
 			throw new Ili2dbException("failed to query "+sqlName,ex);
 		}finally{
+            if(res!=null){
+                try{
+                    res.close();
+                    res=null;
+                }catch(java.sql.SQLException ex){
+                    EhiLogger.logError(ex);
+                }
+            }
 			if(getstmt!=null){
 				try{
 					getstmt.close();

@@ -358,34 +358,53 @@ public class Fgdb2iox
 		if(shells.size()==0){
 			throw new IoxException("polygon without shell");
 		}else if(shells.size()==1){
-			LinearRing shell=fact.createRing(shells.get(0));
-			Polygon polygon = null;
-			if(holes.size()==0){
-				polygon=fact.createPolygon(shell);
-			}else{
-				LinearRing hole[]=new LinearRing[holes.size()];
-				int i=0;
-				for(LineString line:holes){
-					hole[i]=fact.createRing(line);
-					i++;
-				}
-				polygon=fact.createPolygon(shell,hole);
-			}
-			IomObject ret=null;
-			try {
-				ret = Jtsext2iox.JTS2surface(polygon);
-			} catch (Iox2jtsException e) {
-				throw new IoxException(e);
-			}
-			return ret;
-		}else{
-			// TODO  MultiSurface
+		    LineString shell=shells.get(0);
+			return createIoxSurface(fact, shell, holes);
 		}
-		return null;
+        IomObject iomMultiSurface=new ch.interlis.iom_j.Iom_jObject("MULTISURFACE",null);
+        for(LineString shell:shells) {
+            ArrayList<LineString> holesPerShell=new ArrayList<LineString>();
+            for(int holei=holes.size()-1;holei>=0;holei--) {
+                LineString hole=holes.get(holei);
+                if(shell.contains(hole)) {
+                    holesPerShell.add(hole);
+                    holes.remove(holei);
+                }
+            }
+            IomObject iomSingleSurface=createIoxSurface(fact, shell, holesPerShell);
+            IomObject iomSurface=iomSingleSurface.getattrobj("surface",0);
+            iomMultiSurface.addattrobj("surface", iomSurface);
+        }
+        return iomMultiSurface;
 	}else{
 		throw new IoxException("unexpected geometryType "+geometryType);
 	}
   }
+
+
+private IomObject createIoxSurface(JtsextGeometryFactory fact, LineString shellx, ArrayList<LineString> holes)
+        throws IoxException {
+    LinearRing shell=fact.createRing(shellx);
+    Polygon polygon = null;
+    if(holes.size()==0){
+    	polygon=fact.createPolygon(shell);
+    }else{
+    	LinearRing hole[]=new LinearRing[holes.size()];
+    	int i=0;
+    	for(LineString line:holes){
+    		hole[i]=fact.createRing(line);
+    		i++;
+    	}
+    	polygon=fact.createPolygon(shell,hole);
+    }
+    IomObject ret=null;
+    try {
+    	ret = Jtsext2iox.JTS2surface(polygon);
+    } catch (Iox2jtsException e) {
+    	throw new IoxException(e);
+    }
+    return ret;
+}
 
 
   private LineString getPolyline(JtsextGeometryFactory fact,int part, Coordinate[] points, int[] partsStart,

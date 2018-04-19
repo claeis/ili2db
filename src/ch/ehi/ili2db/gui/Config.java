@@ -115,6 +115,7 @@ public class Config extends Settings {
 	private Long maxIdSeqValue=null;
 	private boolean setupPgExt=false;
 	private String transferFileFormat=null;
+	private String iliMetaAttrsFile=null;
 	final static public String ILIGML20="ILIGML20"; 
 	
 	static public final int FC_IMPORT=0;
@@ -609,5 +610,11 @@ public class Config extends Settings {
 	}
 	public boolean getCreateMetaInfo() {
 		return TRUE.equals(getValue(CREATE_META_INFO))?true:false;
+	}
+	public String getIliMetaAttrsFile() {
+		return iliMetaAttrsFile;
+	}
+	public void setIliMetaAttrsFile(String iliMetaAttrsFile) {
+		this.iliMetaAttrsFile = iliMetaAttrsFile;
 	}
 }

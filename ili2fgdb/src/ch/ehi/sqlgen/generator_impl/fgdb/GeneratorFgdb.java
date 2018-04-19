@@ -104,13 +104,19 @@ public class GeneratorFgdb implements Generator {
 			if(tab.isDeleteDataIfTableExists()){
 				String delStmt="DELETE FROM "+tab.getName().getName();
 				EhiLogger.traceBackendCmd(delStmt);
-				EnumRows rows=new EnumRows();
-				int err=db.ExecuteSQL(delStmt, false, rows);
-				if(err!=0){
-					throw new IllegalStateException("failed to delete data from "+tab.getName().getName());
+				EnumRows rows=null;
+				try {
+	                rows=new EnumRows();
+	                int err=db.ExecuteSQL(delStmt, false, rows);
+	                if(err!=0){
+	                    throw new IllegalStateException("failed to delete data from "+tab.getName().getName());
+	                }
+				}finally {
+				    if(rows!=null) {
+	                    rows.Close();
+	                    rows=null;
+				    }
 				}
-				rows.delete();
-				rows=null;
 			}
 		}
 	}

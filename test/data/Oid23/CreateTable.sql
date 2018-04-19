@@ -1,7 +1,7 @@
 DROP SCHEMA IF EXISTS Oid23 CASCADE;
 CREATE SCHEMA Oid23;
 
-CREATE SEQUENCE Oid23.t_ili2db_seq;;
+CREATE SEQUENCE Oid23.t_ili2db_seq;
 -- Oid23.TestA.ClassA1
 CREATE TABLE Oid23.classa1 (
   T_Id bigint PRIMARY KEY DEFAULT nextval('Oid23.t_ili2db_seq')

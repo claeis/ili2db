@@ -137,6 +137,7 @@ public class DbExtMetaInfo {
 			}catch(java.sql.SQLException ex){
 				throw new Ili2dbException("failed to read meta info values from "+sqlName,ex);
 			}finally{
+			    rs.close();
 				selPrepStmt.close();
 			}
 		}catch(java.sql.SQLException ex){		
@@ -208,6 +209,7 @@ public class DbExtMetaInfo {
 			}catch(java.sql.SQLException ex){
 				throw new Ili2dbException("failed to read meta info values from "+sqlName,ex);
 			}finally{
+			    rs.close();
 				selPrepStmt.close();
 			}
 		}catch(java.sql.SQLException ex){		

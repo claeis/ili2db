@@ -1,0 +1,48 @@
+INTERLIS 2.3;
+
+!!@ technicalContact=mario@opengis.ch
+!!@ Model1MetaAttr1=Model1MetaAttr1Value 
+!!@ Model1MetaAttr2=Model1MetaAttr2Value
+MODEL Model1
+  AT "mailto:noreply@localhost" VERSION "2018-01-30" =
+
+  UNIT
+    !!@ Unit1MetaAttr1=Unit1MetaAttr1Value
+    Minute [min] = 60 [INTERLIS.s];
+    !!@ Unit2MetaAttr1=Unit2MetaAttr1Value
+    Hour [h] = 60 [min];
+    Day [d] = 24 [h];
+    Month [M] EXTENDS INTERLIS.TIME;
+    Year [Y] EXTENDS INTERLIS.TIME;    
+
+  
+  DOMAIN
+    !!@ Domain1MetaAttr1=Domain1MetaAttr1Value
+    !!@ Domain1MetaAttr2=Domain1MetaAttr2Value
+    Domain1 = COORD
+      2460000.000 .. 2870000.000,
+      1045000.000 .. 1310000.000;
+      
+  !!@ Topic1MetaAttr1=Topic1MetaAttr1Value
+  !!@ Topic1MetaAttr2=Topic1MetaAttr2Value    
+  TOPIC Topic1 =
+    
+    !!@ Class1MetaAttr1=Class1MetaAttr1Value    
+    !!@ Class1MetaAttr2=Class1MetaAttr2Value    
+    CLASS Class1 =
+    	attr1 : TEXT*60;
+    END Class1;
+        
+        
+    !!@ Structure1MetaAttr1=Structure1MetaAttr1Value
+    !!@ Structure1MetaAttr2=Structure1MetaAttr2Value
+    STRUCTURE Structure1 (ABSTRACT) =
+      !!@ Attribute1MetaAttr1=Attribute1MetaAttr1Value
+      Hours: 0 .. 23 CIRCULAR [h];
+      CONTINUOUS SUBDIVISION Minutes: 0 .. 59 CIRCULAR [min];
+      CONTINUOUS SUBDIVISION Seconds: 0.000 .. 59.999 CIRCULAR [INTERLIS.s];
+    END Structure1;    
+        
+  END Topic1;
+
+END Model1.

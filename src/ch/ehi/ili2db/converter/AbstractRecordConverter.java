@@ -23,8 +23,10 @@ import ch.ehi.sqlgen.repository.DbColVarchar;
 import ch.ehi.sqlgen.repository.DbColumn;
 import ch.ehi.sqlgen.repository.DbTable;
 import ch.ehi.sqlgen.repository.DbTableName;
+import ch.interlis.ili2c.metamodel.AbstractClassDef;
 import ch.interlis.ili2c.metamodel.AbstractLeafElement;
 import ch.interlis.ili2c.metamodel.AttributeDef;
+import ch.interlis.ili2c.metamodel.CompositionType;
 import ch.interlis.ili2c.metamodel.CoordType;
 import ch.interlis.ili2c.metamodel.Domain;
 import ch.interlis.ili2c.metamodel.EnumerationType;
@@ -32,9 +34,11 @@ import ch.interlis.ili2c.metamodel.ExtendableContainer;
 import ch.interlis.ili2c.metamodel.LineType;
 import ch.interlis.ili2c.metamodel.NumericType;
 import ch.interlis.ili2c.metamodel.NumericalType;
+import ch.interlis.ili2c.metamodel.ReferenceType;
 import ch.interlis.ili2c.metamodel.SurfaceOrAreaType;
 import ch.interlis.ili2c.metamodel.Table;
 import ch.interlis.ili2c.metamodel.TransferDescription;
+import ch.interlis.ili2c.metamodel.Type;
 import ch.interlis.ili2c.metamodel.Viewable;
 import ch.interlis.iom_j.itf.EnumCodeMapper;
 
@@ -231,6 +235,10 @@ public class AbstractRecordConverter {
 			targetTablesPool.put(destination, ret);
 			return ret;
 		}
+	    protected static AbstractClassDef getCatalogueRefTarget(Type type) {
+	        return ((ReferenceType) ((AttributeDef)((CompositionType)type).getComponentType().getAttributes().next()).getDomain()).getReferred();
+	    }
+
 	protected String getSqlAttrName(AttributeDef def,String ownerSqlTableName,String targetSqlTableName){
 		return ili2sqlName.mapIliAttributeDef(def,ownerSqlTableName,targetSqlTableName);
 	}
