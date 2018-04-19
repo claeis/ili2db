@@ -52,11 +52,7 @@ public class OraSequenceBasedIdGen implements DbIdGen {
 			((GeneratorJdbc) gen).addDropLine(((GeneratorJdbc) gen).new Stmt("DROP SEQUENCE "+sqlName.getQName()));
 		}
 		
-		// Check if a sequence exists (PLSQL)
-//		String seqExist = "IF NOT EXISTS(SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'"+sqlName.getQName()+"') AND type = 'SO')\r\n"+
-//				"begin\r\n"+ stmt +"\r\nend";
-//		
-//		stmt = seqExist;
+		// TODO check if sequence exists 
 		
 		EhiLogger.traceBackendCmd(stmt);
 		java.sql.PreparedStatement updstmt = null;
@@ -94,7 +90,7 @@ public class OraSequenceBasedIdGen implements DbIdGen {
 			sqlName=schema+"."+sqlName;
 		}
 		java.sql.PreparedStatement getstmt=null;
-		try{//select ilisuite.t_ili2db_seq.nextval from dual
+		try{
 			String stmt="select "+sqlName+".nextval from dual";
 			EhiLogger.traceBackendCmd(stmt);
 			getstmt=conn.prepareStatement(stmt);

@@ -52,11 +52,11 @@ public class OraMain extends ch.ehi.ili2db.AbstractMain {
 				    */
 				String sid = config.getDbdatabase();
 				
-				// ninguna opción
+				// no option selected
 				if((sid == null || sid.isEmpty()) && (dbservice == null || dbservice.isEmpty())) {
 					return null;
 				}
-				// dos opciones
+				// two options selected: service and database
 				if((sid != null && !sid.isEmpty()) && (dbservice != null && !dbservice.isEmpty())) {
 					EhiLogger.logError("TODO Message");
 					return null;

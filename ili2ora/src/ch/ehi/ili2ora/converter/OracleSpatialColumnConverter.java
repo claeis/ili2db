@@ -7,14 +7,25 @@ import java.sql.SQLException;
 
 import com.vividsolutions.jts.io.ParseException;
 
+import ch.ehi.basics.settings.Settings;
 import ch.ehi.ili2db.converter.AbstractWKBColumnConverter;
 import ch.ehi.ili2db.converter.ConverterException;
+import ch.ehi.ili2db.gui.Config;
 import ch.interlis.iom.IomObject;
 import ch.interlis.iox_j.wkb.Iox2wkb;
 import ch.interlis.iox_j.wkb.Iox2wkbException;
 import ch.interlis.iox_j.wkb.Wkb2iox;
 
 public class OracleSpatialColumnConverter extends AbstractWKBColumnConverter {
+	
+	private boolean strokeArcs=true;
+	
+	@Override
+	public void setup(Connection conn, Settings config) {
+		super.setup(conn,config);
+		strokeArcs=Config.STROKE_ARCS_ENABLE.equals(Config.getStrokeArcs(config));
+	}
+	
 	@Override
 	public String getInsertValueWrapperCoord(String wkfValue,int srid) {
 		return "SDO_UTIL.FROM_WKBGEOMETRY("+wkfValue+")";
@@ -32,8 +43,6 @@ public class OracleSpatialColumnConverter extends AbstractWKBColumnConverter {
 		return "SDO_UTIL.FROM_WKBGEOMETRY("+wkfValue+")";
 	}
 	
-	
-	//desde aquí
 	@Override
 	public String getSelectValueWrapperCoord(String dbNativeValue) {
 		return "SDO_UTIL.TO_WKBGEOMETRY(" + dbNativeValue + ")";
@@ -56,7 +65,7 @@ public class OracleSpatialColumnConverter extends AbstractWKBColumnConverter {
 			String sqlAttrName,
 			boolean is3D)
 			throws SQLException, ConverterException {
-			//byte bv[]=(byte [])geomobj;
+
 			Blob blob = (Blob) geomobj;
 			
 			int blobLength = (int) blob.length();  
@@ -135,12 +144,9 @@ public class OracleSpatialColumnConverter extends AbstractWKBColumnConverter {
 			boolean is3D,double p)
 			throws SQLException, ConverterException {
 		
-			// TODO ajustar el parametro strokeArcs
-			boolean strokeArcs=true;
-		
 				if(value!=null){
 					Iox2wkb conv=new Iox2wkb(is3D?3:2);
-					//EhiLogger.debug("conv "+conv); // select st_asewkt(form) from tablea
+					
 					try {
 						return conv.multisurface2wkb(value,!strokeArcs,p);
 					} catch (Iox2wkbException ex) {

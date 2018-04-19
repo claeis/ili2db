@@ -53,7 +53,7 @@ public class GeneratorOracleSpatial extends GeneratorJdbc {
 				type="CLOB";
 			}
 		}else{
-			type="VARCHAR2(20)"; // type="VARCHAR(MAX)";
+			type="VARCHAR2(20)";
 		}
 		String isNull=column.isNotNull()?"NOT NULL":"NULL";
 		if(column instanceof DbColId){
