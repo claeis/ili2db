@@ -1,5 +1,8 @@
 package ch.ehi.ili2db;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -8,9 +11,15 @@ import java.sql.Statement;
 import java.util.HashMap;
 import org.junit.Assert;
 import org.junit.Test;
+import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.CoordinateList;
 import ch.ehi.basics.logging.EhiLogger;
 import ch.ehi.ili2db.base.Ili2db;
 import ch.ehi.ili2db.gui.Config;
+import ch.interlis.ili2c.config.Configuration;
+import ch.interlis.ili2c.config.FileEntry;
+import ch.interlis.ili2c.config.FileEntryKind;
+import ch.interlis.ili2c.metamodel.TransferDescription;
 import ch.interlis.iom.IomObject;
 import ch.interlis.iom_j.itf.ItfReader;
 import ch.interlis.iom_j.xtf.XtfReader;
@@ -20,6 +29,7 @@ import ch.interlis.iox.IoxEvent;
 import ch.interlis.iox.ObjectEvent;
 import ch.interlis.iox.StartBasketEvent;
 import ch.interlis.iox.StartTransferEvent;
+import ch.interlis.iox_j.jts.Iox2jts;
 
 //-Ddburl=jdbc:postgresql:dbname -Ddbusr=usrname -Ddbpwd=1234
 public class TranslationTest {
@@ -395,7 +405,233 @@ public class TranslationTest {
 			}
 		}
 	}
-        
+    
+	@Test
+	public void exportItf10() throws Exception
+	{
+		Connection jdbcConnection=null;
+		{
+			importItf10();
+		}
+		try{
+	        Class driverClass = Class.forName("org.postgresql.Driver");
+	        jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
+	        stmt=jdbcConnection.createStatement();
+	        {
+	        	{
+		    		File data=new File(TEST_OUT,"ModelAsimple10a-out.itf");
+		    		Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+		    		config.setFunction(Config.FC_EXPORT);
+		    		config.setDatasetName("ModelAsimple10");
+		    		Ili2db.readSettingsFromDb(config);
+		    		Ili2db.run(config,null);
+		    		
+		    		// compile model
+		    		TransferDescription td2=null;
+		    		Configuration ili2cConfig=new Configuration();
+		    		FileEntry fileEntry=new FileEntry("test/data/Translation/ModelAsimple10.ili", FileEntryKind.ILIMODELFILE);
+		    		ili2cConfig.addFileEntry(fileEntry);
+		    		td2=ch.interlis.ili2c.Ili2c.runCompiler(ili2cConfig);
+		    		assertNotNull(td2);
+		    		
+		    		HashMap<String,IomObject> objs=new HashMap<String,IomObject>();
+		    		ItfReader reader=new ItfReader(data);
+		    		reader.setModel(td2);
+		    		IoxEvent event=null;
+		    		do{
+		    			event=reader.read();
+		    			if(event instanceof StartTransferEvent){
+		    			}else if(event instanceof StartBasketEvent){
+		    			}else if(event instanceof ObjectEvent){
+		    				IomObject iomObj=((ObjectEvent)event).getIomObject();
+		    				if(iomObj.getobjectoid()!=null){
+		    					objs.put(iomObj.getobjectoid(), iomObj);
+		    				}
+		    			}else if(event instanceof EndBasketEvent){
+		    			}else if(event instanceof EndTransferEvent){
+		    			}
+		    		}while(!(event instanceof EndTransferEvent));
+		    		{
+						 IomObject obj0 = objs.get("10");
+						 Assert.assertNotNull(obj0);
+						 Assert.assertEquals("ModelAsimple10.TopicA.ClassA", obj0.getobjecttag());
+						 Assert.assertEquals("o10",obj0.getattrvalue("attrA"));
+					 }
+		    		 {
+						 IomObject obj0 = objs.get("11");
+						 Assert.assertNotNull(obj0);
+						 Assert.assertEquals("ModelAsimple10.TopicA.ClassA", obj0.getobjecttag());
+						 Assert.assertEquals("o11",obj0.getattrvalue("attrA"));
+					 }
+					 {
+						 IomObject obj0 = objs.get("12");
+						 Assert.assertNotNull(obj0);
+						 Assert.assertEquals("ModelAsimple10.TopicA.ClassA2", obj0.getobjecttag());
+					 }
+					 {
+						IomObject iomObj = objs.get("15");
+						String attrtag=iomObj.getobjecttag();
+						assertEquals("ModelAsimple10.TopicA.ClassA3",attrtag);
+						IomObject coord=iomObj.getattrobj("geomA", 0);
+						assertTrue(coord.getattrvalue("C1").equals("480005.000"));
+						assertTrue(coord.getattrvalue("C2").equals("70005.000"));
+					 }
+					 {
+						 IomObject iomObj = objs.get("16");
+						String attrtag=iomObj.getobjecttag();
+						assertEquals("ModelAsimple10.TopicA.ClassA2_geomA",attrtag);
+						IomObject multisurface=iomObj.getattrobj("_itf_geom_ClassA2", 0);
+						// convert
+						CoordinateList jtsMultipolygon=Iox2jts.polyline2JTS(multisurface, false, 0);
+						// polygon1
+						Coordinate[] coords=jtsMultipolygon.toCoordinateArray();
+						{
+							com.vividsolutions.jts.geom.Coordinate coord=new com.vividsolutions.jts.geom.Coordinate(new Double("480000.0"), new Double("70000.0"));
+							assertEquals(coord, coords[0]);
+							com.vividsolutions.jts.geom.Coordinate coord2=new com.vividsolutions.jts.geom.Coordinate(new Double("480000.0"), new Double("70010.0"));
+							assertEquals(coord2, coords[1]);
+							com.vividsolutions.jts.geom.Coordinate coord3=new com.vividsolutions.jts.geom.Coordinate(new Double("480010.0"), new Double("70010.0"));
+							assertEquals(coord3, coords[2]);
+							com.vividsolutions.jts.geom.Coordinate coord4=new com.vividsolutions.jts.geom.Coordinate(new Double("480010.0"), new Double("70000.0"));
+							assertEquals(coord4, coords[3]);
+							com.vividsolutions.jts.geom.Coordinate coord5=new com.vividsolutions.jts.geom.Coordinate(new Double("480000.0"), new Double("70000.0"));
+							assertEquals(coord5, coords[4]);
+						}
+					 }
+					 {
+						 IomObject iomObj = objs.get("17");
+						String attrtag=iomObj.getobjecttag();
+						assertEquals("ModelAsimple10.TopicA.ClassA3_geomA",attrtag);
+						IomObject multisurface=iomObj.getattrobj("_itf_geom_ClassA3", 0);
+						// convert
+						CoordinateList jtsMultipolygon=Iox2jts.polyline2JTS(multisurface, false, 0);
+						// polygon1
+						Coordinate[] coords=jtsMultipolygon.toCoordinateArray();
+						{
+							com.vividsolutions.jts.geom.Coordinate coord=new com.vividsolutions.jts.geom.Coordinate(new Double("480000.0"), new Double("70000.0"));
+							assertEquals(coord, coords[0]);
+							com.vividsolutions.jts.geom.Coordinate coord2=new com.vividsolutions.jts.geom.Coordinate(new Double("480000.0"), new Double("70010.0"));
+							assertEquals(coord2, coords[1]);
+							com.vividsolutions.jts.geom.Coordinate coord3=new com.vividsolutions.jts.geom.Coordinate(new Double("480010.0"), new Double("70010.0"));
+							assertEquals(coord3, coords[2]);
+							com.vividsolutions.jts.geom.Coordinate coord4=new com.vividsolutions.jts.geom.Coordinate(new Double("480010.0"), new Double("70000.0"));
+							assertEquals(coord4, coords[3]);
+							com.vividsolutions.jts.geom.Coordinate coord5=new com.vividsolutions.jts.geom.Coordinate(new Double("480000.0"), new Double("70000.0"));
+							assertEquals(coord5, coords[4]);
+						}
+					 }
+	        	}
+		        {
+					File data2=new File(TEST_OUT,"ModelBsimple10a-out.itf");
+					Config config=initConfig(data2.getPath(),DBSCHEMA,data2.getPath()+".log");
+		    		config.setFunction(Config.FC_EXPORT);
+		    		config.setDatasetName("ModelBsimple10");
+		    		Ili2db.readSettingsFromDb(config);
+		    		Ili2db.run(config,null);
+		    		
+		    		// compile model
+		    		TransferDescription td2=null;
+		    		Configuration ili2cConfig=new Configuration();
+		    		FileEntry fileEntry=new FileEntry("test/data/Translation/ModelBsimple10.ili", FileEntryKind.ILIMODELFILE);
+		    		ili2cConfig.addFileEntry(fileEntry);
+		    		td2=ch.interlis.ili2c.Ili2c.runCompiler(ili2cConfig);
+		    		assertNotNull(td2);
+		    		
+		    		HashMap<String,IomObject> objs=new HashMap<String,IomObject>();
+		    		ItfReader reader=new ItfReader(data2);
+		    		reader.setModel(td2);
+		    		IoxEvent event=null;
+		    		do{
+		    			event=reader.read();
+		    			if(event instanceof StartTransferEvent){
+		    			}else if(event instanceof StartBasketEvent){
+		    			}else if(event instanceof ObjectEvent){
+		    				IomObject iomObj=((ObjectEvent)event).getIomObject();
+		    				if(iomObj.getobjectoid()!=null){
+		    					objs.put(iomObj.getobjectoid(), iomObj);
+		    				}
+		    			}else if(event instanceof EndBasketEvent){
+		    			}else if(event instanceof EndTransferEvent){
+		    			}
+		    		}while(!(event instanceof EndTransferEvent));
+		    		{
+						 IomObject obj0 = objs.get("21");
+						 Assert.assertNotNull(obj0);
+						 Assert.assertEquals("ModelBsimple10.TopicB.ClassB", obj0.getobjecttag());
+						 Assert.assertEquals("o21",obj0.getattrvalue("attrB"));
+					 }
+		    		 {
+						 IomObject obj0 = objs.get("20");
+						 Assert.assertNotNull(obj0);
+						 Assert.assertEquals("ModelBsimple10.TopicB.ClassB", obj0.getobjecttag());
+						 Assert.assertEquals("o20",obj0.getattrvalue("attrB"));
+					 }
+					 {
+						 IomObject obj0 = objs.get("22");
+						 Assert.assertNotNull(obj0);
+						 Assert.assertEquals("ModelBsimple10.TopicB.ClassB2", obj0.getobjecttag());
+					 }
+					 {
+						 IomObject obj0 = objs.get("25");
+						 Assert.assertNotNull(obj0);
+						 Assert.assertEquals("ModelBsimple10.TopicB.ClassB3", obj0.getobjecttag());
+						 IomObject obj1=obj0.getattrobj("geomB", 0);
+						 Assert.assertEquals("480005.000",obj1.getattrvalue("C1"));
+						 Assert.assertEquals("70005.000",obj1.getattrvalue("C2"));
+					 }
+					 {
+						IomObject iomObj = objs.get("26");
+						String attrtag=iomObj.getobjecttag();
+						assertEquals("ModelBsimple10.TopicB.ClassB2_geomB",attrtag);
+						IomObject multisurface=iomObj.getattrobj("_itf_geom_ClassB2", 0);
+						// convert
+						CoordinateList jtsMultipolygon=Iox2jts.polyline2JTS(multisurface, false, 0);
+						// polygon1
+						Coordinate[] coords=jtsMultipolygon.toCoordinateArray();
+						{
+							com.vividsolutions.jts.geom.Coordinate coord=new com.vividsolutions.jts.geom.Coordinate(new Double("480000.0"), new Double("70000.0"));
+							assertEquals(coord, coords[0]);
+							com.vividsolutions.jts.geom.Coordinate coord2=new com.vividsolutions.jts.geom.Coordinate(new Double("480000.0"), new Double("70010.0"));
+							assertEquals(coord2, coords[1]);
+							com.vividsolutions.jts.geom.Coordinate coord3=new com.vividsolutions.jts.geom.Coordinate(new Double("480010.0"), new Double("70010.0"));
+							assertEquals(coord3, coords[2]);
+							com.vividsolutions.jts.geom.Coordinate coord4=new com.vividsolutions.jts.geom.Coordinate(new Double("480010.0"), new Double("70000.0"));
+							assertEquals(coord4, coords[3]);
+							com.vividsolutions.jts.geom.Coordinate coord5=new com.vividsolutions.jts.geom.Coordinate(new Double("480000.0"), new Double("70000.0"));
+							assertEquals(coord5, coords[4]);
+						}
+					 }
+					 {
+						 IomObject iomObj = objs.get("27");
+						String attrtag=iomObj.getobjecttag();
+						assertEquals("ModelBsimple10.TopicB.ClassB3_geomB",attrtag);
+						IomObject multisurface=iomObj.getattrobj("_itf_geom_ClassB3", 0);
+						// convert
+						CoordinateList jtsMultipolygon=Iox2jts.polyline2JTS(multisurface, false, 0);
+						// polygon1
+						Coordinate[] coords=jtsMultipolygon.toCoordinateArray();
+						{
+							com.vividsolutions.jts.geom.Coordinate coord=new com.vividsolutions.jts.geom.Coordinate(new Double("480000.0"), new Double("70000.0"));
+							assertEquals(coord, coords[0]);
+							com.vividsolutions.jts.geom.Coordinate coord2=new com.vividsolutions.jts.geom.Coordinate(new Double("480000.0"), new Double("70010.0"));
+							assertEquals(coord2, coords[1]);
+							com.vividsolutions.jts.geom.Coordinate coord3=new com.vividsolutions.jts.geom.Coordinate(new Double("480010.0"), new Double("70010.0"));
+							assertEquals(coord3, coords[2]);
+							com.vividsolutions.jts.geom.Coordinate coord4=new com.vividsolutions.jts.geom.Coordinate(new Double("480010.0"), new Double("70000.0"));
+							assertEquals(coord4, coords[3]);
+							com.vividsolutions.jts.geom.Coordinate coord5=new com.vividsolutions.jts.geom.Coordinate(new Double("480000.0"), new Double("70000.0"));
+							assertEquals(coord5, coords[4]);
+						}
+					 }
+		        }
+	        }
+		}finally{
+			if(jdbcConnection!=null){
+				jdbcConnection.close();
+			}
+		}
+	}
+	
 	@Test
 	public void importItf10lineTable() throws Exception
 	{
@@ -431,17 +667,17 @@ public class TranslationTest {
 	    		Ili2db.readSettingsFromDb(config);
 	    		Ili2db.run(config,null);
 	        }
- 			Assert.assertTrue(stmt.execute("SELECT classa2_geoma._geom FROM "+DBSCHEMA+".classa2_geoma"));
+ 			Assert.assertTrue(stmt.execute("SELECT st_asewkt(classa2_geoma._geom) FROM "+DBSCHEMA+".classa2_geoma"));
  			{
  				ResultSet rs=stmt.getResultSet();
  				Assert.assertTrue(rs.next());
- 				Assert.assertEquals("0109000020155500000100000001020000000500000000000000004C1D41000000000017F14000000000284C1D41000000000017F14000000000284C1D4100000000A017F14000000000004C1D4100000000A017F14000000000004C1D41000000000017F140",rs.getString(1));
+ 				Assert.assertEquals("SRID=21781;COMPOUNDCURVE((480000 70000,480010 70000,480010 70010,480000 70010,480000 70000))",rs.getString(1));
  			}
- 			Assert.assertTrue(stmt.execute("SELECT classa3_geoma._geom FROM translation.classa3_geoma"));
+ 			Assert.assertTrue(stmt.execute("SELECT st_asewkt(classa3_geoma._geom) FROM "+DBSCHEMA+".classa3_geoma"));
  			{
  				ResultSet rs=stmt.getResultSet();
  				Assert.assertTrue(rs.next());
- 				Assert.assertEquals("0109000020155500000100000001020000000500000000000000004C1D41000000000017F14000000000284C1D41000000000017F14000000000284C1D4100000000A017F14000000000004C1D4100000000A017F14000000000004C1D41000000000017F140",rs.getString(1));
+ 				Assert.assertEquals("SRID=21781;COMPOUNDCURVE((480000 70000,480010 70000,480010 70010,480000 70010,480000 70000))",rs.getString(1));
  			}
  			// bid's of classa and classb are created
  			Assert.assertTrue(stmt.execute("SELECT t_ili2db_basket.t_id, t_ili2db_basket.topic FROM "+DBSCHEMA+".t_ili2db_basket WHERE t_ili2db_basket.t_id = 3"));
@@ -456,136 +692,6 @@ public class TranslationTest {
  				Assert.assertTrue(rs.next());
  				Assert.assertEquals("ModelBsimple10.TopicB",rs.getString(2));
  			}
-		}finally{
-			if(jdbcConnection!=null){
-				jdbcConnection.close();
-			}
-		}
-	}
-    
-	@Test
-	public void exportItf10() throws Exception
-	{
-		Connection jdbcConnection=null;
-		{
-			importItf10();
-		}
-		try{
-	        Class driverClass = Class.forName("org.postgresql.Driver");
-	        jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
-	        stmt=jdbcConnection.createStatement();
-	        {
-	        	{
-		    		File data=new File(TEST_OUT,"ModelAsimple10a-out.itf");
-		    		Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
-		    		config.setFunction(Config.FC_EXPORT);
-		    		config.setDatasetName("ModelAsimple10");
-		    		Ili2db.readSettingsFromDb(config);
-		    		Ili2db.run(config,null);
-		    		
-		    		HashMap<String,IomObject> objs=new HashMap<String,IomObject>();
-		    		ItfReader reader=new ItfReader(data);
-		    		IoxEvent event=null;
-		    		do{
-		    			event=reader.read();
-		    			if(event instanceof StartTransferEvent){
-		    			}else if(event instanceof StartBasketEvent){
-		    			}else if(event instanceof ObjectEvent){
-		    				IomObject iomObj=((ObjectEvent)event).getIomObject();
-		    				if(iomObj.getobjectoid()!=null){
-		    					objs.put(iomObj.getobjectoid(), iomObj);
-		    				}
-		    			}else if(event instanceof EndBasketEvent){
-		    			}else if(event instanceof EndTransferEvent){
-		    			}
-		    		}while(!(event instanceof EndTransferEvent));
-		    		{
-						 IomObject obj0 = objs.get("10");
-						 Assert.assertNotNull(obj0);
-						 Assert.assertEquals("ModelAsimple10.TopicA.ClassA", obj0.getobjecttag());
-					 }
-		    		 {
-						 IomObject obj0 = objs.get("11");
-						 Assert.assertNotNull(obj0);
-						 Assert.assertEquals("ModelAsimple10.TopicA.ClassA", obj0.getobjecttag());
-					 }
-					 {
-						 IomObject obj0 = objs.get("12");
-						 Assert.assertNotNull(obj0);
-						 Assert.assertEquals("ModelAsimple10.TopicA.ClassA2", obj0.getobjecttag());
-					 }
-					 {
-						 IomObject obj0 = objs.get("17");
-						 Assert.assertNotNull(obj0);
-						 Assert.assertEquals("ModelAsimple10.TopicA.ClassA3_geomA", obj0.getobjecttag());
-					 }
-					 {
-						 IomObject obj0 = objs.get("16");
-						 Assert.assertNotNull(obj0);
-						 Assert.assertEquals("ModelAsimple10.TopicA.ClassA2_geomA", obj0.getobjecttag());
-					 }
-					 {
-						 IomObject obj0 = objs.get("15");
-						 Assert.assertNotNull(obj0);
-						 Assert.assertEquals("ModelAsimple10.TopicA.ClassA3", obj0.getobjecttag());
-					 }
-		        }
-		        {
-					File data2=new File(TEST_OUT,"ModelBsimple10a-out.itf");
-					Config config=initConfig(data2.getPath(),DBSCHEMA,data2.getPath()+".log");
-		    		config.setFunction(Config.FC_EXPORT);
-		    		config.setDatasetName("ModelBsimple10");
-		    		Ili2db.readSettingsFromDb(config);
-		    		Ili2db.run(config,null);
-		    		
-		    		HashMap<String,IomObject> objs=new HashMap<String,IomObject>();
-		    		ItfReader reader=new ItfReader(data2);
-		    		IoxEvent event=null;
-		    		do{
-		    			event=reader.read();
-		    			if(event instanceof StartTransferEvent){
-		    			}else if(event instanceof StartBasketEvent){
-		    			}else if(event instanceof ObjectEvent){
-		    				IomObject iomObj=((ObjectEvent)event).getIomObject();
-		    				if(iomObj.getobjectoid()!=null){
-		    					objs.put(iomObj.getobjectoid(), iomObj);
-		    				}
-		    			}else if(event instanceof EndBasketEvent){
-		    			}else if(event instanceof EndTransferEvent){
-		    			}
-		    		}while(!(event instanceof EndTransferEvent));
-		    		{
-						 IomObject obj0 = objs.get("21");
-						 Assert.assertNotNull(obj0);
-						 Assert.assertEquals("ModelBsimple10.TopicB.ClassB", obj0.getobjecttag());
-					 }
-		    		 {
-						 IomObject obj0 = objs.get("20");
-						 Assert.assertNotNull(obj0);
-						 Assert.assertEquals("ModelBsimple10.TopicB.ClassB", obj0.getobjecttag());
-					 }
-					 {
-						 IomObject obj0 = objs.get("22");
-						 Assert.assertNotNull(obj0);
-						 Assert.assertEquals("ModelBsimple10.TopicB.ClassB2", obj0.getobjecttag());
-					 }
-					 {
-						 IomObject obj0 = objs.get("25");
-						 Assert.assertNotNull(obj0);
-						 Assert.assertEquals("ModelBsimple10.TopicB.ClassB3", obj0.getobjecttag());
-					 }
-					 {
-						 IomObject obj0 = objs.get("26");
-						 Assert.assertNotNull(obj0);
-						 Assert.assertEquals("ModelBsimple10.TopicB.ClassB2_geomB", obj0.getobjecttag());
-					 }
-					 {
-						 IomObject obj0 = objs.get("27");
-						 Assert.assertNotNull(obj0);
-						 Assert.assertEquals("ModelBsimple10.TopicB.ClassB3_geomB", obj0.getobjecttag());
-					 }
-		        }
-	        }
 		}finally{
 			if(jdbcConnection!=null){
 				jdbcConnection.close();
@@ -612,6 +718,102 @@ public class TranslationTest {
 	    		config.setDatasetName("ModelAsimple10");
 	    		Ili2db.readSettingsFromDb(config);
 	    		Ili2db.run(config,null);
+	    		
+	    		// compile model
+	    		TransferDescription td2=null;
+	    		Configuration ili2cConfig=new Configuration();
+	    		FileEntry fileEntry=new FileEntry("test/data/Translation/ModelAsimple10.ili", FileEntryKind.ILIMODELFILE);
+	    		ili2cConfig.addFileEntry(fileEntry);
+	    		td2=ch.interlis.ili2c.Ili2c.runCompiler(ili2cConfig);
+	    		assertNotNull(td2);
+	    		
+	    		ItfReader reader=new ItfReader(data);
+	    		reader.setModel(td2);
+	    		IoxEvent event=null;
+	    		HashMap<String,IomObject> objs=new HashMap<String,IomObject>();
+	    		 do{
+	    		        event=reader.read();
+	    		        if(event instanceof StartTransferEvent){
+	    		        }else if(event instanceof StartBasketEvent){
+	    		        }else if(event instanceof ObjectEvent){
+	    		        	IomObject iomObj=((ObjectEvent)event).getIomObject();
+	    		    		assertNotNull(iomObj.getobjectoid());
+	    		    		objs.put(iomObj.getobjectoid(), iomObj);
+	    		        }else if(event instanceof EndBasketEvent){
+	    		        }else if(event instanceof EndTransferEvent){
+	    		        }
+	    		 }while(!(event instanceof EndTransferEvent));
+				 {
+					 IomObject obj0 = objs.get("10");
+					 Assert.assertNotNull(obj0);
+					 Assert.assertEquals("ModelAsimple10.TopicA.ClassA", obj0.getobjecttag());
+					 Assert.assertEquals("o10",obj0.getattrvalue("attrA"));
+				 }
+	    		 {
+					 IomObject obj0 = objs.get("11");
+					 Assert.assertNotNull(obj0);
+					 Assert.assertEquals("ModelAsimple10.TopicA.ClassA", obj0.getobjecttag());
+					 Assert.assertEquals("o11",obj0.getattrvalue("attrA"));
+				 }
+				 {
+					 IomObject obj0 = objs.get("12");
+					 Assert.assertNotNull(obj0);
+					 Assert.assertEquals("ModelAsimple10.TopicA.ClassA2", obj0.getobjecttag());
+				 }
+				 {
+					 IomObject iomObj = objs.get("13");
+					String attrtag=iomObj.getobjecttag();
+					assertEquals("ModelAsimple10.TopicA.ClassA2_geomA",attrtag);
+					IomObject multisurface=iomObj.getattrobj("_itf_geom_ClassA2", 0);
+					// convert
+					CoordinateList jtsMultipolygon=Iox2jts.polyline2JTS(multisurface, false, 0);
+					// polygon1
+					Coordinate[] coords=jtsMultipolygon.toCoordinateArray();
+					{
+						com.vividsolutions.jts.geom.Coordinate coord=new com.vividsolutions.jts.geom.Coordinate(new Double("480000.0"), new Double("70000.0"));
+						assertEquals(coord, coords[0]);
+						com.vividsolutions.jts.geom.Coordinate coord2=new com.vividsolutions.jts.geom.Coordinate(new Double("480010.0"), new Double("70000.0"));
+						assertEquals(coord2, coords[1]);
+						com.vividsolutions.jts.geom.Coordinate coord3=new com.vividsolutions.jts.geom.Coordinate(new Double("480010.0"), new Double("70010.0"));
+						assertEquals(coord3, coords[2]);
+						com.vividsolutions.jts.geom.Coordinate coord4=new com.vividsolutions.jts.geom.Coordinate(new Double("480000.0"), new Double("70010.0"));
+						assertEquals(coord4, coords[3]);
+						com.vividsolutions.jts.geom.Coordinate coord5=new com.vividsolutions.jts.geom.Coordinate(new Double("480000.0"), new Double("70000.0"));
+						assertEquals(coord5, coords[4]);
+					}
+					IomObject iomObj2=iomObj.getattrobj("_itf_ref_ClassA2", 0);
+					assertEquals("12", iomObj2.getobjectrefoid());
+				 }
+				 {
+					 IomObject iomObj = objs.get("14");
+					String attrtag=iomObj.getobjecttag();
+					assertEquals("ModelAsimple10.TopicA.ClassA3_geomA",attrtag);
+					IomObject multisurface=iomObj.getattrobj("_itf_geom_ClassA3", 0);
+					// convert
+					CoordinateList jtsMultipolygon=Iox2jts.polyline2JTS(multisurface, false, 0);
+					// polygon1
+					Coordinate[] coords=jtsMultipolygon.toCoordinateArray();
+					{
+						com.vividsolutions.jts.geom.Coordinate coord=new com.vividsolutions.jts.geom.Coordinate(new Double("480000.0"), new Double("70000.0"));
+						assertEquals(coord, coords[0]);
+						com.vividsolutions.jts.geom.Coordinate coord2=new com.vividsolutions.jts.geom.Coordinate(new Double("480010.0"), new Double("70000.0"));
+						assertEquals(coord2, coords[1]);
+						com.vividsolutions.jts.geom.Coordinate coord3=new com.vividsolutions.jts.geom.Coordinate(new Double("480010.0"), new Double("70010.0"));
+						assertEquals(coord3, coords[2]);
+						com.vividsolutions.jts.geom.Coordinate coord4=new com.vividsolutions.jts.geom.Coordinate(new Double("480000.0"), new Double("70010.0"));
+						assertEquals(coord4, coords[3]);
+						com.vividsolutions.jts.geom.Coordinate coord5=new com.vividsolutions.jts.geom.Coordinate(new Double("480000.0"), new Double("70000.0"));
+						assertEquals(coord5, coords[4]);
+					}
+				 }
+				 {
+					 IomObject obj0 = objs.get("15");
+					 Assert.assertNotNull(obj0);
+					 Assert.assertEquals("ModelAsimple10.TopicA.ClassA3", obj0.getobjecttag());
+					 IomObject obj1=obj0.getattrobj("geomA", 0);
+					 Assert.assertEquals("480005.000",obj1.getattrvalue("C1"));
+					 Assert.assertEquals("70005.000",obj1.getattrvalue("C2"));
+				 }
 	        }
 	        {
 	        	File data=new File(TEST_OUT,"ModelBsimple10a-out.itf");
@@ -620,32 +822,42 @@ public class TranslationTest {
 	    		config.setDatasetName("ModelBsimple10");
 	    		Ili2db.readSettingsFromDb(config);
 	    		Ili2db.run(config,null);
-	        
-				HashMap<String,IomObject> objs=new HashMap<String,IomObject>();
-				ItfReader reader=new ItfReader(data);
-				IoxEvent event=null;
-				 do{
-			        event=reader.read();
-			        if(event instanceof StartTransferEvent){
-			        }else if(event instanceof StartBasketEvent){
-			        }else if(event instanceof ObjectEvent){
-			        	IomObject iomObj=((ObjectEvent)event).getIomObject();
-			        	if(iomObj.getobjectoid()!=null){
-				        	objs.put(iomObj.getobjectoid(), iomObj);
-			        	}
-			        }else if(event instanceof EndBasketEvent){
-			        }else if(event instanceof EndTransferEvent){
-			        }
-				 }while(!(event instanceof EndTransferEvent));
+	    		
+	    		// compile model
+	    		TransferDescription td2=null;
+	    		Configuration ili2cConfig=new Configuration();
+	    		FileEntry fileEntry=new FileEntry("test/data/Translation/ModelBsimple10.ili", FileEntryKind.ILIMODELFILE);
+	    		ili2cConfig.addFileEntry(fileEntry);
+	    		td2=ch.interlis.ili2c.Ili2c.runCompiler(ili2cConfig);
+	    		assertNotNull(td2);
+	    		
+	    		ItfReader reader=new ItfReader(data);
+	    		reader.setModel(td2);
+	    		IoxEvent event=null;
+	    		HashMap<String,IomObject> objs=new HashMap<String,IomObject>();
+	    		 do{
+    		        event=reader.read();
+    		        if(event instanceof StartTransferEvent){
+    		        }else if(event instanceof StartBasketEvent){
+    		        }else if(event instanceof ObjectEvent){
+    		        	IomObject iomObj=((ObjectEvent)event).getIomObject();
+    		    		assertNotNull(iomObj.getobjectoid());
+    		    		objs.put(iomObj.getobjectoid(), iomObj);
+    		        }else if(event instanceof EndBasketEvent){
+    		        }else if(event instanceof EndTransferEvent){
+    		        }
+	    		 }while(!(event instanceof EndTransferEvent));
 				 {
 					 IomObject obj0 = objs.get("21");
 					 Assert.assertNotNull(obj0);
 					 Assert.assertEquals("ModelBsimple10.TopicB.ClassB", obj0.getobjecttag());
+					 Assert.assertEquals("o21",obj0.getattrvalue("attrB"));
 				 }
 	    		 {
 					 IomObject obj0 = objs.get("20");
 					 Assert.assertNotNull(obj0);
 					 Assert.assertEquals("ModelBsimple10.TopicB.ClassB", obj0.getobjecttag());
+					 Assert.assertEquals("o20",obj0.getattrvalue("attrB"));
 				 }
 				 {
 					 IomObject obj0 = objs.get("22");
@@ -656,6 +868,9 @@ public class TranslationTest {
 					 IomObject obj0 = objs.get("25");
 					 Assert.assertNotNull(obj0);
 					 Assert.assertEquals("ModelBsimple10.TopicB.ClassB3", obj0.getobjecttag());
+					 IomObject obj1=obj0.getattrobj("geomB", 0);
+					 Assert.assertEquals("480005.000",obj1.getattrvalue("C1"));
+					 Assert.assertEquals("70005.000",obj1.getattrvalue("C2"));
 				 }
 	        }
 		}finally{
