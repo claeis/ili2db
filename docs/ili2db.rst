@@ -1101,14 +1101,14 @@ Metadaten
 
 TODO alle Tabelle beschreiben
 
-t\_ili2db\_baskets
+t\_ili2db\_basket
 ......................
 Angaben zu den einzelnen Behältern (Ein Behälter ist eine Instanz eines TOPICs).
 
-- t_id Diese Spalte ist der Datenbank interne Primärschlüssel (und nicht die BID aus der Transferdatei).
+- t_id Diese Spalte ist der Datenbank interne Primärschlüssel (und nicht die BID aus der Transferdatei). Wird mit der Option --createBasketCol von den einzelnen Records für die Objekte via Spalte t_basket referenziert. 
 - dataset Fremdschlüssel auf die Tabelle t\_ili2db\_dataset
 - topic Der qualifizierte Name des Interlis-TOPICs.
-- t_ili_tid BID aus der Transferdatei
+- t_ili_tid BID aus der Transferdatei. Wird beim Datenexport mittels --baskets benutzt, um zu ermitteln, welche Objekte exportiert werden sollen.
 - attachmentKey Nicht mehr verwenden, wird entfernt. (Als Pfad-Prefix für Zusatzdatein zu diesem Behälter gedacht.)
 
 t\_ili2db\_column_prop
