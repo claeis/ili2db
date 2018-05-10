@@ -15,6 +15,7 @@ import ch.ehi.sqlgen.repository.DbColTime;
 import ch.ehi.sqlgen.repository.DbColUuid;
 import ch.ehi.sqlgen.repository.DbColVarchar;
 import ch.ehi.sqlgen.repository.DbColumn;
+import ch.ehi.sqlgen.repository.DbIndex;
 import ch.ehi.sqlgen.repository.DbTable;
 
 public class GeneratorOracleSpatial extends GeneratorJdbc {
@@ -69,5 +70,11 @@ public class GeneratorOracleSpatial extends GeneratorJdbc {
 		
 		out.write(getIndent()+colSep+name+" "+type+" "+isNull+newline());
 		colSep=",";
-	} 
+	}
+	
+	@Override
+	public void visitIndex(DbIndex idx) throws IOException {
+		if(!idx.isPrimary())
+			super.visitIndex(idx);
+	}
 }
