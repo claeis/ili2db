@@ -429,8 +429,8 @@ public class TransferFromIli {
 			}
 			// select entries
 			String insStmt="SELECT "+DbNames.MODELS_TAB_FILE_COL+","+DbNames.MODELS_TAB_ILIVERSION_COL+","+DbNames.MODELS_TAB_MODELNAME_COL+" FROM "+sqlName;
-			if(isMsSqlServer(conn)) {
-				// 'file' is keyword in sql server
+			if(isMsSqlServer(conn) || isOracle(conn)) {
+				// 'file' is keyword in sql server and oracle
 				insStmt="SELECT \""+DbNames.MODELS_TAB_FILE_COL+"\","+DbNames.MODELS_TAB_ILIVERSION_COL+","+DbNames.MODELS_TAB_MODELNAME_COL+" FROM "+sqlName;
 			}
 			EhiLogger.traceBackendCmd(insStmt);
@@ -464,6 +464,9 @@ public class TransferFromIli {
 	private static boolean isMsSqlServer(java.sql.Connection conn) throws SQLException {
 		return conn.getMetaData().getURL().startsWith("jdbc:sqlserver:");
 	}
+	private static boolean isOracle(java.sql.Connection conn) throws SQLException {
+		return conn.getMetaData().getURL().startsWith("jdbc:oracle:thin:@");
+	}	
 	public static String readIliFile(java.sql.Connection conn,String schema,String filename)
 	throws Ili2dbException
 	{
@@ -474,7 +477,7 @@ public class TransferFromIli {
 		try{
 			// select entries
 			String selStmt="SELECT "+DbNames.MODELS_TAB_CONTENT_COL+" FROM "+sqlName+" WHERE "+DbNames.MODELS_TAB_FILE_COL+"=?";
-			if(isMsSqlServer(conn)) {
+			if(isMsSqlServer(conn) || isOracle(conn)) {
 				selStmt="SELECT "+DbNames.MODELS_TAB_CONTENT_COL+" FROM "+sqlName+" WHERE \""+DbNames.MODELS_TAB_FILE_COL+"\"=?";
 			}
 			EhiLogger.traceBackendCmd(selStmt);
@@ -518,8 +521,8 @@ public class TransferFromIli {
 
 			// insert entries
 			String insStmt="INSERT INTO "+sqlName+" ("+DbNames.MODELS_TAB_FILE_COL+","+DbNames.MODELS_TAB_ILIVERSION_COL+","+DbNames.MODELS_TAB_MODELNAME_COL+","+DbNames.MODELS_TAB_CONTENT_COL+","+DbNames.MODELS_TAB_IMPORTDATE_COL+") VALUES (?,?,?,?,?)";
-			if(isMsSqlServer(conn)) {
-				// 'file' is keyword in sql server
+			if(isMsSqlServer(conn) || isOracle(conn)) {
+				// 'file' is keyword in sql server and oracle
 				insStmt="INSERT INTO "+sqlName+" (\""+DbNames.MODELS_TAB_FILE_COL+"\","+DbNames.MODELS_TAB_ILIVERSION_COL+","+DbNames.MODELS_TAB_MODELNAME_COL+","+DbNames.MODELS_TAB_CONTENT_COL+","+DbNames.MODELS_TAB_IMPORTDATE_COL+") VALUES (?,?,?,?,?)";
 			}
 			EhiLogger.traceBackendCmd(insStmt);
