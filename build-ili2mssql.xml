@@ -64,7 +64,7 @@
 
 
   <target depends="init,compile" name="jar">
-    <propertyfile file="ili2mssql/src/ch/ehi/ili2mssql/Version.properties">
+    <propertyfile file="src/ch/ehi/ili2db/Version.properties">
 	<!-- <entry  key="versionMicro" type="int" value="1" operation="+"/> -->
 	<entry  key="versionDate" type="date" value="now" pattern="yyyyMMdd"/>
     </propertyfile>
@@ -89,7 +89,7 @@
   </target>
 
   <target depends="init,compile" name="fatjar">
-    <property file="ili2mssql/src/ch/ehi/ili2mssql/Version.properties" prefix="buildnr."/>
+    <property file="src/ch/ehi/ili2db/Version.properties" prefix="buildnr."/>
 	<property name="buildnr" value="${buildnr.versionMajor}.${buildnr.versionMinor}.${buildnr.versionMicro}"/>
 
 	<delete file="${build}/jar/${ant.project.name}-${buildnr}.jar" quiet="true"/>
@@ -119,7 +119,7 @@
   </target>
   
   <target depends="init" name="buildnr">
-    <property file="ili2mssql/src/ch/ehi/ili2mssql/Version.properties" prefix="buildnr."/>
+    <property file="src/ch/ehi/ili2db/Version.properties" prefix="buildnr."/>
     <property name="buildnr" value="${buildnr.versionMajor}.${buildnr.versionMinor}.${buildnr.versionMicro}"/>
     <!-- <property name="buildnr" value="${DSTAMP}"/> -->
   </target>

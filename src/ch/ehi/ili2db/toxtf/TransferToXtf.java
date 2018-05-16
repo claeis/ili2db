@@ -253,12 +253,13 @@ public class TransferToXtf {
 		String topicName=null;
 		String bid=null;
 		java.sql.PreparedStatement getstmt=null;
+        java.sql.ResultSet res=null;
 		try{
 			String stmt="SELECT "+DbNames.BASKETS_TAB_TOPIC_COL+","+DbNames.T_ILI_TID_COL+" FROM "+sqlName+" WHERE "+colT_ID+"= ?";
 			EhiLogger.traceBackendCmd(stmt);
 			getstmt=conn.prepareStatement(stmt);
 			getstmt.setLong(1,basketSqlId);
-			java.sql.ResultSet res=getstmt.executeQuery();
+			res=getstmt.executeQuery();
 			if(res.next()){
 				topicName=res.getString(1);
 				bid=res.getString(2);
@@ -266,6 +267,14 @@ public class TransferToXtf {
 		}catch(java.sql.SQLException ex){
 			EhiLogger.logError("failed to query "+sqlName,ex);
 		}finally{
+            if(res!=null){
+                try{
+                    res.close();
+                    res=null;
+                }catch(java.sql.SQLException ex){
+                    EhiLogger.logError(ex);
+                }
+            }
 			if(getstmt!=null){
 				try{
 					getstmt.close();
@@ -456,12 +465,13 @@ public class TransferToXtf {
 			String stmt = createQueryStmt4xtfid(aclass);
 			EhiLogger.traceBackendCmd(stmt);
 			java.sql.PreparedStatement dbstmt = null;
+            java.sql.ResultSet rs = null;
 			try {
 
 				dbstmt = conn.prepareStatement(stmt);
 				dbstmt.clearParameters();
 				dbstmt.setLong(1, sqlid);
-				java.sql.ResultSet rs = dbstmt.executeQuery();
+				rs = dbstmt.executeQuery();
 				if(rs.next()) {
 					sqlIliTid = rs.getString(2);
 					if(rs.wasNull()){
@@ -475,6 +485,14 @@ public class TransferToXtf {
 			} catch (java.sql.SQLException ex) {
 				EhiLogger.logError("failed to query " + aclass.getScopedName(null),	ex);
 			} finally {
+                if (rs != null) {
+                    try {
+                        rs.close();
+                        rs=null;
+                    } catch (java.sql.SQLException ex) {
+                        EhiLogger.logError("failed to close query of "+ aclass.getScopedName(null), ex);
+                    }
+                }
 				if (dbstmt != null) {
 					try {
 						dbstmt.close();
@@ -643,10 +661,11 @@ public class TransferToXtf {
 		String stmt=createQueryStmt4Type(baseClass,structWrapper);
 		EhiLogger.traceBackendCmd(stmt);
 		java.sql.Statement dbstmt = null;
+        java.sql.ResultSet rs=null;
 		try{
 			
 			dbstmt = conn.createStatement();
-			java.sql.ResultSet rs=dbstmt.executeQuery(stmt);
+			rs=dbstmt.executeQuery(stmt);
 			while(rs.next()){
 				String sqlid=rs.getString(1);
 				String structEleClass=null;
@@ -664,6 +683,13 @@ public class TransferToXtf {
 		}catch(java.sql.SQLException ex){		
 			EhiLogger.logError("failed to query structure elements "+baseClass.getScopedName(null),ex);
 		}finally{
+            if(rs!=null){
+                try{
+                    rs.close();
+                }catch(java.sql.SQLException ex){       
+                    EhiLogger.logError("failed to close query of structure elements "+baseClass.getScopedName(null),ex);
+                }
+            }
 			if(dbstmt!=null){
 				try{
 					dbstmt.close();
@@ -693,6 +719,7 @@ public class TransferToXtf {
 		}
 		
 		java.sql.PreparedStatement dbstmt = null;
+        java.sql.ResultSet rs=null;
 		try{
 			
 			dbstmt = conn.prepareStatement(stmt);
@@ -701,7 +728,7 @@ public class TransferToXtf {
 			if(basketSqlId!=null){
 				dbstmt.setLong(paramIdx++,basketSqlId);
 			}
-			java.sql.ResultSet rs=dbstmt.executeQuery();
+			rs=dbstmt.executeQuery();
 			while(rs.next()){
 				int valuei=1;
 				long sqlid=rs.getLong(valuei);
@@ -775,6 +802,14 @@ public class TransferToXtf {
 			}catch(ch.interlis.iox.IoxException ex){		
 				EhiLogger.logError("failed to write "+attr.getScopedName(null),ex);
 			}finally{
+                if(rs!=null){
+                    try{
+                        rs.close();
+                        rs=null;
+                    }catch(java.sql.SQLException ex){       
+                        EhiLogger.logError("failed to close query of "+attr.getScopedName(null),ex);
+                    }
+                }
 				if(dbstmt!=null){
 					try{
 						dbstmt.close();
@@ -797,11 +832,12 @@ public class TransferToXtf {
 		String stmt=recConv.createQueryStmt(aclass,basketSqlId,structWrapper);
 		EhiLogger.traceBackendCmd(stmt);
 		java.sql.PreparedStatement dbstmt = null;
+        java.sql.ResultSet rs=null;
 		try{
 			
 			dbstmt = conn.prepareStatement(stmt);
 			recConv.setStmtParams(dbstmt, basketSqlId, fixref, structWrapper);
-			java.sql.ResultSet rs=dbstmt.executeQuery();
+			rs=dbstmt.executeQuery();
 			while(rs.next()){
 				// list of not yet processed struct attrs
 				ArrayList<StructWrapper> structQueue=new ArrayList<StructWrapper>();
@@ -845,6 +881,14 @@ public class TransferToXtf {
 		}catch(ch.interlis.iox.IoxException ex){		
 			EhiLogger.logError("failed to write "+aclass.getScopedName(null),ex);
 		}finally{
+		    if(rs!=null) {
+                try{
+                    rs.close();
+                    rs=null;
+                }catch(java.sql.SQLException ex){       
+                    EhiLogger.logError(ex);
+                }
+		    }
 			if(dbstmt!=null){
 				try{
 					dbstmt.close();
@@ -1253,7 +1297,7 @@ public class TransferToXtf {
 			}
 			subSelectSep=" UNION ";
 		}
-		ret.append(" ) AS r0 ORDER BY "+DbNames.T_SEQ_COL+" ASC");
+		ret.append(" ) r0 ORDER BY "+DbNames.T_SEQ_COL+" ASC");
 
 		return ret.toString();
 	}

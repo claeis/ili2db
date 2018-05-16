@@ -1,7 +1,7 @@
 DROP SCHEMA IF EXISTS MultiSurface CASCADE;
 CREATE SCHEMA MultiSurface;
 
-CREATE SEQUENCE MultiSurface.t_ili2db_seq;;
+CREATE SEQUENCE MultiSurface.t_ili2db_seq;
 -- MultiSurface2.FlaecheStruktur2D
 CREATE TABLE MultiSurface.flaechestruktur2d (
   T_Id bigint PRIMARY KEY DEFAULT nextval('MultiSurface.t_ili2db_seq')

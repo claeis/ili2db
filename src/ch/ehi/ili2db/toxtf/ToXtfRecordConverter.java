@@ -238,9 +238,14 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 				 ret.append(geomConv.getSelectValueWrapperDateTime(makeColumnRef(tableAlias,attrSqlName)));
 			}else if (type instanceof CompositionType){
 				if(TrafoConfigNames.CATALOGUE_REF_TRAFO_COALESCE.equals(trafoConfig.getAttrConfig(attr, TrafoConfigNames.CATALOGUE_REF_TRAFO))){
-					 ret.append(sep);
-					 sep=",";
-					 ret.append(makeColumnRef(tableAlias,attrSqlName));
+                    ArrayList<ViewableWrapper> targetTables = getTargetTables(getCatalogueRefTarget(type));
+                    for(ViewableWrapper targetTable:targetTables)
+                    {
+                        attrSqlName=ili2sqlName.mapIliAttributeDef(attr,sqlTableName,targetTable.getSqlTablename(),targetTables.size()>1);
+                         ret.append(sep);
+                         sep=",";
+                         ret.append(makeColumnRef(tableAlias,attrSqlName));
+                    }                
 				}else if(TrafoConfigNames.MULTISURFACE_TRAFO_COALESCE.equals(trafoConfig.getAttrConfig(attr, TrafoConfigNames.MULTISURFACE_TRAFO))){
 					 ret.append(sep);
 					 sep=",";
@@ -505,14 +510,25 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 				Type type = attr.getDomainResolvingAliases();
 				if (type instanceof CompositionType){
 					if(TrafoConfigNames.CATALOGUE_REF_TRAFO_COALESCE.equals(trafoConfig.getAttrConfig(attr, TrafoConfigNames.CATALOGUE_REF_TRAFO))){
-						Table catalogueReferenceTyp = ((CompositionType) type).getComponentType();
-						long value=rs.getLong(valuei);
-						valuei++;
-						if(!rs.wasNull()){
-							IomObject catref=iomObj.addattrobj(attrName,catalogueReferenceTyp.getScopedName(null));
-							IomObject ref=catref.addattrobj(IliNames.CHBASE1_CATALOGUEREFERENCE_REFERENCE,"REF");
-							mapSqlid2Xtfid(fixref,value,ref,((ReferenceType) ((AttributeDef)catalogueReferenceTyp.getAttributes().next()).getDomain()).getReferred());
-						}
+	                    ArrayList<ViewableWrapper> targetTables = getTargetTables(getCatalogueRefTarget(type));
+	                    boolean refAlreadyDefined=false;
+	                    for(ViewableWrapper targetTable:targetTables)
+	                    {
+	                        long value=rs.getLong(valuei);
+	                        valuei++;
+	                        if(!rs.wasNull()){
+	                            if(refAlreadyDefined){
+	                                sqlAttrName=ili2sqlName.mapIliAttributeDef(attr,table.getSqlTablename(),targetTable.getSqlTablename(),targetTables.size()>1);
+	                                EhiLogger.logAdaption("Table "+table.getSqlTablename()+"(id "+sqlid+") more than one value for refattr "+attrName+"; value of "+sqlAttrName+" ignored");
+	                            }else{
+	                                Table catalogueReferenceTyp = ((CompositionType) type).getComponentType();
+	                                IomObject catref=iomObj.addattrobj(attrName,catalogueReferenceTyp.getScopedName(null));
+	                                IomObject ref=catref.addattrobj(IliNames.CHBASE1_CATALOGUEREFERENCE_REFERENCE,"REF");
+	                                mapSqlid2Xtfid(fixref,value,ref,getCatalogueRefTarget(type));
+                                    refAlreadyDefined=true;
+	                            }
+	                        }
+	                    }
 					}else if(TrafoConfigNames.MULTISURFACE_TRAFO_COALESCE.equals(trafoConfig.getAttrConfig(attr, TrafoConfigNames.MULTISURFACE_TRAFO))){
 						 MultiSurfaceMapping attrMapping=multiSurfaceAttrs.getMapping(attr);
 						Table multiSurfaceType = ((CompositionType) type).getComponentType();

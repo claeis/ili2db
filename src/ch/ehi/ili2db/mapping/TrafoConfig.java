@@ -33,8 +33,9 @@ public class TrafoConfig {
 				String insStmt="SELECT "+DbNames.TRAFO_TAB_ILINAME_COL+","+DbNames.TRAFO_TAB_TAG_COL+","+DbNames.TRAFO_TAB_SETTING_COL+" FROM "+sqlName;
 				EhiLogger.traceBackendCmd(insStmt);
 				java.sql.PreparedStatement insPrepStmt = conn.prepareStatement(insStmt);
+                java.sql.ResultSet rs=null;
 				try{
-					java.sql.ResultSet rs=insPrepStmt.executeQuery();
+					rs=insPrepStmt.executeQuery();
 					while(rs.next()){
 						int valIdx=1;
 						String iliname=rs.getString(valIdx++);
@@ -45,7 +46,12 @@ public class TrafoConfig {
 				}catch(java.sql.SQLException ex){
 					throw new Ili2dbException("failed to read "+sqlName,ex);
 				}finally{
+				    if(rs!=null) {
+				        rs.close();
+				        rs=null;
+				    }
 					insPrepStmt.close();
+					insPrepStmt=null;
 				}
 			}catch(java.sql.SQLException ex){		
 				throw new Ili2dbException("failed to read "+sqlName,ex);

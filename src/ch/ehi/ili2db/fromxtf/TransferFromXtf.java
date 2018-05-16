@@ -1194,6 +1194,7 @@ public class TransferFromXtf {
 		String stmt = createQueryStmt4sqlid(xclass);
 		EhiLogger.traceBackendCmd(stmt);
 		java.sql.PreparedStatement dbstmt = null;
+        java.sql.ResultSet rs = null;
 		long sqlid=0;
 		String sqlType=null;
 		try {
@@ -1205,7 +1206,7 @@ public class TransferFromXtf {
 			}else{
 				dbstmt.setString(1, xtfid);
 			}
-			java.sql.ResultSet rs = dbstmt.executeQuery();
+			rs = dbstmt.executeQuery();
 			if(rs.next()) {
 				sqlid = rs.getLong(1);
 				sqlType=rs.getString(3);
@@ -1218,6 +1219,14 @@ public class TransferFromXtf {
 		} catch (ConverterException ex) {
 			EhiLogger.logError("failed to query " + xclass.getScopedName(null),	ex);
 		} finally {
+            if (rs != null) {
+                try {
+                    rs.close();
+                    rs=null;
+                } catch (java.sql.SQLException ex) {
+                    EhiLogger.logError("failed to close query of "+ xclass.getScopedName(null), ex);
+                }
+            }
 			if (dbstmt != null) {
 				try {
 					dbstmt.close();
@@ -1261,12 +1270,13 @@ public class TransferFromXtf {
 		String stmt = createQueryStmt4sqlids(noTypeCol,sqltablename.getQName());
 		EhiLogger.traceBackendCmd(stmt);
 		java.sql.PreparedStatement dbstmt = null;
+        java.sql.ResultSet rs = null;
 		try {
 
 			dbstmt = conn.prepareStatement(stmt);
 			dbstmt.clearParameters();
 			dbstmt.setLong(1, basketsqlid);
-			java.sql.ResultSet rs = dbstmt.executeQuery();
+			rs = dbstmt.executeQuery();
 			while(rs.next()) {
 				long sqlid = rs.getLong(1);
 				String xtfid=rs.getString(2);
@@ -1283,6 +1293,14 @@ public class TransferFromXtf {
 		} catch (java.sql.SQLException ex) {
 			EhiLogger.logError("failed to query " + sqltablename,	ex);
 		} finally {
+            if (rs != null) {
+                try {
+                    rs.close();
+                    rs=null;
+                } catch (java.sql.SQLException ex) {
+                    EhiLogger.logError("failed to close query of "+ sqltablename, ex);
+                }
+            }
 			if (dbstmt != null) {
 				try {
 					dbstmt.close();

@@ -429,14 +429,15 @@ public class TransferFromIli {
 			}
 			// select entries
 			String insStmt="SELECT "+DbNames.MODELS_TAB_FILE_COL+","+DbNames.MODELS_TAB_ILIVERSION_COL+","+DbNames.MODELS_TAB_MODELNAME_COL+" FROM "+sqlName;
-			if(isMsSqlServer(conn)) {
-				// 'file' is keyword in sql server
+			if(isMsSqlServer(conn) || isOracle(conn)) {
+				// 'file' is keyword in sql server and oracle
 				insStmt="SELECT \""+DbNames.MODELS_TAB_FILE_COL+"\","+DbNames.MODELS_TAB_ILIVERSION_COL+","+DbNames.MODELS_TAB_MODELNAME_COL+" FROM "+sqlName;
 			}
 			EhiLogger.traceBackendCmd(insStmt);
 			java.sql.PreparedStatement insPrepStmt = conn.prepareStatement(insStmt);
+            java.sql.ResultSet rs=null;
 			try{
-				java.sql.ResultSet rs=insPrepStmt.executeQuery();
+				rs=insPrepStmt.executeQuery();
 				while(rs.next()){
 					String file=rs.getString(1);
 					double iliversion=Double.parseDouble(rs.getString(2));
@@ -449,6 +450,10 @@ public class TransferFromIli {
 			}catch(java.sql.SQLException ex){
 				throw new Ili2dbException("failed to read IliFiles from db",ex);
 			}finally{
+			    if(rs!=null) {
+			        rs.close();
+			        rs=null;
+			    }
 				insPrepStmt.close();
 			}
 		}catch(java.sql.SQLException ex){		
@@ -459,6 +464,9 @@ public class TransferFromIli {
 	private static boolean isMsSqlServer(java.sql.Connection conn) throws SQLException {
 		return conn.getMetaData().getURL().startsWith("jdbc:sqlserver:");
 	}
+	private static boolean isOracle(java.sql.Connection conn) throws SQLException {
+		return conn.getMetaData().getURL().startsWith("jdbc:oracle:thin:@");
+	}	
 	public static String readIliFile(java.sql.Connection conn,String schema,String filename)
 	throws Ili2dbException
 	{
@@ -469,15 +477,16 @@ public class TransferFromIli {
 		try{
 			// select entries
 			String selStmt="SELECT "+DbNames.MODELS_TAB_CONTENT_COL+" FROM "+sqlName+" WHERE "+DbNames.MODELS_TAB_FILE_COL+"=?";
-			if(isMsSqlServer(conn)) {
+			if(isMsSqlServer(conn) || isOracle(conn)) {
 				selStmt="SELECT "+DbNames.MODELS_TAB_CONTENT_COL+" FROM "+sqlName+" WHERE \""+DbNames.MODELS_TAB_FILE_COL+"\"=?";
 			}
 			EhiLogger.traceBackendCmd(selStmt);
 			java.sql.PreparedStatement selPrepStmt = conn.prepareStatement(selStmt);
+            java.sql.ResultSet rs=null;
 			try{
 				selPrepStmt.clearParameters();
 				selPrepStmt.setString(1, filename);
-				java.sql.ResultSet rs=selPrepStmt.executeQuery();
+				rs=selPrepStmt.executeQuery();
 				while(rs.next()){
 					String file=rs.getString(1);
 					return file;
@@ -485,6 +494,10 @@ public class TransferFromIli {
 			}catch(java.sql.SQLException ex){
 				throw new Ili2dbException("failed to read ili-file <"+filename+"> from db",ex);
 			}finally{
+			    if(rs!=null) {
+			        rs.close();
+			        rs=null;
+			    }
 				selPrepStmt.close();
 			}
 		}catch(java.sql.SQLException ex){		
@@ -508,8 +521,8 @@ public class TransferFromIli {
 
 			// insert entries
 			String insStmt="INSERT INTO "+sqlName+" ("+DbNames.MODELS_TAB_FILE_COL+","+DbNames.MODELS_TAB_ILIVERSION_COL+","+DbNames.MODELS_TAB_MODELNAME_COL+","+DbNames.MODELS_TAB_CONTENT_COL+","+DbNames.MODELS_TAB_IMPORTDATE_COL+") VALUES (?,?,?,?,?)";
-			if(isMsSqlServer(conn)) {
-				// 'file' is keyword in sql server
+			if(isMsSqlServer(conn) || isOracle(conn)) {
+				// 'file' is keyword in sql server and oracle
 				insStmt="INSERT INTO "+sqlName+" (\""+DbNames.MODELS_TAB_FILE_COL+"\","+DbNames.MODELS_TAB_ILIVERSION_COL+","+DbNames.MODELS_TAB_MODELNAME_COL+","+DbNames.MODELS_TAB_CONTENT_COL+","+DbNames.MODELS_TAB_IMPORTDATE_COL+") VALUES (?,?,?,?,?)";
 			}
 			EhiLogger.traceBackendCmd(insStmt);
@@ -637,9 +650,10 @@ public class TransferFromIli {
 				String insStmt="SELECT "+DbNames.SETTINGS_TAB_TAG_COL+","+DbNames.SETTINGS_TAB_SETTING_COL+" FROM "+sqlName;
 				EhiLogger.traceBackendCmd(insStmt);
 				java.sql.PreparedStatement insPrepStmt = conn.prepareStatement(insStmt);
+                java.sql.ResultSet rs=null;
 				boolean settingsExists=false;
 				try{
-					java.sql.ResultSet rs=insPrepStmt.executeQuery();
+					rs=insPrepStmt.executeQuery();
 					while(rs.next()){
 						String tag=rs.getString(1);
 						String value=rs.getString(2);
@@ -653,6 +667,10 @@ public class TransferFromIli {
 				}catch(java.sql.SQLException ex){
 					throw new Ili2dbException("failed to read setting",ex);
 				}finally{
+				    if(rs!=null) {
+				        rs.close();
+				        rs=null;
+				    }
 					insPrepStmt.close();
 				}
 			}catch(java.sql.SQLException ex){		
@@ -1043,13 +1061,18 @@ public class TransferFromIli {
 			exstStmt="SELECT "+DbNames.INHERIT_TAB_THIS_COL+" FROM "+sqlName;
 			EhiLogger.traceBackendCmd(exstStmt);
 			java.sql.PreparedStatement exstPrepStmt = conn.prepareStatement(exstStmt);
+            java.sql.ResultSet rs=null;
 			try{
-				java.sql.ResultSet rs=exstPrepStmt.executeQuery();
+				rs=exstPrepStmt.executeQuery();
 				while(rs.next()){
 					String iliClassQName=rs.getString(1);
 					ret.add(iliClassQName);
 				}
 			}finally{
+			    if(rs!=null) {
+			        rs.close();
+			        rs=null;
+			    }
 				exstPrepStmt.close();
 			}
 		}catch(java.sql.SQLException ex){		

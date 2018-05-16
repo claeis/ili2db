@@ -1,7 +1,7 @@
 DROP SCHEMA IF EXISTS InheritanceSmart1 CASCADE;
 CREATE SCHEMA InheritanceSmart1;
 
-CREATE SEQUENCE InheritanceSmart1.t_ili2db_seq;;
+CREATE SEQUENCE InheritanceSmart1.t_ili2db_seq;
 -- StructAttr1.TopicA.StructA
 CREATE TABLE InheritanceSmart1.topica_structa (
   T_Id bigint PRIMARY KEY DEFAULT nextval('InheritanceSmart1.t_ili2db_seq')

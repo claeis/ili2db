@@ -151,60 +151,75 @@ public class FgdbStatement implements Statement {
 
 	private ResultSet executeFgdbSelectStmt(FgdbSelectStmt ustmt) throws SQLException {
 		ResultSet ret;
-		EnumRows rows=new EnumRows();
 		  List<SelectValue> selectvalues = null;
 		  int err=0;
-		Table table=new Table();
-		err=conn.getGeodatabase().OpenTable(ustmt.getTableName(), table);
-		if(err!=0){
-			StringBuffer errDesc=new StringBuffer();
-			fgbd4j.GetErrorDescription(err, errDesc);
-			throw new SQLException(errDesc.toString(),"22000",err);
+		Table table=null;
+        EnumRows rows=null;
+		try {
+	        table=new Table();
+	        err=conn.getGeodatabase().OpenTable(ustmt.getTableName(), table);
+	        if(err!=0){
+	            StringBuffer errDesc=new StringBuffer();
+	            fgbd4j.GetErrorDescription(err, errDesc);
+	            throw new SQLException(errDesc.toString(),"22000",err);
+	        }
+	          StringBuffer where=new StringBuffer();
+	          { 
+	              String sep="";
+	                for(java.util.Map.Entry<Value,Value> cond : ustmt.getConditions()){
+	                    where.append(((ch.ehi.ili2fgdb.jdbc.sql.ColRef)cond.getKey()).getName());
+	                    Value rh = cond.getValue();
+	                    if(rh instanceof IsNull) {
+	                        where.append("IS NULL");
+	                    }else {
+	                        where.append("=");
+	                        if(rh instanceof IntConst){
+	                            where.append(Integer.toString(((IntConst)rh).getValue()));
+	                        }else{
+	                            where.append("'");
+	                            where.append(((StringConst)rh).getValue());
+	                            where.append("'");
+	                        }
+	                    }
+	                    sep=" AND ";
+	                }
+	          }
+	          StringBuffer fields=new StringBuffer();
+	          {
+	              String sep="";
+	              for(SelectValue colref:ustmt.getFields()){
+	                  if(colref instanceof SelectValueField){
+	                      fields.append(sep);sep=",";
+	                      fields.append(colref.getColumnName());
+	                  }
+	              }
+	              if(fields.length()==0){
+	                  fields.append("*");
+	              }
+	          }
+	          
+	          rows=new EnumRows();
+	          err= table.Search(fields.toString(), where.toString(), false, rows);
+	          selectvalues = ustmt.getFields();
+	            if(err!=0){
+	                StringBuffer errDesc=new StringBuffer();
+	                fgbd4j.GetErrorDescription(err, errDesc);
+	                throw new SQLException(errDesc.toString());
+	            }
+	            ret=new FgdbResultSet(conn,table,rows,selectvalues);
+	            rows=null;
+	            table=null;
+	        return ret;
+		}finally {
+		    if(rows!=null) {
+		        rows.Close();
+		        rows=null;
+		    }
+		    if(table!=null) {
+		        conn.getGeodatabase().CloseTable(table);
+		        table=null;
+		    }
 		}
-		  StringBuffer where=new StringBuffer();
-		  { 
-			  String sep="";
-				for(java.util.Map.Entry<Value,Value> cond : ustmt.getConditions()){
-					where.append(((ch.ehi.ili2fgdb.jdbc.sql.ColRef)cond.getKey()).getName());
-					Value rh = cond.getValue();
-					if(rh instanceof IsNull) {
-						where.append("IS NULL");
-					}else {
-						where.append("=");
-						if(rh instanceof IntConst){
-							where.append(Integer.toString(((IntConst)rh).getValue()));
-						}else{
-							where.append("'");
-							where.append(((StringConst)rh).getValue());
-							where.append("'");
-						}
-					}
-					sep=" AND ";
-				}
-		  }
-		  StringBuffer fields=new StringBuffer();
-		  {
-			  String sep="";
-			  for(SelectValue colref:ustmt.getFields()){
-				  if(colref instanceof SelectValueField){
-					  fields.append(sep);sep=",";
-					  fields.append(colref.getColumnName());
-				  }
-			  }
-			  if(fields.length()==0){
-				  fields.append("*");
-			  }
-		  }
-		  
-		  err= table.Search(fields.toString(), where.toString(), false, rows);
-		  selectvalues = ustmt.getFields();
-			if(err!=0){
-				StringBuffer errDesc=new StringBuffer();
-				fgbd4j.GetErrorDescription(err, errDesc);
-				throw new SQLException(errDesc.toString());
-			}
-			ret=new FgdbResultSet(conn,table,rows,selectvalues);
-		return ret;
 	}
 
 	@Override
