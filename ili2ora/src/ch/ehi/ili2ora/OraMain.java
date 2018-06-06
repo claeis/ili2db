@@ -31,13 +31,18 @@ import ch.ehi.ili2db.gui.AbstractDbPanelDescriptor;
 public class OraMain extends ch.ehi.ili2db.AbstractMain {
 	private final String DB_PORT="1521";
 	private final String DB_HOST="localhost";
+	
+	private String dbservice="";
+	
 	@Override
 	public void initConfig(Config config) {
 		super.initConfig(config);
-		config.setGeometryConverter(ch.ehi.ili2ora.converter.OracleColumnConverter.class.getName());
-		config.setDdlGenerator(ch.ehi.sqlgen.generator_impl.jdbc.GeneratorOracle.class.getName());
-		config.setJdbcDriver("oracle.jdbc.OracleDriver");
-		config.setDbport(DB_PORT);
+		config.setGeometryConverter(ch.ehi.ili2ora.converter.OracleSpatialColumnConverter.class.getName());
+		config.setDdlGenerator(ch.ehi.ili2ora.sqlgen.GeneratorOracleSpatial.class.getName());
+		config.setJdbcDriver("oracle.jdbc.driver.OracleDriver");
+		config.setIdGenerator(ch.ehi.ili2ora.OraSequenceBasedIdGen.class.getName());
+		config.setIli2dbCustomStrategy(ch.ehi.ili2ora.OracleCustomStrategy.class.getName());
+		config.setValue(Config.MODELS_TAB_MODELNAME_COLSIZE, "400");
 	}
 	protected DbUrlConverter getDbUrlConverter() {
 		return new DbUrlConverter(){
@@ -45,19 +50,31 @@ public class OraMain extends ch.ehi.ili2db.AbstractMain {
 				/*
 				 *  jdbc:oracle:thin:@myhost:1521:orcl
 				    */
-				String dbport=config.getDbport();
-				if(dbport==null){
-					dbport=DB_PORT;
+				String sid = config.getDbdatabase();
+				
+				// no option selected
+				if((sid == null || sid.isEmpty()) && (dbservice == null || dbservice.isEmpty())) {
+					return null;
 				}
-				String dbhost=config.getDbhost();
-				if(dbhost==null){
-					dbhost=DB_HOST;
+				// two options selected: service and database
+				if((sid != null && !sid.isEmpty()) && (dbservice != null && !dbservice.isEmpty())) {
+					EhiLogger.logError("TODO Message");
+					return null;
 				}
-				if(config.getDbdatabase()!=null ){
-					String url = "jdbc:oracle:thin:@" + dbhost + ":" + dbport + ":" + config.getDbdatabase();
-					return url;
+				
+				
+				String strDbHost = config.getDbhost()!=null&&!config.getDbhost().isEmpty()? config.getDbhost() : DB_HOST;
+				String strPort = config.getDbport()!=null && !config.getDbport().isEmpty()? config.getDbport() : DB_PORT;
+				String strDbdatabase = sid != null && !sid.isEmpty()? ":" + sid : "";
+				String strService = dbservice != null && !dbservice.isEmpty()? "/" + dbservice : "";
+				
+				String subProtocol = "jdbc:oracle:thin:@";
+				
+				if(dbservice != null && !dbservice.isEmpty()) {
+					subProtocol += "//";
 				}
-				return null;
+				
+				return subProtocol + strDbHost + ":" + strPort + strDbdatabase + strService;
 			}
 		};
 	}
@@ -90,6 +107,7 @@ public class OraMain extends ch.ehi.ili2db.AbstractMain {
 		System.err.println("--dbhost  host         The host name of the server. Defaults to "+DB_HOST+".");
 		System.err.println("--dbport  port         The port number the server is listening on. Defaults to "+DB_PORT+".");
 		System.err.println("--dbdatabase sid       The database name.");
+		System.err.println("--dbservice servicename The Oracle service name.");
 		System.err.println("--dbusr  username      User name to access database.");
 		System.err.println("--dbpwd  password      Password of user used to access database.");
 		System.err.println("--geomwkb              Geometry as WKB (to be used if no Oracle Spatial).");
@@ -126,7 +144,12 @@ public class OraMain extends ch.ehi.ili2db.AbstractMain {
 			argi++;
 			config.setGeometryConverter(ch.ehi.ili2ora.converter.OracleWKTColumnConverter.class.getName());
 			config.setDdlGenerator(ch.ehi.sqlgen.generator_impl.jdbc.GeneratorOracleWKT.class.getName());
+		}else if(arg.equals("--dbservice")) {
+			argi++;
+			dbservice = args[argi];
+			argi++;
 		}
+		
 		return argi;
 	}
 	@Override
