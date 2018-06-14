@@ -15,6 +15,7 @@ ideas/open issues/questions
 LATEST
 ---------------------------
 - fixed export validation error "incompatible values" if LocalisationCH_V1.LocalisedText without language
+- use models from xtf element MODEL instead of first basket 
 
 ili2fgdb/ili2pg/ili2gpkg 3.11.3 (2018-04-12)
 -----------------------------

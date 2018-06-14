@@ -1396,6 +1396,9 @@ public class TransferFromXtf {
 		 updateObjStat(objStat,tag,sqlId);
 		 // loop over all classes; start with leaf, end with the base of the inheritance hierarchy
 		 ViewableWrapper aclass=class2wrapper.get(aclass1);
+		 if(aclass==null) {
+		     throw new IllegalStateException("no ViewableWrapper found for "+aclass1.getScopedName());
+		 }
 		 while(aclass!=null){
 			 {
 					String insert = getInsertStmt(updateObj,aclass1,aclass,structEle);
