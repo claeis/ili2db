@@ -7,6 +7,7 @@ import java.util.List;
 
 import javax.xml.ws.Holder;
 
+import ch.ehi.basics.types.OutParam;
 import ch.ehi.ili2db.base.DbIdGen;
 import ch.ehi.ili2db.base.DbNames;
 import ch.ehi.ili2db.base.Ili2cUtility;
@@ -447,9 +448,9 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 	public void generateAttr(DbTable dbTable,Viewable aclass,AttributeDef attr)
 	throws Ili2dbException
 	{
-		Holder<DbColumn> dbCol=new Holder<DbColumn>();dbCol.value=null;
-		Holder<Unit> unitDef=new Holder<Unit>();unitDef.value=null;
-		Holder<Boolean> mText=new Holder<Boolean>();mText.value=false;
+		OutParam<DbColumn> dbCol=new OutParam<DbColumn>();dbCol.value=null;
+		OutParam<Unit> unitDef=new OutParam<Unit>();unitDef.value=null;
+		OutParam<Boolean> mText=new OutParam<Boolean>();mText.value=false;
 
 		ArrayList<DbColumn> dbColExts=new ArrayList<DbColumn>();
 		Type type = attr.getDomainResolvingAll();
@@ -675,7 +676,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 	}
 
 	private boolean createSimpleDbCol(DbTable dbTable, Viewable aclass, AttributeDef attr, Type type,
-			Holder<DbColumn> dbCol, Holder<Unit> unitDef, Holder<Boolean> mText, ArrayList<DbColumn> dbColExts) {
+			OutParam<DbColumn> dbCol, OutParam<Unit> unitDef, OutParam<Boolean> mText, ArrayList<DbColumn> dbColExts) {
 		if (attr.isDomainBoolean()) {
 			dbCol.value= new DbColBoolean();
 		}else if (attr.isDomainIli1Date()) {
