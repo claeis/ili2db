@@ -14,6 +14,10 @@ ideas/open issues/questions
 
 LATEST
 ---------------------------
+
+ili2pg 3.11.4 (2018-06-22)
+-----------------------------
+- fixed object references reolution with DB records based on EXTERNAL instead of OID AS 
 - fixed export validation error "incompatible values" if LocalisationCH_V1.LocalisedText without language
 - use models from xtf element MODEL instead of first basket 
 - use OutParam instead of Holder

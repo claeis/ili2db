@@ -1,0 +1,28 @@
+INTERLIS 2.3;
+
+MODEL Oid2
+  AT "mailto:ce@eisenhutinformatik.ch" VERSION "2015-12-03" =
+    
+  TOPIC TestD =
+  
+    CLASS ClassDa =
+    END ClassDa;
+    CLASS ClassDb =
+    END ClassDb;
+    ASSOCIATION a2b =
+      a (EXTERNAL) -- {0..1} ClassDa;
+      b -- {0..*} ClassDb;
+    END a2b;
+    
+  END TestD;
+  TOPIC TestE EXTENDS TestD =
+  
+    CLASS ClassDa (EXTENDED) =
+    	OID AS INTERLIS.UUIDOID;
+    END ClassDa;
+    CLASS ClassDb (EXTENDED) =
+    	OID AS INTERLIS.UUIDOID;
+    END ClassDb;    
+  END TestE;
+  
+END Oid2.

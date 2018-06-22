@@ -528,7 +528,7 @@ public class TransferFromXtf {
 										// skip it; now resolvable
 									}else{
 										// object in another basket
-										if(readIliTid || (aclass instanceof AbstractClassDef && ((AbstractClassDef) aclass).getOid()!=null)){
+										if(fixref.isExternalTarget(ref) && (readIliTid || Ili2cUtility.isViewableWithOid(aclass))){
 											// read object
 											Long sqlid=readObjectSqlid(aclass,xtfid);
 											if(sqlid==null){
@@ -1133,7 +1133,7 @@ public class TransferFromXtf {
 										String refoid=structvalue.getobjectrefoid();
 										Viewable targetClass=role.getDestination();
 										if(!oidPool.containsXtfid(Ili2cUtility.getRootViewable(targetClass).getScopedName(null),refoid)){
-											extref.addFix(structvalue, targetClass);
+											extref.addFix(structvalue, targetClass,role.isExternal());
 										}
 									}
 								}
@@ -1142,7 +1142,7 @@ public class TransferFromXtf {
 								 String refoid=structvalue.getobjectrefoid();
 									Viewable targetClass=role.getDestination();
 								if(!oidPool.containsXtfid(Ili2cUtility.getRootViewable(targetClass).getScopedName(null),refoid)){
-									extref.addFix(structvalue, targetClass);
+									extref.addFix(structvalue, targetClass,role.isExternal());
 								}
 								
 							 }
@@ -1180,9 +1180,10 @@ public class TransferFromXtf {
 					 refoid=structvalue.getobjectrefoid();
 				 }
 				 if(refoid!=null){
-					 	Viewable targetClass=((ReferenceType)type).getReferred();
+					 	ReferenceType refType = (ReferenceType)type;
+                        Viewable targetClass=refType.getReferred(); 
 						if(!oidPool.containsXtfid(Ili2cUtility.getRootViewable(targetClass).getScopedName(null),refoid)){
-							extref.addFix(structvalue, targetClass);
+							extref.addFix(structvalue, targetClass,refType.isExternal());
 						}
 				 }
 			}else{
@@ -1201,11 +1202,7 @@ public class TransferFromXtf {
 
 			dbstmt = conn.prepareStatement(stmt);
 			dbstmt.clearParameters();
-			if(( xclass instanceof AbstractClassDef)  && ((AbstractClassDef) xclass).getOid()!=null && AbstractRecordConverter.isUuidOid(td, ((AbstractClassDef) xclass).getOid())){
-				dbstmt.setObject(1, geomConv.fromIomUuid(xtfid));
-			}else{
-				dbstmt.setString(1, xtfid);
-			}
+            dbstmt.setString(1, xtfid);
 			rs = dbstmt.executeQuery();
 			if(rs.next()) {
 				sqlid = rs.getLong(1);
@@ -1215,8 +1212,6 @@ public class TransferFromXtf {
 				return null;
 			}
 		} catch (java.sql.SQLException ex) {
-			EhiLogger.logError("failed to query " + xclass.getScopedName(null),	ex);
-		} catch (ConverterException ex) {
 			EhiLogger.logError("failed to query " + xclass.getScopedName(null),	ex);
 		} finally {
             if (rs != null) {
