@@ -461,6 +461,9 @@ public class TransferFromIli {
 		}
 		return ret;
 	}
+    public static boolean isPostgresql(java.sql.Connection conn) throws SQLException {
+        return conn.getMetaData().getURL().startsWith("jdbc:postgresql:");
+    }
 	private static boolean isMsSqlServer(java.sql.Connection conn) throws SQLException {
 		return conn.getMetaData().getURL().startsWith("jdbc:sqlserver:");
 	}

@@ -1191,13 +1191,13 @@ public class TransferFromXtf {
 	}
 
 	private Long readObjectSqlid(Viewable xclass, String xtfid) {
-		String stmt = createQueryStmt4sqlid(xclass);
-		EhiLogger.traceBackendCmd(stmt);
 		java.sql.PreparedStatement dbstmt = null;
         java.sql.ResultSet rs = null;
 		long sqlid=0;
 		String sqlType=null;
 		try {
+	        String stmt = createQueryStmt4sqlid(xclass);
+	        EhiLogger.traceBackendCmd(stmt);
 
 			dbstmt = conn.prepareStatement(stmt);
 			dbstmt.clearParameters();
@@ -1240,17 +1240,21 @@ public class TransferFromXtf {
 		oidPool.putXtfid2sqlid(Ili2cUtility.getRootViewable(aclass).getScopedName(null),aclass.getScopedName(null),xtfid, sqlid);
 		return sqlid;
 	}
-	private String createQueryStmt4sqlid(Viewable aclass){
+	private String createQueryStmt4sqlid(Viewable aclass) throws SQLException{
 		ArrayList<ViewableWrapper> wrappers = recConv.getTargetTables(aclass);
 		StringBuffer ret = new StringBuffer();
 		int i=1;
-		
+		boolean isPg=TransferFromIli.isPostgresql(conn);
 		ret.append("SELECT "+colT_ID+","+DbNames.T_ILI_TID_COL+","+DbNames.T_TYPE_COL+" FROM (");
 		String sep="";
 		for(ViewableWrapper wrapper:wrappers){
 			ret.append(sep);
 			ret.append("SELECT r"+i+"."+colT_ID);
-			ret.append(", r"+i+"."+DbNames.T_ILI_TID_COL);
+			if(isPg) {
+	            ret.append(", "+"CAST(r"+i+"."+DbNames.T_ILI_TID_COL+" AS text)");
+			}else {
+	            ret.append(", r"+i+"."+DbNames.T_ILI_TID_COL);
+			}
 			if(recConv.createTypeDiscriminator() ||wrapper.includesMultipleTypes()){
 				ret.append(", r"+i+"."+DbNames.T_TYPE_COL);
 			}else{
