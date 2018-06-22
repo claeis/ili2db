@@ -76,7 +76,7 @@ public class CreateFK23GpkgTest {
             fail();
         } catch (Exception e) {
         	e.printStackTrace();
-            Assert.assertEquals("loop in create table statements: classb1->classa1->classb1", e.getCause().getMessage());
+            Assert.assertEquals("loop in create table statements: classa1->classb1->classa1", e.getCause().getMessage());
         }
 	}
 }
