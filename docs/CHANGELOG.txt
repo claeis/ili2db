@@ -17,6 +17,7 @@ LATEST
 - fixed export validation error "incompatible values" if LocalisationCH_V1.LocalisedText without language
 - use models from xtf element MODEL instead of first basket 
 - use OutParam instead of Holder
+- iox-ili-1.20.6
 - ehibasics-1.2.0
 - ehisqlgen-1.13.5
 
