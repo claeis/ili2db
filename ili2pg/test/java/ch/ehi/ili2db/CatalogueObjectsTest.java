@@ -1,23 +1,17 @@
 package ch.ehi.ili2db;
 
+import static org.junit.Assert.assertEquals;
 import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.HashMap;
-
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
-
 import ch.ehi.basics.logging.EhiLogger;
-import ch.ehi.ili2db.base.DbUrlConverter;
 import ch.ehi.ili2db.base.Ili2db;
-import ch.ehi.ili2db.base.Ili2dbException;
 import ch.ehi.ili2db.gui.Config;
-import ch.ehi.ili2db.mapping.NameMapping;
-import ch.ehi.sqlgen.DbUtility;
 import ch.interlis.iom.IomObject;
 import ch.interlis.iom_j.xtf.XtfReader;
 import ch.interlis.iox.EndBasketEvent;
@@ -34,8 +28,11 @@ import ch.interlis.iox.StartTransferEvent;
  */
 // -Ddburl=jdbc:postgresql:dbname -Ddbusr=usrname -Ddbpwd=1234
 public class CatalogueObjectsTest {
+	
 	private static final String DBSCHEMA = "CatalogueObjects1";
 	private static final String DATASETNAME = "Testset1";
+	private static final String TEST_OUT="test/data/CatalogueObjects/";
+	
 	String dburl=System.getProperty("dburl"); 
 	String dbuser=System.getProperty("dbusr");
 	String dbpwd=System.getProperty("dbpwd"); 
@@ -66,12 +63,11 @@ public class CatalogueObjectsTest {
 		Connection jdbcConnection=null;
 		try{
 			Class driverClass = Class.forName("org.postgresql.Driver");
-	        jdbcConnection = DriverManager.getConnection(
-	        		dburl, dbuser, dbpwd);
+	        jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
 	        Statement stmt=jdbcConnection.createStatement();
 	        stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");
 	        {
-				File data=new File("test/data/CatalogueObjects/CatalogueObjects1.ili");
+				File data=new File(TEST_OUT,"CatalogueObjects1.ili");
 				Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 				Ili2db.setNoSmartMapping(config);
 				config.setFunction(Config.FC_SCHEMAIMPORT);
@@ -91,6 +87,7 @@ public class CatalogueObjectsTest {
 			}
 		}
 	}
+	
     @Test
     public void importIliSmart1CoalesceCatalogRef() throws Exception
     {
@@ -98,12 +95,11 @@ public class CatalogueObjectsTest {
         Connection jdbcConnection=null;
         try{
             Class driverClass = Class.forName("org.postgresql.Driver");
-            jdbcConnection = DriverManager.getConnection(
-                    dburl, dbuser, dbpwd);
+            jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
             Statement stmt=jdbcConnection.createStatement();
             stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");
             {
-                File data=new File("test/data/CatalogueObjects/CatalogueObjects1.ili");
+                File data=new File(TEST_OUT,"CatalogueObjects1.ili");
                 Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
                 config.setFunction(Config.FC_SCHEMAIMPORT);
                 config.setCreateFk(Config.CREATE_FK_YES);
@@ -122,6 +118,7 @@ public class CatalogueObjectsTest {
             }
         }
     }
+    
     @Test
     public void importIliSmart2CoalesceCatalogRef() throws Exception
     {
@@ -134,7 +131,7 @@ public class CatalogueObjectsTest {
             Statement stmt=jdbcConnection.createStatement();
             stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");
             {
-                File data=new File("test/data/CatalogueObjects/CatalogueObjects1.ili");
+                File data=new File(TEST_OUT,"CatalogueObjects1.ili");
                 Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
                 config.setFunction(Config.FC_SCHEMAIMPORT);
                 config.setCreateFk(Config.CREATE_FK_YES);
@@ -166,7 +163,7 @@ public class CatalogueObjectsTest {
 	        Statement stmt=jdbcConnection.createStatement();
 	        stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");
 	        {
-				File data=new File("test/data/CatalogueObjects/CatalogueObjects1a.xtf");
+				File data=new File(TEST_OUT,"CatalogueObjects1a.xtf");
 				Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 				Ili2db.setNoSmartMapping(config);
 				config.setFunction(Config.FC_IMPORT);
@@ -197,7 +194,7 @@ public class CatalogueObjectsTest {
             Statement stmt=jdbcConnection.createStatement();
             stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");
             {
-                File data=new File("test/data/CatalogueObjects/CatalogueObjects1a.xtf");
+                File data=new File(TEST_OUT,"CatalogueObjects1a.xtf");
                 Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
                 config.setFunction(Config.FC_IMPORT);
                 config.setCreateFk(Config.CREATE_FK_YES);
@@ -216,7 +213,8 @@ public class CatalogueObjectsTest {
                 jdbcConnection.close();
             }
         }
-    }   
+    }
+    
     @Test
     public void importXtfSmart2CoalesceCatalogRef() throws Exception
     {
@@ -228,7 +226,7 @@ public class CatalogueObjectsTest {
             Statement stmt=jdbcConnection.createStatement();
             stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");
             {
-                File data=new File("test/data/CatalogueObjects/CatalogueObjects1a.xtf");
+                File data=new File(TEST_OUT,"CatalogueObjects1a.xtf");
                 Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
                 config.setFunction(Config.FC_IMPORT);
                 config.setCreateFk(Config.CREATE_FK_YES);
@@ -253,14 +251,14 @@ public class CatalogueObjectsTest {
 	@Test
 	public void exportXtf() throws Exception
 	{
-	    importXtf();
+    	{
+    		importXtf();
+    	}
 		Connection jdbcConnection=null;
 		try{
 			 Class driverClass = Class.forName("org.postgresql.Driver");
 	        jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
-	        //DbUtility.executeSqlScript(jdbcConnection, new java.io.FileReader("test/data/CatalogueObjects/CreateTable.sql"));
-	        //DbUtility.executeSqlScript(jdbcConnection, new java.io.FileReader("test/data/CatalogueObjects/InsertIntoTable.sql"));
-			File data=new File("test/data/CatalogueObjects/CatalogueObjects1a-out.xtf");
+			File data=new File(TEST_OUT,"CatalogueObjects1a-out.xtf");
 			Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 			config.setFunction(Config.FC_EXPORT);
 			config.setDatasetName(DATASETNAME);
@@ -300,17 +298,18 @@ public class CatalogueObjectsTest {
 			}
 		}
 	}
+    
     @Test
     public void exportXtfSmart1CoalesceCatalogRef() throws Exception
     {
-        importXtfSmart1CoalesceCatalogRef();
+    	{
+    		importXtfSmart1CoalesceCatalogRef();
+    	}
         Connection jdbcConnection=null;
         try{
-             Class driverClass = Class.forName("org.postgresql.Driver");
+            Class driverClass = Class.forName("org.postgresql.Driver");
             jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
-            //DbUtility.executeSqlScript(jdbcConnection, new java.io.FileReader("test/data/CatalogueObjects/CreateTable.sql"));
-            //DbUtility.executeSqlScript(jdbcConnection, new java.io.FileReader("test/data/CatalogueObjects/InsertIntoTable.sql"));
-            File data=new File("test/data/CatalogueObjects/CatalogueObjects1a-smart1out.xtf");
+            File data=new File(TEST_OUT,"CatalogueObjects1a-smart1out.xtf");
             Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
             config.setFunction(Config.FC_EXPORT);
             config.setDatasetName(DATASETNAME);
@@ -343,8 +342,39 @@ public class CatalogueObjectsTest {
              }while(!(event instanceof EndTransferEvent));
              Assert.assertNotNull(ohneUuid);
              Assert.assertNotNull(nutzung);
+             
+            // ohneUuid
+         	String objTag=ohneUuid.getobjecttag();
+         	assertEquals("CatalogueObjects1.TopicB.OhneUuid",objTag);
+         	String oid=ohneUuid.getobjectoid();
+			assertEquals("9",oid);
              {
-                 // TODO verify references Programm_n, OhneUuid_n, Programm_1, OhneUuid_1
+                // Programm_n
+            	IomObject programm_n=nutzung.getattrobj("Programm_n", 0);
+            	IomObject programm=programm_n.getattrobj("Reference", 0);
+            	String refOid=programm.getobjectrefoid();
+				assertEquals("5880375a-52cd-4b2d-af50-c3a6fc5c5352",refOid);
+             }
+             {
+				// OhneUuid_n
+				IomObject programm_n=nutzung.getattrobj("OhneUuid_n", 0);
+            	IomObject programm=programm_n.getattrobj("Reference", 0);
+            	String refOid=programm.getobjectrefoid();
+				assertEquals(oid,refOid);
+             }
+             {
+				// Programm_1
+				IomObject programm_n=nutzung.getattrobj("Programm_1", 0);
+            	IomObject programm=programm_n.getattrobj("Reference", 0);
+            	String refOid=programm.getobjectrefoid();
+				assertEquals("5880375a-52cd-4b2d-af50-c3a6fc5c5352",refOid);
+             }
+             {
+				// OhneUuid_1
+				IomObject programm_n=nutzung.getattrobj("OhneUuid_1", 0);
+            	IomObject programm=programm_n.getattrobj("Reference", 0);
+            	String refOid=programm.getobjectrefoid();
+				assertEquals(oid,refOid);
              }
         }finally{
             if(jdbcConnection!=null){
@@ -352,17 +382,18 @@ public class CatalogueObjectsTest {
             }
         }
     }
+    
     @Test
     public void exportXtfSmart2CoalesceCatalogRef() throws Exception
     {
-        importXtfSmart2CoalesceCatalogRef();
+    	{
+    		importXtfSmart2CoalesceCatalogRef();
+    	}
         Connection jdbcConnection=null;
         try{
-             Class driverClass = Class.forName("org.postgresql.Driver");
+            Class driverClass = Class.forName("org.postgresql.Driver");
             jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
-            //DbUtility.executeSqlScript(jdbcConnection, new java.io.FileReader("test/data/CatalogueObjects/CreateTable.sql"));
-            //DbUtility.executeSqlScript(jdbcConnection, new java.io.FileReader("test/data/CatalogueObjects/InsertIntoTable.sql"));
-            File data=new File("test/data/CatalogueObjects/CatalogueObjects1a-smart2out.xtf");
+            File data=new File(TEST_OUT,"CatalogueObjects1a-smart2out.xtf");
             Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
             config.setFunction(Config.FC_EXPORT);
             config.setDatasetName(DATASETNAME);
@@ -396,7 +427,39 @@ public class CatalogueObjectsTest {
              Assert.assertNotNull(ohneUuid);
              Assert.assertNotNull(nutzung);
              {
-                 // TODO verify references Programm_n, OhneUuid_n, Programm_1, OhneUuid_1
+            	// ohneUuid
+              	String objTag=ohneUuid.getobjecttag();
+              	assertEquals("CatalogueObjects1.TopicB.OhneUuid",objTag);
+              	String oid=ohneUuid.getobjectoid();
+     			assertEquals("9",oid);
+                  {
+                     // Programm_n
+                 	IomObject programm_n=nutzung.getattrobj("Programm_n", 0);
+                 	IomObject programm=programm_n.getattrobj("Reference", 0);
+                 	String refOid=programm.getobjectrefoid();
+     				assertEquals("5880375a-52cd-4b2d-af50-c3a6fc5c5352",refOid);
+                  }
+                  {
+     				// OhneUuid_n
+     				IomObject programm_n=nutzung.getattrobj("OhneUuid_n", 0);
+                 	IomObject programm=programm_n.getattrobj("Reference", 0);
+                 	String refOid=programm.getobjectrefoid();
+     				assertEquals(oid,refOid);
+                  }
+                  {
+     				// Programm_1
+     				IomObject programm_n=nutzung.getattrobj("Programm_1", 0);
+                 	IomObject programm=programm_n.getattrobj("Reference", 0);
+                 	String refOid=programm.getobjectrefoid();
+     				assertEquals("5880375a-52cd-4b2d-af50-c3a6fc5c5352",refOid);
+                  }
+                  {
+     				// OhneUuid_1
+     				IomObject programm_n=nutzung.getattrobj("OhneUuid_1", 0);
+                 	IomObject programm=programm_n.getattrobj("Reference", 0);
+                 	String refOid=programm.getobjectrefoid();
+     				assertEquals(oid,refOid);
+                  }
              }
         }finally{
             if(jdbcConnection!=null){

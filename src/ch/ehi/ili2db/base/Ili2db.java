@@ -78,6 +78,7 @@ import ch.interlis.iom_j.xtf.XtfWriter;
 import ch.interlis.iox.IoxException;
 import ch.interlis.iox.IoxReader;
 import ch.interlis.iox.IoxWriter;
+import ch.interlis.iox_j.IoxUtility;
 import ch.interlis.iox_j.logging.FileLogger;
 import ch.interlis.iox_j.logging.StdLogger;
 
@@ -287,15 +288,25 @@ public class Ili2db {
 							try{
 								java.io.InputStream in=zipFile.getInputStream(zipXtfEntry);
 								m=getModelFromXtf(in,zipXtfEntry.getName());
+			                    if(m!=null){
+			                        modelv.addFileEntry(new ch.interlis.ili2c.config.FileEntry(m,ch.interlis.ili2c.config.FileEntryKind.ILIMODELFILE));             
+			                    }
 							}catch(java.io.IOException ex){
 								throw new Ili2dbException(ex);
 							}
 						}else{
-							m=getModelFromXtf(inputFilename);
+							List<String> modelsFromXtf=null;
+                            try {
+                                modelsFromXtf = IoxUtility.getModels(new java.io.File(inputFilename));
+                            } catch (IoxException e) {
+                                throw new Ili2dbException(e);
+                            }
+		                    for(String modelFromXtf:modelsFromXtf){
+		                        modelv.addFileEntry(new ch.interlis.ili2c.config.FileEntry(modelFromXtf,ch.interlis.ili2c.config.FileEntryKind.ILIMODELFILE));             
+		                    }
 						}
-					}
-					if(m!=null){
-						modelv.addFileEntry(new ch.interlis.ili2c.config.FileEntry(m,ch.interlis.ili2c.config.FileEntryKind.ILIMODELFILE));				
+					}else {
+                        modelv.addFileEntry(new ch.interlis.ili2c.config.FileEntry(m,ch.interlis.ili2c.config.FileEntryKind.ILIMODELFILE));             
 					}
 				}
 				
@@ -462,6 +473,7 @@ public class Ili2db {
 				for(int modeli=0;modeli<modelv.getSizeFileEntry();modeli++){
 					if(modelv.getFileEntry(modeli).getKind()==ch.interlis.ili2c.config.FileEntryKind.ILIMODELFILE){
 						String m=modelv.getFileEntry(modeli).getFilename();
+						EhiLogger.traceState("use model "+m);
 						modelNames.add(m);				
 					}
 				}
@@ -1889,6 +1901,7 @@ public class Ili2db {
 		ret[1]=topicName;
 		return ret;
 	}
+	@Deprecated
 	public static String getModelFromXtf(String filename)
 	{
 		ch.interlis.iox.StartBasketEvent be=null;

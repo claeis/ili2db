@@ -528,7 +528,7 @@ public class TransferFromXtf {
 										// skip it; now resolvable
 									}else{
 										// object in another basket
-										if(readIliTid || (aclass instanceof AbstractClassDef && ((AbstractClassDef) aclass).getOid()!=null)){
+										if(fixref.isExternalTarget(ref) && (readIliTid || Ili2cUtility.isViewableWithOid(aclass))){
 											// read object
 											Long sqlid=readObjectSqlid(aclass,xtfid);
 											if(sqlid==null){
@@ -1133,7 +1133,7 @@ public class TransferFromXtf {
 										String refoid=structvalue.getobjectrefoid();
 										Viewable targetClass=role.getDestination();
 										if(!oidPool.containsXtfid(Ili2cUtility.getRootViewable(targetClass).getScopedName(null),refoid)){
-											extref.addFix(structvalue, targetClass);
+											extref.addFix(structvalue, targetClass,role.isExternal());
 										}
 									}
 								}
@@ -1142,7 +1142,7 @@ public class TransferFromXtf {
 								 String refoid=structvalue.getobjectrefoid();
 									Viewable targetClass=role.getDestination();
 								if(!oidPool.containsXtfid(Ili2cUtility.getRootViewable(targetClass).getScopedName(null),refoid)){
-									extref.addFix(structvalue, targetClass);
+									extref.addFix(structvalue, targetClass,role.isExternal());
 								}
 								
 							 }
@@ -1180,9 +1180,10 @@ public class TransferFromXtf {
 					 refoid=structvalue.getobjectrefoid();
 				 }
 				 if(refoid!=null){
-					 	Viewable targetClass=((ReferenceType)type).getReferred();
+					 	ReferenceType refType = (ReferenceType)type;
+                        Viewable targetClass=refType.getReferred(); 
 						if(!oidPool.containsXtfid(Ili2cUtility.getRootViewable(targetClass).getScopedName(null),refoid)){
-							extref.addFix(structvalue, targetClass);
+							extref.addFix(structvalue, targetClass,refType.isExternal());
 						}
 				 }
 			}else{
@@ -1191,21 +1192,17 @@ public class TransferFromXtf {
 	}
 
 	private Long readObjectSqlid(Viewable xclass, String xtfid) {
-		String stmt = createQueryStmt4sqlid(xclass);
-		EhiLogger.traceBackendCmd(stmt);
 		java.sql.PreparedStatement dbstmt = null;
         java.sql.ResultSet rs = null;
 		long sqlid=0;
 		String sqlType=null;
 		try {
+	        String stmt = createQueryStmt4sqlid(xclass);
+	        EhiLogger.traceBackendCmd(stmt);
 
 			dbstmt = conn.prepareStatement(stmt);
 			dbstmt.clearParameters();
-			if(( xclass instanceof AbstractClassDef)  && ((AbstractClassDef) xclass).getOid()!=null && AbstractRecordConverter.isUuidOid(td, ((AbstractClassDef) xclass).getOid())){
-				dbstmt.setObject(1, geomConv.fromIomUuid(xtfid));
-			}else{
-				dbstmt.setString(1, xtfid);
-			}
+            dbstmt.setString(1, xtfid);
 			rs = dbstmt.executeQuery();
 			if(rs.next()) {
 				sqlid = rs.getLong(1);
@@ -1215,8 +1212,6 @@ public class TransferFromXtf {
 				return null;
 			}
 		} catch (java.sql.SQLException ex) {
-			EhiLogger.logError("failed to query " + xclass.getScopedName(null),	ex);
-		} catch (ConverterException ex) {
 			EhiLogger.logError("failed to query " + xclass.getScopedName(null),	ex);
 		} finally {
             if (rs != null) {
@@ -1240,17 +1235,21 @@ public class TransferFromXtf {
 		oidPool.putXtfid2sqlid(Ili2cUtility.getRootViewable(aclass).getScopedName(null),aclass.getScopedName(null),xtfid, sqlid);
 		return sqlid;
 	}
-	private String createQueryStmt4sqlid(Viewable aclass){
+	private String createQueryStmt4sqlid(Viewable aclass) throws SQLException{
 		ArrayList<ViewableWrapper> wrappers = recConv.getTargetTables(aclass);
 		StringBuffer ret = new StringBuffer();
 		int i=1;
-		
+		boolean isPg=TransferFromIli.isPostgresql(conn);
 		ret.append("SELECT "+colT_ID+","+DbNames.T_ILI_TID_COL+","+DbNames.T_TYPE_COL+" FROM (");
 		String sep="";
 		for(ViewableWrapper wrapper:wrappers){
 			ret.append(sep);
 			ret.append("SELECT r"+i+"."+colT_ID);
-			ret.append(", r"+i+"."+DbNames.T_ILI_TID_COL);
+			if(isPg) {
+	            ret.append(", "+"CAST(r"+i+"."+DbNames.T_ILI_TID_COL+" AS text)");
+			}else {
+	            ret.append(", r"+i+"."+DbNames.T_ILI_TID_COL);
+			}
 			if(recConv.createTypeDiscriminator() ||wrapper.includesMultipleTypes()){
 				ret.append(", r"+i+"."+DbNames.T_TYPE_COL);
 			}else{
@@ -1396,6 +1395,9 @@ public class TransferFromXtf {
 		 updateObjStat(objStat,tag,sqlId);
 		 // loop over all classes; start with leaf, end with the base of the inheritance hierarchy
 		 ViewableWrapper aclass=class2wrapper.get(aclass1);
+		 if(aclass==null) {
+		     throw new IllegalStateException("no ViewableWrapper found for "+aclass1.getScopedName());
+		 }
 		 while(aclass!=null){
 			 {
 					String insert = getInsertStmt(updateObj,aclass1,aclass,structEle);

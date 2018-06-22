@@ -639,8 +639,11 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 									iomMulti=new Iom_jObject(multilingualTextQname, null);
 								}
 								IomObject iomTxt=iomMulti.addattrobj(IliNames.CHBASE1_LOCALISEDTEXT,localizedTextQname);
-								
-								iomTxt.setattrvalue(IliNames.CHBASE1_LOCALISEDTEXT_LANGUAGE,sfx.length()==0?null:sfx.substring(LEN_LANG_PREFIX));
+								if(sfx.length()==0) {
+	                                iomTxt.setattrundefined(IliNames.CHBASE1_LOCALISEDTEXT_LANGUAGE);
+								}else {
+	                                iomTxt.setattrvalue(IliNames.CHBASE1_LOCALISEDTEXT_LANGUAGE,sfx.substring(LEN_LANG_PREFIX));
+								}
 								iomTxt.setattrvalue(IliNames.CHBASE1_LOCALISEDTEXT_TEXT,value);
 							}
 						}

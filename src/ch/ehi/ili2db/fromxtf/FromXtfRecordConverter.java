@@ -15,6 +15,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
 import javax.xml.ws.Holder;
 
 import ch.ehi.basics.logging.EhiLogger;
+import ch.ehi.basics.types.OutParam;
 import ch.ehi.ili2db.base.DbIdGen;
 import ch.ehi.ili2db.base.DbNames;
 import ch.ehi.ili2db.base.Ili2cUtility;
@@ -229,7 +230,7 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 								//ret.setStringAttribute(roleName, refoid);
 							 }
 						 }
-						Holder<Integer> valueiRef=new Holder<Integer>(valuei);
+						OutParam<Integer> valueiRef=new OutParam<Integer>(valuei);
 						setReferenceColumn(ps,role.getDestination(),refoid,valueiRef);
 						valuei=valueiRef.value;
 					}
@@ -260,7 +261,7 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 		}
 	}
 	private void setReferenceColumn(PreparedStatement ps,
-			AbstractClassDef destination, String refoid, Holder<Integer> valuei) throws SQLException {
+			AbstractClassDef destination, String refoid, OutParam<Integer> valuei) throws SQLException {
 	  	String targetRootClassName=Ili2cUtility.getRootViewable(destination).getScopedName(null);
 	  	ViewableWrapper targetObjTable=null;
 		ArrayList<ViewableWrapper> targetTables = getTargetTables(destination);
@@ -880,7 +881,7 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
                                 refoid=structvalue.getobjectrefoid();
                             }
                         }
-	                    Holder<Integer> valueiRef=new Holder<Integer>(valuei);
+	                    OutParam<Integer> valueiRef=new OutParam<Integer>(valuei);
 	                    setReferenceColumn(ps,getCatalogueRefTarget(type),refoid,valueiRef);
 	                    valuei=valueiRef.value;
 					}else if(TrafoConfigNames.MULTISURFACE_TRAFO_COALESCE.equals(trafoConfig.getAttrConfig(attr, TrafoConfigNames.MULTISURFACE_TRAFO))){
@@ -1112,7 +1113,7 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 					 if(structvalue!=null){
 						 refoid=structvalue.getobjectrefoid();
 					 }
-					Holder<Integer> valueiRef=new Holder<Integer>(valuei);
+					OutParam<Integer> valueiRef=new OutParam<Integer>(valuei);
 					setReferenceColumn(ps,((ReferenceType) type).getReferred(),refoid,valueiRef);
 					valuei=valueiRef.value;
 				}else if(type instanceof BlackboxType){

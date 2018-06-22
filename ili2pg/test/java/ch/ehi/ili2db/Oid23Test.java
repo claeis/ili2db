@@ -233,4 +233,67 @@ public class Oid23Test {
 			}
 		}
 	}
+    @Test
+    public void importIliExtendedTopic() throws Exception
+    {
+        //EhiLogger.getInstance().setTraceFilter(false);
+        Connection jdbcConnection=null;
+        try{
+            Class driverClass = Class.forName("org.postgresql.Driver");
+            jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
+            stmt=jdbcConnection.createStatement();
+            stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");
+            {
+                File data=new File("test/data/Oid23/Oid2.ili");
+                Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+                config.setFunction(Config.FC_SCHEMAIMPORT);
+                config.setCreateFk(config.CREATE_FK_YES);
+                config.setTidHandling(null);
+                config.setBasketHandling(config.BASKET_HANDLING_READWRITE);
+                config.setCatalogueRefTrafo(null);
+                config.setMultiSurfaceTrafo(null);
+                config.setMultilingualTrafo(null);
+                config.setInheritanceTrafo(Config.INHERITANCE_TRAFO_SMART1);
+                Ili2db.readSettingsFromDb(config);
+                Ili2db.run(config,null);
+            }
+        }finally{
+            if(jdbcConnection!=null){
+                jdbcConnection.close();
+            }
+        }
+    }
+    @Test
+    public void importXtfExtendedTopic() throws Exception
+    {
+        importIliExtendedTopic();
+        EhiLogger.getInstance().setTraceFilter(false);
+        Connection jdbcConnection=null;
+        try{
+            Class driverClass = Class.forName("org.postgresql.Driver");
+            jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
+            stmt=jdbcConnection.createStatement();
+            {
+                File data=new File("test/data/Oid23/Oid2a.xtf");
+                Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+                config.setFunction(Config.FC_IMPORT);
+                config.setValidation(false);
+                Ili2db.readSettingsFromDb(config);
+                Ili2db.run(config,null);
+            }
+            {
+                File data=new File("test/data/Oid23/Oid2b.xtf");
+                Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+                config.setFunction(Config.FC_IMPORT);
+                config.setValidation(false);
+                Ili2db.readSettingsFromDb(config);
+                Ili2db.run(config,null);
+            }
+        }finally{
+            if(jdbcConnection!=null){
+                jdbcConnection.close();
+            }
+        }
+    }
+	
 }

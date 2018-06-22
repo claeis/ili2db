@@ -12,11 +12,13 @@ public class FixIomObjectExtRefs {
 	private String rootTag=null;
 	private HashMap<IomObject,Target> refs=new HashMap<IomObject,Target>();
 	private class Target{
-		public Target(Viewable aclass) {
+		public Target(Viewable aclass,boolean isExternal) {
 			super();
 			this.aclass = aclass;
+			this.isExternal=isExternal;
 		}
 		Viewable aclass;
+		boolean isExternal;
 			
 	}
 	public FixIomObjectExtRefs(long basketSqlId,String rootObjTag,String rootObjTid) {
@@ -31,8 +33,8 @@ public class FixIomObjectExtRefs {
 	public String getRootTag(){
 		return rootTag;
 	}
-	public void addFix(IomObject refobj, Viewable targetClass) {
-		refs.put(refobj, new Target(targetClass));
+	public void addFix(IomObject refobj, Viewable targetClass,boolean isExternal) {
+		refs.put(refobj, new Target(targetClass,isExternal));
 	}
 
 	public boolean needsFixing() {
@@ -50,5 +52,9 @@ public class FixIomObjectExtRefs {
 	public long getBasketSqlId() {
 		return basketSqlId;
 	}
+
+    public boolean isExternalTarget(IomObject ref) {
+        return refs.get(ref).isExternal;
+    }
 
 }

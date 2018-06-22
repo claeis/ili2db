@@ -1,6 +1,9 @@
 package ch.ehi.ili2db;
 
+import static org.junit.Assert.fail;
+
 import java.io.File;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.Statement;
@@ -9,20 +12,20 @@ import org.junit.Assert;
 import org.junit.Test;
 import ch.ehi.basics.logging.EhiLogger;
 import ch.ehi.ili2db.base.Ili2db;
+import ch.ehi.ili2db.base.Ili2dbException;
 import ch.ehi.ili2db.gui.Config;
 
 public class CreateFK23GpkgTest {
+	
 	private static final String TEST_OUT="test/data/CreateFK23/";
-	private String gpkgFileName=TEST_OUT+"test.gpkg";
-	Connection jdbcConnection=null;
-	Statement stmt=null;
+    private static final String GPKGFILENAME=TEST_OUT+"test.gpkg";
+	private Connection jdbcConnection=null;
 	
 	public void initDb() throws Exception
 	{
 	    Class driverClass = Class.forName("org.sqlite.JDBC");
-        jdbcConnection = DriverManager.getConnection(
-        		"jdbc:sqlite:"+gpkgFileName, null, null);
-        stmt=jdbcConnection.createStatement();
+        jdbcConnection = DriverManager.getConnection("jdbc:sqlite:"+GPKGFILENAME, null, null);
+        Statement stmt=jdbcConnection.createStatement();
 	}
 	
 	@After
@@ -36,9 +39,8 @@ public class CreateFK23GpkgTest {
 	public Config initConfig(String xtfFilename,String logfile) {
 		Config config=new Config();
 		new ch.ehi.ili2gpkg.GpkgMain().initConfig(config);
-		
-		config.setDbfile(gpkgFileName);
-		config.setDburl("jdbc:sqlite:"+gpkgFileName);
+		config.setDbfile(GPKGFILENAME);
+		config.setDburl("jdbc:sqlite:"+GPKGFILENAME);
 		if(logfile!=null){
 			config.setLogfile(logfile);
 		}
@@ -48,20 +50,19 @@ public class CreateFK23GpkgTest {
 		}
 		return config;
 	}	
-
 	@Test
 	public void importIli_CreateFK() throws Exception
 	{
-		File gpkgFile=new File(TEST_OUT+"test.gpkg");
+		EhiLogger.getInstance().setTraceFilter(false);
+		File gpkgFile=new File(GPKGFILENAME);
 		if(gpkgFile.exists()){
-			Assert.assertTrue(gpkgFile.delete());
+			gpkgFile.delete();
 		}
-		File data=new File(TEST_OUT+"model1.ili");
+		File data=new File(TEST_OUT,"model1.ili");
 		Config config=initConfig(data.getPath(),data.getPath()+".log");
 		config.setFunction(Config.FC_SCHEMAIMPORT);
 		config.setCreateFk(Config.CREATE_FK_YES);
 		config.setCreateNumChecks(true);
-		EhiLogger.getInstance().setTraceFilter(false);
 		config.setTidHandling(Config.TID_HANDLING_PROPERTY);
 		config.setBasketHandling(config.BASKET_HANDLING_READWRITE);
 		config.setCatalogueRefTrafo(null);
@@ -72,9 +73,10 @@ public class CreateFK23GpkgTest {
 		Ili2db.readSettingsFromDb(config);
 		try {
             Ili2db.run(config,null);
-            Assert.fail();
+            fail();
         } catch (Exception e) {
-            Assert.assertEquals("loop in create table statements: classb1->classa1->classb1", e.getCause().getMessage());
+        	e.printStackTrace();
+            Assert.assertEquals("loop in create table statements: classa1->classb1->classa1", e.getCause().getMessage());
         }
 	}
 }
