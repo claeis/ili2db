@@ -24,23 +24,21 @@ public class MsSqlColumnConverter extends AbstractWKBColumnConverter {
 		strokeArcs=Config.STROKE_ARCS_ENABLE.equals(Config.getStrokeArcs(config));
 	}
 	
-	final String defaultSrid = "3116"; // FIXME remove db specific default
-	
 	@Override
 	public String getInsertValueWrapperCoord(String wkfValue,int srid) {
-		return "geometry::STGeomFromWKB("+wkfValue+(srid==-1?","+defaultSrid:","+srid)+")";
+		return "geometry::STGeomFromWKB("+wkfValue+","+srid+")";
 	}
 	@Override
 	public String getInsertValueWrapperPolyline(String wkfValue,int srid) {
-		return "geometry::STGeomFromWKB("+wkfValue+(srid==-1?","+defaultSrid:","+srid)+")";
+		return "geometry::STGeomFromWKB("+wkfValue+","+srid+")";
 	}
 	@Override
 	public String getInsertValueWrapperSurface(String wkfValue,int srid) {
-		return "geometry::STGeomFromWKB("+wkfValue+(srid==-1?","+defaultSrid:","+srid)+")";
+		return "geometry::STGeomFromWKB("+wkfValue+","+srid+")";
 	}
 	@Override
 	public String getInsertValueWrapperMultiSurface(String wkfValue,int srid) {
-		return "geometry::STGeomFromWKB("+wkfValue+(srid==-1?","+defaultSrid:","+srid)+")";
+		return "geometry::STGeomFromWKB("+wkfValue+","+srid+")";
 	}
 	
 	@Override
