@@ -992,7 +992,7 @@ public class TransferToXtf {
 					   }
 					   if(obj.obj instanceof RoleDef){
 						   RoleDef role = (RoleDef) obj.obj;
-						   if(role.getExtending()==null){
+						   { // if(role.getExtending()==null)
 							String roleName=role.getName();
 							String sqlRoleName=ili2sqlName.mapIliRoleDef(role,recConv.getSqlType(aclass).getName(),recConv.getSqlType(role.getDestination()).getName());
 							// a role of an embedded association?
