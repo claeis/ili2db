@@ -5,15 +5,25 @@ import java.sql.SQLException;
 
 import com.vividsolutions.jts.io.ParseException;
 
+import ch.ehi.basics.settings.Settings;
 import ch.ehi.ili2db.converter.AbstractWKBColumnConverter;
 import ch.ehi.ili2db.converter.ConverterException;
-import ch.ehi.iox.adddefval.Converter;
+import ch.ehi.ili2db.gui.Config;
 import ch.interlis.iom.IomObject;
 import ch.interlis.iox_j.wkb.Iox2wkb;
 import ch.interlis.iox_j.wkb.Iox2wkbException;
 import ch.interlis.iox_j.wkb.Wkb2iox;
 
 public class MsSqlColumnConverter extends AbstractWKBColumnConverter {
+	
+	private boolean strokeArcs=true;
+	
+	@Override
+	public void setup(Connection conn, Settings config) {
+		super.setup(conn,config);
+		strokeArcs=Config.STROKE_ARCS_ENABLE.equals(Config.getStrokeArcs(config));
+	}
+	
 	final String defaultSrid = "3116"; // FIXME remove db specific default
 	
 	@Override
@@ -128,12 +138,10 @@ public class MsSqlColumnConverter extends AbstractWKBColumnConverter {
 			boolean hasLineAttr,
 			boolean is3D,double p)
 			throws SQLException, ConverterException {
-				// TODO ajustar el parametro strokeArcs
-				boolean strokeArcs=true;
 		
 				if(value!=null){
 					Iox2wkb conv=new Iox2wkb(is3D?3:2);
-					//EhiLogger.debug("conv "+conv); // select st_asewkt(form) from tablea
+					
 					try {
 						return conv.multisurface2wkb(value,!strokeArcs,p);
 					} catch (Iox2wkbException ex) {
