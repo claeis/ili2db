@@ -149,5 +149,108 @@ public class MsSqlColumnConverter extends AbstractWKBColumnConverter {
 				return null;
 		}
 	
+	   @Override
+	    public java.lang.Object fromIomSurface(
+	        IomObject value,
+	        int srid,
+	        boolean hasLineAttr,
+	        boolean is3D,double p)
+	    throws SQLException, ConverterException {
+	        if (value!=null) {
+	            Iox2wkb conv=new Iox2wkb(is3D?3:2);
+
+	            try {
+	                return conv.surface2wkb(value,!strokeArcs,p);
+	            } catch (Iox2wkbException ex) {
+	                throw new ConverterException(ex);
+	            }
+	        }
+	        return null;
+	    }
+
+	    @Override
+	    public java.lang.Object fromIomCoord(IomObject value, int srid,boolean is3D)
+	    throws SQLException, ConverterException {
+	        if (value!=null) {
+	            Iox2wkb conv=new Iox2wkb(is3D?3:2);
+	            try {
+	                return conv.coord2wkb(value);
+	            } catch (Iox2wkbException ex) {
+	                throw new ConverterException(ex);
+	            }
+	        }
+	        return null;
+	    }
+	    @Override
+	    public java.lang.Object fromIomMultiCoord(IomObject value, int srid,boolean is3D)
+	    throws SQLException, ConverterException {
+	        if (value!=null) {
+	            Iox2wkb conv=new Iox2wkb(is3D?3:2);
+	            try {
+	                return conv.multicoord2wkb(value);
+	            } catch (Iox2wkbException ex) {
+	                throw new ConverterException(ex);
+	            }
+	        }
+	        return null;
+	    }
+	    @Override
+	    public java.lang.Object fromIomPolyline(IomObject value, int srid,boolean is3D,double p)
+	    throws SQLException, ConverterException {
+	        if (value!=null) {
+	            Iox2wkb conv=new Iox2wkb(is3D?3:2);
+	            try {
+	                return conv.polyline2wkb(value,false,!strokeArcs,p);
+	            } catch (Iox2wkbException ex) {
+	                throw new ConverterException(ex);
+	            }
+	        }
+	        return null;
+	    }
+	    @Override
+	    public java.lang.Object fromIomMultiPolyline(IomObject value, int srid,boolean is3D,double p)
+	    throws SQLException, ConverterException {
+	        if (value!=null) {
+	            Iox2wkb conv=new Iox2wkb(is3D?3:2);
+	            try {
+	                return conv.multiline2wkb(value,!strokeArcs,p);
+	            } catch (Iox2wkbException ex) {
+	                throw new ConverterException(ex);
+	            }
+	        }
+	        return null;
+	    }
+
+	    @Override
+	    public IomObject toIomMultiCoord(
+	        Object geomobj,
+	        String sqlAttrName,
+	        boolean is3D)
+	    throws SQLException, ConverterException {
+	        byte bv[]=(byte [])geomobj;
+	        Wkb2iox conv=new Wkb2iox();
+	        try {
+	            return conv.read(bv);
+	        } catch (ParseException e) {
+	            throw new ConverterException(e);
+	        }
+	    }
+
+	    @Override
+	    public IomObject toIomMultiPolyline(
+	        Object geomobj,
+	        String sqlAttrName,
+	        boolean is3D)
+	    throws SQLException, ConverterException {
+	        byte bv[]=(byte [])geomobj;
+
+	        Wkb2iox conv=new Wkb2iox();
+	        try {
+	            return conv.read(bv);
+	        } catch (ParseException e) {
+	            throw new ConverterException(e);
+	        }
+	    }
+	
 
 }
