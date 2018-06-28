@@ -688,10 +688,12 @@ public class Ili2db {
 					}
 				}
 				if(config.getCreateMetaInfo()){
-					// update meta-attributes table
-					MetaAttrUtility.updateMetaAttributesTable(conn, config.getDbschema(), td);
-					// set elements' meta-attributes
-					MetaAttrUtility.addMetaAttrsFromDb(td, conn, config.getDbschema());
+                    if(DbUtility.tableExists(conn,new DbTableName(config.getDbschema(),DbNames.META_ATTRIBUTES_TAB))){
+                        // update meta-attributes table
+                        MetaAttrUtility.updateMetaAttributesTable(conn, config.getDbschema(), td);
+                        // set elements' meta-attributes
+                        MetaAttrUtility.addMetaAttrsFromDb(td, conn, config.getDbschema());
+                    }
 				}
 				// run post-script
 				if(config.getPostScript()!=null){
