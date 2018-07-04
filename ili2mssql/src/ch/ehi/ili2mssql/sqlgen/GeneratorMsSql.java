@@ -44,7 +44,7 @@ public class GeneratorMsSql extends GeneratorJdbc {
 		}else if(column instanceof DbColId){
 			type="BIGINT";
 		}else if(column instanceof DbColUuid){
-			type="VARCHAR(36)";
+			type="UNIQUEIDENTIFIER";
 		}else if(column instanceof DbColNumber){
 			DbColNumber col=(DbColNumber)column;
 			type="NUMERIC("+Integer.toString(col.getSize())+")";
