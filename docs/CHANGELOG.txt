@@ -15,6 +15,14 @@ ideas/open issues/questions
 LATEST
 ---------------------------
 
+ili2pg 3.11.5 (2018-07-06)
+-----------------------------
+- ili2c-4.7.9
+- iox-ili-1.20.7
+- fixed Viewable.getAttributesAndRoles2() workaround
+- fixed import:  table t_ili2db_meta_attrs may not exist, if db schema created with a pre 3.11.2 version
+- added --ver4-noSchemaImport to avoid implicit schema import during data import
+
 ili2pg 3.11.4 (2018-06-22)
 -----------------------------
 - fixed object references reolution with DB records based on EXTERNAL instead of OID AS 

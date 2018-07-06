@@ -313,7 +313,7 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 		   }
 		   if(obj.obj instanceof RoleDef){
 			   RoleDef role = (RoleDef) obj.obj;
-			   if(role.getExtending()==null){
+			   { // if(role.getExtending()==null)
 					// a role of an embedded association?
 					if(obj.embedded){
 						AssociationDef roleOwner = (AssociationDef) role.getContainer();

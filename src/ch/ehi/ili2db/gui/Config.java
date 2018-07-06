@@ -110,6 +110,7 @@ public class Config extends Settings {
 	private boolean configReadFromDb=false;
 	private boolean itfTransferFile=false;
 	private String validConfigFileName=null;
+    private boolean doImplicitSchemaImport=true; // do implicit schema import during data import
 	private boolean validation=false;
 	private Long minIdSeqValue=null;
 	private Long maxIdSeqValue=null;
@@ -617,4 +618,10 @@ public class Config extends Settings {
 	public void setIliMetaAttrsFile(String iliMetaAttrsFile) {
 		this.iliMetaAttrsFile = iliMetaAttrsFile;
 	}
+    public boolean isDoImplicitSchemaImport() {
+        return doImplicitSchemaImport;
+    }
+    public void setDoImplicitSchemaImport(boolean doImplicitSchemaImport) {
+        this.doImplicitSchemaImport = doImplicitSchemaImport;
+    }
 }

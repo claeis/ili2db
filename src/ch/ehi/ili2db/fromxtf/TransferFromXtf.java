@@ -1117,7 +1117,7 @@ public class TransferFromXtf {
 					}
 					if(obj.obj instanceof RoleDef){
 						RoleDef role = (RoleDef) obj.obj;
-						if(role.getExtending()==null){
+						{ // if(role.getExtending()==null)
 							String roleName=role.getName();
 							// a role of an embedded association?
 							if(obj.embedded){
