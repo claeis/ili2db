@@ -150,9 +150,9 @@ public class Iox2gpkg {
 		    	CompoundCurve curve = Iox2jtsext.polyline2JTS(polyline,false, p);
 		    	env.expandToInclude(curve.getEnvelopeInternal());
 	    	}
-	    	writeGeoPackageBinaryHeader(srsId,env);
-			Iox2wkb helper=new Iox2wkb(outputDimension,os.order());
-            os.write(helper.multiline2wkb(obj, false, p));
+            writeGeoPackageBinaryHeader(srsId, env);
+            Iox2wkb helper = new Iox2wkb(outputDimension, os.order());
+            os.write(helper.multiline2wkb(obj, asCompoundCurve, p));
 		} catch (IOException e) {
 	        throw new RuntimeException("Unexpected IO exception: " + e.getMessage());
 		} catch (IoxException e) {
