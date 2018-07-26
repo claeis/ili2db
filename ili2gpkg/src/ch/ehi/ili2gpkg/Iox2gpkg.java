@@ -152,10 +152,7 @@ public class Iox2gpkg {
 	    	}
 	    	writeGeoPackageBinaryHeader(srsId,env);
 			Iox2wkb helper=new Iox2wkb(outputDimension,os.order());
-			for(int polylinei=0;polylinei<polylinec;polylinei++){
-				IomObject polyline=obj.getattrobj(Wkb2iox.ATTR_POLYLINE,polylinei);
-				os.write(helper.polyline2wkb(polyline,false,asCompoundCurve,p));
-	    	}
+            os.write(helper.multiline2wkb(obj, false, p));
 		} catch (IOException e) {
 	        throw new RuntimeException("Unexpected IO exception: " + e.getMessage());
 		} catch (IoxException e) {
