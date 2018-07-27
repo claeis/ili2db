@@ -9,11 +9,8 @@ import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
 import ch.ehi.basics.logging.EhiLogger;
-import ch.ehi.fgdb4j.Fgdb4j;
 import ch.ehi.ili2db.base.Ili2db;
 import ch.ehi.ili2db.gui.Config;
-import ch.ehi.ili2fgdb.jdbc.FgdbDriver;
-import ch.ehi.sqlgen.generator_impl.fgdb.GeneratorFgdb;
 import ch.interlis.iom.IomObject;
 import ch.interlis.iom_j.xtf.XtfReader;
 import ch.interlis.iox.EndBasketEvent;
@@ -26,7 +23,7 @@ import ch.interlis.iox.StartTransferEvent;
 public class SimpleGpkgTest {
 	
 	private static final String TEST_OUT="test/data/Simple/";
-    private static final String GPKGFILENAME=TEST_OUT+"Simple.gdb";
+    private static final String GPKGFILENAME=TEST_OUT+"Simple.gpkg";
 	private Connection jdbcConnection=null;
 	
 	public Config initConfig(String xtfFilename,String logfile) {
@@ -139,8 +136,6 @@ public class SimpleGpkgTest {
 		config.setMultilingualTrafo(null);
 		config.setInheritanceTrafo(null);
 		config.setDefaultSrsCode("2056");
-		config.setValue(GeneratorFgdb.XY_RESOLUTION, "0.005");
-		config.setValue(GeneratorFgdb.XY_TOLERANCE, "0.05");
 		Ili2db.run(config,null);
 	}
 	
@@ -305,8 +300,6 @@ public class SimpleGpkgTest {
 		config.setMultilingualTrafo(null);
 		config.setInheritanceTrafo(null);
 		config.setDefaultSrsCode("2056");
-		config.setValue(GeneratorFgdb.XY_RESOLUTION, "0.0005");
-		config.setValue(GeneratorFgdb.XY_TOLERANCE, "0.005");
 		try{
 			Ili2db.run(config,null);
 		}catch(Exception ex){
