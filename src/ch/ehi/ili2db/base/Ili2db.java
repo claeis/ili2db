@@ -1392,19 +1392,24 @@ public class Ili2db {
 				}
 				// map datasetName to sqlBasketId and modelnames
 				String[] datasetNames = datasetName.split(ch.interlis.ili2c.Main.MODELS_SEPARATOR);
-				long collectedbasketSqlIds[]=new long[datasetNames.length];
-				int index = 0;
+				long tmpbasketSqlIds[]=null; 
+				List<Long> tmpListOfBasket = new ArrayList<Long>();
 				for (String dtName : datasetNames) {
 	                Long datasetId=getDatasetId(dtName, conn, config);
 	                if(datasetId==null){
 	                    throw new Ili2dbException("dataset <"+dtName+"> doesn't exist");
 	                }
-	                basketSqlIds=getBasketSqlIdsFromDatasetId(datasetId,modelv,conn,config);
-	                collectedbasketSqlIds[index] = basketSqlIds[0];
-	                index++;
+	                tmpbasketSqlIds=getBasketSqlIdsFromDatasetId(datasetId,modelv,conn,config);
+	                for (int i = 0; i < tmpbasketSqlIds.length; i++) {
+	                    tmpListOfBasket.add(tmpbasketSqlIds[i]);
+	                }
 				}
-				basketSqlIds = collectedbasketSqlIds;
-				
+				if (tmpListOfBasket.size() > 0) {
+				    basketSqlIds = new long[tmpListOfBasket.size()];
+				    for (int i = 0; i < tmpListOfBasket.size(); i++) {
+				        basketSqlIds[i] = tmpListOfBasket.get(i);
+				    }
+				}
 			}else if(baskets!=null){
 				if(!createBasketCol){
 					throw new Ili2dbException("basket wise export requires column "+DbNames.T_BASKET_COL);

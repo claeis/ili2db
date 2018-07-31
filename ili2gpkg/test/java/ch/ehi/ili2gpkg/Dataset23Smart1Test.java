@@ -26,7 +26,7 @@ import ch.interlis.iox.StartTransferEvent;
 //-Ddburl=jdbc:postgresql:dbname -Ddbusr=usrname -Ddbpwd=1234
 public class Dataset23Smart1Test {
     String gpkgFileName = "test/data/Dataset23Smart1/Dataset23Smart1.gpkg";
-    private static final String DATASETNAME_A = "Testset1";
+    private static final String DATASETNAME_A = "Testset1"; 
     private static final String DATASETNAME_B = "Testset2";
     Connection jdbcConnection = null;
 
@@ -94,9 +94,57 @@ public class Dataset23Smart1Test {
             }
         }
     }
-
+    
     @Test
     public void exportDataset() throws Exception {
+
+        importDataset();
+
+        try {
+
+            File data = new File("test/data/Dataset23Smart1/Dataset1-export.xtf");
+            Config config = initConfig(data.getPath(), null, data.getPath() + ".log");
+            config.setDatasetName(DATASETNAME_A);
+            config.setFunction(Config.FC_EXPORT);
+            config.setModels("Dataset1");
+            Ili2db.readSettingsFromDb(config);
+            try {
+                Ili2db.run(config, null);
+            } catch (Exception e) {
+                EhiLogger.logError(e);
+                Assert.fail();
+            }
+
+            XtfReader reader = new XtfReader(data);
+            assertTrue(reader.read() instanceof StartTransferEvent);
+            assertTrue(reader.read() instanceof StartBasketEvent);
+            IoxEvent event = reader.read();
+            {
+                assertTrue(event instanceof ObjectEvent);
+                IomObject iomObj = ((ObjectEvent) event).getIomObject();
+                String attrtag = iomObj.getobjecttag();
+                assertEquals("5", iomObj.getobjectoid());
+                assertTrue(iomObj.getattrvalue("attr1").equals("a1"));
+                assertEquals("Dataset1.TestA.ClassA1", attrtag);
+            }
+            event = reader.read();
+            {
+                assertTrue(event instanceof ObjectEvent);
+                IomObject iomObj = ((ObjectEvent) event).getIomObject();
+                assertEquals("7", iomObj.getobjectoid());
+                assertTrue(iomObj.getattrvalue("attr1").equals("a1"));
+
+                assertTrue(reader.read() instanceof EndBasketEvent);
+                assertTrue(reader.read() instanceof EndTransferEvent);
+            }
+
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+    }
+
+    @Test
+    public void exportMultipleDataset() throws Exception {
 
         importDataset();
 
