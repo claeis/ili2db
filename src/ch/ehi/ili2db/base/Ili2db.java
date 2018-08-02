@@ -24,11 +24,14 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+
+import javax.swing.JOptionPane;
 
 import ch.ehi.basics.logging.EhiLogger;
 import ch.ehi.basics.logging.LogEvent;
@@ -1390,11 +1393,24 @@ public class Ili2db {
 					throw new Ili2dbException("dataset wise export requires column "+DbNames.T_BASKET_COL);
 				}
 				// map datasetName to sqlBasketId and modelnames
-				Long datasetId=getDatasetId(datasetName, conn, config);
-				if(datasetId==null){
-					throw new Ili2dbException("dataset <"+datasetName+"> doesn't exist");
+				String datasetNames[] = datasetName.split(ch.interlis.ili2c.Main.MODELS_SEPARATOR);
+				List<Long> tmpListOfBasket = new ArrayList<Long>();
+				for (String dtName : datasetNames) {
+	                Long datasetId=getDatasetId(dtName, conn, config);
+	                if(datasetId==null){
+	                    throw new Ili2dbException("dataset <"+dtName+"> doesn't exist");
+	                }
+	                long tmpbasketSqlIds[]=getBasketSqlIdsFromDatasetId(datasetId,modelv,conn,config);
+	                for (int i = 0; i < tmpbasketSqlIds.length; i++) {
+	                    tmpListOfBasket.add(tmpbasketSqlIds[i]);
+	                }
 				}
-				basketSqlIds=getBasketSqlIdsFromDatasetId(datasetId,modelv,conn,config);
+				if (tmpListOfBasket.size() > 0) {
+				    basketSqlIds = new long[tmpListOfBasket.size()];
+				    for (int i = 0; i < tmpListOfBasket.size(); i++) {
+				        basketSqlIds[i] = tmpListOfBasket.get(i);
+				    }
+				}
 			}else if(baskets!=null){
 				if(!createBasketCol){
 					throw new Ili2dbException("basket wise export requires column "+DbNames.T_BASKET_COL);
