@@ -22,6 +22,7 @@ import ch.interlis.iox.ObjectEvent;
 import ch.interlis.iox.StartBasketEvent;
 import ch.interlis.iox.StartTransferEvent;
 import ch.interlis.iox_j.jts.Iox2jts;
+import ch.interlis.iox_j.jts.Iox2jtsException;
 
 public class MultipleGeomAttrsTest {
 	
@@ -55,6 +56,7 @@ public class MultipleGeomAttrsTest {
 	@Test
 	public void importIli() throws Exception
 	{
+        EhiLogger.getInstance().setTraceFilter(false);
 	    File gpkgFile=new File(GPKGFILENAME);
         if(gpkgFile.exists()){ 
             File file = new File(gpkgFile.getAbsolutePath());
@@ -76,6 +78,7 @@ public class MultipleGeomAttrsTest {
     @Test
     public void importIliExtendedClass() throws Exception
     {
+        EhiLogger.getInstance().setTraceFilter(false);
         File gpkgFile=new File(GPKGFILENAME);
         if(gpkgFile.exists()){ 
             File file = new File(gpkgFile.getAbsolutePath());
@@ -182,41 +185,7 @@ public class MultipleGeomAttrsTest {
 				String attrtag=iomObj.getobjecttag();
 				assertEquals("MultipleGeomAttrs1.Topic.ClassA",attrtag);
 				
-				IomObject coordObj=iomObj.getattrobj("coord", 0);
-				{
-					assertTrue(coordObj.getattrvalue("C1").equals("2460001.0"));
-					assertTrue(coordObj.getattrvalue("C2").equals("1045001.0"));
-				}
-				IomObject polylineObj=iomObj.getattrobj("line", 0);
-				IomObject sequence=polylineObj.getattrobj("sequence", 0);
-				{
-					IomObject segment=sequence.getattrobj("segment", 0);
-					assertTrue(segment.getattrvalue("C1").equals("2460002.0"));
-					assertTrue(segment.getattrvalue("C2").equals("1045002.0"));
-				}
-				{
-					IomObject segment=sequence.getattrobj("segment", 1);
-					assertTrue(segment.getattrvalue("C1").equals("2460010.0"));
-					assertTrue(segment.getattrvalue("C2").equals("1045010.0"));
-				}
-				IomObject attrObj=iomObj.getattrobj("surface", 0);
-				
-				// convert
-				MultiPolygon jtsMultipolygon=Iox2jts.multisurface2JTS(attrObj, 0, 2056);
-				// polygon1
-				Geometry polygon1=jtsMultipolygon.getGeometryN(0);
-				assertEquals(1,polygon1.getNumGeometries());
-				Coordinate[] coords=polygon1.getCoordinates();
-				{
-					com.vividsolutions.jts.geom.Coordinate coord=new com.vividsolutions.jts.geom.Coordinate(new Double("2460005.0"), new Double("1045005.0"));
-					assertEquals(coord, coords[0]);
-					com.vividsolutions.jts.geom.Coordinate coord2=new com.vividsolutions.jts.geom.Coordinate(new Double("2460010.0"), new Double("1045010.0"));
-					assertEquals(coord2, coords[1]);
-					com.vividsolutions.jts.geom.Coordinate coord3=new com.vividsolutions.jts.geom.Coordinate(new Double("2460005.0"), new Double("1045010.0"));
-					assertEquals(coord3, coords[2]);
-					com.vividsolutions.jts.geom.Coordinate coord4=new com.vividsolutions.jts.geom.Coordinate(new Double("2460005.0"), new Double("1045005.0"));
-					assertEquals(coord4, coords[3]);
-				}
+				assertObjectProperties(iomObj);
 			}
 			assertTrue(reader.read() instanceof EndBasketEvent);
 			assertTrue(reader.read() instanceof EndTransferEvent);
@@ -235,7 +204,7 @@ public class MultipleGeomAttrsTest {
         File data=new File(TEST_OUT,"MultipleGeomAttrsExtendedClass-out.xtf");
         Config config=initConfig(data.getPath(),data.getPath()+".log");
         config.setFunction(Config.FC_EXPORT);
-        config.setModels("MultipleGeomAttrs1");
+        config.setModels("MultipleGeomAttrsExtendedClass");
         Ili2db.readSettingsFromDb(config);
         try{
             Ili2db.run(config,null);
@@ -252,46 +221,59 @@ public class MultipleGeomAttrsTest {
                 assertTrue(event instanceof ObjectEvent);
                 IomObject iomObj=((ObjectEvent)event).getIomObject();
                 String attrtag=iomObj.getobjecttag();
-                assertEquals("MultipleGeomAttrs1ExtendedClass.Topic.ClassA",attrtag);
+                assertEquals("MultipleGeomAttrsExtendedClass.Topic.ClassA",attrtag);
                 
-                IomObject coordObj=iomObj.getattrobj("coord", 0);
-                {
-                    assertTrue(coordObj.getattrvalue("C1").equals("2460001.0"));
-                    assertTrue(coordObj.getattrvalue("C2").equals("1045001.0"));
-                }
-                IomObject polylineObj=iomObj.getattrobj("line", 0);
-                IomObject sequence=polylineObj.getattrobj("sequence", 0);
-                {
-                    IomObject segment=sequence.getattrobj("segment", 0);
-                    assertTrue(segment.getattrvalue("C1").equals("2460002.0"));
-                    assertTrue(segment.getattrvalue("C2").equals("1045002.0"));
-                }
-                {
-                    IomObject segment=sequence.getattrobj("segment", 1);
-                    assertTrue(segment.getattrvalue("C1").equals("2460010.0"));
-                    assertTrue(segment.getattrvalue("C2").equals("1045010.0"));
-                }
-                IomObject attrObj=iomObj.getattrobj("surface", 0);
+                assertObjectProperties(iomObj);
+            }
+            event=reader.read();
+            {
+                assertTrue(event instanceof ObjectEvent);
+                IomObject iomObj=((ObjectEvent)event).getIomObject();
+                String attrtag=iomObj.getobjecttag();
+                assertEquals("MultipleGeomAttrsExtendedClass.Topic.ClassAp",attrtag);
                 
-                // convert
-                MultiPolygon jtsMultipolygon=Iox2jts.multisurface2JTS(attrObj, 0, 2056);
-                // polygon1
-                Geometry polygon1=jtsMultipolygon.getGeometryN(0);
-                assertEquals(1,polygon1.getNumGeometries());
-                Coordinate[] coords=polygon1.getCoordinates();
-                {
-                    com.vividsolutions.jts.geom.Coordinate coord=new com.vividsolutions.jts.geom.Coordinate(new Double("2460005.0"), new Double("1045005.0"));
-                    assertEquals(coord, coords[0]);
-                    com.vividsolutions.jts.geom.Coordinate coord2=new com.vividsolutions.jts.geom.Coordinate(new Double("2460010.0"), new Double("1045010.0"));
-                    assertEquals(coord2, coords[1]);
-                    com.vividsolutions.jts.geom.Coordinate coord3=new com.vividsolutions.jts.geom.Coordinate(new Double("2460005.0"), new Double("1045010.0"));
-                    assertEquals(coord3, coords[2]);
-                    com.vividsolutions.jts.geom.Coordinate coord4=new com.vividsolutions.jts.geom.Coordinate(new Double("2460005.0"), new Double("1045005.0"));
-                    assertEquals(coord4, coords[3]);
-                }
+                assertObjectProperties(iomObj);
             }
             assertTrue(reader.read() instanceof EndBasketEvent);
             assertTrue(reader.read() instanceof EndTransferEvent);
+        }
+    }
+
+    public void assertObjectProperties(IomObject iomObj) throws Iox2jtsException {
+        IomObject coordObj=iomObj.getattrobj("coord", 0);
+        {
+            assertTrue(coordObj.getattrvalue("C1").equals("2460001.0"));
+            assertTrue(coordObj.getattrvalue("C2").equals("1045001.0"));
+        }
+        IomObject polylineObj=iomObj.getattrobj("line", 0);
+        IomObject sequence=polylineObj.getattrobj("sequence", 0);
+        {
+            IomObject segment=sequence.getattrobj("segment", 0);
+            assertTrue(segment.getattrvalue("C1").equals("2460002.0"));
+            assertTrue(segment.getattrvalue("C2").equals("1045002.0"));
+        }
+        {
+            IomObject segment=sequence.getattrobj("segment", 1);
+            assertTrue(segment.getattrvalue("C1").equals("2460010.0"));
+            assertTrue(segment.getattrvalue("C2").equals("1045010.0"));
+        }
+        IomObject attrObj=iomObj.getattrobj("surface", 0);
+        
+        // convert
+        MultiPolygon jtsMultipolygon=Iox2jts.multisurface2JTS(attrObj, 0, 2056);
+        // polygon1
+        Geometry polygon1=jtsMultipolygon.getGeometryN(0);
+        assertEquals(1,polygon1.getNumGeometries());
+        Coordinate[] coords=polygon1.getCoordinates();
+        {
+            com.vividsolutions.jts.geom.Coordinate coord=new com.vividsolutions.jts.geom.Coordinate(new Double("2460005.0"), new Double("1045005.0"));
+            assertEquals(coord, coords[0]);
+            com.vividsolutions.jts.geom.Coordinate coord2=new com.vividsolutions.jts.geom.Coordinate(new Double("2460010.0"), new Double("1045010.0"));
+            assertEquals(coord2, coords[1]);
+            com.vividsolutions.jts.geom.Coordinate coord3=new com.vividsolutions.jts.geom.Coordinate(new Double("2460005.0"), new Double("1045010.0"));
+            assertEquals(coord3, coords[2]);
+            com.vividsolutions.jts.geom.Coordinate coord4=new com.vividsolutions.jts.geom.Coordinate(new Double("2460005.0"), new Double("1045005.0"));
+            assertEquals(coord4, coords[3]);
         }
     }
 }

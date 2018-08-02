@@ -175,6 +175,15 @@ public class TrafoConfig {
 		String iliname=getIliQname(attr);
 		return getSetting(config, iliname, tag);
 	}
+    public String getAttrConfig(Viewable iliclass,AttributeDef attr, String tag) {
+        String iliname=getIliQname(attr)+"("+iliclass.getScopedName()+")";
+        String setting=getSetting(config, iliname, tag);
+        if(setting==null) {
+            // handle pre 3.11.6  case
+            setting=getAttrConfig(attr, tag);
+        }
+        return setting;
+    }
 	public String getViewableConfig(Viewable aclass, String tag) {
 		String iliname=aclass.getScopedName(null);
 		return getSetting(config, iliname, tag);
@@ -183,6 +192,10 @@ public class TrafoConfig {
 		String iliname=getIliQname(attr);
 		setSetting(config, iliname, tag,value);
 	}
+    public void setAttrConfig(Viewable iliclass,AttributeDef attr, String tag,String value) {
+        String iliname=getIliQname(attr)+"("+iliclass.getScopedName()+")";
+        setSetting(config, iliname, tag,value);
+    }
 	public void setViewableConfig(Viewable aclass, String tag,String value) {
 		String iliname=aclass.getScopedName(null);
 		setSetting(config, iliname, tag,value);
