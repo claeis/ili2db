@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TRANSFER xmlns="http://www.interlis.ch/INTERLIS2.3">
+	<HEADERSECTION SENDER="ili2gpkg-3.11.3-20180413" VERSION="2.3">
+		<MODELS>
+			<MODEL NAME="Abl_22" VERSION="1" URI="mailto:ceis@localhost"></MODEL>
+		</MODELS>
+	</HEADERSECTION>
+	<DATASECTION>
+		<Abl_22.TopicA BID="GdeB.TopicA">
+			<Abl_22.TopicA.Gebaeude TID="2">
+				<baujahr>2001</baujahr>
+				<art>Wohngebaeude</art>
+			</Abl_22.TopicA.Gebaeude>
+		</Abl_22.TopicA>
+	</DATASECTION>
+</TRANSFER>

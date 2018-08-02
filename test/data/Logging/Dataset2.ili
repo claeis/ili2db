@@ -1,0 +1,16 @@
+INTERLIS 2.3;
+
+MODEL Dataset2
+  AT "mailto:ce@eisenhutinformatik.ch" VERSION "2016-07-07" =
+    
+  TOPIC TestA =
+    BASKET OID AS INTERLIS.UUIDOID;
+
+    CLASS ClassA1 =
+    	attr1 : TEXT*60;
+    END ClassA1;
+    
+  END TestA;
+  
+  
+END Dataset2.
