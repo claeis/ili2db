@@ -31,6 +31,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import javax.swing.JOptionPane;
+
 import ch.ehi.basics.logging.EhiLogger;
 import ch.ehi.basics.logging.LogEvent;
 import ch.ehi.basics.logging.StdListener;
@@ -1391,15 +1393,14 @@ public class Ili2db {
 					throw new Ili2dbException("dataset wise export requires column "+DbNames.T_BASKET_COL);
 				}
 				// map datasetName to sqlBasketId and modelnames
-				String[] datasetNames = datasetName.split(ch.interlis.ili2c.Main.MODELS_SEPARATOR);
-				long tmpbasketSqlIds[]=null; 
+				String datasetNames[] = datasetName.split(ch.interlis.ili2c.Main.MODELS_SEPARATOR);
 				List<Long> tmpListOfBasket = new ArrayList<Long>();
 				for (String dtName : datasetNames) {
 	                Long datasetId=getDatasetId(dtName, conn, config);
 	                if(datasetId==null){
 	                    throw new Ili2dbException("dataset <"+dtName+"> doesn't exist");
 	                }
-	                tmpbasketSqlIds=getBasketSqlIdsFromDatasetId(datasetId,modelv,conn,config);
+	                long tmpbasketSqlIds[]=getBasketSqlIdsFromDatasetId(datasetId,modelv,conn,config);
 	                for (int i = 0; i < tmpbasketSqlIds.length; i++) {
 	                    tmpListOfBasket.add(tmpbasketSqlIds[i]);
 	                }
