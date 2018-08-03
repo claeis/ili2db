@@ -218,7 +218,7 @@ public class TransferFromXtf {
 		unknownTypev=new HashSet();
 		structQueue=new ArrayList();
 		boolean surfaceAsPolyline=true;
-		boolean ignoreUnresolvedReferences=false;
+		boolean ignoreUnresolvedReferences=config.isSkipReferenceErrors();
 
 		
 		recman=new ObjectPoolManager();
