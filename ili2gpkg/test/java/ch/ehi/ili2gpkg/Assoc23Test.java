@@ -68,6 +68,7 @@ public class Assoc23Test {
             Ili2db.readSettingsFromDb(config);
             try {
                 Ili2db.run(config, null);
+                Assert.fail();
             } catch (Exception e) {
                 final String errorTxt1 = "unknown referenced object Assoc3.Test.ClassA1 TID a1_fail referenced from Assoc3.Test.ClassB1 TID b1";
                 final String errorTxt2 = "unknown referenced object Assoc3.Test.ClassA1 TID a1_fail referenced from Assoc3.Test.assocab2 TID a1_fail:b1";
@@ -82,6 +83,40 @@ public class Assoc23Test {
                 }
                 Assert.assertEquals(3, counter);
             }
+        } finally {
+            if (jdbcConnection != null) {
+                jdbcConnection.close();
+            }
+        }
+    }
+    @Test
+    public void importXtfSkipReferenceErrors() throws Exception {
+        Connection jdbcConnection = null;
+        try {
+            File gpkgFile = new File(gpkgFileName);
+            if (gpkgFile.exists()) {
+                File file = new File(gpkgFile.getAbsolutePath());
+                boolean fileDeleted = file.delete();
+                Assert.assertTrue(fileDeleted);
+            }
+            
+            LogCollector logCollector = new LogCollector();
+            EhiLogger.getInstance().addListener(logCollector);
+            File data = new File("test/data/Assoc23/Assoc3a.xtf");
+            Config config = initConfig(data.getPath(), null, data.getPath() + ".log");
+            config.setDatasetName(DATASETNAME_A);
+            config.setFunction(Config.FC_IMPORT);
+            config.setCreateFk(config.CREATE_FK_YES);
+            config.setValidation(false);
+            config.setSkipReferenceErrors(true);
+            config.setSqlNull(Config.SQL_NULL_ENABLE);
+            config.setBasketHandling(config.BASKET_HANDLING_READWRITE);
+            config.setCatalogueRefTrafo(null);
+            config.setMultiSurfaceTrafo(null);
+            config.setMultilingualTrafo(null);
+            config.setInheritanceTrafo(config.INHERITANCE_TRAFO_SMART1);
+            Ili2db.readSettingsFromDb(config);
+            Ili2db.run(config, null);
         } finally {
             if (jdbcConnection != null) {
                 jdbcConnection.close();
