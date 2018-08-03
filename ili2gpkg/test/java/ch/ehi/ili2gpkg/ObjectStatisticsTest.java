@@ -14,7 +14,6 @@ import ch.ehi.ili2db.gui.Config;
 
 public class ObjectStatisticsTest {
     String gpkgFileName = "test/data/Logging/Logging.gpkg";
-    String gpkgFileName2 = "test/data/Logging/Dataset2.gpkg";
     private static final String DATASETNAME_A = "Testset1";
     private static final String DATASETNAME_B = "Testset2";
 
@@ -112,7 +111,7 @@ public class ObjectStatisticsTest {
                 }
             }
         } catch (Exception e) {
-            Assert.fail(e.getMessage());
+            Assert.fail(e.getMessage()); 
         } finally {
             if (jdbcConnection != null) {
                 jdbcConnection.close();
@@ -153,122 +152,6 @@ public class ObjectStatisticsTest {
             Assert.assertEquals(3, counter);
         } catch (Exception e) {
             Assert.fail(e.getMessage());
-        }
-    }
-    
-    @Test
-    public void exportMultipleDataset2() throws Exception {
-
-        importDataset2();
-
-        LogCollector logCollector = null;
-        try {
-            logCollector = new LogCollector();
-            EhiLogger.getInstance().addListener(logCollector);
-            File data = new File("test/data/Logging/Dataset-out.xtf");
-            Config config = initConfig(data.getPath(), null, data.getPath() + ".log", gpkgFileName2);
-            config.setDatasetName(DATASETNAME_A + ch.interlis.ili2c.Main.MODELS_SEPARATOR + DATASETNAME_B);
-            config.setFunction(Config.FC_EXPORT);
-            config.setModels("Dataset2");
-            config.setValidation(false);
-            Ili2db.readSettingsFromDb(config);
-            try {
-                Ili2db.run(config, null);
-            } catch (Exception e) {
-                EhiLogger.logError(e);
-                Assert.fail();
-            }
-            int counter = 0;
-            for (LogEvent event : logCollector.getWarn()) {
-                if (event.getEventMsg().equals("Dataset-out.xtf: Dataset2.TestA BID=1aa57314-dca3-4add-a6e6-00f02ab165c1")
-                        || event.getEventMsg().equals("Dataset-out.xtf: Dataset2.TestA BID=23b08e5a-07d8-4e85-9f83-1b449bdae961")
-                        || event.getEventMsg().equals("Dataset-out.xtf: Dataset2.TestA BID=46b78f2e-2402-4600-8a26-b220e0950800") 
-                        || event.getEventMsg().equals("Dataset-out.xtf: Dataset2.TestA BID=c34c86ec-2a75-4a89-a194-f9ebc422f8bc")) {
-                    counter++;
-                }
-            }
-            Assert.assertEquals(4, counter);
-        } catch (Exception e) {
-            Assert.fail(e.getMessage());
-        }
-    }
-    
-    @Test
-    public void importDataset2() throws Exception {
-        Connection jdbcConnection = null;
-        try {
-            File gpkgFile = new File(gpkgFileName2);
-            if (gpkgFile.exists()) {
-                File file = new File(gpkgFile.getAbsolutePath());
-                boolean fileDeleted = file.delete();
-                Assert.assertTrue(fileDeleted);
-            }
-
-            {
-                LogCollector logCollector = null;
-                {
-                    logCollector = new LogCollector();
-                    EhiLogger.getInstance().addListener(logCollector);
-                    File data = new File("test/data/Logging/Dataset2a.xtf");
-                    Config config = initConfig(data.getPath(), null, data.getPath() + ".log", gpkgFileName2);
-                    config.setDatasetName(DATASETNAME_A);
-                    config.setFunction(Config.FC_IMPORT);
-                    config.setCreateFk(config.CREATE_FK_YES);
-                    config.setBasketHandling(config.BASKET_HANDLING_READWRITE);
-                    config.setCatalogueRefTrafo(null);
-                    config.setMultiSurfaceTrafo(null);
-                    config.setMultilingualTrafo(null);
-                    config.setInheritanceTrafo(config.INHERITANCE_TRAFO_SMART1);
-                    Ili2db.readSettingsFromDb(config);
-                    config.setValidation(false);
-                    try {
-                        Ili2db.run(config, null);
-                    } catch (Exception e) {
-                        Assert.fail(e.getMessage());
-                    }
-                    int counter = 0;
-                    for (LogEvent event : logCollector.getWarn()) {
-                        if (event.getEventMsg().equals("Dataset2a.xtf: Dataset2.TestA BID=1aa57314-dca3-4add-a6e6-00f02ab165c1")
-                                || event.getEventMsg().equals("Dataset2a.xtf: Dataset2.TestA BID=23b08e5a-07d8-4e85-9f83-1b449bdae961")
-                                || event.getEventMsg().equals("      2 objects in CLASS Dataset2.TestA.ClassA1")
-                                || event.getEventMsg().equals("      2 objects in CLASS Dataset2.TestA.ClassA1")) {
-                            counter++;
-                        }
-                    }
-                    Assert.assertEquals(4, counter);
-                }
-                {
-                    logCollector = new LogCollector();
-                    EhiLogger.getInstance().addListener(logCollector);
-                    File data = new File("test/data/Logging/Dataset2b.xtf");
-                    Config config = initConfig(data.getPath(), null, data.getPath() + ".log", gpkgFileName2);
-                    config.setDatasetName(DATASETNAME_B);
-                    config.setFunction(Config.FC_IMPORT);
-                    config.setValidation(false);
-                    Ili2db.readSettingsFromDb(config);
-                    try {
-                        Ili2db.run(config, null);
-                    } catch (Exception e) {
-                        Assert.fail(e.getMessage());
-                    }
-                    int counter = 0;
-                    for (LogEvent event : logCollector.getWarn()) {
-                        if (event.getEventMsg().equals("Dataset2b.xtf: Dataset2.TestA BID=46b78f2e-2402-4600-8a26-b220e0950800")
-                                || event.getEventMsg().equals("Dataset2b.xtf: Dataset2.TestA BID=c34c86ec-2a75-4a89-a194-f9ebc422f8bc")
-                                || event.getEventMsg().equals("      2 objects in CLASS Dataset2.TestA.ClassA1")
-                                || event.getEventMsg().equals("      2 objects in CLASS Dataset2.TestA.ClassA1")) {
-                            counter++;
-                        }
-                    }
-                    Assert.assertEquals(4, counter);
-                }
-            }
-        } catch (Exception e) {
-            Assert.fail(e.getMessage());
-        } finally {
-            if (jdbcConnection != null) {
-                jdbcConnection.close();
-            }
         }
     }
 }
