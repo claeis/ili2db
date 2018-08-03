@@ -1,0 +1,18 @@
+INTERLIS 2.3;
+
+MODEL Abl_22 (de) AT "mailto:ceis@localhost" VERSION "1" =
+		
+	TOPIC TopicA =
+		CLASS Gebaeude =
+		  baujahr : MANDATORY 1900 .. 2050;
+		  art : MANDATORY (Wohngebaeude, Gewerbe (Lagerhaus, Produktionsgebaeude));
+		END Gebaeude;
+	END TopicA;
+
+	TOPIC TopicB =
+		CLASS Grundstueck =
+		  flaeche : MANDATORY 1.0 .. 10000.0;
+		END Grundstueck;
+	END TopicB;
+	
+END Abl_22.
