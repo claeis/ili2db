@@ -293,6 +293,9 @@ public abstract class AbstractMain {
 				// DEPRECATED remove option
 				argi++;
 				config.setSkipGeometryErrors(true);
+			}else if (arg.equals("--skipReferenceErrors")) { 
+                argi++;
+                config.setSkipReferenceErrors(true);
 			}else if(arg.equals("--skipGeometryErrors")){
 				argi++;
 				config.setSkipGeometryErrors(true);
@@ -398,6 +401,7 @@ public abstract class AbstractMain {
 					System.err.println("--sqlEnableNull        create no NOT NULL constraints in db schema.");
 					System.err.println("--strokeArcs           stroke ARCS on import.");
 					System.err.println("--skipPolygonBuilding  keep linetables; don't build polygons on import.");
+					System.err.println("--skipReferenceErrors  ignore/do not report reference errors.");
 					System.err.println("--skipGeometryErrors   ignore/do not report geometry errors.");
 					System.err.println("--keepAreaRef          keep arreaRef as additional column on import.");
 					System.err.println("--importTid            read TID into additional column "+DbNames.T_ILI_TID_COL);

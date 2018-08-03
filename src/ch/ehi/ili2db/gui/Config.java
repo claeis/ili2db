@@ -112,7 +112,8 @@ public class Config extends Settings {
 	private String validConfigFileName=null;
     private boolean doImplicitSchemaImport=true; // do implicit schema import during data import
 	private boolean validation=false;
-	private Long minIdSeqValue=null;
+	private boolean skipReferenceErrors=false;
+    private Long minIdSeqValue=null;
 	private Long maxIdSeqValue=null;
 	private boolean setupPgExt=false;
 	private String transferFileFormat=null;
@@ -562,6 +563,12 @@ public class Config extends Settings {
 	public void setOnlyMultiplicityReduction(boolean onlyMultiplicityReduction) {
 		this.onlyMultiplicityReduction = onlyMultiplicityReduction;
 	}
+    public boolean isSkipReferenceErrors() {
+        return skipReferenceErrors;
+    }
+    public void setSkipReferenceErrors(boolean skipReferenceErrors) {
+        this.skipReferenceErrors = skipReferenceErrors;
+    }
 	private boolean skipGeometryErrors=false;
 	public boolean isSkipGeometryErrors() {
 		return skipGeometryErrors;
