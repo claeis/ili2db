@@ -77,10 +77,11 @@ public class ObjectStatisticsTest {
                     }
                     int counter = 0;
                     for (LogEvent event : logCollector.getWarn()) {
-                        if (event.getEventMsg().equals("Logging-a.xtf: Abl_22.TopicA BID=GdeA.TopicA")
-                                || event.getEventMsg().equals("Logging-a.xtf: Abl_22.TopicB BID=GdeA.TopicB")
-                                || event.getEventMsg().equals("      1 objects in CLASS Abl_22.TopicA.Gebaeude")
-                                || event.getEventMsg().equals("      2 objects in CLASS Abl_22.TopicB.Grundstueck")) {
+                        String msg = trim(event.getEventMsg());
+                        if (msg.equals("Logging-a.xtf: Abl_22.TopicA BID=GdeA.TopicA")
+                                || msg.equals("Logging-a.xtf: Abl_22.TopicB BID=GdeA.TopicB")
+                                || msg.equals("1 objects in CLASS Abl_22.TopicA.Gebaeude")
+                                || msg.equals("2 objects in CLASS Abl_22.TopicB.Grundstueck")) {
                             counter++;
                         }
                     }
@@ -102,8 +103,8 @@ public class ObjectStatisticsTest {
                     }
                     int counter = 0;
                     for (LogEvent event : logCollector.getWarn()) {
-                        if (event.getEventMsg().equals("Logging-b.xtf: Abl_22.TopicA BID=GdeB.TopicA")
-                                || event.getEventMsg().equals("      1 objects in CLASS Abl_22.TopicA.Gebaeude")) {
+                        if (trim(event.getEventMsg()).equals("Logging-b.xtf: Abl_22.TopicA BID=GdeB.TopicA")
+                                || trim(event.getEventMsg()).equals("1 objects in CLASS Abl_22.TopicA.Gebaeude")) {
                             counter++;
                         }
                     }
@@ -153,5 +154,12 @@ public class ObjectStatisticsTest {
         } catch (Exception e) {
             Assert.fail(e.getMessage());
         }
+    }
+    private static String trim(String value)
+    {
+        if(value==null)return null;
+        String ret=value.replace(Ili2db.NO_BREAK_SPACE,' ');
+        return ret.trim();
+        
     }
 }

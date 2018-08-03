@@ -96,6 +96,7 @@ public class Ili2db {
 	public static final String ILI_FROM_DB="%ILI_FROM_DB";
 	private final static String SETTINGS_FILE = System.getProperty("user.home") + "/.ili2db";
 	public static final String SETTING_DIRUSED="ch.ehi.ili2db.dirused";
+    public static final char NO_BREAK_SPACE='\u00A0';
 	public static void readAppSettings(Settings settings)
 	{
 		java.io.File file=new java.io.File(SETTINGS_FILE);
@@ -821,14 +822,13 @@ public class Ili2db {
 					return ret;
 				}
 			});
-			String nbsp=Character.toString('\u00A0');
 			for(String className : classv){
 				ClassStat classStat=objStat.get(className);
 				String objCount=Long.toString(classStat.getObjcount());
 				if(objCount.length()<6){
 					objCount=ch.ehi.basics.tools.StringUtility.STRING(6-objCount.length(), ' ')+objCount;
 				}
-				EhiLogger.logState(nbsp+objCount+" objects in CLASS "+className);
+				EhiLogger.logState(Character.toString(NO_BREAK_SPACE)+objCount+" objects in CLASS "+className);
 			}
 		}
 	}
