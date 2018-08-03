@@ -367,7 +367,7 @@ public class TransferFromIli {
 		return new DbTableName(schema.getName(),sqlname);
 	}
 	private DbTableName getSqlTableNameItfLineTable(AttributeDef def){
-		String sqlname=ili2sqlName.mapGeometryAsTable(def);
+		String sqlname=ili2sqlName.mapGeometryAsTable((Viewable)def.getContainer(),def);
 		return new DbTableName(schema.getName(),sqlname);
 	}
 	static public void addModelsTable(DbSchema schema,Settings config)

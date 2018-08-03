@@ -24,6 +24,7 @@ import java.util.Set;
 import ch.ehi.basics.logging.EhiLogger;
 import ch.ehi.ili2db.base.DbNames;
 import ch.ehi.ili2db.base.Ili2dbException;
+import ch.interlis.ili2c.metamodel.Viewable;
 
 /** make names unique and conforming to the underlying database
  * @author ce
@@ -177,13 +178,12 @@ public class NameMapping {
 		}
 		return sqlname;
 	}
-	public String mapGeometryAsTable(ch.interlis.ili2c.metamodel.AttributeDef def){
-		String iliname=def.getContainer().getScopedName(null)+"."+def.getName();
+	public String mapGeometryAsTable(Viewable aclass,ch.interlis.ili2c.metamodel.AttributeDef def){
+		String iliname=aclass.getScopedName(null)+"."+def.getName();
 		String sqlname=(String)classNameIli2sql.get(iliname);
 		if(sqlname==null){
-			ch.interlis.ili2c.metamodel.Topic topic=(ch.interlis.ili2c.metamodel.Topic)def.getContainer(ch.interlis.ili2c.metamodel.Topic.class);
-			ch.interlis.ili2c.metamodel.Model model=(ch.interlis.ili2c.metamodel.Model)def.getContainer(ch.interlis.ili2c.metamodel.Model.class);
-			ch.interlis.ili2c.metamodel.Viewable aclass=(ch.interlis.ili2c.metamodel.Viewable)def.getContainer(ch.interlis.ili2c.metamodel.Viewable.class);
+			ch.interlis.ili2c.metamodel.Topic topic=(ch.interlis.ili2c.metamodel.Topic)aclass.getContainer(ch.interlis.ili2c.metamodel.Topic.class);
+			ch.interlis.ili2c.metamodel.Model model=(ch.interlis.ili2c.metamodel.Model)aclass.getContainer(ch.interlis.ili2c.metamodel.Model.class);
 			sqlname=makeSqlTableName(model.getName(),topic!=null ? topic.getName():null,aclass.getName(),def.getName(),getMaxSqlNameLength());
 			addTableNameMapping(iliname,sqlname);
 		}
