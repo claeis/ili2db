@@ -524,7 +524,7 @@ public class Ili2db {
 				
 				// create table structure
 				if(function==Config.FC_IMPORT && config.isDoImplicitSchemaImport()){
-					EhiLogger.logState("create table structure...");
+					EhiLogger.logState("create table structure, if not existing...");
 	                idGen.initDbDefs(gen);
 					try{
 						TransferFromIli trsfFromIli=new TransferFromIli();
@@ -1086,7 +1086,7 @@ public class Ili2db {
 			}
 			
 			// create table structure
-			EhiLogger.logState("create table structure...");
+			EhiLogger.logState("create table structure, if not existing...");
 			try{
 				TransferFromIli trsfFromIli=new TransferFromIli();
 				
