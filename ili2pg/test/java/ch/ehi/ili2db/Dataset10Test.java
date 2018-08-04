@@ -71,6 +71,7 @@ public class Dataset10Test {
 				config.setMultiSurfaceTrafo(null);
 				config.setMultilingualTrafo(null);
 				config.setInheritanceTrafo(null);
+				config.setImportBid(true);
 				final String datasetName="ceis";
 				config.setDatasetName(datasetName);
 				Ili2db.readSettingsFromDb(config);

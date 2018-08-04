@@ -67,6 +67,7 @@ public class ObjectStatisticsTest {
                     config.setCatalogueRefTrafo(null);
                     config.setMultiSurfaceTrafo(null);
                     config.setMultilingualTrafo(null);
+                    config.setImportBid(true);
                     config.setInheritanceTrafo(config.INHERITANCE_TRAFO_SMART1);
                     Ili2db.readSettingsFromDb(config);
                     config.setValidation(false);
@@ -95,6 +96,7 @@ public class ObjectStatisticsTest {
                     config.setDatasetName(DATASETNAME_B);
                     config.setFunction(Config.FC_IMPORT);
                     config.setValidation(false);
+                    config.setImportBid(true);
                     Ili2db.readSettingsFromDb(config);
                     try {
                         Ili2db.run(config, null);

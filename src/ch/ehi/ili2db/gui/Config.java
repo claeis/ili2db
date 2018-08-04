@@ -113,6 +113,7 @@ public class Config extends Settings {
     private boolean doImplicitSchemaImport=true; // do implicit schema import during data import
 	private boolean validation=false;
 	private boolean skipReferenceErrors=false;
+    private boolean importBid=false;
     private Long minIdSeqValue=null;
 	private Long maxIdSeqValue=null;
 	private boolean setupPgExt=false;
@@ -630,5 +631,11 @@ public class Config extends Settings {
     }
     public void setDoImplicitSchemaImport(boolean doImplicitSchemaImport) {
         this.doImplicitSchemaImport = doImplicitSchemaImport;
+    }
+    public void setImportBid(boolean enable) {
+        importBid=true;
+    }
+    public boolean isImportBid() {
+        return importBid;
     }
 }

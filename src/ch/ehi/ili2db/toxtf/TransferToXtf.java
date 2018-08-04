@@ -200,6 +200,9 @@ public class TransferToXtf {
 				if(topic==null){
 					throw new IoxException("no basketId "+basketSqlId+" in db");
 				}else{
+				    if(basketXtfId.length()==0) {
+				        basketXtfId.append(basketSqlId);
+				    }
 					referrs = referrs || doBasket(filename, iomFile, topic,basketSqlId,basketXtfId.toString());				
 				}
 			}
@@ -288,7 +291,9 @@ public class TransferToXtf {
 			if(topic==null){
 				throw new IoxException("unknown Topic "+topicName+" in table "+sqlName);
 			}
-			basketXtfId.append(bid);
+			if(bid!=null){
+	            basketXtfId.append(bid);
+			}
 			return topic;
 		}
 		return null;
