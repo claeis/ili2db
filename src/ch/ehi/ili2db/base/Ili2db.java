@@ -24,11 +24,14 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+
+import javax.swing.JOptionPane;
 
 import ch.ehi.basics.logging.EhiLogger;
 import ch.ehi.basics.logging.LogEvent;
@@ -93,6 +96,7 @@ public class Ili2db {
 	public static final String ILI_FROM_DB="%ILI_FROM_DB";
 	private final static String SETTINGS_FILE = System.getProperty("user.home") + "/.ili2db";
 	public static final String SETTING_DIRUSED="ch.ehi.ili2db.dirused";
+    public static final char NO_BREAK_SPACE='\u00A0';
 	public static void readAppSettings(Settings settings)
 	{
 		java.io.File file=new java.io.File(SETTINGS_FILE);
@@ -520,7 +524,7 @@ public class Ili2db {
 				
 				// create table structure
 				if(function==Config.FC_IMPORT && config.isDoImplicitSchemaImport()){
-					EhiLogger.logState("create table structure...");
+					EhiLogger.logState("create table structure, if not existing...");
 	                idGen.initDbDefs(gen);
 					try{
 						TransferFromIli trsfFromIli=new TransferFromIli();
@@ -818,14 +822,13 @@ public class Ili2db {
 					return ret;
 				}
 			});
-			String nbsp=Character.toString('\u00A0');
 			for(String className : classv){
 				ClassStat classStat=objStat.get(className);
 				String objCount=Long.toString(classStat.getObjcount());
 				if(objCount.length()<6){
 					objCount=ch.ehi.basics.tools.StringUtility.STRING(6-objCount.length(), ' ')+objCount;
 				}
-				EhiLogger.logState(nbsp+objCount+" objects in CLASS "+className);
+				EhiLogger.logState(Character.toString(NO_BREAK_SPACE)+objCount+" objects in CLASS "+className);
 			}
 		}
 	}
@@ -1083,7 +1086,7 @@ public class Ili2db {
 			}
 			
 			// create table structure
-			EhiLogger.logState("create table structure...");
+			EhiLogger.logState("create table structure, if not existing...");
 			try{
 				TransferFromIli trsfFromIli=new TransferFromIli();
 				
@@ -1390,11 +1393,24 @@ public class Ili2db {
 					throw new Ili2dbException("dataset wise export requires column "+DbNames.T_BASKET_COL);
 				}
 				// map datasetName to sqlBasketId and modelnames
-				Long datasetId=getDatasetId(datasetName, conn, config);
-				if(datasetId==null){
-					throw new Ili2dbException("dataset <"+datasetName+"> doesn't exist");
+				String datasetNames[] = datasetName.split(ch.interlis.ili2c.Main.MODELS_SEPARATOR);
+				List<Long> tmpListOfBasket = new ArrayList<Long>();
+				for (String dtName : datasetNames) {
+	                Long datasetId=getDatasetId(dtName, conn, config);
+	                if(datasetId==null){
+	                    throw new Ili2dbException("dataset <"+dtName+"> doesn't exist");
+	                }
+	                long tmpbasketSqlIds[]=getBasketSqlIdsFromDatasetId(datasetId,modelv,conn,config);
+	                for (int i = 0; i < tmpbasketSqlIds.length; i++) {
+	                    tmpListOfBasket.add(tmpbasketSqlIds[i]);
+	                }
 				}
-				basketSqlIds=getBasketSqlIdsFromDatasetId(datasetId,modelv,conn,config);
+				if (tmpListOfBasket.size() > 0) {
+				    basketSqlIds = new long[tmpListOfBasket.size()];
+				    for (int i = 0; i < tmpListOfBasket.size(); i++) {
+				        basketSqlIds[i] = tmpListOfBasket.get(i);
+				    }
+				}
 			}else if(baskets!=null){
 				if(!createBasketCol){
 					throw new Ili2dbException("basket wise export requires column "+DbNames.T_BASKET_COL);

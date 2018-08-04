@@ -71,6 +71,7 @@ public class FilterImportTest {
 				config.setMultilingualTrafo(null);
 				config.setInheritanceTrafo(null);
 				config.setBaskets("TestA1");
+				config.setImportBid(true);
 				Ili2db.readSettingsFromDb(config);
 				Ili2db.run(config,null);
 

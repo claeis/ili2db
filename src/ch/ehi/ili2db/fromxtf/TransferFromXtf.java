@@ -21,6 +21,7 @@ import java.io.FileNotFoundException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -109,6 +110,7 @@ public class TransferFromXtf {
 	private boolean createStdCols=false;
 	private boolean createGenericStructRef=false;
 	private boolean readIliTid=false;
+    private boolean readIliBid=false;
 	private boolean createBasketCol=false;
 	private boolean createDatasetCol=false;
 	private String xtffilename=null;
@@ -159,6 +161,7 @@ public class TransferFromXtf {
 		}
 		createGenericStructRef=config.STRUCT_MAPPING_GENERICREF.equals(config.getStructMapping());
 		readIliTid=config.TID_HANDLING_PROPERTY.equals(config.getTidHandling());
+		readIliBid=config.isImportBid();
 		createBasketCol=config.BASKET_HANDLING_READWRITE.equals(config.getBasketHandling());
 		createDatasetCol=config.CREATE_DATASET_COL.equals(config.getCreateDatasetCols());
 		doItfLineTables=config.isItfTransferfile();
@@ -218,7 +221,7 @@ public class TransferFromXtf {
 		unknownTypev=new HashSet();
 		structQueue=new ArrayList();
 		boolean surfaceAsPolyline=true;
-		boolean ignoreUnresolvedReferences=false;
+		boolean ignoreUnresolvedReferences=config.isSkipReferenceErrors();
 
 		
 		recman=new ObjectPoolManager();
@@ -424,7 +427,9 @@ public class TransferFromXtf {
 									config.setAttachmentKey(attachmentKey);
 								}
 								if(existingBasketSqlId==null){
-									writeBasket(datasetSqlId,basket,basketSqlId,attachmentKey);
+								    Topic topic=(Topic)td.getElement(basket.getType());
+								    boolean hasBid=topic.getBasketOid()!=null;
+									writeBasket(datasetSqlId,basket,basketSqlId,attachmentKey,hasBid?hasBid:readIliBid);
 								}else{
 									// TODO update attachmentKey of existing basket
 								}
@@ -1433,7 +1438,7 @@ public class TransferFromXtf {
 
 
 	private DbTableName getSqlTableNameItfLineTable(AttributeDef attrDef){
-		String sqlTabName=ili2sqlName.mapGeometryAsTable(attrDef);
+		String sqlTabName=ili2sqlName.mapGeometryAsTable((Viewable)attrDef.getContainer(),attrDef);
 		return new DbTableName(schema,sqlTabName);
 		
 	}
@@ -1500,7 +1505,7 @@ public class TransferFromXtf {
 			    Iterator attri = lineAttrTable.getAttributes ();
 			    while(attri.hasNext()){
 			    	AttributeDef lineattr=(AttributeDef)attri.next();
-					valuei = recConv.addAttrValue(iomObj, ili2sqlName.mapGeometryAsTable(attrDef), sqlId, sqlTableName,ps,
+					valuei = recConv.addAttrValue(iomObj, ili2sqlName.mapGeometryAsTable((Viewable)attrDef.getContainer(),attrDef), sqlId, sqlTableName,ps,
 							valuei, lineattr,null);
 			    }
 			}
@@ -1678,7 +1683,7 @@ public class TransferFromXtf {
 		
 	}
 
-	private long writeBasket(long datasetSqlId,StartBasketEvent iomBasket,long basketSqlId,String attachmentKey)
+	private long writeBasket(long datasetSqlId,StartBasketEvent iomBasket,long basketSqlId,String attachmentKey,boolean importBid)
 	throws java.sql.SQLException,ConverterException
 
 	{
@@ -1706,7 +1711,11 @@ public class TransferFromXtf {
 			ps.setString(valuei, tag);
 			valuei++;
 
-			ps.setString(valuei, bid);
+			if(importBid) {
+	            ps.setString(valuei, bid);
+			}else {
+			    ps.setNull(valuei, Types.VARCHAR);
+			}
 			valuei++;
 			
 			ps.setString(valuei, attachmentKey);

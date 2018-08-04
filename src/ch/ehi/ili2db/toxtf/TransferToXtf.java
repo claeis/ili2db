@@ -200,6 +200,9 @@ public class TransferToXtf {
 				if(topic==null){
 					throw new IoxException("no basketId "+basketSqlId+" in db");
 				}else{
+				    if(basketXtfId.length()==0) {
+				        basketXtfId.append(basketSqlId);
+				    }
 					referrs = referrs || doBasket(filename, iomFile, topic,basketSqlId,basketXtfId.toString());				
 				}
 			}
@@ -288,7 +291,9 @@ public class TransferToXtf {
 			if(topic==null){
 				throw new IoxException("unknown Topic "+topicName+" in table "+sqlName);
 			}
-			basketXtfId.append(bid);
+			if(bid!=null){
+	            basketXtfId.append(bid);
+			}
 			return topic;
 		}
 		return null;
@@ -708,7 +713,7 @@ public class TransferToXtf {
 	private void dumpItfTableObject(IoxWriter out,AttributeDef attr,Long basketSqlId)
 	{
 		String stmt=createItfLineTableQueryStmt(attr,basketSqlId,geomConv);
-		String sqlTabName=ili2sqlName.mapGeometryAsTable(attr);
+		String sqlTabName=ili2sqlName.mapGeometryAsTable((Viewable)attr.getContainer(),attr);
 		EhiLogger.traceBackendCmd(stmt);
 		
 		SurfaceOrAreaType type = (SurfaceOrAreaType)attr.getDomainResolvingAliases();
@@ -1151,7 +1156,7 @@ public class TransferToXtf {
 	  return false;
 	}
 	private DbTableName getSqlTableNameItfLineTable(AttributeDef def){
-		String sqlname=ili2sqlName.mapGeometryAsTable(def);
+		String sqlname=ili2sqlName.mapGeometryAsTable((Viewable)def.getContainer(),def);
 		return new DbTableName(schema,sqlname);
 	}
 	private String createItfLineTableQueryStmt(AttributeDef attr,Long basketSqlId,SqlColumnConverter conv){
@@ -1163,7 +1168,7 @@ public class TransferToXtf {
 		String sep=",";
 		
 		SurfaceOrAreaType type = (SurfaceOrAreaType)attr.getDomainResolvingAliases();
-		String sqlTabName=ili2sqlName.mapGeometryAsTable(attr);
+		String sqlTabName=ili2sqlName.mapGeometryAsTable((Viewable)attr.getContainer(),attr);
 		
 		// geomAttr
 		 ret.append(sep);

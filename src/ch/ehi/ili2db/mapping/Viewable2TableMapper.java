@@ -254,6 +254,7 @@ public class Viewable2TableMapper {
 
 	private void addProps(ViewableWrapper viewable,List<ViewableTransferElement> attrv,
 		Iterator<ViewableTransferElement> iter) {
+        Viewable iliclass=viewable.getViewable();
 		boolean hasGeometry=false;
 		// only one geometry column per table?
 		if(singleGeom){
@@ -279,7 +280,7 @@ public class Viewable2TableMapper {
 			ViewableTransferElement obj = iter.next();
 			if (obj.obj instanceof AttributeDef) {
 				AttributeDef attr=(AttributeDef) obj.obj;
-				String sqlname=trafoConfig.getAttrConfig(attr, TrafoConfigNames.SECONDARY_TABLE);
+				String sqlname=trafoConfig.getAttrConfig(iliclass,attr, TrafoConfigNames.SECONDARY_TABLE);
 				// attribute configured to be in a secondary table?
 				if(sqlname!=null){
 					// add attribute to given secondary table
@@ -306,7 +307,7 @@ public class Viewable2TableMapper {
 								// table already has a geometry column?
 								if(hasGeometry){
 									// create a new secondary table
-									sqlname=nameMapping.mapGeometryAsTable(attr);
+									sqlname=nameMapping.mapGeometryAsTable(iliclass,attr);
 									ViewableWrapper attrWrapper=viewable.getSecondaryTable(sqlname);
 									if(attrWrapper==null){
 										attrWrapper=viewable.createSecondaryTable(sqlname);
@@ -315,7 +316,7 @@ public class Viewable2TableMapper {
 									List<ViewableTransferElement> attrProps=new java.util.ArrayList<ViewableTransferElement>();
 									attrProps.add(obj);
 									attrWrapper.setAttrv(attrProps);
-									trafoConfig.setAttrConfig(attr, TrafoConfigNames.SECONDARY_TABLE, sqlname);
+									trafoConfig.setAttrConfig(iliclass,attr, TrafoConfigNames.SECONDARY_TABLE, sqlname);
 								}else{
 									// table has not yet a geometry column
 									// add it

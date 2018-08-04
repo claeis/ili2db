@@ -293,6 +293,9 @@ public abstract class AbstractMain {
 				// DEPRECATED remove option
 				argi++;
 				config.setSkipGeometryErrors(true);
+			}else if (arg.equals("--skipReferenceErrors")) { 
+                argi++;
+                config.setSkipReferenceErrors(true);
 			}else if(arg.equals("--skipGeometryErrors")){
 				argi++;
 				config.setSkipGeometryErrors(true);
@@ -302,6 +305,9 @@ public abstract class AbstractMain {
 			}else if(arg.equals("--importTid")){
 				argi++;
 				config.setTidHandling(config.TID_HANDLING_PROPERTY);
+            }else if(arg.equals("--importBid")){
+                argi++;
+                config.setImportBid(true);
 			}else if(arg.equals("--createBasketCol")){
 				argi++;
 				config.setBasketHandling(config.BASKET_HANDLING_READWRITE);
@@ -398,9 +404,11 @@ public abstract class AbstractMain {
 					System.err.println("--sqlEnableNull        create no NOT NULL constraints in db schema.");
 					System.err.println("--strokeArcs           stroke ARCS on import.");
 					System.err.println("--skipPolygonBuilding  keep linetables; don't build polygons on import.");
+					System.err.println("--skipReferenceErrors  ignore/do not report reference errors.");
 					System.err.println("--skipGeometryErrors   ignore/do not report geometry errors.");
 					System.err.println("--keepAreaRef          keep arreaRef as additional column on import.");
-					System.err.println("--importTid            read TID into additional column "+DbNames.T_ILI_TID_COL);
+					System.err.println("--importTid            read transient TIDs into an additional column "+DbNames.T_ILI_TID_COL);
+                    System.err.println("--importBid            read transient BIDs into "+DbNames.BASKETS_TAB+"."+DbNames.T_ILI_TID_COL);
 					System.err.println("--createBasketCol      generate "+DbNames.T_BASKET_COL+" column.");
 					System.err.println("--createDatasetCol     generate "+DbNames.T_DATASET_COL+" column (Requires --dataset)");
 					System.err.println("--createFk             generate foreign key constraints.");
