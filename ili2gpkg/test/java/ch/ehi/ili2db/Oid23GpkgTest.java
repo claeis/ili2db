@@ -8,6 +8,7 @@ import java.sql.DriverManager;
 import java.sql.Statement;
 import org.junit.After;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import ch.ehi.basics.logging.EhiLogger;
 import ch.ehi.ili2db.base.Ili2db;
@@ -29,11 +30,15 @@ public class Oid23GpkgTest {
 	
 	public void initDb() throws Exception
 	{
-	    Class driverClass = Class.forName("org.sqlite.JDBC");
         jdbcConnection = DriverManager.getConnection("jdbc:sqlite:"+GPKGFILENAME, null, null);
         stmt=jdbcConnection.createStatement();
 	}
 	
+    @Before
+    public void setupJdbc() throws Exception
+    {
+        Class driverClass = Class.forName("org.sqlite.JDBC");
+    }
 	@After
 	public void endDb() throws Exception
 	{
@@ -76,7 +81,6 @@ public class Oid23GpkgTest {
 		config.setInheritanceTrafo(null);
 		Ili2db.readSettingsFromDb(config);
 		Ili2db.run(config,null);
-		initDb();
 	}
 	
 	@Test
@@ -98,6 +102,7 @@ public class Oid23GpkgTest {
     		config.setMultilingualTrafo(null);
     		config.setInheritanceTrafo(null);
     		config.setValidation(false);
+    		config.setImportBid(true);
     		Ili2db.readSettingsFromDb(config);
     		Ili2db.run(config,null);
         }
@@ -107,10 +112,10 @@ public class Oid23GpkgTest {
 			Config config=initConfig(data.getPath(),data.getPath()+".log");
 			config.setFunction(Config.FC_IMPORT);
     		config.setValidation(false);
+            config.setImportBid(true);
 			Ili2db.readSettingsFromDb(config);
 			Ili2db.run(config,null);
 		}
-		initDb();
 	}
 	
 	@Test
@@ -153,6 +158,5 @@ public class Oid23GpkgTest {
 			assertTrue(reader.read() instanceof EndBasketEvent);
 			assertTrue(reader.read() instanceof EndTransferEvent);
 		}
-		initDb();
 	}
 }

@@ -15,6 +15,10 @@ ideas/open issues/questions
 LATEST
 ---------------------------
 
+ili2pg 3.12.1 (2018-08-13)
+-----------------------------
+- iox-ili 1.20.8
+
 ili2pg 3.12.0 (2018-08-04)
 -----------------------------
 - fixed: create secondary table (with geometry attr) per main table with smart2
