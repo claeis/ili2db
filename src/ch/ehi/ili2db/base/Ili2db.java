@@ -387,6 +387,9 @@ public class Ili2db {
 				}
 			  }
 			  
+              // run DB specific pre-processing
+              customMapping.prePreScript(conn, config);
+              
 			  // run pre-script
 			  if(config.getPreScript()!=null){
 				  try {
@@ -710,6 +713,9 @@ public class Ili2db {
 					}
 				}
 				
+                // run DB specific post processing
+                customMapping.postPostScript(conn, config);
+				
 				if(errs.hasSeenErrors()){
 					if(!connectionFromExtern){
 						try {
@@ -967,10 +973,13 @@ public class Ili2db {
 				  // switch off auto-commit
 				  conn.setAutoCommit(false);
 			  }
-			  
+			  	            
 			}catch(SQLException ex){
 				throw new Ili2dbException(ex);
 			}
+
+            // run DB specific pre-processing
+            customMapping.prePreScript(conn, config);
 			
 			// run pre-script
 			if(config.getPreScript()!=null){
@@ -1173,6 +1182,9 @@ public class Ili2db {
 					}
 				}
 				
+                // run DB specific post processing
+                customMapping.postPostScript(conn, config);
+				
 				//if(conn instanceof ch.ehi.ili2geodb.jdbc.GeodbConnection){
 				//	String xmlfile=null;
 				//	try{
@@ -1373,8 +1385,11 @@ public class Ili2db {
 			} catch (SQLException e) {
 				throw new Ili2dbException("failed to get db connection",e);
 			}
-			  logDBVersion(conn);
+			logDBVersion(conn);
 			  
+            // run DB specific pre-processing
+            customMapping.prePreScript(conn, config);
+              
 			// run pre-script 
 			if(config.getPreScript()!=null){
 				try {
@@ -1537,6 +1552,9 @@ public class Ili2db {
 						throw new Ili2dbException("export post-script statements failed",e);
 					}
 				}
+				
+				// run DB specific post processing
+				customMapping.postPostScript(conn, config);
 				
 			//}catch(Exception ex){
 				//EhiLogger.logError(ex);

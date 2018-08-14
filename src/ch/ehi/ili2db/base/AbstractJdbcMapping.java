@@ -15,6 +15,16 @@ public abstract class AbstractJdbcMapping implements CustomMapping {
 	}
 
     @Override
+    public void prePreScript(Connection conn, Config config)
+    {
+        
+    }
+    @Override
+    public void postPostScript(Connection conn, Config config)
+    {
+        
+    }
+    @Override
     public String shortenConnectUrl4IliCache(String url) {
         return url;
     }
