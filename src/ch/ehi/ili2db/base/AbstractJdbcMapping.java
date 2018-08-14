@@ -14,4 +14,8 @@ public abstract class AbstractJdbcMapping implements CustomMapping {
 		return DriverManager.getConnection(url, dbusr, dbpwd);
 	}
 
+    @Override
+    public String shortenConnectUrl4IliCache(String url) {
+        return url;
+    }
 }

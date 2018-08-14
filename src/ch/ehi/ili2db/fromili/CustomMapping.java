@@ -21,5 +21,6 @@ public interface CustomMapping {
 	public void preConnect(String url, String dbusr, String dbpwd, Config config);
 	public Connection connect(String url, String dbusr, String dbpwd, Config config) throws SQLException;
 	public void postConnect(Connection conn, Config config);
+    public String shortenConnectUrl4IliCache(String url);
 
 }

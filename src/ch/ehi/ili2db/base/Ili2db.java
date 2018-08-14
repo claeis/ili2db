@@ -440,7 +440,7 @@ public class Ili2db {
 
 				
 				// compile required ili files
-				setupIli2cPathmap(config, appHome, inputFilename,conn);
+				setupIli2cPathmap(config, appHome, inputFilename,conn,customMapping);
 			    Ili2cMetaAttrs ili2cMetaAttrs=new Ili2cMetaAttrs();
 			    ch.interlis.ili2c.config.Configuration ili2cConfig=null;
 				try {
@@ -983,7 +983,7 @@ public class Ili2db {
 			}
 			
 			// setup ilidirs+pathmap for ili2c
-			setupIli2cPathmap(config, appHome, ilifile,conn);
+			setupIli2cPathmap(config, appHome, ilifile,conn,customMapping);
 		    Ili2cMetaAttrs ili2cMetaAttrs=new Ili2cMetaAttrs();
 		    setupIli2cMetaAttrs(ili2cMetaAttrs,config,modelv);
 			
@@ -1248,7 +1248,7 @@ public class Ili2db {
 		EhiLogger.logState("currentTime "+new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new java.util.Date()));
 	}
 	private static void setupIli2cPathmap(Config config, String appHome,
-			String xtffile,java.sql.Connection conn) throws Ili2dbException {
+			String xtffile,java.sql.Connection conn, CustomMapping mapping) throws Ili2dbException {
 		config.setValue(ch.interlis.ili2c.gui.UserSettings.ILIDIRS,config.getModeldir());
 		java.util.HashMap pathMap=new java.util.HashMap();
 		if(xtffile!=null){
@@ -1265,6 +1265,7 @@ public class Ili2db {
 			String url=null;
 			try {
 				url=conn.getMetaData().getURL();
+				url=mapping.shortenConnectUrl4IliCache(url);
 				iliFiles=TransferFromIli.readIliFiles(conn,config.getDbschema());
 			} catch (SQLException e) {
 				throw new Ili2dbException(e);
@@ -1461,7 +1462,7 @@ public class Ili2db {
 			
 
 				// compile required ili files
-				setupIli2cPathmap(config, appHome, xtffile,conn);
+				setupIli2cPathmap(config, appHome, xtffile,conn,customMapping);
 			    Ili2cMetaAttrs ili2cMetaAttrs=new Ili2cMetaAttrs();
 			    setupIli2cMetaAttrs(ili2cMetaAttrs,config,null); // don't add ili1 model translations to model list (should already be in list because of topicname in t_baskets table)
 				EhiLogger.logState("compile models...");
