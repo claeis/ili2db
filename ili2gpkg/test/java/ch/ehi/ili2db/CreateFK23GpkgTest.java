@@ -51,7 +51,7 @@ public class CreateFK23GpkgTest {
 		return config;
 	}	
 	@Test
-	public void importIli_CreateFK() throws Exception
+	public void importIli_CreateFK_fail() throws Exception
 	{
 		EhiLogger.getInstance().setTraceFilter(false);
 		File gpkgFile=new File(GPKGFILENAME);
@@ -79,4 +79,32 @@ public class CreateFK23GpkgTest {
             Assert.assertEquals("loop in create table statements: classa1->classb1->classa1", e.getCause().getMessage());
         }
 	}
+    @Test
+    public void importIli_CreateFKrecursive_fail() throws Exception
+    {
+        EhiLogger.getInstance().setTraceFilter(false);
+        File gpkgFile=new File(GPKGFILENAME);
+        if(gpkgFile.exists()){
+            gpkgFile.delete();
+        }
+        File data=new File(TEST_OUT,"modelrecursive.ili");
+        Config config=initConfig(data.getPath(),data.getPath()+".log");
+        config.setFunction(Config.FC_SCHEMAIMPORT);
+        config.setCreateFk(Config.CREATE_FK_YES);
+        config.setCreateNumChecks(true);
+        config.setTidHandling(Config.TID_HANDLING_PROPERTY);
+        config.setBasketHandling(config.BASKET_HANDLING_READWRITE);
+        config.setCatalogueRefTrafo(null);
+        config.setMultiSurfaceTrafo(null);
+        config.setMultilingualTrafo(null);
+        config.setInheritanceTrafo(null);
+        Ili2db.readSettingsFromDb(config);
+        try {
+            Ili2db.run(config,null);
+            fail();
+        } catch (Exception e) {
+            e.printStackTrace();
+            Assert.assertEquals("loop in create table statements: classa1->classa1", e.getCause().getMessage());
+        }
+    }
 }

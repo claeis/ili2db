@@ -1,0 +1,18 @@
+INTERLIS 2.3;
+
+MODEL modelrecursive
+  AT "mailto:ce@eisenhutinformatik.ch" VERSION "2015-12-03" =
+    
+  TOPIC topic1 =
+  
+    CLASS ClassA1 =
+    END ClassA1;
+    
+    ASSOCIATION a1=
+      a1_a -- {1..*} ClassA1;
+      a1_b -- {1} ClassA1;
+    END a1;
+    
+  END topic1;
+ 
+END modelrecursive.
