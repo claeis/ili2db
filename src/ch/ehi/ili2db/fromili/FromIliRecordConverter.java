@@ -159,10 +159,12 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 		  if(createFk){
 			  dbColId.setReferencedTable(getSqlType(base.getViewable()));
 		  }
+                  metaInfo.setColumnInfo(dbTable.getName().getName(), null, dbColId.getName(), DbExtMetaInfo.TAG_COL_FOREIGNKEY, getSqlType(base.getViewable()).getName());
 		}else if(def.isSecondaryTable()){
 			  if(createFk){
 				  dbColId.setReferencedTable(new DbTableName(schema.getName(),def.getMainTable().getSqlTablename()));
 			  }
+                          metaInfo.setColumnInfo(dbTable.getName().getName(), null, dbColId.getName(), DbExtMetaInfo.TAG_COL_FOREIGNKEY, def.getMainTable().getSqlTablename());
 		}
 		  if(createBasketCol){
 			  // add basketCol
@@ -279,6 +281,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 							  if(createFk){
 								  dbColId.setReferencedTable(targetSqlTableName);
 							  }
+							  metaInfo.setColumnInfo(dbTable.getName().getName(), null, dbColId.getName(), DbExtMetaInfo.TAG_COL_FOREIGNKEY, targetSqlTableName.getName());                                                          
 								if(createFkIdx){
 									dbColId.setIndex(true);
 								}
@@ -328,6 +331,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 								  if(createFk){
 									  dbColId.setReferencedTable(targetSqlTableName);
 								  }
+                                                                  metaInfo.setColumnInfo(dbTable.getName().getName(), null, dbColId.getName(), DbExtMetaInfo.TAG_COL_FOREIGNKEY, targetSqlTableName.getName());
 									if(createFkIdx){
 										dbColId.setIndex(true);
 									}
@@ -516,6 +520,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
                         if(createFk){
                             ret.setReferencedTable(targetTable.getSqlTable());
                         }
+                        metaInfo.setColumnInfo(dbTable.getName().getName(), null, ret.getName(), DbExtMetaInfo.TAG_COL_FOREIGNKEY, targetTable.getSqlTablename());
                         if(createFkIdx){
                             ret.setIndex(true);
                         }
@@ -615,6 +620,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 				if(createFk){
 					ret.setReferencedTable(targetTable.getSqlTable());
 				}
+                                metaInfo.setColumnInfo(dbTable.getName().getName(), null, ret.getName(), DbExtMetaInfo.TAG_COL_FOREIGNKEY, targetTable.getSqlTablename());
 				if(createFkIdx){
 					ret.setIndex(true);
 				}
@@ -855,6 +861,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 			if(createFk){
 				dbParentId.setReferencedTable(class2wrapper.get(parentTable).getSqlTable());
 			}
+                        metaInfo.setColumnInfo(dbTable.getName().getName(), null, dbParentId.getName(), DbExtMetaInfo.TAG_COL_FOREIGNKEY, class2wrapper.get(parentTable).getSqlTablename());
 			if(createFkIdx){
 				dbParentId.setIndex(true);
 			}
