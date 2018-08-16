@@ -658,6 +658,9 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 					metaInfo.setColumnInfo(dbTable.getName().getName(), subType, sqlColName, DbExtMetaInfo.TAG_COL_C3_MIN, Double.toString(((DbColGeometry) dbCol.value).getMin3()));
 					metaInfo.setColumnInfo(dbTable.getName().getName(), subType, sqlColName, DbExtMetaInfo.TAG_COL_C3_MAX, Double.toString(((DbColGeometry) dbCol.value).getMax3()));
 				}
+				metaInfo.setColumnInfo(dbTable.getName().getName(), subType, sqlColName, DbExtMetaInfo.TAG_COL_GEOMTYPE, getIli2DbGeomType(((DbColGeometry) dbCol.value).getType()));
+				metaInfo.setColumnInfo(dbTable.getName().getName(), subType, sqlColName, DbExtMetaInfo.TAG_COL_SRID, ((DbColGeometry) dbCol.value).getSrsId());
+				metaInfo.setColumnInfo(dbTable.getName().getName(), subType, sqlColName, DbExtMetaInfo.TAG_COL_COORDDIMENSION, Integer.toString(((DbColGeometry) dbCol.value).getDimension()));
 			}
 			String dispName = attr.getMetaValues().getValue(IliMetaAttrNames.METAATTR_DISPNAME);
 			if (dispName!=null){
@@ -673,6 +676,44 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 		if(dbCol.value==null && dbColExts.size()==0){
 			customMapping.fixupAttribute(dbTable, null, attr);
 		}
+	}
+	
+	static public String getIli2DbGeomType(int type)
+	{
+		 switch(type){
+			case DbColGeometry.POINT:
+				return "POINT";
+			case DbColGeometry.LINESTRING:
+				return "LINESTRING";
+			case DbColGeometry.POLYGON:
+				return "POLYGON";
+			case DbColGeometry.MULTIPOINT:
+				return "MULTIPOINT";
+			case DbColGeometry.MULTILINESTRING:
+				return "MULTILINESTRING";
+			case DbColGeometry.MULTIPOLYGON:
+				return "MULTIPOLYGON";
+			case DbColGeometry.GEOMETRYCOLLECTION:
+				return "GEOMETRYCOLLECTION";
+			case DbColGeometry.CIRCULARSTRING:
+				return "CIRCULARSTRING";
+			case DbColGeometry.COMPOUNDCURVE:
+				return "COMPOUNDCURVE";
+			case DbColGeometry.CURVEPOLYGON:
+				return "CURVEPOLYGON";
+			case DbColGeometry.MULTICURVE:
+				return "MULTICURVE";
+			case DbColGeometry.MULTISURFACE:
+				return "MULTISURFACE";
+			case DbColGeometry.POLYHEDRALSURFACE:
+				return "POLYHEDRALSURFACE";
+			case DbColGeometry.TIN:
+				return "TIN";
+			case DbColGeometry.TRIANGLE:
+				return "TRIANGLE";
+			default:
+				throw new IllegalArgumentException();
+		 }
 	}
 
 	private boolean createSimpleDbCol(DbTable dbTable, Viewable aclass, AttributeDef attr, Type type,
