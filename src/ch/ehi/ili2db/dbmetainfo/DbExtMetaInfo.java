@@ -17,6 +17,7 @@ import ch.interlis.ili2c.metamodel.Domain;
 import ch.interlis.ili2c.metamodel.EnumerationType;
 
 public class DbExtMetaInfo {
+	public static final String TAG_COL_FOREIGNKEY = Config.PREFIX+".foreignKey";
 	public static final String TAG_COL_UNIT = Config.PREFIX+".unit";
 	public static final String TAG_COL_TEXTKIND = Config.PREFIX+".textKind";
 	public static final String TAG_COL_TEXTKIND_MTEXT = "MTEXT";
