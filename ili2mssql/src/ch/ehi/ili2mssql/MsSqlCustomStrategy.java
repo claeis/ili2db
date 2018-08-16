@@ -1,7 +1,9 @@
 package ch.ehi.ili2mssql;
 
 import java.sql.Connection;
+import java.sql.SQLException;
 
+import ch.ehi.basics.logging.EhiLogger;
 import ch.ehi.ili2db.base.AbstractJdbcMapping;
 import ch.ehi.ili2db.gui.Config;
 import ch.ehi.sqlgen.repository.DbColumn;
@@ -48,5 +50,64 @@ public class MsSqlCustomStrategy  extends AbstractJdbcMapping {
 	public void postConnect(Connection conn, Config config) {
 		
 	}
+	
+	@Override
+	public void prePreScript(Connection conn, Config config)
+	{
+		java.sql.Statement stmt=null;
+		try {
+			stmt=conn.createStatement();
+			String sql=null;
 
+			try {
+				sql="EXEC sp_msforeachtable \"ALTER TABLE ? NOCHECK CONSTRAINT all\";";
+				EhiLogger.traceBackendCmd(sql);
+				stmt.execute(sql);
+			} catch(SQLException e){
+				throw new IllegalStateException("failed to disable foreign keys", e);
+			}
+			
+		} catch (SQLException e) {
+			EhiLogger.logError(e);
+		}finally{
+			if(stmt!=null){
+				try {
+					stmt.close();
+					stmt=null;
+				} catch (SQLException e) {
+					EhiLogger.logError(e);
+				}
+			}
+		}
+	}
+	
+	@Override
+	public void postPostScript(Connection conn, Config config)
+	{
+		java.sql.Statement stmt=null;
+		try {
+			stmt=conn.createStatement();
+			String sql=null;
+
+			try {
+				sql="EXEC sp_msforeachtable \"ALTER TABLE ? WITH CHECK CHECK CONSTRAINT all\";";
+				EhiLogger.traceBackendCmd(sql);
+				stmt.execute(sql);
+			} catch(SQLException e){
+				throw new IllegalStateException("failed to enable foreign keys", e);
+			}
+			
+		} catch (SQLException e) {
+			EhiLogger.logError(e);
+		}finally{
+			if(stmt!=null){
+				try {
+					stmt.close();
+					stmt=null;
+				} catch (SQLException e) {
+					EhiLogger.logError(e);
+				}
+			}
+		}
+	}
 }
