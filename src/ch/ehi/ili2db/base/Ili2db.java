@@ -581,7 +581,7 @@ public class Ili2db {
 							// update enumerations table
 							trsfFromIli.updateEnumTable(conn);
 							trsfFromIli.updateMetaInfoTables(conn);
-							TransferFromIli.addModels(conn,td,config.getDbschema());
+							TransferFromIli.addModels(conn,td,config.getDbschema(),customMapping);
 							if(!config.isConfigReadFromDb()){
 								TransferFromIli.updateSettings(conn,config,config.getDbschema());
 							}
@@ -1160,7 +1160,7 @@ public class Ili2db {
 					// update enum table
 					trsfFromIli.updateEnumTable(conn);
 					trsfFromIli.updateMetaInfoTables(conn);
-					TransferFromIli.addModels(conn,td,config.getDbschema());
+					TransferFromIli.addModels(conn,td,config.getDbschema(),customMapping);
 					if(!config.isConfigReadFromDb()){
 						TransferFromIli.updateSettings(conn,config,config.getDbschema());
 					}
@@ -1278,7 +1278,7 @@ public class Ili2db {
 			try {
 				url=conn.getMetaData().getURL();
 				url=mapping.shortenConnectUrl4IliCache(url);
-				iliFiles=TransferFromIli.readIliFiles(conn,config.getDbschema());
+				iliFiles=TransferFromIli.readIliFiles(conn,config.getDbschema(),mapping);
 			} catch (SQLException e) {
 				throw new Ili2dbException(e);
 			}
