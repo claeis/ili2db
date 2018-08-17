@@ -110,4 +110,10 @@ public class MsSqlCustomStrategy  extends AbstractJdbcMapping {
 			}
 		}
 	}
+	
+	@Override
+	public String shortenConnectUrl4IliCache(String url) {
+		String[] parts = url.split(";");
+		return parts[0]; //the first part contains host, port and instance
+	}
 }
