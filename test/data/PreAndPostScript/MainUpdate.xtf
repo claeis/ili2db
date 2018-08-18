@@ -2,7 +2,7 @@
 	<TRANSFER xmlns="http://www.interlis.ch/INTERLIS2.3">
 	<HEADERSECTION SENDER="ili2pg-2.4.0-20151123" VERSION="2.3">
 	<MODELS>
-		<MODEL NAME="ModelAUpdate" VERSION="2015-12-08" URI="mailto:ce@eisenhutinformatik.ch"></MODEL>
+		<MODEL NAME="ModelA" VERSION="2015-12-08" URI="mailto:ce@eisenhutinformatik.ch"></MODEL>
 	</MODELS>
 	</HEADERSECTION>
 	<DATASECTION>
