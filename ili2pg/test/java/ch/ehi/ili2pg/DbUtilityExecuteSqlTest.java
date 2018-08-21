@@ -1,4 +1,4 @@
-package ch.ehi.ili2db.base;
+package ch.ehi.ili2pg;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;

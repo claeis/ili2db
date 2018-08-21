@@ -1,4 +1,4 @@
-package ch.ehi.ili2db.base;
+package ch.ehi.ili2pg;
 
 import static org.junit.Assert.*;
 
@@ -8,20 +8,20 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.Statement;
 
-import junit.framework.Assert;
+import org.junit.Assert;
 
 import org.junit.Test;
 
+import ch.ehi.ili2db.base.Ili2db;
+import ch.ehi.ili2db.base.Ili2dbException;
 import ch.ehi.ili2db.gui.Config;
 
 //-Ddburl=jdbc:postgresql:dbname -Ddbusr=usrname -Ddbpwd=1234
 public class SRSVerificationTest {
 
-	private static final String DBSCHEMA = "srsVerifySchema";
 	String dburl=System.getProperty("dburl"); 
 	String dbuser=System.getProperty("dbusr");
 	String dbpwd=System.getProperty("dbpwd"); 
-	Statement stmt=null;
 	
 	public Config initConfig(String xtfFilename,String dbschema,String logfile) {
 		Config config=new Config();
@@ -45,6 +45,7 @@ public class SRSVerificationTest {
 	@Test
 	public void verifySRS_True() throws Exception
 	{
+	    final String DBSCHEMA = "srsVerifySchema_verifySRS";
 		Connection jdbcConnection=null;
 		try{
 	        Class driverClass = Class.forName("org.postgresql.Driver");
@@ -60,11 +61,7 @@ public class SRSVerificationTest {
 				config.setDefaultSrsAuthority("EPSG");
 				config.setDefaultSrsCode("2000");
 				Ili2db.readSettingsFromDb(config);
-				try{
-					Ili2db.run(config,null);
-				} catch (Ili2dbException e) {
-					Assert.assertEquals("TPSG/2000 does not exist", e.getMessage());
-				}
+                Ili2db.run(config,null);
 			}
 		}finally{
 			if(jdbcConnection!=null){
@@ -76,6 +73,7 @@ public class SRSVerificationTest {
 	@Test
 	public void srsAuthNotExist_False() throws Exception
 	{
+        final String DBSCHEMA = "srsVerifySchema_srsAuthNotExist";
 		Connection jdbcConnection=null;
 		try{
 	        Class driverClass = Class.forName("org.postgresql.Driver");
@@ -108,6 +106,7 @@ public class SRSVerificationTest {
 	@Test
 	public void srsCodeNotExist_False() throws Exception
 	{
+        final String DBSCHEMA = "srsVerifySchema_srsCodeNotExist";
 		Connection jdbcConnection=null;
 		try{
 	        Class driverClass = Class.forName("org.postgresql.Driver");
@@ -140,6 +139,7 @@ public class SRSVerificationTest {
 	@Test
 	public void srsAuthLowerCase_False() throws Exception
 	{
+        final String DBSCHEMA = "srsVerifySchema_srsAuthLowerCase";
 		Connection jdbcConnection=null;
 		try{
 	        Class driverClass = Class.forName("org.postgresql.Driver");
