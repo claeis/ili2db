@@ -17,6 +17,7 @@ import ch.interlis.ili2c.metamodel.Domain;
 import ch.interlis.ili2c.metamodel.EnumerationType;
 
 public class DbExtMetaInfo {
+	public static final String TAG_COL_FOREIGNKEY = Config.PREFIX+".foreignKey";
 	public static final String TAG_COL_UNIT = Config.PREFIX+".unit";
 	public static final String TAG_COL_TEXTKIND = Config.PREFIX+".textKind";
 	public static final String TAG_COL_TEXTKIND_MTEXT = "MTEXT";
@@ -27,6 +28,9 @@ public class DbExtMetaInfo {
 	public static final String TAG_COL_C2_MAX = Config.PREFIX+".c2Max";
 	public static final String TAG_COL_C3_MIN = Config.PREFIX+".c3Min";
 	public static final String TAG_COL_C3_MAX = Config.PREFIX+".c3Max";
+	public static final String TAG_COL_GEOMTYPE = Config.PREFIX+".geomType";
+	public static final String TAG_COL_SRID = Config.PREFIX+".srid";
+	public static final String TAG_COL_COORDDIMENSION = Config.PREFIX+".coordDimension";
 	public static final String TAG_TAB_TABLEKIND = Config.PREFIX+".tableKind";
 	public static final String TAG_TAB_TABLEKIND_ENUM = "ENUM";
 	public static final String TAG_TAB_TABLEKIND_SECONDARY = "SECONDARY";
