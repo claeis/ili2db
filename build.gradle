@@ -187,10 +187,10 @@ configurations {
 }
 
 dependencies {
-    //pmd group: 'xalan', name: 'xalan', version: '2.7.2'
     antClasspath group: 'org.apache.ant', name: 'ant-junit', version: '1.9.13'
 
 }
+
 ClassLoader antClassLoader = org.apache.tools.ant.Project.class.classLoader
  configurations.antClasspath.each { File f ->
    antClassLoader.addURL(f.toURI().toURL())
@@ -213,6 +213,8 @@ task testreport {
 	}
 }
 
+// use plugin 'maven' instead of 'maven-publish', 
+// because 'maven-publish' doesn't support ftp repository access
 artifacts {
     archives(jar.archivePath){
     	builtBy jar
@@ -264,6 +266,17 @@ uploadArchives {
             addFilter('ili2db') {artifact, file ->
                 artifact.name == 'ili2db'
             }            
+            pom('ili2pg').artifactId = 'ili2pg'
+            pom('ili2pg').scopeMappings.with {
+                mappings.clear()
+                addMapping(300, configurations.ili2pgCompileClasspath, 'runtime')
+                addMapping(300, configurations.ili2db, 'runtime')
+            }
+            pom('ili2db').artifactId = 'ili2db'
+            pom('ili2db').scopeMappings.with {
+                mappings.clear()
+                addMapping(300, configurations.implementation, 'runtime')
+            }
         }
     }
 }

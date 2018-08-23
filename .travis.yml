@@ -42,12 +42,12 @@ after_failure:
 deploy:
   - provider: script
     skip_cleanup: true
-    script: gradle -Drepos_pwd=${repos_pwd} -Drepos_usr=jql_jars-INTE deploy
+    script: gradle -Drepos_pwd=${repos_pwd} -Drepos_usr=jql_jars-INTE upload
     on:
       branch: master
   - provider: script
     skip_cleanup: true
-    script: gradle -Drepos_pwd=${repos_pwd} -Drepos_usr=jql_jars-INTE -Drelease=final deploy
+    script: gradle -Drepos_pwd=${repos_pwd} -Drepos_usr=jql_jars-INTE -Drelease=final upload
     on:
       branch: stable
 notifications:
