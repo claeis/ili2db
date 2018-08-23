@@ -59,9 +59,8 @@ def repos_usr = System.getProperty('repos_usr',properties.get('repos_usr','repos
 def dburl = System.getProperty('dburl',properties.get('dburl'))
 def dbusr = System.getProperty('dbusr',properties.get('dbusr'))
 def dbpwd = System.getProperty('dbpwd',properties.get('dbpwd'))
-def python= System.getProperty('python',properties.get('python'))
-def pythonhome= System.getProperty('pythonhome',properties.get('pythonhome'))
-def rst2html= System.getProperty('rst2html',properties.get('rst2html'))
+def python= System.getProperty('python',properties.get('python','python'))
+def rst2html= System.getProperty('rst2html',properties.get('rst2html','rst2html'))
     
 def generatedResources = "$buildDir/generated-resources/main"
 
