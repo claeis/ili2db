@@ -35,8 +35,8 @@ before_script:
 script: 
   - # ant -f build-ili2pg.xml jar
   - gradle jar test 
-  - gradle -Drst2html=`which rst2html.py` usrdoc testreport
-  - gradle ili2pgJar ili2pgTest ili2pgBindist -Ddburl=jdbc:postgresql:ili2db -Ddbusr=postgres
+  - gradle ili2pgJar ili2pgTest -Ddburl=jdbc:postgresql:ili2db -Ddbusr=postgres
+  - gradle -Drst2html=`which rst2html.py` usrdoc testreport ili2pgBindist
 after_failure:
   - cat  build/junitreport/junit-noframes.html
 deploy:
