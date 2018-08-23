@@ -112,12 +112,16 @@ task printcp {
 	}
 }
 task usrdoc(type:Exec) {
+	def infile=new File(project.projectDir,'docs/ili2db.rst')
+	def outfile=new File('docs/ili2db.html')
+	inputs.file infile
+	outputs.file outfile
 	doFirst{
 		new File(project.buildDir,'docs').mkdir()
 	}
 		workingDir = project.buildDir
 		executable python
-		args = [rst2html, new File(project.projectDir,'docs/ili2db.rst'), 'docs/ili2db.html']
+		args = [rst2html, infile, outfile]
 }
 task ili2pgJar(dependsOn: jar,type: Jar) {
 	baseName = 'ili2pg'
