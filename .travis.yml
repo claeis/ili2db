@@ -38,7 +38,8 @@ script:
   - gradle ili2pgJar ili2pgTest -Ddburl=jdbc:postgresql:ili2db -Ddbusr=postgres
   - gradle ili2gpkgJar ili2gpkgTest
   - gradle ili2fgdbJar
-  - gradle -Drst2html=`which rst2html.py` usrdoc testreport ili2pgBindist ili2fgdbBindist
+  - gradle ili2mssqlJar ili2mssqlTest
+  - gradle -Drst2html=`which rst2html.py` usrdoc testreport ili2pgBindist ili2fgdbBindist ili2mssqlBindist
 after_failure:
   - cat  build/junitreport/junit-noframes.html
 deploy:

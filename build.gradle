@@ -39,6 +39,17 @@ configurations {
 		extendsFrom testImplementation
 		extendsFrom ili2fgdbCompileClasspath
 	}
+	ili2mssqlCompileClasspath {
+		extendsFrom implementation
+	}
+	ili2mssqlRuntimeClasspath {
+		extendsFrom runtimeOnly
+		extendsFrom ili2mssqlCompileClasspath
+	}
+	ili2mssqlTestCompileClasspath {
+		extendsFrom testImplementation
+		extendsFrom ili2mssqlCompileClasspath
+	}
     deployerJars
 }
 
@@ -60,6 +71,7 @@ dependencies {
 	ili2pgCompileClasspath group: 'org.postgresql', name: 'postgresql', version: '42.1.4.jre6'
 	ili2gpkgCompileClasspath group: 'org.xerial', name: 'sqlite-jdbc', version: '3.8.11.2'
 	ili2fgdbCompileClasspath files('libs/fgdb4j.jar')
+	ili2mssqlCompileClasspath group: 'com.microsoft.sqlserver', name: 'mssql-jdbc', version: '6.4.0.jre7'
 	ili2db group: project.group, name: project.name, version: project.version
     deployerJars "org.apache.maven.wagon:wagon-ftp:3.0.0"
 }
@@ -160,6 +172,21 @@ sourceSets {
     compileClasspath += sourceSets.ili2fgdb.output
     runtimeClasspath += sourceSets.main.output
     runtimeClasspath += sourceSets.ili2fgdb.output
+  }
+  ili2mssql {
+    java {
+    	srcDirs=['ili2mssql/src']
+    }
+    compileClasspath += sourceSets.main.output
+  }
+  ili2mssqlTest {
+    java {
+    	srcDirs=['ili2mssql/test/java']
+    }
+    compileClasspath += sourceSets.main.output
+    compileClasspath += sourceSets.ili2mssql.output
+    runtimeClasspath += sourceSets.main.output
+    runtimeClasspath += sourceSets.ili2mssql.output
   }
 }
 task printcp {
@@ -286,6 +313,38 @@ task ili2fgdbTest(type: Test) {
     classpath += sourceSets.ili2fgdbTest.output 
     testLogging.exceptionFormat = 'full'
 }
+task ili2mssqlJar(dependsOn: jar,type: Jar) {
+	baseName = 'ili2mssql'
+    from sourceSets.ili2mssql.output
+  manifest {
+    attributes(
+      "Main-Class": "ch.ehi.ili2mssql.MsSqlMain",
+      "Class-Path": 'libs/'+jar.archiveName+' '+configurations.ili2mssqlRuntimeClasspath.collect { 'libs/'+it.getName() }.join(' '))
+  }   
+}
+task ili2mssqlBindist(dependsOn:[usrdoc,ili2mssqlJar], type: Zip){
+	baseName = 'ili2mssql'
+    classifier 'bindist'
+	destinationDir = file('dist')
+	from ili2mssqlJar
+	into('docs'){
+		from files(fileTree("docs").include("LICENSE.*"),"docs/README.txt","docs/CHANGELOG.txt","build/docs/ili2db.html")
+	}
+	into('libs'){
+		from configurations.ili2mssqlRuntimeClasspath
+		from jar
+	}
+}
+task ili2mssqlTest(type: Test) {
+	maxParallelForks = 1
+	forkEvery = 1
+    testClassesDirs = sourceSets.ili2mssqlTest.output.classesDirs
+    classpath = configurations.ili2mssqlTestCompileClasspath
+    classpath += sourceSets.main.output
+    classpath += sourceSets.ili2mssql.output
+    classpath += sourceSets.ili2mssqlTest.output 
+    testLogging.exceptionFormat = 'full'
+}
 
 task generateMyResources {
 	doLast {
@@ -369,6 +428,14 @@ artifacts {
     archives(ili2fgdbJar.archivePath){
     	builtBy ili2fgdbJar
     }
+	archives(ili2mssqlBindist.archivePath) {
+        type 'zip'
+        classifier 'bindist'
+        builtBy ili2mssqlBindist
+    }
+    archives(ili2mssqlJar.archivePath){
+    	builtBy ili2mssqlJar
+    }
 }
 
 install {
@@ -385,6 +452,9 @@ install {
             }            
             addFilter('ili2fgdb') {artifact, file ->
                 artifact.name == 'ili2fgdb'
+            }            
+            addFilter('ili2mssql') {artifact, file ->
+                artifact.name == 'ili2mssql'
             }            
             pom('ili2db').artifactId = 'ili2db'
             pom('ili2db').scopeMappings.with {
@@ -407,6 +477,12 @@ install {
             pom('ili2fgdb').scopeMappings.with {
                 mappings.clear()
                 addMapping(300, configurations.ili2fgdbCompileClasspath, 'runtime')
+                addMapping(300, configurations.ili2db, 'runtime')
+            }
+            pom('ili2mssql').artifactId = 'ili2mssql'
+            pom('ili2mssql').scopeMappings.with {
+                mappings.clear()
+                addMapping(300, configurations.ili2mssqlCompileClasspath, 'runtime')
                 addMapping(300, configurations.ili2db, 'runtime')
             }
     	}
@@ -432,6 +508,9 @@ uploadArchives {
             addFilter('ili2fgdb') {artifact, file ->
                 artifact.name == 'ili2fgdb'
             }            
+            addFilter('ili2mssql') {artifact, file ->
+                artifact.name == 'ili2mssql'
+            }            
             pom('ili2db').artifactId = 'ili2db'
             pom('ili2db').scopeMappings.with {
                 mappings.clear()
@@ -453,6 +532,12 @@ uploadArchives {
             pom('ili2fgdb').scopeMappings.with {
                 mappings.clear()
                 addMapping(300, configurations.ili2fgdbCompileClasspath, 'runtime')
+                addMapping(300, configurations.ili2db, 'runtime')
+            }
+            pom('ili2mssql').artifactId = 'ili2mssql'
+            pom('ili2mssql').scopeMappings.with {
+                mappings.clear()
+                addMapping(300, configurations.ili2mssqlCompileClasspath, 'runtime')
                 addMapping(300, configurations.ili2db, 'runtime')
             }
         }
