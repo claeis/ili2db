@@ -1,7 +1,5 @@
 package ch.ehi.sqlgen.generator_impl.fgdb;
 
-import static org.junit.Assert.fail;
-
 import java.io.IOException;
 import java.sql.Connection;
 
