@@ -50,6 +50,17 @@ configurations {
 		extendsFrom testImplementation
 		extendsFrom ili2mssqlCompileClasspath
 	}
+	ili2oraCompileClasspath {
+		extendsFrom implementation
+	}
+	ili2oraRuntimeClasspath {
+		extendsFrom runtimeOnly
+		extendsFrom ili2oraCompileClasspath
+	}
+	ili2oraTestCompileClasspath {
+		extendsFrom testImplementation
+		extendsFrom ili2oraCompileClasspath
+	}
     deployerJars
 }
 
@@ -72,6 +83,8 @@ dependencies {
 	ili2gpkgCompileClasspath group: 'org.xerial', name: 'sqlite-jdbc', version: '3.8.11.2'
 	ili2fgdbCompileClasspath files('libs/fgdb4j.jar')
 	ili2mssqlCompileClasspath group: 'com.microsoft.sqlserver', name: 'mssql-jdbc', version: '6.4.0.jre7'
+	ili2oraCompileClasspath files('lib/ojdbc14.jar')
+	//ili2oraCompileClasspath files('lib/sdoapi.jar')
 	ili2db group: project.group, name: project.name, version: project.version
     deployerJars "org.apache.maven.wagon:wagon-ftp:3.0.0"
 }
@@ -187,6 +200,21 @@ sourceSets {
     compileClasspath += sourceSets.ili2mssql.output
     runtimeClasspath += sourceSets.main.output
     runtimeClasspath += sourceSets.ili2mssql.output
+  }
+  ili2ora {
+    java {
+    	srcDirs=['ili2ora/src']
+    }
+    compileClasspath += sourceSets.main.output
+  }
+  ili2oraTest {
+    java {
+    	srcDirs=['ili2ora/test/java']
+    }
+    compileClasspath += sourceSets.main.output
+    compileClasspath += sourceSets.ili2ora.output
+    runtimeClasspath += sourceSets.main.output
+    runtimeClasspath += sourceSets.ili2ora.output
   }
 }
 task printcp {
@@ -345,6 +373,38 @@ task ili2mssqlTest(type: Test) {
     classpath += sourceSets.ili2mssqlTest.output 
     testLogging.exceptionFormat = 'full'
 }
+task ili2oraJar(dependsOn: jar,type: Jar) {
+	baseName = 'ili2ora'
+    from sourceSets.ili2ora.output
+  manifest {
+    attributes(
+      "Main-Class": "ch.ehi.ili2ora.OraMain",
+      "Class-Path": 'libs/'+jar.archiveName+' '+configurations.ili2oraRuntimeClasspath.collect { 'libs/'+it.getName() }.join(' '))
+  }   
+}
+task ili2oraBindist(dependsOn:[usrdoc,ili2oraJar], type: Zip){
+	baseName = 'ili2ora'
+    classifier 'bindist'
+	destinationDir = file('dist')
+	from ili2oraJar
+	into('docs'){
+		from files(fileTree("docs").include("LICENSE.*"),"docs/README.txt","docs/CHANGELOG.txt","build/docs/ili2db.html")
+	}
+	into('libs'){
+		from configurations.ili2oraRuntimeClasspath
+		from jar
+	}
+}
+task ili2oraTest(type: Test) {
+	maxParallelForks = 1
+	forkEvery = 1
+    testClassesDirs = sourceSets.ili2oraTest.output.classesDirs
+    classpath = configurations.ili2oraTestCompileClasspath
+    classpath += sourceSets.main.output
+    classpath += sourceSets.ili2ora.output
+    classpath += sourceSets.ili2oraTest.output 
+    testLogging.exceptionFormat = 'full'
+}
 
 task generateMyResources {
 	doLast {
@@ -436,6 +496,14 @@ artifacts {
     archives(ili2mssqlJar.archivePath){
     	builtBy ili2mssqlJar
     }
+	archives(ili2oraBindist.archivePath) {
+        type 'zip'
+        classifier 'bindist'
+        builtBy ili2oraBindist
+    }
+    archives(ili2oraJar.archivePath){
+    	builtBy ili2oraJar
+    }
 }
 
 install {
@@ -455,6 +523,9 @@ install {
             }            
             addFilter('ili2mssql') {artifact, file ->
                 artifact.name == 'ili2mssql'
+            }            
+            addFilter('ili2ora') {artifact, file ->
+                artifact.name == 'ili2ora'
             }            
             pom('ili2db').artifactId = 'ili2db'
             pom('ili2db').scopeMappings.with {
@@ -483,6 +554,12 @@ install {
             pom('ili2mssql').scopeMappings.with {
                 mappings.clear()
                 addMapping(300, configurations.ili2mssqlCompileClasspath, 'runtime')
+                addMapping(300, configurations.ili2db, 'runtime')
+            }
+            pom('ili2ora').artifactId = 'ili2ora'
+            pom('ili2ora').scopeMappings.with {
+                mappings.clear()
+                addMapping(300, configurations.ili2oraCompileClasspath, 'runtime')
                 addMapping(300, configurations.ili2db, 'runtime')
             }
     	}
@@ -511,6 +588,9 @@ uploadArchives {
             addFilter('ili2mssql') {artifact, file ->
                 artifact.name == 'ili2mssql'
             }            
+            addFilter('ili2ora') {artifact, file ->
+                artifact.name == 'ili2ora'
+            }            
             pom('ili2db').artifactId = 'ili2db'
             pom('ili2db').scopeMappings.with {
                 mappings.clear()
@@ -538,6 +618,12 @@ uploadArchives {
             pom('ili2mssql').scopeMappings.with {
                 mappings.clear()
                 addMapping(300, configurations.ili2mssqlCompileClasspath, 'runtime')
+                addMapping(300, configurations.ili2db, 'runtime')
+            }
+            pom('ili2ora').artifactId = 'ili2ora'
+            pom('ili2ora').scopeMappings.with {
+                mappings.clear()
+                addMapping(300, configurations.ili2oraCompileClasspath, 'runtime')
                 addMapping(300, configurations.ili2db, 'runtime')
             }
         }

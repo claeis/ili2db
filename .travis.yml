@@ -39,7 +39,8 @@ script:
   - gradle ili2gpkgJar ili2gpkgTest
   - gradle ili2fgdbJar
   - gradle ili2mssqlJar ili2mssqlTest
-  - gradle -Drst2html=`which rst2html.py` usrdoc testreport ili2pgBindist ili2fgdbBindist ili2mssqlBindist
+  - gradle ili2oraJar ili2oraTest
+  - gradle -Drst2html=`which rst2html.py` usrdoc testreport ili2pgBindist ili2fgdbBindist ili2mssqlBindist ili2oraBindist
 after_failure:
   - cat  build/junitreport/junit-noframes.html
 deploy:
