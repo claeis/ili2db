@@ -66,6 +66,8 @@ configurations {
 
 sourceCompatibility = "1.6" 
 targetCompatibility = "1.6"
+compileJava.options.encoding = 'US-ASCII'
+
 
 // to get the latest SNAPSHOT uncomment the following lines
 //configurations.all {
@@ -81,7 +83,7 @@ dependencies {
 	testImplementation group: 'org.hamcrest', name: 'hamcrest-library', version: '1.3'
 	ili2pgCompileClasspath group: 'org.postgresql', name: 'postgresql', version: '42.1.4.jre6'
 	ili2gpkgCompileClasspath group: 'org.xerial', name: 'sqlite-jdbc', version: '3.8.11.2'
-	ili2fgdbCompileClasspath files('libs/fgdb4j.jar')
+	ili2fgdbCompileClasspath group: 'ch.ehi', name: 'fgdb4j', version: "1.1.0"
 	ili2mssqlCompileClasspath group: 'com.microsoft.sqlserver', name: 'mssql-jdbc', version: '6.4.0.jre7'
 	ili2oraCompileClasspath files('lib/ojdbc14.jar')
 	//ili2oraCompileClasspath files('lib/sdoapi.jar')
