@@ -20,13 +20,26 @@ import java.sql.Statement;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.Calendar;
+import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+
+import ch.ehi.ili2fgdb.jdbc.sql.ColRef;
+import ch.ehi.ili2fgdb.jdbc.sql.IntConst;
+import ch.ehi.ili2fgdb.jdbc.sql.IsNull;
+import ch.ehi.ili2fgdb.jdbc.sql.StringConst;
+import ch.ehi.ili2fgdb.jdbc.sql.Value;
 
 public class MemResultSet implements ResultSet {
 
 	private ResultSet subResultSet=null;
-	public MemResultSet(ResultSet subResultSet) {
+	private List<java.util.Map.Entry<Value,Value>> conditions=null;
+	private List<Object> params=null;
+
+	public MemResultSet(ResultSet subResultSet,List<java.util.Map.Entry<Value,Value>> conditions,List<Object> params) {
 		this.subResultSet=subResultSet;
+		this.conditions=conditions;
+		this.params=params;
 	}
 	public boolean absolute(int row) throws SQLException {
 		return subResultSet.absolute(row);
@@ -320,9 +333,51 @@ public class MemResultSet implements ResultSet {
 		subResultSet.moveToInsertRow();
 	}
 	public boolean next() throws SQLException {
-		return subResultSet.next();
+		boolean hasNext=subResultSet.next();
+		if(conditions!=null) {
+		    while(hasNext) {
+	            if(condtionsTrue()) {
+	                return true;
+	            }
+	            hasNext=subResultSet.next();
+		    }
+		}
+		return hasNext;
 	}
-	public boolean previous() throws SQLException {
+	private boolean condtionsTrue() throws SQLException {
+            int paramIdx=0;
+            for(java.util.Map.Entry<Value,Value> set:conditions){
+                ColRef colref=(ColRef)set.getKey();
+                Object leftValue=subResultSet.getObject(colref.getName());
+                Value rh=set.getValue();
+                  if(rh instanceof IntConst){
+                      if(leftValue==null || !leftValue.equals(((IntConst)rh).getValue())) {
+                          return false;
+                      }
+                  }else if(rh instanceof IsNull){
+                      if(leftValue!=null) {
+                          return false;
+                      }
+                  }else if(rh instanceof StringConst){
+                      if(leftValue==null || !leftValue.equals(((StringConst)rh).getValue())) {
+                          return false;
+                      }
+                  }else{
+                        Object param=params.get(paramIdx++);
+                        if(param==null) {
+                            if(leftValue!=null) {
+                                return false;
+                            }
+                        }else {
+                            if(leftValue==null || !leftValue.equals(param)) {
+                                return false;
+                            }
+                        }
+                  }
+            }
+        return true;
+    }
+    public boolean previous() throws SQLException {
 		return subResultSet.previous();
 	}
 	public void refreshRow() throws SQLException {
