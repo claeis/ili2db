@@ -14,6 +14,11 @@ ideas/open issues/questions
 
 LATEST
 ---------------------------
+- Add geometry meta info to T_ILI2DB_COLUMN_PROP
+- Add FK meta info to T_ILI2DB_COLUMN_PROP
+- MSSQL: Add prePreScript and postPosScript template methods
+- MSSQL: fixed connection string is to long for ilicache/filesystem 
+- fgdb4j-1.1.1
 
 ili2pg 3.12.1 (2018-08-13)
 -----------------------------
