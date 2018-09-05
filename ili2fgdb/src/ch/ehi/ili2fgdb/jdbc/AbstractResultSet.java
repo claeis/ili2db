@@ -524,7 +524,9 @@ public abstract class AbstractResultSet implements ResultSet {
 		}
 		if(ret instanceof Timestamp){
 			return (Timestamp) ret;
-		}
+		}else if(ret instanceof Date){
+            return new Timestamp( ((Date) ret).getTime() );
+        }
 		throw new SQLException("unexpected type "+ret.getClass().getName());
 	}
 
