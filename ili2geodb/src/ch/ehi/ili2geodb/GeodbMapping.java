@@ -3,6 +3,7 @@ package ch.ehi.ili2geodb;
 import java.sql.Connection;
 import java.sql.SQLException;
 
+import ch.ehi.ili2db.base.AbstractJdbcMapping;
 import ch.ehi.ili2db.fromili.CustomMapping;
 import ch.ehi.ili2db.gui.Config;
 import ch.ehi.sqlgen.repository.DbColumn;
@@ -11,7 +12,7 @@ import ch.ehi.sqlgen.repository.DbTableName;
 import ch.interlis.ili2c.metamodel.*;
 import ch.ehi.ili2geodb.sqlgen.GeodbGenerator;
 
-public class GeodbMapping implements CustomMapping {
+public class GeodbMapping extends AbstractJdbcMapping {
 	private java.util.HashMap geodbDomains=new java.util.HashMap(); // map<String geodbDomainName,AttributeDef | DomainDef>
 	private java.util.HashSet geodbLinks=new java.util.HashSet(); // map<GeodbLink>
 	@Override

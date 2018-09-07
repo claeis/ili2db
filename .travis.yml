@@ -33,28 +33,28 @@ before_script:
     - python -m pip freeze
     - 
 script: 
-  - 
-  - ant -f build-ili2pg.xml jar 
-  - ant -f build-ili2pg.xml junit -Ddburl=jdbc:postgresql:ili2db -Ddbusr=postgres 
-  - # ant -f build-ili2pg.xml  junitreport
-  - ant -f build-ili2pg.xml -Dpython=python -Drst2html=`which rst2html.py` usrdoc 
-  - # rst2html.py docs/ili2db.rst docs/ili2db.html
+  - # ant -f build-ili2pg.xml jar
+  - gradle jar test 
+  - gradle ili2pgJar ili2pgTest -Ddburl=jdbc:postgresql:ili2db -Ddbusr=postgres
+  - gradle ili2gpkgJar ili2gpkgTest
+  - gradle ili2fgdbJar
+  - gradle ili2mssqlJar ili2mssqlTest
+  - gradle ili2oraJar ili2oraTest
+  - gradle -Drst2html=`which rst2html.py` usrdoc testreport ili2pgBindist ili2fgdbBindist ili2mssqlBindist ili2oraBindist
 after_failure:
-  - cat  build/junitreport/TEST-*.txt
+  - cat  build/junitreport/junit-noframes.html
 deploy:
   - provider: script
     skip_cleanup: true
-    script: ant -Duser.repos_pwd=${repos_pwd} -Duser.repos_usr=jql_jars-INTE -f build-ili2pg.xml  bindist deploy
+    script: gradle -Drst2html=`which rst2html.py` -Drepos_pwd=${repos_pwd} -Drepos_usr=jql_jars-INTE upload
     on:
       branch: master
   - provider: script
     skip_cleanup: true
-    script: ant -Duser.repos_pwd=${repos_pwd} -Duser.repos_usr=jql_jars-INTE -Drelease=final -f build-ili2pg.xml bindist deploy
+    script: gradle -Drst2html=`which rst2html.py` -Drepos_pwd=${repos_pwd} -Drepos_usr=jql_jars-INTE -Drelease=final upload
     on:
       branch: stable
 notifications:
   email:
-    recipients:
-      - ce@eisenhutinformatik.ch
     on_success: change # default: change
     on_failure: always # default: always

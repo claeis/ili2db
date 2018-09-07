@@ -1145,11 +1145,24 @@ sie beliebige (auch zukünftige) Werte/Zusatzangaben aufnehmen kann.
 +------------------------------------+---------------------------------------------------------------+
 | ``ch.ehi.ili2db.c3Max``            | Bei Geometriespalten der Maximalwert der 3. Dimension         |
 +------------------------------------+---------------------------------------------------------------+
+| ``ch.ehi.ili2db.geomType``         | Bei Geometriespalten die Art der Geometrie. Mögliche Wert:    |
+|                                    | POINT, LINESTRING, POLYGON, MULTIPOINT, MULTILINESTRING       |
+|                                    | MULTIPOLYGON, GEOMETRYCOLLECTION, CIRCULARSTRING              |
+|                                    | COMPOUNDCURVE, CURVEPOLYGON, MULTICURVE, MULTISURFACE         |
+|                                    | POLYHEDRALSURFACE, TIN, TRIANGLE                              |
++------------------------------------+---------------------------------------------------------------+
+| ``ch.ehi.ili2db.srid``             | Bei Geometriespalten der EPSG Code                            |
++------------------------------------+---------------------------------------------------------------+
+| ``ch.ehi.ili2db.coordDimension``   | Bei Geometriespalten die Dimension der Geometrie              |
++------------------------------------+---------------------------------------------------------------+
 | ``ch.ehi.ili2db.dispName``         | Benutzerfreundliche Bezeichnung der Spalte (z.B. im UI)       |
 +------------------------------------+---------------------------------------------------------------+
 | ``ch.ehi.ili2db.textKind``         | Falls mehrzeilige Textspalte, der Wert MTEXT                  |
 +------------------------------------+---------------------------------------------------------------+
 | ``ch.ehi.ili2db.unit``             | Name der numerischen Einheit z.B. m                           |
++------------------------------------+---------------------------------------------------------------+
+| ``ch.ehi.ili2db.foreignKey``       | Bei Fremdschlüsseln der Name der Zieltabelle. Damit auch      |
+|                                    | ohne ``--createFk`` die Beziehungen ermittelt werden können   |
 +------------------------------------+---------------------------------------------------------------+
 
 t\_ili2db\_table_prop

@@ -143,7 +143,7 @@ public class FgdbPreparedStatement implements PreparedStatement {
 		            }
 		            ret=new JoinResultSet(rsLeft,rsRight,jstmt);
 		        }else if(stmt instanceof ComplexSelectStmt){
-		            ret=new MemResultSet(executeSelectStmt(((ComplexSelectStmt) stmt).getSubSelect(),null));
+		            ret=new MemResultSet(executeSelectStmt(((ComplexSelectStmt) stmt).getSubSelect(),null),stmt.getConditions(),params);
 		        }else{
 		            rows=new EnumRows();
 		            err=conn.getGeodatabase().ExecuteSQL(stmtStr, true, rows);

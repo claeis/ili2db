@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TRANSFER xmlns="http://www.interlis.ch/INTERLIS2.3">
+	<HEADERSECTION SENDER="ili2fgdb-3.10.0-20170630" VERSION="2.3">
+		<MODELS>
+			<MODEL NAME="Simple23" VERSION="2016-12-21" URI="mailto:ce@eisenhutinformatik.ch"></MODEL>
+		</MODELS>
+	</HEADERSECTION>
+	<DATASECTION>
+		<Simple23.TestA BID="b1">
+			<Simple23.TestA.ClassA1 TID="o1">
+				<attr1>gugus</attr1>
+			</Simple23.TestA.ClassA1>
+			<Simple23.TestA.ClassA1 TID="o2">
+				<attr1>hola</attr1>
+			</Simple23.TestA.ClassA1>
+		</Simple23.TestA>
+	</DATASECTION>
+</TRANSFER>

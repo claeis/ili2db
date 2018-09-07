@@ -499,13 +499,9 @@ public abstract class AbstractMain {
 			// Minor version numbers identify smaller extensions to the functionality.
 			// Micro versions are even finer grained versions.
 			StringBuffer ret=new StringBuffer(20);
-		ret.append(resVersion.getString("versionMajor"));
-			ret.append('.');
-		ret.append(resVersion.getString("versionMinor"));
-			ret.append('.');
-		ret.append(resVersion.getString("versionMicro"));
-			ret.append('-');
-		ret.append(resVersion.getString("versionDate"));
+            ret.append(resVersion.getString("version"));
+            ret.append('-');
+            ret.append(resVersion.getString("versionCommit"));
 			version=ret.toString();
 		  }
 		  return version;

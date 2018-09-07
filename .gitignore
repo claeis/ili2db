@@ -10,3 +10,4 @@ support/
 /ili2fgdb/src/ch/ehi/ili2fgdb/jdbc/parser/SqlSyntaxTokenTypes.txt
 /ili2fgdb/src/ch/ehi/ili2fgdb/jdbc/parser/SqlLexer.smap
 /ili2fgdb/src/ch/ehi/ili2fgdb/jdbc/parser/SqlSyntax.smap
+/.gradle/

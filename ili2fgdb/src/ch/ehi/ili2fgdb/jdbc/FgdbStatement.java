@@ -131,7 +131,7 @@ public class FgdbStatement implements Statement {
 		return ret;
 	}
 	private ResultSet executeComplexSelectStmt(ComplexSelectStmt stmt) throws SQLException {
-		MemResultSet ret=new MemResultSet(executeSelectStmt(stmt.getSubSelect()));
+		MemResultSet ret=new MemResultSet(executeSelectStmt(stmt.getSubSelect()),null,null);
 		return ret;
 	}
 

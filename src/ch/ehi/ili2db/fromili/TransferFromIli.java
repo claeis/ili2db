@@ -413,7 +413,7 @@ public class TransferFromIli {
 		tab.addIndex(pk);
 		schema.addTable(tab);
 	}
-	public static ch.interlis.ilirepository.IliFiles readIliFiles(java.sql.Connection conn,String schema)
+	public static ch.interlis.ilirepository.IliFiles readIliFiles(java.sql.Connection conn,String schema,CustomMapping mapping)
 	throws Ili2dbException
 	{
 		String sqlName=DbNames.MODELS_TAB;
@@ -423,6 +423,7 @@ public class TransferFromIli {
 		ch.interlis.ilirepository.IliFiles ret=new ch.interlis.ilirepository.IliFiles();
 		try{
 			String reposUri=conn.getMetaData().getURL();
+			reposUri=mapping.shortenConnectUrl4IliCache(reposUri);
 			if(schema!=null){
 				sqlName=schema+"."+sqlName;
 				reposUri=reposUri+"/"+schema;
@@ -508,11 +509,11 @@ public class TransferFromIli {
 		}
 		return null;
 	}
-	public static void addModels(java.sql.Connection conn,TransferDescription td,String schema)
+	public static void addModels(java.sql.Connection conn,TransferDescription td,String schema,CustomMapping mapping)
 	throws Ili2dbException
 	{
 		// read existing models from db
-		IliFiles iliModelsInDb = TransferFromIli.readIliFiles(conn,schema);
+		IliFiles iliModelsInDb = TransferFromIli.readIliFiles(conn,schema,mapping);
 
 		String sqlName=DbNames.MODELS_TAB;
 		if(schema!=null){

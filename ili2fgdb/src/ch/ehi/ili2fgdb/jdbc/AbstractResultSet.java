@@ -325,15 +325,20 @@ public abstract class AbstractResultSet implements ResultSet {
 	}
 
 	@Override
-	public int getInt(int arg0) throws SQLException {
-		// TODO Auto-generated method stub
-		return 0;
+	public int getInt(int colIdx) throws SQLException {
+        Object ret=getObject(colIdx);
+        if(ret==null){
+            return 0;
+        }
+        if(ret instanceof Integer){
+            return (Integer) ret;
+        }
+        throw new SQLException("unexpected type "+ret.getClass().getName());
 	}
 
 	@Override
-	public int getInt(String arg0) throws SQLException {
-		// TODO Auto-generated method stub
-		return 0;
+	public int getInt(String colName) throws SQLException {
+        return getInt(findColumn(colName));
 	}
 
 	@Override
@@ -524,7 +529,9 @@ public abstract class AbstractResultSet implements ResultSet {
 		}
 		if(ret instanceof Timestamp){
 			return (Timestamp) ret;
-		}
+		}else if(ret instanceof Date){
+            return new Timestamp( ((Date) ret).getTime() );
+        }
 		throw new SQLException("unexpected type "+ret.getClass().getName());
 	}
 

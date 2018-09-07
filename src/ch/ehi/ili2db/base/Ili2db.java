@@ -387,6 +387,9 @@ public class Ili2db {
 				}
 			  }
 			  
+              // run DB specific pre-processing
+              customMapping.prePreScript(conn, config);
+              
 			  // run pre-script
 			  if(config.getPreScript()!=null){
 				  try {
@@ -440,7 +443,7 @@ public class Ili2db {
 
 				
 				// compile required ili files
-				setupIli2cPathmap(config, appHome, inputFilename,conn);
+				setupIli2cPathmap(config, appHome, inputFilename,conn,customMapping);
 			    Ili2cMetaAttrs ili2cMetaAttrs=new Ili2cMetaAttrs();
 			    ch.interlis.ili2c.config.Configuration ili2cConfig=null;
 				try {
@@ -578,7 +581,7 @@ public class Ili2db {
 							// update enumerations table
 							trsfFromIli.updateEnumTable(conn);
 							trsfFromIli.updateMetaInfoTables(conn);
-							TransferFromIli.addModels(conn,td,config.getDbschema());
+							TransferFromIli.addModels(conn,td,config.getDbschema(),customMapping);
 							if(!config.isConfigReadFromDb()){
 								TransferFromIli.updateSettings(conn,config,config.getDbschema());
 							}
@@ -709,6 +712,9 @@ public class Ili2db {
 						throw new Ili2dbException("update post-script statements failed",e);
 					}
 				}
+				
+                // run DB specific post processing
+                customMapping.postPostScript(conn, config);
 				
 				if(errs.hasSeenErrors()){
 					if(!connectionFromExtern){
@@ -967,10 +973,13 @@ public class Ili2db {
 				  // switch off auto-commit
 				  conn.setAutoCommit(false);
 			  }
-			  
+			  	            
 			}catch(SQLException ex){
 				throw new Ili2dbException(ex);
 			}
+
+            // run DB specific pre-processing
+            customMapping.prePreScript(conn, config);
 			
 			// run pre-script
 			if(config.getPreScript()!=null){
@@ -983,7 +992,7 @@ public class Ili2db {
 			}
 			
 			// setup ilidirs+pathmap for ili2c
-			setupIli2cPathmap(config, appHome, ilifile,conn);
+			setupIli2cPathmap(config, appHome, ilifile,conn,customMapping);
 		    Ili2cMetaAttrs ili2cMetaAttrs=new Ili2cMetaAttrs();
 		    setupIli2cMetaAttrs(ili2cMetaAttrs,config,modelv);
 			
@@ -1151,7 +1160,7 @@ public class Ili2db {
 					// update enum table
 					trsfFromIli.updateEnumTable(conn);
 					trsfFromIli.updateMetaInfoTables(conn);
-					TransferFromIli.addModels(conn,td,config.getDbschema());
+					TransferFromIli.addModels(conn,td,config.getDbschema(),customMapping);
 					if(!config.isConfigReadFromDb()){
 						TransferFromIli.updateSettings(conn,config,config.getDbschema());
 					}
@@ -1172,6 +1181,9 @@ public class Ili2db {
 						throw new Ili2dbException("schemaImport post-script statements failed",e);
 					}
 				}
+				
+                // run DB specific post processing
+                customMapping.postPostScript(conn, config);
 				
 				//if(conn instanceof ch.ehi.ili2geodb.jdbc.GeodbConnection){
 				//	String xmlfile=null;
@@ -1248,7 +1260,7 @@ public class Ili2db {
 		EhiLogger.logState("currentTime "+new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new java.util.Date()));
 	}
 	private static void setupIli2cPathmap(Config config, String appHome,
-			String xtffile,java.sql.Connection conn) throws Ili2dbException {
+			String xtffile,java.sql.Connection conn, CustomMapping mapping) throws Ili2dbException {
 		config.setValue(ch.interlis.ili2c.gui.UserSettings.ILIDIRS,config.getModeldir());
 		java.util.HashMap pathMap=new java.util.HashMap();
 		if(xtffile!=null){
@@ -1265,7 +1277,8 @@ public class Ili2db {
 			String url=null;
 			try {
 				url=conn.getMetaData().getURL();
-				iliFiles=TransferFromIli.readIliFiles(conn,config.getDbschema());
+				url=mapping.shortenConnectUrl4IliCache(url);
+				iliFiles=TransferFromIli.readIliFiles(conn,config.getDbschema(),mapping);
 			} catch (SQLException e) {
 				throw new Ili2dbException(e);
 			}
@@ -1372,8 +1385,11 @@ public class Ili2db {
 			} catch (SQLException e) {
 				throw new Ili2dbException("failed to get db connection",e);
 			}
-			  logDBVersion(conn);
+			logDBVersion(conn);
 			  
+            // run DB specific pre-processing
+            customMapping.prePreScript(conn, config);
+              
 			// run pre-script 
 			if(config.getPreScript()!=null){
 				try {
@@ -1461,7 +1477,7 @@ public class Ili2db {
 			
 
 				// compile required ili files
-				setupIli2cPathmap(config, appHome, xtffile,conn);
+				setupIli2cPathmap(config, appHome, xtffile,conn,customMapping);
 			    Ili2cMetaAttrs ili2cMetaAttrs=new Ili2cMetaAttrs();
 			    setupIli2cMetaAttrs(ili2cMetaAttrs,config,null); // don't add ili1 model translations to model list (should already be in list because of topicname in t_baskets table)
 				EhiLogger.logState("compile models...");
@@ -1536,6 +1552,9 @@ public class Ili2db {
 						throw new Ili2dbException("export post-script statements failed",e);
 					}
 				}
+				
+				// run DB specific post processing
+				customMapping.postPostScript(conn, config);
 				
 			//}catch(Exception ex){
 				//EhiLogger.logError(ex);
