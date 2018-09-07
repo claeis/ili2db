@@ -76,7 +76,7 @@ compileJava.options.encoding = 'US-ASCII'
 //}
 
 dependencies {
-    implementation group: 'ch.interlis', name: 'iox-ili', version: '1.20.9+'
+    implementation group: 'ch.interlis', name: 'iox-ili', version: '1.20.9'
     implementation group: 'ch.interlis', name: 'ili2c-tool', version: "4.7.9"
     implementation group: 'ch.ehi', name: 'ehisqlgen', version: "1.13.6"
     testImplementation group: 'junit', name: 'junit', version: '4.12'
