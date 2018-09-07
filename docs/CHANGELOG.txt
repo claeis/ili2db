@@ -14,11 +14,19 @@ ideas/open issues/questions
 
 LATEST
 ---------------------------
+
+ili2pg 3.12.2 (2018-09-07)
+-----------------------------
 - Add geometry meta info to T_ILI2DB_COLUMN_PROP
 - Add FK meta info to T_ILI2DB_COLUMN_PROP
 - MSSQL: Add prePreScript and postPosScript template methods
 - MSSQL: fixed connection string is to long for ilicache/filesystem 
+- switched from ant to gradle build
+- ili2fgdb: fixed reference resolution
+- ili2fgdb: fixed query of int column
 - fgdb4j-1.1.1
+- ehisqlgen-1.13.6
+- iox-ili-1.20.9
 
 ili2pg 3.12.1 (2018-08-13)
 -----------------------------
