@@ -19,9 +19,12 @@ package ch.ehi.ili2db.fromili;
 
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Map;
 
 import ch.ehi.basics.logging.EhiLogger;
 import ch.ehi.basics.settings.Settings;
@@ -32,7 +35,12 @@ import ch.ehi.ili2db.base.Ili2dbException;
 import ch.ehi.ili2db.converter.AbstractRecordConverter;
 import ch.ehi.ili2db.dbmetainfo.DbExtMetaInfo;
 import ch.ehi.ili2db.gui.Config;
+import ch.ehi.ili2db.mapping.ColumnWrapper;
 import ch.ehi.ili2db.mapping.IliMetaAttrNames;
+import ch.ehi.ili2db.mapping.MultiLineMappings;
+import ch.ehi.ili2db.mapping.MultiPointMappings;
+import ch.ehi.ili2db.mapping.MultiSurfaceMapping;
+import ch.ehi.ili2db.mapping.MultiSurfaceMappings;
 import ch.ehi.ili2db.mapping.TrafoConfig;
 import ch.ehi.ili2db.mapping.Viewable2TableMapping;
 import ch.ehi.ili2db.mapping.ViewableWrapper;
@@ -49,16 +57,21 @@ import ch.ehi.sqlgen.repository.DbTable;
 import ch.ehi.sqlgen.repository.DbTableName;
 import ch.interlis.ili2c.metamodel.AssociationDef;
 import ch.interlis.ili2c.metamodel.AttributeDef;
+import ch.interlis.ili2c.metamodel.CompositionType;
+import ch.interlis.ili2c.metamodel.CoordType;
 import ch.interlis.ili2c.metamodel.Domain;
 import ch.interlis.ili2c.metamodel.Element;
 import ch.interlis.ili2c.metamodel.Enumeration;
 import ch.interlis.ili2c.metamodel.EnumerationType;
+import ch.interlis.ili2c.metamodel.LineType;
 import ch.interlis.ili2c.metamodel.Model;
 import ch.interlis.ili2c.metamodel.SurfaceOrAreaType;
 import ch.interlis.ili2c.metamodel.SurfaceType;
 import ch.interlis.ili2c.metamodel.Table;
 import ch.interlis.ili2c.metamodel.Topic;
 import ch.interlis.ili2c.metamodel.TransferDescription;
+import ch.interlis.ili2c.metamodel.Type;
+import ch.interlis.ili2c.metamodel.TypeAlias;
 import ch.interlis.ili2c.metamodel.View;
 import ch.interlis.ili2c.metamodel.Viewable;
 import ch.interlis.ilirepository.IliFiles;
@@ -68,7 +81,8 @@ import ch.interlis.ilirepository.IliFiles;
  * @version $Revision: 1.0 $ $Date: 07.02.2005 $
  */
 public class TransferFromIli {
-	private DbSchema schema=null;
+	private static final String EPSG = "EPSG";
+    private DbSchema schema=null;
 	private HashSet<Element> visitedElements=null;
 	private Viewable2TableMapping class2wrapper=null;
 	private HashSet<ViewableWrapper> visitedWrapper=null;
@@ -90,7 +104,7 @@ public class TransferFromIli {
 	private String nl=System.getProperty("line.separator");
 	private FromIliRecordConverter recConv=null;
 	private DbExtMetaInfo metaInfo=new DbExtMetaInfo();
-
+	private Integer defaultCrsCode=null;
 	public DbSchema doit(TransferDescription td1,java.util.List<Element> modelEles,ch.ehi.ili2db.mapping.NameMapping ili2sqlName,ch.ehi.ili2db.gui.Config config,DbIdGen idGen,TrafoConfig trafoConfig,Viewable2TableMapping class2wrapper1,CustomMapping customMapping1)
 	throws Ili2dbException
 	{
@@ -111,6 +125,8 @@ public class TransferFromIli {
 		createIliTidCol=config.TID_HANDLING_PROPERTY.equals(config.getTidHandling());
 		createBasketCol=config.BASKET_HANDLING_READWRITE.equals(config.getBasketHandling());
 		createDatasetCol=config.CREATE_DATASET_COL.equals(config.getCreateDatasetCols());
+		
+		defaultCrsCode=Integer.parseInt(config.getDefaultSrsCode());
 		
 		isIli1Model=td1.getIli1Format()!=null;
 		createItfLineTables=isIli1Model && config.getDoItfLineTables();
@@ -175,7 +191,9 @@ public class TransferFromIli {
 			}else if (modelo instanceof AttributeDef){
 				AttributeDef attr=(AttributeDef)modelo;
 				if(attr.getDomainResolvingAll() instanceof SurfaceOrAreaType){
-					generateItfLineTable(attr,pass);
+				    for(int epsgCode:getEpsgCodes(attr,defaultCrsCode)) {
+	                    generateItfLineTable(attr,epsgCode,pass);
+				    }
 				}else if(attr.getDomainResolvingAll() instanceof EnumerationType){
 					if(pass==2){
 						visitedEnums.add(attr);
@@ -235,19 +253,13 @@ public class TransferFromIli {
 			for(ViewableWrapper secondary:def.getSecondaryTables()){
 				recConv.generateTable(secondary,pass);
 			}
-			
-		  	if(false && createItfLineTables){
-		  		for(AttributeDef attr : recConv.getSurfaceAttrs()){
-		  			generateItfLineTable(attr,pass);
-		  		}
-		  	}
 		}
 	}
-	private void generateItfLineTable(AttributeDef attr,int pass)
+	private void generateItfLineTable(AttributeDef attr,Integer epsgCode,int pass)
 	throws Ili2dbException
 	{
 		if(pass==1){
-			DbTableName sqlName=getSqlTableNameItfLineTable(attr);
+			DbTableName sqlName=getSqlTableNameItfLineTable(attr,epsgCode);
 			DbTable dbTable=new DbTable();
 			dbTable.setName(sqlName);
 			dbTable.setIliName(attr.getContainer().getScopedName(null)+"."+attr.getName());
@@ -255,7 +267,7 @@ public class TransferFromIli {
 			return;
 		}
 		// second pass; add columns
-		DbTableName sqlName=getSqlTableNameItfLineTable(attr);
+		DbTableName sqlName=getSqlTableNameItfLineTable(attr,epsgCode);
 		DbTable dbTable=schema.findTable(sqlName);
 		StringBuffer cmt=new StringBuffer();
 		String cmtSep="";
@@ -301,7 +313,7 @@ public class TransferFromIli {
 			SurfaceOrAreaType type = (SurfaceOrAreaType)attr.getDomainResolvingAll();
 			
 			DbColGeometry dbCol = recConv.generatePolylineType(type, attr.getContainer().getScopedName(null)+"."+attr.getName());
-			recConv.setCrs(dbCol, attr);
+			  recConv.setCrs(dbCol, epsgCode);
 			  dbCol.setName(ili2sqlName.getSqlColNameItfLineTableGeomAttr(attr,sqlName.getName()));
 			  dbCol.setNotNull(true);
 			  dbTable.addColumn(dbCol);
@@ -326,7 +338,7 @@ public class TransferFromIli {
 			    Iterator attri = lineAttrTable.getAttributes ();
 			    while(attri.hasNext()){
 			    	AttributeDef lineattr=(AttributeDef)attri.next();
-			    	recConv.generateAttr(dbTable,lineAttrTable,lineattr);
+			    	recConv.generateAttr(dbTable,lineAttrTable,lineattr,null);
 			    }
 			}
 		
@@ -366,8 +378,8 @@ public class TransferFromIli {
 		String sqlname=ili2sqlName.mapIliEnumAttributeDefAsTable(def);
 		return new DbTableName(schema.getName(),sqlname);
 	}
-	private DbTableName getSqlTableNameItfLineTable(AttributeDef def){
-		String sqlname=ili2sqlName.mapGeometryAsTable((Viewable)def.getContainer(),def);
+	private DbTableName getSqlTableNameItfLineTable(AttributeDef def,Integer epsgCode){
+		String sqlname=ili2sqlName.mapGeometryAsTable((Viewable)def.getContainer(),def,epsgCode);
 		return new DbTableName(schema.getName(),sqlname);
 	}
 	static public void addModelsTable(DbSchema schema,Settings config)
@@ -771,6 +783,13 @@ public class TransferFromIli {
 			attkey.setNotNull(true);
 			attkey.setSize(200);
 			tab.addColumn(attkey);
+
+            // space separated list of assignments from generic to concrete domain "generic1=concrete1 generic2=concrete2"
+            DbColVarchar domains=new DbColVarchar();
+            domains.setName(DbNames.BASKETS_TAB_DOMAINS_COL);
+            domains.setNotNull(false);
+            domains.setSize(1024);
+            tab.addColumn(domains);
 			
 			schema.addTable(tab);
 		}
@@ -1420,4 +1439,120 @@ public class TransferFromIli {
 		}
 		metaInfo.updateMetaInfoTables(conn, schema.getName());
 	}
+    public static int[] getEpsgCodes(AttributeDef attr,int defaultCrsCode) {
+        TransferDescription td=(TransferDescription)attr.getContainer(TransferDescription.class);
+        if(Ili2cUtility.isMultiSurfaceAttr(td,attr)) {
+            MultiSurfaceMappings multiSurfaceAttrs=new MultiSurfaceMappings();
+            multiSurfaceAttrs.addMultiSurfaceAttr(attr);
+            AttributeDef surfaceAttr = multiSurfaceAttrs.getSurfaceAttr(attr);
+            attr=surfaceAttr;
+        }else if(Ili2cUtility.isMultiLineAttr(td, attr)) {
+            MultiLineMappings multiLineAttrs=new MultiLineMappings();
+            multiLineAttrs.addMultiLineAttr(attr);
+            AttributeDef polylineAttr=multiLineAttrs.getPolylineAttr(attr);
+            attr=polylineAttr;
+        }else if(Ili2cUtility.isMultiPointAttr(td, attr)) {
+            MultiPointMappings multiPointAttrs=new MultiPointMappings();
+            multiPointAttrs.addMultiPointAttr(attr);
+            AttributeDef multipointAttr=multiPointAttrs.getCoordAttr(attr);
+            attr=multipointAttr;
+        }
+        ch.interlis.ili2c.metamodel.Element attrOrDomainDef=attr;
+        ch.interlis.ili2c.metamodel.Type attrType=attr.getDomain();
+        Domain coordDomain=null;
+        if(attrType instanceof ch.interlis.ili2c.metamodel.TypeAlias) {
+            attrOrDomainDef=((ch.interlis.ili2c.metamodel.TypeAlias)attrType).getAliasing();
+            attrType=((Domain) attrOrDomainDef).getType();
+            if(attrType instanceof CoordType) {
+                coordDomain=(Domain) attrOrDomainDef;
+            }
+        }
+        CoordType coord=null;
+        if(attrType instanceof CoordType) {
+            coord=(CoordType)attrType;
+        }else if(attrType instanceof LineType) {
+            coordDomain=((LineType)attrType).getControlPointDomain();
+            if(coordDomain!=null){
+                attrOrDomainDef=coordDomain;
+                coord=(CoordType)coordDomain.getType();
+            }
+        }
+        if(coord==null) {
+            return null;
+        }
+        if(coord.isGeneric()) {
+            Domain concreteCoordDomains[]=((Model) attr.getContainer(Model.class)).resolveGenericDomain(coordDomain);
+            HashSet<Integer> codes=new HashSet<Integer>();
+            for(Domain concreteCoordDomain: concreteCoordDomains) {
+                String crs=((CoordType)concreteCoordDomain.getType()).getCrs(concreteCoordDomain);
+                if(crs!=null) {
+                    codes.add(parseEpsgCode(crs));
+                }
+            }
+            ArrayList<Integer> codev=new ArrayList<Integer>(codes);
+            Collections.sort(codev);
+            int epsgCodes[]=new int[codev.size()];
+            for(int i=0;i<epsgCodes.length;i++) {
+                epsgCodes[i]=codev.get(i);
+            }
+            return epsgCodes;
+        }
+        String crs=coord.getCrs(attrOrDomainDef);
+        if(crs!=null) {
+            int epsgCodes[]=new int[1];
+            epsgCodes[0]=parseEpsgCode(crs);
+            return epsgCodes;
+        }
+        int epsgCodes[]=new int[1];
+        epsgCodes[0]=defaultCrsCode;
+        return epsgCodes;
+    }
+    public static int parseEpsgCode(String crs) {
+        String crsv[]=crs.split(":");
+        String auth=crsv[0];
+        if(!auth.equals(EPSG)) {
+            throw new IllegalArgumentException("unexpected SRS authority <"+auth+">");
+        }
+        return Integer.parseInt(crsv[1]);
+    }
+    public static int getEpsgCode(AttributeDef attr, Map<String, String> genericDomains,int defaultCrsCode) {
+        ch.interlis.ili2c.metamodel.Element attrOrDomainDef=attr;
+        ch.interlis.ili2c.metamodel.Type attrType=attr.getDomain();
+        Domain coordDomain=null;
+        if(attrType instanceof ch.interlis.ili2c.metamodel.TypeAlias) {
+            attrOrDomainDef=((ch.interlis.ili2c.metamodel.TypeAlias)attrType).getAliasing();
+            attrType=((Domain) attrOrDomainDef).getType();
+            if(attrType instanceof CoordType) {
+                coordDomain=(Domain) attrOrDomainDef;
+            }
+        }
+        CoordType coord=null;
+        if(attrType instanceof CoordType) {
+            coord=(CoordType)attrType;
+        }else if(attrType instanceof LineType) {
+            coordDomain=((LineType)attrType).getControlPointDomain();
+            if(coordDomain!=null){
+                attrOrDomainDef=coordDomain;
+                coord=(CoordType)coordDomain.getType();
+            }
+        }
+        if(coord==null) {
+            throw new IllegalArgumentException(attr.getScopedName()+" is not a geometry attribute");
+        }
+        if(coord.isGeneric()) {
+            Domain concreteCoordDomain=((Model) attr.getContainer(Model.class)).mapGenericDomain(coordDomain,genericDomains);
+            String crs=((CoordType)concreteCoordDomain.getType()).getCrs(concreteCoordDomain);
+            if(crs==null) {
+                
+            }
+            int epsgCode=parseEpsgCode(crs);
+            return epsgCode;
+        }
+        String crs=coord.getCrs(attrOrDomainDef);
+        if(crs!=null) {
+            int epsgCode=parseEpsgCode(crs);
+            return epsgCode;
+        }
+        return defaultCrsCode;
+    }
 }

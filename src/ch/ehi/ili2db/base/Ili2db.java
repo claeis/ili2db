@@ -76,6 +76,7 @@ import ch.interlis.iom_j.itf.ItfReader;
 import ch.interlis.iom_j.itf.ItfReader2;
 import ch.interlis.iom_j.itf.ItfWriter;
 import ch.interlis.iom_j.itf.ItfWriter2;
+import ch.interlis.iom_j.xtf.Xtf24Reader;
 import ch.interlis.iom_j.xtf.XtfReader;
 import ch.interlis.iom_j.xtf.XtfWriter;
 import ch.interlis.iox.IoxException;
@@ -685,8 +686,11 @@ public class Ili2db {
 										((ItfReader2)ioxReader).setModel(td);		
 										((ItfReader2)ioxReader).setBidPrefix(config.getDatasetName());		
 									}
-								}else{
-									ioxReader=new XtfReader(new java.io.File(inputFilename));
+                                }else{
+                                    ioxReader=Xtf24Reader.createReader(new java.io.File(inputFilename));
+                                    if(ioxReader instanceof ch.interlis.iox_j.IoxIliReader) {
+                                        ((ch.interlis.iox_j.IoxIliReader) ioxReader).setModel(td);
+                                    }
 								}
 						}
 						transferFromXtf(conn,ioxReader,function,mapping,td,dbusr,geomConverter,idGen,config,stat,trafoConfig,class2wrapper);

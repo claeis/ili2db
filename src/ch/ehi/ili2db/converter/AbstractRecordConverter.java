@@ -136,35 +136,11 @@ public class AbstractRecordConverter {
 		}
 		return ret;
 	}
-	public void setCrs(DbColGeometry ret,AttributeDef attr) {
-		ch.interlis.ili2c.metamodel.Element attrOrDomainDef=attr;
-		ch.interlis.ili2c.metamodel.Type attrType=attr.getDomain();
-		if(attrType instanceof ch.interlis.ili2c.metamodel.TypeAlias) {
-			attrOrDomainDef=((ch.interlis.ili2c.metamodel.TypeAlias)attrType).getAliasing();
-			attrType=((Domain) attrOrDomainDef).getType();
-		}
-		CoordType coord=null;
-		if(attrType instanceof CoordType) {
-			coord=(CoordType)attrType;
-		}else if(attrType instanceof LineType) {
-			Domain coordDomain=((LineType)attrType).getControlPointDomain();
-			if(coordDomain!=null){
-				attrOrDomainDef=coordDomain;
-				coord=(CoordType)coordDomain.getType();
-			}
-		}
-		if(coord!=null) {
-			String crs=coord.getCrs(attrOrDomainDef);
-			if(crs!=null) {
-				String crsv[]=crs.split(":");
-				ret.setSrsAuth(crsv[0]);
-				ret.setSrsId(crsv[1]);
-				return;
-			}
-		}
-		ret.setSrsAuth(defaultCrsAuthority);
-		ret.setSrsId(defaultCrsCode);
-	}
+    public void setCrs(DbColGeometry ret,int epsgCode) {
+        ret.setSrsAuth("EPSG");
+        ret.setSrsId(Integer.toString(epsgCode));
+        
+    }
 		public DbColId addKeyCol(DbTable table) {
 			  DbColId dbColId=new DbColId();
 			  dbColId.setName(colT_ID);
@@ -239,8 +215,8 @@ public class AbstractRecordConverter {
 	        return ((ReferenceType) ((AttributeDef)((CompositionType)type).getComponentType().getAttributes().next()).getDomain()).getReferred();
 	    }
 
-	protected String getSqlAttrName(AttributeDef def,String ownerSqlTableName,String targetSqlTableName){
-		return ili2sqlName.mapIliAttributeDef(def,ownerSqlTableName,targetSqlTableName);
+	protected String getSqlAttrName(AttributeDef def,Integer epsgCode,String ownerSqlTableName,String targetSqlTableName){
+		return ili2sqlName.mapIliAttributeDef(def,epsgCode,ownerSqlTableName,targetSqlTableName);
 	}
 	/** maps a ili2c viewable to a sql name. 
 	 * @param def class, structure, association to map

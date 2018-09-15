@@ -11,7 +11,6 @@ import ch.interlis.ili2c.metamodel.AttributeDef;
 import ch.interlis.ili2c.metamodel.Domain;
 import ch.interlis.ili2c.metamodel.Table;
 import ch.interlis.ili2c.metamodel.Viewable;
-import ch.interlis.ili2c.metamodel.ViewableTransferElement;
 
 /** Wrapper around a Viewable to  
  * make it aware of all attributes of all specializations.
@@ -50,18 +49,18 @@ public class ViewableWrapper {
 	/** the attributes and roles that this Record has.
 	 * list<Viewable.TransferElement>
 	 */
-	private List<ViewableTransferElement> attrv=new java.util.ArrayList<ViewableTransferElement>();
+	private List<ColumnWrapper> attrv=new java.util.ArrayList<ColumnWrapper>();
 	private ArrayList<ViewableWrapper> allTablev=null;
 	/** the attributes and roles that this record has.
 	 * @return list<ViewableTransferElement>
 	 */
-	public List<ViewableTransferElement> getAttrv() {
+	public List<ColumnWrapper> getAttrv() {
 		return attrv;
 	}
-	public void setAttrv(List<ViewableTransferElement> list) {
+	public void setAttrv(List<ColumnWrapper> list) {
 		attrv = list;
 	}
-	public java.util.Iterator<ViewableTransferElement> getAttrIterator() {
+	public java.util.Iterator<ColumnWrapper> getAttrIterator() {
 		return attrv.iterator();
 	}
 	public ArrayList<ViewableWrapper> getSecondaryTables() {
@@ -146,9 +145,9 @@ public class ViewableWrapper {
 		return mainTable!=null;
 	}
 	public boolean containsAttributes(HashSet<AttributeDef> iomObjectAttrs) {
-		for(ViewableTransferElement ele:attrv){
-			if(ele.obj instanceof AttributeDef){
-				if(iomObjectAttrs.contains(ele.obj)){
+		for(ColumnWrapper ele:attrv){
+			if(ele.getViewableTransferElement().obj instanceof AttributeDef){
+				if(iomObjectAttrs.contains(ele.getViewableTransferElement().obj)){
 					return true;
 				}
 			}

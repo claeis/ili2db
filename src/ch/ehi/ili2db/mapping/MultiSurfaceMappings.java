@@ -63,5 +63,9 @@ public class MultiSurfaceMappings {
 	public MultiSurfaceMapping getMapping(AttributeDef attr) {
 		return mappings.get(attr);
 	}
+    public AttributeDef getSurfaceAttr(AttributeDef attr) {
+        MultiSurfaceMapping attrMapping=getMapping(attr);
+        return (AttributeDef) ((CompositionType) ((AttributeDef) ((CompositionType) attr.getDomainResolvingAll()).getComponentType().getElement(AttributeDef.class, attrMapping.getBagOfSurfacesAttrName())).getDomain()).getComponentType().getElement(AttributeDef.class,attrMapping.getSurfaceAttrName());
+    }
 
 }

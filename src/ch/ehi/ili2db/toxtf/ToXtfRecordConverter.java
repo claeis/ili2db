@@ -7,6 +7,7 @@ import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Map;
 
 import ch.ehi.basics.logging.EhiLogger;
 import ch.ehi.ili2db.base.DbIdGen;
@@ -15,8 +16,10 @@ import ch.ehi.ili2db.base.IliNames;
 import ch.ehi.ili2db.converter.AbstractRecordConverter;
 import ch.ehi.ili2db.converter.ConverterException;
 import ch.ehi.ili2db.converter.SqlColumnConverter;
+import ch.ehi.ili2db.fromili.TransferFromIli;
 import ch.ehi.ili2db.gui.Config;
 import ch.ehi.ili2db.mapping.ArrayMapping;
+import ch.ehi.ili2db.mapping.ColumnWrapper;
 import ch.ehi.ili2db.mapping.MultiLineMapping;
 import ch.ehi.ili2db.mapping.MultiPointMapping;
 import ch.ehi.ili2db.mapping.MultiSurfaceMapping;
@@ -53,6 +56,8 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 	private Connection conn=null;
 	private SqlColumnConverter geomConv=null;
 	private SqlidPool sqlid2xtfid=null;
+	private Integer defaultEpsgCode=null;
+
 	public final static java.util.Date PURE_GREGORIAN_CALENDAR = new java.util.Date(Long.MIN_VALUE);
 	public ToXtfRecordConverter(TransferDescription td1, NameMapping ili2sqlName,
 			Config config, DbIdGen idGen1,SqlColumnConverter geomConv1,Connection conn1,SqlidPool sqlidPool,TrafoConfig trafoConfig,Viewable2TableMapping class2wrapper1) {
@@ -67,6 +72,7 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 		} catch (SQLException e) {
 			EhiLogger.logError(e);
 		}
+        defaultEpsgCode=TransferFromIli.parseEpsgCode(defaultCrsAuthority+":"+defaultCrsCode);
 	}
 	/** creates sql query statement for a class.
 	 * @param aclass type of objects to build query for
@@ -98,34 +104,23 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 		}
 		String sep=",";
 		int tableAliasIdx=0;
-		HashSet<AttributeDef> visitedAttrs=new HashSet<AttributeDef>();
 		for(ViewableWrapper table:aclass.getWrappers()){
 			String tableAlias = "r"+tableAliasIdx;
 			String sqlTableName=table.getSqlTablename();
-			Iterator iter = table.getAttrIterator();
+			Iterator<ColumnWrapper> iter = table.getAttrIterator();
 			while (iter.hasNext()) {
-			   ViewableTransferElement obj = (ViewableTransferElement)iter.next();
+			    ColumnWrapper columnWrapper=iter.next();
+			   ViewableTransferElement obj = columnWrapper.getViewableTransferElement();
 			   if (obj.obj instanceof AttributeDef) {
 				   AttributeDef attr = (AttributeDef) obj.obj;
-				   AttributeDef baseAttr=attr;
-				   while(true){
-					   AttributeDef baseAttr1=(AttributeDef)baseAttr.getExtending();
-					   if(baseAttr1==null){
-						   break;
-					   }
-					   baseAttr=baseAttr1;
-				   }
-					if(!visitedAttrs.contains(baseAttr)){
-						visitedAttrs.add(baseAttr);
-						if(!baseAttr.isTransient()){
-							Type proxyType=baseAttr.getDomain();
-							if(proxyType!=null && (proxyType instanceof ObjectType)){
-								// skip implicit particles (base-viewables) of views
-							}else{
-								 sep = addAttrToQueryStmt(ret, sep, tableAlias,baseAttr,sqlTableName);
-							}
-						}
-					}
+                   if(!attr.isTransient()){
+                       Type proxyType=attr.getDomain();
+                       if(proxyType!=null && (proxyType instanceof ObjectType)){
+                           // skip implicit particles (base-viewables) of views
+                       }else{
+                            sep = addAttrToQueryStmt(ret, sep, tableAlias,attr,columnWrapper.getEpsgCode(),sqlTableName);
+                       }
+                   }
 			   }
 			   if(obj.obj instanceof RoleDef){
 				   RoleDef role = (RoleDef) obj.obj;
@@ -216,10 +211,10 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 		}
 		return tableAlias+"."+columnName;
 	}
-	public String addAttrToQueryStmt(StringBuffer ret, String sep, String tableAlias,AttributeDef attr,String sqlTableName) {
+	public String addAttrToQueryStmt(StringBuffer ret, String sep, String tableAlias,AttributeDef attr,Integer epsgCode,String sqlTableName) {
 		if(attr.getExtending()==null){
 			Type type = attr.getDomainResolvingAliases();
-			 String attrSqlName=ili2sqlName.mapIliAttributeDef(attr,sqlTableName,null);
+			 String attrSqlName=ili2sqlName.mapIliAttributeDef(attr,epsgCode,sqlTableName,null);
 			if( attr.isDomainIli1Date()) {
 				 ret.append(sep);
 				 sep=",";
@@ -320,7 +315,7 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 		if(structWrapper!=null){
 			dbstmt.setLong(paramIdx++,structWrapper.getParentSqlId());
 			if(createGenericStructRef){
-				dbstmt.setString(paramIdx++,ili2sqlName.mapIliAttributeDef(structWrapper.getParentAttr(),getSqlType(structWrapper.getParentTable().getViewable()).getName(),null));
+				dbstmt.setString(paramIdx++,ili2sqlName.mapIliAttributeDef(structWrapper.getParentAttr(),null,getSqlType(structWrapper.getParentTable().getViewable()).getName(),null));
 			}
 		}else{
 			if(fixref!=null){
@@ -337,7 +332,7 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 	}
 	public Iom_jObject convertRecord(java.sql.ResultSet rs, Viewable aclass1,
 			FixIomObjectRefs fixref, StructWrapper structWrapper,
-			HashMap structelev, ArrayList<StructWrapper> structQueue, long sqlid)
+			HashMap structelev, ArrayList<StructWrapper> structQueue, long sqlid,Map<String,String> genericDomains)
 			throws SQLException {
 		ViewableWrapper aclass=class2wrapper.get(aclass1);
 		Iom_jObject iomObj;
@@ -378,30 +373,20 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 		}
 		HashSet<AttributeDef> visitedAttrs=new HashSet<AttributeDef>();
 		for(ViewableWrapper table:aclass.getWrappers()){
-			Iterator iter = table.getAttrIterator();
+			Iterator<ColumnWrapper> iter = table.getAttrIterator();
 			while (iter.hasNext()) {
-			   ViewableTransferElement obj = (ViewableTransferElement)iter.next();
+			    ColumnWrapper columnWrapper=iter.next();
+			   ViewableTransferElement obj = columnWrapper.getViewableTransferElement();
 			   if (obj.obj instanceof AttributeDef) {
 				   AttributeDef attr = (AttributeDef) obj.obj;
-				   AttributeDef baseAttr=attr;
-				   while(true){
-					   AttributeDef baseAttr1=(AttributeDef)baseAttr.getExtending();
-					   if(baseAttr1==null){
-						   break;
-					   }
-					   baseAttr=baseAttr1;
-				   }
-					if(!visitedAttrs.contains(baseAttr)){
-						visitedAttrs.add(baseAttr);
-						if(!baseAttr.isTransient()){
-							Type proxyType=baseAttr.getDomain();
-							if(proxyType!=null && (proxyType instanceof ObjectType)){
-								// skip implicit particles (base-viewables) of views
-							}else{
-								   valuei = addAttrValue(rs, valuei, sqlid, iomObj, baseAttr,structQueue,table,fixref);
-							}
-						}
-					}
+                   if(!attr.isTransient()){
+                       Type proxyType=attr.getDomain();
+                       if(proxyType!=null && (proxyType instanceof ObjectType)){
+                           // skip implicit particles (base-viewables) of views
+                       }else{
+                              valuei = addAttrValue(rs, valuei, sqlid, iomObj, attr,columnWrapper.getEpsgCode(),structQueue,table,fixref,genericDomains);
+                       }
+                   }
 			   }
 			   if(obj.obj instanceof RoleDef){
 				   RoleDef role = (RoleDef) obj.obj;
@@ -455,10 +440,10 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 	
 	final private int  LEN_LANG_PREFIX=DbNames.MULTILINGUAL_TXT_COL_PREFIX.length();
 	public int addAttrValue(java.sql.ResultSet rs, int valuei, long sqlid,
-			Iom_jObject iomObj, AttributeDef attr,ArrayList<StructWrapper> structQueue,ViewableWrapper table,FixIomObjectRefs fixref) throws SQLException {
+			Iom_jObject iomObj, AttributeDef attr,Integer epsgCode,ArrayList<StructWrapper> structQueue,ViewableWrapper table,FixIomObjectRefs fixref,Map<String,String> genericDomains) throws SQLException {
 		if(attr.getExtending()==null){
 			String attrName=attr.getName();
-			String sqlAttrName=ili2sqlName.mapIliAttributeDef(attr,table.getSqlTablename(),null);
+			String sqlAttrName=ili2sqlName.mapIliAttributeDef(attr,epsgCode,table.getSqlTablename(),null);
 			if( attr.isDomainBoolean()) {
 					boolean value=rs.getBoolean(valuei);
 					valuei++;
@@ -699,7 +684,8 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 				 }else if(type instanceof CoordType){
 					Object geomobj=rs.getObject(valuei);
 					valuei++;
-					if(!rs.wasNull()){
+                    int actualEpsgCode=TransferFromIli.getEpsgCode(attr, genericDomains, defaultEpsgCode);
+					if(!rs.wasNull() && epsgCode==actualEpsgCode){
 						try{
 							boolean is3D=((CoordType)type).getDimensions().length==3;
 							IomObject coord=geomConv.toIomCoord(geomobj,sqlAttrName,is3D);

@@ -1,0 +1,25 @@
+INTERLIS 2.4;
+MODEL MultiCrs24
+	AT "mailto:ce@eisenhutinformatik.ch" VERSION "2018-09-07" =
+	DOMAIN
+	    Coord (GENERIC) = COORD NUMERIC, NUMERIC;
+	    
+		Coord_LV95 EXTENDS Coord = COORD
+			2460000.000 .. 2870000.000,
+			1045000.000 .. 1310000.000,
+			ROTATION 2 -> 1 REFSYS "EPSG:2056";
+		Coord_LV03 EXTENDS Coord = COORD
+			460000.000 .. 870000.000,
+			45000.000 .. 310000.000,
+			ROTATION 2 -> 1 REFSYS "EPSG:21781";
+	CONTEXT default =
+		Coord = Coord_LV03 OR Coord_LV95;
+		
+	TOPIC TestA =
+	DEFERRED GENERICS Coord;
+		CLASS ClassA1 =
+			attr1 : TEXT*60;
+			attr2 : Coord;
+		END ClassA1;
+	END TestA;
+END MultiCrs24.

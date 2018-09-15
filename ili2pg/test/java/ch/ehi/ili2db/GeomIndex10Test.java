@@ -59,8 +59,7 @@ public class GeomIndex10Test {
 			config.setBasketHandling(config.BASKET_HANDLING_READWRITE);
 			config.setValue(SqlConfiguration.CREATE_GEOM_INDEX,"True");
 			config.setMaxSqlNameLength("20");
-			config.setDoItfLineTables(true);
-			config.setAreaRef(config.AREA_REF_KEEP);
+            Ili2db.setSkipPolygonBuilding(config);
 			config.setCatalogueRefTrafo(null);
 			config.setMultiSurfaceTrafo(null);
 			config.setMultilingualTrafo(null);

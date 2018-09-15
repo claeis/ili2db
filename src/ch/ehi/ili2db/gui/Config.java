@@ -78,6 +78,7 @@ public class Config extends Settings {
 	public static final String ILI1TRANSLATION=PREFIX+".ili1translation";
 	public static final String DELETE_DATA="data";
 	public static final String CREATE_META_INFO=PREFIX+".createMetaInfo";
+	public static final String USE_EPGS_IN_NAMES=PREFIX+".useEpsgInNames";
 	public static final String MODELS_TAB_MODELNAME_COLSIZE = PREFIX+".modelsTabModelnameColSize";
 	private int function;
 	private String dburl;
@@ -119,6 +120,7 @@ public class Config extends Settings {
 	private boolean setupPgExt=false;
 	private String transferFileFormat=null;
 	private String iliMetaAttrsFile=null;
+    private String domainAssignments=null;
 	final static public String ILIGML20="ILIGML20"; 
 	
 	static public final int FC_IMPORT=0;
@@ -637,5 +639,17 @@ public class Config extends Settings {
     }
     public boolean isImportBid() {
         return importBid;
+    }
+    public void setUseEpsgInNames(boolean value) {
+        setValue(USE_EPGS_IN_NAMES,value?TRUE:FALSE);
+    }
+    public boolean useEpsgInNames() {
+        return TRUE.equals(getValue(USE_EPGS_IN_NAMES))?true:false;
+    }
+    public void setDomainAssignments(String value) {
+        domainAssignments=value;
+    }
+    public String getDomainAssignments() {
+        return domainAssignments;
     }
 }

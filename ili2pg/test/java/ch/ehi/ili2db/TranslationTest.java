@@ -174,8 +174,7 @@ public class TranslationTest {
 				config.setMultiSurfaceTrafo(null);
 				config.setMultilingualTrafo(null);
 				config.setInheritanceTrafo(null);
-				config.setDoItfLineTables(true);
-				config.setAreaRef(config.AREA_REF_KEEP);
+                Ili2db.setSkipPolygonBuilding(config);
 				config.setIli1Translation("ModelBsimple10=ModelAsimple10");
 				Ili2db.readSettingsFromDb(config);
 				Ili2db.run(config,null);
@@ -648,12 +647,11 @@ public class TranslationTest {
 	    		config.setCreateFk(config.CREATE_FK_YES);
 	    		config.setTidHandling(Config.TID_HANDLING_PROPERTY);
 	    		config.setBasketHandling(config.BASKET_HANDLING_READWRITE);
-	    		config.setDoItfLineTables(true);
+                Ili2db.setSkipPolygonBuilding(config);
 	    		config.setCatalogueRefTrafo(null);
 	    		config.setMultiSurfaceTrafo(null);
 	    		config.setMultilingualTrafo(null);
 	    		config.setInheritanceTrafo(null);
-	    		config.setAreaRef(config.AREA_REF_KEEP);
 	    		config.setIli1Translation("ModelBsimple10=ModelAsimple10");
 	    		config.setDatasetName("ModelAsimple10");
 	    		Ili2db.readSettingsFromDb(config);

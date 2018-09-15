@@ -64,4 +64,10 @@ public class MultiPointMappings {
 		return mappings.get(attr);
 	}
 
+    public AttributeDef getCoordAttr(AttributeDef attr) {
+        MultiPointMapping attrMapping=getMapping(attr);
+        AttributeDef coordAttr = (AttributeDef) ((CompositionType) ((AttributeDef) ((CompositionType) attr.getDomainResolvingAll()).getComponentType().getElement(AttributeDef.class, attrMapping.getBagOfPointsAttrName())).getDomain()).getComponentType().getElement(AttributeDef.class,attrMapping.getPointAttrName());
+        return coordAttr;
+    }
+
 }

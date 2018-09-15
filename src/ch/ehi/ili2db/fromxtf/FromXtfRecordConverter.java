@@ -9,6 +9,7 @@ import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Map;
 
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.XMLGregorianCalendar;
@@ -23,8 +24,10 @@ import ch.ehi.ili2db.base.IliNames;
 import ch.ehi.ili2db.converter.AbstractRecordConverter;
 import ch.ehi.ili2db.converter.ConverterException;
 import ch.ehi.ili2db.converter.SqlColumnConverter;
+import ch.ehi.ili2db.fromili.TransferFromIli;
 import ch.ehi.ili2db.gui.Config;
 import ch.ehi.ili2db.mapping.ArrayMapping;
+import ch.ehi.ili2db.mapping.ColumnWrapper;
 import ch.ehi.ili2db.mapping.MultiLineMapping;
 import ch.ehi.ili2db.mapping.MultiPointMapping;
 import ch.ehi.ili2db.mapping.MultiSurfaceMapping;
@@ -72,6 +75,7 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 	private boolean isItfReader;
 	private XtfidPool oidPool=null;
 	private HashMap tag2class=null;
+	private Integer defaultEpsgCode=null;
 	
 	public FromXtfRecordConverter(TransferDescription td1, NameMapping ili2sqlName,HashMap tag2class1,
 			Config config,
@@ -100,9 +104,10 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 		}catch(ConverterException ex){
 			throw new IllegalArgumentException("failed to get srsid for "+defaultCrsAuthority+":"+defaultCrsCode+", "+ex.getLocalizedMessage());
 		}
+		defaultEpsgCode=TransferFromIli.parseEpsgCode(defaultCrsAuthority+":"+defaultCrsCode);
 		
 	}
-	public void writeRecord(long basketSqlId, IomObject iomObj,Viewable iomClass,
+	public void writeRecord(long basketSqlId, java.util.Map<String,String> genericDomains,IomObject iomObj,Viewable iomClass,
 			StructWrapper structEle, ViewableWrapper aclass, String sqlType,
 			long sqlId, boolean updateObj, PreparedStatement ps,ArrayList structQueue)
 			throws SQLException, ConverterException {
@@ -168,9 +173,10 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 		}
  
 		HashSet attrs=getIomObjectAttrs(iomClass);
-		Iterator iter = aclass.getAttrIterator();
+		Iterator<ColumnWrapper> iter = aclass.getAttrIterator();
 		while (iter.hasNext()) {
-			ViewableTransferElement obj = (ViewableTransferElement)iter.next();
+		    ColumnWrapper columnWrapper=iter.next();
+			ViewableTransferElement obj = columnWrapper.getViewableTransferElement();
 			if (obj.obj instanceof AttributeDef) {
 				AttributeDef attr = (AttributeDef) obj.obj;
 				if(attrs.contains(attr)){
@@ -180,7 +186,7 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 							// skip implicit particles (base-viewables) of views
 						}else{
 							valuei = addAttrValue(iomObj, sqlType, sqlId, aclass.getSqlTablename(),ps,
-									valuei, attr,structQueue);
+									valuei, attr,columnWrapper.getEpsgCode(),structQueue,genericDomains);
 						}
 					}
 				}
@@ -478,9 +484,10 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 		}
 		
 		HashSet attrs=getIomObjectAttrs(iomClass);
-		Iterator iter = aclass.getAttrIterator();
+		Iterator<ColumnWrapper> iter = aclass.getAttrIterator();
 		while (iter.hasNext()) {
-		   ViewableTransferElement obj = (ViewableTransferElement)iter.next();
+		    ColumnWrapper columnWrapper=iter.next();
+		   ViewableTransferElement obj = columnWrapper.getViewableTransferElement();
 		   if (obj.obj instanceof AttributeDef) {
 			   AttributeDef attr = (AttributeDef) obj.obj;
 			   if(attrs.contains(attr)){
@@ -489,7 +496,7 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 						if(proxyType!=null && (proxyType instanceof ObjectType)){
 							// skip implicit particles (base-viewables) of views
 						}else{
-							   sep = addAttrToInsertStmt(isUpdate,ret, values, sep, attr,sqlTableName.getName());
+							   sep = addAttrToInsertStmt(isUpdate,ret, values, sep, attr,columnWrapper.getEpsgCode(),sqlTableName.getName());
 						}
 					}
 			   }
@@ -615,10 +622,10 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 		return aclass;
 	}
 	public String addAttrToInsertStmt(boolean isUpdate,
-			StringBuffer ret, StringBuffer values, String sep, AttributeDef attr,String sqlTableName) {
+			StringBuffer ret, StringBuffer values, String sep, AttributeDef attr,Integer epsgCode,String sqlTableName) {
 		if(attr.getExtending()==null){
 			Type type = attr.getDomainResolvingAliases();
-			String attrSqlName=ili2sqlName.mapIliAttributeDef(attr,sqlTableName,null);
+			String attrSqlName=ili2sqlName.mapIliAttributeDef(attr,epsgCode,sqlTableName,null);
 			if (attr.isDomainBoolean()) {
 					ret.append(sep);
 					ret.append(attrSqlName);
@@ -647,33 +654,30 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 					 ret.append(sep);
 					 ret.append(attrSqlName);
 						multiSurfaceAttrs.addMultiSurfaceAttr(attr);
-						int srsid=getSrsid(getMultiSurfaceAttrDef(type,multiSurfaceAttrs.getMapping(attr)));
 						if(isUpdate){
-							ret.append("="+geomConv.getInsertValueWrapperMultiSurface("?",srsid));
+							ret.append("="+geomConv.getInsertValueWrapperMultiSurface("?",epsgCode));
 						}else{
-							values.append(","+geomConv.getInsertValueWrapperMultiSurface("?",srsid));
+							values.append(","+geomConv.getInsertValueWrapperMultiSurface("?",epsgCode));
 						}
 						sep=",";
 				}else if(TrafoConfigNames.MULTILINE_TRAFO_COALESCE.equals(trafoConfig.getAttrConfig(attr, TrafoConfigNames.MULTILINE_TRAFO))){
 					 ret.append(sep);
 					 ret.append(attrSqlName);
 						multiLineAttrs.addMultiLineAttr(attr);
-						int srsid=getSrsid(getMultiLineAttrDef(type,multiLineAttrs.getMapping(attr)));
 						if(isUpdate){
-							ret.append("="+geomConv.getInsertValueWrapperMultiPolyline("?",srsid));
+							ret.append("="+geomConv.getInsertValueWrapperMultiPolyline("?",epsgCode));
 						}else{
-							values.append(","+geomConv.getInsertValueWrapperMultiPolyline("?",srsid));
+							values.append(","+geomConv.getInsertValueWrapperMultiPolyline("?",epsgCode));
 						}
 						sep=",";
 				}else if(TrafoConfigNames.MULTIPOINT_TRAFO_COALESCE.equals(trafoConfig.getAttrConfig(attr, TrafoConfigNames.MULTIPOINT_TRAFO))){
 					 ret.append(sep);
 					 ret.append(attrSqlName);
 						multiPointAttrs.addMultiPointAttr(attr);
-						int srsid=getSrsid(getMultiPointAttrDef(type, multiPointAttrs.getMapping(attr)));
 						if(isUpdate){
-							ret.append("="+geomConv.getInsertValueWrapperMultiCoord("?",srsid));
+							ret.append("="+geomConv.getInsertValueWrapperMultiCoord("?",epsgCode));
 						}else{
-							values.append(","+geomConv.getInsertValueWrapperMultiCoord("?",srsid));
+							values.append(","+geomConv.getInsertValueWrapperMultiCoord("?",epsgCode));
 						}
 						sep=",";
 				}else if(TrafoConfigNames.ARRAY_TRAFO_COALESCE.equals(trafoConfig.getAttrConfig(attr, TrafoConfigNames.ARRAY_TRAFO))){
@@ -702,9 +706,9 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 				 ret.append(sep);
 				 ret.append(attrSqlName);
 					if(isUpdate){
-						ret.append("="+geomConv.getInsertValueWrapperPolyline("?",getSrsid(attr)));
+						ret.append("="+geomConv.getInsertValueWrapperPolyline("?",epsgCode));
 					}else{
-						values.append(","+geomConv.getInsertValueWrapperPolyline("?",getSrsid(attr)));
+						values.append(","+geomConv.getInsertValueWrapperPolyline("?",epsgCode));
 					}
 					sep=",";
 			 }else if(type instanceof SurfaceOrAreaType){
@@ -713,9 +717,9 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 					 ret.append(sep);
 					 ret.append(attrSqlName);
 						if(isUpdate){
-							ret.append("="+geomConv.getInsertValueWrapperSurface("?",getSrsid(attr)));
+							ret.append("="+geomConv.getInsertValueWrapperSurface("?",epsgCode));
 						}else{
-							values.append(","+geomConv.getInsertValueWrapperSurface("?",getSrsid(attr)));
+							values.append(","+geomConv.getInsertValueWrapperSurface("?",epsgCode));
 						}
 						sep=",";
 				 }
@@ -724,9 +728,9 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 						 ret.append(sep);
 						 ret.append(attrSqlName+DbNames.ITF_MAINTABLE_GEOTABLEREF_COL_SUFFIX);
 							if(isUpdate){
-								ret.append("="+geomConv.getInsertValueWrapperCoord("?",getSrsid(attr)));
+								ret.append("="+geomConv.getInsertValueWrapperCoord("?",epsgCode));
 							}else{
-								 values.append(","+geomConv.getInsertValueWrapperCoord("?",getSrsid(attr)));
+								 values.append(","+geomConv.getInsertValueWrapperCoord("?",epsgCode));
 							}
 							sep=",";
 					 }
@@ -735,9 +739,9 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 				 ret.append(sep);
 				 ret.append(attrSqlName);
 					if(isUpdate){
-						ret.append("="+geomConv.getInsertValueWrapperCoord("?",getSrsid(attr)));
+						ret.append("="+geomConv.getInsertValueWrapperCoord("?",epsgCode));
 					}else{
-						values.append(","+geomConv.getInsertValueWrapperCoord("?",getSrsid(attr)));
+						values.append(","+geomConv.getInsertValueWrapperCoord("?",epsgCode));
 					}
 					sep=",";
 			}else if(type instanceof EnumerationType){
@@ -787,7 +791,7 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 		return sep;
 	}
 	public int addAttrValue(IomObject iomObj, String sqlType, long sqlId,
-			String sqlTableName,PreparedStatement ps, int valuei, AttributeDef attr,ArrayList structQueue)
+			String sqlTableName,PreparedStatement ps, int valuei, AttributeDef attr,Integer epsgCode,ArrayList structQueue,Map<String,String> genericDomains)
 			throws SQLException, ConverterException {
 		if(attr.getExtending()==null){
 			 String attrName=attr.getName();
@@ -906,7 +910,7 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 								SurfaceType surface=((SurfaceType) surfaceAttr.getDomainResolvingAliases());
 								CoordType coord=(CoordType)surface.getControlPointDomain().getType();
 							 boolean is3D=coord.getDimensions().length==3;
-							 Object geomObj = geomConv.fromIomMultiSurface(iomMultisurface,getSrsid(surfaceAttr),surface.getLineAttributeStructure()!=null,is3D,getP(surface));
+							 Object geomObj = geomConv.fromIomMultiSurface(iomMultisurface,epsgCode,surface.getLineAttributeStructure()!=null,is3D,getP(surface));
 							ps.setObject(valuei,geomObj);
 						 }else{
 							geomConv.setSurfaceNull(ps,valuei);
@@ -933,7 +937,7 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 								PolylineType line=((PolylineType) polylineAttr.getDomainResolvingAliases());
 								CoordType coord=(CoordType)line.getControlPointDomain().getType();
 							 boolean is3D=coord.getDimensions().length==3;
-							 Object geomObj = geomConv.fromIomMultiPolyline(iomMultiline,getSrsid(polylineAttr),is3D,getP(line));
+							 Object geomObj = geomConv.fromIomMultiPolyline(iomMultiline,epsgCode,is3D,getP(line));
 							ps.setObject(valuei,geomObj);
 						 }else{
 							geomConv.setPolylineNull(ps,valuei);
@@ -959,7 +963,7 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 								AttributeDef coordAttr = getMultiPointAttrDef(type, attrMapping);
 								CoordType coord=((CoordType) coordAttr.getDomainResolvingAliases());
 							 boolean is3D=coord.getDimensions().length==3;
-							 Object geomObj = geomConv.fromIomMultiCoord(iomMultipoint,getSrsid(coordAttr),is3D);
+							 Object geomObj = geomConv.fromIomMultiCoord(iomMultipoint,epsgCode,is3D);
 							ps.setObject(valuei,geomObj);
 						 }else{
 							geomConv.setCoordNull(ps,valuei);
@@ -1000,7 +1004,7 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 						 // enqueue struct values
 						 for(int structi=0;structi<structc;structi++){
 						 	IomObject struct=iomObj.getattrobj(attrName,structi);
-						 	String sqlAttrName=ili2sqlName.mapIliAttributeDef(attr,sqlTableName,null);
+						 	String sqlAttrName=ili2sqlName.mapIliAttributeDef(attr,null,sqlTableName,null);
 						 	enqueStructValue(structQueue,sqlId,sqlType,sqlAttrName,struct,structi,attr);
 						 }
 					}
@@ -1008,7 +1012,7 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 					 IomObject value=iomObj.getattrobj(attrName,0);
 					 if(value!=null){
 						boolean is3D=((CoordType)((PolylineType)type).getControlPointDomain().getType()).getDimensions().length==3;
-						ps.setObject(valuei,geomConv.fromIomPolyline(value,getSrsid(attr),is3D,getP((PolylineType)type)));
+						ps.setObject(valuei,geomConv.fromIomPolyline(value,epsgCode,is3D,getP((PolylineType)type)));
 					 }else{
 						geomConv.setPolylineNull(ps,valuei);
 					 }
@@ -1019,7 +1023,7 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 						 IomObject value=iomObj.getattrobj(attrName,0);
 						 if(value!=null){
 								boolean is3D=((CoordType)((SurfaceOrAreaType)type).getControlPointDomain().getType()).getDimensions().length==3;
-							 Object geomObj = geomConv.fromIomSurface(value,getSrsid(attr),((SurfaceOrAreaType)type).getLineAttributeStructure()!=null,is3D,getP((SurfaceOrAreaType)type));
+							 Object geomObj = geomConv.fromIomSurface(value,epsgCode,((SurfaceOrAreaType)type).getLineAttributeStructure()!=null,is3D,getP((SurfaceOrAreaType)type));
 							ps.setObject(valuei,geomObj);
 						 }else{
 							geomConv.setSurfaceNull(ps,valuei);
@@ -1036,7 +1040,7 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 							 }
 							 if(value!=null){
 								boolean is3D=((CoordType)((SurfaceOrAreaType)type).getControlPointDomain().getType()).getDimensions().length==3;
-								ps.setObject(valuei,geomConv.fromIomCoord(value,getSrsid(attr),is3D));
+								ps.setObject(valuei,geomConv.fromIomCoord(value,epsgCode,is3D));
 							 }else{
 								geomConv.setCoordNull(ps,valuei);
 							 }
@@ -1046,8 +1050,13 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 				 }else if(type instanceof CoordType){
 					 IomObject value=iomObj.getattrobj(attrName,0);
 					 if(value!=null){
-						boolean is3D=((CoordType)type).getDimensions().length==3;
-						ps.setObject(valuei,geomConv.fromIomCoord(value,getSrsid(attr),is3D));
+					    int actualEpsgCode=TransferFromIli.getEpsgCode(attr, genericDomains, defaultEpsgCode);
+					    if(actualEpsgCode==epsgCode) {
+	                        boolean is3D=((CoordType)type).getDimensions().length==3;
+	                        ps.setObject(valuei,geomConv.fromIomCoord(value,epsgCode,is3D));
+					    }else {
+	                        geomConv.setCoordNull(ps,valuei);
+					    }
 					 }else{
 						geomConv.setCoordNull(ps,valuei);
 					 }
@@ -1184,7 +1193,7 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 		return null;
 	}
 	private HashMap<AttributeDef,Integer> srsCache=new HashMap<AttributeDef,Integer>();
-	public int getSrsid(AttributeDef attr){
+	public int _getSrsid(AttributeDef attr){ // FIXME sollte nicht notwendig sein
 		Integer srsid=srsCache.get(attr);
 		if(srsid!=null) {
 			return srsid;

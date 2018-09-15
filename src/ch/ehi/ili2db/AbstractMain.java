@@ -175,6 +175,13 @@ public abstract class AbstractMain {
 				argi++;
 				config.setDefaultSrsCode(args[argi]);
 				argi++;
+            }else if(arg.equals("--multiSrs")){
+                argi++;
+                config.setUseEpsgInNames(true);
+            }else if(arg.equals("--domains")){
+                argi++;
+                config.setDomainAssignments(args[argi]);
+                argi++;
 			}else if(arg.equals("--attachmentsPath")){
 				argi++;
 				config.setAttachmentsPath(args[argi]);
@@ -370,6 +377,8 @@ public abstract class AbstractMain {
 					System.err.println("--deleteData           on schema/data import, delete existing data from existing tables.");
 					System.err.println("--defaultSrsAuth  auth Default SRS authority "+config.getDefaultSrsAuthority());
 					System.err.println("--defaultSrsCode  code Default SRS code "+config.getDefaultSrsCode());
+                    System.err.println("--multiSrs             create a DB schema that supports multiple SRS codes");
+                    System.err.println("--domains genericDomain=concreteDomain overrides the generic domain assignments on export");
 					System.err.println("--modeldir  path       Path(s) of directories containing ili-files.");
 					System.err.println("--models modelname     Name(s) of ili-models to generate an db schema for.");
 					System.err.println("--dataset name         Name of dataset.");

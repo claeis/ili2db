@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ili:transfer xmlns:ili="http://www.interlis.ch/xtf/2.4/INTERLIS" xmlns:geom="http://www.interlis.ch/geometry/1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:MultiCrs24="http://www.interlis.ch/xtf/2.4/MultiCrs24">
+	<ili:headersection>
+		<ili:models>
+			<ili:model>MultiCrs24</ili:model>
+		</ili:models>
+		<ili:sender>ili2pg-developer-workspace</ili:sender>
+	</ili:headersection>
+	<ili:datasection>
+		<MultiCrs24:TestA ili:bid="3" ili:domains="MultiCrs24.Coord=MultiCrs24.Coord_LV95">
+			<MultiCrs24:ClassA1 ili:tid="4">
+				<MultiCrs24:attr1>1</MultiCrs24:attr1>
+				<MultiCrs24:attr2>
+					<geom:coord>
+						<geom:c1>2460001.0</geom:c1>
+						<geom:c2>1045001.0</geom:c2>
+					</geom:coord>
+				</MultiCrs24:attr2>
+			</MultiCrs24:ClassA1>
+		</MultiCrs24:TestA>
+		<MultiCrs24:TestA ili:bid="7" ili:domains="MultiCrs24.Coord=MultiCrs24.Coord_LV03">
+			<MultiCrs24:ClassA1 ili:tid="8">
+				<MultiCrs24:attr1>2</MultiCrs24:attr1>
+				<MultiCrs24:attr2>
+					<geom:coord>
+						<geom:c1>460002.0</geom:c1>
+						<geom:c2>45002.0</geom:c2>
+					</geom:coord>
+				</MultiCrs24:attr2>
+			</MultiCrs24:ClassA1>
+		</MultiCrs24:TestA>
+	</ili:datasection>
+</ili:transfer>

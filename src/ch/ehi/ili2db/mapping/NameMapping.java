@@ -24,6 +24,7 @@ import java.util.Set;
 import ch.ehi.basics.logging.EhiLogger;
 import ch.ehi.ili2db.base.DbNames;
 import ch.ehi.ili2db.base.Ili2dbException;
+import ch.ehi.ili2db.gui.Config;
 import ch.interlis.ili2c.metamodel.Viewable;
 
 /** make names unique and conforming to the underlying database
@@ -46,6 +47,7 @@ public class NameMapping {
 	private static final int UNQUALIFIED_NAMES=0;
 	private static final int TOPIC_QUALIFIED_NAMES=1;
 	private static final int FULL_QUALIFIED_NAMES=2;
+	private boolean useEpsg=false;
 	private NameMapping(){};
 	public NameMapping(ch.ehi.ili2db.gui.Config config)
 	{
@@ -57,7 +59,7 @@ public class NameMapping {
 		}else{
 			nameing=UNQUALIFIED_NAMES;
 		}
-		
+		useEpsg=config.useEpsgInNames();
 	}
 	private String makeSqlTableName(String modelName,String topicName,String className,String attrName,int maxSqlNameLength)
 	{
@@ -178,14 +180,29 @@ public class NameMapping {
 		}
 		return sqlname;
 	}
-	public String mapGeometryAsTable(Viewable aclass,ch.interlis.ili2c.metamodel.AttributeDef def){
-		String iliname=aclass.getScopedName(null)+"."+def.getName();
-		String sqlname=(String)classNameIli2sql.get(iliname);
+	public String mapGeometryAsTable(Viewable aclass,ch.interlis.ili2c.metamodel.AttributeDef def,Integer epsgCode){
+		String iliqname=aclass.getScopedName(null)+"."+def.getName();
+		String sqlname=null;
+		if(useEpsg && epsgCode!=null) {
+            String iliqname2 = iliqname+":"+epsgCode;
+            sqlname=(String)classNameIli2sql.get(iliqname2);
+            if(sqlname==null) {
+                // pre 3.13.x
+                sqlname=(String)classNameIli2sql.get(iliqname);
+            }
+            iliqname=iliqname2;
+		}else {
+	        sqlname=(String)classNameIli2sql.get(iliqname);
+		}
 		if(sqlname==null){
 			ch.interlis.ili2c.metamodel.Topic topic=(ch.interlis.ili2c.metamodel.Topic)aclass.getContainer(ch.interlis.ili2c.metamodel.Topic.class);
 			ch.interlis.ili2c.metamodel.Model model=(ch.interlis.ili2c.metamodel.Model)aclass.getContainer(ch.interlis.ili2c.metamodel.Model.class);
-			sqlname=makeSqlTableName(model.getName(),topic!=null ? topic.getName():null,aclass.getName(),def.getName(),getMaxSqlNameLength());
-			addTableNameMapping(iliname,sqlname);
+			if(useEpsg && epsgCode!=null) {
+                sqlname=makeSqlTableName(model.getName(),topic!=null ? topic.getName():null,aclass.getName(),def.getName()+"_"+epsgCode,getMaxSqlNameLength());
+			}else {
+	            sqlname=makeSqlTableName(model.getName(),topic!=null ? topic.getName():null,aclass.getName(),def.getName(),getMaxSqlNameLength());
+			}
+			addTableNameMapping(iliqname,sqlname);
 		}
 		return sqlname;
 	}
@@ -246,11 +263,26 @@ public class NameMapping {
 		}
 		return sqlname;
 	}
-	public String mapIliAttributeDef(ch.interlis.ili2c.metamodel.AttributeDef def,String ownerSqlTablename,String targetSqlTablename){
+	public String mapIliAttributeDef(ch.interlis.ili2c.metamodel.AttributeDef def,Integer epsgCode,String ownerSqlTablename,String targetSqlTablename){
 		String iliqname=def.getContainer().getScopedName(null)+"."+def.getName();
-		String sqlname=columnMapping.getSqlName(iliqname,ownerSqlTablename,targetSqlTablename);
+		String sqlname=null;
+		if(useEpsg && epsgCode!=null) {
+	        String iliqname2 = iliqname+":"+epsgCode;
+            sqlname=columnMapping.getSqlName(iliqname2,ownerSqlTablename,targetSqlTablename);
+	        if(sqlname==null) {
+	            // pre 3.13.x
+	            sqlname=columnMapping.getSqlName(iliqname,ownerSqlTablename,targetSqlTablename);
+	        }
+	        iliqname=iliqname2;
+		}else {
+	        sqlname=columnMapping.getSqlName(iliqname,ownerSqlTablename,targetSqlTablename);
+		}
 		if(sqlname==null){
-			sqlname=shortcutName(def.getName(),getMaxSqlNameLength());
+		    if(useEpsg && epsgCode!=null) {
+	            sqlname=shortcutName(def.getName()+"_"+epsgCode,getMaxSqlNameLength());
+		    }else {
+	            sqlname=shortcutName(def.getName(),getMaxSqlNameLength());
+		    }
 			sqlname=makeValidSqlName(sqlname);
 			sqlname=makeSqlColNameUnique(ownerSqlTablename,sqlname);
 			columnMapping.addAttrNameMapping(iliqname,sqlname,ownerSqlTablename,targetSqlTablename);
