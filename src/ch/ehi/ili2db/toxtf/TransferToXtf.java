@@ -779,7 +779,7 @@ public class TransferToXtf {
 	private void dumpItfTableObject(IoxWriter out,AttributeDef attr,Integer epsgCode,Long basketSqlId)
 	{
 		String stmt=createItfLineTableQueryStmt(attr,epsgCode,basketSqlId,geomConv);
-		String sqlTabName=ili2sqlName.mapGeometryAsTable((Viewable)attr.getContainer(),attr,epsgCode);
+		String sqlTabName=ili2sqlName.mapItfGeometryAsTable((Viewable)attr.getContainer(),attr,epsgCode);
 		EhiLogger.traceBackendCmd(stmt);
 		
 		SurfaceOrAreaType type = (SurfaceOrAreaType)attr.getDomainResolvingAliases();
@@ -1222,7 +1222,7 @@ public class TransferToXtf {
 	  return false;
 	}
 	private DbTableName getSqlTableNameItfLineTable(AttributeDef def,Integer epsgCode){
-		String sqlname=ili2sqlName.mapGeometryAsTable((Viewable)def.getContainer(),def,epsgCode);
+		String sqlname=ili2sqlName.mapItfGeometryAsTable((Viewable)def.getContainer(),def,epsgCode);
 		return new DbTableName(schema,sqlname);
 	}
 	private String createItfLineTableQueryStmt(AttributeDef attr,Integer epsgCode,Long basketSqlId,SqlColumnConverter conv){
@@ -1234,7 +1234,7 @@ public class TransferToXtf {
 		String sep=",";
 		
 		SurfaceOrAreaType type = (SurfaceOrAreaType)attr.getDomainResolvingAliases();
-		String sqlTabName=ili2sqlName.mapGeometryAsTable((Viewable)attr.getContainer(),attr,epsgCode);
+		String sqlTabName=ili2sqlName.mapItfGeometryAsTable((Viewable)attr.getContainer(),attr,epsgCode);
 		
 		// geomAttr
 		 ret.append(sep);

@@ -379,7 +379,7 @@ public class TransferFromIli {
 		return new DbTableName(schema.getName(),sqlname);
 	}
 	private DbTableName getSqlTableNameItfLineTable(AttributeDef def,Integer epsgCode){
-		String sqlname=ili2sqlName.mapGeometryAsTable((Viewable)def.getContainer(),def,epsgCode);
+		String sqlname=ili2sqlName.mapItfGeometryAsTable((Viewable)def.getContainer(),def,epsgCode);
 		return new DbTableName(schema.getName(),sqlname);
 	}
 	static public void addModelsTable(DbSchema schema,Settings config)

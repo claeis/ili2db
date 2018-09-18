@@ -180,8 +180,8 @@ public class NameMapping {
 		}
 		return sqlname;
 	}
-	public String mapGeometryAsTable(Viewable aclass,ch.interlis.ili2c.metamodel.AttributeDef def,Integer epsgCode){
-		String iliqname=aclass.getScopedName(null)+"."+def.getName();
+	public String mapItfGeometryAsTable(Viewable aclass,ch.interlis.ili2c.metamodel.AttributeDef def,Integer epsgCode){
+		String iliqname=aclass.getScopedName(null)+"_"+def.getName();
 		String sqlname=null;
 		if(useEpsg && epsgCode!=null) {
             String iliqname2 = iliqname+":"+epsgCode;
@@ -206,6 +206,32 @@ public class NameMapping {
 		}
 		return sqlname;
 	}
+    public String mapAttributeAsTable(Viewable aclass,ch.interlis.ili2c.metamodel.AttributeDef def,Integer epsgCode){
+        String iliqname=aclass.getScopedName(null)+"."+def.getName();
+        String sqlname=null;
+        if(useEpsg && epsgCode!=null) {
+            String iliqname2 = iliqname+":"+epsgCode;
+            sqlname=(String)classNameIli2sql.get(iliqname2);
+            if(sqlname==null) {
+                // pre 3.13.x
+                sqlname=(String)classNameIli2sql.get(iliqname);
+            }
+            iliqname=iliqname2;
+        }else {
+            sqlname=(String)classNameIli2sql.get(iliqname);
+        }
+        if(sqlname==null){
+            ch.interlis.ili2c.metamodel.Topic topic=(ch.interlis.ili2c.metamodel.Topic)aclass.getContainer(ch.interlis.ili2c.metamodel.Topic.class);
+            ch.interlis.ili2c.metamodel.Model model=(ch.interlis.ili2c.metamodel.Model)aclass.getContainer(ch.interlis.ili2c.metamodel.Model.class);
+            if(useEpsg && epsgCode!=null) {
+                sqlname=makeSqlTableName(model.getName(),topic!=null ? topic.getName():null,aclass.getName(),def.getName()+"_"+epsgCode,getMaxSqlNameLength());
+            }else {
+                sqlname=makeSqlTableName(model.getName(),topic!=null ? topic.getName():null,aclass.getName(),def.getName(),getMaxSqlNameLength());
+            }
+            addTableNameMapping(iliqname,sqlname);
+        }
+        return sqlname;
+    }
 	public String mapIliAttributeDefReverse(ch.interlis.ili2c.metamodel.AttributeDef def,String ownerSqlTablename,String targetSqlTablename){
 		String iliname=def.getContainer().getScopedName(null)+"."+def.getName();
 		String sqlname=(String)columnMapping.getSqlName(iliname,ownerSqlTablename,targetSqlTablename);

@@ -1453,7 +1453,7 @@ public class TransferFromXtf {
 
 
 	private DbTableName getSqlTableNameItfLineTable(AttributeDef attrDef,Integer epsgCode){
-		String sqlTabName=ili2sqlName.mapGeometryAsTable((Viewable)attrDef.getContainer(),attrDef,epsgCode);
+		String sqlTabName=ili2sqlName.mapItfGeometryAsTable((Viewable)attrDef.getContainer(),attrDef,epsgCode);
 		return new DbTableName(schema,sqlTabName);
 		
 	}
@@ -1520,7 +1520,7 @@ public class TransferFromXtf {
 			    Iterator attri = lineAttrTable.getAttributes ();
 			    while(attri.hasNext()){
 			    	AttributeDef lineattr=(AttributeDef)attri.next();
-					valuei = recConv.addAttrValue(iomObj, ili2sqlName.mapGeometryAsTable((Viewable)attrDef.getContainer(),attrDef,null), sqlId, sqlTableName,ps,
+					valuei = recConv.addAttrValue(iomObj, ili2sqlName.mapItfGeometryAsTable((Viewable)attrDef.getContainer(),attrDef,null), sqlId, sqlTableName,ps,
 							valuei, lineattr,null,null,new HashMap<String,String>());
 			    }
 			}

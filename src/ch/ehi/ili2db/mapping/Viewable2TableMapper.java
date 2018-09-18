@@ -320,7 +320,7 @@ public class Viewable2TableMapper {
                                 // table already has a geometry column?
                                 if(singleGeom && hasGeometry){
                                     // create a new secondary table
-                                    sqlname=nameMapping.mapGeometryAsTable(iliclass,attr,epsgCode);
+                                    sqlname=nameMapping.mapAttributeAsTable(iliclass,attr,epsgCode);
                                     ViewableWrapper attrWrapper=viewable.getSecondaryTable(sqlname);
                                     if(attrWrapper==null){
                                         attrWrapper=viewable.createSecondaryTable(sqlname);
