@@ -14,6 +14,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import ch.ehi.basics.logging.EhiLogger;
+import ch.ehi.ili2db.base.DbNames;
 import ch.ehi.ili2db.base.DbUrlConverter;
 import ch.ehi.ili2db.base.Ili2db;
 import ch.ehi.ili2db.base.Ili2dbException;
@@ -63,6 +64,68 @@ public class MultiCrs24Test {
 		}
 		return config;
 	}
+	
+    @Test
+    public void importIli() throws Exception
+    {
+        EhiLogger.getInstance().setTraceFilter(false);
+        Connection jdbcConnection=null;
+        try{
+            Class driverClass = Class.forName("org.postgresql.Driver");
+            jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
+            stmt=jdbcConnection.createStatement();
+            stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");        
+
+            File data=new File("test/data/Crs/MultiCrs24.ili");
+            Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+            config.setFunction(Config.FC_SCHEMAIMPORT);
+            config.setCreateFk(config.CREATE_FK_YES);
+            config.setTidHandling(Config.TID_HANDLING_PROPERTY);
+            config.setBasketHandling(config.BASKET_HANDLING_READWRITE);
+            config.setCatalogueRefTrafo(null);
+            config.setMultiSurfaceTrafo(null);
+            config.setMultiLineTrafo(null);
+            config.setMultiPointTrafo(null);
+            config.setMultilingualTrafo(null);
+            config.setInheritanceTrafo(null);
+            config.setUseEpsgInNames(true);
+            config.setValidation(false);
+            Ili2db.readSettingsFromDb(config);
+            Ili2db.run(config,null);
+            
+            final String ili2db_attrname_table=DBSCHEMA+"."+DbNames.ATTRNAME_TAB;
+            // verify attr name mapping
+            {
+                String stmtTxt="SELECT "+DbNames.ATTRNAME_TAB_SQLNAME_COL+","+DbNames.ATTRNAME_TAB_OWNER_COL+" FROM "+ili2db_attrname_table+" WHERE "+DbNames.ATTRNAME_TAB_ILINAME_COL+"='MultiCrs24.TestA.ClassA1.attr2:2056'";
+                Assert.assertTrue(stmt.execute(stmtTxt));
+                ResultSet rs=stmt.getResultSet();
+                Assert.assertTrue(rs.next());
+                Assert.assertEquals("attr2_2056",rs.getString(1));
+                Assert.assertEquals("classa1",rs.getString(2));
+            }
+            {
+                String stmtTxt="SELECT "+DbNames.ATTRNAME_TAB_SQLNAME_COL+","+DbNames.ATTRNAME_TAB_OWNER_COL+" FROM "+ili2db_attrname_table+" WHERE "+DbNames.ATTRNAME_TAB_ILINAME_COL+"='MultiCrs24.TestA.ClassA1.attr2:21781'";
+                Assert.assertTrue(stmt.execute(stmtTxt));
+                ResultSet rs=stmt.getResultSet();
+                Assert.assertTrue(rs.next());
+                Assert.assertEquals("attr2_21781",rs.getString(1));
+                Assert.assertEquals("classa1",rs.getString(2));
+            }
+            // verify columns exist
+            {
+                String stmtTxt="SELECT attr2_21781,attr2_2056 FROM "+DBSCHEMA+".classa1";
+                Assert.assertTrue(stmt.execute(stmtTxt));
+                ResultSet rs=stmt.getResultSet();
+                Assert.assertFalse(rs.next());
+            }
+        }catch(Exception e) {
+            throw new IoxException(e);
+        }finally{
+            if(jdbcConnection!=null){
+                jdbcConnection.close();
+            }
+        }
+    }
 	
 	@Test
 	public void importXtf() throws Exception
