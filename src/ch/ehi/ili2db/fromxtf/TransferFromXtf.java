@@ -54,6 +54,7 @@ import ch.interlis.ili2c.metamodel.AssociationDef;
 import ch.interlis.ili2c.metamodel.AttributeDef;
 import ch.interlis.ili2c.metamodel.CompositionType;
 import ch.interlis.ili2c.metamodel.CoordType;
+import ch.interlis.ili2c.metamodel.Element;
 import ch.interlis.ili2c.metamodel.EnumerationType;
 import ch.interlis.ili2c.metamodel.Model;
 import ch.interlis.ili2c.metamodel.NumericType;
@@ -137,6 +138,8 @@ public class TransferFromXtf {
 	 */
 	private ArrayList structQueue=null;
     private Integer defaultCrsCode=null;
+    private String srsModelAssignment=null;
+    private Map<Element,Element> crsFilter=null;
 	public TransferFromXtf(int function,NameMapping ili2sqlName1,
 			TransferDescription td1,
 			Connection conn1,
@@ -163,6 +166,7 @@ public class TransferFromXtf {
 			colT_ID=DbNames.T_ID_COL;
 		}
         defaultCrsCode=Integer.parseInt(config.getDefaultSrsCode());
+        srsModelAssignment=config.getSrsModelAssignment();
 		createGenericStructRef=config.STRUCT_MAPPING_GENERICREF.equals(config.getStructMapping());
 		readIliTid=config.TID_HANDLING_PROPERTY.equals(config.getTidHandling());
 		readIliBid=config.isImportBid();
@@ -178,6 +182,10 @@ public class TransferFromXtf {
 		if(config.getVer4_translation() || config.getIli1Translation()!=null){
 			languageFilter=new TranslateToOrigin(td1, config);
 		}
+	    if(config.getSrsModelAssignment()!=null) {
+	        crsFilter=TransferFromIli.getSrsMappingToOriginal(td, config.getSrsModelAssignment());
+	    }
+
 	}
 		
 	public void doit(IoxReader reader,Config config,Map<Long,BasketStat> stat)
@@ -396,6 +404,7 @@ public class TransferFromXtf {
 							if(languageFilter!=null){
 								event=languageFilter.filter(event);
 							}
+							// FIXME do not validate/filter at all
 						}else{
 							// import this basket
 							EhiLogger.logState("Basket "+basket.getType()+"(oid "+basket.getBid()+")...");
@@ -734,7 +743,7 @@ public class TransferFromXtf {
 					}
 				}else if(classo instanceof AttributeDef){
 				    AttributeDef geomAttr=(AttributeDef)classo;
-				    int epsgCodes[]=TransferFromIli.getEpsgCodes(geomAttr, defaultCrsCode);
+				    int epsgCodes[]=TransferFromIli.getEpsgCodes(geomAttr, srsModelAssignment,defaultCrsCode);
 				    for(int epsgCode:epsgCodes) {
 	                    deleteExistingObjectsHelper(getSqlTableNameItfLineTable(geomAttr,epsgCode),ids.toString());
 				    }
@@ -828,7 +837,7 @@ public class TransferFromXtf {
 		  }else if(obj instanceof AttributeDef){
 			  if(isItf){
 					AttributeDef attr=(AttributeDef)obj;
-					int epsgCodes[]=TransferFromIli.getEpsgCodes(attr, defaultCrsCode);
+					int epsgCodes[]=TransferFromIli.getEpsgCodes(attr, srsModelAssignment,defaultCrsCode);
 					for(int epsgCode:epsgCodes) {
 	                    // get sql name
 	                    DbTableName sqlName=getSqlTableNameItfLineTable(attr,epsgCode);
@@ -986,7 +995,7 @@ public class TransferFromXtf {
 		  }else if(obj instanceof AttributeDef){
 			  if(isItf){
 					AttributeDef attr=(AttributeDef)obj;
-					int epsgCodes[]=TransferFromIli.getEpsgCodes(attr, defaultCrsCode);
+					int epsgCodes[]=TransferFromIli.getEpsgCodes(attr, srsModelAssignment,defaultCrsCode);
 					for(int epsgCode:epsgCodes) {
 	                    // get sql name
 	                    DbTableName sqlName=getSqlTableNameItfLineTable(attr,epsgCode);
@@ -1072,7 +1081,7 @@ public class TransferFromXtf {
 	 		tid = getAssociationId(iomObj,(AssociationDef)modelele);
 	 	}
 	 	if(tid!=null && tid.length()>0){
-			oidPool.createObjSqlId(Ili2cUtility.getRootViewable((Viewable) modelele).getScopedName(null),tag,tid);
+			oidPool.createObjSqlId(Ili2cUtility.getRootViewable(getCrsMappedOrSame((Viewable) modelele)).getScopedName(null),tag,tid);
 	 	}
 		FixIomObjectExtRefs extref=new FixIomObjectExtRefs(basketSqlId,genericDomains,tag,tid);
 		allReferencesKnownHelper(iomObj, extref);
@@ -1151,7 +1160,7 @@ public class TransferFromXtf {
 									if(structvalue!=null){
 										String refoid=structvalue.getobjectrefoid();
 										Viewable targetClass=role.getDestination();
-										if(!oidPool.containsXtfid(Ili2cUtility.getRootViewable(targetClass).getScopedName(null),refoid)){
+										if(!oidPool.containsXtfid(Ili2cUtility.getRootViewable(getCrsMappedOrSame(targetClass)).getScopedName(null),refoid)){
 											extref.addFix(structvalue, targetClass,role.isExternal());
 										}
 									}
@@ -1160,7 +1169,7 @@ public class TransferFromXtf {
 								 IomObject structvalue=iomObj.getattrobj(roleName,0);
 								 String refoid=structvalue.getobjectrefoid();
 									Viewable targetClass=role.getDestination();
-								if(!oidPool.containsXtfid(Ili2cUtility.getRootViewable(targetClass).getScopedName(null),refoid)){
+								if(!oidPool.containsXtfid(Ili2cUtility.getRootViewable(getCrsMappedOrSame(targetClass)).getScopedName(null),refoid)){
 									extref.addFix(structvalue, targetClass,role.isExternal());
 								}
 								
@@ -1201,7 +1210,7 @@ public class TransferFromXtf {
 				 if(refoid!=null){
 					 	ReferenceType refType = (ReferenceType)type;
                         Viewable targetClass=refType.getReferred(); 
-						if(!oidPool.containsXtfid(Ili2cUtility.getRootViewable(targetClass).getScopedName(null),refoid)){
+						if(!oidPool.containsXtfid(Ili2cUtility.getRootViewable(getCrsMappedOrSame(targetClass)).getScopedName(null),refoid)){
 							extref.addFix(structvalue, targetClass,refType.isExternal());
 						}
 				 }
@@ -1388,7 +1397,8 @@ public class TransferFromXtf {
 			return;
 		}
 		// ASSERT: an ordinary class/table
-		Viewable aclass1=(Viewable)modelele;		
+        Viewable aclass0=(Viewable)modelele;      
+		Viewable aclass1=getCrsMappedOrSame(aclass0);		
 		String sqlType=(String)ili2sqlName.mapIliClassDef(aclass1);
 		 long sqlId;
 		 boolean updateObj=false;
@@ -1425,7 +1435,7 @@ public class TransferFromXtf {
 					PreparedStatement ps = conn.prepareStatement(insert);
 					try{
 						recConv.writeRecord(basketSqlId, genericDomains,iomObj, aclass1,structEle, aclass, sqlType,
-								sqlId, updateObj, ps,structQueue);
+								sqlId, updateObj, ps,structQueue,aclass0);
 						ps.executeUpdate();
 					}finally{
 						ps.close();
@@ -1439,7 +1449,7 @@ public class TransferFromXtf {
 					PreparedStatement ps = conn.prepareStatement(insert);
 					try{
 						recConv.writeRecord(basketSqlId, genericDomains,iomObj, aclass1,structEle, secondary, sqlType,
-								sqlId, updateObj, ps,structQueue);
+								sqlId, updateObj, ps,structQueue,aclass0);
 						ps.executeUpdate();
 					}finally{
 						ps.close();
@@ -1450,6 +1460,17 @@ public class TransferFromXtf {
 			aclass=aclass.getExtending();
 		 }
 	}
+
+    private Viewable getCrsMappedOrSame(Viewable aclass) {
+        if(crsFilter==null) {
+            return aclass;
+        }
+        Viewable aclass0=(Viewable)crsFilter.get(aclass);
+        if(aclass0!=null) {
+            return aclass0;
+        }
+        return aclass;
+    }
 
 
 	private DbTableName getSqlTableNameItfLineTable(AttributeDef attrDef,Integer epsgCode){
@@ -1521,7 +1542,7 @@ public class TransferFromXtf {
 			    while(attri.hasNext()){
 			    	AttributeDef lineattr=(AttributeDef)attri.next();
 					valuei = recConv.addAttrValue(iomObj, ili2sqlName.mapItfGeometryAsTable((Viewable)attrDef.getContainer(),attrDef,null), sqlId, sqlTableName,ps,
-							valuei, lineattr,null,null,new HashMap<String,String>());
+							valuei, lineattr,null,null,new HashMap<String,String>(),null);
 			    }
 			}
 

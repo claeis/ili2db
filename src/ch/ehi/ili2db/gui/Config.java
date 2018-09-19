@@ -79,6 +79,7 @@ public class Config extends Settings {
 	public static final String DELETE_DATA="data";
 	public static final String CREATE_META_INFO=PREFIX+".createMetaInfo";
 	public static final String USE_EPGS_IN_NAMES=PREFIX+".useEpsgInNames";
+	public static final String SRS_MODEL_ASSIGNMENT=PREFIX+".srsModelAssignment";
 	public static final String MODELS_TAB_MODELNAME_COLSIZE = PREFIX+".modelsTabModelnameColSize";
 	private int function;
 	private String dburl;
@@ -651,5 +652,11 @@ public class Config extends Settings {
     }
     public String getDomainAssignments() {
         return domainAssignments;
+    }
+    public void setSrsModelAssignment(String value) {
+        setValue(SRS_MODEL_ASSIGNMENT,value);
+    }
+    public String getSrsModelAssignment() {
+        return getValue(SRS_MODEL_ASSIGNMENT);
     }
 }

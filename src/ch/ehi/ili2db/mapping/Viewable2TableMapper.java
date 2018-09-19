@@ -31,6 +31,7 @@ public class Viewable2TableMapper {
 	private boolean createItfLineTables=false;
     private String defaultCrsAuthority=null;
     private String defaultCrsCode=null;
+    private String srsModelAssignment=null;
 	private TransferDescription td=null;
 	private Viewable2TableMapper(Config config1,
 			TrafoConfig trafoConfig1, NameMapping nameMapping1) {	
@@ -40,6 +41,7 @@ public class Viewable2TableMapper {
 		sqlSchemaname=config.getDbschema();
         defaultCrsAuthority=config.getDefaultSrsAuthority();
         defaultCrsCode=config.getDefaultSrsCode();
+        srsModelAssignment=config.getSrsModelAssignment();
 	}
 
 	public static Viewable2TableMapping getClass2TableMapping(Config config,
@@ -478,7 +480,7 @@ public class Viewable2TableMapper {
             AttributeDef multipointAttr=multiPointAttrs.getCoordAttr(attr);
             attr=multipointAttr;
         }
-        int epsgCodes[]= TransferFromIli.getEpsgCodes(attr,Integer.parseInt(defaultCrsCode));
+        int epsgCodes[]= TransferFromIli.getEpsgCodes(attr,srsModelAssignment,Integer.parseInt(defaultCrsCode));
         if(epsgCodes==null) {
             // not a geometry attribute
             return new Integer[]{null};

@@ -58,6 +58,7 @@ import ch.ehi.sqlgen.repository.DbTableName;
 import ch.interlis.ili2c.metamodel.AssociationDef;
 import ch.interlis.ili2c.metamodel.AttributeDef;
 import ch.interlis.ili2c.metamodel.CompositionType;
+import ch.interlis.ili2c.metamodel.Container;
 import ch.interlis.ili2c.metamodel.CoordType;
 import ch.interlis.ili2c.metamodel.Domain;
 import ch.interlis.ili2c.metamodel.Element;
@@ -74,6 +75,7 @@ import ch.interlis.ili2c.metamodel.Type;
 import ch.interlis.ili2c.metamodel.TypeAlias;
 import ch.interlis.ili2c.metamodel.View;
 import ch.interlis.ili2c.metamodel.Viewable;
+import ch.interlis.ili2c.metamodel.ViewableTransferElement;
 import ch.interlis.ilirepository.IliFiles;
 
 /**
@@ -82,6 +84,8 @@ import ch.interlis.ilirepository.IliFiles;
  */
 public class TransferFromIli {
 	private static final String EPSG = "EPSG";
+    private static final String SRS_MAPPING_TO_ORIGINAL = "ch.ehi.ili2db.fromili.SrsMapping2Original";
+    private static final String SRS_MAPPING_TO_ALTERNATE = "ch.ehi.ili2db.fromili.SrsMapping2Alternate";
     private DbSchema schema=null;
 	private HashSet<Element> visitedElements=null;
 	private Viewable2TableMapping class2wrapper=null;
@@ -105,6 +109,7 @@ public class TransferFromIli {
 	private FromIliRecordConverter recConv=null;
 	private DbExtMetaInfo metaInfo=new DbExtMetaInfo();
 	private Integer defaultCrsCode=null;
+	private String srsModelAssignment=null;
 	public DbSchema doit(TransferDescription td1,java.util.List<Element> modelEles,ch.ehi.ili2db.mapping.NameMapping ili2sqlName,ch.ehi.ili2db.gui.Config config,DbIdGen idGen,TrafoConfig trafoConfig,Viewable2TableMapping class2wrapper1,CustomMapping customMapping1)
 	throws Ili2dbException
 	{
@@ -127,7 +132,8 @@ public class TransferFromIli {
 		createDatasetCol=config.CREATE_DATASET_COL.equals(config.getCreateDatasetCols());
 		
 		defaultCrsCode=Integer.parseInt(config.getDefaultSrsCode());
-		
+        srsModelAssignment=config.getSrsModelAssignment();
+
 		isIli1Model=td1.getIli1Format()!=null;
 		createItfLineTables=isIli1Model && config.getDoItfLineTables();
 		
@@ -191,7 +197,7 @@ public class TransferFromIli {
 			}else if (modelo instanceof AttributeDef){
 				AttributeDef attr=(AttributeDef)modelo;
 				if(attr.getDomainResolvingAll() instanceof SurfaceOrAreaType){
-				    for(int epsgCode:getEpsgCodes(attr,defaultCrsCode)) {
+				    for(int epsgCode:getEpsgCodes(attr,srsModelAssignment,defaultCrsCode)) {
 	                    generateItfLineTable(attr,epsgCode,pass);
 				    }
 				}else if(attr.getDomainResolvingAll() instanceof EnumerationType){
@@ -1439,7 +1445,7 @@ public class TransferFromIli {
 		}
 		metaInfo.updateMetaInfoTables(conn, schema.getName());
 	}
-    public static int[] getEpsgCodes(AttributeDef attr,int defaultCrsCode) {
+    public static int[] getEpsgCodes(AttributeDef attr,String srsModelAssignment,int defaultCrsCode) {
         TransferDescription td=(TransferDescription)attr.getContainer(TransferDescription.class);
         if(Ili2cUtility.isMultiSurfaceAttr(td,attr)) {
             MultiSurfaceMappings multiSurfaceAttrs=new MultiSurfaceMappings();
@@ -1499,6 +1505,32 @@ public class TransferFromIli {
         }
         String crs=coord.getCrs(attrOrDomainDef);
         if(crs!=null) {
+            if(srsModelAssignment!=null) {
+                Map<ch.interlis.ili2c.metamodel.Element,ch.interlis.ili2c.metamodel.Element> srsMapping=getSrsMappingToAlternate((TransferDescription)attrOrDomainDef.getContainer(TransferDescription.class),srsModelAssignment);
+                ch.interlis.ili2c.metamodel.Element alternativeAttrOrDomainDef=srsMapping.get(attrOrDomainDef);
+                if(alternativeAttrOrDomainDef!=null) {
+                    CoordType alternativeCoord=null;
+                    if(alternativeAttrOrDomainDef instanceof AttributeDef) {
+                        Type attrType2=((AttributeDef)alternativeAttrOrDomainDef).getDomain();
+                        if(attrType2 instanceof ch.interlis.ili2c.metamodel.TypeAlias) {
+                            alternativeAttrOrDomainDef=((ch.interlis.ili2c.metamodel.TypeAlias)attrType2).getAliasing();
+                            alternativeCoord=(CoordType)((Domain)alternativeAttrOrDomainDef).getType();
+                        }else {
+                            alternativeCoord=(CoordType) attrType2;
+                        }
+                    }else {
+                        alternativeCoord=(CoordType) ((Domain)alternativeAttrOrDomainDef).getType();
+                    }
+                    String alternativeCrs=alternativeCoord.getCrs(alternativeAttrOrDomainDef);
+                    if(alternativeCrs==null) {
+                        throw new IllegalArgumentException("missing CRS definition "+alternativeAttrOrDomainDef.getScopedName());
+                    }
+                    int epsgCodes[]=new int[2];
+                    epsgCodes[0]=parseEpsgCode(crs);
+                    epsgCodes[1]=parseEpsgCode(alternativeCrs);
+                    return epsgCodes;
+                }
+            }
             int epsgCodes[]=new int[1];
             epsgCodes[0]=parseEpsgCode(crs);
             return epsgCodes;
@@ -1507,6 +1539,40 @@ public class TransferFromIli {
         epsgCodes[0]=defaultCrsCode;
         return epsgCodes;
     }
+    public static Map<Element, Element> getSrsMappingToOriginal(TransferDescription td, String srsModelAssignment) {
+        if(td.getTransientMetaValue(SRS_MAPPING_TO_ORIGINAL)==null) {
+            initSrsMapping(td, srsModelAssignment);
+        }
+        return (Map<Element, Element>)td.getTransientMetaValue(SRS_MAPPING_TO_ORIGINAL);
+    }
+    public static Map<Element, Element> getSrsMappingToAlternate(TransferDescription td, String srsModelAssignment) {
+        if(td.getTransientMetaValue(SRS_MAPPING_TO_ALTERNATE)==null) {
+            initSrsMapping(td, srsModelAssignment);
+        }
+        return (Map<Element, Element>)td.getTransientMetaValue(SRS_MAPPING_TO_ALTERNATE);
+    }
+    private static void initSrsMapping(TransferDescription td, String srsModelAssignment) {
+        String models[]=srsModelAssignment.split("=");
+        Model originalModel=(Model)td.getElement(models[0]);
+        Model alternateModel=(Model)td.getElement(models[1]);
+        Map<Element, Element> map2originalModel=new HashMap<Element,Element>();
+        setupSrsTranslation(map2originalModel,alternateModel,originalModel);
+        td.setTransientMetaValue(SRS_MAPPING_TO_ORIGINAL,map2originalModel);
+        Map<Element, Element> map2alternateModel=new HashMap<Element,Element>();
+        setupSrsTranslation(map2alternateModel,originalModel,alternateModel);
+        td.setTransientMetaValue(SRS_MAPPING_TO_ALTERNATE,map2alternateModel);
+    }
+    private static void setupSrsTranslation(Map<Element, Element> mapping,Element srcEle,Element destEle){
+        mapping.put(srcEle, destEle);
+        if(destEle instanceof Container){
+            Iterator destIt=((Container) destEle).iterator();
+            Iterator srcIt=((Container) srcEle).iterator();
+            while(destIt.hasNext()){
+                setupSrsTranslation(mapping,(Element)srcIt.next(),(Element)destIt.next());
+            }
+        }
+    }
+    
     public static int parseEpsgCode(String crs) {
         String crsv[]=crs.split(":");
         String auth=crsv[0];
@@ -1515,6 +1581,7 @@ public class TransferFromIli {
         }
         return Integer.parseInt(crsv[1]);
     }
+    @Deprecated
     public static int getEpsgCode(AttributeDef attr, Map<String, String> genericDomains,int defaultCrsCode) {
         ch.interlis.ili2c.metamodel.Element attrOrDomainDef=attr;
         ch.interlis.ili2c.metamodel.Type attrType=attr.getDomain();
@@ -1554,5 +1621,58 @@ public class TransferFromIli {
             return epsgCode;
         }
         return defaultCrsCode;
+    }
+    public static int getEpsgCode(Viewable aclass,AttributeDef attr, Map<String, String> genericDomains,int defaultCrsCode) {
+        attr=getAttribute(aclass, attr.getName());
+        ch.interlis.ili2c.metamodel.Element attrOrDomainDef=attr;
+        ch.interlis.ili2c.metamodel.Type attrType=attr.getDomain();
+        Domain coordDomain=null;
+        if(attrType instanceof ch.interlis.ili2c.metamodel.TypeAlias) {
+            attrOrDomainDef=((ch.interlis.ili2c.metamodel.TypeAlias)attrType).getAliasing();
+            attrType=((Domain) attrOrDomainDef).getType();
+            if(attrType instanceof CoordType) {
+                coordDomain=(Domain) attrOrDomainDef;
+            }
+        }
+        CoordType coord=null;
+        if(attrType instanceof CoordType) {
+            coord=(CoordType)attrType;
+        }else if(attrType instanceof LineType) {
+            coordDomain=((LineType)attrType).getControlPointDomain();
+            if(coordDomain!=null){
+                attrOrDomainDef=coordDomain;
+                coord=(CoordType)coordDomain.getType();
+            }
+        }
+        if(coord==null) {
+            throw new IllegalArgumentException(attr.getScopedName()+" is not a geometry attribute");
+        }
+        if(coord.isGeneric()) {
+            Domain concreteCoordDomain=((Model) attr.getContainer(Model.class)).mapGenericDomain(coordDomain,genericDomains);
+            String crs=((CoordType)concreteCoordDomain.getType()).getCrs(concreteCoordDomain);
+            if(crs==null) {
+                
+            }
+            int epsgCode=parseEpsgCode(crs);
+            return epsgCode;
+        }
+        String crs=coord.getCrs(attrOrDomainDef);
+        if(crs!=null) {
+            int epsgCode=parseEpsgCode(crs);
+            return epsgCode;
+        }
+        return defaultCrsCode;
+    }
+    private static AttributeDef getAttribute(Viewable aclass, String name) {
+        Iterator<ViewableTransferElement> attri=aclass.getAttributesAndRoles2();
+        while(attri.hasNext()) {
+            ViewableTransferElement prop=attri.next();
+            if(prop.obj instanceof AttributeDef) {
+                if(((AttributeDef)prop.obj).getName().equals(name)) {
+                    return (AttributeDef)prop.obj;
+                }
+            }
+        }
+        return null;
     }
 }

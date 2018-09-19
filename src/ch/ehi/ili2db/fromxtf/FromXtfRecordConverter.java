@@ -109,7 +109,7 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 	}
 	public void writeRecord(long basketSqlId, java.util.Map<String,String> genericDomains,IomObject iomObj,Viewable iomClass,
 			StructWrapper structEle, ViewableWrapper aclass, String sqlType,
-			long sqlId, boolean updateObj, PreparedStatement ps,ArrayList structQueue)
+			long sqlId, boolean updateObj, PreparedStatement ps,ArrayList structQueue,Viewable originalClass)
 			throws SQLException, ConverterException {
 		int valuei=1;
 		
@@ -186,7 +186,7 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 							// skip implicit particles (base-viewables) of views
 						}else{
 							valuei = addAttrValue(iomObj, sqlType, sqlId, aclass.getSqlTablename(),ps,
-									valuei, attr,columnWrapper.getEpsgCode(),structQueue,genericDomains);
+									valuei, attr,columnWrapper.getEpsgCode(),structQueue,genericDomains,originalClass);
 						}
 					}
 				}
@@ -791,7 +791,7 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 		return sep;
 	}
 	public int addAttrValue(IomObject iomObj, String sqlType, long sqlId,
-			String sqlTableName,PreparedStatement ps, int valuei, AttributeDef attr,Integer epsgCode,ArrayList structQueue,Map<String,String> genericDomains)
+			String sqlTableName,PreparedStatement ps, int valuei, AttributeDef attr,Integer epsgCode,ArrayList structQueue,Map<String,String> genericDomains,Viewable originalClass)
 			throws SQLException, ConverterException {
 		if(attr.getExtending()==null){
 			 String attrName=attr.getName();
@@ -1050,7 +1050,7 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 				 }else if(type instanceof CoordType){
 					 IomObject value=iomObj.getattrobj(attrName,0);
 					 if(value!=null){
-					    int actualEpsgCode=TransferFromIli.getEpsgCode(attr, genericDomains, defaultEpsgCode);
+					    int actualEpsgCode=TransferFromIli.getEpsgCode(originalClass,attr, genericDomains, defaultEpsgCode);
 					    if(actualEpsgCode==epsgCode) {
 	                        boolean is3D=((CoordType)type).getDimensions().length==3;
 	                        ps.setObject(valuei,geomConv.fromIomCoord(value,epsgCode,is3D));

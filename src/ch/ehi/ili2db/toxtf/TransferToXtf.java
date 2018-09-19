@@ -50,6 +50,7 @@ import ch.interlis.ili2c.metamodel.AttributeDef;
 import ch.interlis.ili2c.metamodel.CompositionType;
 import ch.interlis.ili2c.metamodel.CoordType;
 import ch.interlis.ili2c.metamodel.Domain;
+import ch.interlis.ili2c.metamodel.Element;
 import ch.interlis.ili2c.metamodel.EnumerationType;
 import ch.interlis.ili2c.metamodel.Model;
 import ch.interlis.ili2c.metamodel.PolylineType;
@@ -118,6 +119,8 @@ public class TransferToXtf {
 	private TranslateToTranslation languageFilter=null;
 	private ReduceToBaseModel exportBaseModelFilter=null;
     private Integer defaultCrsCode=null;
+    private Map<Element,Element> crsFilter=null;
+    private Map<Element,Element> crsFilterToTarget=null;
 	
 	public TransferToXtf(NameMapping ili2sqlName1,TransferDescription td1,Connection conn1,SqlColumnConverter geomConv,Config config,TrafoConfig trafoConfig,Viewable2TableMapping class2wrapper1){
 		ili2sqlName=ili2sqlName1;
@@ -150,6 +153,12 @@ public class TransferToXtf {
 		}
 		if(config.getVer4_translation() || config.getIli1Translation()!=null){
 			languageFilter=new TranslateToTranslation(td, config);
+		}
+		
+		String srsAssignment=config.getSrsModelAssignment();
+		if(srsAssignment!=null) {
+		    crsFilter=TransferFromIli.getSrsMappingToOriginal(td, srsAssignment);
+            crsFilterToTarget=TransferFromIli.getSrsMappingToAlternate(td, srsAssignment);
 		}
 		if(config.getExportModels()!=null){
 			List<Model> exportModels=Ili2db.getModels(config.getExportModels(),td);
@@ -422,6 +431,13 @@ public class TransferToXtf {
 				if(languageFilter!=null){
 					aclass=(Viewable)aclass.getTranslationOfOrSame();
 				}
+                Viewable iomTargetClass=aclass;
+				if(crsFilter!=null) {
+				    Viewable aclass0=(Viewable) crsFilter.get(aclass);
+				    if(aclass0!=null) {
+				        aclass=aclass0;
+				    }
+				}
 				ViewableWrapper wrapper=class2wrapper.get(aclass);
 				
 				// get sql name
@@ -441,7 +457,7 @@ public class TransferToXtf {
 						if(validator!=null)validator.validate(iomBasket);
 						iomFile.write(iomBasket);
 					}
-					dumpObject(iomFile,aclass,basketSqlId,genericDomains);
+					dumpObject(iomFile,aclass,iomTargetClass,basketSqlId,genericDomains);
 				}else{
 					// skip it
 					EhiLogger.traceUnusualState(aclass.getScopedName(null)+"...skipped; no table "+sqlName+" in db");
@@ -722,7 +738,7 @@ public class TransferToXtf {
 	/** dumps all struct values of a given struct attr.
 	 * @throws IoxException 
 	 */
-	private void dumpStructs(StructWrapper structWrapper,FixIomObjectRefs fixref,Map<String,String> genericDomains) throws IoxException
+	private void dumpStructs(StructWrapper structWrapper,FixIomObjectRefs fixref,Map<String,String> genericDomains,boolean isCrsAlternate) throws IoxException
 	{
 		Viewable baseClass=((CompositionType)structWrapper.getParentAttr().getDomain()).getComponentType();
 
@@ -773,9 +789,25 @@ public class TransferToXtf {
 		Iterator<Viewable> classi=structClassv.iterator();
 		while(classi.hasNext()){
 			Viewable aclass=classi.next();
-			dumpObjHelper(null,aclass,null,genericDomains,fixref,structWrapper,structelev);
+            Viewable iomTargetClass=aclass;
+			{
+		        if(isCrsAlternate) {
+		            iomTargetClass = getCrsMappedToAlternateOrSame(aclass);
+		        }
+			}
+			dumpObjHelper(null,aclass,iomTargetClass,null,genericDomains,fixref,structWrapper,structelev);
 		}
 	}
+    private Viewable getCrsMappedToAlternateOrSame(Viewable aclass) {
+        if(crsFilterToTarget==null) {
+            return aclass;
+        }
+        Viewable aclass0=(Viewable) crsFilterToTarget.get(aclass);
+        if(aclass0!=null) {
+            return aclass0;
+        }
+        return aclass;
+    }
 	private void dumpItfTableObject(IoxWriter out,AttributeDef attr,Integer epsgCode,Long basketSqlId)
 	{
 		String stmt=createItfLineTableQueryStmt(attr,epsgCode,basketSqlId,geomConv);
@@ -851,7 +883,7 @@ public class TransferToXtf {
 				    Iterator attri = lineAttrTable.getAttributes ();
 				    while(attri.hasNext()){
 						AttributeDef lineattr=(AttributeDef)attri.next();
-						valuei = recConv.addAttrValue(rs, valuei, sqlid, iomObj, lineattr,null,null,class2wrapper.get(lineAttrTable),null,null);
+						valuei = recConv.addAttrValue(rs, valuei, sqlid, iomObj, lineattr,null,null,class2wrapper.get(lineAttrTable),null,null,null);
 				    }
 				}
 				
@@ -892,15 +924,16 @@ public class TransferToXtf {
 	}
 	/** dumps all objects of a given class.
 	 */
-	private void dumpObject(IoxWriter out,Viewable aclass,Long basketSqlId,Map<String,String> genericDomains)
+	private void dumpObject(IoxWriter out,Viewable aclass,Viewable iomTargetClass,Long basketSqlId,Map<String,String> genericDomains)
 	{
-		dumpObjHelper(out,aclass,basketSqlId,genericDomains,null,null,null);
+		dumpObjHelper(out,aclass,iomTargetClass,basketSqlId,genericDomains,null,null,null);
 	}
 	/** helper to dump all objects/structvalues of a given class/structure.
 	 */
-	private void dumpObjHelper(IoxWriter out,Viewable aclass,Long basketSqlId,Map<String,String> genericDomains,FixIomObjectRefs fixref,StructWrapper structWrapper,HashMap<String,IomObject> structelev)
+	private void dumpObjHelper(IoxWriter out,Viewable aclass,Viewable iomTargetClass,Long basketSqlId,Map<String,String> genericDomains,FixIomObjectRefs fixref,StructWrapper structWrapper,HashMap<String,IomObject> structelev)
 	{
 		String stmt=recConv.createQueryStmt(aclass,basketSqlId,structWrapper);
+		ViewableWrapper aclassWrapper=class2wrapper.get(aclass);
 		EhiLogger.traceBackendCmd(stmt);
 		java.sql.PreparedStatement dbstmt = null;
         java.sql.ResultSet rs=null;
@@ -917,13 +950,13 @@ public class TransferToXtf {
 				if(structWrapper==null){
 					fixref=new FixIomObjectRefs();
 				}
-				iomObj = recConv.convertRecord(rs, aclass, fixref, structWrapper,
-						structelev, structQueue, sqlid,genericDomains);
+				iomObj = recConv.convertRecord(rs, aclassWrapper, fixref, structWrapper,
+						structelev, structQueue, sqlid,genericDomains,iomTargetClass);
 				updateObjStat(iomObj.getobjecttag(), sqlid);
 				// collect structvalues
 				while(!structQueue.isEmpty()){
 					StructWrapper wrapper=(StructWrapper)structQueue.remove(0);
-					dumpStructs(wrapper,fixref,genericDomains);
+					dumpStructs(wrapper,fixref,genericDomains,aclass==iomTargetClass);
 				}
 				if(structWrapper==null){
 					if(!fixref.needsFixing() || out instanceof ItfWriter){

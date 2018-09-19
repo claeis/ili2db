@@ -330,11 +330,10 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 		long sqlid=rs.getLong(1);
 		return sqlid;
 	}
-	public Iom_jObject convertRecord(java.sql.ResultSet rs, Viewable aclass1,
+	public Iom_jObject convertRecord(java.sql.ResultSet rs, ViewableWrapper aclass,
 			FixIomObjectRefs fixref, StructWrapper structWrapper,
-			HashMap structelev, ArrayList<StructWrapper> structQueue, long sqlid,Map<String,String> genericDomains)
+			HashMap structelev, ArrayList<StructWrapper> structQueue, long sqlid,Map<String,String> genericDomains,Viewable iomTargetClass)
 			throws SQLException {
-		ViewableWrapper aclass=class2wrapper.get(aclass1);
 		Iom_jObject iomObj;
 		int valuei=1;
 		valuei++;
@@ -357,9 +356,9 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 		}
 		if(structWrapper==null){
 			if(!aclass.isStructure()){
-				iomObj=new Iom_jObject(aclass1.getScopedName(null),sqlIliTid);
+				iomObj=new Iom_jObject(iomTargetClass.getScopedName(null),sqlIliTid);
 			}else{
-				iomObj=new Iom_jObject(aclass1.getScopedName(null),null);
+				iomObj=new Iom_jObject(iomTargetClass.getScopedName(null),null);
 			}
 			iomObj.setattrvalue(ItfWriter2.INTERNAL_T_ID, Long.toString(sqlid));
 			fixref.setRoot(iomObj);
@@ -384,7 +383,7 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
                        if(proxyType!=null && (proxyType instanceof ObjectType)){
                            // skip implicit particles (base-viewables) of views
                        }else{
-                              valuei = addAttrValue(rs, valuei, sqlid, iomObj, attr,columnWrapper.getEpsgCode(),structQueue,table,fixref,genericDomains);
+                              valuei = addAttrValue(rs, valuei, sqlid, iomObj, attr,columnWrapper.getEpsgCode(),structQueue,table,fixref,genericDomains,iomTargetClass);
                        }
                    }
 			   }
@@ -440,7 +439,7 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 	
 	final private int  LEN_LANG_PREFIX=DbNames.MULTILINGUAL_TXT_COL_PREFIX.length();
 	public int addAttrValue(java.sql.ResultSet rs, int valuei, long sqlid,
-			Iom_jObject iomObj, AttributeDef attr,Integer epsgCode,ArrayList<StructWrapper> structQueue,ViewableWrapper table,FixIomObjectRefs fixref,Map<String,String> genericDomains) throws SQLException {
+			Iom_jObject iomObj, AttributeDef attr,Integer epsgCode,ArrayList<StructWrapper> structQueue,ViewableWrapper table,FixIomObjectRefs fixref,Map<String,String> genericDomains,Viewable iomTargetClass) throws SQLException {
 		if(attr.getExtending()==null){
 			String attrName=attr.getName();
 			String sqlAttrName=ili2sqlName.mapIliAttributeDef(attr,epsgCode,table.getSqlTablename(),null);
@@ -684,7 +683,7 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 				 }else if(type instanceof CoordType){
 					Object geomobj=rs.getObject(valuei);
 					valuei++;
-                    int actualEpsgCode=TransferFromIli.getEpsgCode(attr, genericDomains, defaultEpsgCode);
+                    int actualEpsgCode=TransferFromIli.getEpsgCode(iomTargetClass,attr, genericDomains, defaultEpsgCode);
 					if(!rs.wasNull() && epsgCode==actualEpsgCode){
 						try{
 							boolean is3D=((CoordType)type).getDimensions().length==3;

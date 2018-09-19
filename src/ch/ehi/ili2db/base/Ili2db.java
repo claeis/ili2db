@@ -785,20 +785,35 @@ public class Ili2db {
 	}
 	private static void setupIli2cMetaAttrs(Ili2cMetaAttrs ili2cMetaAttrs,
 			Config config,ch.interlis.ili2c.config.Configuration modelv) {
-
-		String ili2translation=config.getIli1Translation();
-		if(ili2translation!=null){
-		    String modelNames[]=ili2translation.split("=");
-		    String translatedModelName=modelNames[0];
-		    String originLanguageModelName=modelNames[1];
-		    if(translatedModelName!=null && originLanguageModelName!=null){
-		    	ili2cMetaAttrs.setMetaAttrValue(translatedModelName, Ili2cMetaAttrs.ILI2C_TRANSLATION_OF, originLanguageModelName);
-		    	if(modelv!=null){
-			    	modelv.addFileEntry(new ch.interlis.ili2c.config.FileEntry(originLanguageModelName,ch.interlis.ili2c.config.FileEntryKind.ILIMODELFILE));
-			    	modelv.addFileEntry(new ch.interlis.ili2c.config.FileEntry(translatedModelName,ch.interlis.ili2c.config.FileEntryKind.ILIMODELFILE));
-		    	}
-		    }
+	    {
+    		String ili2translation=config.getIli1Translation();
+    		if(ili2translation!=null){
+    		    String modelNames[]=ili2translation.split("=");
+    		    String translatedModelName=modelNames[0];
+    		    String originLanguageModelName=modelNames[1];
+    		    if(translatedModelName!=null && originLanguageModelName!=null){
+    		    	ili2cMetaAttrs.setMetaAttrValue(translatedModelName, Ili2cMetaAttrs.ILI2C_TRANSLATION_OF, originLanguageModelName);
+    		    	if(modelv!=null){
+    			    	modelv.addFileEntry(new ch.interlis.ili2c.config.FileEntry(originLanguageModelName,ch.interlis.ili2c.config.FileEntryKind.ILIMODELFILE));
+    			    	modelv.addFileEntry(new ch.interlis.ili2c.config.FileEntry(translatedModelName,ch.interlis.ili2c.config.FileEntryKind.ILIMODELFILE));
+    		    	}
+    		    }
+    		}
 		}
+	    {
+	        String srsModelAssignment=config.getSrsModelAssignment();
+	        if(srsModelAssignment!=null){
+	            String modelNames[]=srsModelAssignment.split("=");
+	            String originalSrsModelName=modelNames[0];
+	            String alternativeSrsModelName=modelNames[1];
+	            if(originalSrsModelName!=null && alternativeSrsModelName!=null){
+	                if(modelv!=null){
+	                    modelv.addFileEntry(new ch.interlis.ili2c.config.FileEntry(originalSrsModelName,ch.interlis.ili2c.config.FileEntryKind.ILIMODELFILE));
+	                    modelv.addFileEntry(new ch.interlis.ili2c.config.FileEntry(alternativeSrsModelName,ch.interlis.ili2c.config.FileEntryKind.ILIMODELFILE));
+	                }
+	            }
+	        }
+	    }
 	}
 	private static void logStatistics(boolean isIli1,Map<Long,BasketStat> stat)
 	{
@@ -1529,6 +1544,14 @@ public class Ili2db {
 				}
 				
 				// use models explicitly given by user (--models, --baskets, --dataset, --topics)
+				// but remove model models that are crs translated
+				String srsModelAssignment=config.getSrsModelAssignment();
+				if(srsModelAssignment!=null) {
+	                String srsModelNames[]=srsModelAssignment.split("=");
+	                String originalSrsModelName=srsModelNames[0];
+	                String alternativeSrsModelName=srsModelNames[1];
+				    modelNames.remove(alternativeSrsModelName);
+				}
 			  java.util.List<Element> eles=ms.getModelElements(modelNames,td, td.getIli1Format()!=null && config.getDoItfLineTables(),Config.CREATE_ENUM_DEFS_MULTI.equals(config.getCreateEnumDefs()),config);
 			  Viewable2TableMapping class2wrapper=Viewable2TableMapper.getClass2TableMapping(config,trafoConfig,eles,mapping);
 
