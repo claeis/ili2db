@@ -15,6 +15,7 @@ ideas/open issues/questions
 LATEST
 ---------------------------
 - xtf24: import/export coord generics
+- fixed: missing resource ch.ehi.basics.wizard
 
 ili2pg 3.12.2 (2018-09-07)
 -----------------------------
