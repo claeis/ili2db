@@ -171,8 +171,8 @@ public class TransferToXtf {
 			if(configFilename!=null){
 				try {
 					modelConfig.mergeConfigFile(new File(configFilename));
-				} catch (FileNotFoundException e) {
-					EhiLogger.logError("validator config file <"+configFilename+"> not found");
+				} catch (java.io.IOException e) {
+					EhiLogger.logError("failed to read validator config file <"+configFilename+">");
 				}
 			}
 			modelConfig.setConfigValue(ValidationConfig.PARAMETER, ValidationConfig.AREA_OVERLAP_VALIDATION, config.isDisableAreaValidation()?ValidationConfig.OFF:null);

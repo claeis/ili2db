@@ -1,26 +1,22 @@
 package ch.ehi.ili2db.metaattr;
 
-import java.util.Map;
 import java.util.Iterator;
-import java.io.FileReader;
+import java.io.File;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.Statement;
 import java.sql.ResultSet;
 
-import com.moandjiezana.toml.Toml;
 
 import ch.interlis.ili2c.metamodel.Element;
 import ch.interlis.ili2c.metamodel.TransferDescription;
+import ch.interlis.iox_j.inifile.IniFileReader;
+import ch.interlis.iox_j.validator.ValidationConfig;
 import ch.interlis.ili2c.metamodel.Container;
-import ch.interlis.ili2c.metamodel.PredefinedModel;
-import ch.interlis.ili2c.metamodel.DataModel;
-
 import ch.ehi.basics.logging.EhiLogger;
 import ch.ehi.basics.settings.Settings;
 import ch.ehi.ili2db.base.DbNames;
 import ch.ehi.ili2db.base.Ili2dbException;
-import ch.ehi.sqlgen.repository.DbSchema;
 import ch.ehi.sqlgen.repository.DbSchema;
 import ch.ehi.sqlgen.repository.DbTable;
 import ch.ehi.sqlgen.repository.DbTableName;
@@ -33,39 +29,25 @@ public class MetaAttrUtility{
 	 * @param tomlFile
 	 * @throws Ili2dbException
 	 */
-	public static void addMetaAttrsFromToml(TransferDescription td, FileReader tomlFile)
-	throws Ili2dbException
+	public static void addMetaAttrsFromConfigFile(TransferDescription td, File configFile)
+	throws java.io.IOException
 	{
-		Toml toml = new Toml().read(tomlFile);
-        for (java.util.Map.Entry<String, Object> entry : toml.entrySet()) {
-            Object entryO=entry.getValue();
-            if(entryO instanceof Toml){
-                String iliQName=stripQuotes(entry.getKey());
-                Element element = td.getElement(iliQName);
-                // known element?
-                if(element!=null) {
-                    Toml config=(Toml)entryO;
-                    for (java.util.Map.Entry<String, Object> configEntry : config.entrySet()) {
-                        String paramName=configEntry.getKey();
-                        if(configEntry.getValue() instanceof String){
-                            String paramValue=(String) configEntry.getValue();
-                            // meta attr not yet defined?
-                            if(element.getMetaValue(paramName)==null) {
-                                // define/set it
-                                element.setMetaValue(paramName, paramValue);
-                            }
-                        }
+        ValidationConfig config=IniFileReader.readFile(configFile);
+        for(String iliQName:config.getIliQnames()) {
+            Element element = td.getElement(iliQName);
+            // known element?
+            if(element!=null) {
+                for(String paramName:config.getConfigParams(iliQName)) {
+                    String paramValue=config.getConfigValue(iliQName, paramName);
+                    if(element.getMetaValue(paramName)==null) {
+                        // define/set it
+                        element.setMetaValue(paramName, paramValue);
                     }
                 }
-            }
+            }            
+            
       }
 	}
-    private static String stripQuotes(String key) {
-        if(key.startsWith("\"") && key.endsWith("\"")){
-            return key.substring(1, key.length()-1);
-        }
-        return key;
-    }
 
 	/** Read meta-attributes from the db and add them to the ili2c metamodel.
 	 * @param td

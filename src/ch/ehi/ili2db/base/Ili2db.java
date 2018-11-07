@@ -468,8 +468,8 @@ public class Ili2db {
                     if(config.getCreateMetaInfo()){
                         try{
                             EhiLogger.logState("import meta-attributes from toml file");
-                            MetaAttrUtility.addMetaAttrsFromToml(td, new java.io.FileReader(config.getIliMetaAttrsFile()));
-                        }catch(FileNotFoundException e){
+                            MetaAttrUtility.addMetaAttrsFromConfigFile(td, new java.io.File(config.getIliMetaAttrsFile()));
+                        }catch(IOException e){
                             throw new Ili2dbException("import meta-attributes failed",e);
                         }
                     }else{
@@ -1030,8 +1030,8 @@ public class Ili2db {
                 if(config.getCreateMetaInfo()){
                     try{
                         EhiLogger.logState("import meta-attributes from toml file");
-                        MetaAttrUtility.addMetaAttrsFromToml(td, new java.io.FileReader(config.getIliMetaAttrsFile()));
-                    }catch(FileNotFoundException e){
+                        MetaAttrUtility.addMetaAttrsFromConfigFile(td, new java.io.File(config.getIliMetaAttrsFile()));
+                    }catch(IOException e){
                         throw new Ili2dbException("import meta-attributes failed",e);
                     }
                 }else{
