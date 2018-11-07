@@ -2166,8 +2166,8 @@ public class Ili2db {
 	}
 	public static boolean isItfFilename(String filename)
 	{
-		String xtfExt=ch.ehi.basics.view.GenericFileFilter.getFileExtension(new java.io.File(filename)).toLowerCase();
-		if("itf".equals(xtfExt)){
+		String xtfExt=ch.ehi.basics.view.GenericFileFilter.getFileExtension(new java.io.File(filename));
+		if(xtfExt!=null && "itf".equals(xtfExt.toLowerCase())){
 			return true;
 		}
 		return false;
