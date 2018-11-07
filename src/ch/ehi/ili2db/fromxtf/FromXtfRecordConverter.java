@@ -898,11 +898,13 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 							 for(int surfacei=0;surfacei<surfacec;surfacei++){
 								 IomObject iomSurfaceStructure=iomValue.getattrobj(attrMapping.getBagOfSurfacesAttrName(), surfacei);
 								 IomObject iomPoly=iomSurfaceStructure.getattrobj(attrMapping.getSurfaceAttrName(), 0);
-								 IomObject iomSurface=iomPoly.getattrobj("surface", 0);
-								 if(iomMultisurface==null){
-									 iomMultisurface=new ch.interlis.iom_j.Iom_jObject("MULTISURFACE",null);
+								 if(iomPoly!=null) {
+	                                 IomObject iomSurface=iomPoly.getattrobj("surface", 0);
+	                                 if(iomMultisurface==null){
+	                                     iomMultisurface=new ch.interlis.iom_j.Iom_jObject("MULTISURFACE",null);
+	                                 }
+	                                 iomMultisurface.addattrobj("surface", iomSurface);
 								 }
-								 iomMultisurface.addattrobj("surface", iomSurface);
 							 }
 						 }
 						 if(iomMultisurface!=null){

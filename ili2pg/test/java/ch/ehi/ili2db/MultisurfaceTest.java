@@ -179,6 +179,41 @@ public class MultisurfaceTest {
 			}
 		}
 	}
+    @Test
+    public void importSmartChbaseNull() throws Exception
+    {
+        Connection jdbcConnection=null;
+        try{
+            Class driverClass = Class.forName("org.postgresql.Driver");
+            jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
+            stmt=jdbcConnection.createStatement();
+            stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");        
+
+            File data=new File("test/data/MultiSurface/MultiSurface1null.xtf");
+            Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+            config.setFunction(Config.FC_IMPORT);
+            config.setCreateFk(config.CREATE_FK_YES);
+            config.setTidHandling(Config.TID_HANDLING_PROPERTY);
+            config.setBasketHandling(config.BASKET_HANDLING_READWRITE);
+            config.setCatalogueRefTrafo(null);
+            config.setMultiSurfaceTrafo(config.MULTISURFACE_TRAFO_COALESCE);
+            config.setMultilingualTrafo(null);
+            config.setInheritanceTrafo(null);
+            Ili2db.readSettingsFromDb(config);
+            Ili2db.run(config,null);
+            // imported attrValues of classa1
+            Assert.assertTrue(stmt.execute("SELECT classa1.geom, classa1.t_id, classa1.point FROM "+DBSCHEMA+".classa1 WHERE classa1.t_id = '4'"));
+            {
+                ResultSet rs=stmt.getResultSet();
+                Assert.assertTrue(rs.next());
+                Assert.assertEquals(null, rs.getString(1));
+            }
+        }finally{
+            if(jdbcConnection!=null){
+                jdbcConnection.close();
+            }
+        }
+    }
 	
 	@Test
 	public void exportSmartChbase() throws Exception
