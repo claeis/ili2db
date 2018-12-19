@@ -82,7 +82,7 @@ public class Config extends Settings {
 	public static final String USE_EPGS_IN_NAMES=PREFIX+".useEpsgInNames";
 	public static final String SRS_MODEL_ASSIGNMENT=PREFIX+".srsModelAssignment";
 	public static final String MODELS_TAB_MODELNAME_COLSIZE = PREFIX+".modelsTabModelnameColSize";
-	private int function;
+	private int function=FC_UNDEFINED;
 	private String dburl;
 	private String dbusr;
 	private String dbpwd;
@@ -125,12 +125,14 @@ public class Config extends Settings {
     private String domainAssignments=null;
 	final static public String ILIGML20="ILIGML20"; 
 	
-	static public final int FC_IMPORT=0;
-	static public final int FC_SCHEMAIMPORT=1;
-	static public final int FC_EXPORT=2;
-	static public final int FC_UPDATE=3;
-	static public final int FC_DELETE=4;
-	static public final int FC_REPLACE=5;
+    static public final int FC_UNDEFINED=0;
+	static public final int FC_IMPORT=1;
+	static public final int FC_SCHEMAIMPORT=2;
+	static public final int FC_EXPORT=3;
+	static public final int FC_UPDATE=4;
+	static public final int FC_DELETE=5;
+	static public final int FC_REPLACE=6;
+    static public final int FC_SCRIPT=7;
 	public String getIdGenerator() {
 		return idGenerator;
 	}

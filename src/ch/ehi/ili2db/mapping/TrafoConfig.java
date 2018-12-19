@@ -27,7 +27,7 @@ public class TrafoConfig {
 		if(schema!=null){
 			sqlName=schema+"."+sqlName;
 		}
-		if(DbUtility.tableExists(conn,new DbTableName(schema,DbNames.TRAFO_TAB))){
+		if(conn!=null && DbUtility.tableExists(conn,new DbTableName(schema,DbNames.TRAFO_TAB))){
 			try{
 				// select entries
 				String insStmt="SELECT "+DbNames.TRAFO_TAB_ILINAME_COL+","+DbNames.TRAFO_TAB_TAG_COL+","+DbNames.TRAFO_TAB_SETTING_COL+" FROM "+sqlName;

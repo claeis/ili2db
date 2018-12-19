@@ -70,6 +70,26 @@ public class SimpleGpkgTest {
 		config.setInheritanceTrafo(null);
 		Ili2db.run(config,null);
 	}
+    @Test
+    public void createScriptFromIli() throws Exception
+    {
+        File data=new File(TEST_OUT,"Simple23.ili");
+        Config config=new Config();
+        new ch.ehi.ili2gpkg.GpkgMain().initConfig(config);
+        config.setLogfile(data.getPath()+".log");
+        config.setXtffile(data.getPath());
+        config.setFunction(Config.FC_SCRIPT);
+        config.setCreateFk(config.CREATE_FK_YES);
+        config.setCreateNumChecks(true);
+        config.setTidHandling(Config.TID_HANDLING_PROPERTY);
+        config.setBasketHandling(config.BASKET_HANDLING_READWRITE);
+        config.setCatalogueRefTrafo(null);
+        config.setMultiSurfaceTrafo(null);
+        config.setMultilingualTrafo(null);
+        config.setInheritanceTrafo(null);
+        config.setCreatescript(data.getPath()+"-out.sql");
+        Ili2db.run(config,null);
+    }
 	
 	@Test
 	public void importIliStruct() throws Exception

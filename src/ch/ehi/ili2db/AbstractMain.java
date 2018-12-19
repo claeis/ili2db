@@ -461,6 +461,11 @@ public abstract class AbstractMain {
 				break;
 			}
 		}
+		if(config.getFunction()==Config.FC_UNDEFINED) {
+		    if(config.getCreatescript()!=null || config.getDropscript()!=null) {
+                config.setFunction(Config.FC_SCRIPT);
+		    }
+		}
 		if(argi+1==args.length){
 			String xtfFilename=args[argi];
 			config.setXtffile(xtfFilename);
@@ -472,9 +477,13 @@ public abstract class AbstractMain {
 			ch.ehi.ili2db.gui.MainWizard.main(config,getAPP_HOME(),getAPP_NAME(),getDbPanelDescriptor(),getDbUrlConverter());
 			Ili2db.writeAppSettings(settings);
 		}else{
-			config.setDburl(getDbUrlConverter().makeUrl(config));
+		    if(config.getFunction()!=Config.FC_SCRIPT) {
+	            config.setDburl(getDbUrlConverter().makeUrl(config));
+		    }
 			try {
-				Ili2db.readSettingsFromDb(config);
+	            if(config.getFunction()!=Config.FC_SCRIPT) {
+	                Ili2db.readSettingsFromDb(config);
+	            }
 				Ili2db.run(config,getAPP_HOME());
 			} catch (Exception ex) {
 				EhiLogger.logError(ex);
