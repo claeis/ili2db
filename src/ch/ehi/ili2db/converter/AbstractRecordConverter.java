@@ -2,10 +2,13 @@ package ch.ehi.ili2db.converter;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 
 import ch.ehi.basics.logging.EhiLogger;
+import ch.ehi.basics.types.OutParam;
 import ch.ehi.ili2db.base.DbIdGen;
 import ch.ehi.ili2db.base.DbNames;
+import ch.ehi.ili2db.base.Ili2cUtility;
 import ch.ehi.ili2db.gui.Config;
 import ch.ehi.ili2db.mapping.ArrayMappings;
 import ch.ehi.ili2db.mapping.MultiLineMappings;
@@ -25,6 +28,7 @@ import ch.ehi.sqlgen.repository.DbTable;
 import ch.ehi.sqlgen.repository.DbTableName;
 import ch.interlis.ili2c.metamodel.AbstractClassDef;
 import ch.interlis.ili2c.metamodel.AbstractLeafElement;
+import ch.interlis.ili2c.metamodel.AssociationDef;
 import ch.interlis.ili2c.metamodel.AttributeDef;
 import ch.interlis.ili2c.metamodel.CompositionType;
 import ch.interlis.ili2c.metamodel.CoordType;
@@ -34,12 +38,15 @@ import ch.interlis.ili2c.metamodel.ExtendableContainer;
 import ch.interlis.ili2c.metamodel.LineType;
 import ch.interlis.ili2c.metamodel.NumericType;
 import ch.interlis.ili2c.metamodel.NumericalType;
+import ch.interlis.ili2c.metamodel.ObjectType;
 import ch.interlis.ili2c.metamodel.ReferenceType;
+import ch.interlis.ili2c.metamodel.RoleDef;
 import ch.interlis.ili2c.metamodel.SurfaceOrAreaType;
 import ch.interlis.ili2c.metamodel.Table;
 import ch.interlis.ili2c.metamodel.TransferDescription;
 import ch.interlis.ili2c.metamodel.Type;
 import ch.interlis.ili2c.metamodel.Viewable;
+import ch.interlis.ili2c.metamodel.ViewableTransferElement;
 import ch.interlis.iom_j.itf.EnumCodeMapper;
 
 public class AbstractRecordConverter {
@@ -49,7 +56,7 @@ public class AbstractRecordConverter {
 	private String schemaName=null;
 	protected String defaultCrsAuthority=null;
 	protected String defaultCrsCode=null;
-	private String createEnumTable=null;
+	protected String createEnumTable=null;
 	protected boolean createStdCols=false;
 	protected boolean createEnumTxtCol=false;
 	protected boolean removeUnderscoreFromEnumDispName=false;
@@ -308,5 +315,59 @@ public class AbstractRecordConverter {
 	public boolean createTypeDiscriminator() {
 		return createTypeDiscriminator;
 	}
+    protected DbTableName getEnumTargetTableName(AttributeDef attr,OutParam<String> iliname,String schema) {
+        ch.interlis.ili2c.metamodel.Type type=attr.getDomain();
+        if(type instanceof ch.interlis.ili2c.metamodel.TypeAlias){
+            Domain domain=((ch.interlis.ili2c.metamodel.TypeAlias) type).getAliasing();
+            if(iliname!=null) {
+                iliname.value=domain.getScopedName();
+            }
+            domain=Ili2cUtility.getRootBaseDomain(domain);
+            String sqlname=ili2sqlName.mapIliDomainDef(domain);
+            return new DbTableName(schema,sqlname);
+        }
+        if(iliname!=null) {
+            iliname.value=attr.getScopedName();
+        }
+        attr=Ili2cUtility.getRootBaseAttr(attr);
+        String sqlname=ili2sqlName.mapIliEnumAttributeDefAsTable(attr);
+        return new DbTableName(schema,sqlname);
+    }
+    public HashMap getIomObjectAttrs(Viewable aclass) {
+    	HashMap ret=new HashMap();
+    	Iterator iter = aclass.getAttributesAndRoles2();
+    	while (iter.hasNext()) {
+    	   ViewableTransferElement obj = (ViewableTransferElement)iter.next();
+    	   if (obj.obj instanceof AttributeDef) {
+    		   AttributeDef attr = (AttributeDef) obj.obj;
+    			if(!attr.isTransient()){
+    				Type proxyType=attr.getDomain();
+    				if(proxyType!=null && (proxyType instanceof ObjectType)){
+    					// skip implicit particles (base-viewables) of views
+    				}else{
+    					AttributeDef root=Ili2cUtility.getRootBaseAttr(attr);
+    					ret.put(root,attr);
+    				}
+    			}
+    	   }
+    	   if(obj.obj instanceof RoleDef){
+    		   RoleDef role = (RoleDef) obj.obj;
+    		   { // if(role.getExtending()==null)
+    				// a role of an embedded association?
+    				if(obj.embedded){
+    					AssociationDef roleOwner = (AssociationDef) role.getContainer();
+    					if(roleOwner.getDerivedFrom()==null){
+    						RoleDef root=Ili2cUtility.getRootBaseRole(role);
+    						ret.put(root,role);
+    					}
+    				 }else{
+                         RoleDef root=Ili2cUtility.getRootBaseRole(role);
+                         ret.put(root,role);
+    				 }
+    			}
+    		}
+    	}
+    	return ret;
+    }
 	
 }

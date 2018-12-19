@@ -3,6 +3,7 @@ package ch.ehi.ili2db.mapping;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import ch.ehi.sqlgen.repository.DbTableName;
 import ch.interlis.ili2c.metamodel.AbstractClassDef;
@@ -144,7 +145,7 @@ public class ViewableWrapper {
 	public boolean isSecondaryTable() {
 		return mainTable!=null;
 	}
-	public boolean containsAttributes(HashSet<AttributeDef> iomObjectAttrs) {
+	public boolean containsAttributes(Set<AttributeDef> iomObjectAttrs) {
 		for(ColumnWrapper ele:attrv){
 			if(ele.getViewableTransferElement().obj instanceof AttributeDef){
 				if(iomObjectAttrs.contains(ele.getViewableTransferElement().obj)){

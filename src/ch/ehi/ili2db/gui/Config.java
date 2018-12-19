@@ -19,6 +19,7 @@ public class Config extends Settings {
 	public static final String CREATE_ENUM_DEFS_NO="no";
 	public static final String CREATE_ENUM_DEFS_SINGLE="singleTable";
 	public static final String CREATE_ENUM_DEFS_MULTI="multiTable";
+    public static final String CREATE_ENUM_DEFS_MULTI_WITH_ID="multiTableWithId";
 	public static final String CREATE_ENUM_COLS=PREFIX+".createEnumCols";
 	public static final String CREATE_ENUM_TXT_COL="addTxtCol";
 	public static final String CREATE_DATASET_COLS=PREFIX+".createDatasetCols";

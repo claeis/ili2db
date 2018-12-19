@@ -138,7 +138,7 @@ public class TransferToXtf {
 		createGenericStructRef=config.STRUCT_MAPPING_GENERICREF.equals(config.getStructMapping());
 		writeIliTid=config.TID_HANDLING_PROPERTY.equals(config.getTidHandling());
 		this.geomConv=geomConv;
-		recConv=new ToXtfRecordConverter(td,ili2sqlName,config,null,geomConv,conn,sqlidPool,trafoConfig,class2wrapper);
+		recConv=new ToXtfRecordConverter(td,ili2sqlName,config,null,geomConv,conn,sqlidPool,trafoConfig,class2wrapper,schema);
 		this.config=config;
 
 	}
@@ -445,8 +445,8 @@ public class TransferToXtf {
 				// if table exists?
 				if(DbUtility.tableExists(conn,sqlName)){
 					// dump it
-					EhiLogger.logState(aclass.getScopedName(null)+"...");
 					if(iomBasket==null){
+	                    EhiLogger.logState(topic.getScopedName(null)+" BID <"+basketXtfId+">...");
 						iomBasket=new StartBasketEvent(topic.getScopedName(null),basketXtfId,genericDomains);
 						if(languageFilter!=null){
 							iomBasket=(StartBasketEvent) languageFilter.filter(iomBasket);
@@ -457,6 +457,7 @@ public class TransferToXtf {
 						if(validator!=null)validator.validate(iomBasket);
 						iomFile.write(iomBasket);
 					}
+                    EhiLogger.logState(aclass.getScopedName(null)+"...");
 					dumpObject(iomFile,aclass,iomTargetClass,basketSqlId,genericDomains);
 				}else{
 					// skip it
@@ -883,7 +884,7 @@ public class TransferToXtf {
 				    Iterator attri = lineAttrTable.getAttributes ();
 				    while(attri.hasNext()){
 						AttributeDef lineattr=(AttributeDef)attri.next();
-						valuei = recConv.addAttrValue(rs, valuei, sqlid, iomObj, lineattr,null,null,class2wrapper.get(lineAttrTable),null,null,null);
+						valuei = recConv.addAttrValue(rs, valuei, sqlid, iomObj, lineattr,lineattr,null,null,class2wrapper.get(lineAttrTable),null,null,null);
 				    }
 				}
 				
@@ -950,7 +951,7 @@ public class TransferToXtf {
 				if(structWrapper==null){
 					fixref=new FixIomObjectRefs();
 				}
-				iomObj = recConv.convertRecord(rs, aclassWrapper, fixref, structWrapper,
+				iomObj = recConv.convertRecord(rs, aclassWrapper, aclass,fixref, structWrapper,
 						structelev, structQueue, sqlid,genericDomains,iomTargetClass);
 				updateObjStat(iomObj.getobjecttag(), sqlid);
 				// collect structvalues

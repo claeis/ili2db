@@ -8,6 +8,7 @@ import java.sql.Statement;
 import java.util.HashMap;
 
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import ch.ehi.basics.logging.EhiLogger;
@@ -428,7 +429,8 @@ public class InheritanceSmart1Test {
 	}
 	
 	@Test
-	public void importIliRefAttrFK() throws Exception
+	@Ignore("incompatibility to ili2db-3.x")
+	public void importIliRefAttrFK_3x() throws Exception
 	{
 		Connection jdbcConnection=null;
 		try{
@@ -491,6 +493,7 @@ public class InheritanceSmart1Test {
 	@Test
 	public void importXtfRefAttrFK() throws Exception
 	{
+	    EhiLogger.getInstance().setTraceFilter(false);
 		Connection jdbcConnection=null;
 		try{
 	        Class driverClass = Class.forName("org.postgresql.Driver");
@@ -547,8 +550,10 @@ public class InheritanceSmart1Test {
 	}
 	
 	@Test
-	public void exportXtfRefAttrFK() throws Exception
+    @Ignore("incompatibility to ili2db-3.x")
+	public void exportXtfRefAttrFK_3x() throws Exception
 	{
+	    EhiLogger.getInstance().setTraceFilter(false);
 		Connection jdbcConnection=null;
 		try{
 	        Class driverClass = Class.forName("org.postgresql.Driver");
@@ -599,4 +604,57 @@ public class InheritanceSmart1Test {
 			}
 		}    
 	}
+    @Test
+    public void exportXtfRefAttrFK() throws Exception
+    {
+        EhiLogger.getInstance().setTraceFilter(false);
+        importXtfRefAttrFK();
+        Connection jdbcConnection=null;
+        try{
+            Class driverClass = Class.forName("org.postgresql.Driver");
+            jdbcConnection = DriverManager.getConnection(
+                    dburl, dbuser, dbpwd);
+            
+            File data=new File("test/data/InheritanceSmart1/RefAttr1a-out.xtf");
+            Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+            config.setFunction(Config.FC_EXPORT);
+            config.setDatasetName(DATASETNAME);
+            //config.setValidation(false);
+            Ili2db.readSettingsFromDb(config);
+            Ili2db.run(config,null);
+
+            HashMap<String,IomObject> objs=new HashMap<String,IomObject>();
+            XtfReader reader=new XtfReader(data);
+            IoxEvent event=null;
+             do{
+                event=reader.read();
+                if(event instanceof StartTransferEvent){
+                }else if(event instanceof StartBasketEvent){
+                }else if(event instanceof ObjectEvent){
+                    IomObject iomObj=((ObjectEvent)event).getIomObject();
+                    if(iomObj.getobjectoid()!=null){
+                        objs.put(iomObj.getobjectoid(), iomObj);
+                    }
+                }else if(event instanceof EndBasketEvent){
+                }else if(event instanceof EndTransferEvent){
+                }
+             }while(!(event instanceof EndTransferEvent));
+             {
+                 IomObject obj0 = objs.get("b.3");
+                 Assert.assertNotNull(obj0);
+                 Assert.assertEquals("RefAttr1.TopicA.ClassB", obj0.getobjecttag());
+                 Assert.assertEquals("RefAttr1.TopicA.StructA11 {ref -> a11.1 REF {}}", obj0.getattrobj("struct", 0).toString());
+             }
+             {
+                 IomObject obj0 = objs.get("b.1");
+                 Assert.assertNotNull(obj0);
+                 Assert.assertEquals("RefAttr1.TopicA.ClassB", obj0.getobjecttag());
+                 Assert.assertEquals("RefAttr1.TopicA.StructA1 {ref -> a1.1 REF {}}", obj0.getattrobj("struct", 0).toString());
+             }
+        }finally{
+            if(jdbcConnection!=null){
+                jdbcConnection.close();
+            }
+        }    
+    }
 }

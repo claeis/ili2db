@@ -5,6 +5,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.Statement;
+import java.util.HashMap;
 
 import org.junit.After;
 import org.junit.Assert;
@@ -20,6 +21,14 @@ import ch.ehi.ili2db.gui.Config;
 import ch.ehi.ili2db.mapping.NameMapping;
 import ch.ehi.sqlgen.DbUtility;
 import ch.ehi.sqlgen.repository.DbTableName;
+import ch.interlis.iom.IomObject;
+import ch.interlis.iom_j.xtf.XtfReader;
+import ch.interlis.iox.EndBasketEvent;
+import ch.interlis.iox.EndTransferEvent;
+import ch.interlis.iox.IoxEvent;
+import ch.interlis.iox.ObjectEvent;
+import ch.interlis.iox.StartBasketEvent;
+import ch.interlis.iox.StartTransferEvent;
 
 //-Ddburl=jdbc:postgresql:dbname -Ddbusr=usrname -Ddbpwd=1234
 public class Enum23Test {
@@ -161,7 +170,7 @@ public class Enum23Test {
 	}
 	
 	@Test
-	public void importExtended() throws Exception
+	public void importExtendedMultiTable() throws Exception
 	{
 		Connection jdbcConnection=null;
 		try{
@@ -185,13 +194,10 @@ public class Enum23Test {
 				Ili2db.readSettingsFromDb(config);
 				Ili2db.run(config,null);
 				{
-					String stmtTxt="SELECT t_ili2db_attrname.iliname, t_ili2db_attrname.sqlname, t_ili2db_attrname.owner, t_ili2db_attrname.target FROM "+DBSCHEMA+".t_ili2db_attrname;";
-					Assert.assertTrue(stmt.execute(stmtTxt));
-					ResultSet rs=stmt.getResultSet();
-					Assert.assertTrue(rs.next());
-					Assert.assertEquals("Enum23b.TestA.ClassA1.attr1",rs.getString(1));
-					Assert.assertEquals("attr1",rs.getString(2));
-					Assert.assertEquals("classa1",rs.getString(3));
+                    String stmtTxt="SELECT * "
+                            + " FROM "+DBSCHEMA+".enum1 WHERE "+DbNames.ENUM_TAB_ILICODE_COL+"='Test1'";
+                    Assert.assertTrue(stmt.execute(stmtTxt));
+                    Assert.assertFalse(stmt.getMoreResults());
 				}
 			}
 		}finally{
@@ -200,6 +206,150 @@ public class Enum23Test {
 			}
 		}		
 	}
+    @Test
+    public void importExtendedFkTable() throws Exception
+    {
+        Connection jdbcConnection=null;
+        try{
+            Class driverClass = Class.forName("org.postgresql.Driver");
+            jdbcConnection = DriverManager.getConnection(
+                    dburl, dbuser, dbpwd);
+            stmt=jdbcConnection.createStatement();          
+            stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");
+            {
+                File data=new File("test/data/Enum23/Enum23b.ili");
+                Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+                config.setFunction(Config.FC_SCHEMAIMPORT);
+                config.setCreateFk(config.CREATE_FK_YES);
+                config.setTidHandling(Config.TID_HANDLING_PROPERTY);
+                //config.setBasketHandling(config.BASKET_HANDLING_READWRITE);
+                config.setCreateEnumDefs(Config.CREATE_ENUM_DEFS_MULTI_WITH_ID);
+                config.setCatalogueRefTrafo(null);
+                config.setMultiSurfaceTrafo(null);
+                config.setMultilingualTrafo(null);
+                config.setInheritanceTrafo(Config.INHERITANCE_TRAFO_SMART1);
+                Ili2db.readSettingsFromDb(config);
+                Ili2db.run(config,null);
+                {
+                    String stmtTxt="SELECT * "
+                            + " FROM "+DBSCHEMA+".enum1 WHERE "+DbNames.ENUM_TAB_THIS_COL+"='Enum23b.Enum1' AND "+DbNames.ENUM_TAB_BASE_COL+" IS NULL AND "+DbNames.ENUM_TAB_ILICODE_COL+"='Test1'";
+                    Assert.assertTrue(stmt.execute(stmtTxt));
+                    Assert.assertFalse(stmt.getMoreResults());
+                    stmtTxt="SELECT * "
+                            + " FROM "+DBSCHEMA+".enum1 WHERE "+DbNames.ENUM_TAB_THIS_COL+"='Enum23b.Enum1a' AND "+DbNames.ENUM_TAB_BASE_COL+"='Enum23b.Enum1' AND "+DbNames.ENUM_TAB_ILICODE_COL+"='Test1'";
+                    Assert.assertTrue(stmt.execute(stmtTxt));
+                    Assert.assertFalse(stmt.getMoreResults());
+                }
+            }
+        }finally{
+            if(jdbcConnection!=null){
+                jdbcConnection.close();
+            }
+        }       
+    }
+    @Test
+    public void importXtfExtendedFkTable() throws Exception
+    {
+        EhiLogger.getInstance().setTraceFilter(false);
+        Connection jdbcConnection=null;
+        try{
+            Class driverClass = Class.forName("org.postgresql.Driver");
+            jdbcConnection = DriverManager.getConnection(
+                    dburl, dbuser, dbpwd);
+            stmt=jdbcConnection.createStatement();          
+            stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");
+            {
+                File data=new File("test/data/Enum23/Enum23b.xtf");
+                Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+                config.setFunction(Config.FC_IMPORT);
+                config.setCreateFk(config.CREATE_FK_YES);
+                config.setTidHandling(Config.TID_HANDLING_PROPERTY);
+                config.setBasketHandling(config.BASKET_HANDLING_READWRITE);
+                config.setCreateEnumDefs(Config.CREATE_ENUM_DEFS_MULTI_WITH_ID);
+                config.setCatalogueRefTrafo(null);
+                config.setMultiSurfaceTrafo(null);
+                config.setMultilingualTrafo(null);
+                config.setInheritanceTrafo(Config.INHERITANCE_TRAFO_SMART1);
+                Ili2db.readSettingsFromDb(config);
+                Ili2db.run(config,null);
+                {
+                    String stmtTxt="SELECT * "
+                            + " FROM "+DBSCHEMA+".enum1 WHERE "+DbNames.ENUM_TAB_THIS_COL+"='Enum23b.Enum1' AND "+DbNames.ENUM_TAB_BASE_COL+" IS NULL AND "+DbNames.ENUM_TAB_ILICODE_COL+"='Test1'";
+                    Assert.assertTrue(stmt.execute(stmtTxt));
+                    Assert.assertFalse(stmt.getMoreResults());
+                    stmtTxt="SELECT * "
+                            + " FROM "+DBSCHEMA+".enum1 WHERE "+DbNames.ENUM_TAB_THIS_COL+"='Enum23b.Enum1a' AND "+DbNames.ENUM_TAB_BASE_COL+"='Enum23b.Enum1' AND "+DbNames.ENUM_TAB_ILICODE_COL+"='Test1'";
+                    Assert.assertTrue(stmt.execute(stmtTxt));
+                    Assert.assertFalse(stmt.getMoreResults());
+                }
+            }
+        }finally{
+            if(jdbcConnection!=null){
+                jdbcConnection.close();
+            }
+        }       
+    }
+    @Test
+    public void exportXtfExtendedFkTable() throws Exception
+    {
+        //EhiLogger.getInstance().setTraceFilter(false);
+        importXtfExtendedFkTable();
+        
+        Connection jdbcConnection=null;
+        try{
+            Class driverClass = Class.forName("org.postgresql.Driver");
+            jdbcConnection = DriverManager.getConnection(
+                    dburl, dbuser, dbpwd);
+            stmt=jdbcConnection.createStatement();          
+            File data=new File("test/data/Enum23/Enum23b-out.xtf");
+            {
+                Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+                config.setFunction(Config.FC_EXPORT);
+                config.setModels("Enum23b");
+                Ili2db.readSettingsFromDb(config);
+                Ili2db.run(config,null);
+            }
+            {
+                HashMap<String,IomObject> objs=new HashMap<String,IomObject>();
+                XtfReader reader=new XtfReader(data);
+                IoxEvent event=null;
+                 do{
+                    event=reader.read();
+                    if(event instanceof StartTransferEvent){
+                    }else if(event instanceof StartBasketEvent){
+                    }else if(event instanceof ObjectEvent){
+                        IomObject iomObj=((ObjectEvent)event).getIomObject();
+                        if(iomObj.getobjectoid()!=null){
+                            objs.put(iomObj.getobjectoid(), iomObj);
+                        }
+                    }else if(event instanceof EndBasketEvent){
+                    }else if(event instanceof EndTransferEvent){
+                    }
+                 }while(!(event instanceof EndTransferEvent));
+                 {
+                     IomObject obj0 = objs.get("1");
+                     Assert.assertNotNull(obj0);
+                     Assert.assertEquals("Enum23b.TestA.ClassA1", obj0.getobjecttag());
+                     Assert.assertEquals("Test2", obj0.getattrvalue("attr1"));
+                     Assert.assertEquals("Test2", obj0.getattrvalue("attr1a"));
+                     Assert.assertEquals("Test2", obj0.getattrvalue("attr1b"));
+                 }
+                 {
+                     IomObject obj0 = objs.get("2");
+                     Assert.assertNotNull(obj0);
+                     Assert.assertEquals("Enum23b.TestA.ClassA2", obj0.getobjecttag());
+                     Assert.assertEquals("Test2", obj0.getattrvalue("attr1"));
+                     Assert.assertEquals("Test2.Test2a", obj0.getattrvalue("attr1a"));
+                     Assert.assertEquals("Test2.Test2a", obj0.getattrvalue("attr1b"));
+                 }
+                
+            }
+        }finally{
+            if(jdbcConnection!=null){
+                jdbcConnection.close();
+            }
+        }       
+    }
 	
 	@Test
 	public void importSingleTable() throws Exception

@@ -246,7 +246,7 @@ public class TransferFromXtf {
 			long objCount=0;
 			boolean referrs=false;
 			
-			recConv=new FromXtfRecordConverter(td,ili2sqlName,tag2class,config,idGen,geomConv,conn,dbusr,isItfReader,oidPool,trafoConfig,class2wrapper,datasetName);
+			recConv=new FromXtfRecordConverter(td,ili2sqlName,tag2class,config,idGen,geomConv,conn,dbusr,isItfReader,oidPool,trafoConfig,class2wrapper,datasetName,schema);
 			
 			if(functionCode==Config.FC_DELETE || functionCode==Config.FC_REPLACE){
 				if(datasetName==null) {
@@ -1443,7 +1443,7 @@ public class TransferFromXtf {
 			 }
 			for(ViewableWrapper secondary:aclass.getSecondaryTables()){
 				// secondarytable contains attributes of this class?
-				if(secondary.containsAttributes(recConv.getIomObjectAttrs(aclass1))){
+				if(secondary.containsAttributes(recConv.getIomObjectAttrs(aclass1).keySet())){
 					String insert = getInsertStmt(updateObj,aclass1,secondary,structEle);
 					EhiLogger.traceBackendCmd(insert);
 					PreparedStatement ps = conn.prepareStatement(insert);
@@ -1542,7 +1542,7 @@ public class TransferFromXtf {
 			    while(attri.hasNext()){
 			    	AttributeDef lineattr=(AttributeDef)attri.next();
 					valuei = recConv.addAttrValue(iomObj, ili2sqlName.mapItfGeometryAsTable((Viewable)attrDef.getContainer(),attrDef,null), sqlId, sqlTableName,ps,
-							valuei, lineattr,null,null,new HashMap<String,String>(),null);
+							valuei, lineattr,lineattr,null,null,new HashMap<String,String>(),null);
 			    }
 			}
 
@@ -1874,7 +1874,7 @@ public class TransferFromXtf {
 		    Iterator attri = lineAttrTable.getAttributes ();
 		    while(attri.hasNext()){
 		    	AttributeDef lineattr=(AttributeDef)attri.next();
-			   sep = recConv.addAttrToInsertStmt(false,stmt, values, sep, lineattr,null,sqlTabName.getName());
+			   sep = recConv.addAttrToInsertStmt(false,stmt, values, sep, lineattr,lineattr,null,sqlTabName.getName());
 		    }
 		}
 		

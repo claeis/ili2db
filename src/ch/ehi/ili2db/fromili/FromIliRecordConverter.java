@@ -52,6 +52,7 @@ import ch.interlis.ili2c.metamodel.BasketType;
 import ch.interlis.ili2c.metamodel.BlackboxType;
 import ch.interlis.ili2c.metamodel.CompositionType;
 import ch.interlis.ili2c.metamodel.CoordType;
+import ch.interlis.ili2c.metamodel.Domain;
 import ch.interlis.ili2c.metamodel.EnumerationType;
 import ch.interlis.ili2c.metamodel.Evaluable;
 import ch.interlis.ili2c.metamodel.LineType;
@@ -623,7 +624,6 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 				if(createFk){
 					ret.setReferencedTable(targetTable.getSqlTable());
 				}
-                                metaInfo.setColumnInfo(dbTable.getName().getName(), null, ret.getName(), DbExtMetaInfo.TAG_COL_FOREIGNKEY, targetTable.getSqlTablename());
 				if(createFkIdx){
 					ret.setIndex(true);
 				}
@@ -657,6 +657,9 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 			}
 			if(mText.value){
 				metaInfo.setColumnInfo(dbTable.getName().getName(), subType, sqlColName, DbExtMetaInfo.TAG_COL_TEXTKIND, DbExtMetaInfo.TAG_COL_TEXTKIND_MTEXT);
+			}
+			if(dbCol.value.getReferencedTable()!=null) {
+                metaInfo.setColumnInfo(dbTable.getName().getName(), null, dbCol.value.getName(), DbExtMetaInfo.TAG_COL_FOREIGNKEY, dbCol.value.getReferencedTable().getName());
 			}
 			if(dbCol.value instanceof DbColGeometry) {
 				metaInfo.setColumnInfo(dbTable.getName().getName(), subType, sqlColName, DbExtMetaInfo.TAG_COL_C1_MIN, Double.toString(((DbColGeometry) dbCol.value).getMin1()));
@@ -748,9 +751,21 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 				DbColId ret=new DbColId();
 				dbCol.value=ret;
 			}else{
-				DbColVarchar ret=new DbColVarchar();
-				ret.setSize(255);
-				dbCol.value=ret;				
+			    if(Config.CREATE_ENUM_DEFS_MULTI_WITH_ID.equals(createEnumTable)) {
+	                DbColId ret=new DbColId();
+	                dbCol.value=ret;
+	                DbTableName targetTable=getEnumTargetTableName(attr,null,schema.getName());
+                    if(createFk){
+	                    ret.setReferencedTable(targetTable);
+	                }
+	                if(createFkIdx){
+	                    ret.setIndex(true);
+	                }
+			    }else {
+	                DbColVarchar ret=new DbColVarchar();
+	                ret.setSize(255);
+	                dbCol.value=ret;                
+			    }
 			}
 		}else if(type instanceof NumericType){
 			if(type.isAbstract()){
@@ -813,7 +828,8 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 		}
 		return true;
 	}
-	private boolean isChbaseMultilingual(TransferDescription td,
+
+    private boolean isChbaseMultilingual(TransferDescription td,
 			AttributeDef attr) {
 		if(Ili2cUtility.isPureChbaseMultilingualText(td, attr) || Ili2cUtility.isPureChbaseMultilingualMText(td, attr)){
 			CompositionType type=(CompositionType)attr.getDomain();

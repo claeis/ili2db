@@ -209,6 +209,9 @@ public abstract class AbstractMain {
 			}else if(arg.equals("--createEnumTabs")){
 				argi++;
 				config.setCreateEnumDefs(config.CREATE_ENUM_DEFS_MULTI);
+            }else if(arg.equals("--createEnumTabsWithId")){
+                argi++;
+                config.setCreateEnumDefs(config.CREATE_ENUM_DEFS_MULTI_WITH_ID);
 			}else if(arg.equals("--createEnumTxtCol")){
 				argi++;
 				config.setCreateEnumCols(config.CREATE_ENUM_TXT_COL);
@@ -403,7 +406,8 @@ public abstract class AbstractMain {
 					System.err.println("--createGeomIdx        create a spatial index on geometry columns.");
 					System.err.println("--createEnumColAsItfCode create enum type column with value according to ITF (instead of XTF).");
 					System.err.println("--createEnumTxtCol     create an additional column with the text of the enumeration value.");
-					System.err.println("--createEnumTabs       generate tables with enum definitions.");
+					System.err.println("--createEnumTabs       generate tables for enum definitions and use xtfcode to reference entries in generated enum tables.");
+                    System.err.println("--createEnumTabsWithId generate tables with "+DbNames.T_ID_COL+" for enum definitions and use ids to reference entries in generated enum tables.");
 					System.err.println("--createSingleEnumTab  generate all enum definitions in a single table.");
 					System.err.println("--beautifyEnumDispName replace underscore with space in dispName of enum table entries");
 					System.err.println("--createStdCols        generate "+DbNames.T_USER_COL+", "+DbNames.T_CREATE_DATE_COL+", "+DbNames.T_LAST_CHANGE_COL+" columns.");
