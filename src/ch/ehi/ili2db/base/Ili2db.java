@@ -1940,7 +1940,7 @@ public class Ili2db {
 			}
 		}
 		if(bids.size()==0){
-			throw new Ili2dbException("no baskets with given topic names in table "+sqlName);
+			throw new Ili2dbException("no baskets with given model names in table "+sqlName);
 		}
 		long ret[]=new long[bids.size()];
 		idx=0;
