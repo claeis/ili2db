@@ -61,9 +61,38 @@ public class InheritanceSmart2Test {
 	//config.setAreaRef(config.AREA_REF_KEEP);
 	// --importTid
 	//config.setTidHandling(config.TID_HANDLING_PROPERTY);
+
+    @Test
+    public void importIliSmart2() throws Exception
+    {
+        Connection jdbcConnection=null;
+        try{
+            Class driverClass = Class.forName("org.postgresql.Driver");
+            jdbcConnection = DriverManager.getConnection(
+                    dburl, dbuser, dbpwd);
+            Statement stmt=jdbcConnection.createStatement();
+            stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");
+            File data=new File("test/data/InheritanceSmart2/Inheritance2.ili");
+            Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+            config.setFunction(Config.FC_SCHEMAIMPORT);
+            config.setCreateFk(Config.CREATE_FK_YES);
+            config.setInheritanceTrafo(Config.INHERITANCE_TRAFO_SMART2);
+            config.setDatasetName(DATASETNAME);
+            config.setTidHandling(Config.TID_HANDLING_PROPERTY);
+            config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
+            //config.setCreatescript(data.getPath()+".sql");
+            Ili2db.readSettingsFromDb(config);
+            Ili2db.run(config,null);
+            // TODO verify content of t_ili2db_attrname
+        }finally{
+            if(jdbcConnection!=null){
+                jdbcConnection.close();
+            }
+        }            
+    }
 	
 	@Test
-	public void importSmart2() throws Exception
+	public void importXtfSmart2() throws Exception
 	{
 		Connection jdbcConnection=null;
 		try{
@@ -107,7 +136,7 @@ public class InheritanceSmart2Test {
 	}
 	
 	@Test
-	public void updateSmart2New() throws Exception
+	public void updateXtfSmart2New() throws Exception
 	{
 		Connection jdbcConnection=null;
 		try{
@@ -151,7 +180,7 @@ public class InheritanceSmart2Test {
 	}
 	
 	@Test
-	public void updateSmart2Existing() throws Exception
+	public void updateXtfSmart2Existing() throws Exception
 	{
 		Connection jdbcConnection=null;
 		try{
@@ -198,7 +227,7 @@ public class InheritanceSmart2Test {
 	}
 	
 	@Test
-	public void importSmart2ExtRef() throws Exception
+	public void importXtfSmart2ExtRef() throws Exception
 	{
 		Connection jdbcConnection=null;
 		try{
@@ -234,7 +263,7 @@ public class InheritanceSmart2Test {
 	}
 	
 	@Test
-	public void exportSmart2() throws Exception
+	public void exportXtfSmart2() throws Exception
 	{
 		Connection jdbcConnection=null;
 		try{
