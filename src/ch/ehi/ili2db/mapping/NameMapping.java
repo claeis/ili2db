@@ -23,8 +23,10 @@ import java.util.Set;
 
 import ch.ehi.basics.logging.EhiLogger;
 import ch.ehi.ili2db.base.DbNames;
+import ch.ehi.ili2db.base.Ili2db;
 import ch.ehi.ili2db.base.Ili2dbException;
 import ch.ehi.ili2db.gui.Config;
+import ch.ehi.sqlgen.generator_impl.jdbc.GeneratorJdbc;
 import ch.interlis.ili2c.metamodel.Viewable;
 
 /** make names unique and conforming to the underlying database
@@ -429,41 +431,54 @@ public class NameMapping {
 		}
 		return ret;
 	}
-	public void updateTableMappingTable(java.sql.Connection conn,String schema)
+	public void updateTableMappingTable(GeneratorJdbc gen, java.sql.Connection conn,String schema)
 	throws Ili2dbException
 	{
-		HashSet<String> exstEntries=readTableMappingTableEntries(conn,schema);
-		String mapTabName=DbNames.CLASSNAME_TAB;
-		if(schema!=null){
-			mapTabName=schema+"."+mapTabName;
-		}
-		// create table
-		try{
+        String mapTabName=DbNames.CLASSNAME_TAB;
+        if(schema!=null){
+            mapTabName=schema+"."+mapTabName;
+        }
+        
+		if(conn!=null) {
+	        HashSet<String> exstEntries=readTableMappingTableEntries(conn,schema);
+	        try{
 
-			// insert mapping entries
-			String stmt="INSERT INTO "+mapTabName+" ("+DbNames.CLASSNAME_TAB_ILINAME_COL+","+DbNames.CLASSNAME_TAB_SQLNAME_COL+") VALUES (?,?)";
-			EhiLogger.traceBackendCmd(stmt);
-			java.sql.PreparedStatement ps = conn.prepareStatement(stmt);
-			String iliname=null;
-			String sqlname=null;
-			try{
-				java.util.Iterator<String> entri=classNameIli2sql.keySet().iterator();
-				while(entri.hasNext()){
-					iliname=entri.next();
-					if(!exstEntries.contains(iliname)){
-						sqlname=classNameIli2sql.get(iliname);
-						ps.setString(1, iliname);
-						ps.setString(2, sqlname);
-						ps.executeUpdate();
-					}
-				}
-			}catch(java.sql.SQLException ex){
-				throw new Ili2dbException("failed to insert classname-mapping "+iliname,ex);
-			}finally{
-				ps.close();
-			}
-		}catch(java.sql.SQLException ex){		
-			throw new Ili2dbException("failed to update mapping-table "+mapTabName,ex);
+	            // insert mapping entries
+	            String stmt="INSERT INTO "+mapTabName+" ("+DbNames.CLASSNAME_TAB_ILINAME_COL+","+DbNames.CLASSNAME_TAB_SQLNAME_COL+") VALUES (?,?)";
+	            EhiLogger.traceBackendCmd(stmt);
+	            java.sql.PreparedStatement ps = conn.prepareStatement(stmt);
+	            String iliname=null;
+	            String sqlname=null;
+	            try{
+	                java.util.Iterator<String> entri=classNameIli2sql.keySet().iterator();
+	                while(entri.hasNext()){
+	                    iliname=entri.next();
+	                    if(!exstEntries.contains(iliname)){
+	                        sqlname=classNameIli2sql.get(iliname);
+	                        ps.setString(1, iliname);
+	                        ps.setString(2, sqlname);
+	                        ps.executeUpdate();
+	                    }
+	                }
+	            }catch(java.sql.SQLException ex){
+	                throw new Ili2dbException("failed to insert classname-mapping "+iliname,ex);
+	            }finally{
+	                ps.close();
+	            }
+	        }catch(java.sql.SQLException ex){       
+	            throw new Ili2dbException("failed to update mapping-table "+mapTabName,ex);
+	        }
+		}
+		if(gen!=null){
+		    // create inserts
+            java.util.Iterator<String> entri=classNameIli2sql.keySet().iterator();
+            while(entri.hasNext()){
+                String iliname=entri.next();
+                String sqlname=classNameIli2sql.get(iliname);
+                String stmt="INSERT INTO "+mapTabName+" ("+DbNames.CLASSNAME_TAB_ILINAME_COL+","+DbNames.CLASSNAME_TAB_SQLNAME_COL+") VALUES ("+Ili2db.quoteSqlStringValue(iliname)+","+Ili2db.quoteSqlStringValue(sqlname)+")";
+                gen.addCreateLine(gen.new Stmt(stmt));
+            }
+		    
 		}
 
 	}
@@ -512,10 +527,10 @@ public class NameMapping {
 		}
 
 	}
-	public void updateAttrMappingTable(java.sql.Connection conn,String schema)
+	public void updateAttrMappingTable(GeneratorJdbc gen, java.sql.Connection conn,String schema)
 	throws Ili2dbException
 	{
-		columnMapping.updateAttrMappingTable(conn, schema);
+		columnMapping.updateAttrMappingTable(gen,conn, schema);
 	}
 	public void readAttrMappingTable(java.sql.Connection conn,String schema)
 	throws Ili2dbException

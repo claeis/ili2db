@@ -4,6 +4,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import java.io.File;
 import java.sql.Connection;
+import java.sql.DriverManager;
+
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Ignore;
@@ -11,6 +13,7 @@ import org.junit.Test;
 import ch.ehi.basics.logging.EhiLogger;
 import ch.ehi.ili2db.base.Ili2db;
 import ch.ehi.ili2db.gui.Config;
+import ch.ehi.sqlgen.DbUtility;
 import ch.interlis.iom.IomObject;
 import ch.interlis.iom_j.xtf.XtfReader;
 import ch.interlis.iox.EndBasketEvent;
@@ -71,9 +74,10 @@ public class SimpleGpkgTest {
 		Ili2db.run(config,null);
 	}
     @Test
-    public void createScriptFromIli() throws Exception
+    public void createScriptFromIliCoord() throws Exception
     {
-        File data=new File(TEST_OUT,"Simple23.ili");
+        File data=new File(TEST_OUT,"SimpleCoord23.ili");
+        File outfile=new File(data.getPath()+"-out.sql");
         Config config=new Config();
         new ch.ehi.ili2gpkg.GpkgMain().initConfig(config);
         config.setLogfile(data.getPath()+".log");
@@ -83,12 +87,44 @@ public class SimpleGpkgTest {
         config.setCreateNumChecks(true);
         config.setTidHandling(Config.TID_HANDLING_PROPERTY);
         config.setBasketHandling(config.BASKET_HANDLING_READWRITE);
+        config.setCreateMetaInfo(true);
+        config.setCreateEnumDefs(Config.CREATE_ENUM_DEFS_MULTI_WITH_ID);
         config.setCatalogueRefTrafo(null);
         config.setMultiSurfaceTrafo(null);
         config.setMultilingualTrafo(null);
         config.setInheritanceTrafo(null);
-        config.setCreatescript(data.getPath()+"-out.sql");
+        config.setCreatescript(outfile.getPath());
         Ili2db.run(config,null);
+        
+        // verify generated script
+        {
+            String dburl="jdbc:sqlite:"+GPKGFILENAME;
+            config.setDbfile(GPKGFILENAME);
+            config.setDburl(dburl);
+            // create gpkg file
+            File gpkgFile=new File(GPKGFILENAME);
+            if(gpkgFile.exists()){ 
+                File file = new File(gpkgFile.getAbsolutePath());
+                file.delete();
+            }
+            
+            GpkgMapping gpkgMapping=new GpkgMapping();
+            gpkgMapping.preConnect(dburl,null,null,config);
+            jdbcConnection = DriverManager.getConnection(dburl, null, null);
+            gpkgMapping.postConnect(jdbcConnection, config);
+            
+            // execute generated script
+            DbUtility.executeSqlScript(jdbcConnection, new java.io.FileReader(outfile));
+
+            // rum import without schema generation
+            data=new File(TEST_OUT,"SimpleCoord23a.xtf");
+            config.setXtffile(data.getPath());
+            config.setFunction(Config.FC_IMPORT);
+            config.setDoImplicitSchemaImport(false);
+            config.setCreatescript(null);
+            Ili2db.run(config,null);
+            
+        }
     }
 	
 	@Test

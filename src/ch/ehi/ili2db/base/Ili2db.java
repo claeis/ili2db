@@ -563,37 +563,38 @@ public class Ili2db {
 						
 						GeneratorDriver drv=new GeneratorDriver(gen);
 						drv.visitSchema(config,schema);
-						// create script requested by user?
-						String createscript=config.getCreatescript();
-						if(createscript!=null && (gen instanceof GeneratorJdbc)){
-							writeScript(createscript,((GeneratorJdbc)gen).iteratorCreateLines());
+						{
+		                    GeneratorJdbc insertCollector = config.getCreatescript()!=null?(GeneratorJdbc)gen:null;
+                            // update mapping table
+                            mapping.updateTableMappingTable(insertCollector,conn,config.getDbschema());
+                            mapping.updateAttrMappingTable(insertCollector,conn,config.getDbschema());
+                            trafoConfig.updateTrafoConfig(insertCollector,conn, config.getDbschema());
+                            // update inheritance table
+                            trsfFromIli.updateInheritanceTable(insertCollector,conn,config.getDbschema());
+                            // update enumerations table
+                            trsfFromIli.updateEnumTable(insertCollector,conn);
+                            trsfFromIli.updateMetaInfoTables(insertCollector,conn);
+                            TransferFromIli.addModels(insertCollector,conn,td,config.getDbschema(),customMapping);
+                            if(!config.isConfigReadFromDb()){
+                                TransferFromIli.updateSettings(insertCollector,conn,config,config.getDbschema());
+                            }
+                            if(config.getCreateMetaInfo()){
+                                // update meta-attributes table
+                                MetaAttrUtility.updateMetaAttributesTable(insertCollector,conn, config.getDbschema(), td);
+                                // set elements' meta-attributes
+                                MetaAttrUtility.addMetaAttrsFromDb(td, conn, config.getDbschema());
+                            }
 						}
-						// drop script requested by user?
-						String dropscript=config.getDropscript();
-						if(dropscript!=null && (gen instanceof GeneratorJdbc)){
-							writeScript(dropscript,((GeneratorJdbc)gen).iteratorDropLines());
-						}
-							// update mapping table
-							mapping.updateTableMappingTable(conn,config.getDbschema());
-							mapping.updateAttrMappingTable(conn,config.getDbschema());
-							trafoConfig.updateTrafoConfig(conn, config.getDbschema());
-							// update inheritance table
-							trsfFromIli.updateInheritanceTable(conn,config.getDbschema());
-							// update enumerations table
-							trsfFromIli.updateEnumTable(conn);
-							trsfFromIli.updateMetaInfoTables(conn);
-							TransferFromIli.addModels(conn,td,config.getDbschema(),customMapping);
-							if(!config.isConfigReadFromDb()){
-								TransferFromIli.updateSettings(conn,config,config.getDbschema());
-							}
-			                if(config.getCreateMetaInfo()){
-			                    if(DbUtility.tableExists(conn,new DbTableName(config.getDbschema(),DbNames.META_ATTRIBUTES_TAB))){
-			                        // update meta-attributes table
-			                        MetaAttrUtility.updateMetaAttributesTable(conn, config.getDbschema(), td);
-			                        // set elements' meta-attributes
-			                        MetaAttrUtility.addMetaAttrsFromDb(td, conn, config.getDbschema());
-			                    }
-			                }
+	                        // create script requested by user?
+	                        String createscript=config.getCreatescript();
+	                        if(createscript!=null && (gen instanceof GeneratorJdbc)){
+	                            writeScript(createscript,((GeneratorJdbc)gen).iteratorCreateLines());
+	                        }
+	                        // drop script requested by user?
+	                        String dropscript=config.getDropscript();
+	                        if(dropscript!=null && (gen instanceof GeneratorJdbc)){
+	                            writeScript(dropscript,((GeneratorJdbc)gen).iteratorDropLines());
+	                        }
 					}catch(java.io.IOException ex){
 						throw new Ili2dbException(ex);
 					}
@@ -1172,40 +1173,44 @@ public class Ili2db {
 				idGen.initDbDefs(gen);
 				
 				drv.visitSchema(config,schema);
-				// is a create script requested by user?
-				String createscript=config.getCreatescript();
-				if(createscript!=null && (gen instanceof GeneratorJdbc)){
-					writeScript(createscript,((GeneratorJdbc)gen).iteratorCreateLines());
-				}
-				// is a drop script requested by user?
-				String dropscript=config.getDropscript();
-				if(dropscript!=null && (gen instanceof GeneratorJdbc)){
-					writeScript(dropscript,((GeneratorJdbc)gen).iteratorDropLines());
-				}
-				if(importToDb) {
-	                if(!(conn instanceof GeodbConnection)){
-	                    // update mapping table
-	                    mapping.updateTableMappingTable(conn,config.getDbschema());
-	                    mapping.updateAttrMappingTable(conn,config.getDbschema());
-	                    trafoConfig.updateTrafoConfig(conn, config.getDbschema());
-	                    
-	                    // update inheritance table
-	                    trsfFromIli.updateInheritanceTable(conn,config.getDbschema());
-	                    // update enum table
-	                    trsfFromIli.updateEnumTable(conn);
-	                    trsfFromIli.updateMetaInfoTables(conn);
-	                    TransferFromIli.addModels(conn,td,config.getDbschema(),customMapping);
-	                    if(!config.isConfigReadFromDb()){
-	                        TransferFromIli.updateSettings(conn,config,config.getDbschema());
-	                    }
-	                    if(config.getCreateMetaInfo()){
-	                        // update meta-attributes table
-	                        MetaAttrUtility.updateMetaAttributesTable(conn, config.getDbschema(), td);
-	                        // set elements' meta-attributes
-	                        MetaAttrUtility.addMetaAttrsFromDb(td, conn, config.getDbschema());
-	                    }
-	                }
-				}
+
+                if(!(conn instanceof GeodbConnection)){
+                    GeneratorJdbc insertCollector = config.getCreatescript()!=null?(GeneratorJdbc)gen:null;
+                    // update mapping table
+                    mapping.updateTableMappingTable(insertCollector,conn,config.getDbschema());
+                    mapping.updateAttrMappingTable(insertCollector,conn,config.getDbschema());
+                    trafoConfig.updateTrafoConfig(insertCollector,conn, config.getDbschema());
+                    
+                    // update inheritance table
+                    trsfFromIli.updateInheritanceTable(insertCollector,conn,config.getDbschema());
+                    // update enum table
+                    trsfFromIli.updateEnumTable(insertCollector,conn);
+                    trsfFromIli.updateMetaInfoTables(insertCollector,conn);
+                    TransferFromIli.addModels(insertCollector,conn,td,config.getDbschema(),customMapping);
+                    if(!config.isConfigReadFromDb()){
+                        TransferFromIli.updateSettings(insertCollector,conn,config,config.getDbschema());
+                    }
+                    if(config.getCreateMetaInfo()){
+                        // update meta-attributes table
+                        MetaAttrUtility.updateMetaAttributesTable(insertCollector,conn, config.getDbschema(), td);
+                        // set elements' meta-attributes
+                        if(conn!=null) {
+                            MetaAttrUtility.addMetaAttrsFromDb(td, conn, config.getDbschema());
+                        }
+                    }
+                }
+				
+                // is a create script requested by user?
+                String createscript=config.getCreatescript();
+                if(createscript!=null && (gen instanceof GeneratorJdbc)){
+                    writeScript(createscript,((GeneratorJdbc) gen).iteratorCreateLines());
+                }
+                
+                // is a drop script requested by user?
+                String dropscript=config.getDropscript();
+                if(dropscript!=null && (gen instanceof GeneratorJdbc)){
+                    writeScript(dropscript,((GeneratorJdbc) gen).iteratorDropLines());
+                }
 				
 				// run post-script
 				if(importToDb) {
@@ -2258,5 +2263,11 @@ public class Ili2db {
 		}
 		return models;
 	}
+    public static String quoteSqlStringValue(String value) {
+        if(value==null) {
+            return "NULL";
+        }
+        return "'"+value.replace("'", "''")+"'";
+    }
 
 }
