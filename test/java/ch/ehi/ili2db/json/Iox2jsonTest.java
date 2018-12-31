@@ -21,7 +21,7 @@ public class Iox2jsonTest {
         JsonGenerator jg = jsonF.createJsonGenerator(out);
         
         IomObject iomObj=new Iom_jObject("Model.Topic.ClassA","1");
-        Iox2json.writeRaw(jg, iomObj);
+        Iox2json.writeRaw(jg, iomObj,null);
         jg.flush();
         assertEquals("{\"@type\":\"Model.Topic.ClassA\",\"@id\":\"1\"}",out.toString());
     }
@@ -44,7 +44,7 @@ public class Iox2jsonTest {
         
         IomObject iomObj=new Iom_jObject("Model.Topic.StructA",null);
         iomObj.setattrvalue("attrA", "attrAvalue");
-        Iox2json.writeRaw(jg, iomObj);
+        Iox2json.writeRaw(jg, iomObj,null);
         jg.flush();
         assertEquals("{\"@type\":\"Model.Topic.StructA\",\"attrA\":\"attrAvalue\"}",out.toString());
     }
@@ -70,7 +70,7 @@ public class Iox2jsonTest {
         a1.setattrvalue("attrB", "b1");
         IomObject a2=iomObj.addattrobj("attrA", "Model.Topic.StructB");
         a2.setattrvalue("attrB", "b2");
-        Iox2json.writeRaw(jg, iomObj);
+        Iox2json.writeRaw(jg, iomObj,null);
         jg.flush();
         assertEquals("{\"@type\":\"Model.Topic.StructA\",\"attrA\":[{\"@type\":\"Model.Topic.StructB\",\"attrB\":\"b1\"},{\"@type\":\"Model.Topic.StructB\",\"attrB\":\"b2\"}]}",out.toString());
     }
