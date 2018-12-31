@@ -246,4 +246,25 @@ public class NullColumnConverter implements SqlColumnConverter {
 			throws SQLException, ConverterException {
 		return null;
 	}
+    @Override
+    public String getSelectValueWrapperJson(String sqlColName) {
+        return null;
+    }
+    @Override
+    public String getInsertValueWrapperJson(String sqlColName) {
+        return null;
+    }
+    @Override
+    public void setJsonNull(PreparedStatement ps, int parameterIndex) throws SQLException {
+    }
+    @Override
+    public Object fromIomStructureToJson(AttributeDef iliEleAttr, IomObject[] iomValues)
+            throws SQLException, ConverterException {
+        return null;
+    }
+    @Override
+    public IomObject[] toIomStructureFromJson(AttributeDef iliEleAttr, Object sqlArray)
+            throws SQLException, ConverterException {
+        return null;
+    }
 }

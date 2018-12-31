@@ -28,6 +28,7 @@ public class Viewable2TableMapper {
 	private boolean coalesceMultiLine=false;
 	private boolean coalesceMultiPoint=false;
 	private boolean coalesceArray=false;
+    private boolean coalesceJson=false;
 	private boolean createItfLineTables=false;
     private String defaultCrsAuthority=null;
     private String defaultCrsCode=null;
@@ -52,6 +53,7 @@ public class Viewable2TableMapper {
 		mapper.coalesceMultiLine=Config.MULTILINE_TRAFO_COALESCE.equals(config.getMultiLineTrafo());
 		mapper.coalesceMultiPoint=Config.MULTIPOINT_TRAFO_COALESCE.equals(config.getMultiPointTrafo());
 		mapper.coalesceArray=Config.ARRAY_TRAFO_COALESCE.equals(config.getArrayTrafo());
+        mapper.coalesceJson=Config.JSON_TRAFO_COALESCE.equals(config.getJsonTrafo());
 		mapper.createItfLineTables=config.getDoItfLineTables();
 		return mapper.doit(eles);
 	}

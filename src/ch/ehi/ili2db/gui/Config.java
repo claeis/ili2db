@@ -48,6 +48,8 @@ public class Config extends Settings {
 	public static final String MULTIPOINT_TRAFO_COALESCE="coalesce";
 	public static final String ARRAY_TRAFO=PREFIX+".arrayTrafo";
 	public static final String ARRAY_TRAFO_COALESCE="coalesce";
+    public static final String JSON_TRAFO=PREFIX+".jsonTrafo";
+    public static final String JSON_TRAFO_COALESCE="coalesce";
 	public static final String MULTILINGUAL_TRAFO=PREFIX+".multilingualTrafo";
 	public static final String MULTILINGUAL_TRAFO_EXPAND="expand";
 	public static final String UNIQUE_CONSTRAINTS=PREFIX+".uniqueConstraints";
@@ -399,6 +401,12 @@ public class Config extends Settings {
 	public void setArrayTrafo(String value) {
 		setValue(ARRAY_TRAFO,value);
 	}
+    public String getJsonTrafo() {
+        return getValue(JSON_TRAFO);
+    }
+    public void setJsonTrafo(String value) {
+        setValue(JSON_TRAFO,value);
+    }
 	public String getMultilingualTrafo() {
 		return getValue(MULTILINGUAL_TRAFO);
 	}

@@ -22,6 +22,7 @@ import ch.ehi.basics.settings.Settings;
 import ch.ehi.ili2db.converter.AbstractWKBColumnConverter;
 import ch.ehi.ili2db.converter.ConverterException;
 import ch.ehi.ili2db.gui.Config;
+import ch.ehi.ili2db.json.Iox2json;
 
 import java.io.IOException;
 import java.sql.Date;
@@ -32,12 +33,20 @@ import java.sql.Time;
 import java.sql.Timestamp;
 import java.sql.Types;
 
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonParser;
 import com.vividsolutions.jts.io.ParseException;
 
+import ch.interlis.ili2c.metamodel.AttributeDef;
+import ch.interlis.ili2c.metamodel.TransferDescription;
 import ch.interlis.iom.IomObject;
+import ch.interlis.iom_j.Iom_jObject;
 import ch.interlis.iox_j.wkb.Iox2wkbException;
 
 public class GpkgColumnConverter extends AbstractWKBColumnConverter {
+    private JsonGenerator jg=null;
+    private TransferDescription td=null;
 	@Override
 	public Integer getSrsid(String crsAuthority, String crsCode, Connection conn)
 			throws ConverterException {
@@ -363,5 +372,50 @@ public class GpkgColumnConverter extends AbstractWKBColumnConverter {
 				throws SQLException {
 			 stmt.setNull(parameterIndex, Types.VARBINARY);
 		}
+	    @Override
+	    public String getSelectValueWrapperJson(String sqlColName) {
+	        return sqlColName;
+	    }
+	    @Override
+	    public String getInsertValueWrapperJson(String sqlColName) {
+	        return sqlColName;
+	    }
+	    @Override
+	    public void setJsonNull(PreparedStatement stmt, int parameterIndex) throws SQLException {
+            stmt.setNull(parameterIndex, Types.VARCHAR);
+	    }
+	    @Override
+	    public Object fromIomStructureToJson(AttributeDef iliEleAttr, IomObject[] iomObjects)
+	            throws SQLException, ConverterException {
+	        JsonFactory jsonF = new JsonFactory();
+	        java.io.StringWriter out=new java.io.StringWriter();
+	        
+	        try {
+	            if(jg==null) {
+	                jg = jsonF.createJsonGenerator(out);
+	                td=(TransferDescription) iliEleAttr.getContainer(TransferDescription.class);
+	            }
+                Iox2json.write(jg, iomObjects,td);
+                jg.flush();
+            } catch (IOException e) {
+                throw new ConverterException(e);
+            }
+	        return out.toString();
+	    }
+	    @Override
+	    public IomObject[] toIomStructureFromJson(AttributeDef iliEleAttr, Object sqlArray)
+	            throws SQLException, ConverterException {
+	        JsonFactory jsonF = new JsonFactory();
+	        java.io.StringReader in=new java.io.StringReader((String)sqlArray);
+	        IomObject iomObj[]=null;
+	        try {
+	            JsonParser jg = jsonF.createJsonParser(in);
+	            
+	            iomObj=Iox2json.read(jg);
+	        }catch(IOException ex) {
+                throw new ConverterException(ex);
+	        }
+	        return iomObj;
+	    }
 
 }

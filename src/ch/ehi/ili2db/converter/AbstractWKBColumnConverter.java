@@ -389,5 +389,27 @@ public abstract class AbstractWKBColumnConverter implements SqlColumnConverter {
 			throws SQLException, ConverterException {
 		throw new UnsupportedOperationException();
 	}
+    @Override
+    public String getSelectValueWrapperJson(String makeColumnRef) {
+        throw new UnsupportedOperationException();
+    }
+    @Override
+    public String getInsertValueWrapperJson(String sqlColName) {
+        throw new UnsupportedOperationException();
+    }
+    @Override
+    public void setJsonNull(PreparedStatement ps, int parameterIndex) throws SQLException {
+        throw new UnsupportedOperationException();
+    }
+    @Override
+    public Object fromIomStructureToJson(AttributeDef iliEleAttr, IomObject[] iomValues)
+            throws SQLException, ConverterException {
+        throw new UnsupportedOperationException();
+    }
+    @Override
+    public IomObject[] toIomStructureFromJson(AttributeDef iliEleAttr, Object sqlArray)
+            throws SQLException, ConverterException {
+        throw new UnsupportedOperationException();
+    }
 
 }

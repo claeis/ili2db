@@ -2245,6 +2245,7 @@ public class Ili2db {
 		config.setMultiLineTrafo(null);
 		config.setMultiPointTrafo(null);
 		config.setArrayTrafo(null);
+        config.setJsonTrafo(null);
 		config.setMultilingualTrafo(null);
 		config.setInheritanceTrafo(null);
 	}

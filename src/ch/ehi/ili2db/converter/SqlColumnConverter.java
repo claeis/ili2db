@@ -25,6 +25,7 @@ import java.sql.Time;
 import java.sql.Timestamp;
 
 import ch.ehi.basics.settings.Settings;
+import ch.interlis.ili2c.metamodel.AttributeDef;
 import ch.interlis.iom.IomObject;
 import ch.interlis.iom_j.itf.EnumCodeMapper;
 
@@ -138,4 +139,11 @@ public interface SqlColumnConverter {
 	public String toIomBlob(Object obj)
 			throws java.sql.SQLException, ConverterException;
 	public String[] toIomArray(ch.interlis.ili2c.metamodel.AttributeDef iliEleAttr,Object sqlArray,EnumCodeMapper enumTypes) throws java.sql.SQLException, ConverterException;
+    public void setJsonNull(PreparedStatement ps, int valuei) throws SQLException;
+    public String getInsertValueWrapperJson(String sqlColName);
+    public String getSelectValueWrapperJson(String sqlColName);
+    public Object fromIomStructureToJson(AttributeDef iliEleAttr, IomObject[] iomValues)
+            throws SQLException, ConverterException;
+    public IomObject[] toIomStructureFromJson(AttributeDef iliEleAttr, Object sqlArray)
+            throws SQLException, ConverterException;
 }

@@ -54,6 +54,7 @@ public abstract class AbstractMain {
 		config.setMultiLineTrafo(Config.MULTILINE_TRAFO_COALESCE);
 		config.setMultiPointTrafo(Config.MULTIPOINT_TRAFO_COALESCE);
 		config.setArrayTrafo(Config.ARRAY_TRAFO_COALESCE);
+        config.setJsonTrafo(Config.JSON_TRAFO_COALESCE);
 		config.setMultilingualTrafo(Config.MULTILINGUAL_TRAFO_EXPAND);
 		config.setValidation(true);
 	}
@@ -245,6 +246,9 @@ public abstract class AbstractMain {
 			}else if(arg.equals("--coalesceArray")){
 				argi++;
 				config.setArrayTrafo(config.ARRAY_TRAFO_COALESCE);
+            }else if(arg.equals("--coalesceJson")){
+                argi++;
+                config.setJsonTrafo(config.JSON_TRAFO_COALESCE);
 			}else if(arg.equals("--expandMultilingual")){
 				argi++;
 				config.setMultilingualTrafo(config.MULTILINGUAL_TRAFO_EXPAND);
@@ -402,6 +406,7 @@ public abstract class AbstractMain {
 					System.err.println("--coalesceMultiLine    enable smart mapping of CHBase:MultiLine");
 					System.err.println("--coalesceMultiPoint   enable smart mapping of MultiPoint structures");
 					System.err.println("--coalesceArray        enable smart mapping of ARRAY structures");
+                    System.err.println("--coalesceJson         enable smart mapping of JSON structures");
 					System.err.println("--expandMultilingual   enable smart mapping of CHBase:MultilingualText");
 					System.err.println("--createGeomIdx        create a spatial index on geometry columns.");
 					System.err.println("--createEnumColAsItfCode create enum type column with value according to ITF (instead of XTF).");

@@ -33,6 +33,7 @@ import ch.ehi.sqlgen.repository.DbColDateTime;
 import ch.ehi.sqlgen.repository.DbColDecimal;
 import ch.ehi.sqlgen.repository.DbColGeometry;
 import ch.ehi.sqlgen.repository.DbColId;
+import ch.ehi.sqlgen.repository.DbColJson;
 import ch.ehi.sqlgen.repository.DbColNumber;
 import ch.ehi.sqlgen.repository.DbColTime;
 import ch.ehi.sqlgen.repository.DbColUuid;
@@ -88,6 +89,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 	private boolean coalesceMultiLine=true;
 	private boolean coalesceMultiPoint=true;
 	private boolean coalesceArray=true;
+    private boolean coalesceJson=true;
 	private boolean expandMultilingual=true;
 	private boolean createUnique=true;
 	private boolean createNumCheck=false;
@@ -107,6 +109,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 		coalesceMultiLine=Config.MULTILINE_TRAFO_COALESCE.equals(config.getMultiLineTrafo());
 		coalesceMultiPoint=Config.MULTIPOINT_TRAFO_COALESCE.equals(config.getMultiPointTrafo());
 		coalesceArray=Config.ARRAY_TRAFO_COALESCE.equals(config.getArrayTrafo());
+        coalesceJson=Config.JSON_TRAFO_COALESCE.equals(config.getJsonTrafo());
 		expandMultilingual=Config.MULTILINGUAL_TRAFO_EXPAND.equals(config.getMultilingualTrafo());
 		createUnique=config.isCreateUniqueConstraints();
 		createNumCheck=config.isCreateCreateNumChecks();
@@ -594,6 +597,11 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 					}
 					dbCol.value.setArraySize(DbColumn.UNLIMITED_ARRAY);		
 					trafoConfig.setAttrConfig(attr, TrafoConfigNames.ARRAY_TRAFO,TrafoConfigNames.ARRAY_TRAFO_COALESCE);
+                }else if(Ili2cUtility.isJsonAttr(td, attr) && (coalesceJson 
+                        || TrafoConfigNames.JSON_TRAFO_COALESCE.equals(trafoConfig.getAttrConfig(attr,TrafoConfigNames.JSON_TRAFO)))){
+                    DbColJson ret=new DbColJson();
+                    dbCol.value=ret;
+                    trafoConfig.setAttrConfig(attr, TrafoConfigNames.JSON_TRAFO,TrafoConfigNames.JSON_TRAFO_COALESCE);
 				}else if(isChbaseMultilingual(td, attr) && (expandMultilingual 
 							|| TrafoConfigNames.MULTILINGUAL_TRAFO_EXPAND.equals(trafoConfig.getAttrConfig(attr,TrafoConfigNames.MULTILINGUAL_TRAFO)))){
 					for(String sfx:DbNames.MULTILINGUAL_TXT_COL_SUFFIXS){

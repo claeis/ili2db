@@ -658,6 +658,15 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 							values.append(","+geomConv.getInsertValueWrapperArray("?"));
 						}
 						sep=",";
+                }else if(TrafoConfigNames.JSON_TRAFO_COALESCE.equals(trafoConfig.getAttrConfig(attr, TrafoConfigNames.JSON_TRAFO))){
+                    ret.append(sep);
+                    ret.append(attrSqlName);
+                       if(isUpdate){
+                           ret.append("="+geomConv.getInsertValueWrapperJson("?"));
+                       }else{
+                           values.append(","+geomConv.getInsertValueWrapperJson("?"));
+                       }
+                       sep=",";
 				}else if(TrafoConfigNames.MULTILINGUAL_TRAFO_EXPAND.equals(trafoConfig.getAttrConfig(attr, TrafoConfigNames.MULTILINGUAL_TRAFO))){
 					for(String sfx:DbNames.MULTILINGUAL_TXT_COL_SUFFIXS){
 						ret.append(sep);
@@ -955,6 +964,19 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 							geomConv.setArrayNull(ps,valuei);
 						 }
 						 valuei++;
+                    }else if(TrafoConfigNames.JSON_TRAFO_COALESCE.equals(trafoConfig.getAttrConfig(tableAttr, TrafoConfigNames.JSON_TRAFO))){
+                        int valuec= classAttr==null ? 0 : iomObj.getattrvaluecount(attrName);
+                        IomObject iomValue[]=new IomObject[valuec];
+                        if(iomValue.length>0){
+                            for(int i=0;i<valuec;i++) {
+                                iomValue[i]=iomObj.getattrobj(attrName, i);
+                            }
+                            Object geomObj = geomConv.fromIomStructureToJson(tableAttr,iomValue);
+                           ps.setObject(valuei,geomObj);
+                        }else{
+                           geomConv.setJsonNull(ps,valuei);
+                        }
+                        valuei++;
 					}else if(TrafoConfigNames.MULTILINGUAL_TRAFO_EXPAND.equals(trafoConfig.getAttrConfig(tableAttr, TrafoConfigNames.MULTILINGUAL_TRAFO))){
 						 IomObject iomMulti= classAttr==null ? null : iomObj.getattrobj(attrName,0);
 						for(String sfx:DbNames.MULTILINGUAL_TXT_COL_SUFFIXS){

@@ -268,6 +268,10 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 					 sep=",";
 					 ret.append(geomConv.getSelectValueWrapperArray(makeColumnRef(tableAlias,attrSqlName)));
 					 arrayAttrs.addArrayAttr(attr);
+                }else if(TrafoConfigNames.JSON_TRAFO_COALESCE.equals(trafoConfig.getAttrConfig(attr, TrafoConfigNames.JSON_TRAFO))){
+                    ret.append(sep);
+                    sep=",";
+                    ret.append(geomConv.getSelectValueWrapperJson(makeColumnRef(tableAlias,attrSqlName)));
 				}else if(TrafoConfigNames.MULTILINGUAL_TRAFO_EXPAND.equals(trafoConfig.getAttrConfig(attr, TrafoConfigNames.MULTILINGUAL_TRAFO))){
 					for(String sfx:DbNames.MULTILINGUAL_TXT_COL_SUFFIXS){
 						 ret.append(sep);
@@ -660,6 +664,23 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 	                             }   
 	                         }
 		                }
+                    }else if(TrafoConfigNames.JSON_TRAFO_COALESCE.equals(trafoConfig.getAttrConfig(tableAttr, TrafoConfigNames.JSON_TRAFO))){
+                        if(classAttr==null) {
+                            valuei++;
+                        }else {
+                             Object dbValue=rs.getObject(valuei);
+                             valuei++;
+                             if(!rs.wasNull()){
+                                 try{
+                                     IomObject iomArray[]=geomConv.toIomStructureFromJson(tableAttr, dbValue);
+                                     for(int elei=0;elei<iomArray.length;elei++){
+                                         iomObj.addattrobj(attrName, iomArray[elei]);
+                                     }
+                                 }catch(ConverterException ex){
+                                     EhiLogger.logError("Object "+sqlid+": failed to convert JSON",ex);
+                                 }   
+                             }
+                        }
 					}else if(TrafoConfigNames.MULTILINGUAL_TRAFO_EXPAND.equals(trafoConfig.getAttrConfig(tableAttr, TrafoConfigNames.MULTILINGUAL_TRAFO))){
 						IomObject iomMulti=null;
 						Table multilingualTextType = ((CompositionType) type).getComponentType();

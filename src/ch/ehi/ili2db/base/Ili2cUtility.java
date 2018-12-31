@@ -262,6 +262,16 @@ public class Ili2cUtility {
 		}
 		return false;
 	}
+    public static boolean isJsonAttr(TransferDescription td,
+            AttributeDef attr) {
+        Type typeo=attr.getDomain();
+        if(typeo instanceof CompositionType){
+            if(IliMetaAttrNames.METAATTR_MAPPING_JSON.equals(attr.getMetaValue(IliMetaAttrNames.METAATTR_MAPPING))){
+                return true;
+            }
+        }
+        return false;
+    }
 
     public static Domain getRootBaseDomain(Domain domain) {
         Domain base=domain.getExtending();
