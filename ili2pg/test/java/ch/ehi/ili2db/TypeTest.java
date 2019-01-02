@@ -55,6 +55,7 @@ public class TypeTest {
             File data = new File(TEST_DATA_DIR, "ClassType.ili");
             Config config = initConfig(data.getPath(), DBSCHEMA,data.getPath()+".log");
             config.setFunction(Config.FC_SCHEMAIMPORT);
+            config.setCreateMetaInfo(true);
 
             Ili2db.readSettingsFromDb(config);
             Ili2db.run(config, null);
@@ -94,6 +95,7 @@ public class TypeTest {
             Config config = initConfig(data.getPath(), DBSCHEMA,data.getPath()+".log");
             config.setFunction(Config.FC_SCHEMAIMPORT);
             config.setCreateTypeConstraint(true);
+            config.setCreateMetaInfo(true);
 
             Ili2db.readSettingsFromDb(config);
             Ili2db.run(config, null);
