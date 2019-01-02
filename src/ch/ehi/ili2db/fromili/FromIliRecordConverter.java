@@ -194,6 +194,12 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 		if(base==null && !def.isSecondaryTable()){
 			if(createTypeDiscriminator || def.includesMultipleTypes()){
 				  dbCol=createSqlTypeCol(DbNames.T_TYPE_COL);
+
+                  // Add entry into column prop table
+                  metaInfo.setColumnInfo(dbTable.getName().getName(),
+                                         DbNames.T_TYPE_COL,
+                                         DbExtMetaInfo.TAG_COL_TYPES,
+                                         "");
 				  dbTable.addColumn(dbCol);
 			}
 			// if CLASS

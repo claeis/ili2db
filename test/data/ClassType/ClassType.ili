@@ -1,0 +1,54 @@
+INTERLIS 2.3;
+
+/** KANTONALES DATENMODELL DER KOMMUNALEN NUTZUNGSNPLANUNG GeoIV ID 73 - 
+    Das Modell stellt eine Erweiterung des MGDM des ARE dar.
+    Die Erweiterung besteht in der UUIDOID-Deklaration fuer alle Datenthemen des Modells.
+    2018-03-06: Aenderung zum Import auf Nutzungsplanung_LV95_V1_1.
+    2018-06-22: Erweiterung Assoziation Typ-Typ_Kt. Korrektur TransferMetadaten.
+ */
+!!@ technicalContact=geoinformation@gl.ch
+!!@ IDGeoIV=73
+MODEL GL_Nutzungsplanung_V1_3 (de) AT "http://geo.gl.ch" VERSION "2018-06-22"  =
+  IMPORTS Nutzungsplanung_LV95_V1_1;
+
+  /** Rechtsvorschriften fuer die kommunale Nutzungsplanung. Erweiterung des MGDM-TOPIC um OID-Deklaration.
+   */
+  TOPIC Rechtsvorschriften EXTENDS Nutzungsplanung_LV95_V1_1.Rechtsvorschriften =
+    OID AS INTERLIS.UUIDOID;
+    /** Erweiterung der Klasse Dokument. Eine Klasse, die im Basismodell geerbt wird, kann nicht mit 
+       (EXTENDED)erweitert werden. */
+    CLASS Dokument_GL EXTENDS Nutzungsplanung_LV95_V1_1.Rechtsvorschriften.Dokument =
+    END Dokument_GL;
+    CLASS Rechtsvorschrift_GL EXTENDS Dokument_GL = END Rechtsvorschrift_GL;
+    ASSOCIATION HinweisWeitereDokumente (EXTENDED) =  END HinweisWeitereDokumente;
+  END Rechtsvorschriften;
+
+  /** Geobasisdaten fuer die kommunale Nutzungsplanung. Erweiterung des MGDM-TOPIC um OID-Deklaration.
+   */
+  TOPIC Geobasisdaten EXTENDS Nutzungsplanung_LV95_V1_1.Geobasisdaten =
+    OID AS INTERLIS.UUIDOID;
+    CLASS Typ (EXTENDED) =  END Typ;
+    CLASS Typ_Kt (EXTENDED) =  END Typ_Kt;
+    CLASS Grundnutzung_Zonenflaeche (EXTENDED) =  END Grundnutzung_Zonenflaeche;
+    CLASS Linienbezogene_Festlegung (EXTENDED) =  END Linienbezogene_Festlegung;
+    CLASS Objektbezogene_Festlegung (EXTENDED) =  END Objektbezogene_Festlegung;
+    CLASS Ueberlagernde_Festlegung (EXTENDED) =  END Ueberlagernde_Festlegung;
+    /** Die Beziehung Typ -- Typ_Kt muss explizit erweitert werden, um auszuschliessen, dass in den 
+        Transferdaten auch Objekte mit Referenzen auf Typ_Kt gemäss Bundesmodell zuslässig sind.
+     */
+    ASSOCIATION Typ_Typ_Kt (EXTENDED) =
+      Typ (EXTENDED) -- {0..*} Typ;
+      Typ_Kt (EXTENDED,EXTERNAL) -<> {1} Typ_Kt;
+    END Typ_Typ_Kt;
+    ASSOCIATION Typ_Dokument (EXTENDED) = END Typ_Dokument;
+  END Geobasisdaten;
+
+  /** Transfermetadaten fuer die kommunale Nutzungsplanung. Erweiterung des MGDM-TOPIC um OID-Deklaration.
+   */
+  TOPIC TransferMetadaten EXTENDS Nutzungsplanung_LV95_V1_1.TransferMetadaten =
+    OID AS INTERLIS.UUIDOID;
+    CLASS Amt (EXTENDED) =  END Amt;
+    CLASS Datenbestand (EXTENDED) =  END Datenbestand;
+  END TransferMetadaten;
+
+END GL_Nutzungsplanung_V1_3.

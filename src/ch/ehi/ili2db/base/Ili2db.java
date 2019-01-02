@@ -46,6 +46,7 @@ import ch.ehi.ili2db.fromili.CustomMappingNull;
 import ch.ehi.ili2db.fromili.IliFromDb;
 import ch.ehi.ili2db.fromili.ModelElementSelector;
 import ch.ehi.ili2db.fromili.TransferFromIli;
+import ch.ehi.ili2db.fromili.TypeUtility;
 import ch.ehi.ili2db.fromxtf.BasketStat;
 import ch.ehi.ili2db.fromxtf.ClassStat;
 import ch.ehi.ili2db.fromxtf.TransferFromXtf;
@@ -1197,6 +1198,10 @@ public class Ili2db {
                         if(conn!=null) {
                             MetaAttrUtility.addMetaAttrsFromDb(td, conn, config.getDbschema());
                         }
+                    }
+                    TypeUtility.writeColumnProps(conn, config.getDbschema(), mapping);
+                    if(config.getCreateTypeConstraint()){
+                        TypeUtility.addTypeConstraints(conn, config.getDbschema(), mapping);
                     }
                 }
 				

@@ -362,7 +362,10 @@ public abstract class AbstractMain {
 			}else if(arg.equals("--iliMetaAttrs")){
 				argi++;	
 				config.setIliMetaAttrsFile(args[argi]);
-				argi++;	
+				argi++;
+            }else if(arg.equals("--createTypeConstraint")){
+                argi++;
+                config.setCreateTypeConstraint(true);
 			}else if(arg.equals("--help")){
 					printVersion ();
 					System.err.println();
