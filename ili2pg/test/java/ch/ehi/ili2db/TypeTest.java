@@ -82,7 +82,6 @@ public class TypeTest {
 		}
     }
 
-    @Ignore
     @Test
     public void checkConstraint() throws Exception {
         Connection jdbcConnection = null;

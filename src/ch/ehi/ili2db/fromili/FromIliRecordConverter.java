@@ -233,11 +233,8 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
                   if(createTypeConstraint){
 
                       // Add check constraint on t_type column
-                      // FIXME uncomment next lines when DbColVarchar.setValueRestriction(String[] possibleValues)
-                      // in ehisqlgen.jar is implemented
-
-                      //String[] possibleValues = new String[extensions.size()];
-                      //dbCol.setValueRestriction(extensions.toArray(possibleValues));
+                      String[] possibleValues = new String[extensions.size()];
+                      ((DbColVarchar) dbCol).setValueRestriction(extensions.toArray(possibleValues));
                   }
                   dbTable.addColumn(dbCol);
 			}
