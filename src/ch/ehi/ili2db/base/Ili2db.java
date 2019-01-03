@@ -1199,7 +1199,6 @@ public class Ili2db {
                             MetaAttrUtility.addMetaAttrsFromDb(td, conn, config.getDbschema());
                         }
                         if(importToDb){
-                            TypeUtility.writeColumnProps(conn, config.getDbschema(), mapping);
                             if(config.getCreateTypeConstraint()){
                                 TypeUtility.addTypeConstraints(conn, config.getDbschema(), mapping);
                             }
