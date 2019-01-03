@@ -448,6 +448,7 @@ public abstract class AbstractMain {
 					System.err.println("--translation translatedModel=originModel assigns a translated model to its orginal language equivalent.");
 					System.err.println("--createMetaInfo       Create aditional ili-model information.");
 					System.err.println("--iliMetaAttrs file    Import meta-attributes from a .toml file (Requires --createMetaInfo)");
+                    System.err.println("--createTypeConstraints   Create CHECK constraint on t_type columns");
 					printSpecificOptions();
 					System.err.println("--proxy host           proxy server to access model repositories.");
 					System.err.println("--proxyPort port       proxy port to access model repositories.");
