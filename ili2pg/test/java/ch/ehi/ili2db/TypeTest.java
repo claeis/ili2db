@@ -64,15 +64,16 @@ public class TypeTest {
             String query = "SELECT setting FROM "+DBSCHEMA+"."+DbNames.META_INFO_COLUMN_TAB+
                 " WHERE "+DbNames.META_INFO_COLUMN_TAB_TAG_COL+" = 'ch.ehi.ili2db.types' and "
                 + DbNames.META_INFO_COLUMN_TAB_COLUMNNAME_COL+" = 'T_Type' and "
-                + DbNames.META_INFO_TABLE_TAB_TABLENAME_COL+" = 'ueberlagernde_festlegung';";
+                + DbNames.META_INFO_TABLE_TAB_TABLENAME_COL+" = 'classa1';";
 
             Assert.assertTrue(stmt.execute(query));
             ResultSet rs = stmt.getResultSet();
 
             Assert.assertTrue(rs.next());
             String setting = rs.getString(1);
-            Assert.assertTrue(setting.contains("ueberlagernde_festlegung"));
-            Assert.assertTrue(setting.contains("gl_ntznng_v1_3geobasisdaten_ueberlagernde_festlegung"));
+            Assert.assertTrue(setting.contains("classa1"));
+            Assert.assertTrue(setting.contains("classa1b"));
+            Assert.assertTrue(setting.contains("classa1c"));
 
         }finally{
 			if(jdbcConnection != null){
@@ -102,15 +103,16 @@ public class TypeTest {
             Ili2db.readSettingsFromDb(config);
             Ili2db.run(config, null);
 
-            String query = "SELECT pg_catalog.pg_get_constraintdef(r.oid, true) as condef FROM pg_catalog.pg_constraint r WHERE r.conrelid = 'classtype.ueberlagernde_festlegung'::regclass AND r.contype = 'c';";
+            String query = "SELECT pg_catalog.pg_get_constraintdef(r.oid, true) as condef FROM pg_catalog.pg_constraint r WHERE r.conrelid = 'classtype.classa1'::regclass AND r.contype = 'c';";
 
             Assert.assertTrue(stmt.execute(query));
             ResultSet rs = stmt.getResultSet();
 
             Assert.assertTrue(rs.next());
             String constraint = rs.getString(1);
-            Assert.assertTrue(constraint.contains("ueberlagernde_festlegung"));
-            Assert.assertTrue(constraint.contains("gl_ntznng_v1_3geobasisdaten_ueberlagernde_festlegung"));
+            Assert.assertTrue(constraint.contains("classa1"));
+            Assert.assertTrue(constraint.contains("classa1b"));
+            Assert.assertTrue(constraint.contains("classa1c"));
 
         }finally{
 			if(jdbcConnection != null){
