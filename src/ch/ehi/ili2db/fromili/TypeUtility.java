@@ -11,7 +11,25 @@ import ch.ehi.ili2db.base.DbNames;
 import ch.ehi.ili2db.dbmetainfo.DbExtMetaInfo;
 import ch.ehi.ili2db.mapping.NameMapping;
 
+
+import ch.interlis.ili2c.metamodel.Viewable;
+
 public class TypeUtility {
+
+    public static String[] getViewableExtensions(Viewable v, NameMapping mapping){
+        /**
+         * Returns a string array with the extensions as sqlnames
+         * of the passed viewable.
+         */
+
+        ArrayList<String> extensions = new ArrayList<String>();
+        for (Object o : v.getExtensions()){
+            extensions.add(mapping.mapIliClassDef((Viewable) o));
+        }
+
+        String[] result = new String[extensions.size()];
+        return extensions.toArray(result);
+    }
 
     public static void writeColumnProps(Connection conn, String dbSchema, NameMapping mapping)
         throws Ili2dbException {

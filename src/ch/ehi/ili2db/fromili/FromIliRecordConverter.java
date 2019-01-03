@@ -195,20 +195,15 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 			if(createTypeDiscriminator || def.includesMultipleTypes()){
 				  dbCol=createSqlTypeCol(DbNames.T_TYPE_COL);
 
-                  String classesString = "";
-                  for (Object o : def.getViewable().getExtensions()){
-                      Viewable v = (Viewable) o;
-                      classesString += ""+ili2sqlName.mapIliClassDef(v)+",";
-                  }
 
-                  //Remove last comma and space
-                  classesString = classesString.substring(0, classesString.length() - 1);
+                  String[] extensions = TypeUtility.getViewableExtensions(def.getViewable(), ili2sqlName);
 
-                  // Add extensions into column prop table
+                  // Add t_type possible values to meta-info table
                   metaInfo.setColumnInfo(dbTable.getName().getName(),
                                          DbNames.T_TYPE_COL,
                                          DbExtMetaInfo.TAG_COL_TYPES,
-                                         classesString);
+                                         java.util.Arrays.toString(extensions));
+
                   dbTable.addColumn(dbCol);
 
 			}
