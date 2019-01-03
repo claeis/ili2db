@@ -94,6 +94,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 	private boolean createUnique=true;
 	private boolean createNumCheck=false;
 	private DbExtMetaInfo metaInfo=null;
+    private boolean createTypeConstraint=false;
 
 	public FromIliRecordConverter(TransferDescription td1, NameMapping ili2sqlName,
 			Config config, DbSchema schema1, CustomMapping customMapping1,
@@ -114,6 +115,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 		createUnique=config.isCreateUniqueConstraints();
 		createNumCheck=config.isCreateCreateNumChecks();
 		this.metaInfo=metaInfo;
+        createTypeConstraint=config.getCreateTypeConstraint();
 	}
 
 	public void generateTable(ViewableWrapper def,int pass)
@@ -205,6 +207,15 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
                                          java.util.Arrays.toString(extensions));
 
                   dbTable.addColumn(dbCol);
+
+                  if(createTypeConstraint){
+
+                      // Add check constraint on t_type column
+                      // FIXME uncomment next line when DbColVarchar.setValueRestriction(String[] possibleValues)
+                      // in ehisqlgen.jar is implemented
+
+                      //dbCol.setValueRestriction(extensions);
+                  }
 
 			}
 			// if CLASS
