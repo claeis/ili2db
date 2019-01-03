@@ -5,7 +5,13 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 
+import java.io.IOException;
+import java.io.StringWriter;
+
 import javax.xml.ws.Holder;
+
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonGenerator;
 
 import ch.ehi.basics.types.OutParam;
 import ch.ehi.ili2db.base.DbIdGen;
@@ -202,11 +208,27 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
                       extensions.add(ili2sqlName.mapIliClassDef((Viewable) o));
                   }
 
+                  String jsonExtensions = "";
+
+                  JsonFactory factory = new JsonFactory();
+                  StringWriter out = new StringWriter();
+                  try{
+                      JsonGenerator generator = factory.createGenerator(out);
+                      generator.writeStartArray();
+                      for (String e : extensions){
+                          generator.writeString(e);
+                      }
+                      generator.writeEndArray();
+                      generator.flush();
+                      jsonExtensions = out.toString();
+                      generator.close();
+                  }catch (IOException e){}
+
                   // Add t_type possible values to meta-info table
                   metaInfo.setColumnInfo(dbTable.getName().getName(),
                                          DbNames.T_TYPE_COL,
                                          DbExtMetaInfo.TAG_COL_TYPES,
-                                         extensions.toString());
+                                         jsonExtensions);
 
                   if(createTypeConstraint){
 
