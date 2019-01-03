@@ -197,26 +197,27 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 			if(createTypeDiscriminator || def.includesMultipleTypes()){
 				  dbCol=createSqlTypeCol(DbNames.T_TYPE_COL);
 
-
-                  String[] extensions = TypeUtility.getViewableExtensions(def.getViewable(), ili2sqlName);
+                  ArrayList<String> extensions = new ArrayList<String>();
+                  for (Object o : def.getViewable().getExtensions()){
+                      extensions.add(ili2sqlName.mapIliClassDef((Viewable) o));
+                  }
 
                   // Add t_type possible values to meta-info table
                   metaInfo.setColumnInfo(dbTable.getName().getName(),
                                          DbNames.T_TYPE_COL,
                                          DbExtMetaInfo.TAG_COL_TYPES,
-                                         java.util.Arrays.toString(extensions));
-
-                  dbTable.addColumn(dbCol);
+                                         extensions.toString());
 
                   if(createTypeConstraint){
 
                       // Add check constraint on t_type column
-                      // FIXME uncomment next line when DbColVarchar.setValueRestriction(String[] possibleValues)
+                      // FIXME uncomment next lines when DbColVarchar.setValueRestriction(String[] possibleValues)
                       // in ehisqlgen.jar is implemented
 
-                      //dbCol.setValueRestriction(extensions);
+                      //String[] possibleValues = new String[extensions.size()];
+                      //dbCol.setValueRestriction(extensions.toArray(possibleValues));
                   }
-
+                  dbTable.addColumn(dbCol);
 			}
 			// if CLASS
 			  if(!def.isStructure()){
