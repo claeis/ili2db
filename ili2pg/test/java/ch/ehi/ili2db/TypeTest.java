@@ -9,6 +9,7 @@ import java.util.HashMap;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.junit.Ignore;
 
 import ch.ehi.ili2db.base.Ili2db;
 import ch.ehi.ili2db.gui.Config;
@@ -80,6 +81,7 @@ public class TypeTest {
 		}
     }
 
+    @Ignore
     @Test
     public void checkConstraint() throws Exception {
         Connection jdbcConnection = null;
