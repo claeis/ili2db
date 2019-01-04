@@ -226,6 +226,30 @@ public class Iox2json {
         }
         jg.writeEndObject();
     }
+    public static void writeArray(JsonGenerator jg, String[] iomValues, AttributeDef attr) throws IOException {
+        jg.writeStartArray();
+        for(String value:iomValues) {
+            if(value==null) {
+                jg.writeNull();
+            }else {
+                if(attr.isDomainBoolean()) {
+                    if(value.equals("true")) {
+                        jg.writeBoolean(true);
+                    }else {
+                        jg.writeBoolean(false);
+                    }
+                }else{
+                    Type type=attr.getDomainResolvingAll();
+                    if(type instanceof NumericType) {
+                        jg.writeNumber(value);
+                    }else {
+                        jg.writeString(value);
+                    }
+                }
+            }
+        }
+        jg.writeEndArray();
+    }
     public static ch.interlis.iom.IomObject[] read(JsonParser jg) throws IOException
     {
         JsonToken current = jg.currentToken();
@@ -355,6 +379,40 @@ public class Iox2json {
             throw new IOException("unexpected json token "+jg.currentToken().toString()+"; '}' expected");
         }
         return ret;
+    }
+    public static String[] readArray(JsonParser jg) throws IOException {
+        JsonToken current = jg.currentToken();
+        // before any tokens have been read?
+        if(current==null) {
+            current = jg.nextToken();
+            // end of input?
+            if(current==null) {
+                return null;
+            }
+        }
+        if(current!=JsonToken.START_ARRAY) {
+            throw new IOException("unexpected json token "+jg.currentToken().toString()+"; '[' expected");
+        }
+        ArrayList<String> values=new ArrayList<String>();
+        current = jg.nextToken();
+        while(current!=null && current!=JsonToken.END_ARRAY) {
+            if(current==JsonToken.VALUE_TRUE) {
+                values.add("true");
+                current = jg.nextToken();
+            }else if(current==JsonToken.VALUE_FALSE) {
+                values.add("false");
+                current = jg.nextToken();
+            }else if(current==JsonToken.VALUE_NULL) {
+                values.add(null);
+                current = jg.nextToken();
+            }else if(current==JsonToken.VALUE_NUMBER_FLOAT || current==JsonToken.VALUE_NUMBER_INT || current==JsonToken.VALUE_STRING) {
+                values.add(jg.getValueAsString());
+                current = jg.nextToken();
+            }else {
+                throw new IOException("unexpected json token "+jg.currentToken().toString());
+            }
+        }
+        return values.toArray(new String[values.size()]);
     }
     
 }

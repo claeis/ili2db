@@ -34,7 +34,7 @@
 				</aBoolean>
 				<aTime>
 					<Array23.TestA.ATime_>
-						<Value>09:00:00.0</Value>
+						<Value>09:00:00.000</Value>
 					</Array23.TestA.ATime_>
 				</aTime>
 				<aDate>
@@ -44,7 +44,7 @@
 				</aDate>
 				<aDateTime>
 					<Array23.TestA.ADateTime_>
-						<Value>1900-01-01T12:30:05</Value>
+						<Value>1900-01-01T12:30:05.000</Value>
 					</Array23.TestA.ADateTime_>
 				</aDateTime>
 				<numericInt>
