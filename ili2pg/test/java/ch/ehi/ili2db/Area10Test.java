@@ -12,6 +12,8 @@ import org.junit.Ignore;
 import org.junit.Test;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Polygon;
+
+import ch.ehi.basics.logging.EhiLogger;
 import ch.ehi.ili2db.base.Ili2db;
 import ch.ehi.ili2db.gui.Config;
 import ch.interlis.iom.IomObject;
@@ -125,6 +127,7 @@ public class Area10Test {
 				config.setMultilingualTrafo(null);
 				config.setInheritanceTrafo(null);
 				config.setSkipGeometryErrors(true);
+                config.setSqlNull(Config.SQL_NULL_ENABLE);
 				config.setValidation(true);
 				Ili2db.readSettingsFromDb(config);
 				Ili2db.run(config,null);
@@ -176,6 +179,7 @@ public class Area10Test {
 				config.setMultilingualTrafo(null);
 				config.setInheritanceTrafo(null);
 				config.setSkipGeometryErrors(true);
+                config.setSqlNull(Config.SQL_NULL_ENABLE);
 				config.setValidation(false);
 				Ili2db.readSettingsFromDb(config);
 				Ili2db.run(config,null);
