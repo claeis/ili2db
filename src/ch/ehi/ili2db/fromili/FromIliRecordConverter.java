@@ -205,7 +205,10 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 
                   ArrayList<String> extensions = new ArrayList<String>();
                   for (Object o : def.getViewable().getExtensions()){
-                      extensions.add(ili2sqlName.mapIliClassDef((Viewable) o));
+                      Viewable v = (Viewable) o;
+                      if (! v.isAbstract()){
+                          extensions.add(ili2sqlName.mapIliClassDef(v));
+                      }
                   }
 
                   String jsonExtensions = "";

@@ -74,6 +74,7 @@ public class TypeTest {
             Assert.assertTrue(setting.contains("classa1"));
             Assert.assertTrue(setting.contains("classa1b"));
             Assert.assertTrue(setting.contains("classa1c"));
+            Assert.assertFalse(setting.contains("classa1d"));
 
         }finally{
 			if(jdbcConnection != null){
