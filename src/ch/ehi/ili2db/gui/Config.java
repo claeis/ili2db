@@ -84,6 +84,7 @@ public class Config extends Settings {
 	public static final String USE_EPGS_IN_NAMES=PREFIX+".useEpsgInNames";
 	public static final String SRS_MODEL_ASSIGNMENT=PREFIX+".srsModelAssignment";
 	public static final String MODELS_TAB_MODELNAME_COLSIZE = PREFIX+".modelsTabModelnameColSize";
+	public static final String CREATE_TYPE_CONSTRAINT=PREFIX+".createTypeConstraint";
 	private int function=FC_UNDEFINED;
 	private String dburl;
 	private String dbusr;
@@ -652,6 +653,7 @@ public class Config extends Settings {
     public boolean isImportBid() {
         return importBid;
     }
+
     public void setUseEpsgInNames(boolean value) {
         setValue(USE_EPGS_IN_NAMES,value?TRUE:FALSE);
     }
@@ -670,4 +672,11 @@ public class Config extends Settings {
     public String getSrsModelAssignment() {
         return getValue(SRS_MODEL_ASSIGNMENT);
     }
+    public void setCreateTypeConstraint(boolean value) {
+		setValue(CREATE_TYPE_CONSTRAINT,value?TRUE:FALSE);
+	}
+	public boolean getCreateTypeConstraint() {
+		return TRUE.equals(getValue(CREATE_TYPE_CONSTRAINT))?true:false;
+	}
+
 }

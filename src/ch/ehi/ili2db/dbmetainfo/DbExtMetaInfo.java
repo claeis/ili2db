@@ -33,6 +33,7 @@ public class DbExtMetaInfo {
 	public static final String TAG_COL_GEOMTYPE = Config.PREFIX+".geomType";
 	public static final String TAG_COL_SRID = Config.PREFIX+".srid";
 	public static final String TAG_COL_COORDDIMENSION = Config.PREFIX+".coordDimension";
+    public static final String TAG_COL_TYPES = Config.PREFIX+".types";
 	public static final String TAG_TAB_TABLEKIND = Config.PREFIX+".tableKind";
 	public static final String TAG_TAB_TABLEKIND_ENUM = "ENUM";
 	public static final String TAG_TAB_TABLEKIND_SECONDARY = "SECONDARY";

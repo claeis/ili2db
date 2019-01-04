@@ -1,0 +1,22 @@
+INTERLIS 2.3;
+
+MODEL Dataset1
+  AT "mailto:mario@opengis.ch" VERSION "2019-01-03" =
+
+  TOPIC TestA =
+
+    CLASS ClassA1 =
+    END ClassA1;
+
+    CLASS ClassA1b EXTENDS ClassA1 =
+    END ClassA1b;
+
+    CLASS ClassA1c EXTENDS ClassA1 =
+    END ClassA1c;
+
+    CLASS ClassA1d (ABSTRACT) EXTENDS ClassA1 =
+    END ClassA1d;
+
+  END TestA;
+
+END Dataset1.

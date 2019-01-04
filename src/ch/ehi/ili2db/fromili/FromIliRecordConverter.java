@@ -4,8 +4,15 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Collections;
+
+import java.io.IOException;
+import java.io.StringWriter;
 
 import javax.xml.ws.Holder;
+
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonGenerator;
 
 import ch.ehi.basics.types.OutParam;
 import ch.ehi.ili2db.base.DbIdGen;
@@ -94,6 +101,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 	private boolean createUnique=true;
 	private boolean createNumCheck=false;
 	private DbExtMetaInfo metaInfo=null;
+    private boolean createTypeConstraint=false;
 
 	public FromIliRecordConverter(TransferDescription td1, NameMapping ili2sqlName,
 			Config config, DbSchema schema1, CustomMapping customMapping1,
@@ -114,6 +122,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 		createUnique=config.isCreateUniqueConstraints();
 		createNumCheck=config.isCreateCreateNumChecks();
 		this.metaInfo=metaInfo;
+        createTypeConstraint=config.getCreateTypeConstraint();
 	}
 
 	public void generateTable(ViewableWrapper def,int pass)
@@ -194,7 +203,46 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 		if(base==null && !def.isSecondaryTable()){
 			if(createTypeDiscriminator || def.includesMultipleTypes()){
 				  dbCol=createSqlTypeCol(DbNames.T_TYPE_COL);
-				  dbTable.addColumn(dbCol);
+
+                  ArrayList<String> extensions = new ArrayList<String>();
+                  for (Object o : def.getViewable().getExtensions()){
+                      Viewable v = (Viewable) o;
+                      if (! v.isAbstract()){
+                          extensions.add(ili2sqlName.mapIliClassDef(v));
+                      }
+                  }
+
+                  Collections.sort(extensions);
+
+                  String jsonExtensions = "";
+
+                  JsonFactory factory = new JsonFactory();
+                  StringWriter out = new StringWriter();
+                  try{
+                      JsonGenerator generator = factory.createGenerator(out);
+                      generator.writeStartArray();
+                      for (String e : extensions){
+                          generator.writeString(e);
+                      }
+                      generator.writeEndArray();
+                      generator.flush();
+                      jsonExtensions = out.toString();
+                      generator.close();
+                  }catch (IOException e){}
+
+                  // Add t_type possible values to meta-info table
+                  metaInfo.setColumnInfo(dbTable.getName().getName(),
+                                         DbNames.T_TYPE_COL,
+                                         DbExtMetaInfo.TAG_COL_TYPES,
+                                         jsonExtensions);
+
+                  if(createTypeConstraint){
+
+                      // Add check constraint on t_type column
+                      String[] possibleValues = new String[extensions.size()];
+                      ((DbColVarchar) dbCol).setValueRestriction(extensions.toArray(possibleValues));
+                  }
+                  dbTable.addColumn(dbCol);
 			}
 			// if CLASS
 			  if(!def.isStructure()){
