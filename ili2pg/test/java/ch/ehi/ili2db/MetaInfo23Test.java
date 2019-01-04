@@ -105,6 +105,40 @@ public class MetaInfo23Test {
 						Assert.assertEquals("m",rs.getString(1));
 						Assert.assertEquals(null,rs.getString(2));
 					}
+					
+		            {
+		                // t_ili2db_attrname
+		                String [][] expectedValues=new String[][] {
+		                    {"MetaInfo23.TestA.ClassA.num0", "num0", "classa1", null},
+		                    {"MetaInfo23.TestA.a2b.a", "a", "a2b", "classa1"},
+		                    {"MetaInfo23.TestA.a2b.b", "b", "a2b", "classb1"},
+		                    {"MetaInfo23.TestA.ClassA1.enumb", "enumb", "classa1", null},   
+		                    {"MetaInfo23.TestA.ClassA1.enuma", "enuma", "classa1", null}, 
+		                    {"MetaInfo23.TestA.ClassA1.mtextb", "mtextb", "classa1", null},   
+		                    {"MetaInfo23.TestA.ClassA1.mtexta", "mtexta", "classa1", null},   
+		                    {"MetaInfo23.TestA.ClassA1.texta", "texta", "classa1", null},   
+		                    {"MetaInfo23.TestA.ClassA1b.numx", "numx", "classa1", null},   
+		                    {"MetaInfo23.TestA.ClassA1.numa", "numa", "classa1", null},   
+		                    {"MetaInfo23.TestA.ClassA1.textb", "textb", "classa1", null},   
+		                    {"MetaInfo23.TestA.ClassA1.numb", "numb", "classa1", null},   
+		                    {"MetaInfo23.TestA.ClassA1.structa", "classa1_structa", "structa1", "classa1"}
+		                };
+		                Ili2dbAssert.assertAttrNameTable(jdbcConnection,expectedValues, DBSCHEMA);
+		            }
+		            {
+		                // t_ili2db_trafo
+		                String [][] expectedValues=new String[][] {
+		                    {"MetaInfo23.TestA.Codelist", "ch.ehi.ili2db.inheritance", "newClass"},
+		                    {"MetaInfo23.TestA.ClassA1b", "ch.ehi.ili2db.inheritance", "superClass"},
+		                    {"MetaInfo23.TestA.ClassA", "ch.ehi.ili2db.inheritance", "subClass"},
+		                    {"MetaInfo23.TestA.a2b", "ch.ehi.ili2db.inheritance", "newClass"},
+		                    {"CatalogueObjects_V1.Catalogues.Item", "ch.ehi.ili2db.inheritance", "subClass"},
+		                    {"MetaInfo23.TestA.StructA1", "ch.ehi.ili2db.inheritance", "newClass"},
+		                    {"MetaInfo23.TestA.ClassB1",  "ch.ehi.ili2db.inheritance", "newClass"},
+		                    {"MetaInfo23.TestA.ClassA1",  "ch.ehi.ili2db.inheritance", "newClass"}
+		                };
+		                Ili2dbAssert.assertTrafoTable(jdbcConnection,expectedValues, DBSCHEMA);
+		            }
 				}
 			}
 		}finally{

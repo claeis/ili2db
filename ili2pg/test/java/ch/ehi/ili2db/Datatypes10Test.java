@@ -89,6 +89,43 @@ public class Datatypes10Test {
 					Assert.assertEquals(2,rs.getInt(1));
 					Assert.assertEquals(1,rs.getInt(2));
 				}
+                {
+                    // t_ili2db_attrname
+                    String [][] expectedValues=new String[][] {
+                        {"Datatypes10.Topic.TableA.dim2", "dim2",  "tablea", null},
+                        {"Datatypes10.Topic.OtherTable.otherAttr",    "otherattr", "othertable", null},
+                        {"Datatypes10.Topic.TableA.dim1", "dim1",  "tablea",null},
+                        {"Datatypes10.Topic.TableA.radians",  "radians",   "tablea", null},
+                        {"Datatypes10.Topic.TableA.linientyp",    "linientyp", "tablea",null},
+                        {"Datatypes10.Topic.TableA.koord2",   "koord2",    "tablea", null},
+                        {"Datatypes10.Topic.TableA.datum",    "datum", "tablea",null},    
+                        {"Datatypes10.Topic.SubTablemain.main",   "main",  "subtable",  "tablea"},
+                        {"Datatypes10.Topic.TableA.bereich",  "bereich",   "tablea",null},
+                        {"Datatypes10.Topic.TableA.koord3",   "koord3",    "tablea",null},
+                        {"Datatypes10.Topic.TableA.grads",    "grads", "tablea",null}, 
+                        {"Datatypes10.Topic.TableA.aufzaehlung",  "aufzaehlung",   "tablea",null},
+                        {"Datatypes10.Topic.TableA.surface",  "surface", "tablea", null},
+                        {"Datatypes10.Topic.TableA.horizAlignment", "horizalignment",    "tablea",null},
+                        {"Datatypes10.Topic.TableA.vertAlignment",    "vertalignment", "tablea",null},    
+                        {"Datatypes10.Topic.TableA.text", "atext", "tablea", null},
+                        {"Datatypes10.Topic.TableA.bereichInt",   "bereichint", "tablea",null},
+                        {"Datatypes10.Topic.TableA.area", "area",  "tablea",null},
+                        {"Datatypes10.Topic.TableA.degrees",  "degrees",   "tablea", null},
+                    };
+                    Ili2dbAssert.assertAttrNameTable(jdbcConnection,expectedValues, DBSCHEMA);
+                    
+                }
+                {
+                    // t_ili2db_trafo
+                    String [][] expectedValues=new String[][] {
+                        {"Datatypes10.Topic.SubTablemain", "ch.ehi.ili2db.inheritance", "newClass"},
+                        {"Datatypes10.Topic.TableA", "ch.ehi.ili2db.inheritance", "newClass"},
+                        {"Datatypes10.Topic.SubTable", "ch.ehi.ili2db.inheritance", "newClass"},
+                        {"Datatypes10.Topic.OtherTable", "ch.ehi.ili2db.inheritance", "newClass"},
+                        {"Datatypes10.Topic.LineAttrib1", "ch.ehi.ili2db.inheritance", "newClass"},
+                    };
+                    Ili2dbAssert.assertTrafoTable(jdbcConnection,expectedValues, DBSCHEMA);
+                }
 	        }
 		}finally{
 			if(jdbcConnection!=null){

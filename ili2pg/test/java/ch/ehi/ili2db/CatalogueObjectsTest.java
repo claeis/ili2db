@@ -80,6 +80,51 @@ public class CatalogueObjectsTest {
 				//config.setCreatescript(data.getPath()+".sql");
 				Ili2db.readSettingsFromDb(config);
 				Ili2db.run(config,null);
+				{
+                    // t_ili2db_attrname
+                    String [][] expectedValues=new String[][] {
+                        {"Localisation_V1.MultilingualText.LocalisedText", "multilingualtext_localisedtext", "localisedtext", "multilingualtext"},
+                        {"CatalogueObjects_V1.Catalogues.MandatoryCatalogueReference.Reference", "reference", "catalogues_mandatorycataloguereference", "catalogues_item"},
+                        {"CatalogueObjects1.TopicC.Nutzung.Programm2_n", "topicc_nutzung_programm2_n", "catalogues_cataloguereference", "topicc_nutzung"},
+                        {"CatalogueObjects1.TopicC.Nutzung.Programm_n", "topicc_nutzung_programm_n", "catalogues_cataloguereference", "topicc_nutzung"},
+                        {"CatalogueObjects1.TopicA.Katalog_Programm2.Titel", "titel", "topica_katalog_programm2", null},
+                        {"CatalogueObjects1.TopicA.Katalog_Programm.Programm", "topica_katalog_prgramm_programm", "multilingualtext",  "topica_katalog_programm"},
+                        {"Localisation_V1.LocalisedText.Text", "atext", "localisedtext", null},
+                        {"CatalogueObjects_V1.Catalogues.CatalogueReference.Reference", "reference", "catalogues_cataloguereference", "catalogues_item"},
+                        {"CatalogueObjects1.TopicA.Katalog_Programm.Code",    "code", "topica_katalog_programm", null},
+                        {"CatalogueObjects1.TopicC.Nutzung.Programm_1",   "topicc_nutzung_programm_1", "catalogues_cataloguereference", "topicc_nutzung"},
+                        {"CatalogueObjects1.TopicC.Nutzung.Programm2_1",  "topicc_nutzung_programm2_1",    "catalogues_cataloguereference", "topicc_nutzung"},
+                        {"CatalogueObjects1.TopicC.Nutzung.OhneUuid_1",   "topicc_nutzung_ohneuuid_1", "catalogues_cataloguereference", "topicc_nutzung"},
+                        {"CatalogueObjects1.TopicC.Nutzung.OhneUuid2_1",  "topicc_nutzung_ohneuuid2_1",    "catalogues_cataloguereference", "topicc_nutzung"},
+                        {"CatalogueObjects1.TopicC.Nutzung.OhneUuid2_n",  "topicc_nutzung_ohneuuid2_n",    "catalogues_cataloguereference", "topicc_nutzung"},
+                        {"CatalogueObjects1.TopicC.Nutzung.OhneUuid_n",   "topicc_nutzung_ohneuuid_n", "catalogues_cataloguereference", "topicc_nutzung"},
+                        {"Localisation_V1.LocalisedText.Language",    "alanguage", "localisedtext", null},
+                        
+                    };
+                    Ili2dbAssert.assertAttrNameTable(jdbcConnection,expectedValues, DBSCHEMA);
+				}
+                {
+                    // t_ili2db_trafo
+                    String [][] expectedValues=new String[][] {
+                        {"CatalogueObjects1.TopicA.Katalog_Programm", "ch.ehi.ili2db.inheritance", "newClass"},
+                        {"CatalogueObjects_V1.Catalogues.Item", "ch.ehi.ili2db.inheritance", "newClass"},
+                        {"Localisation_V1.MultilingualText", "ch.ehi.ili2db.inheritance", "newClass"},
+                        {"CatalogueObjects1.TopicC.Nutzung", "ch.ehi.ili2db.inheritance", "newClass"},
+                        {"CatalogueObjects1.TopicA.Katalog_Programm2Ref", "ch.ehi.ili2db.inheritance", "newClass"},
+                        {"CatalogueObjects1.TopicB.OhneUuid2", "ch.ehi.ili2db.inheritance", "newClass"},
+                        {"CatalogueObjects1.TopicA.Katalog_ProgrammRef", "ch.ehi.ili2db.inheritance", "newClass"},
+                        {"CatalogueObjects1.TopicB.OhneUuid", "ch.ehi.ili2db.inheritance", "newClass"},
+                        {"Localisation_V1.LocalisedText", "ch.ehi.ili2db.inheritance", "newClass"},
+                        {"CatalogueObjects1.TopicA.Katalog_Programm2", "ch.ehi.ili2db.inheritance", "newClass"},
+                        {"CatalogueObjects_V1.Catalogues.CatalogueReference", "ch.ehi.ili2db.inheritance", "newClass"},
+                        {"CatalogueObjects_V1.Catalogues.MandatoryCatalogueReference", "ch.ehi.ili2db.inheritance", "newClass"},
+                        {"CatalogueObjects1.TopicB.OhneUuid2Ref", "ch.ehi.ili2db.inheritance", "newClass"},
+                        {"LocalisationCH_V1.LocalisedText", "ch.ehi.ili2db.inheritance", "newClass"},
+                        {"LocalisationCH_V1.MultilingualText", "ch.ehi.ili2db.inheritance", "newClass"},
+                        {"CatalogueObjects1.TopicB.OhneUuidRef", "ch.ehi.ili2db.inheritance", "newClass"}, 
+                    };
+                    Ili2dbAssert.assertTrafoTable(jdbcConnection,expectedValues, DBSCHEMA);
+                }
 			}
 		}finally{
 			if(jdbcConnection!=null){
@@ -111,6 +156,56 @@ public class CatalogueObjectsTest {
                 //config.setCreatescript(data.getPath()+".sql");
                 Ili2db.readSettingsFromDb(config);
                 Ili2db.run(config,null);
+                {
+                    // t_ili2db_attrname
+                    String [][] expectedValues=new String[][] {
+                        {"CatalogueObjects1.TopicC.Nutzung.Programm_1", "programm_1", "topicc_nutzung", "topica_katalog_programm"},
+                        {"Localisation_V1.MultilingualText.LocalisedText", "multilingualtext_localisedtext", "localisedtext", "multilingualtext"},
+                        {"CatalogueObjects1.TopicA.Katalog_Programm.Programm",    "programm",  "topica_katalog_programm", null},
+                        {"CatalogueObjects1.TopicC.Nutzung.Programm_n",   "topicc_nutzung_programm_n", "topica_katalog_programmref", "topicc_nutzung"},
+                        {"CatalogueObjects1.TopicC.Nutzung.Programm2_n",  "topicc_nutzung_programm2_n", "topica_katalog_programmref", "topicc_nutzung"},
+                        {"CatalogueObjects1.TopicA.Katalog_Programm2.Titel",  "titel", "topica_katalog_programm", null},
+                        {"CatalogueObjects1.TopicB.OhneUuidRef.Reference",    "reference", "topicb_ohneuuidref", "topicb_ohneuuid"},
+                        {"CatalogueObjects1.TopicC.Nutzung.OhneUuid_1",   "ohneuuid_1", "topicc_nutzung", "topicb_ohneuuid"},
+                        {"Localisation_V1.LocalisedText.Text", "atext", "localisedtext", null},
+                        {"CatalogueObjects1.TopicA.Katalog_Programm.Code",    "code",  "topica_katalog_programm", null},
+                        {"CatalogueObjects1.TopicC.Nutzung.Programm2_1",  "programm2_1",   "topicc_nutzung",    "topica_katalog_programm"},
+                        {"CatalogueObjects1.TopicC.Nutzung.OhneUuid2_1",  "ohneuuid2_1",   "topicc_nutzung",    "topicb_ohneuuid"},
+                        {"CatalogueObjects1.TopicC.Nutzung.OhneUuid_n",   "topicc_nutzung_ohneuuid_n", "topicb_ohneuuidref", "topicc_nutzung"},
+                        {"CatalogueObjects1.TopicC.Nutzung.OhneUuid2_n",  "topicc_nutzung_ohneuuid2_n",    "topicb_ohneuuidref", "topicc_nutzung"},
+                        {"Localisation_V1.LocalisedText.Language", "alanguage", "localisedtext" , null},
+                        {"CatalogueObjects1.TopicA.Katalog_ProgrammRef.Reference", "reference", "topica_katalog_programmref", "topica_katalog_programm"},
+                        
+                    };
+                    Ili2dbAssert.assertAttrNameTable(jdbcConnection,expectedValues, DBSCHEMA);
+                }
+                {
+                    // t_ili2db_trafo
+                    String [][] expectedValues=new String[][] {
+                        {"Localisation_V1.MultilingualText",  "ch.ehi.ili2db.inheritance", "newClass"},
+                        {"CatalogueObjects1.TopicC.Nutzung.OhneUuid_1",   "ch.ehi.ili2db.catalogueRefTrafo", "coalesce"},
+                        {"CatalogueObjects1.TopicA.Katalog_Programm2",    "ch.ehi.ili2db.inheritance", "superClass"},
+                        {"CatalogueObjects1.TopicC.Nutzung",  "ch.ehi.ili2db.inheritance", "newClass"},
+                        {"CatalogueObjects1.TopicC.Nutzung.Programm2_1",  "ch.ehi.ili2db.catalogueRefTrafo", "coalesce"},
+                        {"CatalogueObjects_V1.Catalogues.CatalogueReference", "ch.ehi.ili2db.inheritance", "subClass"},
+                        {"CatalogueObjects1.TopicA.Katalog_ProgrammRef",  "ch.ehi.ili2db.inheritance", "newClass"},
+                        {"Localisation_V1.LocalisedText", "ch.ehi.ili2db.inheritance", "newClass"},
+                        {"CatalogueObjects1.TopicB.OhneUuidRef",  "ch.ehi.ili2db.inheritance", "newClass"},
+                        {"CatalogueObjects1.TopicB.OhneUuid", "ch.ehi.ili2db.inheritance", "newClass"},
+                        {"CatalogueObjects1.TopicB.OhneUuid2Ref", "ch.ehi.ili2db.inheritance", "superClass"},
+                        {"CatalogueObjects1.TopicA.Katalog_Programm", "ch.ehi.ili2db.inheritance", "newClass"},
+                        {"LocalisationCH_V1.MultilingualText", "ch.ehi.ili2db.inheritance", "superClass"},
+                        {"LocalisationCH_V1.LocalisedText", "ch.ehi.ili2db.inheritance", "superClass"},
+                        {"CatalogueObjects1.TopicA.Katalog_Programm.Programm", "ch.ehi.ili2db.multilingualTrafo",   "expand"},
+                        {"CatalogueObjects1.TopicA.Katalog_Programm2Ref", "ch.ehi.ili2db.inheritance", "superClass"},
+                        {"CatalogueObjects_V1.Catalogues.MandatoryCatalogueReference", "ch.ehi.ili2db.inheritance", "subClass"},
+                        {"CatalogueObjects_V1.Catalogues.Item", "ch.ehi.ili2db.inheritance", "subClass"},
+                        {"CatalogueObjects1.TopicB.OhneUuid2", "ch.ehi.ili2db.inheritance", "superClass"},
+                        {"CatalogueObjects1.TopicC.Nutzung.Programm_1", "ch.ehi.ili2db.catalogueRefTrafo",  "coalesce"},
+                        {"CatalogueObjects1.TopicC.Nutzung.OhneUuid2_1",  "ch.ehi.ili2db.catalogueRefTrafo", "coalesce"},
+                    };
+                    Ili2dbAssert.assertTrafoTable(jdbcConnection,expectedValues, DBSCHEMA);
+                }
             }
         }finally{
             if(jdbcConnection!=null){
@@ -143,6 +238,67 @@ public class CatalogueObjectsTest {
                 //config.setCreatescript(data.getPath()+".sql");
                 Ili2db.readSettingsFromDb(config);
                 Ili2db.run(config,null);
+            }
+            {
+                // t_ili2db_attrname
+                String [][] expectedValues=new String[][] {
+                    {"CatalogueObjects1.TopicC.Nutzung.Programm_1",   "programm_1_topica_katalog_programm",    "topicc_nutzung", "topica_katalog_programm"},
+                    {"Localisation_V1.MultilingualText.LocalisedText",    "multilingualtext_localisedtext", "localisedtext", "multilingualtext"},
+                    {"CatalogueObjects1.TopicA.Katalog_Programm.Programm",    "programm", "topica_katalog_programm", null},
+                    {"CatalogueObjects1.TopicB.OhneUuid2Ref.Reference",   "reference", "topicb_ohneuuid2ref","topicb_ohneuuid2"},
+                    {"CatalogueObjects1.TopicA.Katalog_Programm2.Titel",  "titel", "topica_katalog_programm2",null},
+                    {"CatalogueObjects1.TopicC.Nutzung.Programm_n",   "topicc_nutzung_programm_n", "topica_katalog_programmref",    "topicc_nutzung"},
+                    {"CatalogueObjects1.TopicA.Katalog_Programm.Code",    "code",  "topica_katalog_programm2",null},
+                    {"CatalogueObjects1.TopicA.Katalog_Programm2Ref.Reference",   "reference", "topica_katalog_programm2ref",   "topica_katalog_programm2"},
+                    {"CatalogueObjects1.TopicB.OhneUuidRef.Reference",    "reference_topicb_ohneuuid", "topicb_ohneuuidref",    "topicb_ohneuuid"},
+                    {"CatalogueObjects1.TopicB.OhneUuidRef.Reference",    "reference_topicb_ohneuuid2",    "topicb_ohneuuidref", "topicb_ohneuuid2"},
+                    {"CatalogueObjects1.TopicA.Katalog_Programm.Code",    "code" , "topica_katalog_programm", null},
+                    {"CatalogueObjects1.TopicC.Nutzung.OhneUuid2_1",  "ohneuuid2_1",   "topicc_nutzung",    "topicb_ohneuuid2"},
+                    {"LocalisationCH_V1.MultilingualText.LocalisedText",  "loclstnch_vmltlngltext_localisedtext",  "localisationch_v1_localisedtext", "localisationch_v1_multilingualtext"},
+                    {"Localisation_V1.LocalisedText.Text",    "atext", "localisationch_v1_localisedtext", null},
+                    {"CatalogueObjects1.TopicC.Nutzung.Programm2_n",  "topicc_nutzung_programm2_n", "topica_katalog_programm2ref", "topicc_nutzung"},
+                    {"CatalogueObjects1.TopicC.Nutzung.OhneUuid_1",   "ohneuuid_1_topicb_ohneuuid", "topicc_nutzung", "topicb_ohneuuid"},
+                    {"Localisation_V1.LocalisedText.Text",    "atext", "localisedtext", null },
+                    {"CatalogueObjects1.TopicC.Nutzung.Programm_1",   "programm_1_topica_katalog_programm2",   "topicc_nutzung",    "topica_katalog_programm2"},
+                    {"CatalogueObjects1.TopicC.Nutzung.Programm2_1",  "programm2_1", "topicc_nutzung", "topica_katalog_programm2"},
+                    {"CatalogueObjects1.TopicC.Nutzung.OhneUuid_1",   "ohneuuid_1_topicb_ohneuuid2", "topicc_nutzung", "topicb_ohneuuid2"},
+                    {"Localisation_V1.LocalisedText.Language",    "alanguage", "localisationch_v1_localisedtext", null},
+                    {"CatalogueObjects1.TopicC.Nutzung.OhneUuid_n",   "topicc_nutzung_ohneuuid_n", "topicb_ohneuuidref", "topicc_nutzung"},
+                    {"CatalogueObjects1.TopicA.Katalog_ProgrammRef.Reference", "reference_topica_katalog_programm2", "topica_katalog_programmref", "topica_katalog_programm2"},
+                    {"CatalogueObjects1.TopicA.Katalog_ProgrammRef.Reference", "reference_topica_katalog_programm" , "topica_katalog_programmref", "topica_katalog_programm"},
+                    {"CatalogueObjects1.TopicA.Katalog_Programm.Programm",    "programm", "topica_katalog_programm2", null},
+                    {"Localisation_V1.LocalisedText.Language",    "alanguage", "localisedtext", null},
+                    {"CatalogueObjects1.TopicC.Nutzung.OhneUuid2_n", "topicc_nutzung_ohneuuid2_n", "topicb_ohneuuid2ref","topicc_nutzung"},
+                    
+                };
+                Ili2dbAssert.assertAttrNameTable(jdbcConnection,expectedValues, DBSCHEMA);
+            }
+            {
+                // t_ili2db_trafo
+                String [][] expectedValues=new String[][] {
+                    {"Localisation_V1.MultilingualText",  "ch.ehi.ili2db.inheritance", "newAndSubClass"},
+                    {"CatalogueObjects1.TopicC.Nutzung.OhneUuid_1",   "ch.ehi.ili2db.catalogueRefTrafo",   "coalesce"},
+                    {"CatalogueObjects1.TopicA.Katalog_Programm2",    "ch.ehi.ili2db.inheritance", "newAndSubClass"},
+                    {"CatalogueObjects1.TopicC.Nutzung",  "ch.ehi.ili2db.inheritance", "newAndSubClass"},
+                    {"CatalogueObjects1.TopicC.Nutzung.Programm2_1",  "ch.ehi.ili2db.catalogueRefTrafo",  "coalesce"},
+                    {"CatalogueObjects_V1.Catalogues.CatalogueReference", "ch.ehi.ili2db.inheritance", "subClass"},
+                    {"CatalogueObjects1.TopicA.Katalog_ProgrammRef",  "ch.ehi.ili2db.inheritance", "newAndSubClass"},
+                    {"Localisation_V1.LocalisedText", "ch.ehi.ili2db.inheritance", "newAndSubClass"},
+                    {"CatalogueObjects1.TopicB.OhneUuidRef",  "ch.ehi.ili2db.inheritance", "newAndSubClass"},
+                    {"CatalogueObjects1.TopicB.OhneUuid", "ch.ehi.ili2db.inheritance", "newAndSubClass"},
+                    {"CatalogueObjects1.TopicB.OhneUuid2Ref", "ch.ehi.ili2db.inheritance", "newAndSubClass"},
+                    {"CatalogueObjects1.TopicA.Katalog_Programm", "ch.ehi.ili2db.inheritance", "newAndSubClass"},
+                    {"LocalisationCH_V1.MultilingualText",    "ch.ehi.ili2db.inheritance", "newAndSubClass"},
+                    {"LocalisationCH_V1.LocalisedText",   "ch.ehi.ili2db.inheritance", "newAndSubClass"},
+                    {"CatalogueObjects1.TopicA.Katalog_Programm.Programm",    "ch.ehi.ili2db.multilingualTrafo", "expand"},
+                    {"CatalogueObjects1.TopicA.Katalog_Programm2Ref", "ch.ehi.ili2db.inheritance", "newAndSubClass"},
+                    {"CatalogueObjects_V1.Catalogues.MandatoryCatalogueReference",    "ch.ehi.ili2db.inheritance", "subClass"},
+                    {"CatalogueObjects_V1.Catalogues.Item",   "ch.ehi.ili2db.inheritance", "subClass"},
+                    {"CatalogueObjects1.TopicB.OhneUuid2",    "ch.ehi.ili2db.inheritance", "newAndSubClass"},
+                    {"CatalogueObjects1.TopicC.Nutzung.Programm_1", "ch.ehi.ili2db.catalogueRefTrafo", "coalesce"},
+                    {"CatalogueObjects1.TopicC.Nutzung.OhneUuid2_1",  "ch.ehi.ili2db.catalogueRefTrafo", "coalesce"},
+                };
+                Ili2dbAssert.assertTrafoTable(jdbcConnection,expectedValues, DBSCHEMA);
             }
         }finally{
             if(jdbcConnection!=null){

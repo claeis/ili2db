@@ -99,6 +99,20 @@ public class TranslationTest {
 					ResultSet rs=stmt.getResultSet();
 					Assert.assertFalse(rs.next());
 				}
+                {
+                    // t_ili2db_attrname
+                    String [][] expectedValues=new String[][] {
+                        {"EnumOkA.TopicA.ClassA.attrA",  "attra", "classa", null}, 
+                    };
+                    Ili2dbAssert.assertAttrNameTable(jdbcConnection, expectedValues, DBSCHEMA);
+                }
+                {
+                    // t_ili2db_trafo
+                    String [][] expectedValues=new String[][] {
+                        {"EnumOkA.TopicA.ClassA", "ch.ehi.ili2db.inheritance", "newClass"},
+                    };
+                    Ili2dbAssert.assertTrafoTable(jdbcConnection,expectedValues, DBSCHEMA);
+                }
 		    }
 		}finally{
 			if(jdbcConnection!=null){
@@ -145,6 +159,26 @@ public class TranslationTest {
 					ResultSet rs=stmt.getResultSet();
 					Assert.assertFalse(rs.next());
 				}
+	            {
+	                // t_ili2db_attrname
+	                String [][] expectedValues=new String[][] {
+	                    {"ModelAsimple10.TopicA.ClassA3.geomA",  "geoma", "classa3", null},   
+	                    {"ModelAsimple10.TopicA.ClassA2.geomA",   "geoma", "classa2", null},
+	                    {"ModelAsimple10.TopicA.ClassA.attrA",    "attra", "classa", null},
+	                };
+	                Ili2dbAssert.assertAttrNameTable(jdbcConnection, expectedValues, DBSCHEMA);
+	            }
+	            {
+	                // t_ili2db_trafo
+	                String [][] expectedValues=new String[][] {
+	                    {"ModelAsimple10.TopicA.ClassA",  "ch.ehi.ili2db.inheritance", "newClass"},
+	                    {"ModelAsimple10.TopicA.ClassA2", "ch.ehi.ili2db.inheritance", "newClass"},
+	                    {"ModelAsimple10.TopicA.ClassA3", "ch.ehi.ili2db.inheritance", "newClass"},
+	                    
+	                };
+	                Ili2dbAssert.assertTrafoTable(jdbcConnection,expectedValues, DBSCHEMA);
+	            }
+				
 	        }
 		}finally{
 			if(jdbcConnection!=null){
@@ -191,6 +225,26 @@ public class TranslationTest {
 					ResultSet rs=stmt.getResultSet();
 					Assert.assertFalse(rs.next());
 				}
+                {
+                    // t_ili2db_attrname
+                    String [][] expectedValues=new String[][] {
+                        {"ModelAsimple10.TopicA.ClassA2.geomA._geom", "_geom", "classa2_geoma", null}, 
+                        {"ModelAsimple10.TopicA.ClassA3.geomA",   "geoma", "classa3", null},   
+                        {"ModelAsimple10.TopicA.ClassA3.geomA._geom", "_geom", "classa3_geoma", null}, 
+                        {"ModelAsimple10.TopicA.ClassA2.geomA._ref", "_ref", "classa2_geoma", null}, 
+                        {"ModelAsimple10.TopicA.ClassA.attrA", "attra", "classa", null}
+                    };
+                    Ili2dbAssert.assertAttrNameTable(jdbcConnection, expectedValues, DBSCHEMA);
+                }
+                {
+                    // t_ili2db_trafo
+                    String [][] expectedValues=new String[][] {
+                        {"ModelAsimple10.TopicA.ClassA3", "ch.ehi.ili2db.inheritance", "newClass"},
+                        {"ModelAsimple10.TopicA.ClassA2", "ch.ehi.ili2db.inheritance", "newClass"},
+                        {"ModelAsimple10.TopicA.ClassA",  "ch.ehi.ili2db.inheritance", "newClass"}
+                    };
+                    Ili2dbAssert.assertTrafoTable(jdbcConnection,expectedValues, DBSCHEMA);
+                }
 		    }
 		}finally{
 			if(jdbcConnection!=null){
