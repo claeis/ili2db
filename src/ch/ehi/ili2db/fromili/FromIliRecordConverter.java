@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Collections;
 
 import java.io.IOException;
 import java.io.StringWriter;
@@ -210,6 +211,8 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
                           extensions.add(ili2sqlName.mapIliClassDef(v));
                       }
                   }
+
+                  Collections.sort(extensions);
 
                   String jsonExtensions = "";
 
