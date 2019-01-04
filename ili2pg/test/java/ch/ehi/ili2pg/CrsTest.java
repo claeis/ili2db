@@ -15,6 +15,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import ch.ehi.basics.logging.EhiLogger;
+import ch.ehi.ili2db.Ili2dbAssert;
 import ch.ehi.ili2db.base.DbUrlConverter;
 import ch.ehi.ili2db.base.Ili2db;
 import ch.ehi.ili2db.base.Ili2dbException;
@@ -108,6 +109,22 @@ public class CrsTest {
 		Ili2db.run(config,null);
 		assertEquals(21781,getColumnCrsId(DBSCHEMA, "classa1", "attrLV03", jdbcConnection));
 		assertEquals(2056,getColumnCrsId(DBSCHEMA, "classa1", "attrLV95", jdbcConnection));
+        {
+            // t_ili2db_attrname
+            String [][] expectedValues=new String[][] {
+                {"CrsCoord23.TestA.ClassA1.attrLV03", "attrlv03",  "classa1", null},   
+                {"CrsCoord23.TestA.ClassA1.attrLV95", "attrlv95",  "classa1", null},
+                {"CrsCoord23.TestA.ClassA1.attr1",    "attr1", "classa1", null},
+            };
+            Ili2dbAssert.assertAttrNameTable(jdbcConnection, expectedValues, DBSCHEMA);
+        }
+        {
+            // t_ili2db_trafo
+            String [][] expectedValues=new String[][] {
+                {"CrsCoord23.TestA.ClassA1", "ch.ehi.ili2db.inheritance", "newClass"}
+            };
+            Ili2dbAssert.assertTrafoTable(jdbcConnection,expectedValues, DBSCHEMA);
+        }
 	}
 	@Test
 	public void importXtfCoord() throws Exception

@@ -120,6 +120,23 @@ public class MultiCrs23Test {
                 ResultSet rs=stmt.getResultSet();
                 Assert.assertFalse(rs.next());
             }
+            
+            {
+                // t_ili2db_attrname
+                String [][] expectedValues=new String[][] {
+                    {"MultiCrs23_LV95.TestA.ClassA1.attr2:21781", "attr2_21781", "classa1", null},   
+                    {"MultiCrs23_LV95.TestA.ClassA1.attr1",   "attr1", "classa1", null},
+                    {"MultiCrs23_LV95.TestA.ClassA1.attr2:2056",  "attr2_2056",    "classa1", null},   
+                };
+                Ili2dbAssert.assertAttrNameTable(jdbcConnection, expectedValues, DBSCHEMA);
+            }
+            {
+                // t_ili2db_trafo
+                String [][] expectedValues=new String[][] {
+                    {"MultiCrs23_LV95.TestA.ClassA1", "ch.ehi.ili2db.inheritance", "newClass"},
+                };
+                Ili2dbAssert.assertTrafoTable(jdbcConnection,expectedValues, DBSCHEMA);
+            }
         }catch(Exception e) {
             throw new IoxException(e);
         }finally{

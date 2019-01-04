@@ -239,6 +239,24 @@ public class InheritanceSmart1Test {
 					Assert.assertTrue(rs.next());
 					Assert.assertEquals("classc",rs.getString(2));
 				}
+                {
+                    // t_ili2db_attrname
+                    String [][] expectedValues=new String[][] {
+                        {"SubtypeFK23.Topic.bc1.b1", "b1", "classa", "classa"},
+                    };
+                    Ili2dbAssert.assertAttrNameTable(jdbcConnection,expectedValues, DBSCHEMA);
+                    
+                }
+                {
+                    // t_ili2db_trafo
+                    String [][] expectedValues=new String[][] {
+                        {"SubtypeFK23.Topic.ClassA",  "ch.ehi.ili2db.inheritance", "newClass"},
+                        {"SubtypeFK23.Topic.ClassB",  "ch.ehi.ili2db.inheritance", "superClass"},
+                        {"SubtypeFK23.Topic.bc1", "ch.ehi.ili2db.inheritance", "newClass"},
+                        {"SubtypeFK23.Topic.ClassC",  "ch.ehi.ili2db.inheritance", "superClass"},
+                    };
+                    Ili2dbAssert.assertTrafoTable(jdbcConnection,expectedValues, DBSCHEMA);
+                }
 	        }
 		}finally{
 			if(jdbcConnection!=null){
@@ -322,6 +340,37 @@ public class InheritanceSmart1Test {
 					Assert.assertTrue(rs.next());
 					Assert.assertEquals("topicb_structa",rs.getString(2));
 				}
+                {
+                    // t_ili2db_attrname
+                    String [][] expectedValues=new String[][] {
+                        {"StructAttr1.TopicB.StructA.name",  "aname", "topicb_structa", null},    
+                        {"StructAttr1.TopicA.ClassB.attr3",   "attr3", "topica_classa", null},
+                        {"StructAttr1.TopicB.ClassB.attr3",   "attr3", "topicb_classb", null},
+                        {"StructAttr1.TopicB.ClassA.attr1",   "topicb_classb_attr1",   "topicb_structa", "topicb_classb"},
+                        {"StructAttr1.TopicA.ClassA.attr1",   "topica_classa_attr1",   "topica_structa", "topica_classa"},
+                        {"StructAttr1.TopicA.ClassC.attr4",   "attr4", "topica_classa", null},
+                        {"StructAttr1.TopicB.ClassA.attr2",   "attr2", "topicb_classb", null},
+                        {"StructAttr1.TopicA.StructA.name",   "aname", "topica_structa", null},
+                        {"StructAttr1.TopicA.ClassA.attr2",   "attr2", "topica_classa", null},
+                        {"StructAttr1.TopicB.ClassC.attr4",   "attr4", "topicb_classb", null},
+                    };
+                    Ili2dbAssert.assertAttrNameTable(jdbcConnection,expectedValues, DBSCHEMA);
+                    
+                }
+                {
+                    // t_ili2db_trafo
+                    String [][] expectedValues=new String[][] {
+                        {"StructAttr1.TopicB.StructA", "ch.ehi.ili2db.inheritance", "newClass"},
+                        {"StructAttr1.TopicA.ClassB", "ch.ehi.ili2db.inheritance", "superClass"},
+                        {"StructAttr1.TopicA.ClassA", "ch.ehi.ili2db.inheritance", "newClass"},
+                        {"StructAttr1.TopicB.ClassA", "ch.ehi.ili2db.inheritance", "subClass"},
+                        {"StructAttr1.TopicB.ClassB", "ch.ehi.ili2db.inheritance", "newClass"},
+                        {"StructAttr1.TopicA.StructA",  "ch.ehi.ili2db.inheritance", "newClass"},
+                        {"StructAttr1.TopicA.ClassC", "ch.ehi.ili2db.inheritance", "superClass"},
+                        {"StructAttr1.TopicB.ClassC", "ch.ehi.ili2db.inheritance", "superClass"},
+                    };
+                    Ili2dbAssert.assertTrafoTable(jdbcConnection,expectedValues, DBSCHEMA);
+                }
 	        }
 		}finally{
 			if(jdbcConnection!=null){
@@ -482,6 +531,39 @@ public class InheritanceSmart1Test {
 					Assert.assertEquals("topica_structa2",rs.getString(2));
 					Assert.assertEquals("topica_classa2",rs.getString(3));
 				}
+                {
+                    // t_ili2db_attrname
+                    String [][] expectedValues=new String[][] {
+                        {"RefAttr1.TopicA.StructA0.ref",  "ref_topica_classa2",    "topica_structa1",   "topica_classa2"},
+                        {"RefAttr1.TopicA.StructA0.ref",  "ref_topica_classa1",    "topica_structa1",   "topica_classa1"},
+                        {"RefAttr1.TopicA.StructA0.ref",  "ref_topica_classa2",    "topica_structa2",   "topica_classa2"},
+                        {"RefAttr1.TopicA.ClassC.struct", "topica_classc_struct",  "topica_structa1",   "topica_classc"},
+                        {"RefAttr1.TopicA.StructA2.ref",  "aref",  "topica_structa2",   "topica_classa2"},
+                        {"RefAttr1.TopicA.StructA0.ref",  "ref_topica_classa1",    "topica_structa2",   "topica_classa1"},
+                        {"RefAttr1.TopicA.ClassB.struct", "topica_classb_struct",  "topica_structa1",   "topica_classb"},
+                        {"RefAttr1.TopicA.ClassD.struct", "topica_classd_struct",  "topica_structa2",   "topica_classd"},
+                        {"RefAttr1.TopicA.StructA1.ref",  "aref",  "topica_structa1",   "topica_classa1"}
+                    };
+                    Ili2dbAssert.assertAttrNameTable(jdbcConnection,expectedValues, DBSCHEMA);
+                    
+                }
+                {
+                    // t_ili2db_trafo
+                    String [][] expectedValues=new String[][] {
+                        {"RefAttr1.TopicA.ClassA1",   "ch.ehi.ili2db.inheritance", "newClass"},
+                        {"RefAttr1.TopicA.ClassA11",  "ch.ehi.ili2db.inheritance", "superClass"},
+                        {"RefAttr1.TopicA.StructA2",  "ch.ehi.ili2db.inheritance", "newClass"},
+                        {"RefAttr1.TopicA.ClassD",    "ch.ehi.ili2db.inheritance", "newClass"},
+                        {"RefAttr1.TopicA.ClassA0",   "ch.ehi.ili2db.inheritance", "subClass"},
+                        {"RefAttr1.TopicA.StructA1",  "ch.ehi.ili2db.inheritance", "newClass"},
+                        {"RefAttr1.TopicA.ClassC",    "ch.ehi.ili2db.inheritance", "newClass"},
+                        {"RefAttr1.TopicA.ClassB",    "ch.ehi.ili2db.inheritance", "newClass"},
+                        {"RefAttr1.TopicA.ClassA2",   "ch.ehi.ili2db.inheritance", "newClass"},
+                        {"RefAttr1.TopicA.StructA0",  "ch.ehi.ili2db.inheritance", "subClass"},
+                        {"RefAttr1.TopicA.StructA11", "ch.ehi.ili2db.inheritance", "superClass"}
+                    };
+                    Ili2dbAssert.assertTrafoTable(jdbcConnection,expectedValues, DBSCHEMA);
+                }
 	        }
 		}finally{
 			if(jdbcConnection!=null){

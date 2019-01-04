@@ -79,6 +79,11 @@ public class BlackBoxTypes23GpkgTest {
 	@Test
 	public void importIli() throws Exception
 	{
+        File gpkgFile=new File(GPKGFILENAME);
+        if(gpkgFile.exists()){ 
+            File file = new File(gpkgFile.getAbsolutePath());
+            file.delete();
+        }
 		{
 			File data=new File(TEST_OUT,"BlackBoxTypes23.ili");
 			Config config=initConfig(data.getPath(),data.getPath()+".log");
@@ -104,12 +109,32 @@ public class BlackBoxTypes23GpkgTest {
 				Assert.assertTrue(rs.next());
 				Assert.assertEquals(java.sql.Types.VARCHAR,rs.getInt("DATA_TYPE"));
 			}
+            {
+                // t_ili2db_attrname
+                String [][] expectedValues=new String[][] {
+                    {"BlackBoxTypes23.Topic.ClassA.xmlbox", "xmlbox", "classa", null},
+                    {"BlackBoxTypes23.Topic.ClassA.binbox", "binbox", "classa", null},
+                };
+                Ili2dbAssert.assertAttrNameTableFromGpkg(jdbcConnection, expectedValues);
+            }
+            {
+                // t_ili2db_trafo
+                String [][] expectedValues=new String[][] {
+                    {"BlackBoxTypes23.Topic.ClassA",  "ch.ehi.ili2db.inheritance", "newClass"},    
+                };
+                Ili2dbAssert.assertTrafoTableFromGpkg(jdbcConnection, expectedValues);
+            }
 		}
 	}
 	
 	@Test
 	public void importXtf() throws Exception
 	{
+        File gpkgFile=new File(GPKGFILENAME);
+        if(gpkgFile.exists()){ 
+            File file = new File(gpkgFile.getAbsolutePath());
+            file.delete();
+        }
 		{
 			File data=new File(TEST_OUT,"BlackBoxTypes23a.xtf");
 			Config config=initConfig(data.getPath(),data.getPath()+".log");

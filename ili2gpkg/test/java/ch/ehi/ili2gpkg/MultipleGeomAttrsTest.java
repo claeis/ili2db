@@ -4,13 +4,18 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import java.io.File;
 import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.Statement;
+
 import org.junit.After;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.MultiPolygon;
 import ch.ehi.basics.logging.EhiLogger;
+import ch.ehi.ili2db.Ili2dbAssert;
 import ch.ehi.ili2db.base.Ili2db;
 import ch.ehi.ili2db.gui.Config;
 import ch.interlis.iom.IomObject;
@@ -29,6 +34,7 @@ public class MultipleGeomAttrsTest {
 	private static final String TEST_OUT="test/data/MultipleGeomAttrs/";
     private static final String GPKGFILENAME=TEST_OUT+"MultipleGeomAttrs.gpkg";
 	private Connection jdbcConnection=null;
+	private Statement stmt=null;
 	
 	public Config initConfig(String xtfFilename,String logfile) {
 		Config config=new Config();
@@ -44,6 +50,22 @@ public class MultipleGeomAttrsTest {
 		}
 		return config;
 	}
+	
+    @Before
+    public void initDb() throws Exception
+    {
+        File gpkgFile=new File(GPKGFILENAME);
+        if(gpkgFile.exists()){
+            gpkgFile.delete();
+        }
+    }
+    
+    public void openDb() throws Exception
+    {
+        Class driverClass = Class.forName("org.sqlite.JDBC");
+        jdbcConnection = DriverManager.getConnection("jdbc:sqlite:"+GPKGFILENAME, null, null);
+        stmt=jdbcConnection.createStatement();
+    }
 	
 	@After
 	public void endDb() throws Exception
@@ -74,6 +96,25 @@ public class MultipleGeomAttrsTest {
 		config.setMultilingualTrafo(null);
 		config.setInheritanceTrafo(null);
 		Ili2db.run(config,null);
+		openDb();
+        {
+            // t_ili2db_attrname
+            String [][] expectedValues=new String[][] {
+                {"MultipleGeomAttrs1.Topic.ClassA.line", "line", "classa_line", null},
+                {"MultipleGeomAttrs1.Topic.ClassA.coord", "coord", "classa", null},
+                {"MultipleGeomAttrs1.Topic.ClassA.surface", "surface", "classa_surface", null},
+            };
+            Ili2dbAssert.assertAttrNameTableFromGpkg(jdbcConnection, expectedValues);
+        }
+        {
+            // t_ili2db_trafo
+            String [][] expectedValues=new String[][] {
+                {"MultipleGeomAttrs1.Topic.ClassA.line:21781(MultipleGeomAttrs1.Topic.ClassA)",  "ch.ehi.ili2db.secondaryTable",  "classa_line"},
+                {"MultipleGeomAttrs1.Topic.ClassA.surface:21781(MultipleGeomAttrs1.Topic.ClassA)",    "ch.ehi.ili2db.secondaryTable",  "classa_surface"},
+                {"MultipleGeomAttrs1.Topic.ClassA",   "ch.ehi.ili2db.inheritance", "newClass"},
+            };
+            Ili2dbAssert.assertTrafoTableFromGpkg(jdbcConnection, expectedValues);
+        }
 	}
     @Test
     public void importIliExtendedClass() throws Exception
@@ -96,6 +137,25 @@ public class MultipleGeomAttrsTest {
         config.setMultilingualTrafo(null);
         config.setInheritanceTrafo(Config.INHERITANCE_TRAFO_SMART2);
         Ili2db.run(config,null);
+        openDb();
+        {
+            // t_ili2db_attrname
+            String [][] expectedValues=new String[][] {
+                {"MultipleGeomAttrs1.Topic.ClassA.line", "line", "classa_line", null},
+                {"MultipleGeomAttrs1.Topic.ClassA.coord", "coord", "classa", null},
+                {"MultipleGeomAttrs1.Topic.ClassA.surface", "surface", "classa_surface", null},
+            };
+            Ili2dbAssert.assertAttrNameTableFromGpkg(jdbcConnection, expectedValues);
+        }
+        {
+            // t_ili2db_trafo
+            String [][] expectedValues=new String[][] {
+                {"MultipleGeomAttrs1.Topic.ClassA.line:21781(MultipleGeomAttrs1.Topic.ClassA)",  "ch.ehi.ili2db.secondaryTable",  "classa_line"},
+                {"MultipleGeomAttrs1.Topic.ClassA.surface:21781(MultipleGeomAttrs1.Topic.ClassA)",    "ch.ehi.ili2db.secondaryTable",  "classa_surface"},
+                {"MultipleGeomAttrs1.Topic.ClassA",   "ch.ehi.ili2db.inheritance", "newClass"},
+            };
+            Ili2dbAssert.assertTrafoTableFromGpkg(jdbcConnection, expectedValues);
+        }
     }
 	
 	@Test

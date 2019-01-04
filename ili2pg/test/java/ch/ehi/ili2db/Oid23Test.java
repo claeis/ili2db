@@ -1,9 +1,11 @@
 package ch.ehi.ili2db;
 
 import java.io.File;
+import java.sql.Array;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.HashMap;
 
@@ -102,6 +104,26 @@ public class Oid23Test {
 					Assert.assertTrue(rs.next());
 					Assert.assertEquals("classb1",rs.getString(2));
 				}
+				{
+				    // t_ili2db_attrname
+				    String [][] expectedValues=new String[][] {
+				        {"Oid1.TestC.ac.a", "a", "classc1", "classa1"},
+				    };
+				    Ili2dbAssert.assertAttrNameTable(jdbcConnection,expectedValues, DBSCHEMA);
+				    
+				}
+                {
+                    // t_ili2db_trafo
+                    String [][] expectedValues=new String[][] {
+                        {"Oid1.TestA.ClassA1b", "ch.ehi.ili2db.inheritance", "newClass"},
+                        {"Oid1.TestA.ClassB1b", "ch.ehi.ili2db.inheritance", "newClass"},
+                        {"Oid1.TestC.ac", "ch.ehi.ili2db.inheritance", "newClass"},
+                        {"Oid1.TestC.ClassC1", "ch.ehi.ili2db.inheritance", "newClass"},
+                        {"Oid1.TestA.ClassB1", "ch.ehi.ili2db.inheritance", "newClass"},
+                        {"Oid1.TestA.ClassA1", "ch.ehi.ili2db.inheritance", "newClass"},
+                    };
+                    Ili2dbAssert.assertTrafoTable(jdbcConnection,expectedValues, DBSCHEMA);
+                }
 			}
 		}finally{
 			if(jdbcConnection!=null){
@@ -110,7 +132,8 @@ public class Oid23Test {
 		}
 	}
 	
-	@Test
+
+    @Test
 	public void importXtf() throws Exception
 	{
 		EhiLogger.getInstance().setTraceFilter(false);

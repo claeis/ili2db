@@ -183,6 +183,37 @@ public class InheritanceNoSmartTest {
 				Ili2db.readSettingsFromDb(config);
 				Ili2db.run(config,null);
 				// FIXME check that FK exists on reference from struct table to class table
+                {
+                    // t_ili2db_attrname
+                    String [][] expectedValues=new String[][] {
+                        {"StructAttr1.TopicB.StructA.name",   "aname", "topicb_structa", null},
+                        {"StructAttr1.TopicB.ClassB.attr3",   "attr3", "topicb_classb", null},
+                        {"StructAttr1.TopicB.ClassA.attr1",   "topicb_classa_attr1",   "topicb_structa",    "topicb_classa"},
+                        {"StructAttr1.TopicB.ClassA.attr2",   "attr2", "topicb_classa", null},
+                        {"StructAttr1.TopicA.ClassA.attr1",   "topica_classa_attr1",   "topica_structa",   "topica_classa"},
+                        {"StructAttr1.TopicA.ClassC.attr4",   "attr4", "topica_classc", null},
+                        {"StructAttr1.TopicA.ClassB.attr3",   "attr3", "topica_classb", null},
+                        {"StructAttr1.TopicA.StructA.name",   "aname", "topica_structa", null},
+                        {"StructAttr1.TopicA.ClassA.attr2",   "attr2", "topica_classa", null},
+                        {"StructAttr1.TopicB.ClassC.attr4",   "attr4", "topicb_classc", null}, 
+                    };
+                    Ili2dbAssert.assertAttrNameTable(jdbcConnection,expectedValues, DBSCHEMA);
+                    
+                }
+                {
+                    // t_ili2db_trafo
+                    String [][] expectedValues=new String[][] {
+                        {"StructAttr1.TopicB.StructA", "ch.ehi.ili2db.inheritance", "newClass"},
+                        {"StructAttr1.TopicA.ClassB", "ch.ehi.ili2db.inheritance", "newClass"},
+                        {"StructAttr1.TopicA.ClassA", "ch.ehi.ili2db.inheritance", "newClass"},
+                        {"StructAttr1.TopicB.ClassA", "ch.ehi.ili2db.inheritance", "newClass"},
+                        {"StructAttr1.TopicB.ClassB", "ch.ehi.ili2db.inheritance", "newClass"},
+                        {"StructAttr1.TopicA.StructA", "ch.ehi.ili2db.inheritance", "newClass"},
+                        {"StructAttr1.TopicA.ClassC", "ch.ehi.ili2db.inheritance", "newClass"},
+                        {"StructAttr1.TopicB.ClassC", "ch.ehi.ili2db.inheritance", "newClass"},
+                    };
+                    Ili2dbAssert.assertTrafoTable(jdbcConnection,expectedValues, DBSCHEMA);
+                }
 	        }
 		}finally{
 			if(jdbcConnection!=null){

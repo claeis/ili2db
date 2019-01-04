@@ -40,6 +40,13 @@ public class Datatypes10GpkgTest {
         stmt=jdbcConnection.createStatement();
 	}
 	
+    public void openDb() throws Exception
+    {
+        Class driverClass = Class.forName("org.sqlite.JDBC");
+        jdbcConnection = DriverManager.getConnection("jdbc:sqlite:"+GPKGFILENAME, null, null);
+        stmt=jdbcConnection.createStatement();
+    }
+	
 	@After
 	public void endDb() throws Exception
 	{
@@ -83,6 +90,47 @@ public class Datatypes10GpkgTest {
 		config.setInheritanceTrafo(null);
 		Ili2db.readSettingsFromDb(config);
 		Ili2db.run(config,null);
+		openDb();
+        {
+            // t_ili2db_attrname
+            String [][] expectedValues=new String[][] {
+                {"Datatypes10.Topic.TableA.dim2", "dim2",  "tablea", null},
+                {"Datatypes10.Topic.OtherTable.otherAttr", "otherattr", "othertable", null},    
+                {"Datatypes10.Topic.TableA.dim1", "dim1",  "tablea", null},    
+                {"Datatypes10.Topic.TableA.radians", "radians", "tablea", null},    
+                {"Datatypes10.Topic.TableA.koord2", "koord2", "tablea", null},
+                {"Datatypes10.Topic.TableA.datum", "datum", "tablea", null},    
+                {"Datatypes10.Topic.SubTablemain.main", "main", "subtable", "tablea"},
+                {"Datatypes10.Topic.TableA.bereich",  "bereich",   "tablea", null},    
+                {"Datatypes10.Topic.TableA.grads",    "grads", "tablea", null},    
+                {"Datatypes10.Topic.TableA.aufzaehlung",  "aufzaehlung",   "tablea", null},    
+                {"Datatypes10.Topic.TableA.horizAlignment",   "horizalignment", "tablea", null},    
+                {"Datatypes10.Topic.TableA.vertAlignment",    "vertalignment", "tablea", null},
+                {"Datatypes10.Topic.TableA.area", "area",  "tablea_area", null},   
+                {"Datatypes10.Topic.TableA.koord3",   "koord3",    "tablea_koord3", null},
+                {"Datatypes10.Topic.TableA.text", "atext", "tablea", null},    
+                {"Datatypes10.Topic.TableA.surface",  "surface",   "tablea_surface", null},
+                {"Datatypes10.Topic.TableA.bereichInt",   "bereichint",    "tablea", null},
+                {"Datatypes10.Topic.TableA.degrees",  "degrees",   "tablea", null},    
+                {"Datatypes10.Topic.TableA.linientyp",    "linientyp", "tablea_linientyp", null},
+            };
+            Ili2dbAssert.assertAttrNameTableFromGpkg(jdbcConnection, expectedValues);
+        }
+        {
+            // t_ili2db_trafo
+            String [][] expectedValues=new String[][] {
+                {"Datatypes10.Topic.SubTablemain", "ch.ehi.ili2db.inheritance", "newClass"},
+                {"Datatypes10.Topic.TableA.linientyp:21781(Datatypes10.Topic.TableA)", "ch.ehi.ili2db.secondaryTable", "tablea_linientyp"},
+                {"Datatypes10.Topic.TableA.area:21781(Datatypes10.Topic.TableA)", "ch.ehi.ili2db.secondaryTable", "tablea_area"},
+                {"Datatypes10.Topic.TableA",  "ch.ehi.ili2db.inheritance", "newClass"},
+                {"Datatypes10.Topic.SubTable",    "ch.ehi.ili2db.inheritance", "newClass"},
+                {"Datatypes10.Topic.OtherTable",  "ch.ehi.ili2db.inheritance", "newClass"},
+                {"Datatypes10.Topic.TableA.surface:21781(Datatypes10.Topic.TableA)",  "ch.ehi.ili2db.secondaryTable",  "tablea_surface"},
+                {"Datatypes10.Topic.LineAttrib1", "ch.ehi.ili2db.inheritance", "newClass"},
+                {"Datatypes10.Topic.TableA.koord3:21781(Datatypes10.Topic.TableA)",   "ch.ehi.ili2db.secondaryTable" , "tablea_koord3"},
+            };
+            Ili2dbAssert.assertTrafoTableFromGpkg(jdbcConnection, expectedValues);
+        }
 	}
 
 	@Test
@@ -226,6 +274,48 @@ public class Datatypes10GpkgTest {
             Assert.assertTrue(rs.next());
             Assert.assertEquals("_geom",rs.getString(1));
             Assert.assertEquals("tablea_surface",rs.getString(2));
+        }
+        {
+            // t_ili2db_attrname
+            String [][] expectedValues=new String[][] {
+                {"Datatypes10.Topic.TableA.dim2", "dim2",  "tablea", null},    
+                {"Datatypes10.Topic.OtherTable.otherAttr",    "otherattr", "othertable", null},
+                {"Datatypes10.Topic.TableA.dim1", "dim1",  "tablea", null},    
+                {"Datatypes10.Topic.TableA.radians",  "radians",   "tablea",null},    
+                {"Datatypes10.Topic.TableA.surface._geom", "_geom", "tablea_surface", null},
+                {"Datatypes10.Topic.TableA.koord2", "koord2", "tablea", null},    
+                {"Datatypes10.Topic.TableA.datum", "datum", "tablea", null},    
+                {"Datatypes10.Topic.SubTablemain.main", "main", "subtable", "tablea"},
+                {"Datatypes10.Topic.TableA.bereich", "bereich", "tablea", null},
+                {"Datatypes10.Topic.TableA.grads", "grads", "tablea", null},
+                {"Datatypes10.Topic.TableA.aufzaehlung",  "aufzaehlung",   "tablea", null},    
+                {"Datatypes10.Topic.LineAttrib1.attr", "attr", "datatypes10topic_tablea_area", null},
+                {"Datatypes10.Topic.TableA.area._geom", "_geom", "datatypes10topic_tablea_area", null},  
+                {"Datatypes10.Topic.TableA.horizAlignment",   "horizalignment", "tablea", null},    
+                {"Datatypes10.Topic.TableA.vertAlignment",    "vertalignment", "tablea", null},    
+                {"Datatypes10.Topic.TableA.area", "area",  "tablea_area", null},   
+                {"Datatypes10.Topic.TableA.koord3",   "koord3",    "tablea_koord3", null},
+                {"Datatypes10.Topic.TableA.surface._ref", "_ref",  "tablea_surface", null},   
+                {"Datatypes10.Topic.TableA.text", "atext", "tablea", null},
+                {"Datatypes10.Topic.TableA.bereichInt",   "bereichint",    "tablea", null},
+                {"Datatypes10.Topic.TableA.degrees",  "degrees",   "tablea", null},
+                {"Datatypes10.Topic.TableA.linientyp",    "linientyp", "tablea_linientyp", null},    
+            };
+            Ili2dbAssert.assertAttrNameTableFromGpkg(jdbcConnection, expectedValues);
+        }
+        {
+            // t_ili2db_trafo
+            String [][] expectedValues=new String[][] {
+                {"Datatypes10.Topic.SubTablemain",    "ch.ehi.ili2db.inheritance", "newClass"},
+                {"Datatypes10.Topic.TableA.linientyp:21781(Datatypes10.Topic.TableA)",    "ch.ehi.ili2db.secondaryTable",  "tablea_linientyp"},
+                {"Datatypes10.Topic.TableA.area:21781(Datatypes10.Topic.TableA)", "ch.ehi.ili2db.secondaryTable",  "tablea_area"},
+                {"Datatypes10.Topic.TableA",  "ch.ehi.ili2db.inheritance", "newClass"},
+                {"Datatypes10.Topic.SubTable",    "ch.ehi.ili2db.inheritance", "newClass"},
+                {"Datatypes10.Topic.OtherTable",  "ch.ehi.ili2db.inheritance", "newClass"},
+                {"Datatypes10.Topic.LineAttrib1", "ch.ehi.ili2db.inheritance", "newClass"},
+                {"Datatypes10.Topic.TableA.koord3:21781(Datatypes10.Topic.TableA)",   "ch.ehi.ili2db.secondaryTable",  "tablea_koord3"},
+            };
+            Ili2dbAssert.assertTrafoTableFromGpkg(jdbcConnection, expectedValues);
         }
     }
     
