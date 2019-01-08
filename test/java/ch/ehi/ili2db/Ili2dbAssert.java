@@ -54,7 +54,7 @@ public class Ili2dbAssert {
                 if ((foundValue[i] == null && expectedValue[i] == null) 
                         || ((foundValue[i] != null && expectedValue[i] != null) && foundValue[i].equals(expectedValue[i]))) {
                 }else {
-                    String message = "Werte stimmen nicht ueberein für: " + expectedValue[0];
+                    String message = "Werte stimmen nicht ueberein fuer: " + expectedValue[0];
                     throw new org.junit.ComparisonFailure(message, expectedValue[i], foundValue[i]);                    
                 }
             }            
@@ -98,7 +98,7 @@ public class Ili2dbAssert {
                 if ((foundValue[i] == null && expectedValue[i] == null) 
                         || ((foundValue[i] != null && expectedValue[i] != null) && foundValue[i].equals(expectedValue[i]))) {
                 }else {
-                    String message = "Werte stimmen nicht ueberein für: " + expectedValue[0];
+                    String message = "Werte stimmen nicht ueberein fuer: " + expectedValue[0];
                     throw new org.junit.ComparisonFailure(message, expectedValue[i], foundValue[i]);                    
                 }
             }            
@@ -142,7 +142,7 @@ public class Ili2dbAssert {
                 if ((foundValue[i] == null && expectedValue[i] == null) 
                         || ((foundValue[i] != null && expectedValue[i] != null) && foundValue[i].equals(expectedValue[i]))) {
                 }else {
-                    String message = "Werte stimmen nicht ueberein für: " + expectedValue[0];
+                    String message = "Werte stimmen nicht ueberein fuer: " + expectedValue[0];
                     throw new org.junit.ComparisonFailure(message, expectedValue[i], foundValue[i]);                    
                 }
             }            
@@ -187,7 +187,7 @@ public class Ili2dbAssert {
                 if ((foundValue[i] == null && expectedValue[i] == null) 
                         || ((foundValue[i] != null && expectedValue[i] != null) && foundValue[i].equals(expectedValue[i]))) {
                 }else {
-                    String message = "Werte stimmen nicht ueberein für: " + expectedValue[0];
+                    String message = "Werte stimmen nicht ueberein fuer: " + expectedValue[0];
                     throw new org.junit.ComparisonFailure(message, expectedValue[i], foundValue[i]);                    
                 }
             }            
