@@ -4,65 +4,6 @@ version '4.0.0'+System.getProperty('release','-SNAPSHOT')
 apply plugin: "java"
 apply plugin: "maven"
 
-configurations {
-	ili2db
-	ili2pgCompileClasspath {
-		extendsFrom implementation
-	}
-	ili2pgRuntimeClasspath {
-		extendsFrom runtimeOnly
-		extendsFrom ili2pgCompileClasspath
-	}
-	ili2pgTestCompileClasspath {
-		extendsFrom testImplementation
-		extendsFrom ili2pgCompileClasspath
-	}
-	ili2gpkgCompileClasspath {
-		extendsFrom implementation
-	}
-	ili2gpkgRuntimeClasspath {
-		extendsFrom runtimeOnly
-		extendsFrom ili2gpkgCompileClasspath
-	}
-	ili2gpkgTestCompileClasspath {
-		extendsFrom testImplementation
-		extendsFrom ili2gpkgCompileClasspath
-	}
-	ili2fgdbCompileClasspath {
-		extendsFrom implementation
-	}
-	ili2fgdbRuntimeClasspath {
-		extendsFrom runtimeOnly
-		extendsFrom ili2fgdbCompileClasspath
-	}
-	ili2fgdbTestCompileClasspath {
-		extendsFrom testImplementation
-		extendsFrom ili2fgdbCompileClasspath
-	}
-	ili2mssqlCompileClasspath {
-		extendsFrom implementation
-	}
-	ili2mssqlRuntimeClasspath {
-		extendsFrom runtimeOnly
-		extendsFrom ili2mssqlCompileClasspath
-	}
-	ili2mssqlTestCompileClasspath {
-		extendsFrom testImplementation
-		extendsFrom ili2mssqlCompileClasspath
-	}
-	ili2oraCompileClasspath {
-		extendsFrom implementation
-	}
-	ili2oraRuntimeClasspath {
-		extendsFrom runtimeOnly
-		extendsFrom ili2oraCompileClasspath
-	}
-	ili2oraTestCompileClasspath {
-		extendsFrom testImplementation
-		extendsFrom ili2oraCompileClasspath
-	}
-    deployerJars
-}
 
 sourceCompatibility = "1.6" 
 targetCompatibility = "1.6"
@@ -75,24 +16,6 @@ compileJava.options.encoding = 'US-ASCII'
 //    resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
 //}
 
-dependencies {
-    implementation group: 'ch.interlis', name: 'iox-ili', version: '1.20.10+'
-    implementation group: 'ch.interlis', name: 'ili2c-tool', version: "4.7.10+"
-    implementation group: 'ch.ehi', name: 'ehisqlgen', version: "1.13.7+"
-    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: '2.9.7'
-    testImplementation group: 'junit', name: 'junit', version: '4.12'
-	testImplementation group: 'org.hamcrest', name: 'hamcrest-library', version: '1.3'
-	ili2pgCompileClasspath group: 'org.postgresql', name: 'postgresql', version: '42.1.4.jre6'
-	compileOnly group: 'org.postgresql', name: 'postgresql', version: '42.1.4.jre6' // add as compileOnly, so that eclipse sees it
-	ili2gpkgCompileClasspath group: 'org.xerial', name: 'sqlite-jdbc', version: '3.8.11.2'
-	compileOnly group: 'org.xerial', name: 'sqlite-jdbc', version: '3.8.11.2' // add as compileOnly, so that eclipse sees it
-	ili2fgdbCompileClasspath group: 'ch.ehi', name: 'fgdb4j', version: "1.1.1"
-	compileOnly group: 'ch.ehi', name: 'fgdb4j', version: "1.1.1" // add as compileOnly, so that eclipse sees it
-	ili2mssqlCompileClasspath group: 'com.microsoft.sqlserver', name: 'mssql-jdbc', version: '6.4.0.jre7'
-	ili2oraCompileClasspath files('lib/ojdbc14.jar')
-	ili2db group: project.group, name: project.name, version: project.version
-    deployerJars "org.apache.maven.wagon:wagon-ftp:3.0.0"
-}
 
 repositories {
     mavenLocal()
@@ -154,10 +77,27 @@ sourceSets {
     java {
     	srcDirs=['ili2pg/test/java']
     }
-    //compileClasspath = [ configurations.ili2pgCompileClasspath, configurations.testImplementation]
+    
+    // compileClasspath — FileCollection
+    //   Default value: ${name}CompileClasspath configuration
+    //   The classpath to use when compiling the source files of this source set.
+    // The classpath used to compile this source.
+    // Default with java plugin:
+    // 	project.configurations.compileClasspath 
+    //  (or project.configurations.testCompileClasspath for the test source set).
     compileClasspath += sourceSets.main.output
+    compileClasspath += sourceSets.test.output
     compileClasspath += sourceSets.ili2pg.output
+    
+    // runtimeClasspath — FileCollection
+    //   Default value: $output, ${name}RuntimeClasspath configuration
+    //   The classpath to use when executing the classes of this source set.
+    // The classpath used to execute this source.
+    // Default with java plugin:
+    //   sourceSet.output + project.configurations.runtime 
+    //   (or sourceSet.output + project.configurations.testRuntime for the test source set).
     runtimeClasspath += sourceSets.main.output
+    runtimeClasspath += sourceSets.test.output
     runtimeClasspath += sourceSets.ili2pg.output
   }
   ili2gpkg {
@@ -175,8 +115,10 @@ sourceSets {
     	srcDirs=['ili2gpkg/test/java']
     }
     compileClasspath += sourceSets.main.output
+    compileClasspath += sourceSets.test.output
     compileClasspath += sourceSets.ili2gpkg.output
     runtimeClasspath += sourceSets.main.output
+    runtimeClasspath += sourceSets.test.output
     runtimeClasspath += sourceSets.ili2gpkg.output
   }
   ili2fgdb {
@@ -190,8 +132,10 @@ sourceSets {
     	srcDirs=['ili2fgdb/test/java']
     }
     compileClasspath += sourceSets.main.output
+    compileClasspath += sourceSets.test.output
     compileClasspath += sourceSets.ili2fgdb.output
     runtimeClasspath += sourceSets.main.output
+    runtimeClasspath += sourceSets.test.output
     runtimeClasspath += sourceSets.ili2fgdb.output
   }
   ili2mssql {
@@ -205,8 +149,10 @@ sourceSets {
     	srcDirs=['ili2mssql/test/java']
     }
     compileClasspath += sourceSets.main.output
+    compileClasspath += sourceSets.test.output
     compileClasspath += sourceSets.ili2mssql.output
     runtimeClasspath += sourceSets.main.output
+    runtimeClasspath += sourceSets.test.output
     runtimeClasspath += sourceSets.ili2mssql.output
   }
   ili2ora {
@@ -220,16 +166,114 @@ sourceSets {
     	srcDirs=['ili2ora/test/java']
     }
     compileClasspath += sourceSets.main.output
+    compileClasspath += sourceSets.test.output
     compileClasspath += sourceSets.ili2ora.output
     runtimeClasspath += sourceSets.main.output
+    runtimeClasspath += sourceSets.test.output
     runtimeClasspath += sourceSets.ili2ora.output
   }
 }
+
+// If you want to use the convention-based configurations, such as 
+// intTestImplementation, you must declare the dependencies after the new 
+// source set
+configurations {
+	ili2db
+	ili2pgImplementation {
+		extendsFrom implementation
+	}
+	ili2pgRuntimeOnly {
+		extendsFrom runtimeOnly
+	}
+	ili2pgTestImplementation {
+		extendsFrom testImplementation
+		extendsFrom ili2pgImplementation
+	}
+    ili2pgTestRuntimeOnly {
+    	extendsFrom ili2pgRuntimeOnly
+    }
+
+	ili2gpkgImplementation {
+		extendsFrom implementation
+	}
+	ili2gpkgRuntimeOnly {
+		extendsFrom runtimeOnly
+	}
+	ili2gpkgTestRuntimeOnly {
+		extendsFrom ili2gpkgRuntimeOnly
+	}
+	ili2gpkgTestImplementation {
+		extendsFrom testImplementation
+		extendsFrom ili2gpkgImplementation
+	}
+	ili2fgdbImplementation {
+		extendsFrom implementation
+	}
+	ili2fgdbRuntimeOnly {
+		extendsFrom runtimeOnly
+	}
+	ili2fgdbTestImplementation {
+		extendsFrom testImplementation
+		extendsFrom ili2fgdbImplementation
+	}
+	ili2fgdbTestRuntimeOnly {
+		extendsFrom ili2fgdbRuntimeOnly
+	}
+	ili2mssqlImplementation {
+		extendsFrom implementation
+	}
+	ili2mssqlRuntimeOnly {
+		extendsFrom runtimeOnly
+	}
+	ili2mssqlTestImplementation {
+		extendsFrom testImplementation
+		extendsFrom ili2mssqlImplementation
+	}
+	ili2mssqlTestRuntimeOnly {
+		extendsFrom ili2mssqlRuntimeOnly
+	}
+	ili2oraImplementation {
+		extendsFrom implementation
+	}
+	ili2oraRuntimeOnly {
+		extendsFrom runtimeOnly
+	}
+	ili2oraTestImplementation {
+		extendsFrom testImplementation
+		extendsFrom ili2oraImplementation
+	}
+	ili2oraTestRuntimeOnly {
+		extendsFrom ili2oraRuntimeOnly
+	}
+    deployerJars
+}
+dependencies {
+    implementation group: 'ch.interlis', name: 'iox-ili', version: '1.20.10+'
+    implementation group: 'ch.interlis', name: 'ili2c-tool', version: "4.7.10+"
+    implementation group: 'ch.ehi', name: 'ehisqlgen', version: "1.13.7+"
+    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: '2.9.7'
+    testImplementation group: 'junit', name: 'junit', version: '4.12'
+	testImplementation group: 'org.hamcrest', name: 'hamcrest-library', version: '1.3'
+	ili2pgImplementation group: 'org.postgresql', name: 'postgresql', version: '42.1.4.jre6'
+	//compileOnly group: 'org.postgresql', name: 'postgresql', version: '42.1.4.jre6' // add as compileOnly, so that eclipse sees it
+	ili2gpkgImplementation group: 'org.xerial', name: 'sqlite-jdbc', version: '3.8.11.2'
+	//compileOnly group: 'org.xerial', name: 'sqlite-jdbc', version: '3.8.11.2' // add as compileOnly, so that eclipse sees it
+	ili2fgdbImplementation group: 'ch.ehi', name: 'fgdb4j', version: "1.1.1"
+	//compileOnly group: 'ch.ehi', name: 'fgdb4j', version: "1.1.1" // add as compileOnly, so that eclipse sees it
+	ili2mssqlImplementation group: 'com.microsoft.sqlserver', name: 'mssql-jdbc', version: '6.4.0.jre7'
+	ili2oraImplementation files('lib/ojdbc14.jar')
+	ili2db group: project.group, name: project.name, version: project.version
+    deployerJars "org.apache.maven.wagon:wagon-ftp:3.0.0"
+}
+
+
 task printcp {
 	doLast{
 		//sourceSets.main.output.each { println it }
 		// components.java.each { println it }
-		System.out.println components.java
+		//System.out.println components.java
+		//System.out.println sourceSets.main.compileClasspath.getFiles()
+		System.out.println sourceSets.ili2pgTest.runtimeClasspath.getFiles()
 	}
 }
 task usrdoc(type:Exec) {
@@ -275,11 +319,12 @@ task ili2pgBindist(dependsOn:[usrdoc,ili2pgJar], type: Zip){
 task ili2pgTest(type: Test) {
 	maxParallelForks = 1
 	forkEvery = 1
+	
+    classpath = sourceSets.ili2pgTest.runtimeClasspath
+    
+	// testClassesDirs The directories for the compiled test sources
+	// Default with java plugin: project.sourceSets.test.output.classesDirs
     testClassesDirs = sourceSets.ili2pgTest.output.classesDirs
-    classpath = configurations.ili2pgTestCompileClasspath
-    classpath += sourceSets.main.output
-    classpath += sourceSets.ili2pg.output
-    classpath += sourceSets.ili2pgTest.output 
 	systemProperty 'dburl', dburl
 	systemProperty 'dbusr', dbusr
 	systemProperty 'dbpwd', dbpwd
@@ -310,11 +355,8 @@ task ili2gpkgBindist(dependsOn:[usrdoc,ili2gpkgJar], type: Zip){
 task ili2gpkgTest(type: Test) {
 	maxParallelForks = 1
 	forkEvery = 1
+    classpath = sourceSets.ili2gpkgTest.runtimeClasspath
     testClassesDirs = sourceSets.ili2gpkgTest.output.classesDirs
-    classpath = configurations.ili2gpkgTestCompileClasspath
-    classpath += sourceSets.main.output
-    classpath += sourceSets.ili2gpkg.output
-    classpath += sourceSets.ili2gpkgTest.output 
     testLogging.exceptionFormat = 'full'
 }
 task ili2fgdbJar(dependsOn: jar,type: Jar) {
@@ -342,11 +384,8 @@ task ili2fgdbBindist(dependsOn:[usrdoc,ili2fgdbJar], type: Zip){
 task ili2fgdbTest(type: Test) {
 	maxParallelForks = 1
 	forkEvery = 1
+    classpath = sourceSets.ili2fgdbTest.runtimeClasspath
     testClassesDirs = sourceSets.ili2fgdbTest.output.classesDirs
-    classpath = configurations.ili2fgdbTestCompileClasspath
-    classpath += sourceSets.main.output
-    classpath += sourceSets.ili2fgdb.output
-    classpath += sourceSets.ili2fgdbTest.output 
     testLogging.exceptionFormat = 'full'
 }
 task ili2mssqlJar(dependsOn: jar,type: Jar) {
@@ -374,11 +413,8 @@ task ili2mssqlBindist(dependsOn:[usrdoc,ili2mssqlJar], type: Zip){
 task ili2mssqlTest(type: Test) {
 	maxParallelForks = 1
 	forkEvery = 1
+    classpath = sourceSets.ili2mssqlTest.runtimeClasspath
     testClassesDirs = sourceSets.ili2mssqlTest.output.classesDirs
-    classpath = configurations.ili2mssqlTestCompileClasspath
-    classpath += sourceSets.main.output
-    classpath += sourceSets.ili2mssql.output
-    classpath += sourceSets.ili2mssqlTest.output 
     testLogging.exceptionFormat = 'full'
 }
 task ili2oraJar(dependsOn: jar,type: Jar) {
@@ -406,11 +442,8 @@ task ili2oraBindist(dependsOn:[usrdoc,ili2oraJar], type: Zip){
 task ili2oraTest(type: Test) {
 	maxParallelForks = 1
 	forkEvery = 1
+    classpath = sourceSets.ili2oraTest.runtimeClasspath
     testClassesDirs = sourceSets.ili2oraTest.output.classesDirs
-    classpath = configurations.ili2oraTestCompileClasspath
-    classpath += sourceSets.main.output
-    classpath += sourceSets.ili2ora.output
-    classpath += sourceSets.ili2oraTest.output 
     testLogging.exceptionFormat = 'full'
 }
 
