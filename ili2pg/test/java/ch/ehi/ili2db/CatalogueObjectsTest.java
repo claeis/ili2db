@@ -59,7 +59,7 @@ public class CatalogueObjectsTest {
 	@Test
 	public void importIli() throws Exception
 	{
-		EhiLogger.getInstance().setTraceFilter(false);
+		//EhiLogger.getInstance().setTraceFilter(false);
 		Connection jdbcConnection=null;
 		try{
 			Class driverClass = Class.forName("org.postgresql.Driver");
@@ -136,7 +136,7 @@ public class CatalogueObjectsTest {
     @Test
     public void importIliSmart1CoalesceCatalogRef() throws Exception
     {
-        EhiLogger.getInstance().setTraceFilter(false);
+        //EhiLogger.getInstance().setTraceFilter(false);
         Connection jdbcConnection=null;
         try{
             Class driverClass = Class.forName("org.postgresql.Driver");
@@ -217,7 +217,7 @@ public class CatalogueObjectsTest {
     @Test
     public void importIliSmart2CoalesceCatalogRef() throws Exception
     {
-        EhiLogger.getInstance().setTraceFilter(false);
+        //EhiLogger.getInstance().setTraceFilter(false);
         Connection jdbcConnection=null;
         try{
             Class driverClass = Class.forName("org.postgresql.Driver");
@@ -311,7 +311,7 @@ public class CatalogueObjectsTest {
 	@Test
 	public void importXtf() throws Exception
 	{
-		EhiLogger.getInstance().setTraceFilter(false);
+		//EhiLogger.getInstance().setTraceFilter(false);
 		Connection jdbcConnection=null;
 		try{
 			 Class driverClass = Class.forName("org.postgresql.Driver");
@@ -342,7 +342,7 @@ public class CatalogueObjectsTest {
     @Test
     public void importXtfSmart1CoalesceCatalogRef() throws Exception
     {
-        EhiLogger.getInstance().setTraceFilter(false);
+        //EhiLogger.getInstance().setTraceFilter(false);
         Connection jdbcConnection=null;
         try{
              Class driverClass = Class.forName("org.postgresql.Driver");
@@ -374,7 +374,7 @@ public class CatalogueObjectsTest {
     @Test
     public void importXtfSmart2CoalesceCatalogRef() throws Exception
     {
-        EhiLogger.getInstance().setTraceFilter(false);
+        //EhiLogger.getInstance().setTraceFilter(false);
         Connection jdbcConnection=null;
         try{
              Class driverClass = Class.forName("org.postgresql.Driver");

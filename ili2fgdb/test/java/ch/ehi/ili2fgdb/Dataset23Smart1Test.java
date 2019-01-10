@@ -112,7 +112,7 @@ public class Dataset23Smart1Test {
 	@Test
 	public void importNoDatasetName() throws Exception
 	{
-		EhiLogger.getInstance().setTraceFilter(false);
+		//EhiLogger.getInstance().setTraceFilter(false);
 		Connection jdbcConnection=null;
 		try{
 		    File fgdbFile=new File(fgdbFileName);

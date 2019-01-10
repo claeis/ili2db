@@ -90,7 +90,7 @@ public class Json23Test {
     @Test
     public void importXtf() throws Exception
     {
-        EhiLogger.getInstance().setTraceFilter(false);
+        //EhiLogger.getInstance().setTraceFilter(false);
         Class driverClass = Class.forName("org.postgresql.Driver");
         jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
         stmt=jdbcConnection.createStatement();
@@ -145,7 +145,7 @@ public class Json23Test {
         {
             importXtf();
         }
-        EhiLogger.getInstance().setTraceFilter(false);
+        //EhiLogger.getInstance().setTraceFilter(false);
         File data=new File(TEST_OUT,"Json23a-out.xtf");
         Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
         config.setFunction(Config.FC_EXPORT);

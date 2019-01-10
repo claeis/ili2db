@@ -78,7 +78,7 @@ public class MultipleGeomAttrsTest {
 	@Test
 	public void importIli() throws Exception
 	{
-        EhiLogger.getInstance().setTraceFilter(false);
+        //EhiLogger.getInstance().setTraceFilter(false);
 	    File gpkgFile=new File(GPKGFILENAME);
         if(gpkgFile.exists()){ 
             File file = new File(gpkgFile.getAbsolutePath());
@@ -119,7 +119,7 @@ public class MultipleGeomAttrsTest {
     @Test
     public void importIliExtendedClass() throws Exception
     {
-        EhiLogger.getInstance().setTraceFilter(false);
+        //EhiLogger.getInstance().setTraceFilter(false);
         File gpkgFile=new File(GPKGFILENAME);
         if(gpkgFile.exists()){ 
             File file = new File(gpkgFile.getAbsolutePath());
@@ -167,7 +167,7 @@ public class MultipleGeomAttrsTest {
 	@Test
 	public void importXtf() throws Exception
 	{
-		EhiLogger.getInstance().setTraceFilter(false);
+		//EhiLogger.getInstance().setTraceFilter(false);
 	    File gpkgFile=new File(GPKGFILENAME);
         if (gpkgFile.exists()) {
             File file = new File(gpkgFile.getAbsolutePath());
@@ -195,7 +195,7 @@ public class MultipleGeomAttrsTest {
     @Test
     public void importXtfExtendedClass() throws Exception
     {
-        EhiLogger.getInstance().setTraceFilter(false);
+        //EhiLogger.getInstance().setTraceFilter(false);
         File gpkgFile=new File(GPKGFILENAME);
         if (gpkgFile.exists()) {
             File file = new File(gpkgFile.getAbsolutePath());
@@ -226,7 +226,7 @@ public class MultipleGeomAttrsTest {
 		{
 			importXtf();
 		}
-		EhiLogger.getInstance().setTraceFilter(false);
+		//EhiLogger.getInstance().setTraceFilter(false);
 	    File gpkgFile=new File(GPKGFILENAME);
 	    //Fgdb4j.deleteFileGdb(fgdbFile);
 		File data=new File(TEST_OUT,"MultipleGeomAttrs1a-out.xtf");
@@ -264,7 +264,7 @@ public class MultipleGeomAttrsTest {
         {
             importXtfExtendedClass();
         }
-        EhiLogger.getInstance().setTraceFilter(false);
+        //EhiLogger.getInstance().setTraceFilter(false);
         File gpkgFile=new File(GPKGFILENAME);
         //Fgdb4j.deleteFileGdb(fgdbFile);
         File data=new File(TEST_OUT,"MultipleGeomAttrsExtendedClass-out.xtf");

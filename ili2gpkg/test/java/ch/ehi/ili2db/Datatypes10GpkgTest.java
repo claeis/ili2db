@@ -205,7 +205,7 @@ public class Datatypes10GpkgTest {
     @Test
     public void importIliWithSkipPolygonBuilding() throws Exception
     {
-        EhiLogger.getInstance().setTraceFilter(false);
+        //EhiLogger.getInstance().setTraceFilter(false);
         File gpkgFile=new File(GPKGFILENAME);
         if(gpkgFile.exists()){
             gpkgFile.delete();
@@ -322,7 +322,7 @@ public class Datatypes10GpkgTest {
 	@Test
 	public void importItfWithSkipPolygonBuilding() throws Exception
 	{
-	    EhiLogger.getInstance().setTraceFilter(false);
+	    //EhiLogger.getInstance().setTraceFilter(false);
 	    File gpkgFile=new File(GPKGFILENAME);
         if(gpkgFile.exists()){
             gpkgFile.delete();

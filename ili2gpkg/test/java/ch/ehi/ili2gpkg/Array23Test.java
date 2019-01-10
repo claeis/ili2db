@@ -62,7 +62,7 @@ public class Array23Test {
 	@Test
 	public void importIliSmartCustom() throws Exception
 	{
-		EhiLogger.getInstance().setTraceFilter(false);
+		//EhiLogger.getInstance().setTraceFilter(false);
 		try{
             File gpkgFile = new File(gpkgFileName);
             if (gpkgFile.exists()) {
@@ -109,7 +109,7 @@ public class Array23Test {
     @Test
     public void importSmartCustom() throws Exception
     {
-        EhiLogger.getInstance().setTraceFilter(false);
+        //EhiLogger.getInstance().setTraceFilter(false);
         try{
             File gpkgFile = new File(gpkgFileName);
             if (gpkgFile.exists()) {

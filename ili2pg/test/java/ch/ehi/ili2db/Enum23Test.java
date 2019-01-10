@@ -250,7 +250,7 @@ public class Enum23Test {
     @Test
     public void importXtfExtendedFkTable() throws Exception
     {
-        EhiLogger.getInstance().setTraceFilter(false);
+        //EhiLogger.getInstance().setTraceFilter(false);
         Connection jdbcConnection=null;
         try{
             Class driverClass = Class.forName("org.postgresql.Driver");

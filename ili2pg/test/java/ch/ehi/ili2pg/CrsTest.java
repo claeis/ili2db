@@ -134,7 +134,7 @@ public class CrsTest {
         stmt=jdbcConnection.createStatement();
 		stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");
 		
-		EhiLogger.getInstance().setTraceFilter(false);
+		//EhiLogger.getInstance().setTraceFilter(false);
 		File data=new File("test/data/Crs/CrsCoord23a.xtf");
 		Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 		config.setFunction(Config.FC_IMPORT);

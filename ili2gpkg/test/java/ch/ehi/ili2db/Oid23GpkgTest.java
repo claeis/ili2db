@@ -128,7 +128,7 @@ public class Oid23GpkgTest {
     		Ili2db.run(config,null);
         }
 		{
-			EhiLogger.getInstance().setTraceFilter(false);
+			//EhiLogger.getInstance().setTraceFilter(false);
 			File data=new File(TEST_OUT,"Oid1c.xtf");
 			Config config=initConfig(data.getPath(),data.getPath()+".log");
 			config.setFunction(Config.FC_IMPORT);
@@ -145,7 +145,7 @@ public class Oid23GpkgTest {
 		{
 			importXtf();
 		}
-		EhiLogger.getInstance().setTraceFilter(false);
+		//EhiLogger.getInstance().setTraceFilter(false);
 		File data=new File(TEST_OUT,"Oid1a-out.xtf");
 		Config config=initConfig(data.getPath(),data.getPath()+".log");
 		config.setFunction(Config.FC_EXPORT);

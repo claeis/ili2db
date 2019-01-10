@@ -198,7 +198,7 @@ public class SimpleGpkgTest {
 	@Test
 	public void importXtf() throws Exception
 	{
-		EhiLogger.getInstance().setTraceFilter(false);
+		//EhiLogger.getInstance().setTraceFilter(false);
 	    File gpkgFile=new File(GPKGFILENAME);
 	    if (gpkgFile.exists()) {
             File file = new File(gpkgFile.getAbsolutePath());
@@ -226,7 +226,7 @@ public class SimpleGpkgTest {
 	@Test
 	public void importXtfStruct() throws Exception
 	{
-		EhiLogger.getInstance().setTraceFilter(false);
+		//EhiLogger.getInstance().setTraceFilter(false);
 	    File gpkgFile=new File(GPKGFILENAME);
         if (gpkgFile.exists()) {
             File file = new File(gpkgFile.getAbsolutePath());
@@ -254,7 +254,7 @@ public class SimpleGpkgTest {
 	@Test
 	public void importXtfInheritanceNewClass() throws Exception
 	{
-		EhiLogger.getInstance().setTraceFilter(false);
+		//EhiLogger.getInstance().setTraceFilter(false);
 	    File gpkgFile=new File(GPKGFILENAME);
         if (gpkgFile.exists()) {
             File file = new File(gpkgFile.getAbsolutePath());
@@ -282,7 +282,7 @@ public class SimpleGpkgTest {
 	@Test
 	public void importXtfInheritanceSmart1() throws Exception
 	{
-		EhiLogger.getInstance().setTraceFilter(false);
+		//EhiLogger.getInstance().setTraceFilter(false);
 	    File gpkgFile=new File(GPKGFILENAME);
         if (gpkgFile.exists()) {
             File file = new File(gpkgFile.getAbsolutePath());
@@ -310,7 +310,7 @@ public class SimpleGpkgTest {
 	@Test
 	public void importXtfInheritanceSmart2() throws Exception
 	{
-		EhiLogger.getInstance().setTraceFilter(false);
+		//EhiLogger.getInstance().setTraceFilter(false);
 	    File gpkgFile=new File(GPKGFILENAME);
         if (gpkgFile.exists()) {
             File file = new File(gpkgFile.getAbsolutePath());
@@ -338,7 +338,7 @@ public class SimpleGpkgTest {
 	@Test
 	public void importXtfCoord() throws Exception
 	{
-		EhiLogger.getInstance().setTraceFilter(false);
+		//EhiLogger.getInstance().setTraceFilter(false);
 	    File gpkgFile=new File(GPKGFILENAME);
         if (gpkgFile.exists()) {
             File file = new File(gpkgFile.getAbsolutePath());
@@ -368,7 +368,7 @@ public class SimpleGpkgTest {
 	@Ignore("fails with Abort due to constraint violation (UNIQUE constraint failed: T_ILI2DB_SETTINGS.tag)")
 	public void importXtfWithDelete() throws Exception
 	{
-		EhiLogger.getInstance().setTraceFilter(false);
+		//EhiLogger.getInstance().setTraceFilter(false);
 	    File gpkgFile=new File(GPKGFILENAME);
 		File data=new File(TEST_OUT,"Simple23a.xtf");
 		Config config=initConfig(data.getPath(),data.getPath()+".log");
@@ -397,7 +397,7 @@ public class SimpleGpkgTest {
 		{
 			importXtf();
 		}
-		EhiLogger.getInstance().setTraceFilter(false);
+		//EhiLogger.getInstance().setTraceFilter(false);
 		File data=new File(TEST_OUT,"Simple23a-out.xtf");
 		Config config=initConfig(data.getPath(),data.getPath()+".log");
 		config.setFunction(Config.FC_EXPORT);
@@ -438,7 +438,7 @@ public class SimpleGpkgTest {
 		{
 			importXtfStruct();
 		}
-		EhiLogger.getInstance().setTraceFilter(false);
+		//EhiLogger.getInstance().setTraceFilter(false);
 		File data=new File(TEST_OUT,"SimpleStruct23a-out.xtf");
 		Config config=initConfig(data.getPath(),data.getPath()+".log");
 		config.setFunction(Config.FC_EXPORT);
@@ -485,7 +485,7 @@ public class SimpleGpkgTest {
 		{
 			importXtfInheritanceSmart2();
 		}
-		EhiLogger.getInstance().setTraceFilter(false);
+		//EhiLogger.getInstance().setTraceFilter(false);
 		File data=new File(TEST_OUT,"SimpleInheritance23a-out.xtf");
 		Config config=initConfig(data.getPath(),data.getPath()+".log");
 		config.setFunction(Config.FC_EXPORT);
@@ -564,7 +564,7 @@ public class SimpleGpkgTest {
 		{
 			importXtfCoord();
 		}
-		EhiLogger.getInstance().setTraceFilter(false);
+		//EhiLogger.getInstance().setTraceFilter(false);
 		File data=new File(TEST_OUT,"SimpleCoord23a-out.xtf");
 		Config config=initConfig(data.getPath(),data.getPath()+".log");
 		config.setFunction(Config.FC_EXPORT);

@@ -68,7 +68,7 @@ public class MultiCrs24Test {
     @Test
     public void importIli() throws Exception
     {
-        EhiLogger.getInstance().setTraceFilter(false);
+        //EhiLogger.getInstance().setTraceFilter(false);
         Connection jdbcConnection=null;
         Statement stmt=null;
         try{
@@ -151,7 +151,7 @@ public class MultiCrs24Test {
 	@Test
 	public void importXtf() throws Exception
 	{
-		EhiLogger.getInstance().setTraceFilter(false);
+		//EhiLogger.getInstance().setTraceFilter(false);
 		Connection jdbcConnection=null;
         Statement stmt=null;
 		try{

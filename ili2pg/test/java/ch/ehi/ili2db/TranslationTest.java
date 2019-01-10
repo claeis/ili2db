@@ -338,7 +338,7 @@ public class TranslationTest {
 	        		dburl, dbuser, dbpwd);
 	        Statement stmt=jdbcConnection.createStatement();
 			
-			EhiLogger.getInstance().setTraceFilter(false);
+			//EhiLogger.getInstance().setTraceFilter(false);
 			File data=new File(TEST_OUT,"EnumOka-out.xtf");
 			Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 			config.setFunction(Config.FC_EXPORT);
@@ -759,7 +759,7 @@ public class TranslationTest {
 			importItf10lineTable();
 		}
 		try{
-			EhiLogger.getInstance().setTraceFilter(false);
+			//EhiLogger.getInstance().setTraceFilter(false);
 	        Class driverClass = Class.forName("org.postgresql.Driver");
 	        jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
 	        Statement stmt=jdbcConnection.createStatement();

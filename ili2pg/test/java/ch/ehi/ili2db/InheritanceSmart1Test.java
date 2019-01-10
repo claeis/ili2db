@@ -575,7 +575,7 @@ public class InheritanceSmart1Test {
 	@Test
 	public void importXtfRefAttrFK() throws Exception
 	{
-	    EhiLogger.getInstance().setTraceFilter(false);
+	    //EhiLogger.getInstance().setTraceFilter(false);
 		Connection jdbcConnection=null;
 		try{
 	        Class driverClass = Class.forName("org.postgresql.Driver");
@@ -635,7 +635,7 @@ public class InheritanceSmart1Test {
     @Ignore("incompatibility to ili2db-3.x")
 	public void exportXtfRefAttrFK_3x() throws Exception
 	{
-	    EhiLogger.getInstance().setTraceFilter(false);
+	    //EhiLogger.getInstance().setTraceFilter(false);
 		Connection jdbcConnection=null;
 		try{
 	        Class driverClass = Class.forName("org.postgresql.Driver");
@@ -689,7 +689,7 @@ public class InheritanceSmart1Test {
     @Test
     public void exportXtfRefAttrFK() throws Exception
     {
-        EhiLogger.getInstance().setTraceFilter(false);
+        //EhiLogger.getInstance().setTraceFilter(false);
         importXtfRefAttrFK();
         Connection jdbcConnection=null;
         try{
