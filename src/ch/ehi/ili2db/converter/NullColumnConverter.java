@@ -237,12 +237,12 @@ public class NullColumnConverter implements SqlColumnConverter {
 	public void setArrayNull(PreparedStatement ps, int parameterIndex) throws SQLException {
 	}
 	@Override
-	public Object fromIomArray(AttributeDef iliEleAttr, String[] iomValues, EnumCodeMapper enumTypes)
+	public Object fromIomArray(AttributeDef iliEleAttr, String[] iomValues, boolean isEnumInt)
 			throws SQLException, ConverterException {
 		return null;
 	}
 	@Override
-	public String[] toIomArray(AttributeDef iliEleAttr, Object sqlArray, EnumCodeMapper enumTypes)
+	public String[] toIomArray(AttributeDef iliEleAttr, Object sqlArray, boolean isEnumInt)
 			throws SQLException, ConverterException {
 		return null;
 	}

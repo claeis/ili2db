@@ -72,14 +72,12 @@ import ch.interlis.iox_j.wkb.Wkb2iox;
 
 public class PostgisColumnConverter extends AbstractWKBColumnConverter {
 	private boolean strokeArcs=true;
-	private boolean createEnumColAsItfCode=false;
     private JsonGenerator jg=null;
     private TransferDescription td=null;
 	@Override
 	public void setup(Connection conn, Settings config) {
 		super.setup(conn,config);
 		strokeArcs=Config.STROKE_ARCS_ENABLE.equals(Config.getStrokeArcs(config));
-		createEnumColAsItfCode=Config.CREATE_ENUMCOL_AS_ITFCODE_YES.equals(config.getValue(Config.CREATE_ENUMCOL_AS_ITFCODE));
 	}
 	
 	@Override
@@ -270,7 +268,7 @@ public class PostgisColumnConverter extends AbstractWKBColumnConverter {
 			return null;
 		}
 		@Override
-		public Object fromIomArray(ch.interlis.ili2c.metamodel.AttributeDef attr,String[] iomValues,EnumCodeMapper enumTypes) throws SQLException, ConverterException {
+		public Object fromIomArray(ch.interlis.ili2c.metamodel.AttributeDef attr,String[] iomValues,boolean isEnumInt) throws SQLException, ConverterException {
 			java.sql.Array array=null;
 			ch.interlis.ili2c.metamodel.Type type=attr.getDomainResolvingAliases();
 			if (attr.isDomainBoolean()) {
@@ -338,14 +336,14 @@ public class PostgisColumnConverter extends AbstractWKBColumnConverter {
 				}
 				array=conn.createArrayOf("TIME", values);
 			}else if(type instanceof EnumerationType){
-				if(createEnumColAsItfCode){
-					Integer values[]=new Integer[iomValues.length];
+				if(isEnumInt){
+					Long values[]=new Long[iomValues.length];
 					for(int i=0;i<values.length;i++) {
 						String iomValue=iomValues[i];
-						int itfCode=Integer.parseInt(enumTypes.mapXtfCode2ItfCode((EnumerationType)type, iomValue));
+						long itfCode=Long.parseLong(iomValue);
 						values[i]=itfCode;
 					}
-					array=conn.createArrayOf("INTEGER", values);
+					array=conn.createArrayOf("BIGINT", values);
 				}else {
 					array=conn.createArrayOf("VARCHAR", iomValues);
 				}
@@ -498,7 +496,7 @@ public class PostgisColumnConverter extends AbstractWKBColumnConverter {
 	    return s;
 	}
 	@Override
-	public String[] toIomArray(ch.interlis.ili2c.metamodel.AttributeDef attr,Object sqlArray,EnumCodeMapper enumTypes) throws SQLException, ConverterException {
+	public String[] toIomArray(ch.interlis.ili2c.metamodel.AttributeDef attr,Object sqlArray,boolean isEnumInt) throws SQLException, ConverterException {
 		java.sql.Array array=(java.sql.Array)sqlArray;
 		String[] ret=null;
 		ch.interlis.ili2c.metamodel.Type type=attr.getDomainResolvingAliases();
@@ -556,11 +554,11 @@ public class PostgisColumnConverter extends AbstractWKBColumnConverter {
 				ret[i]=fmt.format(values[i]);
 			}
 		}else if(type instanceof EnumerationType){
-			if(createEnumColAsItfCode){
-				Integer values[]=(Integer[])array.getArray();
+			if(isEnumInt){
+				Long values[]=(Long[])array.getArray();
 				ret=new String[values.length];
 				for(int i=0;i<values.length;i++) {
-					ret[i]=enumTypes.mapItfCode2XtfCode((EnumerationType)type,values[i].toString());
+					ret[i]=values[i].toString();
 				}
 			}else {
 				ret=((String[])array.getArray());			}

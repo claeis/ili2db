@@ -103,7 +103,7 @@ public interface SqlColumnConverter {
 			int srid,
 			boolean is3D,double p)
 			throws java.sql.SQLException, ConverterException;
-	public abstract java.lang.Object fromIomArray(ch.interlis.ili2c.metamodel.AttributeDef iliEleAttr,String iomValues[],EnumCodeMapper enumTypes) throws java.sql.SQLException, ConverterException;
+	public abstract java.lang.Object fromIomArray(ch.interlis.ili2c.metamodel.AttributeDef iliEleAttr,String iomValues[],boolean isEnumInt) throws java.sql.SQLException, ConverterException;
 	public abstract IomObject toIomCoord(
 		Object geomobj,
 		String sqlAttrName,
@@ -138,7 +138,7 @@ public interface SqlColumnConverter {
 		throws java.sql.SQLException, ConverterException;
 	public String toIomBlob(Object obj)
 			throws java.sql.SQLException, ConverterException;
-	public String[] toIomArray(ch.interlis.ili2c.metamodel.AttributeDef iliEleAttr,Object sqlArray,EnumCodeMapper enumTypes) throws java.sql.SQLException, ConverterException;
+	public String[] toIomArray(ch.interlis.ili2c.metamodel.AttributeDef iliEleAttr,Object sqlArray,boolean isEnumInt) throws java.sql.SQLException, ConverterException;
     public void setJsonNull(PreparedStatement ps, int valuei) throws SQLException;
     public String getInsertValueWrapperJson(String sqlColName);
     public String getSelectValueWrapperJson(String sqlColName);

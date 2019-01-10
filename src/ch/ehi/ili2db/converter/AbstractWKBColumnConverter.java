@@ -380,12 +380,12 @@ public abstract class AbstractWKBColumnConverter implements SqlColumnConverter {
 		throw new UnsupportedOperationException();
 	}
 	@Override
-	public Object fromIomArray(AttributeDef iliEleAttr, String[] iomValues, EnumCodeMapper enumTypes)
+	public Object fromIomArray(AttributeDef iliEleAttr, String[] iomValues, boolean isEnumInt)
 			throws SQLException, ConverterException {
 		throw new UnsupportedOperationException();
 	}
 	@Override
-	public String[] toIomArray(AttributeDef iliEleAttr, Object sqlArray, EnumCodeMapper enumTypes)
+	public String[] toIomArray(AttributeDef iliEleAttr, Object sqlArray, boolean isEnumInt)
 			throws SQLException, ConverterException {
 		throw new UnsupportedOperationException();
 	}

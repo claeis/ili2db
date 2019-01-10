@@ -653,7 +653,26 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 	                             try{
 	                                 Table valueStructType = ((CompositionType) type).getComponentType();
 	                                 String valueStructQname=valueStructType.getScopedName(null);
-	                                 String iomArray[]=geomConv.toIomArray(attrMapping.getValueAttr(),dbValue,enumTypes);
+	                                 String iomArray[]=geomConv.toIomArray(attrMapping.getValueAttr(),dbValue,createEnumColAsItfCode || Config.CREATE_ENUM_DEFS_MULTI_WITH_ID.equals(createEnumTable));
+	                                 Type arrayElementType=attrMapping.getValueAttr().getDomainResolvingAliases();
+	                                 if((arrayElementType instanceof EnumerationType) && !attrMapping.getValueAttr().isDomainBoolean()) {
+	                                     if(createEnumColAsItfCode) {
+	                                         String xtfCode[]=new String[iomArray.length];
+	                                         for(int i=0;i<iomArray.length;i++) {
+	                                             xtfCode[i]=enumTypes.mapItfCode2XtfCode((EnumerationType)arrayElementType,iomArray[i]);
+	                                         }
+	                                         iomArray=xtfCode;
+	                                     }else if(Config.CREATE_ENUM_DEFS_MULTI_WITH_ID.equals(createEnumTable)){
+                                             String xtfCode[]=new String[iomArray.length];
+                                             for(int i=0;i<iomArray.length;i++) {
+                                                 xtfCode[i]=mapEnumValue(attrMapping.getValueAttr(),Long.parseLong(iomArray[i]));
+                                             }
+                                             iomArray=xtfCode;
+	                                     }
+	                                 }else {
+	                                     
+	                                 }
+	                                 
 	                                 for(int elei=0;elei<iomArray.length;elei++){
 	                                     IomObject iomValueStruct=new Iom_jObject(valueStructQname,null); 
 	                                     iomValueStruct.setattrvalue(attrMapping.getValueAttr().getName(), iomArray[elei]);

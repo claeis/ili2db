@@ -952,13 +952,21 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 						 int valuec= classAttr==null ? 0 : iomObj.getattrvaluecount(attrName);
 						 String iomArray[]=new String[valuec];
 						 ArrayMapping attrMapping=arrayAttrs.getMapping(tableAttr);
+						 Type arrayElementType=attrMapping.getValueAttr().getDomainResolvingAliases();
 						 for(int elei=0;elei<valuec;elei++) {
 							 IomObject iomValue=iomObj.getattrobj(attrName,elei);
 							 String value=iomValue.getattrvalue(attrMapping.getValueAttr().getName());
+							 if((arrayElementType instanceof EnumerationType) && !attrMapping.getValueAttr().isDomainBoolean()) {
+							     if(createEnumColAsItfCode) {
+	                                 value=enumTypes.mapXtfCode2ItfCode((EnumerationType)arrayElementType, value);
+							     }else if(Config.CREATE_ENUM_DEFS_MULTI_WITH_ID.equals(createEnumTable)) {
+							         value=Long.toString(mapEnumValue(attrMapping.getValueAttr(),value));
+							     }
+							 }
 							 iomArray[elei]=value;
 						 }
 						 if(iomArray.length>0){
-							 Object geomObj = geomConv.fromIomArray(attrMapping.getValueAttr(),iomArray,enumTypes);
+							 Object geomObj = geomConv.fromIomArray(attrMapping.getValueAttr(),iomArray,createEnumColAsItfCode || Config.CREATE_ENUM_DEFS_MULTI_WITH_ID.equals(createEnumTable));
 							ps.setObject(valuei,geomObj);
 						 }else{
 							geomConv.setArrayNull(ps,valuei);

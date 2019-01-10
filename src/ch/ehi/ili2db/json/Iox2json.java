@@ -11,6 +11,7 @@ import ch.interlis.ili2c.metamodel.AssociationDef;
 import ch.interlis.ili2c.metamodel.AttributeDef;
 import ch.interlis.ili2c.metamodel.CompositionType;
 import ch.interlis.ili2c.metamodel.CoordType;
+import ch.interlis.ili2c.metamodel.EnumerationType;
 import ch.interlis.ili2c.metamodel.LineType;
 import ch.interlis.ili2c.metamodel.NumericType;
 import ch.interlis.ili2c.metamodel.ObjectType;
@@ -222,7 +223,7 @@ public class Iox2json {
         }
         jg.writeEndObject();
     }
-    public static void writeArray(JsonGenerator jg, String[] iomValues, AttributeDef attr) throws IOException {
+    public static void writeArray(JsonGenerator jg, String[] iomValues, AttributeDef attr,boolean isEnumInt) throws IOException {
         jg.writeStartArray();
         for(String value:iomValues) {
             if(value==null) {
@@ -237,6 +238,8 @@ public class Iox2json {
                 }else{
                     Type type=attr.getDomainResolvingAll();
                     if(type instanceof NumericType) {
+                        jg.writeNumber(value);
+                    }else if((type instanceof EnumerationType) && isEnumInt) {
                         jg.writeNumber(value);
                     }else {
                         jg.writeString(value);

@@ -385,7 +385,7 @@ public class GpkgColumnConverter extends AbstractWKBColumnConverter {
             stmt.setNull(parameterIndex, Types.VARCHAR);
 	    }
 	    @Override
-	    public Object fromIomArray(AttributeDef iliEleAttr, String[] iomValues, EnumCodeMapper enumTypes)
+	    public Object fromIomArray(AttributeDef iliEleAttr, String[] iomValues, boolean isEnumInt)
 	            throws SQLException, ConverterException {
             JsonFactory jsonF = new JsonFactory();
             JsonGenerator jg=null;
@@ -393,7 +393,7 @@ public class GpkgColumnConverter extends AbstractWKBColumnConverter {
             
             try {
                 jg = jsonF.createJsonGenerator(out);
-                Iox2json.writeArray(jg, iomValues,iliEleAttr);
+                Iox2json.writeArray(jg, iomValues,iliEleAttr,isEnumInt);
                 jg.flush();
                 jg.close();
                 jg=null;
@@ -403,7 +403,7 @@ public class GpkgColumnConverter extends AbstractWKBColumnConverter {
             return out.toString();
 	    }
 	    @Override
-	    public String[] toIomArray(AttributeDef iliEleAttr, Object sqlArray, EnumCodeMapper enumTypes)
+	    public String[] toIomArray(AttributeDef iliEleAttr, Object sqlArray, boolean isEnumInt)
 	            throws SQLException, ConverterException {
             JsonFactory jsonF = new JsonFactory();
             java.io.StringReader in=new java.io.StringReader((String)sqlArray);
