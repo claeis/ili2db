@@ -228,7 +228,9 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
                       generator.flush();
                       jsonExtensions = out.toString();
                       generator.close();
-                  }catch (IOException e){}
+                  }catch (IOException e){
+                      throw new Ili2dbException(e);
+                  }
 
                   // Add t_type possible values to meta-info table
                   metaInfo.setColumnInfo(dbTable.getName().getName(),

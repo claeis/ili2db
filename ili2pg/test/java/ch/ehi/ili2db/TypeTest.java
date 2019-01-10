@@ -136,7 +136,6 @@ public class TypeTest {
             Config config = initConfig(data.getPath(), DBSCHEMA,data.getPath()+".log");
             config.setFunction(Config.FC_SCHEMAIMPORT);
             config.setCreateTypeConstraint(true);
-            config.setCreateMetaInfo(true);
 
             Ili2db.readSettingsFromDb(config);
             Ili2db.run(config, null);

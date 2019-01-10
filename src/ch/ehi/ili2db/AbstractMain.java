@@ -422,7 +422,7 @@ public abstract class AbstractMain {
 					System.err.println("--t_id_Name name       change name of t_id column ("+DbNames.T_ID_COL+")");
 					System.err.println("--idSeqMin minValue    sets the minimum value of the id sequence generator.");
 					System.err.println("--idSeqMax maxValue    sets the maximum value of the id sequence generator.");
-					System.err.println("--createTypeDiscriminator  generate always a type discriminaor colum.");
+					System.err.println("--createTypeDiscriminator  generate always a type discriminator column.");
 					System.err.println("--structWithGenericRef  generate one generic reference to parent in struct tables.");
 					System.err.println("--disableNameOptimization disable use of unqualified class name as table name.");
 					System.err.println("--nameByTopic          use topic+class name as table name.");
@@ -448,7 +448,7 @@ public abstract class AbstractMain {
 					System.err.println("--translation translatedModel=originModel assigns a translated model to its orginal language equivalent.");
 					System.err.println("--createMetaInfo       Create aditional ili-model information.");
 					System.err.println("--iliMetaAttrs file    Import meta-attributes from a .toml file (Requires --createMetaInfo)");
-                    System.err.println("--createTypeConstraints   Create CHECK constraint on t_type columns (Requires --createMetaInfo)");
+                    System.err.println("--createTypeConstraints   Create CHECK constraint on t_type columns.");
 					printSpecificOptions();
 					System.err.println("--proxy host           proxy server to access model repositories.");
 					System.err.println("--proxyPort port       proxy port to access model repositories.");
