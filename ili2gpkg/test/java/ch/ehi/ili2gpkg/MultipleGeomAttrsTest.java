@@ -141,18 +141,24 @@ public class MultipleGeomAttrsTest {
         {
             // t_ili2db_attrname
             String [][] expectedValues=new String[][] {
-                {"MultipleGeomAttrs1.Topic.ClassA.line", "line", "classa_line", null},
-                {"MultipleGeomAttrs1.Topic.ClassA.coord", "coord", "classa", null},
-                {"MultipleGeomAttrs1.Topic.ClassA.surface", "surface", "classa_surface", null},
+                {"MultipleGeomAttrsExtendedClass.Topic.ClassA.coord", "coord", "classap", null},
+                {"MultipleGeomAttrsExtendedClass.Topic.ClassA.line",  "line",  "classa_line",null},
+                {"MultipleGeomAttrsExtendedClass.Topic.ClassA.surface",   "surface",   "classa_surface",null},
+                {"MultipleGeomAttrsExtendedClass.Topic.ClassA.coord", "coord", "classa",null},
+                {"MultipleGeomAttrsExtendedClass.Topic.ClassA.surface",   "surface",   "classap_surface",null},
+                {"MultipleGeomAttrsExtendedClass.Topic.ClassA.line",  "line",  "classap_line", null}                
             };
             Ili2dbAssert.assertAttrNameTableFromGpkg(jdbcConnection, expectedValues);
         }
         {
             // t_ili2db_trafo
             String [][] expectedValues=new String[][] {
-                {"MultipleGeomAttrs1.Topic.ClassA.line:21781(MultipleGeomAttrs1.Topic.ClassA)",  "ch.ehi.ili2db.secondaryTable",  "classa_line"},
-                {"MultipleGeomAttrs1.Topic.ClassA.surface:21781(MultipleGeomAttrs1.Topic.ClassA)",    "ch.ehi.ili2db.secondaryTable",  "classa_surface"},
-                {"MultipleGeomAttrs1.Topic.ClassA",   "ch.ehi.ili2db.inheritance", "newClass"},
+                {"MultipleGeomAttrsExtendedClass.Topic.ClassA.line:21781(MultipleGeomAttrsExtendedClass.Topic.ClassA)", "ch.ehi.ili2db.secondaryTable",  "classa_line"},
+                {"MultipleGeomAttrsExtendedClass.Topic.ClassA.surface:21781(MultipleGeomAttrsExtendedClass.Topic.ClassA)",  "ch.ehi.ili2db.secondaryTable",  "classa_surface"},
+                {"MultipleGeomAttrsExtendedClass.Topic.ClassA",   "ch.ehi.ili2db.inheritance", "newAndSubClass"},
+                {"MultipleGeomAttrsExtendedClass.Topic.ClassA.line:21781(MultipleGeomAttrsExtendedClass.Topic.ClassAp)",    "ch.ehi.ili2db.secondaryTable",  "classap_line"},
+                {"MultipleGeomAttrsExtendedClass.Topic.ClassA.surface:21781(MultipleGeomAttrsExtendedClass.Topic.ClassAp)", "ch.ehi.ili2db.secondaryTable",  "classap_surface"},
+                {"MultipleGeomAttrsExtendedClass.Topic.ClassAp",  "ch.ehi.ili2db.inheritance", "newAndSubClass"}                
             };
             Ili2dbAssert.assertTrafoTableFromGpkg(jdbcConnection, expectedValues);
         }
