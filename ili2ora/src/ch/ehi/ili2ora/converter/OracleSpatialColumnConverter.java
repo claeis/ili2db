@@ -1,12 +1,8 @@
 package ch.ehi.ili2ora.converter;
 
-import java.sql.Blob;
 import java.sql.Connection;
-import java.sql.Date;
 import java.sql.SQLException;
-
 import com.vividsolutions.jts.io.ParseException;
-
 import ch.ehi.basics.settings.Settings;
 import ch.ehi.ili2db.converter.AbstractWKBColumnConverter;
 import ch.ehi.ili2db.converter.ConverterException;
@@ -27,26 +23,27 @@ public class OracleSpatialColumnConverter extends AbstractWKBColumnConverter {
 	}
 	
 	@Override
-	public String getInsertValueWrapperCoord(String wkfValue,int srid) {
-		return "SDO_UTIL.FROM_WKBGEOMETRY("+wkfValue+")";
-	}
-	@Override
-	public String getInsertValueWrapperPolyline(String wkfValue,int srid) {
-		return "SDO_UTIL.FROM_WKBGEOMETRY("+wkfValue+")";
-	}
-	@Override
-	public String getInsertValueWrapperSurface(String wkfValue,int srid) {
-		return "SDO_UTIL.FROM_WKBGEOMETRY("+wkfValue+")";
-	}
-	@Override
-	public String getInsertValueWrapperMultiSurface(String wkfValue,int srid) {
-		return "SDO_UTIL.FROM_WKBGEOMETRY("+wkfValue+")";
-	}
-	
-	@Override
-	public String getSelectValueWrapperCoord(String dbNativeValue) {
-		return "SDO_UTIL.TO_WKBGEOMETRY(" + dbNativeValue + ")";
-	}
+    public String getInsertValueWrapperCoord(String wkfValue,int srid) {
+        return "ILI2ORA_SDO_GEOMETRY(" + wkfValue + ", "+ Integer.toString(srid)  + ")";
+    }
+    @Override
+    public String getInsertValueWrapperPolyline(String wkfValue,int srid) {
+        return "ILI2ORA_SDO_GEOMETRY(" + wkfValue + ", "+ Integer.toString(srid)  + ")";
+    }
+    @Override
+    public String getInsertValueWrapperSurface(String wkfValue,int srid) {
+        return "ILI2ORA_SDO_GEOMETRY(" + wkfValue + ", "+ Integer.toString(srid)  + ")";
+    }
+    @Override
+    public String getInsertValueWrapperMultiSurface(String wkfValue,int srid) {
+        return "ILI2ORA_SDO_GEOMETRY(" + wkfValue + ", "+ Integer.toString(srid)  + ")";
+    }
+    
+    @Override
+    public String getInsertValueWrapperMultiPolyline(String wkfValue,int srid) {
+        return "ILI2ORA_SDO_GEOMETRY(" + wkfValue + ", "+ Integer.toString(srid)  + ")";
+    }
+    
 	@Override
 	public String getSelectValueWrapperPolyline(String dbNativeValue) {
 		return "SDO_UTIL.TO_WKBGEOMETRY(" + dbNativeValue + ")";
