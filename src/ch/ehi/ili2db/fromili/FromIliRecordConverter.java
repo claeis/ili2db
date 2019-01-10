@@ -720,13 +720,13 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
                 metaInfo.setColumnInfo(dbTable.getName().getName(), null, dbCol.value.getName(), DbExtMetaInfo.TAG_COL_FOREIGNKEY, dbCol.value.getReferencedTable().getName());
 			}
 			if(dbCol.value instanceof DbColGeometry) {
-				metaInfo.setColumnInfo(dbTable.getName().getName(), subType, sqlColName, DbExtMetaInfo.TAG_COL_C1_MIN, Double.toString(((DbColGeometry) dbCol.value).getMin1()));
-				metaInfo.setColumnInfo(dbTable.getName().getName(), subType, sqlColName, DbExtMetaInfo.TAG_COL_C1_MAX, Double.toString(((DbColGeometry) dbCol.value).getMax1()));
-				metaInfo.setColumnInfo(dbTable.getName().getName(), subType, sqlColName, DbExtMetaInfo.TAG_COL_C2_MIN, Double.toString(((DbColGeometry) dbCol.value).getMin2()));
-				metaInfo.setColumnInfo(dbTable.getName().getName(), subType, sqlColName, DbExtMetaInfo.TAG_COL_C2_MAX, Double.toString(((DbColGeometry) dbCol.value).getMax2()));
+				metaInfo.setColumnInfo(dbTable.getName().getName(), subType, sqlColName, DbExtMetaInfo.TAG_COL_C1_MIN, ((DbColGeometry) dbCol.value).getMin1AsString());
+				metaInfo.setColumnInfo(dbTable.getName().getName(), subType, sqlColName, DbExtMetaInfo.TAG_COL_C1_MAX, ((DbColGeometry) dbCol.value).getMax1AsString());
+				metaInfo.setColumnInfo(dbTable.getName().getName(), subType, sqlColName, DbExtMetaInfo.TAG_COL_C2_MIN, ((DbColGeometry) dbCol.value).getMin2AsString());
+				metaInfo.setColumnInfo(dbTable.getName().getName(), subType, sqlColName, DbExtMetaInfo.TAG_COL_C2_MAX, ((DbColGeometry) dbCol.value).getMax2AsString());
 				if(((DbColGeometry) dbCol.value).getDimension()==3) {
-					metaInfo.setColumnInfo(dbTable.getName().getName(), subType, sqlColName, DbExtMetaInfo.TAG_COL_C3_MIN, Double.toString(((DbColGeometry) dbCol.value).getMin3()));
-					metaInfo.setColumnInfo(dbTable.getName().getName(), subType, sqlColName, DbExtMetaInfo.TAG_COL_C3_MAX, Double.toString(((DbColGeometry) dbCol.value).getMax3()));
+					metaInfo.setColumnInfo(dbTable.getName().getName(), subType, sqlColName, DbExtMetaInfo.TAG_COL_C3_MIN, ((DbColGeometry) dbCol.value).getMin3AsString());
+					metaInfo.setColumnInfo(dbTable.getName().getName(), subType, sqlColName, DbExtMetaInfo.TAG_COL_C3_MAX, ((DbColGeometry) dbCol.value).getMax3AsString());
 				}
 				metaInfo.setColumnInfo(dbTable.getName().getName(), subType, sqlColName, DbExtMetaInfo.TAG_COL_GEOMTYPE, getIli2DbGeomType(((DbColGeometry) dbCol.value).getType()));
 				metaInfo.setColumnInfo(dbTable.getName().getName(), subType, sqlColName, DbExtMetaInfo.TAG_COL_SRID, ((DbColGeometry) dbCol.value).getSrsId());

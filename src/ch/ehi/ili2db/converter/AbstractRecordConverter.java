@@ -268,13 +268,13 @@ public class AbstractRecordConverter {
 			return;
 		}
 		if(((NumericType)dimv[0]).getMinimum()!=null){
-			ret.setMin1(((NumericType)dimv[0]).getMinimum().doubleValue());
-			ret.setMax1(((NumericType)dimv[0]).getMaximum().doubleValue());
-			ret.setMin2(((NumericType)dimv[1]).getMinimum().doubleValue());
-			ret.setMax2(((NumericType)dimv[1]).getMaximum().doubleValue());
+			ret.setMin1(((NumericType)dimv[0]).getMinimum().toString());
+			ret.setMax1(((NumericType)dimv[0]).getMaximum().toString());
+			ret.setMin2(((NumericType)dimv[1]).getMinimum().toString());
+			ret.setMax2(((NumericType)dimv[1]).getMaximum().toString());
 			if(dimv.length==3){
-				ret.setMin3(((NumericType)dimv[2]).getMinimum().doubleValue());
-				ret.setMax3(((NumericType)dimv[2]).getMaximum().doubleValue());
+				ret.setMin3(((NumericType)dimv[2]).getMinimum().toString());
+				ret.setMax3(((NumericType)dimv[2]).getMaximum().toString());
 			}
 		}
 	}

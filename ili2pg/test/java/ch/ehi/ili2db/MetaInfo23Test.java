@@ -105,6 +105,15 @@ public class MetaInfo23Test {
 						Assert.assertEquals("m",rs.getString(1));
 						Assert.assertEquals(null,rs.getString(2));
 					}
+                    {
+                        selPrepStmt.setString(1, "classc");
+                        selPrepStmt.setString(2, "geom");
+                        selPrepStmt.setString(3, DbExtMetaInfo.TAG_COL_C1_MAX);
+                        ResultSet rs = selPrepStmt.executeQuery();
+                        Assert.assertTrue(rs.next());
+                        Assert.assertEquals("2870000.000",rs.getString(1));
+                        Assert.assertEquals(null,rs.getString(2));
+                    }
 					
 		            {
 		                // t_ili2db_attrname
@@ -121,7 +130,8 @@ public class MetaInfo23Test {
 		                    {"MetaInfo23.TestA.ClassA1.numa", "numa", "classa1", null},   
 		                    {"MetaInfo23.TestA.ClassA1.textb", "textb", "classa1", null},   
 		                    {"MetaInfo23.TestA.ClassA1.numb", "numb", "classa1", null},   
-		                    {"MetaInfo23.TestA.ClassA1.structa", "classa1_structa", "structa1", "classa1"}
+		                    {"MetaInfo23.TestA.ClassA1.structa", "classa1_structa", "structa1", "classa1"},
+		                    {"MetaInfo23.TestA.ClassC.geom","geom","classc",null}
 		                };
 		                Ili2dbAssert.assertAttrNameTable(jdbcConnection,expectedValues, DBSCHEMA);
 		            }
@@ -135,7 +145,8 @@ public class MetaInfo23Test {
 		                    {"CatalogueObjects_V1.Catalogues.Item", "ch.ehi.ili2db.inheritance", "subClass"},
 		                    {"MetaInfo23.TestA.StructA1", "ch.ehi.ili2db.inheritance", "newClass"},
 		                    {"MetaInfo23.TestA.ClassB1",  "ch.ehi.ili2db.inheritance", "newClass"},
-		                    {"MetaInfo23.TestA.ClassA1",  "ch.ehi.ili2db.inheritance", "newClass"}
+		                    {"MetaInfo23.TestA.ClassA1",  "ch.ehi.ili2db.inheritance", "newClass"},
+		                    {"MetaInfo23.TestA.ClassC","ch.ehi.ili2db.inheritance","newClass"}
 		                };
 		                Ili2dbAssert.assertTrafoTable(jdbcConnection,expectedValues, DBSCHEMA);
 		            }
