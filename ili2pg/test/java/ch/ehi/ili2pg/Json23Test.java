@@ -17,6 +17,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import ch.ehi.basics.logging.EhiLogger;
+import ch.ehi.ili2db.Ili2dbAssert;
 import ch.ehi.ili2db.base.DbUrlConverter;
 import ch.ehi.ili2db.base.Ili2db;
 import ch.ehi.ili2db.base.Ili2dbException;
@@ -84,6 +85,32 @@ public class Json23Test {
         config.setInheritanceTrafo(null);
         config.setJsonTrafo(Config.JSON_TRAFO_COALESCE);
         Ili2db.run(config,null);
+        
+        // asserts
+        {
+            {
+                // t_ili2db_attrname
+                String [][] expectedValues=new String[][] {
+                    {"Json23.TestA.Farbe.r",  "r", "farbe" ,null },
+                    {"Json23.TestA.Auto.Farben",  "farben",    "auto",null },  
+                    {"Json23.TestA.Farbe.active", "active",    "farbe" ,null },
+                    {"Json23.TestA.Farbe.g",  "g", "farbe" ,null },
+                    {"Json23.TestA.Farbe.name",   "aname", "farbe" ,null },
+                    {"Json23.TestA.Farbe.b",  "b", "farbe"                 ,null },        
+                };
+                Ili2dbAssert.assertAttrNameTable(jdbcConnection, expectedValues,DBSCHEMA);
+            }
+            {
+                // t_ili2db_trafo
+                String [][] expectedValues=new String[][] {
+                    {"Json23.TestA.Farbe",    "ch.ehi.ili2db.inheritance", "newClass"},
+                    {"Json23.TestA.Auto.Farben",  "ch.ehi.ili2db.jsonTrafo",   "coalesce"},
+                    {"Json23.TestA.Auto", "ch.ehi.ili2db.inheritance", "newClass"}
+                };
+                Ili2dbAssert.assertTrafoTable(jdbcConnection, expectedValues,DBSCHEMA);
+            }
+            
+        }
     }
     
     

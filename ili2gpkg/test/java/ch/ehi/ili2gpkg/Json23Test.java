@@ -12,6 +12,7 @@ import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
 import ch.ehi.basics.logging.EhiLogger;
+import ch.ehi.ili2db.Ili2dbAssert;
 import ch.ehi.ili2db.base.Ili2db;
 import ch.ehi.ili2db.gui.Config;
 import ch.ehi.sqlgen.DbUtility;
@@ -79,6 +80,27 @@ public class Json23Test {
 	        try{
 	            jdbcConnection=DriverManager.getConnection(config.getDburl(),null,null);
 	            java.sql.Statement stmt=jdbcConnection.createStatement();
+                {
+                    // t_ili2db_attrname
+                    String [][] expectedValues=new String[][] {
+                        {"Json23.TestA.Farbe.r",  "r", "farbe" ,null },
+                        {"Json23.TestA.Auto.Farben",  "farben",    "auto",null },  
+                        {"Json23.TestA.Farbe.active", "active",    "farbe" ,null },
+                        {"Json23.TestA.Farbe.g",  "g", "farbe" ,null },
+                        {"Json23.TestA.Farbe.name",   "aname", "farbe" ,null },
+                        {"Json23.TestA.Farbe.b",  "b", "farbe"                 ,null },        
+                    };
+                    Ili2dbAssert.assertAttrNameTableFromGpkg(jdbcConnection, expectedValues);
+                }
+                {
+                    // t_ili2db_trafo
+                    String [][] expectedValues=new String[][] {
+                        {"Json23.TestA.Farbe",    "ch.ehi.ili2db.inheritance", "newClass"},
+                        {"Json23.TestA.Auto.Farben",  "ch.ehi.ili2db.jsonTrafo",   "coalesce"},
+                        {"Json23.TestA.Auto", "ch.ehi.ili2db.inheritance", "newClass"}
+                    };
+                    Ili2dbAssert.assertTrafoTableFromGpkg(jdbcConnection, expectedValues);
+                }
 	            rs=stmt.executeQuery("SELECT mime_type FROM gpkg_data_columns WHERE table_name='auto' AND column_name='farben'");
 	            assertTrue(rs.next());
 	            assertEquals("application/json",rs.getString(1));

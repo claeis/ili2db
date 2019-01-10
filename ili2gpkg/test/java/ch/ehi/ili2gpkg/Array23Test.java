@@ -17,6 +17,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import ch.ehi.basics.logging.EhiLogger;
+import ch.ehi.ili2db.Ili2dbAssert;
 import ch.ehi.ili2db.base.DbUrlConverter;
 import ch.ehi.ili2db.base.Ili2db;
 import ch.ehi.ili2db.base.Ili2dbException;
@@ -91,6 +92,55 @@ public class Array23Test {
 	        try{
 	            jdbcConnection = DriverManager.getConnection("jdbc:sqlite:" + gpkgFileName, null, null);
 	            stmt=jdbcConnection.createStatement();
+	            {
+	                // t_ili2db_attrname
+	                String [][] expectedValues=new String[][] {
+	                    {"Array23.TestA.Binbox_.Value",   "avalue",    "binbox_",null},   
+	                    {"Array23.TestA.NumericDec_.Value",   "avalue",    "numericdec_",null},   
+	                    {"Array23.TestA.Datatypes.aBoolean",  "aboolean",  "datatypes" ,null},
+	                    {"Array23.TestA.Datatypes.aDate", "adate", "datatypes" ,null},
+	                    {"Array23.TestA.Xmlbox_.Value",   "avalue",    "xmlbox_"   ,null},
+	                    {"Array23.TestA.ADateTime_.Value",    "avalue",    "adatetime_"   ,null}, 
+	                    {"Array23.TestA.Farbe.Wert",  "wert",  "farbe" ,null},
+	                    {"Array23.TestA.Datatypes.numericInt",    "numericint",    "datatypes",null}, 
+	                    {"Array23.TestA.Datatypes.numericDec",    "numericdec",    "datatypes" ,null},
+	                    {"Array23.TestA.NumericInt_.Value",   "avalue",    "numericint_"   ,null},
+	                    {"Array23.TestA.Auto.Farben", "farben",    "auto"  ,null},
+	                    {"Array23.TestA.Datatypes.aDateTime", "adatetime", "datatypes",null}, 
+	                    {"Array23.TestA.AUuid_.Value",    "avalue",    "auuid_"    ,null},
+	                    {"Array23.TestA.Datatypes.aUuid", "auuid", "datatypes" ,null},
+	                    {"Array23.TestA.ABoolean_.Value", "avalue",    "aboolean_" ,null},
+	                    {"Array23.TestA.ADate_.Value",    "avalue",    "adate_"    ,null},
+	                    {"Array23.TestA.ATime_.Value",    "avalue",    "atime_"    ,null},
+	                    {"Array23.TestA.Datatypes.aTime", "atime", "datatypes" 	       ,null}         };
+	                Ili2dbAssert.assertAttrNameTableFromGpkg(jdbcConnection, expectedValues);
+	            }
+	            {
+	                // t_ili2db_trafo
+	                String [][] expectedValues=new String[][] {
+	                    {"Array23.TestA.Datatypes.aDate", "ch.ehi.ili2db.arrayTrafo",  "coalesce"},
+	                    {"Array23.TestA.AUuid_",  "ch.ehi.ili2db.inheritance", "newClass"},
+	                    {"Array23.TestA.Auto.Farben", "ch.ehi.ili2db.arrayTrafo",  "coalesce"},
+	                    {"Array23.TestA.NumericInt_", "ch.ehi.ili2db.inheritance", "newClass"},
+	                    {"Array23.TestA.Datatypes",   "ch.ehi.ili2db.inheritance", "newClass"},
+	                    {"Array23.TestA.Binbox_", "ch.ehi.ili2db.inheritance", "newClass"},
+	                    {"Array23.TestA.ATime_",  "ch.ehi.ili2db.inheritance", "newClass"},
+	                    {"Array23.TestA.Datatypes.aTime", "ch.ehi.ili2db.arrayTrafo",  "coalesce"},
+	                    {"Array23.TestA.Datatypes.aBoolean",  "ch.ehi.ili2db.arrayTrafo",  "coalesce"},
+	                    {"Array23.TestA.ABoolean_",   "ch.ehi.ili2db.inheritance", "newClass"},
+	                    {"Array23.TestA.Datatypes.aUuid", "ch.ehi.ili2db.arrayTrafo",  "coalesce"},
+	                    {"Array23.TestA.Datatypes.aDateTime", "ch.ehi.ili2db.arrayTrafo",  "coalesce"},
+	                    {"Array23.TestA.NumericDec_", "ch.ehi.ili2db.inheritance", "newClass"},
+	                    {"Array23.TestA.ADate_",  "ch.ehi.ili2db.inheritance", "newClass"},
+	                    {"Array23.TestA.Datatypes.numericInt",    "ch.ehi.ili2db.arrayTrafo",  "coalesce"},
+	                    {"Array23.TestA.ADateTime_",  "ch.ehi.ili2db.inheritance", "newClass"},
+	                    {"Array23.TestA.Farbe",   "ch.ehi.ili2db.inheritance", "newClass"},
+	                    {"Array23.TestA.Auto",    "ch.ehi.ili2db.inheritance", "newClass"},
+	                    {"Array23.TestA.Xmlbox_", "ch.ehi.ili2db.inheritance", "newClass"},
+	                    {"Array23.TestA.Datatypes.numericDec",    "ch.ehi.ili2db.arrayTrafo",  "coalesce"}	                    
+	                };
+	                Ili2dbAssert.assertTrafoTableFromGpkg(jdbcConnection, expectedValues);
+	            }
 	            
 	        }finally {
 	            if(stmt!=null) {
