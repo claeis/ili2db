@@ -1,7 +1,7 @@
 package ch.ehi.ili2gpkg;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
+
 import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -27,13 +27,14 @@ public class SimpleGpkgTest {
 	
 	private static final String TEST_OUT="test/data/Simple/";
     private static final String GPKGFILENAME=TEST_OUT+"Simple.gpkg";
+    private static final String DBURL="jdbc:sqlite:"+GPKGFILENAME;
 	private Connection jdbcConnection=null;
 	
 	public Config initConfig(String xtfFilename,String logfile) {
 		Config config=new Config();
 		new ch.ehi.ili2gpkg.GpkgMain().initConfig(config);
 		config.setDbfile(GPKGFILENAME);
-		config.setDburl("jdbc:sqlite:"+GPKGFILENAME);
+		config.setDburl(DBURL);
 		if(logfile!=null){
 			config.setLogfile(logfile);
 		}
@@ -98,9 +99,8 @@ public class SimpleGpkgTest {
         
         // verify generated script
         {
-            String dburl="jdbc:sqlite:"+GPKGFILENAME;
             config.setDbfile(GPKGFILENAME);
-            config.setDburl(dburl);
+            config.setDburl(DBURL);
             // create gpkg file
             File gpkgFile=new File(GPKGFILENAME);
             if(gpkgFile.exists()){ 
@@ -109,8 +109,8 @@ public class SimpleGpkgTest {
             }
             
             GpkgMapping gpkgMapping=new GpkgMapping();
-            gpkgMapping.preConnect(dburl,null,null,config);
-            jdbcConnection = DriverManager.getConnection(dburl, null, null);
+            gpkgMapping.preConnect(DBURL,null,null,config);
+            jdbcConnection = DriverManager.getConnection(DBURL, null, null);
             gpkgMapping.postConnect(jdbcConnection, config);
             
             // execute generated script
@@ -431,6 +431,57 @@ public class SimpleGpkgTest {
 			assertTrue(reader.read() instanceof EndTransferEvent);
 		}
 	}
+    @Test
+    public void validateXtf() throws Exception
+    {
+        {
+            importXtf();
+        }
+        //EhiLogger.getInstance().setTraceFilter(false);
+        LogCollector logCollector = new LogCollector();
+        EhiLogger.getInstance().addListener(logCollector);
+        File log=new File(TEST_OUT,"Simple23a-validate.log");
+        Config config=initConfig(null,log.getPath());
+        config.setFunction(Config.FC_VALIDATE);
+        config.setModels("Simple23");
+        Ili2db.readSettingsFromDb(config);
+        try{
+            Ili2db.run(config,null);
+        }catch(Exception ex){
+            EhiLogger.logError(ex);
+            Assert.fail();
+        }
+    }
+    @Test
+    public void validateXtfFail() throws Exception
+    {
+        {
+            importXtf();
+        }
+        // modify data in db so that validation fails
+        {
+            jdbcConnection = DriverManager.getConnection(DBURL, null, null);
+            java.sql.Statement stmt=jdbcConnection.createStatement();
+            stmt.executeUpdate("UPDATE classa1 SET attr1='text with newline\n' WHERE t_ili_tid='o1'");
+            stmt.close();
+            stmt=null;
+        }
+        //EhiLogger.getInstance().setTraceFilter(false);
+        LogCollector logCollector = new LogCollector();
+        EhiLogger.getInstance().addListener(logCollector);
+        File log=new File(TEST_OUT,"Simple23a-validate.log");
+        Config config=initConfig(null,log.getPath());
+        config.setFunction(Config.FC_VALIDATE);
+        config.setModels("Simple23");
+        Ili2db.readSettingsFromDb(config);
+        try{
+            Ili2db.run(config,null);
+            fail();
+        }catch(Exception ex){
+            assertEquals(1,logCollector.getErrs().size());
+            assertEquals("Attribute attr1 must not contain control characters",logCollector.getErrs().get(0).getEventMsg());
+        }
+    }
 	
 	@Test
 	public void exportXtfStruct() throws Exception

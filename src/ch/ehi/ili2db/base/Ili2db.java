@@ -202,6 +202,8 @@ public class Ili2db {
 	{
 		if(config.getFunction()==Config.FC_IMPORT){
 			runImport(config,appHome);
+        }else if(config.getFunction()==Config.FC_VALIDATE){
+            runExport(config,appHome,Config.FC_VALIDATE);
 		}else if(config.getFunction()==Config.FC_UPDATE){
 			runUpdate(config,appHome,Config.FC_UPDATE);
 		}else if(config.getFunction()==Config.FC_REPLACE){
@@ -209,7 +211,7 @@ public class Ili2db {
 		}else if(config.getFunction()==Config.FC_DELETE){
 			runUpdate(config,appHome,Config.FC_DELETE);
 		}else if(config.getFunction()==Config.FC_EXPORT){
-			runExport(config,appHome);
+			runExport(config,appHome,Config.FC_EXPORT);
 		}else if(config.getFunction()==Config.FC_SCHEMAIMPORT || config.getFunction()==Config.FC_SCRIPT){
 			runSchemaImport(config,appHome);
 		}else{
@@ -247,6 +249,10 @@ public class Ili2db {
 				if(config.getDatasetName()==null){
 					throw new Ili2dbException("no datasetName given");
 				}
+			}else if(function==Config.FC_VALIDATE){
+                if(config.getDatasetName()==null){
+                    throw new Ili2dbException("no datasetName given");
+                }
 			}else{
 				if(inputFilename==null){
 					throw new Ili2dbException("no xtf-file given");
@@ -401,14 +407,16 @@ public class Ili2db {
 				  }
 			  }
 
-			  // create db schema
-				if(function==Config.FC_IMPORT){
-				  	if(config.getDbschema()!=null){
-				  		if(!DbUtility.schemaExists(conn, config.getDbschema())){
-					  		DbUtility.createSchema(conn, config.getDbschema());
-				  		}
-				  	}
-				}
+                // create db schema
+                if (function == Config.FC_IMPORT) {
+                    if (config.getDbschema() != null) {
+                        if (!DbUtility.schemaExists(conn, config.getDbschema())) {
+                            DbUtility.createSchema(conn, config.getDbschema());
+                        }
+                    }
+                }
+				
+                // verify dataset/basket settings
 				if(function==Config.FC_DELETE){
 					boolean createBasketCol=config.BASKET_HANDLING_READWRITE.equals(config.getBasketHandling());
 					if(!createBasketCol){
@@ -421,8 +429,7 @@ public class Ili2db {
 						throw new Ili2dbException("dataset <"+datasetName+"> doesn't exist");
 					}
 					getBasketSqlIdsFromDatasetId(datasetId,modelv,conn,config);
-				}
-				if(function==Config.FC_IMPORT){
+				}else if(function==Config.FC_IMPORT){
 					String datasetName=config.getDatasetName();
 					if(datasetName!=null){
 						if(DbUtility.tableExists(conn,new DbTableName(config.getDbschema(),DbNames.DATASETS_TAB))){
@@ -822,7 +829,7 @@ public class Ili2db {
 		java.util.Collections.sort(statv,new java.util.Comparator<BasketStat>(){
 			@Override
 			public int compare(BasketStat b0, BasketStat b1) {
-				int ret=b0.getFile().compareTo(b1.getFile());
+				int ret=b0.getDatasource().compareTo(b1.getDatasource());
 				if(ret==0){
 					ret=b0.getTopic().compareTo(b1.getTopic());
 					if(ret==0){
@@ -835,9 +842,9 @@ public class Ili2db {
 		});
 		for(BasketStat basketStat:statv){
 			if(isIli1){
-				EhiLogger.logState(basketStat.getFile()+": "+basketStat.getTopic());
+				EhiLogger.logState(basketStat.getDatasource()+": "+basketStat.getTopic());
 			}else{
-				EhiLogger.logState(basketStat.getFile()+": "+basketStat.getTopic()+" BID="+basketStat.getBasketId());
+				EhiLogger.logState(basketStat.getDatasource()+": "+basketStat.getTopic()+" BID="+basketStat.getBasketId());
 			}
 			HashMap<String, ClassStat> objStat=basketStat.getObjStat();
 			ArrayList<String> classv=new ArrayList<String>(objStat.keySet());
@@ -1337,9 +1344,13 @@ public class Ili2db {
 			}		  	
 		}
 	}
-	public static void runExport(Config config,String appHome)
+	public static void runExport(Config config,String appHome,int function)
 	throws Ili2dbException
 	{
+	    String functionName="export";
+        if(function==Config.FC_VALIDATE) {
+            functionName="validate";
+        }
 		ch.ehi.basics.logging.FileListener logfile=null;
 		if(config.getLogfile()!=null){
 			logfile=new FileLogger(new java.io.File(config.getLogfile()));
@@ -1354,8 +1365,10 @@ public class Ili2db {
 			logGeneralInfo(config);
 			
 			String xtffile=config.getXtffile();
-			if(xtffile==null){
-				throw new Ili2dbException("no xtf-file given");
+			if(function!=Config.FC_VALIDATE) {
+	            if(xtffile==null){
+	                throw new Ili2dbException("no xtf-file given");
+	            }
 			}
 			String modeldir=config.getModeldir();
 			if(modeldir==null){
@@ -1431,10 +1444,10 @@ public class Ili2db {
 			// run pre-script 
 			if(config.getPreScript()!=null){
 				try {
-					EhiLogger.logState("run export pre-script...");
+					EhiLogger.logState("run "+functionName+" pre-script...");
 					DbUtility.executeSqlScript(conn, new java.io.FileReader(config.getPreScript()));
 				} catch (FileNotFoundException e) {
-					throw new Ili2dbException("export pre-script statements failed",e);
+					throw new Ili2dbException(functionName+" pre-script statements failed",e);
 				}
 			}
 			  
@@ -1444,7 +1457,7 @@ public class Ili2db {
 			long basketSqlIds[]=null;
 			if(datasetName!=null){
 				if(!createBasketCol){
-					throw new Ili2dbException("dataset wise export requires column "+DbNames.T_BASKET_COL);
+					throw new Ili2dbException("dataset wise "+functionName+" requires column "+DbNames.T_BASKET_COL);
 				}
 				// map datasetName to sqlBasketId and modelnames
 				String datasetNames[] = datasetName.split(ch.interlis.ili2c.Main.MODELS_SEPARATOR);
@@ -1467,7 +1480,7 @@ public class Ili2db {
 				}
 			}else if(baskets!=null){
 				if(!createBasketCol){
-					throw new Ili2dbException("basket wise export requires column "+DbNames.T_BASKET_COL);
+					throw new Ili2dbException("basket wise "+functionName+" requires column "+DbNames.T_BASKET_COL);
 				}
 				// BIDs
 				String basketids[]=baskets.split(ch.interlis.ili2c.Main.MODELS_SEPARATOR);
@@ -1475,7 +1488,7 @@ public class Ili2db {
 				basketSqlIds=getBasketSqlIdsFromBID(basketids,modelv,conn,config);
 			}else if(topics!=null){
 				if(!createBasketCol){
-					throw new Ili2dbException("topic wise export requires column "+DbNames.T_BASKET_COL);
+					throw new Ili2dbException("topic wise "+functionName+" requires column "+DbNames.T_BASKET_COL);
 				}
 				// TOPICs
 				String topicv[]=topics.split(ch.interlis.ili2c.Main.MODELS_SEPARATOR);
@@ -1576,16 +1589,18 @@ public class Ili2db {
 
 			  // process xtf files
 			  EhiLogger.logState("process data...");
-			  EhiLogger.logState("data <"+xtffile+">");
+			  if(function!=Config.FC_VALIDATE) {
+	              EhiLogger.logState("data <"+xtffile+">");
+			  }
 				Map<Long,BasketStat> stat=new HashMap<Long,BasketStat>();
 				ch.ehi.basics.logging.ErrorTracker errs=new ch.ehi.basics.logging.ErrorTracker();
 				EhiLogger.getInstance().addListener(errs);
-				transferToXtf(conn,xtffile,mapping,td,geomConverter,config.getSender(),config,exportModelnames,basketSqlIds,stat,trafoConfig,class2wrapper);
+				transferToXtf(conn,function,xtffile,customMapping,mapping,td,geomConverter,config.getSender(),config,exportModelnames,basketSqlIds,stat,trafoConfig,class2wrapper);
 				if (errs.hasSeenErrors()) {
-					throw new Ili2dbException("...export failed");
+					throw new Ili2dbException("..."+functionName+" failed");
 				} else {
 					logStatistics(td.getIli1Format() != null, stat);
-					EhiLogger.logState("...export done");
+					EhiLogger.logState("..."+functionName+" done");
 				}
 			  EhiLogger.getInstance().removeListener(errs);
 			  
@@ -1593,9 +1608,9 @@ public class Ili2db {
 				if(config.getPostScript()!=null){
 					try {
 						DbUtility.executeSqlScript(conn, new java.io.FileReader(config.getPostScript()));
-						EhiLogger.logState("run export post-script...");
+						EhiLogger.logState("run "+functionName+" post-script...");
 					} catch (FileNotFoundException e) {
-						throw new Ili2dbException("export post-script statements failed",e);
+						throw new Ili2dbException(functionName+" post-script statements failed",e);
 					}
 				}
 				
@@ -2099,7 +2114,7 @@ public class Ili2db {
 	}
 	/** transfer data from database to xml file
 	*/
-	static private void transferToXtf(Connection conn,String xtffile,NameMapping ili2sqlName,TransferDescription td
+	static private void transferToXtf(Connection conn,int function,String xtffile,CustomMapping customMapping,NameMapping ili2sqlName,TransferDescription td
 			,SqlColumnConverter geomConv
 			,String sender
 			,Config config
@@ -2109,42 +2124,51 @@ public class Ili2db {
 			,TrafoConfig trafoConfig
 			,Viewable2TableMapping class2wrapper){	
 
-		java.io.File outfile=new java.io.File(xtffile);
-		IoxWriter ioxWriter=null;
-		try{
-			if(Config.ILIGML20.equals(config.getTransferFileFormat())){
-				ioxWriter=new Iligml20Writer(outfile,td);
-			}else{
-				String ext=ch.ehi.basics.view.GenericFileFilter.getFileExtension(xtffile).toLowerCase();
-				if(config.isItfTransferfile()){
-					if(!config.getDoItfLineTables()){
-						ioxWriter=new ItfWriter2(outfile,td);
-					}else{
-						ioxWriter=new ItfWriter(outfile,td);
-					}
-					config.setValue(ch.interlis.iox_j.validator.Validator.CONFIG_DO_ITF_OIDPERTABLE, ch.interlis.iox_j.validator.Validator.CONFIG_DO_ITF_OIDPERTABLE_DO);
-				}else if(ext!=null && ext.equals("gml")){
-					ioxWriter=new Iligml10Writer(outfile,td);
-				}else{
-					ioxWriter=new XtfWriter(outfile,td);
-				}
-			}
-			TransferToXtf trsfr=new TransferToXtf(ili2sqlName,td,conn,geomConv,config,trafoConfig,class2wrapper);
-			trsfr.doit(outfile.getName(),ioxWriter,sender,exportParamModelnames,basketSqlIds,stat);
-			//trsfr.doitJava();
-			ioxWriter.flush();
-		}catch(ch.interlis.iox.IoxException ex){
-			EhiLogger.logError("failed to write xml output",ex);
-		}finally{
-			if(ioxWriter!=null){
-				try{
-					ioxWriter.close();
-				}catch(ch.interlis.iox.IoxException ex){
-					EhiLogger.logError("failed to close xml output",ex);
-				}
-			}
-			ioxWriter=null;
-		}
+	    if(function==Config.FC_VALIDATE) {
+	        try{
+	            TransferToXtf trsfr=new TransferToXtf(ili2sqlName,td,conn,geomConv,config,trafoConfig,class2wrapper);
+	            trsfr.doit(function,customMapping.shortenConnectUrl4Log(config.getDburl()),null,sender,exportParamModelnames,basketSqlIds,stat);
+	        }catch(ch.interlis.iox.IoxException ex){
+	            EhiLogger.logError("failed to validate data from db",ex);
+	        }
+	    }else {
+	        java.io.File outfile=new java.io.File(xtffile);
+	        IoxWriter ioxWriter=null;
+	        try{
+	            if(Config.ILIGML20.equals(config.getTransferFileFormat())){
+	                ioxWriter=new Iligml20Writer(outfile,td);
+	            }else{
+	                String ext=ch.ehi.basics.view.GenericFileFilter.getFileExtension(xtffile).toLowerCase();
+	                if(config.isItfTransferfile()){
+	                    if(!config.getDoItfLineTables()){
+	                        ioxWriter=new ItfWriter2(outfile,td);
+	                    }else{
+	                        ioxWriter=new ItfWriter(outfile,td);
+	                    }
+	                    config.setValue(ch.interlis.iox_j.validator.Validator.CONFIG_DO_ITF_OIDPERTABLE, ch.interlis.iox_j.validator.Validator.CONFIG_DO_ITF_OIDPERTABLE_DO);
+	                }else if(ext!=null && ext.equals("gml")){
+	                    ioxWriter=new Iligml10Writer(outfile,td);
+	                }else{
+	                    ioxWriter=new XtfWriter(outfile,td);
+	                }
+	            }
+	            TransferToXtf trsfr=new TransferToXtf(ili2sqlName,td,conn,geomConv,config,trafoConfig,class2wrapper);
+	            trsfr.doit(function,outfile.getName(),ioxWriter,sender,exportParamModelnames,basketSqlIds,stat);
+	            //trsfr.doitJava();
+	            ioxWriter.flush();
+	        }catch(ch.interlis.iox.IoxException ex){
+	            EhiLogger.logError("failed to write xml output",ex);
+	        }finally{
+	            if(ioxWriter!=null){
+	                try{
+	                    ioxWriter.close();
+	                }catch(ch.interlis.iox.IoxException ex){
+	                    EhiLogger.logError("failed to close xml output",ex);
+	                }
+	            }
+	            ioxWriter=null;
+	        }
+	    }
 	}
 	
 	static private HashSet getModelNames(ArrayList modelv){

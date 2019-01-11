@@ -120,6 +120,9 @@ public abstract class AbstractMain {
 			}else if(arg.equals("--gui")){
 				doGui=true;
 				argi++;
+            }else if(arg.equals("--validate")){
+                config.setFunction(Config.FC_VALIDATE);
+                argi++;
 			}else if(arg.equals("--import")){
 				config.setFunction(Config.FC_IMPORT);
 				argi++;

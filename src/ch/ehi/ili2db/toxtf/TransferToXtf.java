@@ -142,13 +142,13 @@ public class TransferToXtf {
 		this.config=config;
 
 	}
-	public void doit(String filename,IoxWriter iomFile,String sender,String exportParamModelnames[],long basketSqlIds[],Map<Long,BasketStat> stat)
+	public void doit(int function,String datasource,IoxWriter iomFile,String sender,String exportParamModelnames[],long basketSqlIds[],Map<Long,BasketStat> stat)
 	throws ch.interlis.iox.IoxException
 	{
 		this.basketStat=stat;
 		boolean referrs=false;
 		
-		if(iomFile instanceof ItfWriter){
+		if(function!=Config.FC_VALIDATE && iomFile instanceof ItfWriter){
 			config.setValue(ch.interlis.iox_j.validator.Validator.CONFIG_DO_ITF_LINETABLES, ch.interlis.iox_j.validator.Validator.CONFIG_DO_ITF_LINETABLES_DO);
 		}
 		if(config.getVer4_translation() || config.getIli1Translation()!=null){
@@ -180,16 +180,18 @@ public class TransferToXtf {
 			modelConfig.setConfigValue(ValidationConfig.PARAMETER, ValidationConfig.ALLOW_ONLY_MULTIPLICITY_REDUCTION, config.isOnlyMultiplicityReduction()?ValidationConfig.ON:null);
 			IoxLogging errHandler=new ch.interlis.iox_j.logging.Log2EhiLogger();
 			LogEventFactory errFactory=new LogEventFactory();
-			errFactory.setDataSource(filename);
+            errFactory.setDataSource(datasource);
 			if(iomFile instanceof Iligml10Writer || iomFile instanceof Iligml20Writer){
 				String crsAuthority=config.getDefaultSrsAuthority();
 				String crsCode=config.getDefaultSrsCode();
 				if(crsAuthority!=null && crsCode!=null){
-					if(iomFile instanceof Iligml10Writer){
-						((Iligml10Writer)iomFile).setDefaultCrs(crsAuthority+":"+crsCode);
-					}else if(iomFile instanceof Iligml20Writer){
-						((Iligml20Writer)iomFile).setDefaultCrs(crsAuthority+":"+crsCode);
-					}
+				    if(function!=Config.FC_VALIDATE) {
+	                    if(iomFile instanceof Iligml10Writer){
+	                        ((Iligml10Writer)iomFile).setDefaultCrs(crsAuthority+":"+crsCode);
+	                    }else if(iomFile instanceof Iligml20Writer){
+	                        ((Iligml20Writer)iomFile).setDefaultCrs(crsAuthority+":"+crsCode);
+	                    }
+				    }
 				}
 			}
 			PipelinePool pipelinePool=new PipelinePool();
@@ -206,7 +208,9 @@ public class TransferToXtf {
 			startEvent=(StartTransferEvent) exportBaseModelFilter.filter(startEvent);
 		}
 		if(validator!=null)validator.validate(startEvent);
-		iomFile.write(startEvent);
+        if(function!=Config.FC_VALIDATE) {
+            iomFile.write(startEvent);
+        }
 		if(basketSqlIds!=null){
 			for(long basketSqlId : basketSqlIds){
 				StringBuilder basketXtfId=new StringBuilder();
@@ -222,7 +226,7 @@ public class TransferToXtf {
 				    if(basketXtfId.length()==0) {
 				        basketXtfId.append(basketSqlId);
 				    }
-					referrs = referrs || doBasket(filename, iomFile, topic,basketSqlId,basketXtfId.toString(),genericDomains);				
+					referrs = referrs || doBasket(function,datasource, iomFile, topic,basketSqlId,basketXtfId.toString(),genericDomains);				
 				}
 			}
 			
@@ -245,7 +249,7 @@ public class TransferToXtf {
 			                    EhiLogger.logState("domain assignments <"+config.getDomainAssignments()+">");
 			                    genericDomains=Xtf24Reader.parseDomains(config.getDomainAssignments());
 			                }
-							referrs = referrs || doBasket(filename, iomFile, topic,null,topic.getScopedName(null),genericDomains);
+							referrs = referrs || doBasket(function,datasource, iomFile, topic,null,topic.getScopedName(null),genericDomains);
 					}
 				}
 			  }
@@ -262,7 +266,9 @@ public class TransferToXtf {
 			endEvent=(EndTransferEvent) exportBaseModelFilter.filter(endEvent);
 		}
 		if(validator!=null)validator.validate(endEvent);
-		iomFile.write(endEvent);
+		if(function!=Config.FC_VALIDATE) {
+	        iomFile.write(endEvent);
+		}
 		if(validator!=null)validator.close();
 		if(languageFilter!=null){
 			languageFilter.close();
@@ -406,7 +412,7 @@ public class TransferToXtf {
 			  }
 		return null;
 	}
-	private boolean doBasket(String filename, IoxWriter iomFile,Topic topic,Long basketSqlId,String basketXtfId,Map<String,String> genericDomains) throws IoxException {
+	private boolean doBasket(int function,String datasource, IoxWriter iomFile,Topic topic,Long basketSqlId,String basketXtfId,Map<String,String> genericDomains) throws IoxException {
 		Model model=(Model) topic.getContainer();
 		boolean referrs=false;
 		StartBasketEvent iomBasket=null;
@@ -455,10 +461,12 @@ public class TransferToXtf {
 							iomBasket=(StartBasketEvent) exportBaseModelFilter.filter(iomBasket);
 						}
 						if(validator!=null)validator.validate(iomBasket);
-						iomFile.write(iomBasket);
+						if(function!=Config.FC_VALIDATE) {
+	                        iomFile.write(iomBasket);
+						}
 					}
                     EhiLogger.logState(aclass.getScopedName(null)+"...");
-					dumpObject(iomFile,aclass,iomTargetClass,basketSqlId,genericDomains);
+					dumpObject(function,iomFile,aclass,iomTargetClass,basketSqlId,genericDomains);
 				}else{
 					// skip it
 					EhiLogger.traceUnusualState(aclass.getScopedName(null)+"...skipped; no table "+sqlName+" in db");
@@ -484,9 +492,11 @@ public class TransferToXtf {
 								iomBasket=(StartBasketEvent) exportBaseModelFilter.filter(iomBasket);
 							}
 							if(validator!=null)validator.validate(iomBasket);
-							iomFile.write(iomBasket);
+							if(function!=Config.FC_VALIDATE) {
+	                            iomFile.write(iomBasket);
+							}
 						}
-						dumpItfTableObject(iomFile,attr,epsgCode,basketSqlId);
+						dumpItfTableObject(function,iomFile,attr,epsgCode,basketSqlId);
 					}else{
 						// skip it
 						EhiLogger.traceUnusualState(attr.getScopedName(null)+"...skipped; no table "+sqlName+" in db");
@@ -530,7 +540,9 @@ public class TransferToXtf {
 					}
 					if(objEvent!=null) {
 						if(validator!=null)validator.validate(objEvent);
-						iomFile.write(objEvent);
+						if(function!=Config.FC_VALIDATE) {
+	                        iomFile.write(objEvent);
+						}
 					}
 				}
 			}
@@ -542,8 +554,10 @@ public class TransferToXtf {
 				endBasket=(EndBasketEvent) exportBaseModelFilter.filter(endBasket);
 			}
 			if(validator!=null)validator.validate(endBasket);
-			iomFile.write(endBasket);
-			saveObjStat(iomBasket.getBid(),basketSqlId,filename,iomBasket.getType());
+			if(function!=Config.FC_VALIDATE) {
+	            iomFile.write(endBasket);
+			}
+            saveObjStat(iomBasket.getBid(),basketSqlId,datasource,iomBasket.getType());
 		}
 		return referrs;
 	}
@@ -739,7 +753,7 @@ public class TransferToXtf {
 	/** dumps all struct values of a given struct attr.
 	 * @throws IoxException 
 	 */
-	private void dumpStructs(StructWrapper structWrapper,FixIomObjectRefs fixref,Map<String,String> genericDomains,boolean isCrsAlternate) throws IoxException
+	private void dumpStructs(int function,StructWrapper structWrapper,FixIomObjectRefs fixref,Map<String,String> genericDomains,boolean isCrsAlternate) throws IoxException
 	{
 		Viewable baseClass=((CompositionType)structWrapper.getParentAttr().getDomain()).getComponentType();
 
@@ -796,7 +810,7 @@ public class TransferToXtf {
 		            iomTargetClass = getCrsMappedToAlternateOrSame(aclass);
 		        }
 			}
-			dumpObjHelper(null,aclass,iomTargetClass,null,genericDomains,fixref,structWrapper,structelev);
+			dumpObjHelper(function,null,aclass,iomTargetClass,null,genericDomains,fixref,structWrapper,structelev);
 		}
 	}
     private Viewable getCrsMappedToAlternateOrSame(Viewable aclass) {
@@ -809,7 +823,7 @@ public class TransferToXtf {
         }
         return aclass;
     }
-	private void dumpItfTableObject(IoxWriter out,AttributeDef attr,Integer epsgCode,Long basketSqlId)
+	private void dumpItfTableObject(int function,IoxWriter out,AttributeDef attr,Integer epsgCode,Long basketSqlId)
 	{
 		String stmt=createItfLineTableQueryStmt(attr,epsgCode,basketSqlId,geomConv);
 		String sqlTabName=ili2sqlName.mapItfGeometryAsTable((Viewable)attr.getContainer(),attr,epsgCode);
@@ -898,7 +912,9 @@ public class TransferToXtf {
 						objEvent=(ObjectEvent) exportBaseModelFilter.filter(objEvent);
 					}
 					if(validator!=null)validator.validate(objEvent);
-					out.write(objEvent);
+					if(function!=Config.FC_VALIDATE) {
+	                    out.write(objEvent);
+					}
 				}
 			}
 			}catch(java.sql.SQLException ex){		
@@ -925,13 +941,13 @@ public class TransferToXtf {
 	}
 	/** dumps all objects of a given class.
 	 */
-	private void dumpObject(IoxWriter out,Viewable aclass,Viewable iomTargetClass,Long basketSqlId,Map<String,String> genericDomains)
+	private void dumpObject(int function,IoxWriter out,Viewable aclass,Viewable iomTargetClass,Long basketSqlId,Map<String,String> genericDomains)
 	{
-		dumpObjHelper(out,aclass,iomTargetClass,basketSqlId,genericDomains,null,null,null);
+		dumpObjHelper(function,out,aclass,iomTargetClass,basketSqlId,genericDomains,null,null,null);
 	}
 	/** helper to dump all objects/structvalues of a given class/structure.
 	 */
-	private void dumpObjHelper(IoxWriter out,Viewable aclass,Viewable iomTargetClass,Long basketSqlId,Map<String,String> genericDomains,FixIomObjectRefs fixref,StructWrapper structWrapper,HashMap<String,IomObject> structelev)
+	private void dumpObjHelper(int function,IoxWriter out,Viewable aclass,Viewable iomTargetClass,Long basketSqlId,Map<String,String> genericDomains,FixIomObjectRefs fixref,StructWrapper structWrapper,HashMap<String,IomObject> structelev)
 	{
 		String stmt=recConv.createQueryStmt(aclass,basketSqlId,structWrapper);
 		ViewableWrapper aclassWrapper=class2wrapper.get(aclass);
@@ -957,7 +973,7 @@ public class TransferToXtf {
 				// collect structvalues
 				while(!structQueue.isEmpty()){
 					StructWrapper wrapper=(StructWrapper)structQueue.remove(0);
-					dumpStructs(wrapper,fixref,genericDomains,aclass==iomTargetClass);
+					dumpStructs(function,wrapper,fixref,genericDomains,aclass==iomTargetClass);
 				}
 				if(structWrapper==null){
 					if(!fixref.needsFixing() || out instanceof ItfWriter){
@@ -973,7 +989,9 @@ public class TransferToXtf {
 						if(objEvent!=null) {
 							if(validator!=null)validator.validate(objEvent);
 							if(out!=null){
-								out.write(objEvent);
+							    if(function!=Config.FC_VALIDATE) {
+	                                out.write(objEvent);
+							    }
 							}
 						}
 					}else{
@@ -1419,10 +1437,10 @@ public class TransferToXtf {
 			objStat.put(tag,stat);
 		}
 	}
-	private void saveObjStat(String iliBasketId,Long basketSqlId,String file,String topic)
+	private void saveObjStat(String iliBasketId,Long basketSqlId,String datasource,String topic)
 	{
 		// save it for later output to log
-		basketStat.put(basketSqlId,new BasketStat(file,topic,iliBasketId,objStat));
+		basketStat.put(basketSqlId,new BasketStat(datasource,topic,iliBasketId,objStat));
 		// setup new collection
 		objStat=new HashMap<String, ClassStat>();
 	}

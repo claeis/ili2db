@@ -136,6 +136,7 @@ public class Config extends Settings {
 	static public final int FC_DELETE=5;
 	static public final int FC_REPLACE=6;
     static public final int FC_SCRIPT=7;
+    static public final int FC_VALIDATE=8;
 	public String getIdGenerator() {
 		return idGenerator;
 	}

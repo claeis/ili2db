@@ -62,5 +62,9 @@ public class CustomMappingNull implements CustomMapping {
     public String shortenConnectUrl4IliCache(String url) {
         return url;
     }
+    @Override
+    public String shortenConnectUrl4Log(String url) {
+        return url;
+    }
 
 }
