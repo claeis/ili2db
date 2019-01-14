@@ -9,6 +9,7 @@ import org.junit.Test;
 
 import ch.ehi.basics.logging.EhiLogger;
 import ch.ehi.basics.logging.LogEvent;
+import ch.ehi.ili2db.LogCollector;
 import ch.ehi.ili2db.base.Ili2db;
 import ch.ehi.ili2db.gui.Config;
 
