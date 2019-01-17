@@ -78,7 +78,7 @@ public class Iox2jsonTest {
     public void readBag() throws Exception
     {
         JsonFactory jsonF = new JsonFactory();
-        java.io.StringReader in=new java.io.StringReader("{\"@type\":\"Model.Topic.StructA\",\"attrA\":[{\"@type\":\"Model.Topic.StructB\",\"attrB\":\"b1\"},{\"@type\":\"Model.Topic.StructB\",\"attrB\":\"b2\"}]}");
+        java.io.StringReader in=new java.io.StringReader("{\"attrA\":[{\"@type\":\"Model.Topic.StructB\",\"attrB\":\"b1\"},{\"@type\":\"Model.Topic.StructB\",\"attrB\":\"b2\"}],\"@type\":\"Model.Topic.StructA\"}");
         JsonParser jg = jsonF.createJsonParser(in);
         
         IomObject iomObj=Iox2json.readOneObject(jg);

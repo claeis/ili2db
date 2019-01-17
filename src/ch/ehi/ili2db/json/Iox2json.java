@@ -298,17 +298,41 @@ public class Iox2json {
             throw new IOException("unexpected json token "+current.toString()+"; '{' expected");
         }
         current = jg.nextToken();
-        IomObject ret=null;
+        IomObject ret=new Iom_jObject("TAG",null);
         while(current==JsonToken.FIELD_NAME) {
             String propName=jg.getCurrentName();
-            if(propName.equals(CONSISTENCY) || propName.equals(OPERATION) || propName.equals(ORDERPOS) || propName.equals(REF)  || propName.equals(REFBID)  || propName.equals(TID) || propName.equals(TYPE)) {
+            current = jg.nextToken();
+            String propValue=null;
+            if(current==JsonToken.VALUE_TRUE) {
+                propValue= "true";
+                current = jg.nextToken();
+            }else if(current==JsonToken.VALUE_FALSE) {
+                propValue= "false";
+                current = jg.nextToken();
+            }else if(current==JsonToken.VALUE_NULL) {
+                current = jg.nextToken();
+            }else if(current==JsonToken.VALUE_NUMBER_FLOAT || current==JsonToken.VALUE_NUMBER_INT || current==JsonToken.VALUE_STRING) {
+                propValue=jg.getValueAsString();
+                current = jg.nextToken();
+            }else if(current==JsonToken.START_OBJECT) {
+                IomObject structEle=readOneObject(jg);
+                ret.addattrobj(propName, structEle);
+            }else if(current==JsonToken.START_ARRAY) {
+                current = jg.nextToken();
+                while(current==JsonToken.START_OBJECT) {
+                    IomObject structEle=readOneObject(jg);
+                    ret.addattrobj(propName, structEle);
+                    current = jg.nextToken();
+                }
+                if(current!=JsonToken.END_ARRAY) {
+                    throw new IOException("unexpected json token "+jg.currentToken().toString()+"; ']' expected");
+                }
                 current = jg.nextToken();
             }else {
-                break;
+                throw new IOException("unexpected json token "+jg.currentToken().toString());
             }
-            if(current==JsonToken.VALUE_NUMBER_FLOAT || current==JsonToken.VALUE_NUMBER_INT || current==JsonToken.VALUE_STRING) {
-                String propValue=jg.getValueAsString();
-                current = jg.nextToken();
+            if(propValue!=null) {
+                
                 if (propName.equals(CONSISTENCY)) {
                     if(propValue.equals(CONSISTENCY_ADAPTED)) {
                         ret.setobjectconsistency(IomConstants.IOM_ADAPTED);
@@ -336,42 +360,10 @@ public class Iox2json {
                 } else if (propName.equals(TID)) {
                     ret.setobjectoid(propValue);
                 } else if (propName.equals(TYPE)) {
-                    ret=new Iom_jObject(propValue,null);
+                    ret.setobjecttag(propValue);
+                }else {
+                    ret.setattrvalue(propName, propValue);
                 }
-            }else if(current==JsonToken.VALUE_NULL) {
-                current = jg.nextToken();
-            }
-        }
-        while(current==JsonToken.FIELD_NAME) {
-            String propName=jg.getCurrentName();
-            current = jg.nextToken();
-            if(current==JsonToken.VALUE_TRUE) {
-                ret.setattrvalue(propName, "true");
-                current = jg.nextToken();
-            }else if(current==JsonToken.VALUE_FALSE) {
-                ret.setattrvalue(propName, "false");
-                current = jg.nextToken();
-            }else if(current==JsonToken.VALUE_NULL) {
-                current = jg.nextToken();
-            }else if(current==JsonToken.VALUE_NUMBER_FLOAT || current==JsonToken.VALUE_NUMBER_INT || current==JsonToken.VALUE_STRING) {
-                ret.setattrvalue(propName,jg.getValueAsString());
-                current = jg.nextToken();
-            }else if(current==JsonToken.START_OBJECT) {
-                IomObject structEle=readOneObject(jg);
-                ret.addattrobj(propName, structEle);
-            }else if(current==JsonToken.START_ARRAY) {
-                current = jg.nextToken();
-                while(current==JsonToken.START_OBJECT) {
-                    IomObject structEle=readOneObject(jg);
-                    ret.addattrobj(propName, structEle);
-                    current = jg.nextToken();
-                }
-                if(current!=JsonToken.END_ARRAY) {
-                    throw new IOException("unexpected json token "+jg.currentToken().toString()+"; ']' expected");
-                }
-                current = jg.nextToken();
-            }else {
-                throw new IOException("unexpected json token "+jg.currentToken().toString());
             }
         }
         if(current!=JsonToken.END_OBJECT) {
