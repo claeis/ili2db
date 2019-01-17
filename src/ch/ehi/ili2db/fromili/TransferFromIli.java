@@ -768,7 +768,7 @@ public class TransferFromIli {
 
 	}
 	
-	static public void addInheritanceTable(DbSchema schema,int sqlNameSize)
+	static public void addInheritanceTable(DbSchema schema,Config config)
 	{
 		DbTable tab=new DbTable();
 		tab.setName(new DbTableName(schema.getName(),DbNames.INHERIT_TAB));
@@ -776,7 +776,13 @@ public class TransferFromIli {
 		thisClass.setName(DbNames.INHERIT_TAB_THIS_COL);
 		thisClass.setNotNull(true);
 		thisClass.setPrimaryKey(true);
-		thisClass.setSize(1024);
+		int thisClassSize=1024;
+		try {
+		    thisClassSize=Integer.parseInt(config.getValue(Config.INHERIT_TAB_THIS_COLSIZE));
+		}catch(NumberFormatException e) {
+		    
+		}
+		thisClass.setSize(thisClassSize);
 		tab.addColumn(thisClass);
 		DbColVarchar baseClass=new DbColVarchar();
 		baseClass.setName(DbNames.INHERIT_TAB_BASE_COL);
@@ -1665,14 +1671,19 @@ public class TransferFromIli {
 			seq++;
 		}
 	}
-	static public void addTableMappingTable(ch.ehi.sqlgen.repository.DbSchema schema)
+	static public void addTableMappingTable(ch.ehi.sqlgen.repository.DbSchema schema,Config config)
 	{
 		ch.ehi.sqlgen.repository.DbTable tab=new ch.ehi.sqlgen.repository.DbTable();
 		tab.setName(new DbTableName(schema.getName(),DbNames.CLASSNAME_TAB));
 		ch.ehi.sqlgen.repository.DbColVarchar iliClassName=new ch.ehi.sqlgen.repository.DbColVarchar();
 		iliClassName.setName(DbNames.CLASSNAME_TAB_ILINAME_COL);
 		iliClassName.setNotNull(true);
-		iliClassName.setSize(1024);
+		int ilinameSize=1024;
+		try {
+		    ilinameSize=Integer.parseInt(config.getValue(Config.CLASSNAME_TAB_ILINAME_COLSIZE));
+		}catch(NumberFormatException e) {
+		}
+		iliClassName.setSize(ilinameSize);
 		iliClassName.setPrimaryKey(true);
 		tab.addColumn(iliClassName);
 		ch.ehi.sqlgen.repository.DbColVarchar sqlTableName=new ch.ehi.sqlgen.repository.DbColVarchar();
@@ -1682,7 +1693,7 @@ public class TransferFromIli {
 		tab.addColumn(sqlTableName);
 		schema.addTable(tab);
 	}
-	static public void addAttrMappingTable(ch.ehi.sqlgen.repository.DbSchema schema)
+	static public void addAttrMappingTable(ch.ehi.sqlgen.repository.DbSchema schema,Config config)
 	{
 		ch.ehi.sqlgen.repository.DbTable tab=new ch.ehi.sqlgen.repository.DbTable();
 		tab.setName(new DbTableName(schema.getName(),DbNames.ATTRNAME_TAB));
@@ -1694,12 +1705,22 @@ public class TransferFromIli {
 		ch.ehi.sqlgen.repository.DbColVarchar sqlnameCol=new ch.ehi.sqlgen.repository.DbColVarchar();
 		sqlnameCol.setName(DbNames.ATTRNAME_TAB_SQLNAME_COL);
 		sqlnameCol.setNotNull(true);
-		sqlnameCol.setSize(400); // 1024
+		int sqlnameColSize=1024;
+		try {
+		    sqlnameColSize=Integer.parseInt(config.getValue(Config.ATTRNAME_TAB_SQLNAME_COLSIZE));
+		}catch(NumberFormatException e) {
+		}
+		sqlnameCol.setSize(sqlnameColSize);
 		tab.addColumn(sqlnameCol);
 		ch.ehi.sqlgen.repository.DbColVarchar ownerCol=new ch.ehi.sqlgen.repository.DbColVarchar();
 		ownerCol.setName(DbNames.ATTRNAME_TAB_OWNER_COL);
 		ownerCol.setNotNull(true);
-		ownerCol.setSize(400); // 1024
+		int ownerColSize=1024;
+        try {
+            ownerColSize=Integer.parseInt(config.getValue(Config.ATTRNAME_TAB_OWNER_COLSIZE));
+        }catch(NumberFormatException e) {
+        }
+		ownerCol.setSize(ownerColSize);
 		tab.addColumn(ownerCol);
 		ch.ehi.sqlgen.repository.DbColVarchar targetCol=new ch.ehi.sqlgen.repository.DbColVarchar();
 		targetCol.setName(DbNames.ATTRNAME_TAB_TARGET_COL);

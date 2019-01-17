@@ -38,6 +38,10 @@ public class MysqlMain extends ch.ehi.ili2db.AbstractMain {
 		config.setIli2dbCustomStrategy(ch.ehi.ili2mysql.MysqlCustomStrategy.class.getName());
 		config.setUuidDefaultValue("uuid()");
         config.setValue(Config.MODELS_TAB_MODELNAME_COLSIZE, "400");
+        config.setValue(Config.ATTRNAME_TAB_SQLNAME_COLSIZE,"400");
+        config.setValue(Config.ATTRNAME_TAB_OWNER_COLSIZE,"400");
+        config.setValue(Config.CLASSNAME_TAB_ILINAME_COLSIZE,"766");
+        config.setValue(Config.INHERIT_TAB_THIS_COLSIZE,"766");
 	}
 	@Override
 	protected DbUrlConverter getDbUrlConverter() {

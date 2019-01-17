@@ -554,13 +554,13 @@ public class Ili2db {
 						trsfFromIli.addBasketsTable(schema);
 						trsfFromIli.addImportsTable(schema);
 
-						TransferFromIli.addInheritanceTable(schema,Integer.parseInt(config.getMaxSqlNameLength()));
+						TransferFromIli.addInheritanceTable(schema,config);
 						TransferFromIli.addSettingsTable(schema);
 						TransferFromIli.addTrafoConfigTable(schema);
 						TransferFromIli.addModelsTable(schema,config);
 						trsfFromIli.addEnumTable(schema);
-						TransferFromIli.addTableMappingTable(schema);
-						TransferFromIli.addAttrMappingTable(schema);
+						TransferFromIli.addTableMappingTable(schema,config);
+						TransferFromIli.addAttrMappingTable(schema,config);
 						DbExtMetaInfo.addMetaInfoTables(schema);
 						idGen.addMappingTable(schema);
 						
@@ -1155,13 +1155,13 @@ public class Ili2db {
 				if(!(conn instanceof GeodbConnection)){
 					trsfFromIli.addBasketsTable(schema);
 					trsfFromIli.addImportsTable(schema);
-					TransferFromIli.addInheritanceTable(schema,Integer.parseInt(config.getMaxSqlNameLength()));
+					TransferFromIli.addInheritanceTable(schema,config);
 					TransferFromIli.addSettingsTable(schema);
 					TransferFromIli.addTrafoConfigTable(schema);
 					TransferFromIli.addModelsTable(schema,config);
 					trsfFromIli.addEnumTable(schema);
-					TransferFromIli.addTableMappingTable(schema);
-					TransferFromIli.addAttrMappingTable(schema);
+					TransferFromIli.addTableMappingTable(schema,config);
+					TransferFromIli.addAttrMappingTable(schema,config);
 					DbExtMetaInfo.addMetaInfoTables(schema);
 					idGen.addMappingTable(schema);
 

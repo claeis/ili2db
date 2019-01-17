@@ -84,6 +84,10 @@ public class Config extends Settings {
 	public static final String USE_EPGS_IN_NAMES=PREFIX+".useEpsgInNames";
 	public static final String SRS_MODEL_ASSIGNMENT=PREFIX+".srsModelAssignment";
 	public static final String MODELS_TAB_MODELNAME_COLSIZE = PREFIX+".modelsTabModelnameColSize";
+    public static final String ATTRNAME_TAB_SQLNAME_COLSIZE = PREFIX+".attrTabSqlnameColSize";
+    public static final String ATTRNAME_TAB_OWNER_COLSIZE = PREFIX+".attrTabOwnerColSize";
+    public static final String CLASSNAME_TAB_ILINAME_COLSIZE = PREFIX+".classnameTabIlinameColSize";
+    public static final String INHERIT_TAB_THIS_COLSIZE = PREFIX+".inheritTabThisColSize";
 	public static final String CREATE_TYPE_CONSTRAINT=PREFIX+".createTypeConstraint";
 	private int function=FC_UNDEFINED;
 	private String dburl;
