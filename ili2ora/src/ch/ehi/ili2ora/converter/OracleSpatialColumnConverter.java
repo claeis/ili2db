@@ -1,5 +1,6 @@
 package ch.ehi.ili2ora.converter;
 
+import java.sql.Blob;
 import java.sql.Connection;
 import java.sql.SQLException;
 import com.vividsolutions.jts.io.ParseException;
@@ -21,8 +22,8 @@ public class OracleSpatialColumnConverter extends AbstractWKBColumnConverter {
 		super.setup(conn,config);
 		strokeArcs=Config.STROKE_ARCS_ENABLE.equals(Config.getStrokeArcs(config));
 	}
-	
-	@Override
+
+    @Override
     public String getInsertValueWrapperCoord(String wkfValue,int srid) {
         return "ILI2ORA_SDO_GEOMETRY(" + wkfValue + ", "+ Integer.toString(srid)  + ")";
     }
@@ -38,12 +39,14 @@ public class OracleSpatialColumnConverter extends AbstractWKBColumnConverter {
     public String getInsertValueWrapperMultiSurface(String wkfValue,int srid) {
         return "ILI2ORA_SDO_GEOMETRY(" + wkfValue + ", "+ Integer.toString(srid)  + ")";
     }
-    
     @Override
     public String getInsertValueWrapperMultiPolyline(String wkfValue,int srid) {
         return "ILI2ORA_SDO_GEOMETRY(" + wkfValue + ", "+ Integer.toString(srid)  + ")";
     }
-    
+    @Override
+    public String getSelectValueWrapperCoord(String dbNativeValue) {
+        return "SDO_UTIL.TO_WKBGEOMETRY(" + dbNativeValue + ")";
+    }
 	@Override
 	public String getSelectValueWrapperPolyline(String dbNativeValue) {
 		return "SDO_UTIL.TO_WKBGEOMETRY(" + dbNativeValue + ")";
@@ -56,7 +59,10 @@ public class OracleSpatialColumnConverter extends AbstractWKBColumnConverter {
 	public String getSelectValueWrapperMultiSurface(String dbNativeValue) {
 		return "SDO_UTIL.TO_WKBGEOMETRY(" + dbNativeValue + ")";
 	}
-	
+    @Override
+    public String getSelectValueWrapperMultiPolyline(String dbNativeValue) {
+        return "SDO_UTIL.TO_WKBGEOMETRY(" + dbNativeValue + ")";
+    }
 
     @Override
     public java.lang.Object fromIomSurface(
@@ -153,7 +159,9 @@ public class OracleSpatialColumnConverter extends AbstractWKBColumnConverter {
         String sqlAttrName,
         boolean is3D)
     throws SQLException, ConverterException {
-        byte bv[]=(byte [])geomobj;
+        Blob geom = (Blob) geomobj;
+        int blobLenght = (int) geom.length();
+        byte bv[]= geom.getBytes(1, blobLenght);
         Wkb2iox conv=new Wkb2iox();
         try {
             return conv.read(bv);
@@ -167,7 +175,9 @@ public class OracleSpatialColumnConverter extends AbstractWKBColumnConverter {
         String sqlAttrName,
         boolean is3D)
     throws SQLException, ConverterException {
-        byte bv[]=(byte [])geomobj;
+        Blob geom = (Blob) geomobj;
+        int blobLenght = (int) geom.length();
+        byte bv[]= geom.getBytes(1, blobLenght);
         Wkb2iox conv=new Wkb2iox();
         try {
             return conv.read(bv);
@@ -181,7 +191,9 @@ public class OracleSpatialColumnConverter extends AbstractWKBColumnConverter {
         String sqlAttrName,
         boolean is3D)
     throws SQLException, ConverterException {
-        byte bv[]=(byte [])geomobj;
+        Blob geom = (Blob) geomobj;
+        int blobLenght = (int) geom.length();
+        byte bv[]= geom.getBytes(1, blobLenght);
         Wkb2iox conv=new Wkb2iox();
         try {
             return conv.read(bv);
@@ -189,13 +201,35 @@ public class OracleSpatialColumnConverter extends AbstractWKBColumnConverter {
             throw new ConverterException(e);
         }
     }
+
+    @Override
+    public IomObject toIomCoord(
+        Object geomobj,
+        String sqlAttrName,
+        boolean is3D)
+    throws SQLException, ConverterException {
+
+        Blob geom = (Blob) geomobj;
+        int blobLenght = (int) geom.length();
+        byte bv[]= geom.getBytes(1, blobLenght);
+
+        Wkb2iox conv=new Wkb2iox();
+        try {
+            return conv.read(bv);
+        } catch (ParseException e) {
+            throw new ConverterException(e);
+        }
+    }
+
     @Override
     public IomObject toIomPolyline(
         Object geomobj,
         String sqlAttrName,
         boolean is3D)
     throws SQLException, ConverterException {
-        byte bv[]=(byte [])geomobj;
+        Blob geom = (Blob) geomobj;
+        int blobLenght = (int) geom.length();
+        byte bv[]= geom.getBytes(1, blobLenght);
 
         Wkb2iox conv=new Wkb2iox();
         try {
@@ -210,7 +244,9 @@ public class OracleSpatialColumnConverter extends AbstractWKBColumnConverter {
         String sqlAttrName,
         boolean is3D)
     throws SQLException, ConverterException {
-        byte bv[]=(byte [])geomobj;
+        Blob geom = (Blob) geomobj;
+        int blobLenght = (int) geom.length();
+        byte bv[]= geom.getBytes(1, blobLenght);
 
         Wkb2iox conv=new Wkb2iox();
         try {
@@ -220,7 +256,6 @@ public class OracleSpatialColumnConverter extends AbstractWKBColumnConverter {
         }
     }
 
-	
 	@Override
 	public Integer getSrsid(String crsAuthority, String crsCode,Connection conn) 
 	throws ConverterException
