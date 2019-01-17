@@ -36,6 +36,9 @@ def repos_usr = System.getProperty('repos_usr',properties.get('repos_usr','repos
 def dburl = System.getProperty('dburl',properties.get('dburl'))
 def dbusr = System.getProperty('dbusr',properties.get('dbusr'))
 def dbpwd = System.getProperty('dbpwd',properties.get('dbpwd'))
+def myurl = System.getProperty('myurl',properties.get('myurl'))
+def myusr = System.getProperty('myusr',properties.get('myusr'))
+def mypwd = System.getProperty('mypwd',properties.get('mypwd'))
 def python= System.getProperty('python',properties.get('python','python'))
 def rst2html= System.getProperty('rst2html',properties.get('rst2html','rst2html'))
     
@@ -422,6 +425,9 @@ task ili2mysqlTest(type: Test) {
     classpath = sourceSets.ili2mysqlTest.runtimeClasspath
     testClassesDirs = sourceSets.ili2mysqlTest.output.classesDirs
     testLogging.exceptionFormat = 'full'
+	systemProperty 'dburl', myurl
+	systemProperty 'dbusr', myusr
+	systemProperty 'dbpwd', mypwd
 }
 
 task ili2fgdbJar(dependsOn: jar,type: Jar) {
@@ -621,6 +627,9 @@ install {
             addFilter('ili2pg') {artifact, file ->
                 artifact.name == 'ili2pg'
             }            
+            addFilter('ili2mysql') {artifact, file ->
+                artifact.name == 'ili2mysql'
+            }            
             addFilter('ili2gpkg') {artifact, file ->
                 artifact.name == 'ili2gpkg'
             }            
@@ -642,6 +651,12 @@ install {
             pom('ili2pg').scopeMappings.with {
                 mappings.clear()
                 addMapping(300, configurations.ili2pgCompileClasspath, 'runtime')
+                addMapping(300, configurations.ili2db, 'runtime')
+            }
+            pom('ili2mysql').artifactId = 'ili2mysql'
+            pom('ili2mysql').scopeMappings.with {
+                mappings.clear()
+                addMapping(300, configurations.ili2mysqlCompileClasspath, 'runtime')
                 addMapping(300, configurations.ili2db, 'runtime')
             }
             pom('ili2gpkg').artifactId = 'ili2gpkg'
@@ -711,17 +726,17 @@ uploadArchives {
                 addMapping(300, configurations.ili2pgCompileClasspath, 'runtime')
                 addMapping(300, configurations.ili2db, 'runtime')
             }
+            pom('ili2mysql').artifactId = 'ili2mysql'
+            pom('ili2mysql').scopeMappings.with {
+                mappings.clear()
+                addMapping(300, configurations.ili2mysqlCompileClasspath, 'runtime')
+                addMapping(300, configurations.ili2db, 'runtime')
+            }
             pom('ili2gpkg').artifactId = 'ili2gpkg'
             pom('ili2gpkg').scopeMappings.with {
                 mappings.clear()
                 addMapping(300, configurations.ili2gpkgCompileClasspath, 'runtime')
                 addMapping(300, configurations.ili2db, 'runtime')
-            }
-            pom('ili2mysql').artifactId = 'ili2mysql'
-            pom('ili2mysql').scopeMappings.with {
-                mappings.clear()
-                addMapping(300, configurations.ili2mysqlCompileClasspath, 'runtime')
-                addMapping(300, configurations.ili2mysql, 'runtime')
             }
             pom('ili2fgdb').artifactId = 'ili2fgdb'
             pom('ili2fgdb').scopeMappings.with {

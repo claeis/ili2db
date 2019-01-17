@@ -224,7 +224,7 @@ public class GeneratorMysql extends GeneratorJdbc {
 	}
 
     @Override
-    protected String getPreTableEnd(DbTable tab) {
+    protected String getTableEndOptions(DbTable tab) {
         String cmt = tab.getComment();
         if (cmt != null) {
             return("COMMENT '" + escapeString(cmt) + "'");
