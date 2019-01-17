@@ -1694,12 +1694,12 @@ public class TransferFromIli {
 		ch.ehi.sqlgen.repository.DbColVarchar sqlnameCol=new ch.ehi.sqlgen.repository.DbColVarchar();
 		sqlnameCol.setName(DbNames.ATTRNAME_TAB_SQLNAME_COL);
 		sqlnameCol.setNotNull(true);
-		sqlnameCol.setSize(1024);
+		sqlnameCol.setSize(400); // 1024
 		tab.addColumn(sqlnameCol);
 		ch.ehi.sqlgen.repository.DbColVarchar ownerCol=new ch.ehi.sqlgen.repository.DbColVarchar();
 		ownerCol.setName(DbNames.ATTRNAME_TAB_OWNER_COL);
 		ownerCol.setNotNull(true);
-		ownerCol.setSize(1024);
+		ownerCol.setSize(400); // 1024
 		tab.addColumn(ownerCol);
 		ch.ehi.sqlgen.repository.DbColVarchar targetCol=new ch.ehi.sqlgen.repository.DbColVarchar();
 		targetCol.setName(DbNames.ATTRNAME_TAB_TARGET_COL);

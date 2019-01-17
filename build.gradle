@@ -121,6 +121,23 @@ sourceSets {
     runtimeClasspath += sourceSets.test.output
     runtimeClasspath += sourceSets.ili2gpkg.output
   }
+  ili2mysql {
+    java {
+    	srcDirs=['ili2mysql/src']
+    }
+    compileClasspath += sourceSets.main.output
+  }
+  ili2mysqlTest {
+    java {
+    	srcDirs=['ili2mysql/test/java']
+    }
+    compileClasspath += sourceSets.main.output
+    compileClasspath += sourceSets.test.output
+    compileClasspath += sourceSets.ili2mysql.output
+    runtimeClasspath += sourceSets.main.output
+    runtimeClasspath += sourceSets.test.output
+    runtimeClasspath += sourceSets.ili2mysql.output
+  }
   ili2fgdb {
     java {
     	srcDirs=['ili2fgdb/src']
@@ -206,6 +223,21 @@ configurations {
 		extendsFrom testImplementation
 		extendsFrom ili2gpkgImplementation
 	}
+	
+	ili2mysqlImplementation {
+		extendsFrom implementation
+	}
+	ili2mysqlRuntimeOnly {
+		extendsFrom runtimeOnly
+	}
+	ili2mysqlTestRuntimeOnly {
+		extendsFrom ili2mysqlRuntimeOnly
+	}
+	ili2mysqlTestImplementation {
+		extendsFrom testImplementation
+		extendsFrom ili2mysqlImplementation
+	}
+	
 	ili2fgdbImplementation {
 		extendsFrom implementation
 	}
@@ -258,6 +290,8 @@ dependencies {
 	compileOnly group: 'org.postgresql', name: 'postgresql', version: '42.1.4.jre6' // add as compileOnly, so that eclipse sees it
 	ili2gpkgImplementation group: 'org.xerial', name: 'sqlite-jdbc', version: '3.8.11.2'
 	compileOnly group: 'org.xerial', name: 'sqlite-jdbc', version: '3.8.11.2' // add as compileOnly, so that eclipse sees it
+	ili2mysqlImplementation group: 'mysql', name: 'mysql-connector-java', version: '5.1.47'
+	compileOnly group: 'mysql', name: 'mysql-connector-java', version: '5.1.47' // add as compileOnly, so that eclipse sees it
 	ili2fgdbImplementation group: 'ch.ehi', name: 'fgdb4j', version: "1.1.1"
 	compileOnly group: 'ch.ehi', name: 'fgdb4j', version: "1.1.1" // add as compileOnly, so that eclipse sees it
 	ili2mssqlImplementation group: 'com.microsoft.sqlserver', name: 'mssql-jdbc', version: '6.4.0.jre7'
@@ -359,6 +393,37 @@ task ili2gpkgTest(type: Test) {
     testClassesDirs = sourceSets.ili2gpkgTest.output.classesDirs
     testLogging.exceptionFormat = 'full'
 }
+
+task ili2mysqlJar(dependsOn: jar,type: Jar) {
+	baseName = 'ili2mysql'
+    from sourceSets.ili2mysql.output
+  manifest {
+    attributes(
+      "Main-Class": "ch.ehi.ili2mysql.MysqlMain",
+      "Class-Path": 'libs/'+jar.archiveName+' '+configurations.ili2mysqlRuntimeClasspath.collect { 'libs/'+it.getName() }.join(' '))
+  }   
+}
+task ili2mysqlBindist(dependsOn:[usrdoc,ili2mysqlJar], type: Zip){
+	baseName = 'ili2mysql'
+    classifier 'bindist'
+	destinationDir = file('dist')
+	from ili2mysqlJar
+	into('docs'){
+		from files(fileTree("docs").include("LICENSE.*"),"docs/README.txt","docs/CHANGELOG.txt","build/docs/ili2db.html")
+	}
+	into('libs'){
+		from configurations.ili2mysqlRuntimeClasspath
+		from jar
+	}
+}
+task ili2mysqlTest(type: Test) {
+	maxParallelForks = 1
+	forkEvery = 1
+    classpath = sourceSets.ili2mysqlTest.runtimeClasspath
+    testClassesDirs = sourceSets.ili2mysqlTest.output.classesDirs
+    testLogging.exceptionFormat = 'full'
+}
+
 task ili2fgdbJar(dependsOn: jar,type: Jar) {
 	baseName = 'ili2fgdb'
     from sourceSets.ili2fgdb.output
@@ -620,6 +685,9 @@ uploadArchives {
             addFilter('ili2pg') {artifact, file ->
                 artifact.name == 'ili2pg'
             }            
+            addFilter('ili2mysql') {artifact, file ->
+                artifact.name == 'ili2mysql'
+            }            
             addFilter('ili2gpkg') {artifact, file ->
                 artifact.name == 'ili2gpkg'
             }            
@@ -648,6 +716,12 @@ uploadArchives {
                 mappings.clear()
                 addMapping(300, configurations.ili2gpkgCompileClasspath, 'runtime')
                 addMapping(300, configurations.ili2db, 'runtime')
+            }
+            pom('ili2mysql').artifactId = 'ili2mysql'
+            pom('ili2mysql').scopeMappings.with {
+                mappings.clear()
+                addMapping(300, configurations.ili2mysqlCompileClasspath, 'runtime')
+                addMapping(300, configurations.ili2mysql, 'runtime')
             }
             pom('ili2fgdb').artifactId = 'ili2fgdb'
             pom('ili2fgdb').scopeMappings.with {

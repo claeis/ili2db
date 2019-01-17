@@ -7,6 +7,7 @@ branches:
 
 addons:
   postgresql: "9.6"
+  myql: "5.7"
   apt:
     packages:
     - libmaven-ant-tasks-java
@@ -35,12 +36,13 @@ before_script:
 script: 
   - # ant -f build-ili2pg.xml jar
   - gradle jar test 
+  - gradle ili2mysqlJar ili2mysqlTest -Ddburl=jdbc:mysql:///ili2db?useSSL=false -Ddbusr=travis
   - gradle ili2pgJar ili2pgTest -Ddburl=jdbc:postgresql:ili2db -Ddbusr=postgres
   - gradle ili2gpkgJar ili2gpkgTest
   - gradle ili2fgdbJar
   - gradle ili2mssqlJar ili2mssqlTest
   - gradle ili2oraJar ili2oraTest
-  - gradle -Drst2html=`which rst2html.py` usrdoc testreport ili2pgBindist ili2fgdbBindist ili2mssqlBindist ili2oraBindist
+  - gradle -Drst2html=`which rst2html.py` usrdoc testreport ili2mysqlBindist ili2pgBindist ili2fgdbBindist ili2mssqlBindist ili2oraBindist
 after_failure:
   - cat  build/junitreport/junit-noframes.html
 deploy:
