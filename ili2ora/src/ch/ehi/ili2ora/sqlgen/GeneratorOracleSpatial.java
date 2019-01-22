@@ -23,8 +23,7 @@ import ch.ehi.sqlgen.repository.DbSchema;
 import ch.ehi.sqlgen.repository.DbTable;
 
 public class GeneratorOracleSpatial extends GeneratorJdbc {
-    private final String wrapperFunction = "ILI2ORA_SDO_GEOMETRY";
-    
+
 	@Override
 	public void visitColumn(DbTable dbTab,DbColumn column) throws IOException {
 		String type="";
@@ -77,52 +76,6 @@ public class GeneratorOracleSpatial extends GeneratorJdbc {
 		out.write(getIndent()+colSep+name+" "+type+" "+isNull+newline());
 		colSep=",";
 	}
-
-    @Override
-    public void visitSchemaBegin(Settings config, DbSchema schema) throws IOException {
-        super.visitSchemaBegin(config, schema);
-        
-        String strWrapperFunction = wrapperFunction;
-        
-        if(schema != null && schema.getName() != null && !schema.getName().isEmpty()) {
-            strWrapperFunction = schema.getName() + "." + strWrapperFunction;
-        }
-        
-        String stmt = "";
-        
-        stmt += getIndent() + "CREATE OR REPLACE FUNCTION " + strWrapperFunction + "(geom_input BLOB, srid NUMBER)" + newline();
-        inc_ind();
-        stmt += getIndent() + "RETURN MDSYS.SDO_GEOMETRY IS geom MDSYS.SDO_GEOMETRY;" + newline(); 
-        dec_ind();
-        stmt += getIndent() + "BEGIN" + newline();
-        inc_ind();
-        stmt += getIndent() + "geom := NULL;" + newline(); 
-        stmt += getIndent() + "IF geom_input IS NOT NULL THEN" + newline();
-        inc_ind();
-        stmt += getIndent() + "geom := SDO_GEOMETRY(geom_input, srid);" + newline(); 
-        dec_ind();
-        stmt += getIndent() + "END IF;" + newline();
-        stmt += getIndent() + "RETURN(geom);" + newline();
-        dec_ind();
-        stmt += getIndent() + "END;";
-        
-        addCreateLine(new Stmt(stmt));
-        addDropLine(new Stmt("DROP FUNCTION " + strWrapperFunction));
-        Statement dbstmt = null;
-        try{
-            try{
-                dbstmt = conn.createStatement();
-                EhiLogger.traceBackendCmd(stmt);
-                dbstmt.execute(stmt);
-            }finally{
-                dbstmt.close();
-            }
-        }catch(SQLException ex){
-            IOException iox=new IOException("failed to add function " + strWrapperFunction);
-            iox.initCause(ex);
-            throw iox;
-        }
-    }
 
 	@Override
 	public void visitIndex(DbIndex idx) throws IOException {
