@@ -149,8 +149,6 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 				cmt.append(cmtSep+def.getViewable().getDocumentation());
 				cmtSep=nl;
 			}
-			cmt.append(cmtSep+"@iliname "+def.getViewable().getScopedName(null));
-			cmtSep=nl;
 		}
 		if(cmt.length()>0){
 			dbTable.setComment(cmt.toString());
@@ -930,8 +928,6 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 				cmt.append(cmtSep+attr.getDocumentation());
 				cmtSep=nl;
 			}
-			cmt.append(cmtSep+"@iliname "+attr.getContainer().getScopedName(null)+"."+attr.getName());
-			cmtSep=nl;
 			if(cmt.length()>0){
 				dbParentId.setComment(cmt.toString());
 			}
@@ -953,10 +949,6 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 		String cmtSep="";
 		if(attr.getDocumentation()!=null){
 			cmt.append(cmtSep+attr.getDocumentation());
-			cmtSep=nl;
-		}
-		if(sqlName!=attr.getName()){
-			cmt.append(cmtSep+"@iliname "+attr.getName());
 			cmtSep=nl;
 		}
 		if(cmt.length()>0){

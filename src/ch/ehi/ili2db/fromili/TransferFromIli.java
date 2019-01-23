@@ -284,8 +284,6 @@ public class TransferFromIli {
 			cmt.append(cmtSep+attr.getDocumentation());
 			cmtSep=nl;
 		}
-		cmt.append(cmtSep+"@iliname "+attr.getContainer().getScopedName(null)+"."+attr.getName());
-		cmtSep=nl;
 		if(cmt.length()>0){
 			dbTable.setComment(cmt.toString());
 		}
