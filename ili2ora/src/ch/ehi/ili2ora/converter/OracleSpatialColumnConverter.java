@@ -1,5 +1,7 @@
 package ch.ehi.ili2ora.converter;
 
+import java.io.IOException;
+import java.io.OutputStream;
 import java.sql.Blob;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -14,14 +16,14 @@ import ch.interlis.iox_j.wkb.Iox2wkbException;
 import ch.interlis.iox_j.wkb.Wkb2iox;
 
 public class OracleSpatialColumnConverter extends AbstractWKBColumnConverter {
-	
-	private boolean strokeArcs=true;
-	
-	@Override
-	public void setup(Connection conn, Settings config) {
-		super.setup(conn,config);
-		strokeArcs=Config.STROKE_ARCS_ENABLE.equals(Config.getStrokeArcs(config));
-	}
+    
+    private boolean strokeArcs=true;
+    
+    @Override
+    public void setup(Connection conn, Settings config) {
+        super.setup(conn,config);
+        strokeArcs=Config.STROKE_ARCS_ENABLE.equals(Config.getStrokeArcs(config));
+    }
 
     @Override
     public String getInsertValueWrapperCoord(String wkfValue,int srid) {
@@ -44,26 +46,33 @@ public class OracleSpatialColumnConverter extends AbstractWKBColumnConverter {
         return "ILI2ORA_SDO_GEOMETRY(" + wkfValue + ", "+ Integer.toString(srid)  + ")";
     }
     @Override
+    public String getInsertValueWrapperMultiCoord(String wkfValue,int srid) {
+        return "ILI2ORA_SDO_GEOMETRY(" + wkfValue + ", "+ Integer.toString(srid)  + ")";
+    }
+    @Override
     public String getSelectValueWrapperCoord(String dbNativeValue) {
         return "SDO_UTIL.TO_WKBGEOMETRY(" + dbNativeValue + ")";
     }
-	@Override
-	public String getSelectValueWrapperPolyline(String dbNativeValue) {
-		return "SDO_UTIL.TO_WKBGEOMETRY(" + dbNativeValue + ")";
-	}
-	@Override
-	public String getSelectValueWrapperSurface(String dbNativeValue) {
-		return "SDO_UTIL.TO_WKBGEOMETRY(" + dbNativeValue + ")";
-	}
-	@Override
-	public String getSelectValueWrapperMultiSurface(String dbNativeValue) {
-		return "SDO_UTIL.TO_WKBGEOMETRY(" + dbNativeValue + ")";
-	}
+    @Override
+    public String getSelectValueWrapperPolyline(String dbNativeValue) {
+        return "SDO_UTIL.TO_WKBGEOMETRY(" + dbNativeValue + ")";
+    }
+    @Override
+    public String getSelectValueWrapperSurface(String dbNativeValue) {
+        return "SDO_UTIL.TO_WKBGEOMETRY(" + dbNativeValue + ")";
+    }
+    @Override
+    public String getSelectValueWrapperMultiSurface(String dbNativeValue) {
+        return "SDO_UTIL.TO_WKBGEOMETRY(" + dbNativeValue + ")";
+    }
     @Override
     public String getSelectValueWrapperMultiPolyline(String dbNativeValue) {
         return "SDO_UTIL.TO_WKBGEOMETRY(" + dbNativeValue + ")";
     }
-
+    @Override
+    public String getSelectValueWrapperMultiCoord(String dbNativeValue) {
+        return "SDO_UTIL.TO_WKBGEOMETRY(" + dbNativeValue + ")";
+    }
     @Override
     public java.lang.Object fromIomSurface(
         IomObject value,
@@ -75,8 +84,18 @@ public class OracleSpatialColumnConverter extends AbstractWKBColumnConverter {
             Iox2wkb conv=new Iox2wkb(is3D?3:2);
 
             try {
-                return conv.surface2wkb(value,!strokeArcs,p);
+                byte[] geomObj = conv.surface2wkb(value,!strokeArcs,p);
+                
+                Blob data = conn.createBlob();
+                OutputStream stream =  data.setBinaryStream(1);
+                
+                stream.write((byte[])geomObj);
+                stream.flush();
+                
+                return data;
             } catch (Iox2wkbException ex) {
+                throw new ConverterException(ex);
+            } catch (IOException ex) {
                 throw new ConverterException(ex);
             }
         }
@@ -93,8 +112,18 @@ public class OracleSpatialColumnConverter extends AbstractWKBColumnConverter {
             Iox2wkb conv=new Iox2wkb(is3D?3:2);
 
             try {
-                return conv.multisurface2wkb(value,!strokeArcs,p);
+                byte[] geomObj =conv.multisurface2wkb(value,!strokeArcs,p);
+                
+                Blob data = conn.createBlob();
+                OutputStream stream =  data.setBinaryStream(1);
+                
+                stream.write((byte[])geomObj);
+                stream.flush();
+                
+                return data;
             } catch (Iox2wkbException ex) {
+                throw new ConverterException(ex);
+            } catch (IOException ex) {
                 throw new ConverterException(ex);
             }
         }
@@ -106,8 +135,18 @@ public class OracleSpatialColumnConverter extends AbstractWKBColumnConverter {
         if (value!=null) {
             Iox2wkb conv=new Iox2wkb(is3D?3:2);
             try {
-                return conv.coord2wkb(value);
+                byte[] geomObj =  conv.coord2wkb(value);
+                
+                Blob data = conn.createBlob();
+                OutputStream stream =  data.setBinaryStream(1);
+                
+                stream.write((byte[])geomObj);
+                stream.flush();
+                
+                return data;
             } catch (Iox2wkbException ex) {
+                throw new ConverterException(ex);
+            } catch (IOException ex) {
                 throw new ConverterException(ex);
             }
         }
@@ -119,8 +158,18 @@ public class OracleSpatialColumnConverter extends AbstractWKBColumnConverter {
         if (value!=null) {
             Iox2wkb conv=new Iox2wkb(is3D?3:2);
             try {
-                return conv.multicoord2wkb(value);
+                byte[] geomObj = conv.multicoord2wkb(value);
+                
+                Blob data = conn.createBlob();
+                OutputStream stream =  data.setBinaryStream(1);
+             
+                stream.write((byte[])geomObj);
+                stream.flush();
+                
+                return data;
             } catch (Iox2wkbException ex) {
+                throw new ConverterException(ex);
+            } catch (IOException ex) {
                 throw new ConverterException(ex);
             }
         }
@@ -132,8 +181,19 @@ public class OracleSpatialColumnConverter extends AbstractWKBColumnConverter {
         if (value!=null) {
             Iox2wkb conv=new Iox2wkb(is3D?3:2);
             try {
-                return conv.polyline2wkb(value,false,!strokeArcs,p);
+                byte[] geomObj =  conv.polyline2wkb(value,false,!strokeArcs,p);
+                
+                Blob data = conn.createBlob();
+                OutputStream stream =  data.setBinaryStream(1);
+             
+                stream.write((byte[])geomObj);
+                stream.flush();
+                
+                return data;
+                
             } catch (Iox2wkbException ex) {
+                throw new ConverterException(ex);
+            } catch (IOException ex) {
                 throw new ConverterException(ex);
             }
         }
@@ -145,8 +205,18 @@ public class OracleSpatialColumnConverter extends AbstractWKBColumnConverter {
         if (value!=null) {
             Iox2wkb conv=new Iox2wkb(is3D?3:2);
             try {
-                return conv.multiline2wkb(value,!strokeArcs,p);
+                byte[] geomObj =  conv.multiline2wkb(value,!strokeArcs,p);
+                
+                Blob data = conn.createBlob();
+                OutputStream stream =  data.setBinaryStream(1);
+             
+                stream.write((byte[])geomObj);
+                stream.flush();
+                
+                return data;
             } catch (Iox2wkbException ex) {
+                throw new ConverterException(ex);
+            } catch (IOException ex) {
                 throw new ConverterException(ex);
             }
         }
@@ -256,13 +326,13 @@ public class OracleSpatialColumnConverter extends AbstractWKBColumnConverter {
         }
     }
 
-	@Override
-	public Integer getSrsid(String crsAuthority, String crsCode,Connection conn) 
-	throws ConverterException
-	{
-		int srsid;
-		srsid=Integer.parseInt(crsCode);
+    @Override
+    public Integer getSrsid(String crsAuthority, String crsCode,Connection conn) 
+    throws ConverterException
+    {
+        int srsid;
+        srsid=Integer.parseInt(crsCode);
 
-		return srsid;
-	}
+        return srsid;
+    }
 }
