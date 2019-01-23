@@ -1,5 +1,7 @@
 package ch.ehi.ili2db.gui;
 
+import java.util.Properties;
+
 import ch.ehi.basics.settings.Settings;
 import ch.ehi.sqlgen.generator.SqlConfiguration;
 
@@ -93,6 +95,8 @@ public class Config extends Settings {
 	private String dburl;
 	private String dbusr;
 	private String dbpwd;
+	private Properties dbprops=null;
+    private String dbparams=null;
 	private String dbhost;
 	private String dbport;
 	private String dbdatabase;
@@ -183,6 +187,12 @@ public class Config extends Settings {
 	public void setDbusr(String dbusr) {
 		this.dbusr = dbusr;
 	}
+    public Properties getDbProperties() {
+        return dbprops;
+    }
+    public void setDbProperties(Properties props) {
+        this.dbprops=props;
+    }
 	public String getDropscript() {
 		return dropscript;
 	}
@@ -237,10 +247,16 @@ public class Config extends Settings {
 	public void setFunction(int function) {
 		this.function = function;
 	}
+    public String getDbParams() {
+        return dbparams;
+    }
+    public void setDbParams(String propFile) {
+        this.dbparams = propFile;
+    }
 	public String getDbfile() {
 		return dbfile;
 	}
-	public void setDbfile(String dbfile) {
+    public void setDbfile(String dbfile) {
 		this.dbfile = dbfile;
 	}
 	public String getDbhost() {
@@ -683,5 +699,4 @@ public class Config extends Settings {
 	public boolean getCreateTypeConstraint() {
 		return TRUE.equals(getValue(CREATE_TYPE_CONSTRAINT))?true:false;
 	}
-
 }

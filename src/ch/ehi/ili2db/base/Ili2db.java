@@ -17,8 +17,10 @@
  */
 package ch.ehi.ili2db.base;
 
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -183,7 +185,9 @@ public class Ili2db {
 			TransferFromIli.readSettings(conn,config,config.getDbschema());
 		} catch (SQLException e) {
 			EhiLogger.logError(e);
-		}finally{
+		} catch (IOException e) {
+            EhiLogger.logError(e);
+        }finally{
 			if(!connectionFromExtern && conn!=null){
 				try{
 					conn.close();
@@ -382,7 +386,9 @@ public class Ili2db {
 					customMapping.postConnect(conn, config);
 				} catch (SQLException ex) {
 					throw new Ili2dbException("failed to get db connection", ex);
-				}
+				} catch (IOException e) {
+                    throw new Ili2dbException("failed to get db connection", e);
+                }
 			  logDBVersion(conn);
 			  
 			  if(!connectionFromExtern){
@@ -1005,7 +1011,9 @@ public class Ili2db {
 	                            
 	            }catch(SQLException ex){
 	                throw new Ili2dbException(ex);
-	            }
+	            } catch (IOException e) {
+                    throw new Ili2dbException(e);
+                }
 			}
 
             // run DB specific pre-processing
@@ -1435,7 +1443,9 @@ public class Ili2db {
 					customMapping.postConnect(conn, config);
 			} catch (SQLException e) {
 				throw new Ili2dbException("failed to get db connection",e);
-			}
+			} catch (IOException e) {
+                throw new Ili2dbException("failed to get db connection",e);
+            }
 			logDBVersion(conn);
 			  
             // run DB specific pre-processing
@@ -1654,10 +1664,30 @@ public class Ili2db {
 		}
 	}
 	private static Connection connect(String url, String dbusr, String dbpwd,
-			Config config, CustomMapping customMapping) throws SQLException {
+			Config config, CustomMapping customMapping) throws SQLException, IOException {
 		Connection conn;
 		EhiLogger.logState("dburl <" + url + ">");
 		EhiLogger.logState("dbusr <" + dbusr + ">");
+		String dbParams=config.getDbParams();
+		if(dbParams!=null) {
+	        EhiLogger.logState("dbparams <" + dbParams + ">");
+		    java.io.Reader reader=null;
+		    try {
+	            reader=new java.io.InputStreamReader(new FileInputStream(dbParams),"UTF-8");
+	            java.util.Properties props=new java.util.Properties();
+	            props.load(reader);
+	            config.setDbProperties(props);
+            }finally {
+		        if(reader!=null) {
+		            try {
+                        reader.close();
+                    } catch (IOException e) {
+                        ; // igonre
+                    }
+		            reader=null;
+		        }
+		    }
+		}
 		customMapping.preConnect(url, dbusr, dbpwd, config);
 		conn = customMapping.connect(url, dbusr, dbpwd,config);
 		config.setJdbcConnection(conn);

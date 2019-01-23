@@ -18,6 +18,16 @@ public abstract class AbstractJdbcMapping implements CustomMapping {
 	@Override
 	public Connection connect(String url, String dbusr, String dbpwd,
 			Config config) throws SQLException {
+	    java.util.Properties params=config.getDbProperties();
+	    if(params!=null && !params.isEmpty()) {
+	        if(dbusr!=null) {
+	            params.setProperty("user", dbusr);
+	        }
+	        if(dbpwd!=null) {
+	            params.setProperty("password", dbpwd);
+	        }
+	        return DriverManager.getConnection(url, params);
+	    }
 		return DriverManager.getConnection(url, dbusr, dbpwd);
 	}
 
