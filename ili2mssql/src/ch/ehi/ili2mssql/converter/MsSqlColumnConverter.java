@@ -40,7 +40,14 @@ public class MsSqlColumnConverter extends AbstractWKBColumnConverter {
 	public String getInsertValueWrapperMultiSurface(String wkfValue,int srid) {
 		return "geometry::STGeomFromWKB("+wkfValue+","+srid+")";
 	}
-	
+    @Override
+    public String getInsertValueWrapperMultiCoord(String wkfValue,int srid) {
+        return "geometry::STGeomFromWKB("+wkfValue+","+srid+")";
+    }
+    @Override
+    public String getInsertValueWrapperMultiPolyline(String wkfValue,int srid) {
+        return "geometry::STGeomFromWKB("+wkfValue+","+srid+")";
+    }
 	@Override
 	public String getSelectValueWrapperCoord(String dbNativeValue) {
 		return dbNativeValue+".STAsBinary()";
@@ -57,7 +64,14 @@ public class MsSqlColumnConverter extends AbstractWKBColumnConverter {
 	public String getSelectValueWrapperMultiSurface(String dbNativeValue) {
 		return dbNativeValue+".STAsBinary()";
 	}
-	
+    @Override
+    public String getSelectValueWrapperMultiCoord(String dbNativeValue) {
+        return dbNativeValue+".STAsBinary()";
+    }
+    @Override
+    public String getSelectValueWrapperMultiPolyline(String dbNativeValue) {
+        return dbNativeValue+".STAsBinary()";
+    }
 	@Override
 	public Integer getSrsid(String crsAuthority, String crsCode,Connection conn) 
 		throws ConverterException{
