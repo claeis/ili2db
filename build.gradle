@@ -284,7 +284,7 @@ configurations {
 }
 dependencies {
     implementation group: 'ch.interlis', name: 'iox-ili', version: '1.20.10+'
-    implementation group: 'ch.interlis', name: 'ili2c-tool', version: "4.7.10+"
+    implementation group: 'ch.interlis', name: 'ili2c-tool', version: "5.0.0+"
     implementation group: 'ch.ehi', name: 'ehisqlgen', version: "1.13.7+"
     implementation group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: '2.9.7'
     testImplementation group: 'junit', name: 'junit', version: '4.12'
