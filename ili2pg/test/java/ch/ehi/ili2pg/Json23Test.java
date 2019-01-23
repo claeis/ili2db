@@ -146,11 +146,11 @@ public class Json23Test {
             try{
                 jdbcConnection=DriverManager.getConnection(config.getDburl(),config.getDbusr(),config.getDbpwd());
                 java.sql.Statement stmt=jdbcConnection.createStatement();
-                rs=stmt.executeQuery("SELECT (farben#>>'{}')::text FROM "+DBSCHEMA+".auto WHERE t_ili_tid='1'");
+                rs=stmt.executeQuery("SELECT farben->0->>'@type',farben->0->'r' FROM "+DBSCHEMA+".auto WHERE t_ili_tid='1'");
                 assertTrue(rs.next());
-                assertEquals("[{\"@type\":\"Json23.TestA.Farbe\",\"r\":10,\"g\":11,\"b\":12,\"name\":\"f1\",\"active\":false}"
-                        + ",{\"@type\":\"Json23.TestA.Farbe\",\"r\":20,\"g\":21,\"b\":22,\"name\":\"f2\",\"active\":false}]",rs.getString(1));
-                rs=stmt.executeQuery("SELECT (farben#>>'{}')::text FROM "+DBSCHEMA+".auto WHERE t_ili_tid='2'");
+                assertEquals("Json23.TestA.Farbe",rs.getString(1));
+                assertEquals(10,rs.getInt(2));
+                rs=stmt.executeQuery("SELECT cast(farben as text) FROM "+DBSCHEMA+".auto WHERE t_ili_tid='2'");
                 assertTrue(rs.next());
                 rs.getString(1);
                 assertEquals(true,rs.wasNull());

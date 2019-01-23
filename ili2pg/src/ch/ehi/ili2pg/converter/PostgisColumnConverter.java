@@ -626,11 +626,12 @@ public class PostgisColumnConverter extends AbstractWKBColumnConverter {
         @Override
         public String getSelectValueWrapperJson(String sqlColName) {
             //return "from_jsonb("+sqlColName+")";
-            return "("+sqlColName+"#>>'{}')::text";
+            return "cast("+sqlColName+" as text)";
         }
         @Override
         public String getInsertValueWrapperJson(String sqlColName) {
-            return "to_jsonb("+sqlColName+")";
+            //return "to_jsonb("+sqlColName+")";
+            return "cast("+sqlColName+" as jsonb)";
         }
         @Override
         public void setJsonNull(PreparedStatement stmt, int parameterIndex) throws SQLException {
