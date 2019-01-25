@@ -148,12 +148,16 @@ public class OraMain extends ch.ehi.ili2db.AbstractMain {
 			argi++;
 			dbservice = args[argi];
 			argi++;
-		}
+		}else if(arg.equals("--dbschema")){
+            argi++;
+            config.setDbschema(args[argi]);
+            argi++;
+        }
 		
 		return argi;
 	}
 	@Override
 	protected void printSpecificOptions() {
-		
+        System.err.println("--dbschema  schema     The name of the schema in the database. Defaults to not set.");
 	}
 }
