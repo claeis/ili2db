@@ -84,6 +84,34 @@ public class GeneratorOracleSpatial extends GeneratorJdbc {
 		if(!idx.isPrimary())
 			super.visitIndex(idx);
 	}
+    
+    @Override
+    public void visitTableBeginConstraint(DbTable dbTab) throws IOException {
+        super.visitTableBeginConstraint(dbTab);
+
+        String sqlTabName=dbTab.getName().getQName();
+        for(Iterator dbColi=dbTab.iteratorColumn();dbColi.hasNext();){
+            DbColumn dbCol=(DbColumn) dbColi.next();
+            if(dbCol.getReferencedTable()!=null){
+                String createstmt=null;
+                String action="";
+                if(dbCol.getOnUpdateAction()!=null){
+                    action=action+" ON UPDATE "+dbCol.getOnUpdateAction();
+                }
+                if(dbCol.getOnDeleteAction()!=null){
+                    action=action+" ON DELETE "+dbCol.getOnDeleteAction();
+                }
+                String constraintName=createConstraintName(dbTab,"fkey",dbCol.getName());
+
+                createstmt="ALTER TABLE "+sqlTabName+" ADD CONSTRAINT "+constraintName+" FOREIGN KEY ( "+dbCol.getName()+" ) REFERENCES "+dbCol.getReferencedTable().getQName();
+
+                String dropstmt=null;
+                dropstmt="ALTER TABLE "+sqlTabName+" DROP CONSTRAINT "+constraintName;
+
+                addConstraint(dbTab, constraintName,createstmt, dropstmt);
+            }
+        }
+    }
 
    @Override
     public void visit1TableEnd(DbTable tab) throws IOException {
