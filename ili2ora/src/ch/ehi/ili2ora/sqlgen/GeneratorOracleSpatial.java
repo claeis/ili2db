@@ -3,9 +3,11 @@ package ch.ehi.ili2ora.sqlgen;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Iterator;
 import ch.ehi.basics.logging.EhiLogger;
 import ch.ehi.basics.settings.Settings;
 import ch.ehi.ili2db.base.DbNames;
+import ch.ehi.sqlgen.DbUtility;
 import ch.ehi.sqlgen.generator_impl.jdbc.GeneratorJdbc;
 import ch.ehi.sqlgen.repository.DbColBoolean;
 import ch.ehi.sqlgen.repository.DbColDate;
@@ -82,4 +84,74 @@ public class GeneratorOracleSpatial extends GeneratorJdbc {
 		if(!idx.isPrimary())
 			super.visitIndex(idx);
 	}
+
+   @Override
+    public void visit1TableEnd(DbTable tab) throws IOException {
+
+        String sqlTabName=tab.getName().toString();
+        
+        boolean tableExists=DbUtility.tableExists(conn,tab.getName());
+        super.visit1TableEnd(tab);
+
+        String cmt=tab.getComment();
+        if(cmt!=null){
+            cmt="COMMENT ON TABLE "+sqlTabName+" IS '"+escapeString(cmt)+"'";
+            addCreateLine(new Stmt(cmt));
+            if(!tableExists){
+                Statement dbstmt = null;
+                try{
+                    try{
+                        dbstmt = conn.createStatement();
+                        EhiLogger.traceBackendCmd(cmt);
+                        dbstmt.execute(cmt);
+                    }finally{
+                        dbstmt.close();
+                    }
+                }catch(SQLException ex){
+                    IOException iox=new IOException("failed to add comment to table "+tab.getName());
+                    iox.initCause(ex);
+                    throw iox;
+                }
+            }
+        }
+
+        java.util.Iterator coli=tab.iteratorColumn();
+        while(coli.hasNext()){
+            DbColumn col=(DbColumn)coli.next();
+            cmt=col.getComment();
+            if(cmt!=null){
+                cmt="COMMENT ON COLUMN "+sqlTabName+"."+col.getName()+" IS '"+escapeString(cmt)+"'";
+                addCreateLine(new Stmt(cmt));
+                if(!tableExists){
+                    Statement dbstmt = null;
+                    try{
+                        try{
+                            dbstmt = conn.createStatement();
+                            EhiLogger.traceBackendCmd(cmt);
+                            dbstmt.execute(cmt);
+                        }finally{
+                            dbstmt.close();
+                        }
+                    }catch(SQLException ex){
+                        IOException iox=new IOException("failed to add comment to table "+tab.getName());
+                        iox.initCause(ex);
+                        throw iox;
+                    }
+                }
+            }
+        }
+    }
+   
+    static public String escapeString(String cmt)
+    {
+        StringBuilder ret=new StringBuilder((int)cmt.length());
+        for(int i=0;i<cmt.length();i++){
+            char c=cmt.charAt(i);
+            ret.append(c);
+            if(c=='\''){
+                ret.append(c);
+            }
+        }
+        return ret.toString();
+    }
 }
