@@ -110,6 +110,51 @@ public class GeneratorOracleSpatial extends GeneratorJdbc {
 
                 addConstraint(dbTab, constraintName,createstmt, dropstmt);
             }
+            
+            if(dbCol instanceof DbColNumber && (((DbColNumber)dbCol).getMinValue()!=null || ((DbColNumber)dbCol).getMaxValue()!=null)){
+                DbColNumber dbColNum=(DbColNumber)dbCol;
+                String createstmt=null;
+                String action="";
+                if(dbColNum.getMinValue()!=null || dbColNum.getMaxValue()!=null){
+                    if(dbColNum.getMaxValue()==null){
+                        action=">="+dbColNum.getMinValue();
+                    }else if(dbColNum.getMinValue()==null){
+                        action="<="+dbColNum.getMaxValue();
+                    }else{
+                        action="BETWEEN "+dbColNum.getMinValue()+" AND "+dbColNum.getMaxValue();
+                    }
+                }
+                String constraintName=createConstraintName(dbTab,"check",dbCol.getName());
+
+                createstmt="ALTER TABLE "+sqlTabName+" ADD CONSTRAINT "+constraintName+" CHECK( "+dbCol.getName()+" "+action+")";
+
+                String dropstmt=null;
+                dropstmt="ALTER TABLE "+sqlTabName+" DROP CONSTRAINT "+constraintName;
+
+                addConstraint(dbTab, constraintName,createstmt, dropstmt);
+
+             } else if(dbCol instanceof DbColDecimal && (((DbColDecimal)dbCol).getMinValue()!=null || ((DbColDecimal)dbCol).getMaxValue()!=null)){
+                DbColDecimal dbColNum=(DbColDecimal)dbCol;
+                String createstmt=null;
+                String action="";
+                if(dbColNum.getMinValue()!=null || dbColNum.getMaxValue()!=null){
+                    if(dbColNum.getMaxValue()==null){
+                        action=">="+dbColNum.getMinValue();
+                    }else if(dbColNum.getMinValue()==null){
+                        action="<="+dbColNum.getMaxValue();
+                    }else{
+                        action="BETWEEN "+dbColNum.getMinValue()+" AND "+dbColNum.getMaxValue();
+                    }
+                }
+                String constraintName=createConstraintName(dbTab,"check",dbCol.getName());
+
+                createstmt="ALTER TABLE "+sqlTabName+" ADD CONSTRAINT "+constraintName+" CHECK( "+dbCol.getName()+" "+action+")";
+
+                String dropstmt=null;
+                dropstmt="ALTER TABLE "+sqlTabName+" DROP CONSTRAINT "+constraintName;
+
+                addConstraint(dbTab, constraintName,createstmt, dropstmt);
+            }
         }
     }
 
