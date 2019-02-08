@@ -753,14 +753,23 @@ public class TransferToXtf {
 	/** dumps all struct values of a given struct attr.
 	 * @throws IoxException 
 	 */
-	private void dumpStructs(int function,StructWrapper structWrapper,FixIomObjectRefs fixref,Map<String,String> genericDomains,boolean isCrsAlternate) throws IoxException
+	private void dumpStructs(int function,AbstractStructWrapper structWrapper,FixIomObjectRefs fixref,Map<String,String> genericDomains,boolean isCrsAlternate) throws IoxException
 	{
-		Viewable baseClass=((CompositionType)structWrapper.getParentAttr().getDomain()).getComponentType();
+		Viewable baseClass=null;
+		String stmt=null;
+		if(structWrapper instanceof StructWrapper) {
+	        baseClass=((CompositionType)((StructWrapper) structWrapper).getParentAttr().getDomain()).getComponentType();
+	        stmt=createQueryStmt4Type(baseClass,(StructWrapper) structWrapper);
+		}else if(structWrapper instanceof EmbeddedLinkWrapper) {
+	        baseClass=(Viewable) ((EmbeddedLinkWrapper) structWrapper).getRole().getContainer();
+	        stmt=createQueryStmt4Type(baseClass,(EmbeddedLinkWrapper)structWrapper);
+		}else {
+		    throw new IllegalArgumentException("unexpected structWrapper "+structWrapper.getClass().getName());
+		}
 
 		HashMap<String,IomObject> structelev=new HashMap<String,IomObject>();
 		HashSet<Viewable> structClassv=new HashSet<Viewable>();
 
-		String stmt=createQueryStmt4Type(baseClass,structWrapper);
 		EhiLogger.traceBackendCmd(stmt);
 		java.sql.Statement dbstmt = null;
         java.sql.ResultSet rs=null;
@@ -778,7 +787,12 @@ public class TransferToXtf {
 					throw new IoxException("unknown "+DbNames.T_TYPE_COL+" '"+structEleSqlType+"' in table "+getStructRootTableName(baseClass));
 				}
 				structClass=(Viewable)tag2class.get(structEleClass);
-				IomObject iomObj=structWrapper.getParent().addattrobj(structWrapper.getParentAttr().getName(),structEleClass);
+                IomObject iomObj=null;
+		        if(structWrapper instanceof StructWrapper) {
+	                iomObj=structWrapper.getParent().addattrobj(((StructWrapper) structWrapper).getParentAttr().getName(),structEleClass);
+		        }else if(structWrapper instanceof EmbeddedLinkWrapper) {
+	                iomObj=structWrapper.getParent().addattrobj(((EmbeddedLinkWrapper) structWrapper).getRole().getName(),structEleClass);
+		        }
 				structelev.put(sqlid,iomObj);
 				structClassv.add(structClass);
 			}
@@ -947,7 +961,7 @@ public class TransferToXtf {
 	}
 	/** helper to dump all objects/structvalues of a given class/structure.
 	 */
-	private void dumpObjHelper(int function,IoxWriter out,Viewable aclass,Viewable iomTargetClass,Long basketSqlId,Map<String,String> genericDomains,FixIomObjectRefs fixref,StructWrapper structWrapper,HashMap<String,IomObject> structelev)
+	private void dumpObjHelper(int function,IoxWriter out,Viewable aclass,Viewable iomTargetClass,Long basketSqlId,Map<String,String> genericDomains,FixIomObjectRefs fixref,AbstractStructWrapper structWrapper,HashMap<String,IomObject> structelev)
 	{
 		String stmt=recConv.createQueryStmt(aclass,basketSqlId,structWrapper);
 		ViewableWrapper aclassWrapper=class2wrapper.get(aclass);
@@ -961,7 +975,7 @@ public class TransferToXtf {
 			rs=dbstmt.executeQuery();
 			while(rs.next()){
 				// list of not yet processed struct attrs
-				ArrayList<StructWrapper> structQueue=new ArrayList<StructWrapper>();
+				ArrayList<AbstractStructWrapper> structQueue=new ArrayList<AbstractStructWrapper>();
 				long sqlid = recConv.getT_ID(rs);
 				Iom_jObject iomObj=null;
 				if(structWrapper==null){
@@ -970,9 +984,24 @@ public class TransferToXtf {
 				iomObj = recConv.convertRecord(rs, aclassWrapper, aclass,fixref, structWrapper,
 						structelev, structQueue, sqlid,genericDomains,iomTargetClass);
 				updateObjStat(iomObj.getobjecttag(), sqlid);
+				
+				
+		         // add StructWrapper around embedded associations that are mapped to a link table
+		         for(Iterator roleIt=aclass.getAttributesAndRoles2();roleIt.hasNext();) {
+		             ViewableTransferElement roleEle=(ViewableTransferElement) roleIt.next();
+		             if(roleEle.embedded && roleEle.obj instanceof RoleDef) {
+		                 RoleDef role=(RoleDef)roleEle.obj;
+		                 AssociationDef roleOwner = (AssociationDef) role.getContainer();
+		                 if(roleOwner.getDerivedFrom()==null && !TransferFromIli.isLightweightAssociation(roleOwner)){
+                             structQueue.add(new EmbeddedLinkWrapper(sqlid,role,iomObj,aclassWrapper));
+		                 }
+		             }
+		         }
+				
+				
 				// collect structvalues
 				while(!structQueue.isEmpty()){
-					StructWrapper wrapper=(StructWrapper)structQueue.remove(0);
+					AbstractStructWrapper wrapper=structQueue.remove(0);
 					dumpStructs(function,wrapper,fixref,genericDomains,aclass==iomTargetClass);
 				}
 				if(structWrapper==null){
@@ -1424,6 +1453,41 @@ public class TransferToXtf {
 
 		return ret.toString();
 	}
+    private String createQueryStmt4Type(Viewable aclass,EmbeddedLinkWrapper wrapper){
+        StringBuffer ret = new StringBuffer();
+        ret.append("SELECT r0."+colT_ID);
+        ret.append(", r0."+DbNames.T_TYPE_COL);
+        ret.append(", 0 AS "+DbNames.T_SEQ_COL);
+        ret.append(" FROM (");
+        
+        // might have multiple tables!
+        int tabidx=0;
+        String subSelectSep="";
+        for(ViewableWrapper root : recConv.getStructWrappers(aclass)){
+            tabidx++;
+            String tabalias="r"+tabidx;
+            ret.append(subSelectSep);
+            ret.append("SELECT ");
+            ret.append(tabalias+"."+colT_ID);
+            if(createTypeDiscriminator || root.includesMultipleTypes()){
+                ret.append(", "+tabalias+"."+DbNames.T_TYPE_COL);
+            }else{
+                ret.append(",'"+root.getSqlTablename()+"' AS "+DbNames.T_TYPE_COL);
+                
+            }
+            ret.append(" FROM ");
+            ret.append(recConv.getSqlType(root.getViewable()));
+            ret.append(" "+tabalias);
+            RoleDef role=wrapper.getRole().getOppEnd();
+            ArrayList<ViewableWrapper> targetTables = recConv.getTargetTables(role.getDestination());
+            String roleSqlName=ili2sqlName.mapIliRoleDef(role,root.getSqlTablename(),wrapper.getParentTable().getSqlTablename(),targetTables.size()>1);
+            ret.append(" WHERE "+tabalias+"."+roleSqlName+"="+wrapper.getParentSqlId());
+            subSelectSep=" UNION ";
+        }
+        ret.append(" ) r0");
+
+        return ret.toString();
+    }
 
 	private Map<Long,BasketStat> basketStat=null;
 	private HashMap<String, ClassStat> objStat=new HashMap<String, ClassStat>();

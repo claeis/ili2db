@@ -119,7 +119,7 @@ public class Datatypes10GpkgTest {
         {
             // t_ili2db_trafo
             String [][] expectedValues=new String[][] {
-                {"Datatypes10.Topic.SubTablemain", "ch.ehi.ili2db.inheritance", "newClass"},
+                {"Datatypes10.Topic.SubTablemain", "ch.ehi.ili2db.inheritance", "embedded"},
                 {"Datatypes10.Topic.TableA.linientyp:21781(Datatypes10.Topic.TableA)", "ch.ehi.ili2db.secondaryTable", "tablea_linientyp"},
                 {"Datatypes10.Topic.TableA.area:21781(Datatypes10.Topic.TableA)", "ch.ehi.ili2db.secondaryTable", "tablea_area"},
                 {"Datatypes10.Topic.TableA",  "ch.ehi.ili2db.inheritance", "newClass"},
@@ -306,7 +306,7 @@ public class Datatypes10GpkgTest {
         {
             // t_ili2db_trafo
             String [][] expectedValues=new String[][] {
-                {"Datatypes10.Topic.SubTablemain",    "ch.ehi.ili2db.inheritance", "newClass"},
+                {"Datatypes10.Topic.SubTablemain",    "ch.ehi.ili2db.inheritance", "embedded"},
                 {"Datatypes10.Topic.TableA.linientyp:21781(Datatypes10.Topic.TableA)",    "ch.ehi.ili2db.secondaryTable",  "tablea_linientyp"},
                 {"Datatypes10.Topic.TableA.area:21781(Datatypes10.Topic.TableA)", "ch.ehi.ili2db.secondaryTable",  "tablea_area"},
                 {"Datatypes10.Topic.TableA",  "ch.ehi.ili2db.inheritance", "newClass"},

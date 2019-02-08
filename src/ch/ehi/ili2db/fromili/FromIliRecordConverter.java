@@ -245,7 +245,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
                   dbTable.addColumn(dbCol);
 			}
 			// if CLASS
-			  if(!def.isStructure()){
+			  if(!def.isStructure() && !(def.getViewable() instanceof AssociationDef && ((AssociationDef)def.getViewable()).isLightweight())){
 				  if(createIliTidCol || def.getOid()!=null){
 						addIliTidCol(dbTable,def.getOid());
 				  }
@@ -299,99 +299,97 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 			  if(columnWrapper.getViewableTransferElement().obj instanceof RoleDef){
 				  RoleDef role = (RoleDef) columnWrapper.getViewableTransferElement().obj;
 					if(role.getExtending()==null){
-						// not an embedded role and roledef not defined in a lightweight association?
-						if (!columnWrapper.getViewableTransferElement().embedded && !def.isAssocLightweight()){
-							ArrayList<ViewableWrapper> targetTables = getTargetTables(role.getDestination());
-						  for(ViewableWrapper targetTable : targetTables){
-							  dbColId=new DbColId();
-							  DbTableName targetSqlTableName=targetTable.getSqlTable();
-							  String roleSqlName=ili2sqlName.mapIliRoleDef(role,sqlName.getName(),targetSqlTableName.getName(),targetTables.size()>1);
-							  dbColId.setName(roleSqlName);
-							  boolean notNull=false;
-							  if(!sqlEnableNull){
-								  if(targetTables.size()>1){
-									  notNull=false; // multiple alternative FK columns
-								  }else{
-									  notNull=true;
-								  }
-							  }
-							  dbColId.setNotNull(notNull);
-							  dbColId.setPrimaryKey(false);
-							  if(createFk){
-								  dbColId.setReferencedTable(targetSqlTableName);
-							  }
-							  metaInfo.setColumnInfo(dbTable.getName().getName(), null, dbColId.getName(), DbExtMetaInfo.TAG_COL_FOREIGNKEY, targetSqlTableName.getName());                                                          
-								if(createFkIdx){
-									dbColId.setIndex(true);
-								}
-								String cmt=role.getDocumentation();
-								if(cmt!=null && cmt.length()>0){
-									dbColId.setComment(cmt);									
-								}
-							  dbTable.addColumn(dbColId);
-							  // handle ordered
-							  if(role.isOrdered()){
-									// add seqeunce attr
-									DbColId dbSeq=new DbColId();
-									dbSeq.setName(roleSqlName+"_"+DbNames.T_SEQ_COL);
-									dbSeq.setNotNull(notNull);
-									dbSeq.setPrimaryKey(false);
-									dbTable.addColumn(dbSeq);
-							  }
-						  }
-						}
-						// a role of an embedded association?
-						if(columnWrapper.getViewableTransferElement().embedded){
-							AssociationDef roleOwner = (AssociationDef) role.getContainer();
-							if(roleOwner.getDerivedFrom()==null){
-								// role is oppend;
-								ArrayList<ViewableWrapper> targetTables = getTargetTables(role.getDestination());
-							  for(ViewableWrapper targetTable:targetTables){
-								  dbColId=new DbColId();
-								  DbTableName targetSqlTableName=targetTable.getSqlTable();
-								  String roleSqlName=ili2sqlName.mapIliRoleDef(role,sqlName.getName(),targetSqlTableName.getName(),targetTables.size()>1);
-								  dbColId.setName(roleSqlName);
-								  boolean notNull=false;
-								  if(!sqlEnableNull){
-									  if(targetTables.size()>1){
-										  notNull=false; // multiple alternative FK columns
-									  }else if(role.getOppEnd().getDestination()!=def.getViewable()){
-										  notNull=false; // other subtypes in of def don't have this FK
-									  }else{
-										  if(role.getCardinality().getMinimum()==0){
-											  notNull=false;
-										  }else{
-											  notNull=true;
-										  }
-									  }
-								  }
-								  dbColId.setNotNull(notNull);
-								  dbColId.setPrimaryKey(false);
-								  if(createFk){
-									  dbColId.setReferencedTable(targetSqlTableName);
-								  }
+						// an embedded role and roledef defined in a lightweight association?
+						if (columnWrapper.getViewableTransferElement().embedded){
+                            AssociationDef roleOwner = (AssociationDef) role.getContainer();
+                            if(roleOwner.getDerivedFrom()==null){
+                                // role is oppend;
+                                ArrayList<ViewableWrapper> targetTables = getTargetTables(role.getDestination());
+                              for(ViewableWrapper targetTable:targetTables){
+                                  dbColId=new DbColId();
+                                  DbTableName targetSqlTableName=targetTable.getSqlTable();
+                                  String roleSqlName=ili2sqlName.mapIliRoleDef(role,sqlName.getName(),targetSqlTableName.getName(),targetTables.size()>1);
+                                  dbColId.setName(roleSqlName);
+                                  boolean notNull=false;
+                                  if(!sqlEnableNull){
+                                      if(targetTables.size()>1){
+                                          notNull=false; // multiple alternative FK columns
+                                      }else if(role.getOppEnd().getDestination()!=def.getViewable()){
+                                          notNull=false; // other subtypes in of def don't have this FK
+                                      }else{
+                                          if(role.getCardinality().getMinimum()==0){
+                                              notNull=false;
+                                          }else{
+                                              notNull=true;
+                                          }
+                                      }
+                                  }
+                                  dbColId.setNotNull(notNull);
+                                  dbColId.setPrimaryKey(false);
+                                  if(createFk){
+                                      dbColId.setReferencedTable(targetSqlTableName);
+                                  }
                                                                   metaInfo.setColumnInfo(dbTable.getName().getName(), null, dbColId.getName(), DbExtMetaInfo.TAG_COL_FOREIGNKEY, targetSqlTableName.getName());
-									if(createFkIdx){
-										dbColId.setIndex(true);
-									}
-									String cmt=role.getDocumentation();
-									if(cmt!=null && cmt.length()>0){
-										dbColId.setComment(cmt);									
-									}
-								  customMapping.fixupEmbeddedLink(dbTable,dbColId,roleOwner,role,targetSqlTableName,colT_ID);
-								  dbTable.addColumn(dbColId);
-								  // handle ordered
-								  if(role.getOppEnd().isOrdered()){
-										// add seqeunce attr
-										DbColId dbSeq=new DbColId();
-										dbSeq.setName(roleSqlName+"_"+DbNames.T_SEQ_COL);
-										dbSeq.setNotNull(notNull);
-										dbSeq.setPrimaryKey(false);
-										dbTable.addColumn(dbSeq);
-								  }
-								  
-							  }
-							}
+                                    if(createFkIdx){
+                                        dbColId.setIndex(true);
+                                    }
+                                    String cmt=role.getDocumentation();
+                                    if(cmt!=null && cmt.length()>0){
+                                        dbColId.setComment(cmt);                                    
+                                    }
+                                  customMapping.fixupEmbeddedLink(dbTable,dbColId,roleOwner,role,targetSqlTableName,colT_ID);
+                                  dbTable.addColumn(dbColId);
+                                  // handle ordered
+                                  if(role.getOppEnd().isOrdered()){
+                                        // add seqeunce attr
+                                        DbColId dbSeq=new DbColId();
+                                        dbSeq.setName(roleSqlName+"_"+DbNames.T_SEQ_COL);
+                                        dbSeq.setNotNull(notNull);
+                                        dbSeq.setPrimaryKey(false);
+                                        dbTable.addColumn(dbSeq);
+                                  }
+                                  
+                              }
+                            }
+						}else {
+                            ArrayList<ViewableWrapper> targetTables = getTargetTables(role.getDestination());
+                          for(ViewableWrapper targetTable : targetTables){
+                              dbColId=new DbColId();
+                              DbTableName targetSqlTableName=targetTable.getSqlTable();
+                              String roleSqlName=ili2sqlName.mapIliRoleDef(role,sqlName.getName(),targetSqlTableName.getName(),targetTables.size()>1);
+                              dbColId.setName(roleSqlName);
+                              boolean notNull=false;
+                              if(!sqlEnableNull){
+                                  if(targetTables.size()>1){
+                                      notNull=false; // multiple alternative FK columns
+                                  }else{
+                                      notNull=true;
+                                  }
+                              }
+                              dbColId.setNotNull(notNull);
+                              dbColId.setPrimaryKey(false);
+                              if(createFk){
+                                  dbColId.setReferencedTable(targetSqlTableName);
+                              }
+                              metaInfo.setColumnInfo(dbTable.getName().getName(), null, dbColId.getName(), DbExtMetaInfo.TAG_COL_FOREIGNKEY, targetSqlTableName.getName());                                                          
+                                if(createFkIdx){
+                                    dbColId.setIndex(true);
+                                }
+                                String cmt=role.getDocumentation();
+                                if(cmt!=null && cmt.length()>0){
+                                    dbColId.setComment(cmt);                                    
+                                }
+                              dbTable.addColumn(dbColId);
+                              // handle ordered
+                              if(role.isOrdered()){
+                                    // add seqeunce attr
+                                    DbColId dbSeq=new DbColId();
+                                    dbSeq.setName(roleSqlName+"_"+DbNames.T_SEQ_COL);
+                                    dbSeq.setNotNull(notNull);
+                                    dbSeq.setPrimaryKey(false);
+                                    dbTable.addColumn(dbSeq);
+                              }
+                          }
 						}
 					}
 			  }

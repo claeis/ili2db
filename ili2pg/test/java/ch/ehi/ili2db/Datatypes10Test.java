@@ -118,7 +118,7 @@ public class Datatypes10Test {
                 {
                     // t_ili2db_trafo
                     String [][] expectedValues=new String[][] {
-                        {"Datatypes10.Topic.SubTablemain", "ch.ehi.ili2db.inheritance", "newClass"},
+                        {"Datatypes10.Topic.SubTablemain", "ch.ehi.ili2db.inheritance", "embedded"},
                         {"Datatypes10.Topic.TableA", "ch.ehi.ili2db.inheritance", "newClass"},
                         {"Datatypes10.Topic.SubTable", "ch.ehi.ili2db.inheritance", "newClass"},
                         {"Datatypes10.Topic.OtherTable", "ch.ehi.ili2db.inheritance", "newClass"},

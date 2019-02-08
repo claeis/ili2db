@@ -18,40 +18,37 @@
 package ch.ehi.ili2db.toxtf;
 
 import ch.ehi.ili2db.mapping.ViewableWrapper;
-import ch.interlis.ili2c.metamodel.AttributeDef;
+import ch.interlis.ili2c.metamodel.RoleDef;
 import ch.interlis.iom.IomObject;
+import ch.interlis.iom_j.Iom_jObject;
 
-/**
- * @author ce
- * @version $Revision: 1.0 $ $Date: 05.04.2005 $
- */
-public class StructWrapper extends AbstractStructWrapper {
-	private long parentSqlId;
-	private IomObject parent;
-	private AttributeDef parentAttr;
-	private ViewableWrapper parentTable;
-	/** creates a StructWrapper.
-	 * @param parentSqlId1 sqlid of the parent object/structele.
-	 * @param parentAttr1 Structure attribute in the parent CLASS/STRUCTURE.
-	 * @param parent1 parent object/structele.
-	 */
-	public StructWrapper(long parentSqlId1,AttributeDef parentAttr1,IomObject parent1,ViewableWrapper parentTable1){
-		parentSqlId=parentSqlId1;
-		parentAttr=parentAttr1;
-		parentTable=parentTable1;
-		parent=parent1;
-	}
-	public long getParentSqlId() {
-		return parentSqlId;
-	}
-	public AttributeDef getParentAttr() {
-		return parentAttr;
-	}
+public class EmbeddedLinkWrapper extends AbstractStructWrapper {
+
+    private long parentSqlId;
+    private RoleDef targetRole;
+    private Iom_jObject parent;
+    private ViewableWrapper parentTable;
+    public EmbeddedLinkWrapper(long parentSqlId1, RoleDef targetRole1, Iom_jObject parent1, ViewableWrapper parentTable1) {
+        parentSqlId=parentSqlId1;
+        targetRole=targetRole1;
+        parent=parent1;
+        parentTable=parentTable1;
+    }
+
     @Override
-	public IomObject getParent() {
-		return parent;
-	}
-	public ViewableWrapper getParentTable() {
-		return parentTable;
-	}
+    public IomObject getParent() {
+        return parent;
+    }
+
+    public RoleDef getRole() {
+        return targetRole;
+    }
+
+    public long getParentSqlId() {
+        return parentSqlId;
+    }
+
+    public ViewableWrapper getParentTable() {
+        return parentTable;
+    }
 }

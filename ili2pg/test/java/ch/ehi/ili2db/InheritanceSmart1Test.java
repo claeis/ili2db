@@ -252,7 +252,7 @@ public class InheritanceSmart1Test {
                     String [][] expectedValues=new String[][] {
                         {"SubtypeFK23.Topic.ClassA",  "ch.ehi.ili2db.inheritance", "newClass"},
                         {"SubtypeFK23.Topic.ClassB",  "ch.ehi.ili2db.inheritance", "superClass"},
-                        {"SubtypeFK23.Topic.bc1", "ch.ehi.ili2db.inheritance", "newClass"},
+                        {"SubtypeFK23.Topic.bc1", "ch.ehi.ili2db.inheritance", "embedded"},
                         {"SubtypeFK23.Topic.ClassC",  "ch.ehi.ili2db.inheritance", "superClass"},
                     };
                     Ili2dbAssert.assertTrafoTable(jdbcConnection,expectedValues, DBSCHEMA);

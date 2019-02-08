@@ -86,7 +86,7 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 	 * @param wrapper not null, if building query for struct values
 	 * @return SQL-Query statement
 	 */
-	public String createQueryStmt(Viewable aclass1,Long basketSqlId,StructWrapper structWrapper){
+	public String createQueryStmt(Viewable aclass1,Long basketSqlId,AbstractStructWrapper structWrapper0){
 		ViewableWrapper classWrapper=class2wrapper.get(aclass1);
 		ViewableWrapper rootWrapper=classWrapper.getWrappers().get(0);
 		StringBuffer ret = new StringBuffer();
@@ -94,20 +94,23 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 		if(createTypeDiscriminator || classWrapper.includesMultipleTypes()){
 			ret.append(", r0."+DbNames.T_TYPE_COL);
 		}
-		if(!classWrapper.isStructure()){
+		if(structWrapper0==null){
 			if(createIliTidCol || classWrapper.getOid()!=null){
 				ret.append(", r0."+DbNames.T_ILI_TID_COL);
 			}
 		}
-		if(structWrapper!=null){
-			if(createGenericStructRef){
-				ret.append(", r0."+DbNames.T_PARENT_ID_COL);
-				ret.append(", r0."+DbNames.T_PARENT_TYPE_COL);
-				ret.append(", r0."+DbNames.T_PARENT_ATTR_COL);
-			}else{
-				ret.append(", r0."+ili2sqlName.mapIliAttributeDefReverse(structWrapper.getParentAttr(),getSqlType(classWrapper.getViewable()).getName(),getSqlType(structWrapper.getParentTable().getViewable()).getName()));
-			}
-			ret.append(", r0."+DbNames.T_SEQ_COL);
+		if(structWrapper0!=null){
+		    if(structWrapper0 instanceof StructWrapper) {
+		        StructWrapper structWrapper=(StructWrapper)structWrapper0;
+	            if(createGenericStructRef){
+	                ret.append(", r0."+DbNames.T_PARENT_ID_COL);
+	                ret.append(", r0."+DbNames.T_PARENT_TYPE_COL);
+	                ret.append(", r0."+DbNames.T_PARENT_ATTR_COL);
+	            }else{
+	                ret.append(", r0."+ili2sqlName.mapIliAttributeDefReverse(structWrapper.getParentAttr(),getSqlType(classWrapper.getViewable()).getName(),getSqlType(structWrapper.getParentTable().getViewable()).getName()));
+	            }
+	            ret.append(", r0."+DbNames.T_SEQ_COL);
+		    }
 		}
 		String sep=",";
 		int tableAliasIdx=0;
@@ -196,18 +199,27 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 			ret.append(sep+" r0."+DbNames.T_TYPE_COL+"='"+getSqlType(aclass1).getName()+"'");
 			sep=" AND";
 		}
-		if(structWrapper!=null){
-			if(createGenericStructRef){
-				ret.append(sep+" r0."+DbNames.T_PARENT_ID_COL+"=? AND r0."+DbNames.T_PARENT_ATTR_COL+"=?");
-			}else{
-				ret.append(sep+" r0."+ili2sqlName.mapIliAttributeDefReverse(structWrapper.getParentAttr(),getSqlType(classWrapper.getViewable()).getName(),getSqlType(structWrapper.getParentTable().getViewable()).getName())+"=?");
-			}
-			sep=" AND";
+		if(structWrapper0!=null) {
+		    if(structWrapper0 instanceof StructWrapper){
+	            StructWrapper structWrapper=(StructWrapper)structWrapper0;
+	            if(createGenericStructRef){
+	                ret.append(sep+" r0."+DbNames.T_PARENT_ID_COL+"=? AND r0."+DbNames.T_PARENT_ATTR_COL+"=?");
+	            }else{
+	                ret.append(sep+" r0."+ili2sqlName.mapIliAttributeDefReverse(structWrapper.getParentAttr(),getSqlType(classWrapper.getViewable()).getName(),getSqlType(structWrapper.getParentTable().getViewable()).getName())+"=?");
+	            }
+	            sep=" AND";
+		    }else if(structWrapper0 instanceof EmbeddedLinkWrapper) {
+		        EmbeddedLinkWrapper structWrapper=(EmbeddedLinkWrapper)structWrapper0;
+		        RoleDef role=structWrapper.getRole().getOppEnd();
+                ArrayList<ViewableWrapper> targetTables = getTargetTables(role.getDestination());
+                String roleSqlName=ili2sqlName.mapIliRoleDef(role,rootWrapper.getSqlTablename(),structWrapper.getParentTable().getSqlTablename(),targetTables.size()>1);
+                ret.append(sep+" r0."+roleSqlName+"=?");
+		    }
 		}
 		if(basketSqlId!=null){
 			ret.append(sep+" r0."+DbNames.T_BASKET_COL+"=?");
 		}
-		if(structWrapper!=null){
+		if(structWrapper0!=null  && structWrapper0 instanceof StructWrapper){
 			ret.append(" ORDER BY r0."+DbNames.T_SEQ_COL+" ASC");
 		}
 		return ret.toString();
@@ -320,14 +332,21 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 	}
 	public void setStmtParams(java.sql.PreparedStatement dbstmt,
 			Long basketSqlId, FixIomObjectRefs fixref,
-			StructWrapper structWrapper) throws SQLException {
+			AbstractStructWrapper structWrapper0) throws SQLException {
 		dbstmt.clearParameters();
 		int paramIdx=1;
-		if(structWrapper!=null){
-			dbstmt.setLong(paramIdx++,structWrapper.getParentSqlId());
-			if(createGenericStructRef){
-				dbstmt.setString(paramIdx++,ili2sqlName.mapIliAttributeDef(structWrapper.getParentAttr(),null,getSqlType(structWrapper.getParentTable().getViewable()).getName(),null));
-			}
+		if(structWrapper0!=null){
+		    if(structWrapper0 instanceof StructWrapper) {
+		        StructWrapper structWrapper=(StructWrapper) structWrapper0;
+	            dbstmt.setLong(paramIdx++,structWrapper.getParentSqlId());
+	            if(createGenericStructRef){
+	                dbstmt.setString(paramIdx++,ili2sqlName.mapIliAttributeDef(structWrapper.getParentAttr(),null,getSqlType(structWrapper.getParentTable().getViewable()).getName(),null));
+	            }
+		    }else if (structWrapper0 instanceof EmbeddedLinkWrapper){
+		        EmbeddedLinkWrapper structWrapper=(EmbeddedLinkWrapper) structWrapper0;
+                dbstmt.setLong(paramIdx++,structWrapper.getParentSqlId());
+		        
+		    }
 		}else{
 			if(fixref!=null){
 				throw new IllegalArgumentException("fixref!=null");
@@ -342,8 +361,8 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 		return sqlid;
 	}
 	public Iom_jObject convertRecord(java.sql.ResultSet rs, ViewableWrapper aclass,Viewable iliClassForSelect,
-			FixIomObjectRefs fixref, StructWrapper structWrapper,
-			HashMap structelev, ArrayList<StructWrapper> structQueue, long sqlid,Map<String,String> genericDomains,Viewable iliClassForXtf)
+			FixIomObjectRefs fixref, AbstractStructWrapper structWrapper,
+			HashMap structelev, ArrayList<AbstractStructWrapper> structQueue, long sqlid,Map<String,String> genericDomains,Viewable iliClassForXtf)
 			throws SQLException {
 		Iom_jObject iomObj;
 		int valuei=1;
@@ -374,12 +393,16 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 			iomObj.setattrvalue(ItfWriter2.INTERNAL_T_ID, Long.toString(sqlid));
 			fixref.setRoot(iomObj);
 		}else{
-			iomObj=(Iom_jObject)structelev.get(Long.toString(sqlid));
-			if(createGenericStructRef){
-				valuei+=4;
-			}else{
-				valuei+=2;
-			}
+		    if(structWrapper instanceof StructWrapper) {
+	            iomObj=(Iom_jObject)structelev.get(Long.toString(sqlid));
+	            if(createGenericStructRef){
+	                valuei+=4;
+	            }else{
+	                valuei+=2;
+	            }
+		    }else {
+                iomObj=(Iom_jObject)structelev.get(Long.toString(sqlid));
+		    }
 		}
 		
         HashMap attrs=getIomObjectAttrs(iliClassForSelect);
@@ -408,36 +431,53 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 						boolean refAlreadyDefined=false;
 						  for(ViewableWrapper targetTable : targetTables){
 								 String sqlRoleName=ili2sqlName.mapIliRoleDef(role,getSqlType(table.getViewable()).getName(),targetTable.getSqlTablename(),targetTables.size()>1);
-								 // a role of an embedded association?
-								 if(obj.embedded){
-									AssociationDef roleOwner = (AssociationDef) role.getContainer();
-									if(roleOwner.getDerivedFrom()==null){
-										 // TODO if(orderPos!=0){
-										long value=rs.getLong(valuei);
-										valuei++;
-										if(!rs.wasNull()){
-											if(refAlreadyDefined){
-												EhiLogger.logAdaption("Table "+table.getSqlTablename()+"(id "+sqlid+") more than one value for role "+roleName+"; value of "+sqlRoleName+" ignored");
-											}else{
-												IomObject ref=iomObj.addattrobj(roleName,roleOwner.getScopedName(null));
-												mapSqlid2Xtfid(fixref,value,ref,role.getDestination());
-												refAlreadyDefined=true;
-											}
-										}
-									}
-								 }else{
-									 // TODO if(orderPos!=0){
-										long value=rs.getLong(valuei);
-										valuei++;
-										if(!rs.wasNull()){
-											if(refAlreadyDefined){
-												EhiLogger.logAdaption("Table "+table.getSqlTablename()+"(id "+sqlid+") more than one value for role "+roleName+"; value of "+sqlRoleName+" ignored");
-											}else{
-												IomObject ref=iomObj.addattrobj(roleName,"REF");
-												mapSqlid2Xtfid(fixref,value,ref,role.getDestination());
-												refAlreadyDefined=true;
-											}
-										}
+								 if(structWrapper==null) {
+	                                 // a role of an embedded association?
+	                                 if(obj.embedded){
+	                                    AssociationDef roleOwner = (AssociationDef) role.getContainer();
+	                                    if(roleOwner.getDerivedFrom()==null){
+	                                         // TODO if(orderPos!=0){
+	                                        long value=rs.getLong(valuei);
+	                                        valuei++;
+	                                        if(!rs.wasNull()){
+	                                            if(refAlreadyDefined){
+	                                                EhiLogger.logAdaption("Table "+table.getSqlTablename()+"(id "+sqlid+") more than one value for role "+roleName+"; value of "+sqlRoleName+" ignored");
+	                                            }else{
+	                                                IomObject ref=iomObj.addattrobj(roleName,roleOwner.getScopedName(null));
+	                                                mapSqlid2Xtfid(fixref,value,ref,role.getDestination());
+	                                                refAlreadyDefined=true;
+	                                            }
+	                                        }
+	                                    }
+	                                 }else{
+	                                     // TODO if(orderPos!=0){
+	                                        long value=rs.getLong(valuei);
+	                                        valuei++;
+	                                        if(!rs.wasNull()){
+	                                            if(refAlreadyDefined){
+	                                                EhiLogger.logAdaption("Table "+table.getSqlTablename()+"(id "+sqlid+") more than one value for role "+roleName+"; value of "+sqlRoleName+" ignored");
+	                                            }else{
+	                                                IomObject ref=iomObj.addattrobj(roleName,"REF");
+	                                                mapSqlid2Xtfid(fixref,value,ref,role.getDestination());
+	                                                refAlreadyDefined=true;
+	                                            }
+	                                        }
+	                                 }
+								     
+								 }else {
+                                     long value=rs.getLong(valuei);
+                                     valuei++;
+                                     if(!rs.wasNull()){
+                                         if(refAlreadyDefined){
+                                             EhiLogger.logAdaption("Table "+table.getSqlTablename()+"(id "+sqlid+") more than one value for role "+roleName+"; value of "+sqlRoleName+" ignored");
+                                         }else{
+                                             if(role==((EmbeddedLinkWrapper) structWrapper).getRole()) {
+                                                 mapSqlid2Xtfid(fixref,value,iomObj,role.getDestination());
+                                             }
+                                             refAlreadyDefined=true;
+                                         }
+                                     }
+								     
 								 }
 							  
 						  }
@@ -453,7 +493,7 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 	final private int  LEN_LANG_PREFIX=DbNames.MULTILINGUAL_TXT_COL_PREFIX.length();
     private String dbSchema;
 	public int addAttrValue(java.sql.ResultSet rs, int valuei, long sqlid,
-			Iom_jObject iomObj, AttributeDef tableAttr,AttributeDef classAttr,Integer epsgCode,ArrayList<StructWrapper> structQueue,ViewableWrapper table,FixIomObjectRefs fixref,Map<String,String> genericDomains,Viewable iliClassForXtf) throws SQLException {
+			Iom_jObject iomObj, AttributeDef tableAttr,AttributeDef classAttr,Integer epsgCode,ArrayList<AbstractStructWrapper> structQueue,ViewableWrapper table,FixIomObjectRefs fixref,Map<String,String> genericDomains,Viewable iliClassForXtf) throws SQLException {
 		if(true) { // attr.getExtending()==null){
 			String attrName=tableAttr.getName();
 			String sqlAttrName=ili2sqlName.mapIliAttributeDef(tableAttr,epsgCode,table.getSqlTablename(),null);

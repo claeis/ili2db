@@ -67,6 +67,7 @@ import ch.interlis.ili2c.metamodel.Domain;
 import ch.interlis.ili2c.metamodel.Element;
 import ch.interlis.ili2c.metamodel.Enumeration;
 import ch.interlis.ili2c.metamodel.EnumerationType;
+import ch.interlis.ili2c.metamodel.ExtendableContainer;
 import ch.interlis.ili2c.metamodel.LineType;
 import ch.interlis.ili2c.metamodel.Model;
 import ch.interlis.ili2c.metamodel.SurfaceOrAreaType;
@@ -245,9 +246,7 @@ public class TransferFromIli {
 			if(assoc.getDerivedFrom()!=null){
 				return;
 			}
-			if(assoc.isLightweight() 
-				&& !assoc.getAttributes().hasNext()
-				&& !assoc.getLightweightAssociations().iterator().hasNext()) {
+			if(isLightweightAssociation(assoc)) {
 				if(pass==1){
 					customMapping.fixupViewable(null,def.getViewable());
 				}
@@ -1755,6 +1754,19 @@ public class TransferFromIli {
 		}
 		metaInfo.updateMetaInfoTables(gen,conn, schema.getName());
 	}
+    public static boolean isLightweightAssociation(AssociationDef roleOwner) {
+        if(!roleOwner.isLightweight()) {
+            return false;
+        }
+        for(ExtendableContainer<Element> assocEle:roleOwner.getExtensions()) {
+            AssociationDef assoc=(AssociationDef)assocEle;
+            if(assoc.getAttributes().hasNext()
+                    || assoc.getLightweightAssociations().iterator().hasNext()) {
+                return false;
+            }
+        }
+        return true;
+    }
     public static int[] getEpsgCodes(AttributeDef attr,String srsModelAssignment,int defaultCrsCode) {
         TransferDescription td=(TransferDescription)attr.getContainer(TransferDescription.class);
         if(Ili2cUtility.isMultiSurfaceAttr(td,attr)) {

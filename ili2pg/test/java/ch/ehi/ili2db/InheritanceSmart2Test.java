@@ -114,7 +114,7 @@ public class InheritanceSmart2Test {
                     {"Inheritance2.TestA.ClassA3c",   "ch.ehi.ili2db.inheritance", "newAndSubClass"},
                     {"Inheritance2.TestA.aa2bb",  "ch.ehi.ili2db.inheritance", "newAndSubClass"},
                     {"Inheritance2.TestB.ClassA2",    "ch.ehi.ili2db.inheritance", "newAndSubClass"},
-                    {"Inheritance2.TestA.a2b",    "ch.ehi.ili2db.inheritance", "newAndSubClass"},
+                    {"Inheritance2.TestA.a2b",    "ch.ehi.ili2db.inheritance", "embedded"},
                 };
                 Ili2dbAssert.assertTrafoTable(jdbcConnection,expectedValues, DBSCHEMA);
             }

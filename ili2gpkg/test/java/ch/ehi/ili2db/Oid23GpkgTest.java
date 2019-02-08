@@ -95,7 +95,7 @@ public class Oid23GpkgTest {
             String [][] expectedValues=new String[][] {
                 {"Oid1.TestA.ClassA1b", "ch.ehi.ili2db.inheritance", "newClass"},
                 {"Oid1.TestA.ClassB1b", "ch.ehi.ili2db.inheritance", "newClass"},
-                {"Oid1.TestC.ac", "ch.ehi.ili2db.inheritance", "newClass"},
+                {"Oid1.TestC.ac", "ch.ehi.ili2db.inheritance", "embedded"},
                 {"Oid1.TestC.ClassC1", "ch.ehi.ili2db.inheritance", "newClass"},
                 {"Oid1.TestA.ClassB1", "ch.ehi.ili2db.inheritance", "newClass"},
                 {"Oid1.TestA.ClassA1", "ch.ehi.ili2db.inheritance", "newClass"},

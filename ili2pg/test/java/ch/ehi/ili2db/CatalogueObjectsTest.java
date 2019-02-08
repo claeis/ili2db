@@ -269,6 +269,10 @@ public class CatalogueObjectsTest {
                     {"CatalogueObjects1.TopicA.Katalog_Programm.Programm",    "programm", "topica_katalog_programm2", null},
                     {"Localisation_V1.LocalisedText.Language",    "alanguage", "localisedtext", null},
                     {"CatalogueObjects1.TopicC.Nutzung.OhneUuid2_n", "topicc_nutzung_ohneuuid2_n", "topicb_ohneuuid2ref","topicc_nutzung"},
+
+                    {"CatalogueObjects1.TopicC.Nutzung.OhneUuid_n","topicc_nutzung_ohneuuid_n","topicb_ohneuuid2ref","topicc_nutzung"},
+                    {"CatalogueObjects1.TopicC.Nutzung.Programm_n","topicc_nutzung_programm_n","topica_katalog_programm2ref","topicc_nutzung"},
+                    {"Localisation_V1.MultilingualText.LocalisedText","multilingualtext_localisedtext","localisationch_v1_localisedtext","multilingualtext"}
                     
                 };
                 Ili2dbAssert.assertAttrNameTable(jdbcConnection,expectedValues, DBSCHEMA);

@@ -24,6 +24,7 @@ public class TrafoConfigNames {
 	public static final String INHERITANCE_TRAFO_NEWANDSUBCLASS="newAndSubClass";
 	public static final String INHERITANCE_TRAFO_SUPERCLASS="superClass";
 	public static final String INHERITANCE_TRAFO_SUBCLASS="subClass";
+    public static final String INHERITANCE_TRAFO_EMBEDDED="embedded";
 	public static final String SECONDARY_TABLE = Config.PREFIX+".secondaryTable";;
 
 }

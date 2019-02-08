@@ -18,30 +18,24 @@
 package ch.ehi.ili2db.fromxtf;
 
 import ch.interlis.ili2c.metamodel.AttributeDef;
+import ch.interlis.ili2c.metamodel.RoleDef;
 import ch.interlis.iom.IomObject;
 
 /**
  * @author ce
  * @version $Revision: 1.0 $ $Date: 05.04.2005 $
  */
-public class StructWrapper extends AbstractStructWrapper {
-	private long parentSqlId;
+public class EmbeddedLinkWrapper extends AbstractStructWrapper {
+    private String parentXtfId;
 	private String parentSqlType;
 	private IomObject struct;
-	private int structi;
-	private String parentSqlAttr;
-	private AttributeDef parentAttr;
-	public StructWrapper(long parentSqlId1,String parentSqlType1,String parentSqlAttr1,IomObject struct1,int structi1,AttributeDef parentAttr1){
-		parentSqlId=parentSqlId1;
-		parentSqlType=parentSqlType1;
-		parentSqlAttr=parentSqlAttr1;
-		parentAttr=parentAttr1;
-		struct=struct1;
-		structi=structi1;
-	}
-	public long getParentSqlId() {
-		return parentSqlId;
-	}
+	private RoleDef targetRole;
+	public EmbeddedLinkWrapper(String parentXtfId1, String parentSqlType1, IomObject struct1, RoleDef targetRole1) {
+        parentXtfId=parentXtfId1;
+        parentSqlType=parentSqlType1;
+        targetRole=targetRole1;
+        struct=struct1;
+    }
 	/** gets the sql name of the parent class/structure. 
 	 * @return table name or value of column t_type if parent is not mapped with a newClass strategy
 	 */
@@ -49,18 +43,14 @@ public class StructWrapper extends AbstractStructWrapper {
 	public String getParentSqlType() {
 		return parentSqlType;
 	}
-	public String getParentSqlAttr() {
-		return parentSqlAttr;
-	}
-	public AttributeDef getParentAttr() {
-		return parentAttr;
-	}
-	@Override
+    @Override
 	public IomObject getStruct() {
 		return struct;
 	}
-	public int getStructi() {
-		return structi;
-	}
-
+    public String getParentXtfId() {
+        return parentXtfId;
+    }
+    public RoleDef getTargetRole() {
+        return targetRole;
+    }
 }

@@ -114,8 +114,8 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 		
 	}
 	public void writeRecord(long basketSqlId, java.util.Map<String,String> genericDomains,IomObject iomObj,Viewable iomClass,
-			StructWrapper structEle, ViewableWrapper aclass, String sqlType,
-			long sqlId, boolean updateObj, PreparedStatement ps,ArrayList structQueue,Viewable originalClass)
+			AbstractStructWrapper structEle0, ViewableWrapper aclass, String sqlType,
+			long sqlId, boolean updateObj, PreparedStatement ps,ArrayList<AbstractStructWrapper> structQueue,Viewable originalClass)
 			throws SQLException, ConverterException {
 		int valuei=1;
 		
@@ -144,7 +144,7 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 					valuei++;
 				}
 				// if class
-				if(structEle==null){
+				if(structEle0==null){
 					if(!updateObj){
 						if(!aclass.isStructure()){
 							if(createIliTidCol || aclass.getOid()!=null){
@@ -161,7 +161,8 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 					}
 				}
 				// if struct, add ref to parent
-				if(structEle!=null){
+				if(structEle0!=null && (structEle0 instanceof StructWrapper)){
+				    StructWrapper structEle=(StructWrapper)structEle0;
 					ps.setLong(valuei, structEle.getParentSqlId());
 					valuei++;
 					if(createGenericStructRef){
@@ -234,17 +235,31 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 								}
 							}
 						 }else{
-							 IomObject structvalue=iomObj.getattrobj(roleName,0);
-							 refoid=structvalue.getobjectrefoid();
-							 long orderPos=structvalue.getobjectreforderpos();
-							 if(orderPos!=0){
-								// refoid,orderPos
-								//ret.setStringAttribute(roleName, refoid);
-								//ret.setStringAttribute(roleName+".orderPos", Long.toString(orderPos));
-							 }else{
-								// refoid
-								//ret.setStringAttribute(roleName, refoid);
-							 }
+						     if(structEle0!=null) {
+						         EmbeddedLinkWrapper structEle=(EmbeddedLinkWrapper)structEle0;
+						         // role of an association that is embedded in XTF but has its on table in the db (because it has attributes)
+						         if(role==structEle.getTargetRole()) {
+						             refoid=structEle.getStruct().getobjectrefoid();
+						         }else {
+						             refoid=structEle.getParentXtfId();
+						         }
+						     }else {
+						         // role of a normal association
+                                 IomObject structvalue=iomObj.getattrobj(roleName,0);
+                                 refoid=structvalue.getobjectrefoid();
+                                 long orderPos=structvalue.getobjectreforderpos();
+                                 if(orderPos!=0){
+                                    // refoid,orderPos
+                                    //ret.setStringAttribute(roleName, refoid);
+                                    //ret.setStringAttribute(roleName+".orderPos", Long.toString(orderPos));
+                                 }else{
+                                    // refoid
+                                    //ret.setStringAttribute(roleName, refoid);
+                                 }
+						     }
+						     
+						     
+						     
 						 }
 						OutParam<Integer> valueiRef=new OutParam<Integer>(valuei);
 						setReferenceColumn(ps,role.getDestination(),refoid,valueiRef);
@@ -311,7 +326,7 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 	 * @param aclass viewable
 	 * @return insert statement
 	 */
-	public String createInsertStmt(boolean isUpdate,Viewable iomClass,DbTableName sqlTableName,ViewableWrapper aclass,StructWrapper structEle){
+	public String createInsertStmt(boolean isUpdate,Viewable iomClass,DbTableName sqlTableName,ViewableWrapper aclass,AbstractStructWrapper structEle0){
 		StringBuffer ret = new StringBuffer();
 		StringBuffer values = new StringBuffer();
 		//INSERT INTO table_name (column1,column2,column3,...)
@@ -377,7 +392,7 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 					sep=",";
 				}
 				// if Class
-				if(!aclass.isStructure()){
+				if(structEle0==null){
 					if(!isUpdate){
 						if(createIliTidCol || aclass.getOid()!=null){
 							ret.append(sep);
@@ -389,7 +404,7 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 				}
 				// if STRUCTURE, add ref to parent
 				if(aclass.isStructure()){
-					if(structEle==null){
+					if(structEle0==null){
 						// struct is extended by a class and current object is an instance of the class
 					}else{
 						// current object is an instance of the structure
@@ -421,6 +436,7 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 							sep=",";
 						}else{
 							ret.append(sep);
+							StructWrapper structEle=(StructWrapper)structEle0;
 							Viewable parentViewable=getViewable(structEle.getParentSqlType());
 							ViewableWrapper parentTable=getViewableWrapperOfAbstractClass((Viewable)structEle.getParentAttr().getContainer(),parentViewable);
 							ret.append(ili2sqlName.mapIliAttributeDefReverse(structEle.getParentAttr(),sqlTableName.getName(),parentTable.getSqlTablename()));
@@ -768,7 +784,7 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 		return sep;
 	}
 	public int addAttrValue(IomObject iomObj, String sqlType, long sqlId,
-			String sqlTableName,PreparedStatement ps, int valuei, AttributeDef tableAttr,AttributeDef classAttr,Integer epsgCode,ArrayList structQueue,Map<String,String> genericDomains,Viewable originalClass)
+			String sqlTableName,PreparedStatement ps, int valuei, AttributeDef tableAttr,AttributeDef classAttr,Integer epsgCode,ArrayList<AbstractStructWrapper> structQueue,Map<String,String> genericDomains,Viewable originalClass)
 			throws SQLException, ConverterException {
 		if(true) { // attr.getExtending()==null){
 			 String attrName=tableAttr.getName();
@@ -1277,7 +1293,7 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 		typeCache.put(type,new Double(p));
 		return p;
 	}
-	private void enqueStructValue(ArrayList structQueue,long parentSqlId,String parentSqlType,String parentSqlAttr,IomObject struct,int structi,AttributeDef attr)
+	private void enqueStructValue(ArrayList<AbstractStructWrapper> structQueue,long parentSqlId,String parentSqlType,String parentSqlAttr,IomObject struct,int structi,AttributeDef attr)
 	{
 		structQueue.add(new StructWrapper(parentSqlId,parentSqlType,parentSqlAttr,struct,structi,attr));
 	}

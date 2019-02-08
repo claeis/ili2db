@@ -286,7 +286,7 @@ public class AbstractRecordConverter {
 	{
 		return enumTypes.mapItfCode2XtfCode(type, Integer.toString(itfCode));
 	}	
-	public ArrayList<ViewableWrapper> getStructWrappers(Table structClass) {
+	public ArrayList<ViewableWrapper> getStructWrappers(Viewable structClass) {
 		ArrayList<ViewableWrapper> ret=new ArrayList<ViewableWrapper>();
 		ViewableWrapper structWrapper=class2wrapper.get(structClass);
 		if(structWrapper!=null){
@@ -294,18 +294,19 @@ public class AbstractRecordConverter {
 				structWrapper=structWrapper.getExtending();
 			}
 			ret.add(structWrapper);
-			return ret;
 		}
 		ArrayList<ExtendableContainer<AbstractLeafElement>> exts=new ArrayList<ExtendableContainer<AbstractLeafElement>>();
 		exts.addAll(structClass.getDirectExtensions());
 		while(exts.size()>0){
-			structClass=(Table)exts.remove(0);
+			structClass=(Viewable)exts.remove(0);
 			structWrapper=class2wrapper.get(structClass);
 			if(structWrapper!=null){
 				while(structWrapper.getExtending()!=null){
 					structWrapper=structWrapper.getExtending();
 				}
-				ret.add(structWrapper);
+				if(!ret.contains(structWrapper)) {
+	                ret.add(structWrapper);
+				}
 			}else{
 				exts.addAll(structClass.getDirectExtensions());
 			}

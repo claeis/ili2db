@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import ch.ehi.ili2db.fromili.TransferFromIli;
 import ch.ehi.sqlgen.repository.DbTableName;
 import ch.interlis.ili2c.metamodel.AbstractClassDef;
 import ch.interlis.ili2c.metamodel.AssociationDef;
@@ -121,9 +122,6 @@ public class ViewableWrapper {
 	public void setMultipleTypes(boolean multipleTypes) {
 		incMultipleTypes=multipleTypes;
 	}
-	public boolean isAssocLightweight() {
-		return (viewable instanceof AssociationDef) && ((AssociationDef)viewable).isLightweight();
-	}
 	public ViewableWrapper getExtending() {
 		return base;
 	}
@@ -155,5 +153,4 @@ public class ViewableWrapper {
 		}
 		return false;
 	}
-
 }

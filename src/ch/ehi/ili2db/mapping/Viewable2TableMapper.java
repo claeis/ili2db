@@ -1,5 +1,6 @@
 package ch.ehi.ili2db.mapping;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -107,6 +108,9 @@ public class Viewable2TableMapper {
 					    
 	                    // defined attrs
 	                    {
+	                        if(aclass instanceof AssociationDef) {
+	                            addProps(wrapper,props,getRoles((AssociationDef)aclass));
+	                        }
 	                        addProps(wrapper,props,aclass.getDefinedAttributesAndRoles2());
 	                    }
 	                    
@@ -118,6 +122,9 @@ public class Viewable2TableMapper {
 	                            if(!TrafoConfigNames.INHERITANCE_TRAFO_SUBCLASS.equals(baseInheritanceStrategy) 
 	                                    && !TrafoConfigNames.INHERITANCE_TRAFO_NEWANDSUBCLASS.equals(baseInheritanceStrategy)){
 	                                break;
+	                            }
+	                            if(base instanceof AssociationDef) {
+	                                addProps(wrapper,props,getRoles((AssociationDef)base));
 	                            }
 	                            addProps(wrapper,props,base.getDefinedAttributesAndRoles2());
 	                            base=(Viewable) base.getExtending();
@@ -169,6 +176,8 @@ public class Viewable2TableMapper {
 					ret.add(aclass, wrapper);
 				}else if(TrafoConfigNames.INHERITANCE_TRAFO_SUBCLASS.equals(inheritanceStrategy)){
 					// skip it; props already added when visiting subclass
+                }else if(TrafoConfigNames.INHERITANCE_TRAFO_EMBEDDED.equals(inheritanceStrategy)){
+                    // skip it; props already added when visiting container class
 				}else{
 					throw new IllegalStateException("unexpected inheritance config <"+inheritanceStrategy+">");
 				}
@@ -176,6 +185,15 @@ public class Viewable2TableMapper {
 		}
 		return ret;
 	}
+
+    private Iterator<ViewableTransferElement> getRoles(AssociationDef aclass) {
+        ArrayList<ViewableTransferElement> roles=new ArrayList<ViewableTransferElement>();
+        for(Iterator<RoleDef> roleIt=((AssociationDef)aclass).getRolesIterator();roleIt.hasNext();) {
+            RoleDef role=roleIt.next();
+            roles.add(new ViewableTransferElement(role,false));
+        }
+        return roles.iterator();
+    }
 
 	private void doSmartOff(List<Element> eles) {
 		/*
@@ -188,20 +206,17 @@ public class Viewable2TableMapper {
 				// a Viewable
 				Viewable aclass=(Viewable) ele;
 				if(trafoConfig.getViewableConfig(aclass, TrafoConfigNames.INHERITANCE_TRAFO)==null){
-					// newClass
-					trafoConfig.setViewableConfig(aclass, TrafoConfigNames.INHERITANCE_TRAFO, TrafoConfigNames.INHERITANCE_TRAFO_NEWCLASS);
+				    if(aclass instanceof AssociationDef && TransferFromIli.isLightweightAssociation((AssociationDef)aclass)) {
+                        trafoConfig.setViewableConfig(aclass, TrafoConfigNames.INHERITANCE_TRAFO, TrafoConfigNames.INHERITANCE_TRAFO_EMBEDDED);
+				    }else {
+	                    // newClass
+	                    trafoConfig.setViewableConfig(aclass, TrafoConfigNames.INHERITANCE_TRAFO, TrafoConfigNames.INHERITANCE_TRAFO_NEWCLASS);
+				    }
 				}
 				String sqlTablename=nameMapping.mapIliClassDef(aclass);
 				EhiLogger.traceState("viewable "+aclass.getScopedName(null)+" "+trafoConfig.getViewableConfig(aclass, TrafoConfigNames.INHERITANCE_TRAFO)+", "+sqlTablename);
 			}
 		}
-	}
-	private TransferDescription getTransferDescription(Element e)
-	{
-		if(td==null){
-			td=(TransferDescription) e.getContainer(TransferDescription.class);
-		}
-		return td;
 	}
 	private void doSmart1(List<Element> eles) {
 		/*
@@ -221,7 +236,9 @@ public class Viewable2TableMapper {
 				// a Viewable
 				Viewable aclass=(Viewable) ele;
 				if(trafoConfig.getViewableConfig(aclass, TrafoConfigNames.INHERITANCE_TRAFO)==null){
-					if(isReferenced(aclass) && noBaseIsNewClass(trafoConfig,aclass)){
+                    if(aclass instanceof AssociationDef && TransferFromIli.isLightweightAssociation((AssociationDef)aclass)) {
+                        trafoConfig.setViewableConfig(aclass, TrafoConfigNames.INHERITANCE_TRAFO, TrafoConfigNames.INHERITANCE_TRAFO_EMBEDDED);
+                    }else if(isReferenced(aclass) && noBaseIsNewClass(trafoConfig,aclass)){
 						// newClass
 						trafoConfig.setViewableConfig(aclass, TrafoConfigNames.INHERITANCE_TRAFO, TrafoConfigNames.INHERITANCE_TRAFO_NEWCLASS);
 					}else if(aclass.isAbstract()){
@@ -257,7 +274,9 @@ public class Viewable2TableMapper {
 				// a Viewable
 				Viewable aclass=(Viewable) ele;
 				if(trafoConfig.getViewableConfig(aclass, TrafoConfigNames.INHERITANCE_TRAFO)==null){
-					if(aclass.isAbstract()){
+                    if(aclass instanceof AssociationDef && TransferFromIli.isLightweightAssociation((AssociationDef)aclass)) {
+                        trafoConfig.setViewableConfig(aclass, TrafoConfigNames.INHERITANCE_TRAFO, TrafoConfigNames.INHERITANCE_TRAFO_EMBEDDED);
+                    }else if(aclass.isAbstract()){
 						// subClass
 						trafoConfig.setViewableConfig(aclass, TrafoConfigNames.INHERITANCE_TRAFO, TrafoConfigNames.INHERITANCE_TRAFO_SUBCLASS);
 					}else{
@@ -271,6 +290,13 @@ public class Viewable2TableMapper {
 		}
 	}
 
+    private TransferDescription getTransferDescription(Element e)
+    {
+        if(td==null){
+            td=(TransferDescription) e.getContainer(TransferDescription.class);
+        }
+        return td;
+    }
 	private void addProps(ViewableWrapper viewable,List<ColumnWrapper> attrv,
 		Iterator<ViewableTransferElement> iter) {
         Viewable iliclass=viewable.getViewable();
@@ -358,19 +384,20 @@ public class Viewable2TableMapper {
 	                }
 				    
 				}
-			}
-			if(viewableTransferElement.obj instanceof RoleDef){
+			}else if(viewableTransferElement.obj instanceof RoleDef){
 				RoleDef role = (RoleDef) viewableTransferElement.obj;
 				AssociationDef roleOwner = (AssociationDef) role.getContainer();
-				// not an embedded role and roledef not defined in a lightweight association?
-				if (!viewableTransferElement.embedded && !roleOwner.isLightweight()){
-					addColumn(viewable,attrv,new ColumnWrapper(viewableTransferElement));
-				}
-				// a role of an embedded association?
-				if(viewableTransferElement.embedded){
-					if(roleOwner.getDerivedFrom()==null){
-						addColumn(viewable,attrv,new ColumnWrapper(viewableTransferElement));
-					}
+                // a role of an embedded association?
+				if (viewableTransferElement.embedded) {
+				    if(!TransferFromIli.isLightweightAssociation(roleOwner)){
+				        ; // skip it; is added when visiting AssociationDef
+				    }else {
+	                    if(roleOwner.getDerivedFrom()==null){
+	                        addColumn(viewable,attrv,new ColumnWrapper(viewableTransferElement));
+	                    }
+				    }
+				}else {
+                    addColumn(viewable,attrv,new ColumnWrapper(viewableTransferElement));
 				}
 			}
 		}
