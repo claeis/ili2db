@@ -380,9 +380,22 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
                                     dbColId.setComment(cmt);                                    
                                 }
                               dbTable.addColumn(dbColId);
+                              // 1:n association in an intermediate table
+                              // create an unique index to prevent n:n instances
+                              if(createFk) {
+                                  if(def.getViewable() instanceof AssociationDef && ((AssociationDef)def.getViewable()).isLightweight()) {
+                                      if(role.getCardinality().getMaximum()>1) {
+                                          DbIndex dbIndex=new DbIndex();
+                                          dbIndex.setPrimary(false);
+                                          dbIndex.setUnique(true);
+                                          dbIndex.addAttr(dbColId);
+                                          dbTable.addIndex(dbIndex);
+                                      }
+                                  }
+                              }
                               // handle ordered
                               if(role.isOrdered()){
-                                    // add seqeunce attr
+                                    // add sequence attr
                                     DbColId dbSeq=new DbColId();
                                     dbSeq.setName(roleSqlName+"_"+DbNames.T_SEQ_COL);
                                     dbSeq.setNotNull(notNull);
