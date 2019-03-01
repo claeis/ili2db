@@ -184,7 +184,6 @@ public class SimpleMysqlTest {
 		config.setMultiSurfaceTrafo(null);
 		config.setMultilingualTrafo(null);
 		config.setInheritanceTrafo(null);
-		config.setDefaultSrsCode("2056");
 		Ili2db.run(config,null);
 	}
 	
@@ -205,12 +204,7 @@ public class SimpleMysqlTest {
 		config.setMultiSurfaceTrafo(null);
 		config.setMultilingualTrafo(null);
 		config.setInheritanceTrafo(null);
-		try{
-			Ili2db.run(config,null);
-		}catch(Exception ex){
-			EhiLogger.logError(ex);
-			Assert.fail();
-		}
+        Ili2db.run(config,null);
 	}
 
 	@Test
@@ -229,12 +223,7 @@ public class SimpleMysqlTest {
 		config.setMultiSurfaceTrafo(null);
 		config.setMultilingualTrafo(null);
 		config.setInheritanceTrafo(null);
-		try{
-			Ili2db.run(config,null);
-		}catch(Exception ex){
-			EhiLogger.logError(ex);
-			Assert.fail();
-		}
+        Ili2db.run(config,null);
 	}
 	
 	@Test
@@ -253,12 +242,7 @@ public class SimpleMysqlTest {
 		config.setMultiSurfaceTrafo(null);
 		config.setMultilingualTrafo(null);
 		config.setInheritanceTrafo(null);
-		try{
-			Ili2db.run(config,null);
-		}catch(Exception ex){
-			EhiLogger.logError(ex);
-			Assert.fail();
-		}
+        Ili2db.run(config,null);
 	}
 	
 	@Test
@@ -277,12 +261,7 @@ public class SimpleMysqlTest {
 		config.setMultiSurfaceTrafo(null);
 		config.setMultilingualTrafo(null);
 		config.setInheritanceTrafo(Config.INHERITANCE_TRAFO_SMART1);
-		try{
-			Ili2db.run(config,null);
-		}catch(Exception ex){
-			EhiLogger.logError(ex);
-			Assert.fail();
-		}
+        Ili2db.run(config,null);
 	}
 	
 	@Test
@@ -301,12 +280,7 @@ public class SimpleMysqlTest {
 		config.setMultiSurfaceTrafo(null);
 		config.setMultilingualTrafo(null);
 		config.setInheritanceTrafo(Config.INHERITANCE_TRAFO_SMART2);
-		try{
-			Ili2db.run(config,null);
-		}catch(Exception ex){
-			EhiLogger.logError(ex);
-			Assert.fail();
-		}
+        Ili2db.run(config,null);
 	}
 	
 	@Test
@@ -325,13 +299,7 @@ public class SimpleMysqlTest {
 		config.setMultiSurfaceTrafo(null);
 		config.setMultilingualTrafo(null);
 		config.setInheritanceTrafo(null);
-		config.setDefaultSrsCode("2056");
-		try{
-			Ili2db.run(config,null);
-		}catch(Exception ex){
-			EhiLogger.logError(ex);
-			Assert.fail();
-		}
+        Ili2db.run(config,null);
 	}
 	
 	@Test
@@ -353,12 +321,7 @@ public class SimpleMysqlTest {
 		config.setMultiSurfaceTrafo(null);
 		config.setMultilingualTrafo(null);
 		config.setInheritanceTrafo(null);
-		try{
-			Ili2db.run(config,null);
-		}catch(Exception ex){
-			EhiLogger.logError(ex);
-			Assert.fail();
-		}
+        Ili2db.run(config,null);
 	}
 	
 	@Test
@@ -373,12 +336,7 @@ public class SimpleMysqlTest {
 		config.setFunction(Config.FC_EXPORT);
 		config.setModels("Simple23");
 		Ili2db.readSettingsFromDb(config);
-		try{
-			Ili2db.run(config,null);
-		}catch(Exception ex){
-			EhiLogger.logError(ex);
-			Assert.fail();
-		}
+        Ili2db.run(config,null);
 		{
 			XtfReader reader=new XtfReader(data);
 			assertTrue(reader.read() instanceof StartTransferEvent);
@@ -415,12 +373,7 @@ public class SimpleMysqlTest {
         config.setFunction(Config.FC_VALIDATE);
         config.setModels("Simple23");
         Ili2db.readSettingsFromDb(config);
-        try{
-            Ili2db.run(config,null);
-        }catch(Exception ex){
-            EhiLogger.logError(ex);
-            Assert.fail();
-        }
+        Ili2db.run(config,null);
     }
     @Test
     public void validateXtfFail() throws Exception
@@ -465,12 +418,7 @@ public class SimpleMysqlTest {
 		config.setFunction(Config.FC_EXPORT);
 		config.setModels("SimpleStruct23");
 		Ili2db.readSettingsFromDb(config);
-		try{
-			Ili2db.run(config,null);
-		}catch(Exception ex){
-			EhiLogger.logError(ex);
-			Assert.fail();
-		}
+        Ili2db.run(config,null);
 		{
 			XtfReader reader=new XtfReader(data);
 			assertTrue(reader.read() instanceof StartTransferEvent);
@@ -512,12 +460,7 @@ public class SimpleMysqlTest {
 		config.setFunction(Config.FC_EXPORT);
 		config.setModels("SimpleInheritance23");
 		Ili2db.readSettingsFromDb(config);
-		try{
-			Ili2db.run(config,null);
-		}catch(Exception ex){
-			EhiLogger.logError(ex);
-			Assert.fail();
-		}
+        Ili2db.run(config,null);
 		{
 			XtfReader reader=new XtfReader(data);
 			assertTrue(reader.read() instanceof StartTransferEvent);
@@ -591,12 +534,7 @@ public class SimpleMysqlTest {
 		config.setFunction(Config.FC_EXPORT);
 		config.setModels("SimpleCoord23");
 		Ili2db.readSettingsFromDb(config);
-		try{
-			Ili2db.run(config,null);
-		}catch(Exception ex){
-			EhiLogger.logError(ex);
-			Assert.fail();
-		}
+        Ili2db.run(config,null);
 		{
 			XtfReader reader=new XtfReader(data);
 			assertTrue(reader.read() instanceof StartTransferEvent);

@@ -177,12 +177,7 @@ public class Datatypes23Test {
 			config.setMultilingualTrafo(null);
 			config.setInheritanceTrafo(null);
 			//Ili2db.readSettingsFromDb(config);
-			try{
-				Ili2db.run(config,null);
-			}catch(Exception ex){
-				EhiLogger.logError(ex);
-				Assert.fail();
-			}
+            Ili2db.run(config,null);
 			String stmtTxt="SELECT * FROM "+DBSCHEMA+".classattr ORDER BY t_id ASC";
 			{
 				 Assert.assertTrue(stmt.execute(stmtTxt));
@@ -252,12 +247,7 @@ public class Datatypes23Test {
 			config.setMultilingualTrafo(null);
 			config.setInheritanceTrafo(null);
 			//Ili2db.readSettingsFromDb(config);
-			try{
-				Ili2db.run(config,null);
-			}catch(Exception ex){
-				EhiLogger.logError(ex);
-				Assert.fail();
-			}
+            Ili2db.run(config,null);
 			// imported polyline
 			{
 				ResultSet rs = stmt.executeQuery("SELECT st_asewkt(straightsarcs2d) FROM datatypes23.line2 WHERE t_ili_tid = 'Line2.0';");
@@ -272,7 +262,7 @@ public class Datatypes23Test {
 				ResultSetMetaData rsmd=rs.getMetaData();
 				assertEquals(1, rsmd.getColumnCount());
 				while(rs.next()){
-				  	assertEquals("SRID=21781;COMPOUNDCURVE(CIRCULARSTRING(2460001 1045001,2460005 1045004,2460006 1045006),(2460006 1045006,2460010 1045010))", rs.getObject(1));
+				  	assertEquals("SRID=2056;COMPOUNDCURVE(CIRCULARSTRING(2460001 1045001,2460005 1045004,2460006 1045006),(2460006 1045006,2460010 1045010))", rs.getObject(1));
 				}
 			}
 			{
@@ -280,7 +270,7 @@ public class Datatypes23Test {
 				ResultSetMetaData rsmd=rs.getMetaData();
 				assertEquals(1, rsmd.getColumnCount());
 				while(rs.next()){
-				  	assertEquals("SRID=21781;COMPOUNDCURVE(CIRCULARSTRING(2460001 1045001 300,2460005 1045004 0,2460006 1045006 300),(2460006 1045006 300,2460010 1045010 300))", rs.getObject(1));
+				  	assertEquals("SRID=2056;COMPOUNDCURVE(CIRCULARSTRING(2460001 1045001 300,2460005 1045004 0,2460006 1045006 300),(2460006 1045006 300,2460010 1045010 300))", rs.getObject(1));
 				}
 			}
 			{
@@ -296,7 +286,7 @@ public class Datatypes23Test {
 				ResultSetMetaData rsmd=rs.getMetaData();
 				assertEquals(1, rsmd.getColumnCount());
 				while(rs.next()){
-				  	assertEquals("SRID=21781;COMPOUNDCURVE((2460001 1045001,2460010 1045010))", rs.getObject(1));
+				  	assertEquals("SRID=2056;COMPOUNDCURVE((2460001 1045001,2460010 1045010))", rs.getObject(1));
 				}
 			}
 			{
@@ -304,7 +294,7 @@ public class Datatypes23Test {
 				ResultSetMetaData rsmd=rs.getMetaData();
 				assertEquals(1, rsmd.getColumnCount());
 				while(rs.next()){
-				  	assertEquals("SRID=21781;COMPOUNDCURVE((2460001 1045001 300,2460010 1045010 300))", rs.getObject(1));
+				  	assertEquals("SRID=2056;COMPOUNDCURVE((2460001 1045001 300,2460010 1045010 300))", rs.getObject(1));
 				}
 			}
 		}catch(SQLException e) {
@@ -336,12 +326,7 @@ public class Datatypes23Test {
 			config.setMultilingualTrafo(null);
 			config.setInheritanceTrafo(null);
 			//Ili2db.readSettingsFromDb(config);
-			try{
-				Ili2db.run(config,null);
-			}catch(Exception ex){
-				EhiLogger.logError(ex);
-				Assert.fail();
-			}
+            Ili2db.run(config,null);
 			// imported surface
 			{
 				ResultSet rs = stmt.executeQuery("SELECT st_asewkt(surfacearcs2d) FROM datatypes23.surface2 WHERE t_ili_tid = 'Surface2.0';");
@@ -356,7 +341,7 @@ public class Datatypes23Test {
 				ResultSetMetaData rsmd=rs.getMetaData();
 				assertEquals(1, rsmd.getColumnCount());
 				while(rs.next()){
-				  	assertEquals("SRID=21781;CURVEPOLYGON(COMPOUNDCURVE((2460001 1045001,2460020 1045015),CIRCULARSTRING(2460020 1045015,2460010 1045018,2460001 1045015),(2460001 1045015,2460001 1045001)),COMPOUNDCURVE((2460005 1045005,2460010 1045010),CIRCULARSTRING(2460010 1045010,2460007 1045009,2460005 1045010),(2460005 1045010,2460005 1045005)))", rs.getObject(1));//2460001 1045001
+				  	assertEquals("SRID=2056;CURVEPOLYGON(COMPOUNDCURVE((2460001 1045001,2460020 1045015),CIRCULARSTRING(2460020 1045015,2460010 1045018,2460001 1045015),(2460001 1045015,2460001 1045001)),COMPOUNDCURVE((2460005 1045005,2460010 1045010),CIRCULARSTRING(2460010 1045010,2460007 1045009,2460005 1045010),(2460005 1045010,2460005 1045005)))", rs.getObject(1));//2460001 1045001
 				}
 			}
 			{
@@ -372,7 +357,7 @@ public class Datatypes23Test {
 				ResultSetMetaData rsmd=rs.getMetaData();
 				assertEquals(1, rsmd.getColumnCount());
 				while(rs.next()){
-				  	assertEquals("SRID=21781;CURVEPOLYGON(COMPOUNDCURVE((2460005 1045005,2460010 1045010,2460005 1045010,2460005 1045005)))", rs.getObject(1));
+				  	assertEquals("SRID=2056;CURVEPOLYGON(COMPOUNDCURVE((2460005 1045005,2460010 1045010,2460005 1045010,2460005 1045005)))", rs.getObject(1));
 				}
 			}
 			{
@@ -380,7 +365,7 @@ public class Datatypes23Test {
 				ResultSetMetaData rsmd=rs.getMetaData();
 				assertEquals(1, rsmd.getColumnCount());
 				while(rs.next()){
-				  	assertEquals("SRID=21781;CURVEPOLYGON(COMPOUNDCURVE((2460001 1045001,2460020 1045015,2460001 1045015,2460001 1045001)),COMPOUNDCURVE((2460005 1045005,2460010 1045010,2460005 1045010,2460005 1045005)))", rs.getObject(1));
+				  	assertEquals("SRID=2056;CURVEPOLYGON(COMPOUNDCURVE((2460001 1045001,2460020 1045015,2460001 1045015,2460001 1045001)),COMPOUNDCURVE((2460005 1045005,2460010 1045010,2460005 1045010,2460005 1045005)))", rs.getObject(1));
 				}
 			}
 			{
@@ -388,7 +373,7 @@ public class Datatypes23Test {
 				ResultSetMetaData rsmd=rs.getMetaData();
 				assertEquals(1, rsmd.getColumnCount());
 				while(rs.next()){
-				  	assertEquals("SRID=21781;CURVEPOLYGON(COMPOUNDCURVE((2460005 1045005,2460010 1045010,2460005 1045010,2460005 1045005)))", rs.getObject(1));
+				  	assertEquals("SRID=2056;CURVEPOLYGON(COMPOUNDCURVE((2460005 1045005,2460010 1045010,2460005 1045010,2460005 1045005)))", rs.getObject(1));
 				}
 			}
 		}catch(SQLException e) {

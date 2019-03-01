@@ -87,7 +87,7 @@ import ch.interlis.ilirepository.IliFiles;
  * @version $Revision: 1.0 $ $Date: 07.02.2005 $
  */
 public class TransferFromIli {
-	private static final String EPSG = "EPSG";
+	public static final String EPSG = "EPSG";
     private static final String SRS_MAPPING_TO_ORIGINAL = "ch.ehi.ili2db.fromili.SrsMapping2Original";
     private static final String SRS_MAPPING_TO_ALTERNATE = "ch.ehi.ili2db.fromili.SrsMapping2Alternate";
     private DbSchema schema=null;
@@ -134,8 +134,9 @@ public class TransferFromIli {
 		createIliTidCol=config.TID_HANDLING_PROPERTY.equals(config.getTidHandling());
 		createBasketCol=config.BASKET_HANDLING_READWRITE.equals(config.getBasketHandling());
 		createDatasetCol=config.CREATE_DATASET_COL.equals(config.getCreateDatasetCols());
-		
-		defaultCrsCode=Integer.parseInt(config.getDefaultSrsCode());
+		if(config.getDefaultSrsCode()!=null) {
+	        defaultCrsCode=Integer.parseInt(config.getDefaultSrsCode());
+		}
         srsModelAssignment=config.getSrsModelAssignment();
 
 		isIli1Model=td1.getIli1Format()!=null;
@@ -1767,7 +1768,7 @@ public class TransferFromIli {
         }
         return true;
     }
-    public static int[] getEpsgCodes(AttributeDef attr,String srsModelAssignment,int defaultCrsCode) {
+    public static int[] getEpsgCodes(AttributeDef attr,String srsModelAssignment,Integer defaultCrsCode) {
         TransferDescription td=(TransferDescription)attr.getContainer(TransferDescription.class);
         if(Ili2cUtility.isMultiSurfaceAttr(td,attr)) {
             MultiSurfaceMappings multiSurfaceAttrs=new MultiSurfaceMappings();
@@ -1857,6 +1858,9 @@ public class TransferFromIli {
             epsgCodes[0]=parseEpsgCode(crs);
             return epsgCodes;
         }
+        if(defaultCrsCode==null) {
+            return null;
+        }
         int epsgCodes[]=new int[1];
         epsgCodes[0]=defaultCrsCode;
         return epsgCodes;
@@ -1904,7 +1908,7 @@ public class TransferFromIli {
         return Integer.parseInt(crsv[1]);
     }
     @Deprecated
-    public static int getEpsgCode(AttributeDef attr, Map<String, String> genericDomains,int defaultCrsCode) {
+    public static int getEpsgCode(AttributeDef attr, Map<String, String> genericDomains,Integer defaultCrsCode) {
         ch.interlis.ili2c.metamodel.Element attrOrDomainDef=attr;
         ch.interlis.ili2c.metamodel.Type attrType=attr.getDomain();
         Domain coordDomain=null;
@@ -1942,9 +1946,12 @@ public class TransferFromIli {
             int epsgCode=parseEpsgCode(crs);
             return epsgCode;
         }
+        if(defaultCrsCode==null) {
+            throw new IllegalArgumentException("no CRS defined for "+attr.getScopedName());
+        }
         return defaultCrsCode;
     }
-    public static int getEpsgCode(Viewable aclass,AttributeDef attr, Map<String, String> genericDomains,int defaultCrsCode) {
+    public static int getEpsgCode(Viewable aclass,AttributeDef attr, Map<String, String> genericDomains,Integer defaultCrsCode) {
         attr=getAttribute(aclass, attr.getName());
         ch.interlis.ili2c.metamodel.Element attrOrDomainDef=attr;
         ch.interlis.ili2c.metamodel.Type attrType=attr.getDomain();
@@ -1982,6 +1989,9 @@ public class TransferFromIli {
         if(crs!=null) {
             int epsgCode=parseEpsgCode(crs);
             return epsgCode;
+        }
+        if(defaultCrsCode==null) {
+            throw new IllegalArgumentException("no CRS defined for "+attr.getScopedName());
         }
         return defaultCrsCode;
     }

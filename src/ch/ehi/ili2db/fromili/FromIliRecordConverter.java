@@ -59,8 +59,10 @@ import ch.interlis.ili2c.metamodel.AttributeRef;
 import ch.interlis.ili2c.metamodel.BasketType;
 import ch.interlis.ili2c.metamodel.BlackboxType;
 import ch.interlis.ili2c.metamodel.CompositionType;
+import ch.interlis.ili2c.metamodel.Container;
 import ch.interlis.ili2c.metamodel.CoordType;
 import ch.interlis.ili2c.metamodel.Domain;
+import ch.interlis.ili2c.metamodel.Element;
 import ch.interlis.ili2c.metamodel.EnumerationType;
 import ch.interlis.ili2c.metamodel.Evaluable;
 import ch.interlis.ili2c.metamodel.LineType;
@@ -289,7 +291,8 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
                           if(proxyType!=null && (proxyType instanceof ObjectType)){
                               // skip implicit particles (base-viewables) of views
                           }else{
-                              generateAttr(dbTable,def.getViewable(),attr,columnWrapper.getEpsgCode());
+                              Integer epsgCode=columnWrapper.getEpsgCode();
+                              generateAttr(dbTable,def.getViewable(),attr,epsgCode);
                           }
                       }
                   }catch(Exception ex){

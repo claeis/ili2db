@@ -110,7 +110,9 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 		}catch(ConverterException ex){
 			throw new IllegalArgumentException("failed to get srsid for "+defaultCrsAuthority+":"+defaultCrsCode+", "+ex.getLocalizedMessage());
 		}
-		defaultEpsgCode=TransferFromIli.parseEpsgCode(defaultCrsAuthority+":"+defaultCrsCode);
+		if(defaultCrsAuthority!=null && defaultCrsCode!=null) {
+	        defaultEpsgCode=TransferFromIli.parseEpsgCode(defaultCrsAuthority+":"+defaultCrsCode);
+		}
 		
 	}
 	public void writeRecord(long basketSqlId, java.util.Map<String,String> genericDomains,IomObject iomObj,Viewable iomClass,

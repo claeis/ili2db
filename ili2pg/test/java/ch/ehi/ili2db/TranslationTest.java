@@ -143,6 +143,8 @@ public class TranslationTest {
 				config.setMultilingualTrafo(null);
 				config.setInheritanceTrafo(null);
 				config.setIli1Translation("ModelBsimple10=ModelAsimple10");
+	            config.setDefaultSrsAuthority("EPSG");
+	            config.setDefaultSrsCode("21781");
 				Ili2db.readSettingsFromDb(config);
 				Ili2db.run(config,null);
 				
@@ -210,6 +212,8 @@ public class TranslationTest {
 				config.setInheritanceTrafo(null);
                 Ili2db.setSkipPolygonBuilding(config);
 				config.setIli1Translation("ModelBsimple10=ModelAsimple10");
+	            config.setDefaultSrsAuthority("EPSG");
+	            config.setDefaultSrsCode("21781");
 				Ili2db.readSettingsFromDb(config);
 				Ili2db.run(config,null);
 				// class[a2] is imported
@@ -421,6 +425,8 @@ public class TranslationTest {
 	    		config.setInheritanceTrafo(null);
 	    		config.setIli1Translation("ModelBsimple10=ModelAsimple10");
 	    		config.setDatasetName("ModelAsimple10");
+	            config.setDefaultSrsAuthority("EPSG");
+	            config.setDefaultSrsCode("21781");
 	    		Ili2db.readSettingsFromDb(config);
 	    		Ili2db.run(config,null);
 	        }
@@ -708,6 +714,8 @@ public class TranslationTest {
 	    		config.setInheritanceTrafo(null);
 	    		config.setIli1Translation("ModelBsimple10=ModelAsimple10");
 	    		config.setDatasetName("ModelAsimple10");
+	            config.setDefaultSrsAuthority("EPSG");
+	            config.setDefaultSrsCode("21781");
 	    		Ili2db.readSettingsFromDb(config);
 	    		Ili2db.run(config,null);
 	        }

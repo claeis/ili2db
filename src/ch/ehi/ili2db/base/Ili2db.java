@@ -916,6 +916,7 @@ public class Ili2db {
 			logGeneralInfo(config);
 			
 			Ili2dbLibraryInit ao=null;
+            Connection conn=null;
 			try{
 				ao=getInitStrategy(config); 
 				ao.init();
@@ -992,7 +993,6 @@ public class Ili2db {
 
 			CustomMapping customMapping=getCustomMappingStrategy(config);
 			// open db connection
-			Connection conn=null;
 			String url = dburl;
 			if(importToDb) {
 	            try{
@@ -1258,27 +1258,27 @@ public class Ili2db {
 				throw new Ili2dbException(ex);
 			}
 			
-			try{
-                if(importToDb) {
-                    if(!connectionFromExtern){
-                        if(conn!=null){
-                            try{
-                                conn.close();
-                            }finally{
-                                conn=null;
-                                config.setJdbcConnection(null);
-                            }
-                        }
-                    }
-                }
-				EhiLogger.logState("...done");
-			}catch(java.sql.SQLException ex){
-				EhiLogger.logError(ex);
-			}
 				
 			}finally{
+	            try{
+	                if(importToDb) {
+	                    if(!connectionFromExtern){
+	                        if(conn!=null){
+	                            try{
+	                                conn.close();
+	                            }finally{
+	                                conn=null;
+	                                config.setJdbcConnection(null);
+	                            }
+	                        }
+	                    }
+	                }
+	            }catch(java.sql.SQLException ex){
+	                EhiLogger.logError(ex);
+	            }
 				ao.end();
 			}
+            EhiLogger.logState("...done");
 			
 		}catch(Ili2dbException ex){
 			if(logfile!=null){

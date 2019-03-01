@@ -7,6 +7,7 @@ import java.util.Set;
 
 import ch.ehi.basics.logging.EhiLogger;
 import ch.ehi.ili2db.base.Ili2cUtility;
+import ch.ehi.ili2db.base.Ili2dbException;
 import ch.ehi.ili2db.fromili.TransferFromIli;
 import ch.ehi.ili2db.gui.Config;
 import ch.interlis.ili2c.metamodel.AbstractClassDef;
@@ -31,8 +32,7 @@ public class Viewable2TableMapper {
 	private boolean coalesceArray=false;
     private boolean coalesceJson=false;
 	private boolean createItfLineTables=false;
-    private String defaultCrsAuthority=null;
-    private String defaultCrsCode=null;
+    private Integer defaultCrsCode=null;
     private String srsModelAssignment=null;
 	private TransferDescription td=null;
 	private Viewable2TableMapper(Config config1,
@@ -41,13 +41,14 @@ public class Viewable2TableMapper {
 		trafoConfig=trafoConfig1;
 		nameMapping=nameMapping1;
 		sqlSchemaname=config.getDbschema();
-        defaultCrsAuthority=config.getDefaultSrsAuthority();
-        defaultCrsCode=config.getDefaultSrsCode();
+        if(config.getDefaultSrsCode()!=null) {
+            defaultCrsCode=Integer.parseInt(config.getDefaultSrsCode());
+        }
         srsModelAssignment=config.getSrsModelAssignment();
 	}
 
 	public static Viewable2TableMapping getClass2TableMapping(Config config,
-			TrafoConfig trafoConfig, List<Element> eles,NameMapping nameMapping) {
+			TrafoConfig trafoConfig, List<Element> eles,NameMapping nameMapping) throws Ili2dbException {
 		Viewable2TableMapper mapper=new Viewable2TableMapper(config, trafoConfig, nameMapping);
 		mapper.singleGeom=config.isOneGeomPerTable();
 		mapper.coalesceMultiSurface=Config.MULTISURFACE_TRAFO_COALESCE.equals(config.getMultiSurfaceTrafo());
@@ -58,7 +59,7 @@ public class Viewable2TableMapper {
 		mapper.createItfLineTables=config.getDoItfLineTables();
 		return mapper.doit(eles);
 	}
-	private Viewable2TableMapping doit(List<Element> eles) {
+	private Viewable2TableMapping doit(List<Element> eles) throws Ili2dbException {
 		// 
 		// setup/update TrafoConfig (mapping strategy per class)
 		//
@@ -298,7 +299,7 @@ public class Viewable2TableMapper {
         return td;
     }
 	private void addProps(ViewableWrapper viewable,List<ColumnWrapper> attrv,
-		Iterator<ViewableTransferElement> iter) {
+		Iterator<ViewableTransferElement> iter) throws Ili2dbException {
         Viewable iliclass=viewable.getViewable();
 		boolean hasGeometry=false;
 		// only one geometry column per table?
@@ -354,6 +355,9 @@ public class Viewable2TableMapper {
                             || (Ili2cUtility.isMultiPointAttr(getTransferDescription(attr), attr) && (coalesceMultiPoint 
                                     || TrafoConfigNames.MULTIPOINT_TRAFO_COALESCE.equals(trafoConfig.getAttrConfig(attr,TrafoConfigNames.MULTIPOINT_TRAFO))))
                         ){                      
+                            if(epsgCode==null) {
+                                throw new Ili2dbException("no CRS for attribute "+attr.getScopedName());
+                            }
                             if(createItfLineTables && type instanceof ch.interlis.ili2c.metamodel.SurfaceType){
                                 // no attribute in maintable required
                             }else{
@@ -556,7 +560,7 @@ public class Viewable2TableMapper {
             AttributeDef multipointAttr=multiPointAttrs.getCoordAttr(attr);
             attr=multipointAttr;
         }
-        int epsgCodes[]= TransferFromIli.getEpsgCodes(attr,srsModelAssignment,Integer.parseInt(defaultCrsCode));
+        int epsgCodes[]= TransferFromIli.getEpsgCodes(attr,srsModelAssignment,defaultCrsCode);
         if(epsgCodes==null) {
             // not a geometry attribute
             return new Integer[]{null};

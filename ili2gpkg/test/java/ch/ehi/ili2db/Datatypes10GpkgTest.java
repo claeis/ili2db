@@ -88,6 +88,8 @@ public class Datatypes10GpkgTest {
 		config.setMultiSurfaceTrafo(null);
 		config.setMultilingualTrafo(null);
 		config.setInheritanceTrafo(null);
+        config.setDefaultSrsAuthority("EPSG");
+        config.setDefaultSrsCode("21781");
 		Ili2db.readSettingsFromDb(config);
 		Ili2db.run(config,null);
 		openDb();
@@ -150,6 +152,8 @@ public class Datatypes10GpkgTest {
 		config.setMultiSurfaceTrafo(null);
 		config.setMultilingualTrafo(null);
 		config.setInheritanceTrafo(null);
+        config.setDefaultSrsAuthority("EPSG");
+        config.setDefaultSrsCode("21781");
 		Ili2db.readSettingsFromDb(config);
 		Ili2db.run(config,null);
 		initDb();
@@ -221,6 +225,8 @@ public class Datatypes10GpkgTest {
         config.setMultiSurfaceTrafo(null);
         config.setMultilingualTrafo(null);
         config.setInheritanceTrafo(null);
+        config.setDefaultSrsAuthority("EPSG");
+        config.setDefaultSrsCode("21781");
         Ili2db.readSettingsFromDb(config);
         Ili2db.run(config,null);
         initDb();
@@ -338,6 +344,8 @@ public class Datatypes10GpkgTest {
 		config.setMultiSurfaceTrafo(null);
 		config.setMultilingualTrafo(null);
 		config.setInheritanceTrafo(null);
+        config.setDefaultSrsAuthority("EPSG");
+        config.setDefaultSrsCode("21781");
 		Ili2db.readSettingsFromDb(config);
 		Ili2db.run(config,null);
 		initDb();

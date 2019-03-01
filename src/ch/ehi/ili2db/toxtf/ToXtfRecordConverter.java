@@ -79,7 +79,9 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 		} catch (SQLException e) {
 			EhiLogger.logError(e);
 		}
-        defaultEpsgCode=TransferFromIli.parseEpsgCode(defaultCrsAuthority+":"+defaultCrsCode);
+        if(defaultCrsAuthority!=null && defaultCrsCode!=null) {
+            defaultEpsgCode=TransferFromIli.parseEpsgCode(defaultCrsAuthority+":"+defaultCrsCode);
+        }
 	}
 	/** creates sql query statement for a class.
 	 * @param aclass type of objects to build query for

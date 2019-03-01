@@ -45,7 +45,6 @@ public abstract class AbstractMain {
 		config.setModeldir(Ili2db.ILI_FROM_DB+ch.interlis.ili2c.Main.ILIDIR_SEPARATOR+Ili2db.XTF_DIR+ch.interlis.ili2c.Main.ILIDIR_SEPARATOR+ch.interlis.ili2c.Main.ILI_REPOSITORY+ch.interlis.ili2c.Main.ILIDIR_SEPARATOR+Ili2db.JAR_DIR);
 		config.setModels(Ili2db.XTF);
 		config.setDefaultSrsAuthority("EPSG");
-		config.setDefaultSrsCode("21781");
 		config.setMaxSqlNameLength(Integer.toString(NameMapping.DEFAULT_NAME_LENGTH));
 		config.setIdGenerator(ch.ehi.ili2db.base.TableBasedIdGen.class.getName());
 		config.setInheritanceTrafo(config.INHERITANCE_TRAFO_SMART1);
@@ -398,7 +397,7 @@ public abstract class AbstractMain {
 					System.err.println("--forceTypeValidation  restrict customization of validation related to \"multiplicity\"");
 					System.err.println("--deleteData           on schema/data import, delete existing data from existing tables.");
 					System.err.println("--defaultSrsAuth  auth Default SRS authority "+config.getDefaultSrsAuthority());
-					System.err.println("--defaultSrsCode  code Default SRS code "+config.getDefaultSrsCode());
+					System.err.println("--defaultSrsCode  code Default SRS code");
                     System.err.println("--multiSrs             create a DB schema that supports multiple SRS codes");
                     System.err.println("--domains genericDomain=concreteDomain overrides the generic domain assignments on export");
                     System.err.println("--altSrsModel originalSrsModel=alternativeSrsModel assigns a model with an alternative SRS (but same structure as orinal model)");

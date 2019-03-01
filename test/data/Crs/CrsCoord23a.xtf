@@ -30,6 +30,12 @@
 						</COORD>
 					</POLYLINE>
 				</attrLV95>
+				<attrWGS84>
+					<COORD>
+					<C1>0.0</C1>
+					<C2>0.0</C2>
+					</COORD>
+				</attrWGS84>
 			</CrsCoord23.TestA.ClassA1>
 			<CrsCoord23.TestA.ClassA1 TID="o2">
 				<attr1>gugus2</attr1>
@@ -51,6 +57,12 @@
 						</COORD>
 					</POLYLINE>
 				</attrLV95>
+				<attrWGS84>
+					<COORD>
+					<C1>1.0</C1>
+					<C2>1.0</C2>
+					</COORD>
+				</attrWGS84>
 			</CrsCoord23.TestA.ClassA1>
 		</CrsCoord23.TestA>
 	</DATASECTION>

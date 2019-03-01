@@ -165,7 +165,9 @@ public class TransferFromXtf {
 		if(colT_ID==null){
 			colT_ID=DbNames.T_ID_COL;
 		}
-        defaultCrsCode=Integer.parseInt(config.getDefaultSrsCode());
+		if(config.getDefaultSrsCode()!=null) {
+	        defaultCrsCode=Integer.parseInt(config.getDefaultSrsCode());
+		}
         srsModelAssignment=config.getSrsModelAssignment();
 		createGenericStructRef=config.STRUCT_MAPPING_GENERICREF.equals(config.getStructMapping());
 		readIliTid=config.TID_HANDLING_PROPERTY.equals(config.getTidHandling());

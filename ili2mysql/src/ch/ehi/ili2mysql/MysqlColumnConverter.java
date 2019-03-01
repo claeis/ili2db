@@ -65,6 +65,9 @@ public class MysqlColumnConverter extends AbstractWKBColumnConverter {
 	            throw new ConverterException("failed to query srsid from database",ex);
 	        }
 		}else {
+		    if(crsCode==null) {
+		        return null;
+		    }
 		    srsid=Integer.parseInt(crsCode);
 		}
 		return srsid;
