@@ -63,6 +63,7 @@ import ch.ehi.sqlgen.generator.Generator;
 import ch.ehi.sqlgen.generator.GeneratorDriver;
 //import ch.ehi.sqlgen.generator_impl.oracle.GeneratorOracle;
 import ch.ehi.sqlgen.generator_impl.jdbc.GeneratorJdbc;
+import ch.ehi.sqlgen.generator_impl.jdbc.GeneratorJdbc.Stmt;
 import ch.ehi.sqlgen.repository.DbSchema;
 import ch.ehi.sqlgen.repository.DbTableName;
 import ch.interlis.ili2c.config.Configuration;
@@ -1073,10 +1074,15 @@ public class Ili2db {
 				throw new Ili2dbException("failed to load/create DDL generator",ex);
 			}
 			  // create db schema
-            if(importToDb) {
-                if(config.getDbschema()!=null){
+            if(config.getDbschema()!=null){
+                if(importToDb) {
                     if(!DbUtility.schemaExists(conn, config.getDbschema())){
                         DbUtility.createSchema(conn, config.getDbschema());
+                    }
+                }else {
+                    if(gen instanceof GeneratorJdbc){
+                        String sql="CREATE SCHEMA IF NOT EXISTS "+config.getDbschema();
+                        ((GeneratorJdbc) gen).addCreateLine(((GeneratorJdbc) gen).new Stmt(sql));
                     }
                 }
             }
