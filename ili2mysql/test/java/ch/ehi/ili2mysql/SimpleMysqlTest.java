@@ -229,7 +229,7 @@ public class SimpleMysqlTest {
 	@Test
 	public void importXtfInheritanceNewClass() throws Exception
 	{
-		EhiLogger.getInstance().setTraceFilter(false);
+		//EhiLogger.getInstance().setTraceFilter(false);
         resetDb();
 		File data=new File(TEST_OUT,"SimpleInheritance23a.xtf");
 		Config config=initConfig(data.getPath(),data.getPath()+".log");
