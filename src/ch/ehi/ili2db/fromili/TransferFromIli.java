@@ -1634,37 +1634,37 @@ public class TransferFromIli {
                     }
                     ps.executeUpdate();
                 }
-                if(gen!=null) {
-                    StringBuffer insStmt=new StringBuffer("INSERT INTO "+sqlTableName+" ("+DbNames.ENUM_TAB_SEQ_COL+","+DbNames.ENUM_TAB_ILICODE_COL+","+DbNames.ENUM_TAB_ITFCODE_COL+","+DbNames.ENUM_TAB_DISPNAME_COL+","+DbNames.ENUM_TAB_INACTIVE_COL+","+DbNames.ENUM_TAB_DESCRIPTION_COL+","+DbNames.ENUM_TAB_THIS_COL+","+DbNames.ENUM_TAB_BASE_COL
-                            +") VALUES (");
-                    // insert only non-existing entries
-                    if(isOrdered){
-                        insStmt.append(seq);
-                    }else{
-                        insStmt.append("NULL");
-                    }
-                    insStmt.append(","+Ili2db.quoteSqlStringValue(eleName));
-                    insStmt.append(","+itfCode);
-
-                    String dispName = eleElement.getMetaValues().getValue(IliMetaAttrNames.METAATTR_DISPNAME);
-                    if (dispName!=null){
-                        insStmt.append(","+Ili2db.quoteSqlStringValue(dispName)); // do not beautify name provided by user
-                    }else{
-                        insStmt.append(","+ Ili2db.quoteSqlStringValue(recConv.beautifyEnumDispName(eleName))); 
-                    }
-                    insStmt.append(",FALSE");  // inactive
-                    String description = eleElement.getDocumentation();
-                    insStmt.append(","+ Ili2db.quoteSqlStringValue(description));
-
-                    // single table for all enums?
-                    if(thisClass!=null){
-                        insStmt.append(","+Ili2db.quoteSqlStringValue(thisClass));
-                        insStmt.append(","+Ili2db.quoteSqlStringValue(baseClass));
-                    }
-                    insStmt=insStmt.append(")");
-                    gen.addCreateLine(gen.new Stmt(insStmt.toString()));
-                }
 			}
+            if(gen!=null) {
+                StringBuffer insStmt=new StringBuffer("INSERT INTO "+sqlTableName+" ("+DbNames.ENUM_TAB_SEQ_COL+","+DbNames.ENUM_TAB_ILICODE_COL+","+DbNames.ENUM_TAB_ITFCODE_COL+","+DbNames.ENUM_TAB_DISPNAME_COL+","+DbNames.ENUM_TAB_INACTIVE_COL+","+DbNames.ENUM_TAB_DESCRIPTION_COL+","+DbNames.ENUM_TAB_THIS_COL+","+DbNames.ENUM_TAB_BASE_COL
+                        +") VALUES (");
+                // insert only non-existing entries
+                if(isOrdered){
+                    insStmt.append(seq);
+                }else{
+                    insStmt.append("NULL");
+                }
+                insStmt.append(","+Ili2db.quoteSqlStringValue(eleName));
+                insStmt.append(","+itfCode);
+
+                String dispName = eleElement.getMetaValues().getValue(IliMetaAttrNames.METAATTR_DISPNAME);
+                if (dispName!=null){
+                    insStmt.append(","+Ili2db.quoteSqlStringValue(dispName)); // do not beautify name provided by user
+                }else{
+                    insStmt.append(","+ Ili2db.quoteSqlStringValue(recConv.beautifyEnumDispName(eleName))); 
+                }
+                insStmt.append(",FALSE");  // inactive
+                String description = eleElement.getDocumentation();
+                insStmt.append(","+ Ili2db.quoteSqlStringValue(description));
+
+                // single table for all enums?
+                if(thisClass!=null){
+                    insStmt.append(","+Ili2db.quoteSqlStringValue(thisClass));
+                    insStmt.append(","+Ili2db.quoteSqlStringValue(baseClass));
+                }
+                insStmt=insStmt.append(")");
+                gen.addCreateLine(gen.new Stmt(insStmt.toString()));
+            }
 			itfCode++;
 			seq++;
 		}

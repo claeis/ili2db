@@ -19,6 +19,7 @@ import ch.ehi.ili2db.base.Ili2db;
 import ch.ehi.ili2db.base.Ili2dbException;
 import ch.ehi.ili2db.gui.Config;
 import ch.ehi.ili2db.mapping.NameMapping;
+import ch.ehi.ili2gpkg.GpkgMapping;
 import ch.ehi.sqlgen.DbUtility;
 import ch.ehi.sqlgen.repository.DbTableName;
 import ch.interlis.iom.IomObject;
@@ -103,6 +104,75 @@ public class Enum23Test {
 			}
 		}	
 	}
+    @Test
+    public void createScriptFromIli() throws Exception
+    {
+        Connection jdbcConnection=null;
+        try{
+            File data=new File("test/data/Enum23/Enum23b.ili");
+            File outfile=new File(data.getPath()+"-out.sql");
+            Config config=new Config();
+            new ch.ehi.ili2pg.PgMain().initConfig(config);
+            config.setLogfile(data.getPath()+".log");
+            config.setXtffile(data.getPath());
+            config.setFunction(Config.FC_SCRIPT);
+            config.setCreateFk(config.CREATE_FK_YES);
+            config.setDbschema(DBSCHEMA);
+            config.setCreateNumChecks(true);
+            config.setTidHandling(Config.TID_HANDLING_PROPERTY);
+            config.setBasketHandling(config.BASKET_HANDLING_READWRITE);
+            config.setCreateMetaInfo(true);
+            config.setCreateEnumDefs(Config.CREATE_ENUM_DEFS_MULTI_WITH_ID);
+            config.setCatalogueRefTrafo(null);
+            config.setMultiSurfaceTrafo(null);
+            config.setMultilingualTrafo(null);
+            config.setInheritanceTrafo(null);
+            config.setCreatescript(outfile.getPath());
+            Ili2db.run(config,null);
+            
+            // verify generated script
+            {
+                Class driverClass = Class.forName("org.postgresql.Driver");
+                jdbcConnection = DriverManager.getConnection(
+                        dburl, dbuser, dbpwd);
+                jdbcConnection.setAutoCommit(false);
+                stmt=jdbcConnection.createStatement();          
+                stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");
+                stmt.close();
+                stmt=null;
+                
+                // execute generated script
+                DbUtility.executeSqlScript(jdbcConnection, new java.io.FileReader(outfile));
+
+                jdbcConnection.commit();
+                jdbcConnection.close();
+                jdbcConnection=null;
+                
+                {
+                    // rum import without schema generation
+                    data=new File("test/data/Enum23/Enum23b.xtf");
+                    config.setXtffile(data.getPath());
+                    config.setDburl(dburl);
+                    config.setDbusr(dbuser);
+                    config.setDbpwd(dbpwd);
+                    config.setDbschema(DBSCHEMA);
+                    config.setFunction(Config.FC_IMPORT);
+                    config.setDoImplicitSchemaImport(false);
+                    config.setCreatescript(null);
+                    Ili2db.readSettingsFromDb(config);
+                    Ili2db.run(config,null);
+                    
+                }
+                
+            }
+            
+        }finally{
+            if(jdbcConnection!=null){
+                jdbcConnection.close();
+                jdbcConnection=null;
+            }
+        }   
+    }
 	
 	@Test
 	public void importWithBeautify() throws Exception
