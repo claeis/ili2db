@@ -53,11 +53,13 @@ public class EnumValueMap {
     		java.sql.PreparedStatement exstPrepStmt = conn.prepareStatement(exstStmt);
     		try{
     			java.sql.ResultSet rs=exstPrepStmt.executeQuery();
+                Long id=0L;
     			while(rs.next()){
     				String iliCode=rs.getString(1);
-                    Long id=null;
                     if(tidColumnName!=null) {
                         id=rs.getLong(2);
+                    }else {
+                        id++;
                     }
     				ret.addValue(id,iliCode);
     			}
