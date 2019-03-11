@@ -44,7 +44,7 @@ script:
   - gradle ili2oraJar ili2oraTest
   - gradle -Drst2html=`which rst2html.py` usrdoc testreport ili2mysqlBindist ili2pgBindist ili2fgdbBindist ili2mssqlBindist ili2oraBindist
 after_failure:
-  - cat  build/junitreport/junit-noframes.html
+  - # cat  build/junitreport/junit-noframes.html
 deploy:
   - provider: script
     skip_cleanup: true
