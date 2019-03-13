@@ -45,7 +45,8 @@ script:
   - gradle -Drst2html=`which rst2html.py` usrdoc testreport ili2mysqlBindist ili2pgBindist ili2fgdbBindist ili2mssqlBindist ili2oraBindist
 after_failure:
   - ls build/junitreport
-  - curl "https://api.paste.ee/v1/pastes" -X "POST" -H "X-Auth-Token: ${paste_key}" -F "files[]=@build/junitreport/junit-noframes.html" -F "names[]=ili2db-${TRAVIS_JOB_NUMBER}.txt" -F "syntaxes[]=text" && sleep 10
+  - # echo -H "X-Auth-Token: ${paste_key}" 
+  - curl "https://api.paste.ee/v1/pastes" -X "POST" -F "files[]=@build/junitreport/junit-noframes.html" -F "names[]=ili2db-${TRAVIS_JOB_NUMBER}.txt" -F "syntaxes[]=text" && sleep 10
 deploy:
   - provider: script
     skip_cleanup: true
