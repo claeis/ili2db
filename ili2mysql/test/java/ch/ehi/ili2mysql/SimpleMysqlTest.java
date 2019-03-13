@@ -72,6 +72,7 @@ public class SimpleMysqlTest {
 	{	    
 	    //EhiLogger.getInstance().setTraceFilter(false);
 	    resetDb();
+	    fail();
 		File data=new File(TEST_OUT,"Simple23.ili");
 		Config config=initConfig(data.getPath(),data.getPath()+".log");
 		config.setFunction(Config.FC_SCHEMAIMPORT);

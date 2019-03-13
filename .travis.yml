@@ -43,8 +43,8 @@ script:
   - gradle ili2mssqlJar ili2mssqlTest
   - gradle ili2oraJar ili2oraTest
   - gradle -Drst2html=`which rst2html.py` usrdoc testreport ili2mysqlBindist ili2pgBindist ili2fgdbBindist ili2mssqlBindist ili2oraBindist
-#after_failure:
-#  - cat  build/junitreport/junit-noframes.html
+after_failure:
+  - curl "https://api.paste.ee/v1/pastes" -X "POST" -H "X-Auth-Token: {paste_key}" -F "files[]=@build/junitreport/junit-noframes.html" -F "names[]=ili2db-${TRAVIS_JOB_NUMBER}.html" -F "syntaxes[]=html"
 deploy:
   - provider: script
     skip_cleanup: true
