@@ -97,7 +97,8 @@ public class NameMapping {
 			ret.append("_");
 			ret.append(shortcutName(attrSqlName,maxSqlNameLength-ret.length()));
 		}
-		String sqlTableName=normalizeSqlName(ret.toString());
+        String sqlTableName=makeValidSqlName(ret.toString());
+		sqlTableName=normalizeSqlName(sqlTableName);
 		if((nameing!=FULL_QUALIFIED_NAMES) && existsSqlTableName(sqlTableName)){
 			// try full qualified name
 			// reset ret to empty string

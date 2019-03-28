@@ -166,7 +166,7 @@ public class MultisurfaceTest {
 			Ili2db.readSettingsFromDb(config);
 			Ili2db.run(config,null);
 			// imported attrValues of classa1
-			Assert.assertTrue(stmt.execute("SELECT classa1.geom, classa1.t_id, classa1.point FROM "+DBSCHEMA+".classa1 WHERE classa1.t_id = '4'"));
+			Assert.assertTrue(stmt.execute("SELECT classa1.geom, classa1.t_id, classa1.apoint FROM "+DBSCHEMA+".classa1 WHERE classa1.t_id = '4'"));
 			{
 				ResultSet rs=stmt.getResultSet();
 				Assert.assertTrue(rs.next());
@@ -202,7 +202,7 @@ public class MultisurfaceTest {
             Ili2db.readSettingsFromDb(config);
             Ili2db.run(config,null);
             // imported attrValues of classa1
-            Assert.assertTrue(stmt.execute("SELECT classa1.geom, classa1.t_id, classa1.point FROM "+DBSCHEMA+".classa1 WHERE classa1.t_id = '4'"));
+            Assert.assertTrue(stmt.execute("SELECT classa1.geom, classa1.t_id, classa1.apoint FROM "+DBSCHEMA+".classa1 WHERE classa1.t_id = '4'"));
             {
                 ResultSet rs=stmt.getResultSet();
                 Assert.assertTrue(rs.next());

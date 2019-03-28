@@ -93,7 +93,7 @@ public class Json23Test {
                 String [][] expectedValues=new String[][] {
                     {"Json23.TestA.Farbe.r",  "r", "farbe" ,null },
                     {"Json23.TestA.Auto.Farben",  "farben",    "auto",null },  
-                    {"Json23.TestA.Farbe.active", "active",    "farbe" ,null },
+                    {"Json23.TestA.Farbe.active", "aactive",    "farbe" ,null },
                     {"Json23.TestA.Farbe.g",  "g", "farbe" ,null },
                     {"Json23.TestA.Farbe.name",   "aname", "farbe" ,null },
                     {"Json23.TestA.Farbe.b",  "b", "farbe"                 ,null },        
