@@ -356,6 +356,7 @@ public class NameMapping {
 			kws.addAll(SqliteKw.getKeywords());
 			kws.addAll(MssqlKw.getKeywords());
             kws.addAll(MysqlKw.getKeywords());
+            kws.addAll(OracleKw.getKeywords());
 			kws.add("TEXT");
 			kws.add("OBJECTID"); // ili2fgdb / common primary key column name in ESRI world
 		}
