@@ -240,7 +240,7 @@ public class Datatypes10GpkgTest {
         }
         // AREA polyline attribute
         {
-            String stmtTxt="SELECT "+DbNames.ATTRNAME_TAB_SQLNAME_COL+","+DbNames.ATTRNAME_TAB_OWNER_COL+" FROM "+DbNames.ATTRNAME_TAB+" WHERE "+DbNames.ATTRNAME_TAB_ILINAME_COL+"='Datatypes10.Topic.TableA.area._geom'";
+            String stmtTxt="SELECT "+DbNames.ATTRNAME_TAB_SQLNAME_COL+","+DbNames.ATTRNAME_TAB_COLOWNER_COL+" FROM "+DbNames.ATTRNAME_TAB+" WHERE "+DbNames.ATTRNAME_TAB_ILINAME_COL+"='Datatypes10.Topic.TableA.area._geom'";
             Assert.assertTrue(stmt.execute(stmtTxt));
             ResultSet rs=stmt.getResultSet();
             Assert.assertTrue(rs.next());
@@ -249,7 +249,7 @@ public class Datatypes10GpkgTest {
         }
         // AREA lineattribute
         {
-            String stmtTxt="SELECT "+DbNames.ATTRNAME_TAB_SQLNAME_COL+","+DbNames.ATTRNAME_TAB_OWNER_COL+" FROM "+DbNames.ATTRNAME_TAB+" WHERE "+DbNames.ATTRNAME_TAB_ILINAME_COL+"='Datatypes10.Topic.LineAttrib1.attr'";
+            String stmtTxt="SELECT "+DbNames.ATTRNAME_TAB_SQLNAME_COL+","+DbNames.ATTRNAME_TAB_COLOWNER_COL+" FROM "+DbNames.ATTRNAME_TAB+" WHERE "+DbNames.ATTRNAME_TAB_ILINAME_COL+"='Datatypes10.Topic.LineAttrib1.attr'";
             Assert.assertTrue(stmt.execute(stmtTxt));
             ResultSet rs=stmt.getResultSet();
             Assert.assertTrue(rs.next());
@@ -274,7 +274,7 @@ public class Datatypes10GpkgTest {
         }
         // SURFACE polyline attribute
         {
-            String stmtTxt="SELECT "+DbNames.ATTRNAME_TAB_SQLNAME_COL+","+DbNames.ATTRNAME_TAB_OWNER_COL+" FROM "+DbNames.ATTRNAME_TAB+" WHERE "+DbNames.ATTRNAME_TAB_ILINAME_COL+"='Datatypes10.Topic.TableA.surface._geom'";
+            String stmtTxt="SELECT "+DbNames.ATTRNAME_TAB_SQLNAME_COL+","+DbNames.ATTRNAME_TAB_COLOWNER_COL+" FROM "+DbNames.ATTRNAME_TAB+" WHERE "+DbNames.ATTRNAME_TAB_ILINAME_COL+"='Datatypes10.Topic.TableA.surface._geom'";
             Assert.assertTrue(stmt.execute(stmtTxt));
             ResultSet rs=stmt.getResultSet();
             Assert.assertTrue(rs.next());

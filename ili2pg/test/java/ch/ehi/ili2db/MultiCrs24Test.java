@@ -97,7 +97,7 @@ public class MultiCrs24Test {
             final String ili2db_attrname_table=DBSCHEMA+"."+DbNames.ATTRNAME_TAB;
             // verify attr name mapping
             {
-                String stmtTxt="SELECT "+DbNames.ATTRNAME_TAB_SQLNAME_COL+","+DbNames.ATTRNAME_TAB_OWNER_COL+" FROM "+ili2db_attrname_table+" WHERE "+DbNames.ATTRNAME_TAB_ILINAME_COL+"='MultiCrs24.TestA.ClassA1.attr2:2056'";
+                String stmtTxt="SELECT "+DbNames.ATTRNAME_TAB_SQLNAME_COL+","+DbNames.ATTRNAME_TAB_COLOWNER_COL+" FROM "+ili2db_attrname_table+" WHERE "+DbNames.ATTRNAME_TAB_ILINAME_COL+"='MultiCrs24.TestA.ClassA1.attr2:2056'";
                 Assert.assertTrue(stmt.execute(stmtTxt));
                 ResultSet rs=stmt.getResultSet();
                 Assert.assertTrue(rs.next());
@@ -105,7 +105,7 @@ public class MultiCrs24Test {
                 Assert.assertEquals("classa1",rs.getString(2));
             }
             {
-                String stmtTxt="SELECT "+DbNames.ATTRNAME_TAB_SQLNAME_COL+","+DbNames.ATTRNAME_TAB_OWNER_COL+" FROM "+ili2db_attrname_table+" WHERE "+DbNames.ATTRNAME_TAB_ILINAME_COL+"='MultiCrs24.TestA.ClassA1.attr2:21781'";
+                String stmtTxt="SELECT "+DbNames.ATTRNAME_TAB_SQLNAME_COL+","+DbNames.ATTRNAME_TAB_COLOWNER_COL+" FROM "+ili2db_attrname_table+" WHERE "+DbNames.ATTRNAME_TAB_ILINAME_COL+"='MultiCrs24.TestA.ClassA1.attr2:21781'";
                 Assert.assertTrue(stmt.execute(stmtTxt));
                 ResultSet rs=stmt.getResultSet();
                 Assert.assertTrue(rs.next());

@@ -55,7 +55,7 @@ public class ColumnNameMapping {
 		}
 		try{
 			String exstStmt=null;
-			exstStmt="SELECT "+DbNames.ATTRNAME_TAB_ILINAME_COL+","+DbNames.ATTRNAME_TAB_OWNER_COL+","+DbNames.ATTRNAME_TAB_TARGET_COL+" FROM "+sqlName;
+			exstStmt="SELECT "+DbNames.ATTRNAME_TAB_ILINAME_COL+","+DbNames.ATTRNAME_TAB_COLOWNER_COL+","+DbNames.ATTRNAME_TAB_TARGET_COL+" FROM "+sqlName;
 			EhiLogger.traceBackendCmd(exstStmt);
 			java.sql.PreparedStatement exstPrepStmt = conn.prepareStatement(exstStmt);
             java.sql.ResultSet rs=null;
@@ -93,7 +93,7 @@ public class ColumnNameMapping {
 	        try{
 
 	            // insert mapping entries
-	            String stmt="INSERT INTO "+mapTabName+" ("+DbNames.ATTRNAME_TAB_ILINAME_COL+","+DbNames.ATTRNAME_TAB_SQLNAME_COL+","+DbNames.ATTRNAME_TAB_OWNER_COL+","+DbNames.ATTRNAME_TAB_TARGET_COL+") VALUES (?,?,?,?)";
+	            String stmt="INSERT INTO "+mapTabName+" ("+DbNames.ATTRNAME_TAB_ILINAME_COL+","+DbNames.ATTRNAME_TAB_SQLNAME_COL+","+DbNames.ATTRNAME_TAB_COLOWNER_COL+","+DbNames.ATTRNAME_TAB_TARGET_COL+") VALUES (?,?,?,?)";
 	            EhiLogger.traceBackendCmd(stmt);
 	            java.sql.PreparedStatement ps = conn.prepareStatement(stmt);
 	            AttrMappingKey entry1=null;
@@ -123,7 +123,7 @@ public class ColumnNameMapping {
             for(AttrMappingKey entry:attrNameIli2sql.keySet()){
                 String sqlname=attrNameIli2sql.get(entry);
                 String target=entry.getTarget();
-                String stmt="INSERT INTO "+mapTabName+" ("+DbNames.ATTRNAME_TAB_ILINAME_COL+","+DbNames.ATTRNAME_TAB_SQLNAME_COL+","+DbNames.ATTRNAME_TAB_OWNER_COL+","+DbNames.ATTRNAME_TAB_TARGET_COL
+                String stmt="INSERT INTO "+mapTabName+" ("+DbNames.ATTRNAME_TAB_ILINAME_COL+","+DbNames.ATTRNAME_TAB_SQLNAME_COL+","+DbNames.ATTRNAME_TAB_COLOWNER_COL+","+DbNames.ATTRNAME_TAB_TARGET_COL
                         +") VALUES ("+Ili2db.quoteSqlStringValue(entry.getIliname())+","+Ili2db.quoteSqlStringValue(sqlname)+","+Ili2db.quoteSqlStringValue(entry.getOwner())+","+Ili2db.quoteSqlStringValue(target)+")";
                 gen.addCreateLine(gen.new Stmt(stmt));
             }
@@ -139,7 +139,7 @@ public class ColumnNameMapping {
 			mapTableName=schema+"."+mapTableName;
 		}
 		// create table
-		String stmt="SELECT "+DbNames.ATTRNAME_TAB_ILINAME_COL+", "+DbNames.ATTRNAME_TAB_SQLNAME_COL+", "+DbNames.ATTRNAME_TAB_OWNER_COL+", "+DbNames.ATTRNAME_TAB_TARGET_COL+" FROM "+mapTableName;
+		String stmt="SELECT "+DbNames.ATTRNAME_TAB_ILINAME_COL+", "+DbNames.ATTRNAME_TAB_SQLNAME_COL+", "+DbNames.ATTRNAME_TAB_COLOWNER_COL+", "+DbNames.ATTRNAME_TAB_TARGET_COL+" FROM "+mapTableName;
 		java.sql.Statement dbstmt = null;
         java.sql.ResultSet rs=null;
 		try{
@@ -149,7 +149,7 @@ public class ColumnNameMapping {
 			while(rs.next()){
 				String iliname=rs.getString(DbNames.ATTRNAME_TAB_ILINAME_COL);
 				String sqlname=rs.getString(DbNames.ATTRNAME_TAB_SQLNAME_COL);
-				String owner=rs.getString(DbNames.ATTRNAME_TAB_OWNER_COL);
+				String owner=rs.getString(DbNames.ATTRNAME_TAB_COLOWNER_COL);
 				String target=rs.getString(DbNames.ATTRNAME_TAB_TARGET_COL);
 				//EhiLogger.debug("map: "+iliname+"->"+sqlname);
 				addAttrNameMapping(iliname,sqlname,owner,target);

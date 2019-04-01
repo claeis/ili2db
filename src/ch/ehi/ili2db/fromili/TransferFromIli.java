@@ -394,7 +394,7 @@ public class TransferFromIli {
 		DbTable tab=new DbTable();
 		tab.setName(new DbTableName(schema.getName(),DbNames.MODELS_TAB));
 		DbColVarchar fileCol=new DbColVarchar();
-		fileCol.setName(DbNames.MODELS_TAB_FILE_COL);
+		fileCol.setName(DbNames.MODELS_TAB_FILENAME_COL);
 		fileCol.setNotNull(true);
 		fileCol.setSize(250);
 		tab.addColumn(fileCol);
@@ -448,10 +448,10 @@ public class TransferFromIli {
 				reposUri=reposUri+"/"+schema;
 			}
 			// select entries
-			String insStmt="SELECT "+DbNames.MODELS_TAB_FILE_COL+","+DbNames.MODELS_TAB_ILIVERSION_COL+","+DbNames.MODELS_TAB_MODELNAME_COL+" FROM "+sqlName;
+			String insStmt="SELECT "+DbNames.MODELS_TAB_FILENAME_COL+","+DbNames.MODELS_TAB_ILIVERSION_COL+","+DbNames.MODELS_TAB_MODELNAME_COL+" FROM "+sqlName;
 			if(isMsSqlServer(conn) || isOracle(conn)) {
 				// 'file' is keyword in sql server and oracle
-				insStmt="SELECT \""+DbNames.MODELS_TAB_FILE_COL+"\","+DbNames.MODELS_TAB_ILIVERSION_COL+","+DbNames.MODELS_TAB_MODELNAME_COL+" FROM "+sqlName;
+				insStmt="SELECT \""+DbNames.MODELS_TAB_FILENAME_COL+"\","+DbNames.MODELS_TAB_ILIVERSION_COL+","+DbNames.MODELS_TAB_MODELNAME_COL+" FROM "+sqlName;
 			}
 			EhiLogger.traceBackendCmd(insStmt);
 			java.sql.PreparedStatement insPrepStmt = conn.prepareStatement(insStmt);
@@ -499,9 +499,9 @@ public class TransferFromIli {
 		}
 		try{
 			// select entries
-			String selStmt="SELECT "+DbNames.MODELS_TAB_CONTENT_COL+" FROM "+sqlName+" WHERE "+DbNames.MODELS_TAB_FILE_COL+"=?";
+			String selStmt="SELECT "+DbNames.MODELS_TAB_CONTENT_COL+" FROM "+sqlName+" WHERE "+DbNames.MODELS_TAB_FILENAME_COL+"=?";
 			if(isMsSqlServer(conn) || isOracle(conn)) {
-				selStmt="SELECT "+DbNames.MODELS_TAB_CONTENT_COL+" FROM "+sqlName+" WHERE \""+DbNames.MODELS_TAB_FILE_COL+"\"=?";
+				selStmt="SELECT "+DbNames.MODELS_TAB_CONTENT_COL+" FROM "+sqlName+" WHERE \""+DbNames.MODELS_TAB_FILENAME_COL+"\"=?";
 			}
 			EhiLogger.traceBackendCmd(selStmt);
 			java.sql.PreparedStatement selPrepStmt = conn.prepareStatement(selStmt);
@@ -577,10 +577,10 @@ public class TransferFromIli {
 	        try{
 
 	            // insert entries
-	            String insStmt="INSERT INTO "+sqlName+" ("+DbNames.MODELS_TAB_FILE_COL+","+DbNames.MODELS_TAB_ILIVERSION_COL+","+DbNames.MODELS_TAB_MODELNAME_COL+","+DbNames.MODELS_TAB_CONTENT_COL+","+DbNames.MODELS_TAB_IMPORTDATE_COL+") VALUES (?,?,?,?,?)";
+	            String insStmt="INSERT INTO "+sqlName+" ("+DbNames.MODELS_TAB_FILENAME_COL+","+DbNames.MODELS_TAB_ILIVERSION_COL+","+DbNames.MODELS_TAB_MODELNAME_COL+","+DbNames.MODELS_TAB_CONTENT_COL+","+DbNames.MODELS_TAB_IMPORTDATE_COL+") VALUES (?,?,?,?,?)";
 	            if(isMsSqlServer(conn) || isOracle(conn)) {
 	                // 'file' is keyword in sql server and oracle
-	                insStmt="INSERT INTO "+sqlName+" (\""+DbNames.MODELS_TAB_FILE_COL+"\","+DbNames.MODELS_TAB_ILIVERSION_COL+","+DbNames.MODELS_TAB_MODELNAME_COL+","+DbNames.MODELS_TAB_CONTENT_COL+","+DbNames.MODELS_TAB_IMPORTDATE_COL+") VALUES (?,?,?,?,?)";
+	                insStmt="INSERT INTO "+sqlName+" (\""+DbNames.MODELS_TAB_FILENAME_COL+"\","+DbNames.MODELS_TAB_ILIVERSION_COL+","+DbNames.MODELS_TAB_MODELNAME_COL+","+DbNames.MODELS_TAB_CONTENT_COL+","+DbNames.MODELS_TAB_IMPORTDATE_COL+") VALUES (?,?,?,?,?)";
 	            }
 	            EhiLogger.traceBackendCmd(insStmt);
 	            java.sql.PreparedStatement insPrepStmt = conn.prepareStatement(insStmt);
@@ -616,7 +616,7 @@ public class TransferFromIli {
                     ch.interlis.ili2c.modelscan.IliModel ilimodel=(ch.interlis.ili2c.modelscan.IliModel)ilifile.iteratorModel().next();
                     if(iliModelsInDb==null || iliModelsInDb.getFileWithModel(ilimodel.getName(), ilimodel.getIliVersion())==null){
                         String insStmt;
-                        insStmt = "INSERT INTO "+sqlName+" ("+DbNames.MODELS_TAB_FILE_COL+","+DbNames.MODELS_TAB_ILIVERSION_COL+","+DbNames.MODELS_TAB_MODELNAME_COL+","+DbNames.MODELS_TAB_CONTENT_COL+","+DbNames.MODELS_TAB_IMPORTDATE_COL
+                        insStmt = "INSERT INTO "+sqlName+" ("+DbNames.MODELS_TAB_FILENAME_COL+","+DbNames.MODELS_TAB_ILIVERSION_COL+","+DbNames.MODELS_TAB_MODELNAME_COL+","+DbNames.MODELS_TAB_CONTENT_COL+","+DbNames.MODELS_TAB_IMPORTDATE_COL
                                 +") VALUES ("+Ili2db.quoteSqlStringValue(ilifile.getFilename().getName())+","+Ili2db.quoteSqlStringValue(Double.toString(ilifile.getIliVersion()))+","+Ili2db.quoteSqlStringValue(IliImportsUtility.getIliImports(ilifile))+","+Ili2db.quoteSqlStringValue(readFileAsString(ilifile.getFilename()))+",'"+today+"')";
                         gen.addCreateLine(gen.new Stmt(insStmt));
                     }
@@ -911,7 +911,7 @@ public class TransferFromIli {
 			recConv.addKeyCol(tab);
 			
 			DbColId dbColImport=new DbColId();
-			dbColImport.setName(DbNames.IMPORTS_BASKETS_TAB_IMPORT_COL);
+			dbColImport.setName(DbNames.IMPORTS_BASKETS_TAB_IMPORTRUN_COL);
 			dbColImport.setNotNull(true);
 			dbColImport.setScriptComment("REFERENCES "+DbNames.IMPORTS_TAB);
 			if(createFk){
@@ -1711,7 +1711,7 @@ public class TransferFromIli {
 		sqlnameCol.setSize(sqlnameColSize);
 		tab.addColumn(sqlnameCol);
 		ch.ehi.sqlgen.repository.DbColVarchar ownerCol=new ch.ehi.sqlgen.repository.DbColVarchar();
-		ownerCol.setName(DbNames.ATTRNAME_TAB_OWNER_COL);
+		ownerCol.setName(DbNames.ATTRNAME_TAB_COLOWNER_COL);
 		ownerCol.setNotNull(true);
 		int ownerColSize=1024;
         try {

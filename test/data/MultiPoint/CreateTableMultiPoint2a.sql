@@ -35,7 +35,7 @@ CREATE TABLE pointstruktur2d (
 CREATE TABLE t_ili2db_attrname (
     iliname character varying(1024) NOT NULL,
     sqlname character varying(1024) NOT NULL,
-    owner character varying(1024) NOT NULL,
+    colowner character varying(1024) NOT NULL,
     target character varying(1024)
 );
 
@@ -75,7 +75,7 @@ CREATE TABLE t_ili2db_import (
 
 CREATE TABLE t_ili2db_import_basket (
     t_id bigint NOT NULL,
-    import bigint NOT NULL,
+    importrun bigint NOT NULL,
     basket bigint NOT NULL,
     objectcount integer,
     start_t_id bigint,
@@ -97,7 +97,7 @@ CREATE TABLE t_ili2db_inheritance (
 );
 
 CREATE TABLE t_ili2db_model (
-    file character varying(250) NOT NULL,
+    filename character varying(250) NOT NULL,
     iliversion character varying(3) NOT NULL,
     modelname text NOT NULL,
     content text NOT NULL,

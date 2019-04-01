@@ -1655,7 +1655,7 @@ public class TransferFromXtf {
 		}
 		String insert = "INSERT INTO "+sqlname
 			+"("+colT_ID 
-			+", "+DbNames.IMPORTS_BASKETS_TAB_IMPORT_COL
+			+", "+DbNames.IMPORTS_BASKETS_TAB_IMPORTRUN_COL
 			+", "+DbNames.IMPORTS_BASKETS_TAB_BASKET_COL
 			+", "+DbNames.IMPORTS_TAB_OBJECTCOUNT_COL
 			+", "+DbNames.IMPORTS_TAB_STARTTID_COL

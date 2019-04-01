@@ -42,7 +42,7 @@ CREATE TABLE PreAndPostScriptSchema.T_ILI2DB_IMPORT (
 COMMENT ON TABLE PreAndPostScriptSchema.T_ILI2DB_IMPORT IS 'DEPRECATED, do not use';
 CREATE TABLE PreAndPostScriptSchema.T_ILI2DB_IMPORT_BASKET (
   T_Id bigint PRIMARY KEY
-  ,import bigint NOT NULL
+  ,importrun bigint NOT NULL
   ,basket bigint NOT NULL
   ,objectCount integer NULL
   ,start_t_id bigint NULL
@@ -77,7 +77,7 @@ CREATE TABLE PreAndPostScriptSchema.T_ILI2DB_TRAFO (
 )
 ;
 CREATE TABLE PreAndPostScriptSchema.T_ILI2DB_MODEL (
-  file varchar(250) NOT NULL
+  filename varchar(250) NOT NULL
   ,iliversion varchar(3) NOT NULL
   ,modelName text NOT NULL
   ,content text NOT NULL
@@ -93,14 +93,14 @@ CREATE TABLE PreAndPostScriptSchema.T_ILI2DB_CLASSNAME (
 CREATE TABLE PreAndPostScriptSchema.T_ILI2DB_ATTRNAME (
   IliName varchar(1024) NOT NULL
   ,SqlName varchar(1024) NOT NULL
-  ,Owner varchar(1024) NOT NULL
+  ,ColOwner varchar(1024) NOT NULL
   ,Target varchar(1024) NULL
-  ,PRIMARY KEY (SqlName,Owner)
+  ,PRIMARY KEY (SqlName,ColOwner)
 )
 ;
 ALTER TABLE PreAndPostScriptSchema.T_ILI2DB_DATASET ADD CONSTRAINT T_ILI2DB_DATASET_datasetName_key UNIQUE (datasetName)
 ;
 ALTER TABLE PreAndPostScriptSchema.T_ILI2DB_MODEL ADD CONSTRAINT T_ILI2DB_MODEL_iliversion_modelName_key UNIQUE (iliversion,modelName)
 ;
-ALTER TABLE PreAndPostScriptSchema.T_ILI2DB_ATTRNAME ADD CONSTRAINT T_ILI2DB_ATTRNAME_SqlName_Owner_key UNIQUE (SqlName,Owner)
+ALTER TABLE PreAndPostScriptSchema.T_ILI2DB_ATTRNAME ADD CONSTRAINT T_ILI2DB_ATTRNAME_SqlName_Owner_key UNIQUE (SqlName,ColOwner)
 ;

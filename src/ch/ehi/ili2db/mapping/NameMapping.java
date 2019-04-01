@@ -350,7 +350,22 @@ public class NameMapping {
 	private Set<String> kws=null;
 	private String makeValidSqlName(String name)
 	{
-		if(kws==null){
+		initReservedWordList();
+		String ucname=name.toUpperCase();
+		while(kws.contains(ucname)){
+			  name= "a"+name;
+			  ucname=name.toUpperCase();
+		}
+		return name;
+	}
+    public boolean isValidSqlName(String name)
+    {
+        initReservedWordList();
+        String ucname=name.toUpperCase();
+        return !kws.contains(ucname);
+    }
+    private void initReservedWordList() {
+        if(kws==null){
 			kws=Sql2003kw.getKeywords();			
 			kws.addAll(PostgresqlKw.getKeywords());
 			kws.addAll(SqliteKw.getKeywords());
@@ -360,13 +375,7 @@ public class NameMapping {
 			kws.add("TEXT");
 			kws.add("OBJECTID"); // ili2fgdb / common primary key column name in ESRI world
 		}
-		String ucname=name.toUpperCase();
-		while(kws.contains(ucname)){
-			  name= "a"+name;
-			  ucname=name.toUpperCase();
-		}
-		return name;
-	}
+    }
 	private static String shortcutName(String aname, int maxlen)
 	{
 		StringBuffer name=new StringBuffer(aname);

@@ -64,7 +64,9 @@ import ch.ehi.sqlgen.generator.GeneratorDriver;
 //import ch.ehi.sqlgen.generator_impl.oracle.GeneratorOracle;
 import ch.ehi.sqlgen.generator_impl.jdbc.GeneratorJdbc;
 import ch.ehi.sqlgen.generator_impl.jdbc.GeneratorJdbc.Stmt;
+import ch.ehi.sqlgen.repository.DbColumn;
 import ch.ehi.sqlgen.repository.DbSchema;
+import ch.ehi.sqlgen.repository.DbTable;
 import ch.ehi.sqlgen.repository.DbTableName;
 import ch.interlis.ili2c.config.Configuration;
 import ch.interlis.ili2c.metamodel.Element;
@@ -1194,6 +1196,7 @@ public class Ili2db {
 				idGen.initDbDefs(gen);
 				
 				drv.visitSchema(config,schema);
+				validateSchemaNames(schema,mapping);
 
                 if(!(conn instanceof GeodbConnection)){
                     GeneratorJdbc insertCollector = config.getCreatescript()!=null?(GeneratorJdbc)gen:null;
@@ -1309,7 +1312,31 @@ public class Ili2db {
 		}
 		
 }
-	private static void logGeneralInfo(Config config) {
+	private static void validateSchemaNames(DbSchema schema, NameMapping mapping) {
+	    if(false) {
+	        boolean invalidNames=false;
+	        for(DbTable table:schema.getTables()) {
+	            String tabName=table.getName().getName();
+	            if(!mapping.isValidSqlName(tabName)) {
+	                EhiLogger.logAdaption("invalid table name "+tabName);
+	                invalidNames=true;
+	            }
+	            for(Iterator colIt=table.iteratorColumn();colIt.hasNext();) {
+	                DbColumn dbCol=(DbColumn) colIt.next();
+	                String colName=dbCol.getName();
+	                if(!mapping.isValidSqlName(colName)) {
+	                    EhiLogger.logAdaption("invalid column name "+tabName+"."+colName);
+	                    invalidNames=true;
+	                }
+	            }
+	        }
+	        if(invalidNames) {
+	            throw new IllegalStateException("invalid names found");
+	        }
+	    }
+        
+    }
+    private static void logGeneralInfo(Config config) {
 		EhiLogger.logState(config.getSender());
 		EhiLogger.logState("ili2c-"+ch.interlis.ili2c.Main.getVersion());
 		EhiLogger.logState("iox-ili-"+ch.interlis.iox_j.IoxUtility.getVersion());

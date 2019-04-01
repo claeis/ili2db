@@ -12,14 +12,20 @@ import java.util.Set;
 
 import org.junit.Assert;
 
+import ch.ehi.ili2db.base.DbNames;
+
 public class Ili2dbAssert {
     
     public Ili2dbAssert() { }
     
     public static void assertAttrNameTable(Connection jdbcConnection, String[][] expectedValues, String dbschema) throws SQLException {
         Statement stmt = jdbcConnection.createStatement();
-        String query = "SELECT t_ili2db_attrname.iliname, t_ili2db_attrname.sqlname, t_ili2db_attrname.owner, t_ili2db_attrname.target FROM "+dbschema+".t_ili2db_attrname";
-
+        String tabname=DbNames.ATTRNAME_TAB;
+        if(dbschema!=null) {
+            tabname=dbschema+"."+DbNames.ATTRNAME_TAB;
+        }
+        String query = "SELECT "+DbNames.ATTRNAME_TAB+"."+DbNames.ATTRNAME_TAB_ILINAME_COL+", "+DbNames.ATTRNAME_TAB+"."+DbNames.ATTRNAME_TAB_SQLNAME_COL+", "+DbNames.ATTRNAME_TAB+"."+DbNames.ATTRNAME_TAB_COLOWNER_COL+", "+DbNames.ATTRNAME_TAB+"."+DbNames.ATTRNAME_TAB_TARGET_COL+" FROM "+tabname;
+        
         Assert.assertTrue(stmt.execute(query));
         Set<String[]> foundValues = getValuesFromTableAttrName(stmt.getResultSet());
         if (foundValues.size() != expectedValues.length) {
@@ -63,7 +69,11 @@ public class Ili2dbAssert {
 
     public static void assertTrafoTable(Connection jdbcConnection, String[][] expectedValues, String dbschema) throws SQLException {
         Statement stmt = jdbcConnection.createStatement();
-        String query = "SELECT t_ili2db_trafo.iliname, t_ili2db_trafo.tag, t_ili2db_trafo.setting FROM "+dbschema+".t_ili2db_trafo";
+        String tabname = DbNames.TRAFO_TAB;
+        if(dbschema!=null) {
+            tabname = dbschema+"."+DbNames.TRAFO_TAB;
+        }
+        String query = "SELECT "+DbNames.TRAFO_TAB+"."+DbNames.TRAFO_TAB_ILINAME_COL+", "+DbNames.TRAFO_TAB+"."+DbNames.TRAFO_TAB_TAG_COL+", "+DbNames.TRAFO_TAB+"."+DbNames.TRAFO_TAB_SETTING_COL+" FROM "+tabname;
         Assert.assertTrue(stmt.execute(query));
         Set<String[]> foundValues = getValuesFromTableTrafo(stmt.getResultSet());
         if (foundValues.size() != expectedValues.length) {
@@ -106,101 +116,20 @@ public class Ili2dbAssert {
     }
     
     public static void assertTrafoTableFromGpkg(Connection jdbcConnection, String[][] expectedValues) throws SQLException {
-        Statement stmt = jdbcConnection.createStatement();
-        String query = "SELECT t_ili2db_trafo.iliname, t_ili2db_trafo.tag, t_ili2db_trafo.setting FROM t_ili2db_trafo";
-        Assert.assertTrue(stmt.execute(query));
-        Set<String[]> foundValues = getValuesFromTableTrafo(stmt.getResultSet());
-        if (foundValues.size() != expectedValues.length) {
-            String message = "Werte stimmen nicht ueberein. in Test Klasse: ";
-            throw new org.junit.ComparisonFailure(message, foundValues.toString(), expectedValues.toString());  
-        }
-        
-        //Sort the array expectedValues
-        Arrays.sort(expectedValues, new ColumnComparator());
-        
-        //Convert FoundedValues to 2d Array
-        String[][] foundValues2DArray = new String[foundValues.size()][];
-        
-        int index = 0;
-        for (Iterator<String[]> foundIterator = foundValues.iterator(); foundIterator.hasNext();) {  
-            String row[] = foundIterator.next(); 
-            foundValues2DArray[index] = row;
-            index++;
-        }
-        
-        //Sort the array foundValues
-        Arrays.sort(foundValues2DArray, new ColumnComparator());
-        
-        for (int j = 0; j < foundValues2DArray.length; j++) {
-            String[] foundValue = foundValues2DArray[j];
-            String[] expectedValue = expectedValues[j];
-            if (foundValue.length != expectedValue.length) {
-                String message = "Anzahl Werte stimmen nicht ueberein fuer " + expectedValue[0];
-                throw new org.junit.ComparisonFailure(message, Integer.toString(expectedValue.length), Integer.toString(foundValue.length));                
-            }
-            for (int i = 0; i < foundValue.length; i++) {
-                if ((foundValue[i] == null && expectedValue[i] == null) 
-                        || ((foundValue[i] != null && expectedValue[i] != null) && foundValue[i].equals(expectedValue[i]))) {
-                }else {
-                    String message = "Werte stimmen nicht ueberein fuer: " + expectedValue[0];
-                    throw new org.junit.ComparisonFailure(message, expectedValue[i], foundValue[i]);                    
-                }
-            }            
-        }
+        assertTrafoTable(jdbcConnection, expectedValues,null);
     }
     
     public static void assertAttrNameTableFromGpkg(Connection jdbcConnection, String[][] expectedValues) throws SQLException {
-        Statement stmt = jdbcConnection.createStatement();
-        String query = "SELECT t_ili2db_attrname.iliname, t_ili2db_attrname.sqlname, t_ili2db_attrname.owner, t_ili2db_attrname.target FROM t_ili2db_attrname";
-
-        Assert.assertTrue(stmt.execute(query));
-        Set<String[]> foundValues = getValuesFromTableAttrName(stmt.getResultSet());
-        if (foundValues.size() != expectedValues.length) {
-            String message = "Anzahl Records stimmen nicht ueberein in Test Klasse: ";
-            throw new org.junit.ComparisonFailure(message, Integer.toString(expectedValues.length), Integer.toString(foundValues.size()));  
-        }
-        
-        //Sort the array expectedValues
-        Arrays.sort(expectedValues, new ColumnComparator());
-        
-        //Convert FoundedValues to 2d Array
-        String[][] foundValues2DArray = new String[foundValues.size()][];
-        
-        int index = 0;
-        for (Iterator<String[]> foundIterator = foundValues.iterator(); foundIterator.hasNext();) {  
-            String row[] = foundIterator.next(); 
-            foundValues2DArray[index] = row;
-            index++;
-        }
-        
-        //Sort the array foundValues
-        Arrays.sort(foundValues2DArray, new ColumnComparator());
-
-        for (int j = 0; j < foundValues2DArray.length; j++) {
-            String[] foundValue = foundValues2DArray[j];
-            String[] expectedValue = expectedValues[j];
-            if (foundValue.length != expectedValue.length) {
-                String message = "Anzahl Werte stimmen nicht ueberein fuer " + expectedValue[0];
-                throw new org.junit.ComparisonFailure(message, Integer.toString(expectedValue.length), Integer.toString(foundValue.length));                
-            }
-            for (int i = 0; i < foundValue.length; i++) {
-                if ((foundValue[i] == null && expectedValue[i] == null) 
-                        || ((foundValue[i] != null && expectedValue[i] != null) && foundValue[i].equals(expectedValue[i]))) {
-                }else {
-                    String message = "Werte stimmen nicht ueberein fuer: " + expectedValue[0];
-                    throw new org.junit.ComparisonFailure(message, expectedValue[i], foundValue[i]);                    
-                }
-            }            
-        }
+        assertAttrNameTable(jdbcConnection, expectedValues,null);
     }
     
     private static Set<String[]> getValuesFromTableTrafo(ResultSet resultSet) throws SQLException {
         Set<String[]> result = new HashSet<String[]>();
         while (resultSet.next()) {
             String[] values = new String[3];
-            values[0] = resultSet.getString("iliname");
-            values[1] = resultSet.getString("tag");
-            values[2] = resultSet.getString("setting");
+            values[0] = resultSet.getString(DbNames.TRAFO_TAB_ILINAME_COL);
+            values[1] = resultSet.getString(DbNames.TRAFO_TAB_TAG_COL);
+            values[2] = resultSet.getString(DbNames.TRAFO_TAB_SETTING_COL);
             result.add(values);
         }
         return result;
@@ -210,10 +139,10 @@ public class Ili2dbAssert {
         Set<String[]> result = new HashSet<String[]>();
         while (resultSet.next()) {
             String[] values = new String[4];
-            values[0] = resultSet.getString("iliname");
-            values[1] = resultSet.getString("sqlname");
-            values[2] = resultSet.getString("owner");
-            values[3] = resultSet.getString("target");
+            values[0] = resultSet.getString(DbNames.ATTRNAME_TAB_ILINAME_COL);
+            values[1] = resultSet.getString(DbNames.ATTRNAME_TAB_SQLNAME_COL);
+            values[2] = resultSet.getString(DbNames.ATTRNAME_TAB_COLOWNER_COL);
+            values[3] = resultSet.getString(DbNames.ATTRNAME_TAB_TARGET_COL);
             result.add(values);
         }
         return result;

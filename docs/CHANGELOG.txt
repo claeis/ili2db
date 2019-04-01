@@ -17,6 +17,9 @@ LATEST
 - fixed: missing resource ch.ehi.basics.wizard
 - replaced TOML file reader with INI file reader
 - attributes of 1:n associations
+- T_ILI2DB_MODEL.file -> filename
+- T_ILI2DB_IMPORT_BASKET.import -> importrun
+- T_ILI2DB_ATTRNAME.owner -> colowner
 
 ili2pg 3.12.2 (2018-09-07)
 -----------------------------
