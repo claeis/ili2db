@@ -20,6 +20,10 @@ LATEST
 - T_ILI2DB_MODEL.file -> filename
 - T_ILI2DB_IMPORT_BASKET.import -> importrun
 - T_ILI2DB_ATTRNAME.owner -> colowner
+- ehisqlgen-1.13.7
+- iox-ili-1.20.11
+- ili2c-5.0.0
+
 
 ili2pg 3.12.2 (2018-09-07)
 -----------------------------
