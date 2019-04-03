@@ -279,48 +279,6 @@ public class TransferToXtf {
 			exportBaseModelFilter.close();
 		}
 	}
-    public static boolean isBasketTableWithDomains(Connection conn,String schema) {
-        
-        String sqlName=DbNames.BASKETS_TAB;
-        if(schema!=null){
-            sqlName=schema+"."+sqlName;
-        }
-        java.sql.PreparedStatement getstmt=null;
-        java.sql.ResultSet res=null;
-        try{
-            String stmt="SELECT * FROM "+sqlName+" WHERE 1<>1";
-            EhiLogger.traceBackendCmd(stmt);
-            getstmt=conn.prepareStatement(stmt);
-            res=getstmt.executeQuery();
-            ResultSetMetaData meta = res.getMetaData();
-            int colc=meta.getColumnCount();
-            for(int i=1;i<=colc;i++) {
-                String colName=meta.getColumnName(i);
-                if(colName.equalsIgnoreCase(DbNames.BASKETS_TAB_DOMAINS_COL)) {
-                    return true;
-                }
-            }
-        }catch(java.sql.SQLException ex){
-            EhiLogger.logError("failed to query "+sqlName,ex);
-        }finally{
-            if(res!=null){
-                try{
-                    res.close();
-                    res=null;
-                }catch(java.sql.SQLException ex){
-                    EhiLogger.logError(ex);
-                }
-            }
-            if(getstmt!=null){
-                try{
-                    getstmt.close();
-                }catch(java.sql.SQLException ex){
-                    EhiLogger.logError(ex);
-                }
-            }
-        }
-        return false;
-    }
 	private Topic getTopicByBasketId(long basketSqlId, StringBuilder basketXtfId,Map<String,String> genericDomains) throws IoxException {
 		
 		String sqlName=DbNames.BASKETS_TAB;
@@ -332,9 +290,8 @@ public class TransferToXtf {
 		String domains=null;
 		java.sql.PreparedStatement getstmt=null;
         java.sql.ResultSet res=null;
-        boolean withDomains=isBasketTableWithDomains(conn,schema);
 		try{
-			String stmt="SELECT "+DbNames.BASKETS_TAB_TOPIC_COL+","+DbNames.T_ILI_TID_COL+(withDomains?","+DbNames.BASKETS_TAB_DOMAINS_COL:"")+" FROM "+sqlName+" WHERE "+colT_ID+"= ?";
+			String stmt="SELECT "+DbNames.BASKETS_TAB_TOPIC_COL+","+DbNames.T_ILI_TID_COL+","+DbNames.BASKETS_TAB_DOMAINS_COL+" FROM "+sqlName+" WHERE "+colT_ID+"= ?";
 			EhiLogger.traceBackendCmd(stmt);
 			getstmt=conn.prepareStatement(stmt);
 			getstmt.setLong(1,basketSqlId);
@@ -342,9 +299,7 @@ public class TransferToXtf {
 			if(res.next()){
 				topicName=res.getString(1);
 				bid=res.getString(2);
-				if(withDomains) {
-	                domains=res.getString(3);
-				}
+                domains=res.getString(3);
 			}
 		}catch(java.sql.SQLException ex){
 			EhiLogger.logError("failed to query "+sqlName,ex);

@@ -38,6 +38,7 @@ CREATE TABLE MultiSurface.T_ILI2DB_BASKET (
   ,topic varchar(200) NOT NULL
   ,T_Ili_Tid varchar(200) NULL
   ,attachmentKey varchar(200) NOT NULL
+  ,domains varchar(1024) NULL
 )
 ;
 CREATE TABLE MultiSurface.T_ILI2DB_DATASET (

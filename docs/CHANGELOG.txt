@@ -13,6 +13,7 @@ ideas/open issues/questions
 
 LATEST
 ---------------------------
+- IMPORTANT: ili2db 4.x breaks schema compatibility with ili2db 3.x
 - xtf24: import/export coord generics
 - fixed: missing resource ch.ehi.basics.wizard
 - replaced TOML file reader with INI file reader

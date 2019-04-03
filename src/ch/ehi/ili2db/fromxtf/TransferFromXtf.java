@@ -1759,11 +1759,7 @@ public class TransferFromXtf {
 	{
 		String bid=iomBasket.getBid();
 		String tag=iomBasket.getType();
-        boolean withDomains=TransferToXtf.isBasketTableWithDomains(conn,schema);
 		String domains=XtfWriter.domainsToString(genericDomains);
-        if(!withDomains && !genericDomains.isEmpty()) {
-            throw new IllegalStateException("DB requires migration or domains must be empty <"+domains+">");
-        }
 
 		String sqlname=DbNames.BASKETS_TAB;
 		if(schema!=null){
@@ -1777,15 +1773,6 @@ public class TransferFromXtf {
 			+", "+DbNames.BASKETS_TAB_DATASET_COL
             +", "+DbNames.BASKETS_TAB_DOMAINS_COL
 			+") VALUES (?,?,?,?,?,?)";
-		if(!withDomains) {
-	        insert = "INSERT INTO "+sqlname
-	                +"("+colT_ID 
-	                +", "+DbNames.BASKETS_TAB_TOPIC_COL
-	                +", "+DbNames.T_ILI_TID_COL
-	                +", "+DbNames.BASKETS_TAB_ATTACHMENT_KEY_COL
-	                +", "+DbNames.BASKETS_TAB_DATASET_COL
-	                +") VALUES (?,?,?,?,?)";
-		}
 		EhiLogger.traceBackendCmd(insert);
 		PreparedStatement ps = conn.prepareStatement(insert);
 		try{
@@ -1809,10 +1796,8 @@ public class TransferFromXtf {
 			ps.setLong(valuei, datasetSqlId);
 			valuei++;
 			
-			if(withDomains) {
-	            ps.setString(valuei, domains);
-	            valuei++;
-			}
+            ps.setString(valuei, domains);
+            valuei++;
             
 			ps.executeUpdate();
 		}finally{

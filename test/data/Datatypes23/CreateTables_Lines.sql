@@ -123,7 +123,8 @@ CREATE TABLE t_ili2db_basket (
     dataset bigint,
     topic character varying(200) NOT NULL,
     t_ili_tid character varying(200),
-    attachmentkey character varying(200) NOT NULL
+    attachmentkey character varying(200) NOT NULL,
+    domains character varying(1024)
 );
 
 CREATE TABLE t_ili2db_classname (
