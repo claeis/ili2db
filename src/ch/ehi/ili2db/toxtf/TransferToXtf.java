@@ -153,7 +153,7 @@ public class TransferToXtf {
 		if(function!=Config.FC_VALIDATE && iomFile instanceof ItfWriter){
 			config.setValue(ch.interlis.iox_j.validator.Validator.CONFIG_DO_ITF_LINETABLES, ch.interlis.iox_j.validator.Validator.CONFIG_DO_ITF_LINETABLES_DO);
 		}
-		if(config.getVer4_translation() || config.getIli1Translation()!=null){
+		if(!config.isVer3_translation() || config.getIli1Translation()!=null){
 			languageFilter=new TranslateToTranslation(td, config);
 		}
 		

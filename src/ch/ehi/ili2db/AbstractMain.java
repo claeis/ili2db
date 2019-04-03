@@ -353,7 +353,11 @@ public abstract class AbstractMain {
                 config.setDoImplicitSchemaImport(true);
 			}else if(arg.equals("--ver4-translation")){
 				argi++;
-				config.setVer4_translation(true);
+				config.setVer3_translation(false);
+                EhiLogger.logAdaption("--ver4-translation is a deprecated option");
+            }else if(arg.equals("--ver3-translation")){
+                argi++;
+                config.setVer3_translation(true);
 			}else if(arg.equals("--translation")){
 				argi++;
 				config.setIli1Translation(args[argi]);

@@ -81,7 +81,7 @@ public class Config extends Settings {
 	private static final String ATTACHMENT_KEY=PREFIX+".attachmentKey";
 	private static final String DO_ITF_LINE_TABLES=PREFIX+".doItfLineTables";
 	private static final String COLNAME_T_ID=PREFIX+".colName_T_ID";
-	public static final String VER4_TRANSLATION=PREFIX+".ver4_translation";
+    public static final String VER3_TRANSLATION=PREFIX+".ver3_translation";
 	public static final String ILI1TRANSLATION=PREFIX+".ili1translation";
 	public static final String DELETE_DATA="data";
 	public static final String CREATE_META_INFO=PREFIX+".createMetaInfo";
@@ -629,11 +629,11 @@ public class Config extends Settings {
 		this.disableAreaValidation = disableAreaValidation;
 	}
 	private boolean disableAreaValidation=false;
-	public void setVer4_translation(boolean b) {
-		setValue(VER4_TRANSLATION,TRUE);
+	public void setVer3_translation(boolean b) {
+		setValue(VER3_TRANSLATION,b?TRUE:FALSE);
 	}
-	public boolean getVer4_translation() {
-		return TRUE.equals(getValue(VER4_TRANSLATION))?true:false;
+	public boolean isVer3_translation() {
+		return TRUE.equals(getValue(VER3_TRANSLATION))?true:false;
 	}
 	public void setIli1Translation(String modelMapping) {
 		setValue(ILI1TRANSLATION,modelMapping);

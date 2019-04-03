@@ -86,7 +86,7 @@ public class TranslationTest {
 				config.setMultiSurfaceTrafo(null);
 				config.setMultilingualTrafo(null);
 				config.setInheritanceTrafo(null);
-				config.setVer4_translation(true);
+				config.setVer3_translation(false);
 				Ili2db.readSettingsFromDb(config);
 				Ili2db.run(config,null);
 				// class[a] is imported
@@ -283,7 +283,7 @@ public class TranslationTest {
 	    		config.setMultiSurfaceTrafo(null);
 	    		config.setMultilingualTrafo(null);
 	    		config.setInheritanceTrafo(null);
-	    		config.setVer4_translation(true);
+	    		config.setVer3_translation(false);
 	    		config.setDatasetName("EnumOka");
 	    		Ili2db.readSettingsFromDb(config);
 	    		Ili2db.run(config,null);

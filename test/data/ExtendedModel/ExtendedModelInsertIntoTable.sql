@@ -141,6 +141,7 @@ INSERT INTO extendedmodel23.t_ili2db_settings VALUES ('ch.ehi.ili2db.uuidDefault
 INSERT INTO extendedmodel23.t_ili2db_settings VALUES ('ch.ehi.ili2db.inheritanceTrafo', 'smart1');
 INSERT INTO extendedmodel23.t_ili2db_settings VALUES ('ch.ehi.ili2db.multiPointTrafo', 'coalesce');
 INSERT INTO extendedmodel23.t_ili2db_settings VALUES ('ch.ehi.ili2db.multiLineTrafo', 'coalesce');
+INSERT INTO extendedmodel23.t_ili2db_settings VALUES ('ch.ehi.ili2db.ver3_translation','True');
 INSERT INTO extendedmodel23.t_ili2db_trafo VALUES ('BaseModel.TestA.AssocA1', 'ch.ehi.ili2db.inheritance', 'newClass');
 INSERT INTO extendedmodel23.t_ili2db_trafo VALUES ('ExtendedModel.TestAp.AssocAp1', 'ch.ehi.ili2db.inheritance', 'newClass');
 INSERT INTO extendedmodel23.t_ili2db_trafo VALUES ('ExtendedModel.TestBp.ClassB1', 'ch.ehi.ili2db.inheritance', 'newClass');

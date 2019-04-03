@@ -181,7 +181,7 @@ public class TransferFromXtf {
 		}
 		xtffilename=config.getXtffile();
 		functionCode=function;
-		if(config.getVer4_translation() || config.getIli1Translation()!=null){
+		if(!config.isVer3_translation() || config.getIli1Translation()!=null){
 			languageFilter=new TranslateToOrigin(td1, config);
 		}
 	    if(config.getSrsModelAssignment()!=null) {
