@@ -291,7 +291,7 @@ public class DbExtMetaInfo {
 			DbColVarchar setting=new DbColVarchar();
 			setting.setName(DbNames.META_INFO_COLUMN_TAB_SETTING_COL);
 			setting.setNotNull(true);
-			setting.setSize(1024);
+			setting.setSize(DbNames.SETTING_COL_SIZE);
 			tab.addColumn(setting);
 			
 			schema.addTable(tab);
@@ -318,7 +318,7 @@ public class DbExtMetaInfo {
 			DbColVarchar setting=new DbColVarchar();
 			setting.setName(DbNames.META_INFO_TABLE_TAB_SETTING_COL);
 			setting.setNotNull(true);
-			setting.setSize(1024);
+			setting.setSize(DbNames.SETTING_COL_SIZE);
 			tab.addColumn(setting);
 			
 			schema.addTable(tab);

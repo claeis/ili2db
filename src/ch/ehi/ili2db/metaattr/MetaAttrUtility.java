@@ -116,7 +116,7 @@ public class MetaAttrUtility{
 		DbColVarchar attrvalueCol=new DbColVarchar();
 		attrvalueCol.setName(DbNames.META_ATTRIBUTES_TAB_ATTRVALUE_COL);
 		attrvalueCol.setNotNull(true);
-		attrvalueCol.setSize(1024);
+		attrvalueCol.setSize(DbNames.SETTING_COL_SIZE);
 		tab.addColumn(attrvalueCol);
 		schema.addTable(tab);
 	}

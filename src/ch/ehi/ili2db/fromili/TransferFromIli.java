@@ -675,7 +675,7 @@ public class TransferFromIli {
 		DbColVarchar settingCol=new DbColVarchar();
 		settingCol.setName(DbNames.SETTINGS_TAB_SETTING_COL);
 		settingCol.setNotNull(false);
-		settingCol.setSize(255);
+		settingCol.setSize(DbNames.SETTING_COL_SIZE);
 		tab.addColumn(settingCol);
 		schema.addTable(tab);
 	}

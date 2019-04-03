@@ -59,6 +59,7 @@ public class DbNames {
 	public static final String SETTINGS_TAB="T_ILI2DB_SETTINGS";
 	public static final String SETTINGS_TAB_TAG_COL="tag";
 	public static final String SETTINGS_TAB_SETTING_COL="setting";
+    public static final int SETTING_COL_SIZE=1024;
 	public static final String INHERIT_TAB="T_ILI2DB_INHERITANCE";
 	public static final String INHERIT_TAB_THIS_COL="thisClass";
 	public static final String INHERIT_TAB_BASE_COL="baseClass";
