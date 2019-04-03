@@ -59,6 +59,7 @@ public class Assoc23Test {
             Config config = initConfig(data.getPath(), null, data.getPath() + ".log");
             config.setDatasetName(DATASETNAME_A);
             config.setFunction(Config.FC_IMPORT);
+            config.setDoImplicitSchemaImport(true);
             config.setCreateFk(config.CREATE_FK_YES);
             config.setValidation(false);
             config.setBasketHandling(config.BASKET_HANDLING_READWRITE);
@@ -107,6 +108,7 @@ public class Assoc23Test {
             Config config = initConfig(data.getPath(), null, data.getPath() + ".log");
             config.setDatasetName(DATASETNAME_A);
             config.setFunction(Config.FC_IMPORT);
+            config.setDoImplicitSchemaImport(true);
             config.setCreateFk(config.CREATE_FK_YES);
             config.setValidation(false);
             config.setSkipReferenceErrors(true);

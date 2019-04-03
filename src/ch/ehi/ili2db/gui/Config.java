@@ -126,7 +126,7 @@ public class Config extends Settings {
 	private boolean configReadFromDb=false;
 	private boolean itfTransferFile=false;
 	private String validConfigFileName=null;
-    private boolean doImplicitSchemaImport=true; // do implicit schema import during data import
+    private boolean doImplicitSchemaImport=false; // do implicit schema import during data import
 	private boolean validation=false;
 	private boolean skipReferenceErrors=false;
     private boolean importBid=false;

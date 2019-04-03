@@ -102,7 +102,7 @@ public class PreAndPostScriptTest {
 	// [Config.FC_IMPORT]
 	// [setDbschema(DBSCHEMA)]
 	@Test
-	public void importTest() throws Exception
+	public void importXtfTest() throws Exception
 	{
 		Connection jdbcConnection=null;
 		try{
@@ -121,6 +121,7 @@ public class PreAndPostScriptTest {
 				config.setPreScript(preData.toString());
 				config.setDbschema(DBSCHEMA);
 				config.setFunction(Config.FC_IMPORT);
+		        config.setDoImplicitSchemaImport(true);
 				config.setPostScript(postData.toString());
 				Ili2db.readSettingsFromDb(config);
 				Ili2db.run(config,null);

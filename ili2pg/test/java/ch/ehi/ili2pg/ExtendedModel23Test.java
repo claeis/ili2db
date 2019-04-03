@@ -75,6 +75,7 @@ public class ExtendedModel23Test {
 					File data=new File("test/data/ExtendedModel/ExtendedModel1.xtf");
 		    		Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 		    		config.setFunction(Config.FC_IMPORT);
+		            config.setDoImplicitSchemaImport(true);
 					config.setModels("BaseModel;ExtendedModel");
 		    		config.setCreateFk(config.CREATE_FK_YES);
 		    		config.setTidHandling(Config.TID_HANDLING_PROPERTY);

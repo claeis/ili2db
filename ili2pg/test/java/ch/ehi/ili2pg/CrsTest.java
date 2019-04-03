@@ -215,6 +215,7 @@ public class CrsTest {
 		File data=new File("test/data/Crs/CrsCoord23a.xtf");
 		Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 		config.setFunction(Config.FC_IMPORT);
+        config.setDoImplicitSchemaImport(true);
 		config.setCreateFk(config.CREATE_FK_YES);
 		config.setCreateNumChecks(true);
 		config.setTidHandling(Config.TID_HANDLING_PROPERTY);
@@ -243,6 +244,7 @@ public class CrsTest {
                 File data=new File("test/data/Crs/CrsCoord23a.xtf");
                 Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
                 config.setFunction(Config.FC_IMPORT);
+                config.setDoImplicitSchemaImport(true);
                 config.setCreateFk(config.CREATE_FK_YES);
                 config.setCreateNumChecks(true);
                 config.setTidHandling(Config.TID_HANDLING_PROPERTY);
@@ -282,6 +284,7 @@ public class CrsTest {
         File data=new File("test/data/Crs/CrsNoCoord23a.xtf");
         Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
         config.setFunction(Config.FC_IMPORT);
+        config.setDoImplicitSchemaImport(true);
         config.setCreateFk(config.CREATE_FK_YES);
         config.setCreateNumChecks(true);
         config.setTidHandling(Config.TID_HANDLING_PROPERTY);

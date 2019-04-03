@@ -61,7 +61,7 @@ public class InheritanceNoSmartTest {
 	}
 
 	@Test
-	public void importNoSmart() throws Exception
+	public void importXtfNoSmart() throws Exception
 	{
 		Connection jdbcConnection=null;
 		try{
@@ -74,6 +74,7 @@ public class InheritanceNoSmartTest {
 		        File data=new File("test/data/InheritanceNoSmart/Inheritance1a.xtf");
 				Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 				config.setFunction(Config.FC_IMPORT);
+		        config.setDoImplicitSchemaImport(true);
 				config.setCreateFk(Config.CREATE_FK_YES);
 				config.setInheritanceTrafo(null);
 				config.setDatasetName(DATASETNAME);
@@ -98,7 +99,7 @@ public class InheritanceNoSmartTest {
 	}
 
 	@Test
-	public void exportNoSmart() throws Exception
+	public void exportXtfNoSmart() throws Exception
 	{
 		Connection jdbcConnection=null;
 		try{
@@ -236,6 +237,7 @@ public class InheritanceNoSmartTest {
 				File data=new File("test/data/InheritanceNoSmart/StructAttr1a.xtf");
 				Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 				config.setFunction(Config.FC_IMPORT);
+		        config.setDoImplicitSchemaImport(true);
 				config.setCreateFk(Config.CREATE_FK_YES);
 				config.setInheritanceTrafo(null);
 				config.setDatasetName(DATASETNAME);

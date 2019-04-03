@@ -63,7 +63,7 @@ public class Naming1smart1Test {
 	//config.setTidHandling(config.TID_HANDLING_PROPERTY);
 	
 	@Test
-	public void importDataset() throws Exception
+	public void importXtfDataset() throws Exception
 	{
 		Connection jdbcConnection=null;
 		try{
@@ -77,6 +77,7 @@ public class Naming1smart1Test {
 			Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 			config.setDatasetName(DATASETNAME);
 			config.setFunction(Config.FC_IMPORT);
+	        config.setDoImplicitSchemaImport(true);
 			config.setCreateFk(config.CREATE_FK_YES);
 			config.setBasketHandling(config.BASKET_HANDLING_READWRITE);
 			config.setCatalogueRefTrafo(null);
@@ -168,9 +169,9 @@ public class Naming1smart1Test {
 		}
 	}
     @Test
-    public void exportDataset() throws Exception
+    public void exportXtfDataset() throws Exception
     {
-        importDataset();
+        importXtfDataset();
         Connection jdbcConnection=null;
         try{
             Class driverClass = Class.forName("org.postgresql.Driver");

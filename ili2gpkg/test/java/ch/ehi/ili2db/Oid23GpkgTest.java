@@ -115,6 +115,7 @@ public class Oid23GpkgTest {
     		File data=new File(TEST_OUT,"Oid1a.xtf");
     		Config config=initConfig(data.getPath(),data.getPath()+".log");
     		config.setFunction(Config.FC_IMPORT);
+            config.setDoImplicitSchemaImport(true);
     		config.setCreateFk(config.CREATE_FK_YES);
     		config.setTidHandling(Config.TID_HANDLING_PROPERTY);
     		config.setBasketHandling(config.BASKET_HANDLING_READWRITE);

@@ -274,6 +274,7 @@ public class TranslationTest {
 	    		File data=new File(TEST_OUT,"EnumOka.xtf");
 	    		Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 	    		config.setFunction(Config.FC_IMPORT);
+	            config.setDoImplicitSchemaImport(true);
 	    		config.setCreateFk(config.CREATE_FK_YES);
                 config.setImportBid(true);
 	    		config.setTidHandling(Config.TID_HANDLING_PROPERTY);
@@ -405,6 +406,7 @@ public class TranslationTest {
 	    		File data=new File(TEST_OUT,"ModelAsimple10a.itf");
 	    		Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 	    		config.setFunction(Config.FC_IMPORT);
+	            config.setDoImplicitSchemaImport(true);
 	    		config.setCreateFk(config.CREATE_FK_YES);
 	    		config.setTidHandling(Config.TID_HANDLING_PROPERTY);
 	    		config.setImportBid(true);
@@ -695,6 +697,7 @@ public class TranslationTest {
 	    		File data=new File(TEST_OUT,"ModelAsimple10a.itf");
 	    		Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 	    		config.setFunction(Config.FC_IMPORT);
+	            config.setDoImplicitSchemaImport(true);
 	    		config.setCreateFk(config.CREATE_FK_YES);
                 config.setImportBid(true);
 	    		config.setTidHandling(Config.TID_HANDLING_PROPERTY);

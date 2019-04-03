@@ -138,6 +138,7 @@ public class InheritanceSmart2Test {
 			File data=new File("test/data/InheritanceSmart2/Inheritance2a.xtf");
 			Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 			config.setFunction(Config.FC_IMPORT);
+	        config.setDoImplicitSchemaImport(true);
 			config.setCreateFk(Config.CREATE_FK_YES);
 			config.setInheritanceTrafo(Config.INHERITANCE_TRAFO_SMART2);
 			config.setDatasetName(DATASETNAME);
@@ -442,6 +443,7 @@ public class InheritanceSmart2Test {
 			File data=new File("test/data/InheritanceSmart2/StructAttr1a.xtf");
 			Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 			config.setFunction(Config.FC_IMPORT);
+	        config.setDoImplicitSchemaImport(true);
 			config.setCreateFk(Config.CREATE_FK_YES);
 			config.setInheritanceTrafo(Config.INHERITANCE_TRAFO_SMART2);
 			config.setDatasetName(DATASETNAME);

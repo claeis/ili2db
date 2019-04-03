@@ -357,6 +357,7 @@ public class CatalogueObjectsTest {
                 File data=new File(TEST_OUT,"CatalogueObjects1a.xtf");
                 Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
                 config.setFunction(Config.FC_IMPORT);
+                config.setDoImplicitSchemaImport(true);
                 config.setCreateFk(Config.CREATE_FK_YES);
                 config.setDatasetName(DATASETNAME);
                 config.setInheritanceTrafo(Config.INHERITANCE_TRAFO_SMART1);
@@ -389,6 +390,7 @@ public class CatalogueObjectsTest {
                 File data=new File(TEST_OUT,"CatalogueObjects1a.xtf");
                 Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
                 config.setFunction(Config.FC_IMPORT);
+                config.setDoImplicitSchemaImport(true);
                 config.setCreateFk(Config.CREATE_FK_YES);
                 config.setDatasetName(DATASETNAME);
                 config.setInheritanceTrafo(Config.INHERITANCE_TRAFO_SMART2);

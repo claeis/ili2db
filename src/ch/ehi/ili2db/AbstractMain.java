@@ -347,6 +347,10 @@ public abstract class AbstractMain {
             }else if(arg.equals("--ver4-noSchemaImport")){
                 argi++;
                 config.setDoImplicitSchemaImport(false);
+                EhiLogger.logAdaption("--ver4-noSchemaImport is a deprecated option");
+            }else if(arg.equals("--doSchemaImport")){
+                argi++;
+                config.setDoImplicitSchemaImport(true);
 			}else if(arg.equals("--ver4-translation")){
 				argi++;
 				config.setVer4_translation(true);
@@ -455,6 +459,7 @@ public abstract class AbstractMain {
 					System.err.println("--ILIGML20             use eCH-0118-2.0 as transferformat");
 					System.err.println("--exportModels modelname  export data according to the given base ili-models");
 					System.err.println("--ver4-noSchemaImport  do no implicit schema import during data import");
+                    System.err.println("--doSchemaImport       do implicit schema import during data import");
 					System.err.println("--ver4-translation     supports TRANSLATION OF in ili2db 4.x mode (incompatible with ili2db 3.x versions).");
 					System.err.println("--translation translatedModel=originModel assigns a translated model to its orginal language equivalent.");
 					System.err.println("--createMetaInfo       Create aditional ili-model information.");

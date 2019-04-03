@@ -68,7 +68,7 @@ public class InheritanceSmart1Test {
 	//config.setTidHandling(config.TID_HANDLING_PROPERTY);
 	
 	@Test
-	public void importSmart1() throws Exception
+	public void importXtfSmart1() throws Exception
 	{
 		Connection jdbcConnection=null;
 		try{
@@ -81,6 +81,7 @@ public class InheritanceSmart1Test {
 		        File data=new File("test/data/InheritanceSmart1/Inheritance1a.xtf");
 				Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 				config.setFunction(Config.FC_IMPORT);
+		        config.setDoImplicitSchemaImport(true);
 				config.setCreateFk(Config.CREATE_FK_YES);
 				config.setInheritanceTrafo(Config.INHERITANCE_TRAFO_SMART1);
 				config.setDatasetName(DATASETNAME);
@@ -279,6 +280,7 @@ public class InheritanceSmart1Test {
 		        File data=new File("test/data/InheritanceSmart1/SubtypeFKa.xtf");
 				Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 				config.setFunction(Config.FC_IMPORT);
+		        config.setDoImplicitSchemaImport(true);
 				config.setCreateFk(Config.CREATE_FK_YES);
 				config.setInheritanceTrafo(Config.INHERITANCE_TRAFO_SMART1);
 				config.setDatasetName(DATASETNAME);
@@ -393,6 +395,7 @@ public class InheritanceSmart1Test {
 		        File data=new File("test/data/InheritanceSmart1/StructAttr1a.xtf");
 				Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 				config.setFunction(Config.FC_IMPORT);
+		        config.setDoImplicitSchemaImport(true);
 				config.setCreateFk(Config.CREATE_FK_YES);
 				config.setInheritanceTrafo(Config.INHERITANCE_TRAFO_SMART1);
 				config.setDatasetName(DATASETNAME);
@@ -587,6 +590,7 @@ public class InheritanceSmart1Test {
 		        File data=new File("test/data/InheritanceSmart1/RefAttr1a.xtf");
 				Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 				config.setFunction(Config.FC_IMPORT);
+		        config.setDoImplicitSchemaImport(true);
 				config.setCreateFk(Config.CREATE_FK_YES);
 				config.setInheritanceTrafo(Config.INHERITANCE_TRAFO_SMART1);
 				config.setDatasetName(DATASETNAME);
