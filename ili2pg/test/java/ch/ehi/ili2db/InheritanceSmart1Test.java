@@ -404,23 +404,23 @@ public class InheritanceSmart1Test {
 				Ili2db.run(config,null);
 				
 				// subtype value
-				Assert.assertTrue(stmt.execute("SELECT topica_structa.t_id, topica_structa.aname FROM "+DBSCHEMA+".topica_structa WHERE topica_structa.t_id = 5"));
+				Assert.assertTrue(stmt.execute("SELECT topica_structa.t_id, topica_structa.aname FROM "+DBSCHEMA+".topica_structa WHERE topica_structa.aname = 'Anna'"));
 				{
 					ResultSet rs=stmt.getResultSet();
 					Assert.assertTrue(rs.next());
-					Assert.assertEquals("Anna",rs.getString(2));
+                    Assert.assertFalse(rs.next());
 				}
-				Assert.assertTrue(stmt.execute("SELECT topica_structa.t_id, topica_structa.aname FROM "+DBSCHEMA+".topica_structa WHERE topica_structa.t_id = 7"));
+				Assert.assertTrue(stmt.execute("SELECT topica_structa.t_id, topica_structa.aname FROM "+DBSCHEMA+".topica_structa WHERE topica_structa.aname = 'Berta'"));
 				{
 					ResultSet rs=stmt.getResultSet();
 					Assert.assertTrue(rs.next());
-					Assert.assertEquals("Berta",rs.getString(2));
+                    Assert.assertFalse(rs.next());
 				}
-				Assert.assertTrue(stmt.execute("SELECT topica_structa.t_id, topica_structa.aname FROM "+DBSCHEMA+".topica_structa WHERE topica_structa.t_id = 9"));
+				Assert.assertTrue(stmt.execute("SELECT topica_structa.t_id, topica_structa.aname FROM "+DBSCHEMA+".topica_structa WHERE topica_structa.aname = 'Claudia'"));
 				{
 					ResultSet rs=stmt.getResultSet();
 					Assert.assertTrue(rs.next());
-					Assert.assertEquals("Claudia",rs.getString(2));
+                    Assert.assertFalse(rs.next());
 				}
 	        }
 		}finally{

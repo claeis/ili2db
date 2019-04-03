@@ -58,6 +58,8 @@ public class Config extends Settings {
 	public static final String UNIQUE_CONSTRAINTS_CREATE="create";
 	public static final String NUMERIC_CHECK_CONSTRAINTS=PREFIX+".numericCheckConstraints";
 	public static final String NUMERIC_CHECK_CONSTRAINTS_CREATE="create";
+    public static final String IMPORT_TABS=PREFIX+".importTabs";
+    public static final String IMPORT_TABS_CREATE="create";
 	public static final String GEOMATTR_PER_TABLE=PREFIX+".geomAttrPerTable";
 	public static final String GEOMATTR_PER_TABLE_ONE="oneGeomAttrPerTable";
 	private static final String NAME_OPTIMIZATION=PREFIX+".nameOptimization";
@@ -479,6 +481,13 @@ public class Config extends Settings {
 	public boolean isCreateCreateNumChecks() {
 		return NUMERIC_CHECK_CONSTRAINTS_CREATE.equals(getValue(NUMERIC_CHECK_CONSTRAINTS));
 	}
+    public void setCreateImportTabs(boolean ignore) {
+        setValue(IMPORT_TABS,ignore?IMPORT_TABS_CREATE:null);
+    }
+    public boolean isCreateImportTabs() {
+        return IMPORT_TABS_CREATE.equals(getValue(IMPORT_TABS));
+    }
+
 	public void setOneGeomPerTable(boolean onlyOne) {
 		setValue(GEOMATTR_PER_TABLE,onlyOne?GEOMATTR_PER_TABLE_ONE:null);
 	}

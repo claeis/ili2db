@@ -118,24 +118,26 @@ public class Dataset23Smart1Test {
             XtfReader reader = new XtfReader(data);
             assertTrue(reader.read() instanceof StartTransferEvent);
             assertTrue(reader.read() instanceof StartBasketEvent);
+            HashMap<String,IomObject> objs=new HashMap<String,IomObject>();
             IoxEvent event = reader.read();
             {
                 assertTrue(event instanceof ObjectEvent);
                 IomObject iomObj = ((ObjectEvent) event).getIomObject();
-                String attrtag = iomObj.getobjecttag();
-                assertEquals("5", iomObj.getobjectoid());
-                assertTrue(iomObj.getattrvalue("attr1").equals("a1"));
-                assertEquals("Dataset1.TestA.ClassA1", attrtag);
+                objs.put(iomObj.getobjectoid(), iomObj);
             }
             event = reader.read();
             {
                 assertTrue(event instanceof ObjectEvent);
                 IomObject iomObj = ((ObjectEvent) event).getIomObject();
-                assertEquals("7", iomObj.getobjectoid());
-                assertTrue(iomObj.getattrvalue("attr1").equals("a1"));
+                objs.put(iomObj.getobjectoid(), iomObj);
 
-                assertTrue(reader.read() instanceof EndBasketEvent);
-                assertTrue(reader.read() instanceof EndTransferEvent);
+            }
+            assertTrue(reader.read() instanceof EndBasketEvent);
+            assertTrue(reader.read() instanceof EndTransferEvent);
+            
+            assertEquals(2,objs.size());
+            for(IomObject iomObj:objs.values()) {
+                assertTrue(iomObj.getattrvalue("attr1").equals("a1"));
             }
 
         } catch (Exception e) {

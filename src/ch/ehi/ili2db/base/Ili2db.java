@@ -561,7 +561,9 @@ public class Ili2db {
 						}
 
 						trsfFromIli.addBasketsTable(schema);
-						trsfFromIli.addImportsTable(schema);
+	                    if(config.isCreateImportTabs()) {
+	                        trsfFromIli.addImportsTable(schema);
+	                    }
 
 						TransferFromIli.addInheritanceTable(schema,config);
 						TransferFromIli.addSettingsTable(schema);
@@ -1170,7 +1172,9 @@ public class Ili2db {
 
 				if(!(conn instanceof GeodbConnection)){
 					trsfFromIli.addBasketsTable(schema);
-					trsfFromIli.addImportsTable(schema);
+					if(config.isCreateImportTabs()) {
+	                    trsfFromIli.addImportsTable(schema);
+					}
 					TransferFromIli.addInheritanceTable(schema,config);
 					TransferFromIli.addSettingsTable(schema);
 					TransferFromIli.addTrafoConfigTable(schema);

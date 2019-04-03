@@ -264,7 +264,9 @@ public class TransferFromXtf {
 						datasetSqlId=oidPool.newObjSqlId();
 						try {
 							writeDataset(datasetSqlId,datasetName);
-							importSqlId=writeImportStat(datasetSqlId,xtffilename,today,dbusr);
+							if(config.isCreateImportTabs()) {
+	                            importSqlId=writeImportStat(datasetSqlId,xtffilename,today,dbusr);
+							}
 						} catch (SQLException e) {
 							EhiLogger.logError(e);
 						} catch (ConverterException e) {
@@ -298,12 +300,14 @@ public class TransferFromXtf {
 							}
 						}
 					}
-					try {
-						importSqlId=writeImportStat(datasetSqlId,xtffilename,today,dbusr);
-					} catch (SQLException e) {
-						EhiLogger.logError(e);
-					} catch (ConverterException e) {
-						EhiLogger.logError(e);
+					if(config.isCreateImportTabs()) {
+	                    try {
+	                        importSqlId=writeImportStat(datasetSqlId,xtffilename,today,dbusr);
+	                    } catch (SQLException e) {
+	                        EhiLogger.logError(e);
+	                    } catch (ConverterException e) {
+	                        EhiLogger.logError(e);
+	                    }
 					}
 				}
 			}else if(functionCode==Config.FC_UPDATE){
@@ -317,7 +321,9 @@ public class TransferFromXtf {
 						datasetSqlId=oidPool.newObjSqlId();
 						writeDataset(datasetSqlId,datasetName);
 					}
-					importSqlId=writeImportStat(datasetSqlId,xtffilename,today,dbusr);
+					if(config.isCreateImportTabs()) {
+	                    importSqlId=writeImportStat(datasetSqlId,xtffilename,today,dbusr);
+					}
 				} catch (SQLException e) {
 					EhiLogger.logError(e);
 				} catch (ConverterException e) {
@@ -341,7 +347,9 @@ public class TransferFromXtf {
 						}
 					}
 					writeDataset(datasetSqlId,datasetName);
-					importSqlId=writeImportStat(datasetSqlId,xtffilename,today,dbusr);
+					if(config.isCreateImportTabs()) {
+	                    importSqlId=writeImportStat(datasetSqlId,xtffilename,today,dbusr);
+					}
 				} catch (SQLException e) {
 					EhiLogger.logError(e);
 				} catch (ConverterException e) {
@@ -509,8 +517,11 @@ public class TransferFromXtf {
 								if(xtffilename!=null){
 									filename=new java.io.File(xtffilename).getName();
 								}
-								long importId=writeImportBasketStat(importSqlId,basketSqlId,startTid,endTid,objCount);
-								saveObjStat(stat,importId,basket.getBid(),basketSqlId,filename,basket.getType(),objStat);
+								if(config.isCreateImportTabs()) {
+	                                long importId=writeImportBasketStat(importSqlId,basketSqlId,startTid,endTid,objCount);
+	                                writeObjStat(importId,basketSqlId,objStat);
+								}
+								saveObjStat(stat,basket.getBid(),basketSqlId,filename,basket.getType(),objStat);
 							} catch (SQLException ex) {
 								EhiLogger.logError("Basket "+basket.getType()+"(oid "+basket.getBid()+")",ex);
 							} catch (ConverterException ex) {
@@ -1593,12 +1604,15 @@ public class TransferFromXtf {
 			objStat.put(tag,stat);
 		}
 	}
-	private void saveObjStat(Map<Long,BasketStat> basketStat,long sqlImportId,String iliBasketId,long basketSqlId,String file,String topic,HashMap<String, ClassStat> objStat) throws SQLException
+    private void writeObjStat(long sqlImportId,long basketSqlId,HashMap<String, ClassStat> objStat) throws SQLException
+    {
+        for(String className : objStat.keySet()){
+            ClassStat stat=objStat.get(className);
+            writeImportStatDetail(sqlImportId,stat.getStartid(),stat.getEndid(),stat.getObjcount(),className);
+        }
+    }
+	private void saveObjStat(Map<Long,BasketStat> basketStat,String iliBasketId,long basketSqlId,String file,String topic,HashMap<String, ClassStat> objStat) throws SQLException
 	{
-		for(String className : objStat.keySet()){
-			ClassStat stat=objStat.get(className);
-			writeImportStatDetail(sqlImportId,stat.getStartid(),stat.getEndid(),stat.getObjcount(),className);
-		}
 		// save it for later output to log
 		basketStat.put(basketSqlId,new BasketStat(file,topic,iliBasketId,objStat));
 	}

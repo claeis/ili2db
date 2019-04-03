@@ -174,15 +174,17 @@ public class Oid23Test {
 				}
 			}
 			// import-test: Oid1a.xtf
+			Integer a1_tid=null;
 			{
-				String stmtTxt="SELECT classa1.t_id, classa1.t_ili_tid FROM "+DBSCHEMA+".classa1 WHERE classa1.t_id = 4";
+				String stmtTxt="SELECT classa1.t_id, classa1.t_ili_tid FROM "+DBSCHEMA+".classa1 WHERE classa1.t_ili_tid = 'c34c86ec-2a75-4a89-a194-f9ebc422f8bc'";
 				Assert.assertTrue(stmt.execute(stmtTxt));
 				ResultSet rs=stmt.getResultSet();
 				Assert.assertTrue(rs.next());
 				Assert.assertEquals("c34c86ec-2a75-4a89-a194-f9ebc422f8bc",rs.getString(2));
+				a1_tid=rs.getInt(1);
 			}
 			{
-				String stmtTxt="SELECT classb1.t_id, classb1.t_ili_tid FROM "+DBSCHEMA+".classb1 WHERE classb1.t_id = 5";
+				String stmtTxt="SELECT classb1.t_id, classb1.t_ili_tid FROM "+DBSCHEMA+".classb1 WHERE classb1.t_ili_tid = '81fc3941-01ec-4c51-b1ba-46b6295d9b4e'";
 				Assert.assertTrue(stmt.execute(stmtTxt));
 				ResultSet rs=stmt.getResultSet();
 				Assert.assertTrue(rs.next());
@@ -190,11 +192,12 @@ public class Oid23Test {
 			}
 			// import-test_ Oid1c.xtf
 			{
-				String stmtTxt="SELECT classc1.t_id, classc1.a FROM "+DBSCHEMA+".classc1 WHERE classc1.t_id = 12";
+				String stmtTxt="SELECT classc1.t_id, classc1.a FROM "+DBSCHEMA+".classc1";
 				Assert.assertTrue(stmt.execute(stmtTxt));
 				ResultSet rs=stmt.getResultSet();
 				Assert.assertTrue(rs.next());
-				Assert.assertEquals("4",rs.getString(2));
+				Assert.assertEquals((int)a1_tid,rs.getInt(2));
+                Assert.assertFalse(rs.next());
 			}
 		}finally{
 			if(jdbcConnection!=null){

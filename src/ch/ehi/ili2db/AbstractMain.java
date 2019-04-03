@@ -270,6 +270,9 @@ public abstract class AbstractMain {
 			}else if(arg.equals("--createNumChecks")){
 				argi++;
 				config.setCreateNumChecks(true);
+            }else if(arg.equals("--createImportTabs")){
+                argi++;
+                config.setCreateImportTabs(true);
 			}else if(arg.equals("--createStdCols")){
 				argi++;
 				config.setCreateStdCols(config.CREATE_STD_COLS_ALL);
@@ -442,6 +445,7 @@ public abstract class AbstractMain {
 					System.err.println("--keepAreaRef          keep arreaRef as additional column on import.");
 					System.err.println("--importTid            read transient TIDs into an additional column "+DbNames.T_ILI_TID_COL);
                     System.err.println("--importBid            read transient BIDs into "+DbNames.BASKETS_TAB+"."+DbNames.T_ILI_TID_COL);
+                    System.err.println("--createImportTabs     create tables with import statistics. ("+DbNames.IMPORTS_TAB+")");
 					System.err.println("--createBasketCol      generate "+DbNames.T_BASKET_COL+" column.");
 					System.err.println("--createDatasetCol     generate "+DbNames.T_DATASET_COL+" column (Requires --dataset)");
 					System.err.println("--createFk             generate foreign key constraints.");

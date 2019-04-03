@@ -129,6 +129,7 @@ public class Json23Test {
         config.setCreateFk(config.CREATE_FK_YES);
         config.setCreateNumChecks(true);
         config.setTidHandling(Config.TID_HANDLING_PROPERTY);
+        config.setImportBid(true);
         config.setBasketHandling(config.BASKET_HANDLING_READWRITE);
         config.setCatalogueRefTrafo(null);
         config.setMultiSurfaceTrafo(null);

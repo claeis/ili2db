@@ -8,7 +8,10 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.Statement;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
+
 import org.junit.Assert;
 import org.junit.Test;
 import com.vividsolutions.jts.geom.Coordinate;
@@ -272,6 +275,7 @@ public class TranslationTest {
 	    		Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 	    		config.setFunction(Config.FC_IMPORT);
 	    		config.setCreateFk(config.CREATE_FK_YES);
+                config.setImportBid(true);
 	    		config.setTidHandling(Config.TID_HANDLING_PROPERTY);
 	    		config.setBasketHandling(config.BASKET_HANDLING_READWRITE);
 	    		config.setCatalogueRefTrafo(null);
@@ -283,39 +287,24 @@ public class TranslationTest {
 	    		Ili2db.readSettingsFromDb(config);
 	    		Ili2db.run(config,null);
 	    		// tid's of class[a]
-				Assert.assertTrue(stmt.execute("SELECT classa.t_id, classa.t_ili_tid FROM "+DBSCHEMA+".classa WHERE classa.t_id = 4"));
+	    		HashSet<String> expectedTids= new HashSet<String>(Arrays.asList(new String[]{"o1","o2","x1","x2"}));
+				Assert.assertTrue(stmt.execute("SELECT classa.t_id, classa.t_ili_tid FROM "+DBSCHEMA+".classa"));
 				{
 					ResultSet rs=stmt.getResultSet();
-					Assert.assertTrue(rs.next());
-					Assert.assertEquals("o1",rs.getString(2));
+					while(!expectedTids.isEmpty()) {
+	                    Assert.assertTrue(rs.next());
+	                    String tid=rs.getString(2);
+					    assertTrue(expectedTids.remove(tid));
+					}
+                    Assert.assertFalse(rs.next());
 				}
-				Assert.assertTrue(stmt.execute("SELECT classa.t_id, classa.t_ili_tid FROM "+DBSCHEMA+".classa WHERE classa.t_id = 5"));
-				{
-					ResultSet rs=stmt.getResultSet();
-					Assert.assertTrue(rs.next());
-					Assert.assertEquals("o2",rs.getString(2));
-				}
-				// tid's of class[b]
-				Assert.assertTrue(stmt.execute("SELECT classa.t_id, classa.t_ili_tid FROM "+DBSCHEMA+".classa WHERE classa.t_id = 9"));
-				{
-					ResultSet rs=stmt.getResultSet();
-					Assert.assertTrue(rs.next());
-					Assert.assertEquals("x1",rs.getString(2));
-				}
-				Assert.assertTrue(stmt.execute("SELECT classa.t_id, classa.t_ili_tid FROM "+DBSCHEMA+".classa WHERE classa.t_id = 10"));
-				{
-					ResultSet rs=stmt.getResultSet();
-					Assert.assertTrue(rs.next());
-					Assert.assertEquals("x2",rs.getString(2));
-				}
-				// bid's of classa and classb are created
-				Assert.assertTrue(stmt.execute("SELECT t_ili2db_basket.t_id, t_ili2db_basket.topic FROM "+DBSCHEMA+".t_ili2db_basket WHERE t_ili2db_basket.t_id = 3"));
+				Assert.assertTrue(stmt.execute("SELECT t_ili2db_basket.t_id, t_ili2db_basket.topic FROM "+DBSCHEMA+".t_ili2db_basket WHERE t_ili2db_basket.t_ili_tid = 'EnumOkA.Test1'"));
 				{
 					ResultSet rs=stmt.getResultSet();
 					Assert.assertTrue(rs.next());
 					Assert.assertEquals("EnumOkA.TopicA",rs.getString(2));
 				}
-				Assert.assertTrue(stmt.execute("SELECT t_ili2db_basket.t_id, t_ili2db_basket.topic FROM "+DBSCHEMA+".t_ili2db_basket WHERE t_ili2db_basket.t_id = 8"));
+				Assert.assertTrue(stmt.execute("SELECT t_ili2db_basket.t_id, t_ili2db_basket.topic FROM "+DBSCHEMA+".t_ili2db_basket WHERE t_ili2db_basket.t_ili_tid = 'EnumOkB.Test1'"));
 				{
 					ResultSet rs=stmt.getResultSet();
 					Assert.assertTrue(rs.next());
@@ -418,6 +407,7 @@ public class TranslationTest {
 	    		config.setFunction(Config.FC_IMPORT);
 	    		config.setCreateFk(config.CREATE_FK_YES);
 	    		config.setTidHandling(Config.TID_HANDLING_PROPERTY);
+	    		config.setImportBid(true);
 	    		config.setBasketHandling(config.BASKET_HANDLING_READWRITE);
 	    		config.setCatalogueRefTrafo(null);
 	    		config.setMultiSurfaceTrafo(null);
@@ -434,6 +424,7 @@ public class TranslationTest {
 	        	File data=new File(TEST_OUT,"ModelBsimple10a.itf");
 	    		Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 	    		config.setFunction(Config.FC_IMPORT);
+                config.setImportBid(true);
 	    		config.setDatasetName("ModelBsimple10");
 	    		Ili2db.readSettingsFromDb(config);
 	    		Ili2db.run(config,null);
@@ -446,13 +437,13 @@ public class TranslationTest {
 				Assert.assertEquals("o10",rs.getString(1));
 			}
 			// bid's of classa and classb are created
-			Assert.assertTrue(stmt.execute("SELECT t_ili2db_basket.t_id, t_ili2db_basket.topic FROM "+DBSCHEMA+".t_ili2db_basket WHERE t_ili2db_basket.t_id = 3"));
+			Assert.assertTrue(stmt.execute("SELECT t_ili2db_basket.t_id, t_ili2db_basket.topic FROM "+DBSCHEMA+".t_ili2db_basket WHERE t_ili2db_basket.t_ili_tid = 'ModelAsimple10.TopicA'"));
 			{
 				ResultSet rs=stmt.getResultSet();
 				Assert.assertTrue(rs.next());
 				Assert.assertEquals("ModelAsimple10.TopicA",rs.getString(2));
 			}
-			Assert.assertTrue(stmt.execute("SELECT t_ili2db_basket.t_id, t_ili2db_basket.topic FROM "+DBSCHEMA+".t_ili2db_basket WHERE t_ili2db_basket.t_id = 14"));
+			Assert.assertTrue(stmt.execute("SELECT t_ili2db_basket.t_id, t_ili2db_basket.topic FROM "+DBSCHEMA+".t_ili2db_basket WHERE t_ili2db_basket.t_ili_tid = 'ModelBsimple10.TopicB'"));
 			{
 				ResultSet rs=stmt.getResultSet();
 				Assert.assertTrue(rs.next());
@@ -705,6 +696,7 @@ public class TranslationTest {
 	    		Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 	    		config.setFunction(Config.FC_IMPORT);
 	    		config.setCreateFk(config.CREATE_FK_YES);
+                config.setImportBid(true);
 	    		config.setTidHandling(Config.TID_HANDLING_PROPERTY);
 	    		config.setBasketHandling(config.BASKET_HANDLING_READWRITE);
                 Ili2db.setSkipPolygonBuilding(config);
@@ -723,6 +715,7 @@ public class TranslationTest {
 	        	File data=new File(TEST_OUT,"ModelBsimple10a.itf");
 	    		Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 	    		config.setFunction(Config.FC_IMPORT);
+                config.setImportBid(true);
 	    		config.setDatasetName("ModelBsimple10");
 	    		Ili2db.readSettingsFromDb(config);
 	    		Ili2db.run(config,null);
@@ -740,13 +733,13 @@ public class TranslationTest {
  				Assert.assertEquals("SRID=21781;COMPOUNDCURVE((480000 70000,480010 70000,480010 70010,480000 70010,480000 70000))",rs.getString(1));
  			}
  			// bid's of classa and classb are created
- 			Assert.assertTrue(stmt.execute("SELECT t_ili2db_basket.t_id, t_ili2db_basket.topic FROM "+DBSCHEMA+".t_ili2db_basket WHERE t_ili2db_basket.t_id = 3"));
+ 			Assert.assertTrue(stmt.execute("SELECT t_ili2db_basket.t_id, t_ili2db_basket.topic FROM "+DBSCHEMA+".t_ili2db_basket WHERE t_ili2db_basket.t_ili_tid = 'ModelAsimple10.TopicA'"));
  			{
  				ResultSet rs=stmt.getResultSet();
  				Assert.assertTrue(rs.next());
  				Assert.assertEquals("ModelAsimple10.TopicA",rs.getString(2));
  			}
- 			Assert.assertTrue(stmt.execute("SELECT t_ili2db_basket.t_id, t_ili2db_basket.topic FROM "+DBSCHEMA+".t_ili2db_basket WHERE t_ili2db_basket.t_id = 16"));
+ 			Assert.assertTrue(stmt.execute("SELECT t_ili2db_basket.t_id, t_ili2db_basket.topic FROM "+DBSCHEMA+".t_ili2db_basket WHERE t_ili2db_basket.t_ili_tid = 'ModelBsimple10.TopicB'"));
  			{
  				ResultSet rs=stmt.getResultSet();
  				Assert.assertTrue(rs.next());

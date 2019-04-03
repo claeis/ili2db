@@ -507,7 +507,7 @@ public class CatalogueObjectsTest {
          	String objTag=ohneUuid.getobjecttag();
          	assertEquals("CatalogueObjects1.TopicB.OhneUuid",objTag);
          	String oid=ohneUuid.getobjectoid();
-			assertEquals("9",oid);
+			assertEquals("6",oid);
              {
                 // Programm_n
             	IomObject programm_n=nutzung.getattrobj("Programm_n", 0);
@@ -591,7 +591,7 @@ public class CatalogueObjectsTest {
               	String objTag=ohneUuid.getobjecttag();
               	assertEquals("CatalogueObjects1.TopicB.OhneUuid",objTag);
               	String oid=ohneUuid.getobjectoid();
-     			assertEquals("9",oid);
+     			assertEquals("6",oid);
                   {
                      // Programm_n
                  	IomObject programm_n=nutzung.getattrobj("Programm_n", 0);

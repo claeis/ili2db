@@ -88,11 +88,11 @@ public class Area10Test {
 					Assert.assertTrue(rs.next());
 					Assert.assertEquals("Art1",rs.getString(1));
 				}
-				Assert.assertTrue(stmt.execute("SELECT boflaechen.t_id FROM "+DBSCHEMA+".boFlaechen"));
+				Assert.assertTrue(stmt.execute("SELECT count(boflaechen.t_id) FROM "+DBSCHEMA+".boFlaechen"));
 				{
 					ResultSet rs=stmt.getResultSet();
 					Assert.assertTrue(rs.next());
-					Assert.assertEquals("4",rs.getString(1));
+					Assert.assertEquals("1",rs.getString(1));
 				}
 				Assert.assertTrue(stmt.execute("SELECT st_asewkt(boflaechen.form) FROM "+DBSCHEMA+".boFlaechen"));
 				{
@@ -142,11 +142,11 @@ public class Area10Test {
 					Assert.assertTrue(rs.next());
 					Assert.assertEquals("Art1",rs.getString(1));
 				}
-				Assert.assertTrue(stmt.execute("SELECT boflaechen.t_id FROM "+DBSCHEMA+".boFlaechen"));
+				Assert.assertTrue(stmt.execute("SELECT count(boflaechen.t_id) FROM "+DBSCHEMA+".boFlaechen"));
 				{
 					ResultSet rs=stmt.getResultSet();
 					Assert.assertTrue(rs.next());
-					Assert.assertEquals("4",rs.getString(1));
+					Assert.assertEquals("1",rs.getString(1));
 				}
 				Assert.assertTrue(stmt.execute("SELECT t_ili2db_attrname.iliname FROM "+DBSCHEMA+".t_ili2db_attrname"));
 				{
@@ -195,11 +195,11 @@ public class Area10Test {
 					Assert.assertTrue(rs.next());
 					Assert.assertEquals("Art1",rs.getString(1));
 				}
-				Assert.assertTrue(stmt.execute("SELECT boflaechen.t_id FROM "+DBSCHEMA+".boFlaechen"));
+				Assert.assertTrue(stmt.execute("SELECT count(boflaechen.t_id) FROM "+DBSCHEMA+".boFlaechen"));
 				{
 					ResultSet rs=stmt.getResultSet();
 					Assert.assertTrue(rs.next());
-					Assert.assertEquals("4",rs.getString(1));
+					Assert.assertEquals("1",rs.getString(1));
 				}
 				Assert.assertTrue(stmt.execute("SELECT t_ili2db_attrname.iliname FROM "+DBSCHEMA+".t_ili2db_attrname"));
 				{
