@@ -659,37 +659,37 @@ install {
             pom('ili2pg').scopeMappings.with {
                 mappings.clear()
                 addMapping(300, configurations.ili2pgCompileClasspath, 'runtime')
-                addMapping(300, configurations.ili2db, 'runtime')
+                addMapping(300, configurations.ili2db, 'compile')
             }
             pom('ili2mysql').artifactId = 'ili2mysql'
             pom('ili2mysql').scopeMappings.with {
                 mappings.clear()
                 addMapping(300, configurations.ili2mysqlCompileClasspath, 'runtime')
-                addMapping(300, configurations.ili2db, 'runtime')
+                addMapping(300, configurations.ili2db, 'compile')
             }
             pom('ili2gpkg').artifactId = 'ili2gpkg'
             pom('ili2gpkg').scopeMappings.with {
                 mappings.clear()
                 addMapping(300, configurations.ili2gpkgCompileClasspath, 'runtime')
-                addMapping(300, configurations.ili2db, 'runtime')
+                addMapping(300, configurations.ili2db, 'compile')
             }
             pom('ili2fgdb').artifactId = 'ili2fgdb'
             pom('ili2fgdb').scopeMappings.with {
                 mappings.clear()
                 addMapping(300, configurations.ili2fgdbCompileClasspath, 'runtime')
-                addMapping(300, configurations.ili2db, 'runtime')
+                addMapping(300, configurations.ili2db, 'compile')
             }
             pom('ili2mssql').artifactId = 'ili2mssql'
             pom('ili2mssql').scopeMappings.with {
                 mappings.clear()
                 addMapping(300, configurations.ili2mssqlCompileClasspath, 'runtime')
-                addMapping(300, configurations.ili2db, 'runtime')
+                addMapping(300, configurations.ili2db, 'compile')
             }
             pom('ili2ora').artifactId = 'ili2ora'
             pom('ili2ora').scopeMappings.with {
                 mappings.clear()
                 addMapping(300, configurations.ili2oraCompileClasspath, 'runtime')
-                addMapping(300, configurations.ili2db, 'runtime')
+                addMapping(300, configurations.ili2db, 'compile')
             }
     	}
     }
@@ -732,37 +732,37 @@ uploadArchives {
             pom('ili2pg').scopeMappings.with {
                 mappings.clear()
                 addMapping(300, configurations.ili2pgCompileClasspath, 'runtime')
-                addMapping(300, configurations.ili2db, 'runtime')
+                addMapping(300, configurations.ili2db, 'compile')
             }
             pom('ili2mysql').artifactId = 'ili2mysql'
             pom('ili2mysql').scopeMappings.with {
                 mappings.clear()
                 addMapping(300, configurations.ili2mysqlCompileClasspath, 'runtime')
-                addMapping(300, configurations.ili2db, 'runtime')
+                addMapping(300, configurations.ili2db, 'compile')
             }
             pom('ili2gpkg').artifactId = 'ili2gpkg'
             pom('ili2gpkg').scopeMappings.with {
                 mappings.clear()
                 addMapping(300, configurations.ili2gpkgCompileClasspath, 'runtime')
-                addMapping(300, configurations.ili2db, 'runtime')
+                addMapping(300, configurations.ili2db, 'compile')
             }
             pom('ili2fgdb').artifactId = 'ili2fgdb'
             pom('ili2fgdb').scopeMappings.with {
                 mappings.clear()
                 addMapping(300, configurations.ili2fgdbCompileClasspath, 'runtime')
-                addMapping(300, configurations.ili2db, 'runtime')
+                addMapping(300, configurations.ili2db, 'compile')
             }
             pom('ili2mssql').artifactId = 'ili2mssql'
             pom('ili2mssql').scopeMappings.with {
                 mappings.clear()
                 addMapping(300, configurations.ili2mssqlCompileClasspath, 'runtime')
-                addMapping(300, configurations.ili2db, 'runtime')
+                addMapping(300, configurations.ili2db, 'compile')
             }
             pom('ili2ora').artifactId = 'ili2ora'
             pom('ili2ora').scopeMappings.with {
                 mappings.clear()
                 addMapping(300, configurations.ili2oraCompileClasspath, 'runtime')
-                addMapping(300, configurations.ili2db, 'runtime')
+                addMapping(300, configurations.ili2db, 'compile')
             }
         }
     }
