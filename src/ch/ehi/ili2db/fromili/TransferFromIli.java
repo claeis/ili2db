@@ -1636,8 +1636,11 @@ public class TransferFromIli {
                 }
 			}
             if(gen!=null) {
-                StringBuffer insStmt=new StringBuffer("INSERT INTO "+sqlTableName+" ("+DbNames.ENUM_TAB_SEQ_COL+","+DbNames.ENUM_TAB_ILICODE_COL+","+DbNames.ENUM_TAB_ITFCODE_COL+","+DbNames.ENUM_TAB_DISPNAME_COL+","+DbNames.ENUM_TAB_INACTIVE_COL+","+DbNames.ENUM_TAB_DESCRIPTION_COL+","+DbNames.ENUM_TAB_THIS_COL+","+DbNames.ENUM_TAB_BASE_COL
-                        +") VALUES (");
+                StringBuffer insStmt=new StringBuffer("INSERT INTO "+sqlTableName+" ("+DbNames.ENUM_TAB_SEQ_COL+","+DbNames.ENUM_TAB_ILICODE_COL+","+DbNames.ENUM_TAB_ITFCODE_COL+","+DbNames.ENUM_TAB_DISPNAME_COL+","+DbNames.ENUM_TAB_INACTIVE_COL+","+DbNames.ENUM_TAB_DESCRIPTION_COL);
+                if(thisClass!=null){
+                    insStmt.append(","+DbNames.ENUM_TAB_THIS_COL+","+DbNames.ENUM_TAB_BASE_COL);
+                }
+                insStmt.append(") VALUES (");
                 // insert only non-existing entries
                 if(isOrdered){
                     insStmt.append(seq);
