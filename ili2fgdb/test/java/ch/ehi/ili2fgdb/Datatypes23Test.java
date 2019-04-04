@@ -88,6 +88,7 @@ public class Datatypes23Test {
 		File data=new File(TEST_OUT,"Datatypes23Attr.xtf");
 		Config config=initConfig(data.getPath(),data.getPath()+".log");
 		config.setFunction(Config.FC_IMPORT);
+        config.setDoImplicitSchemaImport(true);
 		config.setCreateFk(config.CREATE_FK_YES);
 		config.setCreateNumChecks(true);
 		config.setTidHandling(Config.TID_HANDLING_PROPERTY);
@@ -97,12 +98,7 @@ public class Datatypes23Test {
 		config.setMultilingualTrafo(null);
 		config.setInheritanceTrafo(null);
 		//Ili2db.readSettingsFromDb(config);
-		try{
-			Ili2db.run(config,null);
-		}catch(Exception ex){
-			EhiLogger.logError(ex);
-			Assert.fail();
-		}
+        Ili2db.run(config,null);
 	}
 	
 	@Test
@@ -115,6 +111,7 @@ public class Datatypes23Test {
 		File data=new File(TEST_OUT,"Datatypes23Line.xtf");
 		Config config=initConfig(data.getPath(),data.getPath()+".log");
 		config.setFunction(Config.FC_IMPORT);
+        config.setDoImplicitSchemaImport(true);
 		config.setCreateFk(config.CREATE_FK_YES);
 		config.setCreateNumChecks(true);
 		config.setTidHandling(Config.TID_HANDLING_PROPERTY);
@@ -124,12 +121,7 @@ public class Datatypes23Test {
 		config.setMultilingualTrafo(null);
 		config.setInheritanceTrafo(null);
 		//Ili2db.readSettingsFromDb(config);
-		try{
-			Ili2db.run(config,null);
-		}catch(Exception ex){
-			EhiLogger.logError(ex);
-			Assert.fail();
-		}
+        Ili2db.run(config,null);
 	}
 	
 	@Test
@@ -142,6 +134,7 @@ public class Datatypes23Test {
 		File data=new File(TEST_OUT,"Datatypes23Surface.xtf");
 		Config config=initConfig(data.getPath(),data.getPath()+".log");
 		config.setFunction(Config.FC_IMPORT);
+        config.setDoImplicitSchemaImport(true);
 		config.setCreateFk(config.CREATE_FK_YES);
 		config.setCreateNumChecks(true);
 		config.setTidHandling(Config.TID_HANDLING_PROPERTY);
@@ -151,12 +144,7 @@ public class Datatypes23Test {
 		config.setMultilingualTrafo(null);
 		config.setInheritanceTrafo(null);
 		//Ili2db.readSettingsFromDb(config);
-		try{
-			Ili2db.run(config,null);
-		}catch(Exception ex){
-			EhiLogger.logError(ex);
-			Assert.fail();
-		}
+        Ili2db.run(config,null);
 	}
 	
 	@Test
@@ -175,12 +163,7 @@ public class Datatypes23Test {
 		config.setFunction(Config.FC_EXPORT);
 		config.setModels("Datatypes23");
 		Ili2db.readSettingsFromDb(config);
-		try{
-			Ili2db.run(config,null);
-		}catch(Exception ex){
-			EhiLogger.logError(ex);
-			Assert.fail();
-		}
+        Ili2db.run(config,null);
 		{
 			XtfReader reader=new XtfReader(data);
 			assertTrue(reader.read() instanceof StartTransferEvent);
@@ -307,12 +290,7 @@ public class Datatypes23Test {
 		config.setModels("Datatypes23");
 		Ili2db.readSettingsFromDb(config);
 		config.setBasketHandling(null);
-		try{
-			Ili2db.run(config,null);
-		}catch(Exception ex){
-			EhiLogger.logError(ex);
-			Assert.fail();
-		}
+        Ili2db.run(config,null);
 		{
 			XtfReader reader=new XtfReader(data);
 			assertTrue(reader.read() instanceof StartTransferEvent);
@@ -484,12 +462,7 @@ public class Datatypes23Test {
 		config.setFunction(Config.FC_EXPORT);
 		config.setModels("Datatypes23");
 		Ili2db.readSettingsFromDb(config);
-		try{
-			Ili2db.run(config,null);
-		}catch(Exception ex){
-			EhiLogger.logError(ex);
-			Assert.fail();
-		}
+        Ili2db.run(config,null);
 		{
 			XtfReader reader=new XtfReader(dataAttr);
 			assertTrue(reader.read() instanceof StartTransferEvent);

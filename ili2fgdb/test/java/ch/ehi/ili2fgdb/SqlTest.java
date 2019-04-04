@@ -56,6 +56,7 @@ public class SqlTest {
         File data=new File(TEST_OUT,"Simple23b.xtf");
         Config config=initConfig(data.getPath(),data.getPath()+".log");
         config.setFunction(Config.FC_IMPORT);
+        config.setDoImplicitSchemaImport(true);
         config.setCreateFk(config.CREATE_FK_YES);
         config.setCreateNumChecks(true);
         config.setTidHandling(Config.TID_HANDLING_PROPERTY);
@@ -65,12 +66,7 @@ public class SqlTest {
         config.setMultilingualTrafo(null);
         config.setInheritanceTrafo(null);
         //Ili2db.readSettingsFromDb(config);
-        try{
-            Ili2db.run(config,null);
-        }catch(Exception ex){
-            EhiLogger.logError(ex);
-            Assert.fail();
-        }
+        Ili2db.run(config,null);
     }
     @Test
     public void testQry() throws Exception {
@@ -94,7 +90,7 @@ public class SqlTest {
             if(rs.next()) {
                 sqlid = rs.getLong(1);
                 sqlType=rs.getString(3);
-                assertEquals(6,sqlid);
+                assertEquals(5,sqlid);
             }else{
                 // unknown object
                 fail();
