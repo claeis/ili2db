@@ -43,7 +43,7 @@ public class FgdbColumnConverter extends AbstractWKBColumnConverter {
 	@Override
 	public Integer getSrsid(String crsAuthority, String crsCode, Connection conn)
 			throws ConverterException {
-		int srsid=GeneratorFgdb.getSrsId(crsAuthority, crsCode);
+		Integer srsid=GeneratorFgdb.getSrsId(crsAuthority, crsCode);
 		return srsid;
 	}
 	private boolean strokeArcs=true;
