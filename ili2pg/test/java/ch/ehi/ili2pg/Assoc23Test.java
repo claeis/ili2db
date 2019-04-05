@@ -254,9 +254,10 @@ public class Assoc23Test {
                 Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
                 config.setFunction(Config.FC_IMPORT);
                 config.setDoImplicitSchemaImport(true);
-                config.setCreateFk(config.CREATE_FK_YES);
+                config.setCreateFk(Config.CREATE_FK_YES);
                 config.setTidHandling(Config.TID_HANDLING_PROPERTY);
-                config.setBasketHandling(config.BASKET_HANDLING_READWRITE);
+                config.setImportTid(true);
+                config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
                 config.setCatalogueRefTrafo(null);
                 config.setMultiSurfaceTrafo(null);
                 config.setMultilingualTrafo(null);
@@ -330,6 +331,7 @@ public class Assoc23Test {
                 config.setDoImplicitSchemaImport(true);
                 config.setCreateFk(config.CREATE_FK_YES);
                 config.setTidHandling(Config.TID_HANDLING_PROPERTY);
+                config.setImportTid(true);
                 config.setBasketHandling(config.BASKET_HANDLING_READWRITE);
                 config.setCatalogueRefTrafo(null);
                 config.setMultiSurfaceTrafo(null);
@@ -399,9 +401,10 @@ public class Assoc23Test {
                 Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
                 config.setFunction(Config.FC_IMPORT);
                 config.setDoImplicitSchemaImport(true);
-                config.setCreateFk(config.CREATE_FK_YES);
+                config.setCreateFk(Config.CREATE_FK_YES);
                 config.setTidHandling(Config.TID_HANDLING_PROPERTY);
-                config.setBasketHandling(config.BASKET_HANDLING_READWRITE);
+                config.setImportTid(true);
+                config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
                 config.setCatalogueRefTrafo(null);
                 config.setMultiSurfaceTrafo(null);
                 config.setMultilingualTrafo(null);
@@ -469,6 +472,7 @@ public class Assoc23Test {
 	            config.setDoImplicitSchemaImport(true);
 	    		config.setCreateFk(config.CREATE_FK_YES);
 	    		config.setTidHandling(Config.TID_HANDLING_PROPERTY);
+	    		config.setImportTid(true);
 	    		config.setBasketHandling(config.BASKET_HANDLING_READWRITE);
 	    		config.setCatalogueRefTrafo(null);
 	    		config.setMultiSurfaceTrafo(null);
@@ -499,9 +503,10 @@ public class Assoc23Test {
 	    		Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 	    		config.setFunction(Config.FC_IMPORT);
 	            config.setDoImplicitSchemaImport(true);
-	    		config.setCreateFk(config.CREATE_FK_YES);
+	    		config.setCreateFk(Config.CREATE_FK_YES);
 	    		config.setTidHandling(Config.TID_HANDLING_PROPERTY);
-	    		config.setBasketHandling(config.BASKET_HANDLING_READWRITE);
+	    		config.setImportTid(true);
+	    		config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
 	    		config.setCatalogueRefTrafo(null);
 	    		config.setMultiSurfaceTrafo(null);
 	    		config.setMultilingualTrafo(null);
@@ -568,9 +573,10 @@ public class Assoc23Test {
 	    		Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 	    		config.setFunction(Config.FC_IMPORT);
 	            config.setDoImplicitSchemaImport(true);
-	    		config.setCreateFk(config.CREATE_FK_YES);
+	    		config.setCreateFk(Config.CREATE_FK_YES);
 	    		config.setTidHandling(Config.TID_HANDLING_PROPERTY);
-	    		config.setBasketHandling(config.BASKET_HANDLING_READWRITE);
+	    		config.setImportTid(true);
+	    		config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
 	    		config.setCatalogueRefTrafo(null);
 	    		config.setMultiSurfaceTrafo(null);
 	    		config.setMultilingualTrafo(null);
@@ -603,6 +609,7 @@ public class Assoc23Test {
 		            config.setDoImplicitSchemaImport(true);
 		    		config.setCreateFk(config.CREATE_FK_YES);
 		    		config.setTidHandling(Config.TID_HANDLING_PROPERTY);
+		    		config.setImportTid(true);
 		    		config.setBasketHandling(config.BASKET_HANDLING_READWRITE);
 		    		config.setCatalogueRefTrafo(null);
 		    		config.setMultiSurfaceTrafo(null);
@@ -615,13 +622,7 @@ public class Assoc23Test {
 					File data=new File(TEST_OUT,"Assoc2b2.xtf");
 		    		Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 		    		config.setFunction(Config.FC_IMPORT);
-		    		config.setCreateFk(config.CREATE_FK_YES);
-		    		config.setTidHandling(Config.TID_HANDLING_PROPERTY);
-		    		config.setBasketHandling(config.BASKET_HANDLING_READWRITE);
-		    		config.setCatalogueRefTrafo(null);
-		    		config.setMultiSurfaceTrafo(null);
-		    		config.setMultilingualTrafo(null);
-		    		config.setInheritanceTrafo(null);
+		    		config.setImportTid(true);
 		    		Ili2db.readSettingsFromDb(config);
 		    		Ili2db.run(config,null);
 				}
@@ -648,9 +649,10 @@ public class Assoc23Test {
 	    		Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 	    		config.setFunction(Config.FC_IMPORT);
 	            config.setDoImplicitSchemaImport(true);
-	    		config.setCreateFk(config.CREATE_FK_YES);
+	    		config.setCreateFk(Config.CREATE_FK_YES);
 	    		config.setTidHandling(Config.TID_HANDLING_PROPERTY);
-	    		config.setBasketHandling(config.BASKET_HANDLING_READWRITE);
+	    		config.setImportTid(true);
+	    		config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
 	    		config.setCatalogueRefTrafo(null);
 	    		config.setMultiSurfaceTrafo(null);
 	    		config.setMultilingualTrafo(null);
@@ -682,13 +684,7 @@ public class Assoc23Test {
 				data=new File(TEST_OUT,"Assoc1a-out.xtf");
 	    		Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 	    		config.setFunction(Config.FC_EXPORT);
-	    		config.setCreateFk(config.CREATE_FK_YES);
-	    		config.setTidHandling(Config.TID_HANDLING_PROPERTY);
-	    		config.setBasketHandling(config.BASKET_HANDLING_READWRITE);
-	    		config.setCatalogueRefTrafo(null);
-	    		config.setMultiSurfaceTrafo(null);
-	    		config.setMultilingualTrafo(null);
-	    		config.setInheritanceTrafo(null);
+	    		config.setExportTid(true);
 	    		config.setModels("Assoc1");
 	    		Ili2db.readSettingsFromDb(config);
 	    		Ili2db.run(config,null);
@@ -780,6 +776,7 @@ public class Assoc23Test {
 				data=new File(TEST_OUT,"Assoc1b-out.xtf");
 	    		Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 	    		config.setFunction(Config.FC_EXPORT);
+	    		config.setExportTid(true);
 	    		config.setModels("Assoc1");
 	    		Ili2db.readSettingsFromDb(config);
 	    		Ili2db.run(config,null);
@@ -925,6 +922,7 @@ public class Assoc23Test {
 				data=new File(TEST_OUT,"Assoc2a-out.xtf");
 	    		Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 	    		config.setFunction(Config.FC_EXPORT);
+	    		config.setExportTid(true);
 	    		config.setModels("Assoc2");
 	    		Ili2db.readSettingsFromDb(config);
 	    		Ili2db.run(config,null);
@@ -1017,6 +1015,7 @@ public class Assoc23Test {
 					data=new File(TEST_OUT,"Assoc2b1-out.xtf");
 		    		Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 		    		config.setFunction(Config.FC_EXPORT);
+		    		config.setExportTid(true);
 		    		config.setModels("Assoc2");
 		    		Ili2db.readSettingsFromDb(config);
 		    		Ili2db.run(config,null);
@@ -1025,6 +1024,7 @@ public class Assoc23Test {
 					data=new File(TEST_OUT,"Assoc2b2-out.xtf");
 		    		Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 		    		config.setFunction(Config.FC_EXPORT);
+                    config.setExportTid(true);
 		    		config.setModels("Assoc2");
 		    		Ili2db.readSettingsFromDb(config);
 		    		Ili2db.run(config,null);
@@ -1119,6 +1119,7 @@ public class Assoc23Test {
 				data=new File(TEST_OUT,"Assoc2c-out.xtf");
 	    		Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 	    		config.setFunction(Config.FC_EXPORT);
+	    		config.setExportTid(true);
 	    		config.setModels("Assoc2");
 	    		Ili2db.readSettingsFromDb(config);
 	    		Ili2db.run(config,null);
@@ -1191,6 +1192,7 @@ public class Assoc23Test {
                 data=new File(TEST_OUT,"Assoc4a-out.xtf");
                 Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
                 config.setFunction(Config.FC_EXPORT);
+                config.setExportTid(true);
                 config.setModels("Assoc4");
                 Ili2db.readSettingsFromDb(config);
                 Ili2db.run(config,null);
@@ -1275,6 +1277,7 @@ public class Assoc23Test {
                 data=new File(TEST_OUT,"Assoc4a-out.xtf");
                 Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
                 config.setFunction(Config.FC_EXPORT);
+                config.setExportTid(true);
                 config.setModels("Assoc4");
                 Ili2db.readSettingsFromDb(config);
                 Ili2db.run(config,null);
@@ -1359,6 +1362,7 @@ public class Assoc23Test {
                 data=new File(TEST_OUT,"Assoc4a-out.xtf");
                 Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
                 config.setFunction(Config.FC_EXPORT);
+                config.setExportTid(true);
                 config.setModels("Assoc4");
                 Ili2db.readSettingsFromDb(config);
                 Ili2db.run(config,null);

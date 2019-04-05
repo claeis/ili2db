@@ -133,6 +133,7 @@ public class Oid23GpkgTest {
 			File data=new File(TEST_OUT,"Oid1c.xtf");
 			Config config=initConfig(data.getPath(),data.getPath()+".log");
 			config.setFunction(Config.FC_IMPORT);
+			config.setImportTid(true); // import unstable TIDs from ClassC1
     		config.setValidation(false);
             config.setImportBid(true);
 			Ili2db.readSettingsFromDb(config);
@@ -150,13 +151,7 @@ public class Oid23GpkgTest {
 		File data=new File(TEST_OUT,"Oid1a-out.xtf");
 		Config config=initConfig(data.getPath(),data.getPath()+".log");
 		config.setFunction(Config.FC_EXPORT);
-		config.setCreateFk(config.CREATE_FK_YES);
-		config.setTidHandling(Config.TID_HANDLING_PROPERTY);
-		config.setBasketHandling(config.BASKET_HANDLING_READWRITE);
-		config.setCatalogueRefTrafo(null);
-		config.setMultiSurfaceTrafo(null);
-		config.setMultilingualTrafo(null);
-		config.setInheritanceTrafo(null);
+        config.setExportTid(true); // export unstable TIDs from ClassC1
 		config.setBaskets("Oid1.TestC");
 		Ili2db.readSettingsFromDb(config);
 		Ili2db.run(config,null);

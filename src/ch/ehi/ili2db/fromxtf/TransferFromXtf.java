@@ -170,7 +170,7 @@ public class TransferFromXtf {
 		}
         srsModelAssignment=config.getSrsModelAssignment();
 		createGenericStructRef=config.STRUCT_MAPPING_GENERICREF.equals(config.getStructMapping());
-		readIliTid=config.TID_HANDLING_PROPERTY.equals(config.getTidHandling());
+		readIliTid=config.isImportTid();
 		readIliBid=config.isImportBid();
 		createBasketCol=config.BASKET_HANDLING_READWRITE.equals(config.getBasketHandling());
 		createDatasetCol=config.CREATE_DATASET_COL.equals(config.getCreateDatasetCols());
@@ -198,6 +198,11 @@ public class TransferFromXtf {
 				throw new Ili2dbException("update/replace requires a basket column");
 			}
 		}
+        if(functionCode!=Config.FC_DELETE){
+            if(readIliTid && !Config.TID_HANDLING_PROPERTY.equals(config.getTidHandling())) {
+                throw new Ili2dbException("TID import requires a "+DbNames.T_ILI_TID_COL+" column");
+            }
+        }
 		// limit import to given BIDs
 		HashSet<String> limitedToBids=null;
 		{

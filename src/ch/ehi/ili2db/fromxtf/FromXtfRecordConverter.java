@@ -81,6 +81,7 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 	private Integer defaultEpsgCode=null;
     private Map<AttributeDef,EnumValueMap> enumCache=new HashMap<AttributeDef,EnumValueMap>();
     private String dbSchema;
+    private boolean importTid=false;
 	
 	public FromXtfRecordConverter(TransferDescription td1, NameMapping ili2sqlName,HashMap tag2class1,
 			Config config,
@@ -97,6 +98,7 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 		this.datasetName=datasetName;
 		this.dbSchema=dbSchema;
 		today=new java.sql.Timestamp(System.currentTimeMillis());
+		importTid=config.isImportTid();
 		try{
 			Integer srsid=geomConv.getSrsid(defaultCrsAuthority,defaultCrsCode,conn);
 			if(srsid==null){
@@ -149,7 +151,7 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 				if(structEle0==null){
 					if(!updateObj){
 						if(!aclass.isStructure()){
-							if(createIliTidCol || aclass.getOid()!=null){
+							if(importTid || aclass.getOid()!=null){
 								// import TID from transfer file
 								if(AbstractRecordConverter.isUuidOid(td, aclass.getOid())){
 									 Object toInsertUUID = geomConv.fromIomUuid(iomObj.getobjectoid());
@@ -396,7 +398,7 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 				// if Class
 				if(structEle0==null){
 					if(!isUpdate){
-						if(createIliTidCol || aclass.getOid()!=null){
+						if(importTid || aclass.getOid()!=null){
 							ret.append(sep);
 							ret.append(DbNames.T_ILI_TID_COL);
 							values.append(",?");

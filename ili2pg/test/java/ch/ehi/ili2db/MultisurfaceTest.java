@@ -69,6 +69,7 @@ public class MultisurfaceTest {
 	        config.setDoImplicitSchemaImport(true);
 			config.setCreateFk(config.CREATE_FK_YES);
 			config.setTidHandling(Config.TID_HANDLING_PROPERTY);
+			config.setImportTid(true);
 			config.setBasketHandling(config.BASKET_HANDLING_READWRITE);
 			config.setCatalogueRefTrafo(null);
 			config.setMultiSurfaceTrafo(null);
@@ -85,7 +86,7 @@ public class MultisurfaceTest {
 	}
 	
 	@Test
-	public void exportNoSmartChbase() throws Exception
+	public void exportXtfNoSmartChbase() throws Exception
 	{
 		Connection jdbcConnection=null;
 		try{
@@ -99,6 +100,7 @@ public class MultisurfaceTest {
 			Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 			config.setModels("MultiSurface1");
 			config.setFunction(Config.FC_EXPORT);
+			config.setExportTid(true);
 			Ili2db.readSettingsFromDb(config);
 			Ili2db.run(config,null);
 			
@@ -160,6 +162,7 @@ public class MultisurfaceTest {
 	        config.setDoImplicitSchemaImport(true);
 			config.setCreateFk(config.CREATE_FK_YES);
 			config.setTidHandling(Config.TID_HANDLING_PROPERTY);
+			config.setImportTid(true);
 			config.setBasketHandling(config.BASKET_HANDLING_READWRITE);
 			config.setCatalogueRefTrafo(null);
 			config.setMultiSurfaceTrafo(config.MULTISURFACE_TRAFO_COALESCE);
@@ -197,6 +200,7 @@ public class MultisurfaceTest {
             config.setDoImplicitSchemaImport(true);
             config.setCreateFk(config.CREATE_FK_YES);
             config.setTidHandling(Config.TID_HANDLING_PROPERTY);
+            config.setImportTid(true);
             config.setBasketHandling(config.BASKET_HANDLING_READWRITE);
             config.setCatalogueRefTrafo(null);
             config.setMultiSurfaceTrafo(config.MULTISURFACE_TRAFO_COALESCE);
@@ -219,7 +223,7 @@ public class MultisurfaceTest {
     }
 	
 	@Test
-	public void exportSmartChbase() throws Exception
+	public void exportXtfSmartChbase() throws Exception
 	{
 		Connection jdbcConnection=null;
 		try{
@@ -234,6 +238,7 @@ public class MultisurfaceTest {
 			Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 			config.setModels("MultiSurface1");
 			config.setFunction(Config.FC_EXPORT);
+			config.setExportTid(true);
 			Ili2db.readSettingsFromDb(config);
 			Ili2db.run(config,null);
 			
@@ -295,6 +300,7 @@ public class MultisurfaceTest {
 	        config.setDoImplicitSchemaImport(true);
 			config.setCreateFk(config.CREATE_FK_YES);
 			config.setTidHandling(Config.TID_HANDLING_PROPERTY);
+			config.setImportTid(true);
 			config.setBasketHandling(config.BASKET_HANDLING_READWRITE);
 			config.setCatalogueRefTrafo(null);
 			config.setMultiSurfaceTrafo(config.MULTISURFACE_TRAFO_COALESCE);
@@ -318,7 +324,7 @@ public class MultisurfaceTest {
 	}
 	
 	@Test
-	public void exportSmartCustom() throws Exception
+	public void exportXtfSmartCustom() throws Exception
 	{
 		Connection jdbcConnection=null;
 		try{
@@ -333,6 +339,7 @@ public class MultisurfaceTest {
 			Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 			config.setModels("MultiSurface2");
 			config.setFunction(Config.FC_EXPORT);
+			config.setExportTid(true);
 			Ili2db.readSettingsFromDb(config);
 			Ili2db.run(config,null);
 			
@@ -393,6 +400,7 @@ public class MultisurfaceTest {
 	        config.setDoImplicitSchemaImport(true);
 			config.setCreateFk(config.CREATE_FK_YES);
 			config.setTidHandling(Config.TID_HANDLING_PROPERTY);
+			config.setImportTid(true);
 			config.setBasketHandling(config.BASKET_HANDLING_READWRITE);
 			config.setCatalogueRefTrafo(null);
 			config.setMultiSurfaceTrafo(config.MULTISURFACE_TRAFO_COALESCE);
@@ -433,13 +441,7 @@ public class MultisurfaceTest {
 			Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 			config.setModels("MultiSurface1");
 			config.setFunction(Config.FC_EXPORT);
-			config.setCreateFk(config.CREATE_FK_YES);
-			config.setBasketHandling(config.BASKET_HANDLING_READWRITE);
-			config.setCatalogueRefTrafo(null);
-			config.setMultiSurfaceTrafo(config.MULTISURFACE_TRAFO_COALESCE);
-			config.setOneGeomPerTable(true);
-			config.setMultilingualTrafo(null);
-			config.setInheritanceTrafo(null);
+			config.setExportTid(true);
 			Ili2db.readSettingsFromDb(config);
 			Ili2db.run(config,null);
 			

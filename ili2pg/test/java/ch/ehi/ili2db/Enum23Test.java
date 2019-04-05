@@ -53,7 +53,7 @@ public class Enum23Test {
 	}
 	
 	@Test
-	public void importWithoutBeautify() throws Exception
+	public void importIliWithoutBeautify() throws Exception
 	{
 		Connection jdbcConnection=null;
 		try{
@@ -306,7 +306,7 @@ public class Enum23Test {
     }
 	
 	@Test
-	public void importWithBeautify() throws Exception
+	public void importIliWithBeautify() throws Exception
 	{
 		Connection jdbcConnection=null;
 		try{
@@ -371,7 +371,7 @@ public class Enum23Test {
 	}
 	
 	@Test
-	public void importExtendedMultiTable() throws Exception
+	public void importIliExtendedMultiTable() throws Exception
 	{
 		Connection jdbcConnection=null;
 		try{
@@ -408,7 +408,7 @@ public class Enum23Test {
 		}		
 	}
     @Test
-    public void importExtendedFkTable() throws Exception
+    public void importIliExtendedFkTable() throws Exception
     {
         Connection jdbcConnection=null;
         try{
@@ -466,6 +466,7 @@ public class Enum23Test {
                 config.setDoImplicitSchemaImport(true);
                 config.setCreateFk(config.CREATE_FK_YES);
                 config.setTidHandling(Config.TID_HANDLING_PROPERTY);
+                config.setImportTid(true);
                 config.setBasketHandling(config.BASKET_HANDLING_READWRITE);
                 config.setCreateEnumDefs(Config.CREATE_ENUM_DEFS_MULTI_WITH_ID);
                 config.setCatalogueRefTrafo(null);
@@ -507,6 +508,7 @@ public class Enum23Test {
             {
                 Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
                 config.setFunction(Config.FC_EXPORT);
+                config.setExportTid(true);
                 config.setModels("Enum23b");
                 Ili2db.readSettingsFromDb(config);
                 Ili2db.run(config,null);
@@ -554,7 +556,7 @@ public class Enum23Test {
     }
 	
 	@Test
-	public void importSingleTable() throws Exception
+	public void importIliSingleTable() throws Exception
 	{
 		Connection jdbcConnection=null;
 		try{

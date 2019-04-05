@@ -119,9 +119,9 @@ public class TransferFromIli {
 	{
 		this.ili2sqlName=ili2sqlName;
 		createEnumTable=config.getCreateEnumDefs();
-		createStdCols=config.CREATE_STD_COLS_ALL.equals(config.getCreateStdCols());
-		createFk=config.CREATE_FK_YES.equals(config.getCreateFk());
-		createFkIdx=config.CREATE_FKIDX_YES.equals(config.getCreateFkIdx());
+		createStdCols=Config.CREATE_STD_COLS_ALL.equals(config.getCreateStdCols());
+		createFk=Config.CREATE_FK_YES.equals(config.getCreateFk());
+		createFkIdx=Config.CREATE_FKIDX_YES.equals(config.getCreateFkIdx());
 		colT_ID=config.getColT_ID();
 		if(colT_ID==null){
 			colT_ID=DbNames.T_ID_COL;
@@ -131,9 +131,9 @@ public class TransferFromIli {
 			EhiLogger.logState("delete existing data...");
 		}
 		
-		createIliTidCol=config.TID_HANDLING_PROPERTY.equals(config.getTidHandling());
-		createBasketCol=config.BASKET_HANDLING_READWRITE.equals(config.getBasketHandling());
-		createDatasetCol=config.CREATE_DATASET_COL.equals(config.getCreateDatasetCols());
+		createIliTidCol=Config.TID_HANDLING_PROPERTY.equals(config.getTidHandling());
+		createBasketCol=Config.BASKET_HANDLING_READWRITE.equals(config.getBasketHandling());
+		createDatasetCol=Config.CREATE_DATASET_COL.equals(config.getCreateDatasetCols());
 		if(config.getDefaultSrsCode()!=null) {
 	        defaultCrsCode=Integer.parseInt(config.getDefaultSrsCode());
 		}

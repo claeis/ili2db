@@ -2197,7 +2197,9 @@ public class Ili2db {
 	            trsfr.doit(function,customMapping.shortenConnectUrl4Log(config.getDburl()),null,sender,exportParamModelnames,basketSqlIds,stat);
 	        }catch(ch.interlis.iox.IoxException ex){
 	            EhiLogger.logError("failed to validate data from db",ex);
-	        }
+	        } catch (Ili2dbException ex) {
+                EhiLogger.logError("failed to validate data from db",ex);
+            }
 	    }else {
 	        java.io.File outfile=new java.io.File(xtffile);
 	        IoxWriter ioxWriter=null;
@@ -2225,7 +2227,9 @@ public class Ili2db {
 	            ioxWriter.flush();
 	        }catch(ch.interlis.iox.IoxException ex){
 	            EhiLogger.logError("failed to write xml output",ex);
-	        }finally{
+	        } catch (Ili2dbException ex) {
+                EhiLogger.logError("failed to write xml output",ex);
+            }finally{
 	            if(ioxWriter!=null){
 	                try{
 	                    ioxWriter.close();

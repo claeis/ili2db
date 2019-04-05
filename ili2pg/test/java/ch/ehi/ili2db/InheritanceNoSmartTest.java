@@ -79,6 +79,7 @@ public class InheritanceNoSmartTest {
 				config.setInheritanceTrafo(null);
 				config.setDatasetName(DATASETNAME);
 				config.setTidHandling(Config.TID_HANDLING_PROPERTY);
+				config.setImportTid(true);
 				config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
 				Ili2db.readSettingsFromDb(config);
 				Ili2db.run(config,null);
@@ -113,6 +114,7 @@ public class InheritanceNoSmartTest {
 			Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 			config.setModels("Inheritance1");
 			config.setFunction(Config.FC_EXPORT);
+			config.setExportTid(true);
 			Ili2db.readSettingsFromDb(config);
 			Ili2db.run(config,null);
 			// read objects of db and write objectValue to HashMap
@@ -242,6 +244,7 @@ public class InheritanceNoSmartTest {
 				config.setInheritanceTrafo(null);
 				config.setDatasetName(DATASETNAME);
 				config.setTidHandling(Config.TID_HANDLING_PROPERTY);
+				config.setImportTid(true);
 				config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
 				config.setNameOptimization(Config.NAME_OPTIMIZATION_TOPIC);
 				Ili2db.readSettingsFromDb(config);
@@ -277,6 +280,7 @@ public class InheritanceNoSmartTest {
 			config.setModels("Inheritance1");
 			config.setDatasetName(DATASETNAME);
 			config.setFunction(Config.FC_EXPORT);
+			config.setExportTid(true);
 			Ili2db.readSettingsFromDb(config);
 			Ili2db.run(config,null);
 			// read objects of db and write objectValue to HashMap

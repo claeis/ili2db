@@ -402,6 +402,7 @@ public class Datatypes23Test {
 			Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 			config.setFunction(Config.FC_EXPORT);
 			config.setModels(DBSCHEMA);
+			config.setExportTid(true);
 			config.setBasketHandling(null);
 			Ili2db.readSettingsFromDb(config);
 			try{
@@ -481,6 +482,7 @@ public class Datatypes23Test {
 			File data=new File(TEST_OUT+"Datatypes23Line-out.xtf");
 			Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 			config.setFunction(Config.FC_EXPORT);
+			config.setExportTid(true);
 			config.setModels(DBSCHEMA);
 			config.setBasketHandling(null);
 			Ili2db.readSettingsFromDb(config);
@@ -536,6 +538,7 @@ public class Datatypes23Test {
 			File data=new File(TEST_OUT+"Datatypes23Surface-out.xtf");
 			Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 			config.setFunction(Config.FC_EXPORT);
+			config.setExportTid(true);
 			config.setModels(DBSCHEMA);
 			config.setBasketHandling(null);
 			//config.setValidation(false);

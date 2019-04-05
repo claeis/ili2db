@@ -104,6 +104,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 	private boolean createNumCheck=false;
 	private DbExtMetaInfo metaInfo=null;
     private boolean createTypeConstraint=false;
+    private boolean createIliTidCol=false;
 
 	public FromIliRecordConverter(TransferDescription td1, NameMapping ili2sqlName,
 			Config config, DbSchema schema1, CustomMapping customMapping1,
@@ -125,6 +126,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 		createNumCheck=config.isCreateCreateNumChecks();
 		this.metaInfo=metaInfo;
         createTypeConstraint=config.getCreateTypeConstraint();
+        createIliTidCol=config.TID_HANDLING_PROPERTY.equals(config.getTidHandling());
 	}
 
 	public void generateTable(ViewableWrapper def,int pass)

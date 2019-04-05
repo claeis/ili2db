@@ -174,6 +174,7 @@ public class Array23Test {
             config.setDoImplicitSchemaImport(true);
             config.setCreateFk(config.CREATE_FK_YES);
             config.setTidHandling(Config.TID_HANDLING_PROPERTY);
+            config.setImportTid(true);
             config.setBasketHandling(config.BASKET_HANDLING_READWRITE);
             config.setCatalogueRefTrafo(null);
             config.setMultiSurfaceTrafo(null);
@@ -262,6 +263,7 @@ public class Array23Test {
             config.setDoImplicitSchemaImport(true);
             config.setCreateFk(Config.CREATE_FK_YES);
             config.setTidHandling(Config.TID_HANDLING_PROPERTY);
+            config.setImportTid(true);
             config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
             config.setCatalogueRefTrafo(null);
             config.setMultiSurfaceTrafo(null);
@@ -345,6 +347,7 @@ public class Array23Test {
 			Config config = initConfig(data.getPath(), data.getPath() + ".log");
 			config.setModels("Array23");
 			config.setFunction(Config.FC_EXPORT);
+			config.setExportTid(true);
 			Ili2db.readSettingsFromDb(config);
 			Ili2db.run(config, null);
 			HashMap<String, IomObject> objs = new HashMap<String, IomObject>();
@@ -425,6 +428,7 @@ public class Array23Test {
             Config config = initConfig(data.getPath(), data.getPath() + ".log");
             config.setModels("Array23");
             config.setFunction(Config.FC_EXPORT);
+            config.setExportTid(true);
             Ili2db.readSettingsFromDb(config);
             Ili2db.run(config, null);
             HashMap<String, IomObject> objs = new HashMap<String, IomObject>();

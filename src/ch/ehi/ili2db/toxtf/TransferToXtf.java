@@ -32,6 +32,7 @@ import ch.ehi.basics.logging.EhiLogger;
 import ch.ehi.ili2db.base.DbNames;
 import ch.ehi.ili2db.base.Ili2cUtility;
 import ch.ehi.ili2db.base.Ili2db;
+import ch.ehi.ili2db.base.Ili2dbException;
 import ch.ehi.ili2db.converter.ConverterException;
 import ch.ehi.ili2db.converter.SqlColumnConverter;
 import ch.ehi.ili2db.fromili.TransferFromIli;
@@ -103,6 +104,7 @@ public class TransferToXtf {
 	private boolean createTypeDiscriminator=false;
 	private boolean createGenericStructRef=false;
 	private boolean writeIliTid=false;
+	private boolean hasIliTidCol=false;
 	private SqlColumnConverter geomConv=null;
 	private ToXtfRecordConverter recConv=null;
 	private Viewable2TableMapping class2wrapper=null;
@@ -138,17 +140,22 @@ public class TransferToXtf {
 		}
 		createTypeDiscriminator=config.CREATE_TYPE_DISCRIMINATOR_ALWAYS.equals(config.getCreateTypeDiscriminator());
 		createGenericStructRef=config.STRUCT_MAPPING_GENERICREF.equals(config.getStructMapping());
-		writeIliTid=config.TID_HANDLING_PROPERTY.equals(config.getTidHandling());
+		writeIliTid=config.isExportTid(); 
+		hasIliTidCol=config.TID_HANDLING_PROPERTY.equals(config.getTidHandling());
 		this.geomConv=geomConv;
 		recConv=new ToXtfRecordConverter(td,ili2sqlName,config,null,geomConv,conn,sqlidPool,trafoConfig,class2wrapper,schema);
 		this.config=config;
 
 	}
 	public void doit(int function,String datasource,IoxWriter iomFile,String sender,String exportParamModelnames[],long basketSqlIds[],Map<Long,BasketStat> stat)
-	throws ch.interlis.iox.IoxException
+	throws ch.interlis.iox.IoxException, Ili2dbException
 	{
 		this.basketStat=stat;
 		boolean referrs=false;
+		
+		if(!hasIliTidCol && writeIliTid) {
+            throw new Ili2dbException("TID export requires a "+DbNames.T_ILI_TID_COL+" column");
+		}
 		
 		if(function!=Config.FC_VALIDATE && iomFile instanceof ItfWriter){
 			config.setValue(ch.interlis.iox_j.validator.Validator.CONFIG_DO_ITF_LINETABLES, ch.interlis.iox_j.validator.Validator.CONFIG_DO_ITF_LINETABLES_DO);
@@ -824,11 +831,13 @@ public class TransferToXtf {
 				valuei++;
 				
 				String sqlIliTid=null;
-				if(writeIliTid){
-					sqlIliTid=rs.getString(valuei);
-					valuei++;
-				}else{
-					sqlIliTid=Long.toString(sqlid);
+				if(hasIliTidCol) {
+	                if(writeIliTid){
+	                    sqlIliTid=rs.getString(valuei);
+	                }else{
+	                    sqlIliTid=Long.toString(sqlid);
+	                }
+                    valuei++;
 				}
 				
 				Viewable aclass=(Viewable)attr.getContainer();
@@ -1266,7 +1275,7 @@ public class TransferToXtf {
 	private String createItfLineTableQueryStmt(AttributeDef attr,Integer epsgCode,Long basketSqlId,SqlColumnConverter conv){
 		StringBuffer ret = new StringBuffer();
 		ret.append("SELECT r0."+colT_ID);
-		if(writeIliTid){
+		if(hasIliTidCol){
 			ret.append(", r0."+DbNames.T_ILI_TID_COL);
 		}
 		String sep=",";
@@ -1319,7 +1328,7 @@ public class TransferToXtf {
 		for(ViewableWrapper wrapper:wrappers){
 			ret.append(sep);
 			ret.append("SELECT r"+i+"."+colT_ID);
-			if(writeIliTid || wrapper.getOid()!=null){
+			if(hasIliTidCol || wrapper.getOid()!=null){
 				ret.append(", r"+i+"."+DbNames.T_ILI_TID_COL);
 			}else{
 				ret.append(", NULL "+DbNames.T_ILI_TID_COL);

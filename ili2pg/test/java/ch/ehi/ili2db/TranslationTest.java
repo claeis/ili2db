@@ -277,6 +277,7 @@ public class TranslationTest {
 	            config.setDoImplicitSchemaImport(true);
 	    		config.setCreateFk(config.CREATE_FK_YES);
                 config.setImportBid(true);
+                config.setImportTid(true);
 	    		config.setTidHandling(Config.TID_HANDLING_PROPERTY);
 	    		config.setBasketHandling(config.BASKET_HANDLING_READWRITE);
 	    		config.setCatalogueRefTrafo(null);
@@ -336,13 +337,7 @@ public class TranslationTest {
 			File data=new File(TEST_OUT,"EnumOka-out.xtf");
 			Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 			config.setFunction(Config.FC_EXPORT);
-			config.setCreateFk(config.CREATE_FK_YES);
-			config.setTidHandling(Config.TID_HANDLING_PROPERTY);
-			config.setBasketHandling(config.BASKET_HANDLING_READWRITE);
-			config.setCatalogueRefTrafo(null);
-			config.setMultiSurfaceTrafo(null);
-			config.setMultilingualTrafo(null);
-			config.setInheritanceTrafo(null);
+			config.setExportTid(true);
 			config.setDatasetName("EnumOka");
 			Ili2db.readSettingsFromDb(config);
 			Ili2db.run(config,null);
@@ -409,6 +404,7 @@ public class TranslationTest {
 	            config.setDoImplicitSchemaImport(true);
 	    		config.setCreateFk(config.CREATE_FK_YES);
 	    		config.setTidHandling(Config.TID_HANDLING_PROPERTY);
+	    		config.setImportTid(true);
 	    		config.setImportBid(true);
 	    		config.setBasketHandling(config.BASKET_HANDLING_READWRITE);
 	    		config.setCatalogueRefTrafo(null);
@@ -426,6 +422,7 @@ public class TranslationTest {
 	        	File data=new File(TEST_OUT,"ModelBsimple10a.itf");
 	    		Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 	    		config.setFunction(Config.FC_IMPORT);
+                config.setImportTid(true);
                 config.setImportBid(true);
 	    		config.setDatasetName("ModelBsimple10");
 	    		Ili2db.readSettingsFromDb(config);
@@ -474,6 +471,7 @@ public class TranslationTest {
 		    		File data=new File(TEST_OUT,"ModelAsimple10a-out.itf");
 		    		Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 		    		config.setFunction(Config.FC_EXPORT);
+		    		config.setExportTid(true);
 		    		config.setDatasetName("ModelAsimple10");
 		    		Ili2db.readSettingsFromDb(config);
 		    		Ili2db.run(config,null);
@@ -577,6 +575,7 @@ public class TranslationTest {
 					File data2=new File(TEST_OUT,"ModelBsimple10a-out.itf");
 					Config config=initConfig(data2.getPath(),DBSCHEMA,data2.getPath()+".log");
 		    		config.setFunction(Config.FC_EXPORT);
+                    config.setExportTid(true);
 		    		config.setDatasetName("ModelBsimple10");
 		    		Ili2db.readSettingsFromDb(config);
 		    		Ili2db.run(config,null);
@@ -700,6 +699,7 @@ public class TranslationTest {
 	            config.setDoImplicitSchemaImport(true);
 	    		config.setCreateFk(config.CREATE_FK_YES);
                 config.setImportBid(true);
+                config.setImportTid(true);
 	    		config.setTidHandling(Config.TID_HANDLING_PROPERTY);
 	    		config.setBasketHandling(config.BASKET_HANDLING_READWRITE);
                 Ili2db.setSkipPolygonBuilding(config);
@@ -718,6 +718,7 @@ public class TranslationTest {
 	        	File data=new File(TEST_OUT,"ModelBsimple10a.itf");
 	    		Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 	    		config.setFunction(Config.FC_IMPORT);
+                config.setImportTid(true);
                 config.setImportBid(true);
 	    		config.setDatasetName("ModelBsimple10");
 	    		Ili2db.readSettingsFromDb(config);
@@ -771,6 +772,7 @@ public class TranslationTest {
 	        	File data=new File(TEST_OUT,"ModelAsimple10a-out.itf");
 	    		Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 	    		config.setFunction(Config.FC_EXPORT);
+	    		config.setExportTid(true);
 	    		config.setDatasetName("ModelAsimple10");
 	    		Ili2db.readSettingsFromDb(config);
 	    		Ili2db.run(config,null);
@@ -875,6 +877,7 @@ public class TranslationTest {
 	        	File data=new File(TEST_OUT,"ModelBsimple10a-out.itf");
 	    		Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 	    		config.setFunction(Config.FC_EXPORT);
+                config.setExportTid(true);
 	    		config.setDatasetName("ModelBsimple10");
 	    		Ili2db.readSettingsFromDb(config);
 	    		Ili2db.run(config,null);

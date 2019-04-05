@@ -129,6 +129,8 @@ public class Config extends Settings {
     private boolean doImplicitSchemaImport=false; // do implicit schema import during data import
 	private boolean validation=false;
 	private boolean skipReferenceErrors=false;
+    private boolean exportTid=false;
+    private boolean importTid=false;
     private boolean importBid=false;
     private Long minIdSeqValue=null;
 	private Long maxIdSeqValue=null;
@@ -512,6 +514,19 @@ public class Config extends Settings {
 	public void setTidHandling(String value) {
 		setValue(TID_HANDLING,value);
 	}
+    public void setImportTid(boolean enable) {
+        importTid=enable;
+    }
+    public boolean isImportTid() {
+        return importTid;
+    }
+    public void setExportTid(boolean enable) {
+        exportTid=enable;
+    }
+    public boolean isExportTid() {
+        return exportTid;
+    }
+	
 	public String getBasketHandling() {
 		return getValue(BASKET_HANDLING);
 	}
@@ -678,7 +693,7 @@ public class Config extends Settings {
         this.doImplicitSchemaImport = doImplicitSchemaImport;
     }
     public void setImportBid(boolean enable) {
-        importBid=true;
+        importBid=enable;
     }
     public boolean isImportBid() {
         return importBid;

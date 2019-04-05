@@ -58,7 +58,7 @@ public class Area10Test {
 	}
 
 	@Test
-	public void importAreaOk() throws Exception
+	public void importItfAreaOk() throws Exception
 	{
 		Connection jdbcConnection=null;
 		try{
@@ -72,8 +72,9 @@ public class Area10Test {
 				Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 				config.setFunction(Config.FC_IMPORT);
 		        config.setDoImplicitSchemaImport(true);
-				config.setCreateFk(config.CREATE_FK_YES);
+				config.setCreateFk(Config.CREATE_FK_YES);
 				config.setTidHandling(Config.TID_HANDLING_PROPERTY);
+                config.setImportTid(true);
 				config.setCatalogueRefTrafo(null);
 				config.setMultiSurfaceTrafo(null);
 				config.setMultilingualTrafo(null);
@@ -110,7 +111,7 @@ public class Area10Test {
 	}
 	
 	@Test
-	public void importOpenPolygonWithValidation() throws Exception
+	public void importItfOpenPolygonWithValidation() throws Exception
 	{
 		Connection jdbcConnection=null;
 		try{
@@ -126,6 +127,7 @@ public class Area10Test {
 		        config.setDoImplicitSchemaImport(true);
 				config.setCreateFk(config.CREATE_FK_YES);
 				config.setTidHandling(Config.TID_HANDLING_PROPERTY);
+				config.setImportTid(true);
 				config.setCatalogueRefTrafo(null);
 				config.setMultiSurfaceTrafo(null);
 				config.setMultilingualTrafo(null);
@@ -165,7 +167,7 @@ public class Area10Test {
 	}
 	
 	@Test
-	public void importOpenPolygonWithoutValidation() throws Exception
+	public void importItOpenPolygonWithoutValidation() throws Exception
 	{
 		Connection jdbcConnection=null;
 		try{
@@ -179,8 +181,9 @@ public class Area10Test {
 				Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 				config.setFunction(Config.FC_IMPORT);
 		        config.setDoImplicitSchemaImport(true);
-				config.setCreateFk(config.CREATE_FK_YES);
+				config.setCreateFk(Config.CREATE_FK_YES);
 				config.setTidHandling(Config.TID_HANDLING_PROPERTY);
+                config.setImportTid(true);
 				config.setCatalogueRefTrafo(null);
 				config.setMultiSurfaceTrafo(null);
 				config.setMultilingualTrafo(null);
@@ -222,7 +225,7 @@ public class Area10Test {
 	public void exportAreaOk() throws Exception
 	{
 		{
-			importAreaOk();
+			importItfAreaOk();
 		}
 		File data=null;
 		Connection jdbcConnection=null;

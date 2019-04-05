@@ -60,6 +60,7 @@ public class SqlTest {
         config.setCreateFk(config.CREATE_FK_YES);
         config.setCreateNumChecks(true);
         config.setTidHandling(Config.TID_HANDLING_PROPERTY);
+        config.setImportTid(true);
         config.setBasketHandling(config.BASKET_HANDLING_READWRITE);
         config.setCatalogueRefTrafo(null);
         config.setMultiSurfaceTrafo(null);

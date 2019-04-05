@@ -329,9 +329,15 @@ public abstract class AbstractMain {
 			}else if(arg.equals("--keepAreaRef")){
 				argi++;
 				config.setAreaRef(config.AREA_REF_KEEP);
+            }else if(arg.equals("--createTidCol")){
+                argi++;
+                config.setTidHandling(Config.TID_HANDLING_PROPERTY);
 			}else if(arg.equals("--importTid")){
 				argi++;
-				config.setTidHandling(config.TID_HANDLING_PROPERTY);
+                config.setImportTid(true);
+            }else if(arg.equals("--exportTid")){
+                argi++;
+                config.setExportTid(true);
             }else if(arg.equals("--importBid")){
                 argi++;
                 config.setImportBid(true);

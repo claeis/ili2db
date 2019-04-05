@@ -61,7 +61,6 @@ public class AbstractRecordConverter {
 	protected boolean createEnumTxtCol=false;
 	protected boolean removeUnderscoreFromEnumDispName=false;
 	protected boolean createEnumColAsItfCode=false;
-	protected boolean createIliTidCol=false;
 	protected boolean createTypeDiscriminator=false;
 	protected boolean createGenericStructRef=false;
 	protected boolean sqlEnableNull=true;
@@ -112,7 +111,6 @@ public class AbstractRecordConverter {
 		createGenericStructRef=config.STRUCT_MAPPING_GENERICREF.equals(config.getStructMapping());
 		sqlEnableNull=config.SQL_NULL_ENABLE.equals(config.getSqlNull());
 		strokeArcs=config.STROKE_ARCS_ENABLE.equals(Config.getStrokeArcs(config));
-		createIliTidCol=config.TID_HANDLING_PROPERTY.equals(config.getTidHandling());
 		
 		createBasketCol=config.BASKET_HANDLING_READWRITE.equals(config.getBasketHandling());
 		createDatasetCol=config.CREATE_DATASET_COL.equals(config.getCreateDatasetCols());

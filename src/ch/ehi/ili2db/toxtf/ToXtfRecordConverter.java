@@ -63,6 +63,7 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 	private SqlidPool sqlid2xtfid=null;
 	private Integer defaultEpsgCode=null;
     private HashMap<AttributeDef,EnumValueMap> enumCache=new HashMap<AttributeDef,EnumValueMap>();
+    private boolean exportTid=false;
 
 	public final static java.util.Date PURE_GREGORIAN_CALENDAR = new java.util.Date(Long.MIN_VALUE);
 	public ToXtfRecordConverter(TransferDescription td1, NameMapping ili2sqlName,
@@ -72,6 +73,7 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 		geomConv=geomConv1;
 		sqlid2xtfid=sqlidPool;
 		this.dbSchema=dbSchema;
+		exportTid=config.isExportTid();
 		try {
 			if(conn.getMetaData().getURL().startsWith("jdbc:odbc:DRIVER={Microsoft Access Driver (*.mdb)}")){
 				isMsAccess=true;
@@ -97,7 +99,7 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 			ret.append(", r0."+DbNames.T_TYPE_COL);
 		}
 		if(structWrapper0==null){
-			if(createIliTidCol || classWrapper.getOid()!=null){
+			if(exportTid || classWrapper.getOid()!=null){
 				ret.append(", r0."+DbNames.T_ILI_TID_COL);
 			}
 		}
@@ -376,7 +378,7 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 		String sqlIliTid=null;
 		if(structWrapper==null){
 			if(!aclass.isStructure()){
-				if(createIliTidCol || aclass.getOid()!=null){
+				if(exportTid || aclass.getOid()!=null){
 					sqlIliTid=rs.getString(valuei);
 					sqlid2xtfid.putSqlid2Xtfid(sqlid, sqlIliTid);
 					valuei++;

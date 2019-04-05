@@ -101,7 +101,7 @@ public class MultipointTest {
 	}
 	
 	@Test
-	public void exportSmartCustom() throws Exception
+	public void exportXtfSmartCustom() throws Exception
 	{
 		Connection jdbcConnection=null;
 		try{
@@ -117,6 +117,7 @@ public class MultipointTest {
 			Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 			config.setModels("MultiPoint2");
 			config.setFunction(Config.FC_EXPORT);
+			config.setExportTid(true);
 			Ili2db.readSettingsFromDb(config);
 			Ili2db.run(config,null);
 			HashMap<String,IomObject> objs=new HashMap<String,IomObject>();

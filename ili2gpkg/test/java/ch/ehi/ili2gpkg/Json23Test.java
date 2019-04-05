@@ -129,6 +129,7 @@ public class Json23Test {
 		config.setCreateFk(config.CREATE_FK_YES);
 		config.setCreateNumChecks(true);
 		config.setTidHandling(Config.TID_HANDLING_PROPERTY);
+		config.setImportTid(true);
 		config.setBasketHandling(config.BASKET_HANDLING_READWRITE);
 		config.setCatalogueRefTrafo(null);
 		config.setMultiSurfaceTrafo(null);
@@ -172,6 +173,7 @@ public class Json23Test {
 		File data=new File(TEST_OUT,"Json23a-out.xtf");
 		Config config=initConfig(data.getPath(),data.getPath()+".log");
 		config.setFunction(Config.FC_EXPORT);
+		config.setExportTid(true);
 		config.setModels("Json23");
 		Ili2db.readSettingsFromDb(config);
 		try{

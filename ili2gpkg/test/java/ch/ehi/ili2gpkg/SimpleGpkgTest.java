@@ -5,6 +5,7 @@ import static org.junit.Assert.*;
 import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.util.HashMap;
 
 import org.junit.After;
 import org.junit.Assert;
@@ -211,7 +212,6 @@ public class SimpleGpkgTest {
         config.setDoImplicitSchemaImport(true);
 		config.setCreateFk(config.CREATE_FK_YES);
 		config.setCreateNumChecks(true);
-		config.setTidHandling(Config.TID_HANDLING_PROPERTY);
 		config.setBasketHandling(config.BASKET_HANDLING_READWRITE);
 		config.setCatalogueRefTrafo(null);
 		config.setMultiSurfaceTrafo(null);
@@ -241,6 +241,7 @@ public class SimpleGpkgTest {
 		config.setCreateFk(config.CREATE_FK_YES);
 		config.setCreateNumChecks(true);
 		config.setTidHandling(Config.TID_HANDLING_PROPERTY);
+		config.setImportTid(true);
 		config.setBasketHandling(config.BASKET_HANDLING_READWRITE);
 		config.setCatalogueRefTrafo(null);
 		config.setMultiSurfaceTrafo(null);
@@ -328,6 +329,7 @@ public class SimpleGpkgTest {
 		config.setCreateFk(config.CREATE_FK_YES);
 		config.setCreateNumChecks(true);
 		config.setTidHandling(Config.TID_HANDLING_PROPERTY);
+		config.setImportTid(true);
 		config.setBasketHandling(config.BASKET_HANDLING_READWRITE);
 		config.setCatalogueRefTrafo(null);
 		config.setMultiSurfaceTrafo(null);
@@ -357,6 +359,7 @@ public class SimpleGpkgTest {
 		config.setCreateFk(config.CREATE_FK_YES);
 		config.setCreateNumChecks(true);
 		config.setTidHandling(Config.TID_HANDLING_PROPERTY);
+		config.setImportTid(true);
 		config.setBasketHandling(config.BASKET_HANDLING_READWRITE);
 		config.setCatalogueRefTrafo(null);
 		config.setMultiSurfaceTrafo(null);
@@ -426,8 +429,6 @@ public class SimpleGpkgTest {
 			IomObject iomObj=((ObjectEvent)event).getIomObject();
 			int attrCount=iomObj.getattrcount();
 			assertEquals(1,attrCount);
-			String oid=iomObj.getobjectoid();
-			assertEquals("o1",oid);
 			String attrtag=iomObj.getobjecttag();
 			assertEquals("Simple23.TestA.ClassA1",attrtag);
 			{
@@ -469,7 +470,7 @@ public class SimpleGpkgTest {
         {
             jdbcConnection = DriverManager.getConnection(DBURL, null, null);
             java.sql.Statement stmt=jdbcConnection.createStatement();
-            stmt.executeUpdate("UPDATE classa1 SET attr1='text with newline\n' WHERE t_ili_tid='o1'");
+            stmt.executeUpdate("UPDATE classa1 SET attr1='text with newline\n'");
             stmt.close();
             stmt=null;
         }
@@ -500,6 +501,7 @@ public class SimpleGpkgTest {
 		File data=new File(TEST_OUT,"SimpleStruct23a-out.xtf");
 		Config config=initConfig(data.getPath(),data.getPath()+".log");
 		config.setFunction(Config.FC_EXPORT);
+		config.setExportTid(true);
 		config.setModels("SimpleStruct23");
 		Ili2db.readSettingsFromDb(config);
 		try{
@@ -547,6 +549,7 @@ public class SimpleGpkgTest {
 		File data=new File(TEST_OUT,"SimpleInheritance23a-out.xtf");
 		Config config=initConfig(data.getPath(),data.getPath()+".log");
 		config.setFunction(Config.FC_EXPORT);
+		config.setExportTid(true);
 		config.setModels("SimpleInheritance23");
 		Ili2db.readSettingsFromDb(config);
 		try{
@@ -626,6 +629,7 @@ public class SimpleGpkgTest {
 		File data=new File(TEST_OUT,"SimpleCoord23a-out.xtf");
 		Config config=initConfig(data.getPath(),data.getPath()+".log");
 		config.setFunction(Config.FC_EXPORT);
+		config.setExportTid(true);
 		config.setModels("SimpleCoord23");
 		Ili2db.readSettingsFromDb(config);
 		try{

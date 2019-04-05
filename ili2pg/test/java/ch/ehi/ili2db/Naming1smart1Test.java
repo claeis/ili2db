@@ -86,6 +86,7 @@ public class Naming1smart1Test {
 			config.setInheritanceTrafo(config.INHERITANCE_TRAFO_SMART1);
 			config.setNameOptimization(Config.NAME_OPTIMIZATION_TOPIC);
 			config.setTidHandling(config.TID_HANDLING_PROPERTY);
+			config.setImportTid(true);
 			Ili2db.readSettingsFromDb(config);
 			Ili2db.run(config,null);
 			{
@@ -114,6 +115,7 @@ public class Naming1smart1Test {
 			Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 			config.setDatasetName(DATASETNAME);
 			config.setFunction(Config.FC_EXPORT);
+			config.setExportTid(true);
 			Ili2db.readSettingsFromDb(config);
 			Ili2db.run(config,null);
 			HashMap<String,IomObject> objs=new HashMap<String,IomObject>();
@@ -180,6 +182,7 @@ public class Naming1smart1Test {
             Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
             config.setDatasetName(DATASETNAME);
             config.setFunction(Config.FC_EXPORT);
+            config.setExportTid(true);
             Ili2db.readSettingsFromDb(config);
             Ili2db.run(config,null);
             HashMap<String,IomObject> objs=new HashMap<String,IomObject>();

@@ -143,6 +143,7 @@ public class InheritanceSmart2Test {
 			config.setInheritanceTrafo(Config.INHERITANCE_TRAFO_SMART2);
 			config.setDatasetName(DATASETNAME);
 			config.setTidHandling(Config.TID_HANDLING_PROPERTY);
+			config.setImportTid(true);
 			config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
 			//config.setCreatescript(data.getPath()+".sql");
 			Ili2db.readSettingsFromDb(config);
@@ -182,12 +183,8 @@ public class InheritanceSmart2Test {
 			File data=new File("test/data/InheritanceSmart2/Inheritance2a.xtf");
 			Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 			config.setFunction(Config.FC_UPDATE);
-			config.setCreateFk(Config.CREATE_FK_YES);
-			config.setInheritanceTrafo(Config.INHERITANCE_TRAFO_SMART2);
-			config.setDatasetName(DATASETNAME);
-			config.setTidHandling(Config.TID_HANDLING_PROPERTY);
-			config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
-			//config.setCreatescript(data.getPath()+".sql");
+			config.setImportTid(true);
+            config.setDatasetName(DATASETNAME);
 			Ili2db.readSettingsFromDb(config);
 			Ili2db.run(config,null);
 	        
@@ -276,6 +273,7 @@ public class InheritanceSmart2Test {
 			File data=new File("test/data/InheritanceSmart2/Inheritance2b.xtf");
 			Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 			config.setFunction(Config.FC_IMPORT);
+			config.setImportTid(true);
 			config.setDatasetName(DATASETNAMEX);
 			//config.setCreatescript(data.getPath()+".sql");
 			Ili2db.readSettingsFromDb(config);
@@ -311,6 +309,7 @@ public class InheritanceSmart2Test {
 			Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 			config.setDatasetName(DATASETNAME);
 			config.setFunction(Config.FC_EXPORT);
+			config.setExportTid(true);
 			Ili2db.readSettingsFromDb(config);
 			Ili2db.run(config,null);
 			HashMap<String,IomObject> objs=new HashMap<String,IomObject>();
@@ -487,6 +486,7 @@ public class InheritanceSmart2Test {
 			File data=new File("test/data/InheritanceSmart2/StructAttr1a-out.xtf");
 			Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 			config.setFunction(Config.FC_EXPORT);
+			config.setExportTid(true);
 			config.setDatasetName(DATASETNAME);
 			Ili2db.readSettingsFromDb(config);
 			Ili2db.run(config,null);

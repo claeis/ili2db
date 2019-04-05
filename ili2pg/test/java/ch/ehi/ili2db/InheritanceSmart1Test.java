@@ -447,6 +447,7 @@ public class InheritanceSmart1Test {
 	        File data=new File("test/data/InheritanceSmart1/StructAttr1a-out.xtf");
 			Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 			config.setFunction(Config.FC_EXPORT);
+			config.setExportTid(true);
 			config.setDatasetName(DATASETNAME);
 			Ili2db.readSettingsFromDb(config);
 			Ili2db.run(config,null);
@@ -595,6 +596,7 @@ public class InheritanceSmart1Test {
 				config.setInheritanceTrafo(Config.INHERITANCE_TRAFO_SMART1);
 				config.setDatasetName(DATASETNAME);
 				config.setTidHandling(Config.TID_HANDLING_PROPERTY);
+				config.setImportTid(true);
 				config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
 				config.setNameOptimization(Config.NAME_OPTIMIZATION_TOPIC);
 				//config.setCreatescript(data.getPath()+".sql");
@@ -704,6 +706,7 @@ public class InheritanceSmart1Test {
             File data=new File("test/data/InheritanceSmart1/RefAttr1a-out.xtf");
             Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
             config.setFunction(Config.FC_EXPORT);
+            config.setExportTid(true);
             config.setDatasetName(DATASETNAME);
             //config.setValidation(false);
             Ili2db.readSettingsFromDb(config);

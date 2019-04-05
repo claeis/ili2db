@@ -108,6 +108,7 @@ public class ExtendedModel23Test {
 			Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 			config.setModels("BaseModel;ExtendedModel");
 			config.setFunction(Config.FC_EXPORT);
+			config.setExportTid(true);
 			Ili2db.readSettingsFromDb(config);
 			Ili2db.run(config,null);
 			
@@ -159,6 +160,7 @@ public class ExtendedModel23Test {
 			config.setModels("BaseModel;ExtendedModel");
 			config.setExportModels("BaseModel");
 			config.setFunction(Config.FC_EXPORT);
+			config.setExportTid(true);
 			Ili2db.readSettingsFromDb(config);
 			Ili2db.run(config,null);
 			
