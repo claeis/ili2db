@@ -8,6 +8,7 @@ import java.sql.Statement;
 import java.util.HashMap;
 
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import ch.ehi.basics.logging.EhiLogger;
@@ -67,7 +68,7 @@ public class InheritanceSmart1Test {
 	//config.setTidHandling(config.TID_HANDLING_PROPERTY);
 	
 	@Test
-	public void importSmart1() throws Exception
+	public void importXtfSmart1() throws Exception
 	{
 		Connection jdbcConnection=null;
 		try{
@@ -80,6 +81,7 @@ public class InheritanceSmart1Test {
 		        File data=new File("test/data/InheritanceSmart1/Inheritance1a.xtf");
 				Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 				config.setFunction(Config.FC_IMPORT);
+		        config.setDoImplicitSchemaImport(true);
 				config.setCreateFk(Config.CREATE_FK_YES);
 				config.setInheritanceTrafo(Config.INHERITANCE_TRAFO_SMART1);
 				config.setDatasetName(DATASETNAME);
@@ -238,6 +240,24 @@ public class InheritanceSmart1Test {
 					Assert.assertTrue(rs.next());
 					Assert.assertEquals("classc",rs.getString(2));
 				}
+                {
+                    // t_ili2db_attrname
+                    String [][] expectedValues=new String[][] {
+                        {"SubtypeFK23.Topic.bc1.b1", "b1", "classa", "classa"},
+                    };
+                    Ili2dbAssert.assertAttrNameTable(jdbcConnection,expectedValues, DBSCHEMA);
+                    
+                }
+                {
+                    // t_ili2db_trafo
+                    String [][] expectedValues=new String[][] {
+                        {"SubtypeFK23.Topic.ClassA",  "ch.ehi.ili2db.inheritance", "newClass"},
+                        {"SubtypeFK23.Topic.ClassB",  "ch.ehi.ili2db.inheritance", "superClass"},
+                        {"SubtypeFK23.Topic.bc1", "ch.ehi.ili2db.inheritance", "embedded"},
+                        {"SubtypeFK23.Topic.ClassC",  "ch.ehi.ili2db.inheritance", "superClass"},
+                    };
+                    Ili2dbAssert.assertTrafoTable(jdbcConnection,expectedValues, DBSCHEMA);
+                }
 	        }
 		}finally{
 			if(jdbcConnection!=null){
@@ -260,6 +280,7 @@ public class InheritanceSmart1Test {
 		        File data=new File("test/data/InheritanceSmart1/SubtypeFKa.xtf");
 				Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 				config.setFunction(Config.FC_IMPORT);
+		        config.setDoImplicitSchemaImport(true);
 				config.setCreateFk(Config.CREATE_FK_YES);
 				config.setInheritanceTrafo(Config.INHERITANCE_TRAFO_SMART1);
 				config.setDatasetName(DATASETNAME);
@@ -321,6 +342,37 @@ public class InheritanceSmart1Test {
 					Assert.assertTrue(rs.next());
 					Assert.assertEquals("topicb_structa",rs.getString(2));
 				}
+                {
+                    // t_ili2db_attrname
+                    String [][] expectedValues=new String[][] {
+                        {"StructAttr1.TopicB.StructA.name",  "aname", "topicb_structa", null},    
+                        {"StructAttr1.TopicA.ClassB.attr3",   "attr3", "topica_classa", null},
+                        {"StructAttr1.TopicB.ClassB.attr3",   "attr3", "topicb_classb", null},
+                        {"StructAttr1.TopicB.ClassA.attr1",   "topicb_classb_attr1",   "topicb_structa", "topicb_classb"},
+                        {"StructAttr1.TopicA.ClassA.attr1",   "topica_classa_attr1",   "topica_structa", "topica_classa"},
+                        {"StructAttr1.TopicA.ClassC.attr4",   "attr4", "topica_classa", null},
+                        {"StructAttr1.TopicB.ClassA.attr2",   "attr2", "topicb_classb", null},
+                        {"StructAttr1.TopicA.StructA.name",   "aname", "topica_structa", null},
+                        {"StructAttr1.TopicA.ClassA.attr2",   "attr2", "topica_classa", null},
+                        {"StructAttr1.TopicB.ClassC.attr4",   "attr4", "topicb_classb", null},
+                    };
+                    Ili2dbAssert.assertAttrNameTable(jdbcConnection,expectedValues, DBSCHEMA);
+                    
+                }
+                {
+                    // t_ili2db_trafo
+                    String [][] expectedValues=new String[][] {
+                        {"StructAttr1.TopicB.StructA", "ch.ehi.ili2db.inheritance", "newClass"},
+                        {"StructAttr1.TopicA.ClassB", "ch.ehi.ili2db.inheritance", "superClass"},
+                        {"StructAttr1.TopicA.ClassA", "ch.ehi.ili2db.inheritance", "newClass"},
+                        {"StructAttr1.TopicB.ClassA", "ch.ehi.ili2db.inheritance", "subClass"},
+                        {"StructAttr1.TopicB.ClassB", "ch.ehi.ili2db.inheritance", "newClass"},
+                        {"StructAttr1.TopicA.StructA",  "ch.ehi.ili2db.inheritance", "newClass"},
+                        {"StructAttr1.TopicA.ClassC", "ch.ehi.ili2db.inheritance", "superClass"},
+                        {"StructAttr1.TopicB.ClassC", "ch.ehi.ili2db.inheritance", "superClass"},
+                    };
+                    Ili2dbAssert.assertTrafoTable(jdbcConnection,expectedValues, DBSCHEMA);
+                }
 	        }
 		}finally{
 			if(jdbcConnection!=null){
@@ -343,6 +395,7 @@ public class InheritanceSmart1Test {
 		        File data=new File("test/data/InheritanceSmart1/StructAttr1a.xtf");
 				Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 				config.setFunction(Config.FC_IMPORT);
+		        config.setDoImplicitSchemaImport(true);
 				config.setCreateFk(Config.CREATE_FK_YES);
 				config.setInheritanceTrafo(Config.INHERITANCE_TRAFO_SMART1);
 				config.setDatasetName(DATASETNAME);
@@ -354,23 +407,23 @@ public class InheritanceSmart1Test {
 				Ili2db.run(config,null);
 				
 				// subtype value
-				Assert.assertTrue(stmt.execute("SELECT topica_structa.t_id, topica_structa.aname FROM "+DBSCHEMA+".topica_structa WHERE topica_structa.t_id = 5"));
+				Assert.assertTrue(stmt.execute("SELECT topica_structa.t_id, topica_structa.aname FROM "+DBSCHEMA+".topica_structa WHERE topica_structa.aname = 'Anna'"));
 				{
 					ResultSet rs=stmt.getResultSet();
 					Assert.assertTrue(rs.next());
-					Assert.assertEquals("Anna",rs.getString(2));
+                    Assert.assertFalse(rs.next());
 				}
-				Assert.assertTrue(stmt.execute("SELECT topica_structa.t_id, topica_structa.aname FROM "+DBSCHEMA+".topica_structa WHERE topica_structa.t_id = 7"));
+				Assert.assertTrue(stmt.execute("SELECT topica_structa.t_id, topica_structa.aname FROM "+DBSCHEMA+".topica_structa WHERE topica_structa.aname = 'Berta'"));
 				{
 					ResultSet rs=stmt.getResultSet();
 					Assert.assertTrue(rs.next());
-					Assert.assertEquals("Berta",rs.getString(2));
+                    Assert.assertFalse(rs.next());
 				}
-				Assert.assertTrue(stmt.execute("SELECT topica_structa.t_id, topica_structa.aname FROM "+DBSCHEMA+".topica_structa WHERE topica_structa.t_id = 9"));
+				Assert.assertTrue(stmt.execute("SELECT topica_structa.t_id, topica_structa.aname FROM "+DBSCHEMA+".topica_structa WHERE topica_structa.aname = 'Claudia'"));
 				{
 					ResultSet rs=stmt.getResultSet();
 					Assert.assertTrue(rs.next());
-					Assert.assertEquals("Claudia",rs.getString(2));
+                    Assert.assertFalse(rs.next());
 				}
 	        }
 		}finally{
@@ -394,6 +447,7 @@ public class InheritanceSmart1Test {
 	        File data=new File("test/data/InheritanceSmart1/StructAttr1a-out.xtf");
 			Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 			config.setFunction(Config.FC_EXPORT);
+			config.setExportTid(true);
 			config.setDatasetName(DATASETNAME);
 			Ili2db.readSettingsFromDb(config);
 			Ili2db.run(config,null);
@@ -428,7 +482,8 @@ public class InheritanceSmart1Test {
 	}
 	
 	@Test
-	public void importIliRefAttrFK() throws Exception
+	@Ignore("incompatibility to ili2db-3.x")
+	public void importIliRefAttrFK_3x() throws Exception
 	{
 		Connection jdbcConnection=null;
 		try{
@@ -480,6 +535,39 @@ public class InheritanceSmart1Test {
 					Assert.assertEquals("topica_structa2",rs.getString(2));
 					Assert.assertEquals("topica_classa2",rs.getString(3));
 				}
+                {
+                    // t_ili2db_attrname
+                    String [][] expectedValues=new String[][] {
+                        {"RefAttr1.TopicA.StructA0.ref",  "ref_topica_classa2",    "topica_structa1",   "topica_classa2"},
+                        {"RefAttr1.TopicA.StructA0.ref",  "ref_topica_classa1",    "topica_structa1",   "topica_classa1"},
+                        {"RefAttr1.TopicA.StructA0.ref",  "ref_topica_classa2",    "topica_structa2",   "topica_classa2"},
+                        {"RefAttr1.TopicA.ClassC.struct", "topica_classc_struct",  "topica_structa1",   "topica_classc"},
+                        {"RefAttr1.TopicA.StructA2.ref",  "aref",  "topica_structa2",   "topica_classa2"},
+                        {"RefAttr1.TopicA.StructA0.ref",  "ref_topica_classa1",    "topica_structa2",   "topica_classa1"},
+                        {"RefAttr1.TopicA.ClassB.struct", "topica_classb_struct",  "topica_structa1",   "topica_classb"},
+                        {"RefAttr1.TopicA.ClassD.struct", "topica_classd_struct",  "topica_structa2",   "topica_classd"},
+                        {"RefAttr1.TopicA.StructA1.ref",  "aref",  "topica_structa1",   "topica_classa1"}
+                    };
+                    Ili2dbAssert.assertAttrNameTable(jdbcConnection,expectedValues, DBSCHEMA);
+                    
+                }
+                {
+                    // t_ili2db_trafo
+                    String [][] expectedValues=new String[][] {
+                        {"RefAttr1.TopicA.ClassA1",   "ch.ehi.ili2db.inheritance", "newClass"},
+                        {"RefAttr1.TopicA.ClassA11",  "ch.ehi.ili2db.inheritance", "superClass"},
+                        {"RefAttr1.TopicA.StructA2",  "ch.ehi.ili2db.inheritance", "newClass"},
+                        {"RefAttr1.TopicA.ClassD",    "ch.ehi.ili2db.inheritance", "newClass"},
+                        {"RefAttr1.TopicA.ClassA0",   "ch.ehi.ili2db.inheritance", "subClass"},
+                        {"RefAttr1.TopicA.StructA1",  "ch.ehi.ili2db.inheritance", "newClass"},
+                        {"RefAttr1.TopicA.ClassC",    "ch.ehi.ili2db.inheritance", "newClass"},
+                        {"RefAttr1.TopicA.ClassB",    "ch.ehi.ili2db.inheritance", "newClass"},
+                        {"RefAttr1.TopicA.ClassA2",   "ch.ehi.ili2db.inheritance", "newClass"},
+                        {"RefAttr1.TopicA.StructA0",  "ch.ehi.ili2db.inheritance", "subClass"},
+                        {"RefAttr1.TopicA.StructA11", "ch.ehi.ili2db.inheritance", "superClass"}
+                    };
+                    Ili2dbAssert.assertTrafoTable(jdbcConnection,expectedValues, DBSCHEMA);
+                }
 	        }
 		}finally{
 			if(jdbcConnection!=null){
@@ -491,6 +579,7 @@ public class InheritanceSmart1Test {
 	@Test
 	public void importXtfRefAttrFK() throws Exception
 	{
+	    //EhiLogger.getInstance().setTraceFilter(false);
 		Connection jdbcConnection=null;
 		try{
 	        Class driverClass = Class.forName("org.postgresql.Driver");
@@ -502,10 +591,12 @@ public class InheritanceSmart1Test {
 		        File data=new File("test/data/InheritanceSmart1/RefAttr1a.xtf");
 				Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 				config.setFunction(Config.FC_IMPORT);
+		        config.setDoImplicitSchemaImport(true);
 				config.setCreateFk(Config.CREATE_FK_YES);
 				config.setInheritanceTrafo(Config.INHERITANCE_TRAFO_SMART1);
 				config.setDatasetName(DATASETNAME);
 				config.setTidHandling(Config.TID_HANDLING_PROPERTY);
+				config.setImportTid(true);
 				config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
 				config.setNameOptimization(Config.NAME_OPTIMIZATION_TOPIC);
 				//config.setCreatescript(data.getPath()+".sql");
@@ -547,8 +638,10 @@ public class InheritanceSmart1Test {
 	}
 	
 	@Test
-	public void exportXtfRefAttrFK() throws Exception
+    @Ignore("incompatibility to ili2db-3.x")
+	public void exportXtfRefAttrFK_3x() throws Exception
 	{
+	    //EhiLogger.getInstance().setTraceFilter(false);
 		Connection jdbcConnection=null;
 		try{
 	        Class driverClass = Class.forName("org.postgresql.Driver");
@@ -599,4 +692,58 @@ public class InheritanceSmart1Test {
 			}
 		}    
 	}
+    @Test
+    public void exportXtfRefAttrFK() throws Exception
+    {
+        //EhiLogger.getInstance().setTraceFilter(false);
+        importXtfRefAttrFK();
+        Connection jdbcConnection=null;
+        try{
+            Class driverClass = Class.forName("org.postgresql.Driver");
+            jdbcConnection = DriverManager.getConnection(
+                    dburl, dbuser, dbpwd);
+            
+            File data=new File("test/data/InheritanceSmart1/RefAttr1a-out.xtf");
+            Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+            config.setFunction(Config.FC_EXPORT);
+            config.setExportTid(true);
+            config.setDatasetName(DATASETNAME);
+            //config.setValidation(false);
+            Ili2db.readSettingsFromDb(config);
+            Ili2db.run(config,null);
+
+            HashMap<String,IomObject> objs=new HashMap<String,IomObject>();
+            XtfReader reader=new XtfReader(data);
+            IoxEvent event=null;
+             do{
+                event=reader.read();
+                if(event instanceof StartTransferEvent){
+                }else if(event instanceof StartBasketEvent){
+                }else if(event instanceof ObjectEvent){
+                    IomObject iomObj=((ObjectEvent)event).getIomObject();
+                    if(iomObj.getobjectoid()!=null){
+                        objs.put(iomObj.getobjectoid(), iomObj);
+                    }
+                }else if(event instanceof EndBasketEvent){
+                }else if(event instanceof EndTransferEvent){
+                }
+             }while(!(event instanceof EndTransferEvent));
+             {
+                 IomObject obj0 = objs.get("b.3");
+                 Assert.assertNotNull(obj0);
+                 Assert.assertEquals("RefAttr1.TopicA.ClassB", obj0.getobjecttag());
+                 Assert.assertEquals("RefAttr1.TopicA.StructA11 {ref -> a11.1 REF {}}", obj0.getattrobj("struct", 0).toString());
+             }
+             {
+                 IomObject obj0 = objs.get("b.1");
+                 Assert.assertNotNull(obj0);
+                 Assert.assertEquals("RefAttr1.TopicA.ClassB", obj0.getobjecttag());
+                 Assert.assertEquals("RefAttr1.TopicA.StructA1 {ref -> a1.1 REF {}}", obj0.getattrobj("struct", 0).toString());
+             }
+        }finally{
+            if(jdbcConnection!=null){
+                jdbcConnection.close();
+            }
+        }    
+    }
 }

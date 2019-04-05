@@ -20,3 +20,10 @@ CREATE TABLE gpkg_geometry_columns ( table_name TEXT NOT NULL, column_name TEXT 
 
 CREATE TABLE gpkg_extensions (table_name TEXT,column_name TEXT,extension_name TEXT NOT NULL,definition TEXT NOT NULL,scope TEXT NOT NULL,CONSTRAINT ge_tce UNIQUE (table_name, column_name, extension_name))
 
+CREATE TABLE gpkg_data_columns (table_name TEXT NOT NULL, column_name TEXT NOT NULL,  name TEXT UNIQUE,  title TEXT,  description TEXT,  mime_type TEXT,  constraint_name TEXT,  CONSTRAINT pk_gdc PRIMARY KEY (table_name, column_name),  CONSTRAINT fk_gdc_tn FOREIGN KEY (table_name) REFERENCES gpkg_contents(table_name));
+
+CREATE TABLE gpkg_data_column_constraints (  constraint_name TEXT NOT NULL,  constraint_type TEXT NOT NULL,  value TEXT,  min NUMERIC,  min_is_inclusive BOOLEAN,  max NUMERIC,  max_is_inclusive BOOLEAN,  description TEXT,  CONSTRAINT gdcc_ntv UNIQUE (constraint_name, constraint_type, value));
+
+INSERT INTO gpkg_extensions (table_name,column_name,extension_name,definition,scope) VALUES ('gpkg_data_columns','','gpkg_schema','http://www.geopackage.org/spec120/#extension_schema','read-write');
+
+INSERT INTO gpkg_extensions (table_name,column_name,extension_name,definition,scope) VALUES ('gpkg_data_column_constraints','','gpkg_schema','http://www.geopackage.org/spec120/#extension_schema','read-write');

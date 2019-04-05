@@ -54,7 +54,7 @@ public class MultisurfaceTest {
 	}
 
 	@Test
-	public void importNoSmartChbase() throws Exception
+	public void importXtfNoSmartChbase() throws Exception
 	{
 		Connection jdbcConnection=null;
 		try{
@@ -66,8 +66,10 @@ public class MultisurfaceTest {
 			File data=new File("test/data/MultiSurface/MultiSurface1a.xtf");
 			Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 			config.setFunction(Config.FC_IMPORT);
+	        config.setDoImplicitSchemaImport(true);
 			config.setCreateFk(config.CREATE_FK_YES);
 			config.setTidHandling(Config.TID_HANDLING_PROPERTY);
+			config.setImportTid(true);
 			config.setBasketHandling(config.BASKET_HANDLING_READWRITE);
 			config.setCatalogueRefTrafo(null);
 			config.setMultiSurfaceTrafo(null);
@@ -84,7 +86,7 @@ public class MultisurfaceTest {
 	}
 	
 	@Test
-	public void exportNoSmartChbase() throws Exception
+	public void exportXtfNoSmartChbase() throws Exception
 	{
 		Connection jdbcConnection=null;
 		try{
@@ -98,6 +100,7 @@ public class MultisurfaceTest {
 			Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 			config.setModels("MultiSurface1");
 			config.setFunction(Config.FC_EXPORT);
+			config.setExportTid(true);
 			Ili2db.readSettingsFromDb(config);
 			Ili2db.run(config,null);
 			
@@ -144,7 +147,7 @@ public class MultisurfaceTest {
 	}
 	
 	@Test
-	public void importSmartChbase() throws Exception
+	public void importXtfSmartChbase() throws Exception
 	{
 		Connection jdbcConnection=null;
 		try{
@@ -156,8 +159,10 @@ public class MultisurfaceTest {
 			File data=new File("test/data/MultiSurface/MultiSurface1a.xtf");
 			Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 			config.setFunction(Config.FC_IMPORT);
+	        config.setDoImplicitSchemaImport(true);
 			config.setCreateFk(config.CREATE_FK_YES);
 			config.setTidHandling(Config.TID_HANDLING_PROPERTY);
+			config.setImportTid(true);
 			config.setBasketHandling(config.BASKET_HANDLING_READWRITE);
 			config.setCatalogueRefTrafo(null);
 			config.setMultiSurfaceTrafo(config.MULTISURFACE_TRAFO_COALESCE);
@@ -166,7 +171,7 @@ public class MultisurfaceTest {
 			Ili2db.readSettingsFromDb(config);
 			Ili2db.run(config,null);
 			// imported attrValues of classa1
-			Assert.assertTrue(stmt.execute("SELECT classa1.geom, classa1.t_id, classa1.point FROM "+DBSCHEMA+".classa1 WHERE classa1.t_id = '4'"));
+			Assert.assertTrue(stmt.execute("SELECT classa1.geom, classa1.t_id, classa1.apoint FROM "+DBSCHEMA+".classa1 WHERE classa1.t_ili_tid = 'o1'"));
 			{
 				ResultSet rs=stmt.getResultSet();
 				Assert.assertTrue(rs.next());
@@ -179,9 +184,46 @@ public class MultisurfaceTest {
 			}
 		}
 	}
+    @Test
+    public void importXtfSmartChbaseNull() throws Exception
+    {
+        Connection jdbcConnection=null;
+        try{
+            Class driverClass = Class.forName("org.postgresql.Driver");
+            jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
+            stmt=jdbcConnection.createStatement();
+            stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");        
+
+            File data=new File("test/data/MultiSurface/MultiSurface1null.xtf");
+            Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+            config.setFunction(Config.FC_IMPORT);
+            config.setDoImplicitSchemaImport(true);
+            config.setCreateFk(config.CREATE_FK_YES);
+            config.setTidHandling(Config.TID_HANDLING_PROPERTY);
+            config.setImportTid(true);
+            config.setBasketHandling(config.BASKET_HANDLING_READWRITE);
+            config.setCatalogueRefTrafo(null);
+            config.setMultiSurfaceTrafo(config.MULTISURFACE_TRAFO_COALESCE);
+            config.setMultilingualTrafo(null);
+            config.setInheritanceTrafo(null);
+            Ili2db.readSettingsFromDb(config);
+            Ili2db.run(config,null);
+            // imported attrValues of classa1
+            Assert.assertTrue(stmt.execute("SELECT classa1.geom, classa1.t_id, classa1.apoint FROM "+DBSCHEMA+".classa1 WHERE classa1.t_ili_tid = 'o1'"));
+            {
+                ResultSet rs=stmt.getResultSet();
+                Assert.assertTrue(rs.next());
+                Assert.assertEquals(null, rs.getString(1));
+            }
+        }finally{
+            if(jdbcConnection!=null){
+                jdbcConnection.close();
+            }
+        }
+    }
 	
 	@Test
-	public void exportSmartChbase() throws Exception
+	public void exportXtfSmartChbase() throws Exception
 	{
 		Connection jdbcConnection=null;
 		try{
@@ -196,6 +238,7 @@ public class MultisurfaceTest {
 			Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 			config.setModels("MultiSurface1");
 			config.setFunction(Config.FC_EXPORT);
+			config.setExportTid(true);
 			Ili2db.readSettingsFromDb(config);
 			Ili2db.run(config,null);
 			
@@ -242,7 +285,7 @@ public class MultisurfaceTest {
 	}
 	
 	@Test
-	public void importSmartCustom() throws Exception
+	public void importXtfSmartCustom() throws Exception
 	{
 		Connection jdbcConnection=null;
 		try{
@@ -254,8 +297,10 @@ public class MultisurfaceTest {
 			File data=new File("test/data/MultiSurface/MultiSurface2a.xtf");
 			Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 			config.setFunction(Config.FC_IMPORT);
+	        config.setDoImplicitSchemaImport(true);
 			config.setCreateFk(config.CREATE_FK_YES);
 			config.setTidHandling(Config.TID_HANDLING_PROPERTY);
+			config.setImportTid(true);
 			config.setBasketHandling(config.BASKET_HANDLING_READWRITE);
 			config.setCatalogueRefTrafo(null);
 			config.setMultiSurfaceTrafo(config.MULTISURFACE_TRAFO_COALESCE);
@@ -265,7 +310,7 @@ public class MultisurfaceTest {
 			Ili2db.run(config,null);
 	
 			// imported attrValues of classa1
-			Assert.assertTrue(stmt.execute("SELECT classa1.geom, classa1.t_id FROM "+DBSCHEMA+".classa1 WHERE classa1.t_id = '4'"));
+			Assert.assertTrue(stmt.execute("SELECT classa1.geom, classa1.t_id FROM "+DBSCHEMA+".classa1 WHERE classa1.t_ili_tid = '13'"));
 			{
 				ResultSet rs=stmt.getResultSet();
 				Assert.assertTrue(rs.next());
@@ -279,7 +324,7 @@ public class MultisurfaceTest {
 	}
 	
 	@Test
-	public void exportSmartCustom() throws Exception
+	public void exportXtfSmartCustom() throws Exception
 	{
 		Connection jdbcConnection=null;
 		try{
@@ -294,6 +339,7 @@ public class MultisurfaceTest {
 			Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 			config.setModels("MultiSurface2");
 			config.setFunction(Config.FC_EXPORT);
+			config.setExportTid(true);
 			Ili2db.readSettingsFromDb(config);
 			Ili2db.run(config,null);
 			
@@ -339,7 +385,7 @@ public class MultisurfaceTest {
 	}
 	
 	@Test
-	public void importSmartChbaseSingleGeom() throws Exception
+	public void importXtfSmartChbaseSingleGeom() throws Exception
 	{
 		Connection jdbcConnection=null;
 		try{
@@ -351,8 +397,10 @@ public class MultisurfaceTest {
 			File data=new File("test/data/MultiSurface/MultiSurface1a.xtf");
 			Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 			config.setFunction(Config.FC_IMPORT);
+	        config.setDoImplicitSchemaImport(true);
 			config.setCreateFk(config.CREATE_FK_YES);
 			config.setTidHandling(Config.TID_HANDLING_PROPERTY);
+			config.setImportTid(true);
 			config.setBasketHandling(config.BASKET_HANDLING_READWRITE);
 			config.setCatalogueRefTrafo(null);
 			config.setMultiSurfaceTrafo(config.MULTISURFACE_TRAFO_COALESCE);
@@ -363,7 +411,7 @@ public class MultisurfaceTest {
 			Ili2db.run(config,null);
 			
 			// imported attrValues of classa1
-			Assert.assertTrue(stmt.execute("SELECT classa1.geom, classa1.t_id FROM "+DBSCHEMA+".classa1 WHERE classa1.t_id = '4'"));
+			Assert.assertTrue(stmt.execute("SELECT classa1.geom, classa1.t_id FROM "+DBSCHEMA+".classa1 WHERE classa1.t_ili_tid = 'o1'"));
 			{
 				ResultSet rs=stmt.getResultSet();
 				Assert.assertTrue(rs.next());
@@ -393,13 +441,7 @@ public class MultisurfaceTest {
 			Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 			config.setModels("MultiSurface1");
 			config.setFunction(Config.FC_EXPORT);
-			config.setCreateFk(config.CREATE_FK_YES);
-			config.setBasketHandling(config.BASKET_HANDLING_READWRITE);
-			config.setCatalogueRefTrafo(null);
-			config.setMultiSurfaceTrafo(config.MULTISURFACE_TRAFO_COALESCE);
-			config.setOneGeomPerTable(true);
-			config.setMultilingualTrafo(null);
-			config.setInheritanceTrafo(null);
+			config.setExportTid(true);
 			Ili2db.readSettingsFromDb(config);
 			Ili2db.run(config,null);
 			

@@ -53,7 +53,7 @@ public class CreateFK23GpkgTest {
 	@Test
 	public void importIli_CreateFK_fail() throws Exception
 	{
-		EhiLogger.getInstance().setTraceFilter(false);
+		//EhiLogger.getInstance().setTraceFilter(false);
 		File gpkgFile=new File(GPKGFILENAME);
 		if(gpkgFile.exists()){
 			gpkgFile.delete();
@@ -82,7 +82,7 @@ public class CreateFK23GpkgTest {
     @Test
     public void importIli_CreateFKrecursive_fail() throws Exception
     {
-        EhiLogger.getInstance().setTraceFilter(false);
+        //EhiLogger.getInstance().setTraceFilter(false);
         File gpkgFile=new File(GPKGFILENAME);
         if(gpkgFile.exists()){
             gpkgFile.delete();

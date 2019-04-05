@@ -5,16 +5,20 @@ MODEL Enum23b
 
   DOMAIN
     Enum1 = (Test1, Test2, Test3 (Test3a, Test3b));
-    Enum2 EXTENDS Enum1 = (Test2 (Test2a, Test2b));
+    Enum1a EXTENDS Enum1 = (Test2 (Test2a, Test2b));
+    Enum1b EXTENDS Enum1 = (Test2 (Test2a, Test2b));
     
   TOPIC TestA =
     
     CLASS ClassA1 =
     	attr1 : Enum1;
+    	attr1a : Enum1;
+    	attr1b : Enum1;
     END ClassA1;
     
     CLASS ClassA2 EXTENDS ClassA1 =
-    	attr1 (EXTENDED): Enum2;
+    	attr1a (EXTENDED): Enum1a;
+    	attr1b (EXTENDED): Enum1b;
     END ClassA2;
     
   END TestA;

@@ -116,4 +116,9 @@ public class MsSqlCustomStrategy  extends AbstractJdbcMapping {
 		String[] parts = url.split(";");
 		return parts[0]; //the first part contains host, port and instance
 	}
+    @Override
+    public String shortenConnectUrl4Log(String url) {
+        String[] parts = url.split(";");
+        return parts[0]; //the first part contains host, port and instance
+    }
 }

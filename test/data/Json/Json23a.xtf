@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TRANSFER xmlns="http://www.interlis.ch/INTERLIS2.3">
+	<HEADERSECTION SENDER="ili2gpkg-developer-workspace" VERSION="2.3">
+		<MODELS>
+			<MODEL NAME="Json23" VERSION="2018-12-21" URI="mailto:ce@eisenhutinformatik.ch"></MODEL>
+		</MODELS>
+	</HEADERSECTION>
+	<DATASECTION>
+		<Json23.TestA BID="Json23.TestA">
+			<Json23.TestA.Auto TID="1">
+				<Farben>
+					<Json23.TestA.Farbe>
+						<r>10</r>
+						<g>11</g>
+						<b>12</b>
+						<name>f1</name>
+						<active>false</active>
+					</Json23.TestA.Farbe>
+					<Json23.TestA.Farbe>
+						<r>20</r>
+						<g>21</g>
+						<b>22</b>
+						<name>f2</name>
+						<active>false</active>
+					</Json23.TestA.Farbe>
+				</Farben>
+			</Json23.TestA.Auto>
+			<Json23.TestA.Auto TID="2">
+			</Json23.TestA.Auto>
+		</Json23.TestA>
+	</DATASECTION>
+</TRANSFER>

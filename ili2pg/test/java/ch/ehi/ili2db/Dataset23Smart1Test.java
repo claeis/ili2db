@@ -5,7 +5,9 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.Statement;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -63,7 +65,7 @@ public class Dataset23Smart1Test {
 	//config.setTidHandling(config.TID_HANDLING_PROPERTY);
 	
 	@Test
-	public void importDataset() throws Exception
+	public void importXtfDataset() throws Exception
 	{
 		Connection jdbcConnection=null;
 		try{
@@ -78,6 +80,7 @@ public class Dataset23Smart1Test {
 					Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 					config.setDatasetName(DATASETNAME_A);
 					config.setFunction(Config.FC_IMPORT);
+			        config.setDoImplicitSchemaImport(true);
 					config.setCreateFk(config.CREATE_FK_YES);
 					config.setBasketHandling(config.BASKET_HANDLING_READWRITE);
 					config.setCatalogueRefTrafo(null);
@@ -95,18 +98,17 @@ public class Dataset23Smart1Test {
 					Ili2db.readSettingsFromDb(config);
 					Ili2db.run(config,null);
 				}
-				Assert.assertTrue(stmt.execute("SELECT t_ili2db_dataset.t_id, t_ili2db_dataset.datasetname FROM "+DBSCHEMA+".t_ili2db_dataset WHERE t_ili2db_dataset.t_id = 1"));
-				{
-					ResultSet rs=stmt.getResultSet();
-					Assert.assertTrue(rs.next());
-					Assert.assertEquals("Testset1",rs.getString(2));
-				}
-				Assert.assertTrue(stmt.execute("SELECT t_ili2db_dataset.t_id, t_ili2db_dataset.datasetname FROM "+DBSCHEMA+".t_ili2db_dataset WHERE t_ili2db_dataset.t_id = 11"));
-				{
-					ResultSet rs=stmt.getResultSet();
-					Assert.assertTrue(rs.next());
-					Assert.assertEquals("Testset2",rs.getString(2));
-				}
+				
+	            HashSet<String> expectedDatasets= new HashSet<String>(Arrays.asList(new String[]{DATASETNAME_A,DATASETNAME_B}));
+	            Assert.assertTrue(stmt.execute("SELECT t_ili2db_dataset.t_id, t_ili2db_dataset.datasetname FROM "+DBSCHEMA+".t_ili2db_dataset"));
+	            {
+	                ResultSet rs=stmt.getResultSet();
+	                while(!expectedDatasets.isEmpty()) {
+	                    Assert.assertTrue(rs.next());
+	                    Assert.assertTrue(expectedDatasets.remove(rs.getString(2)));
+	                }
+	                Assert.assertFalse(rs.next());
+	            }
 			}
 		}finally{
 			if(jdbcConnection!=null){
@@ -115,7 +117,7 @@ public class Dataset23Smart1Test {
 		}
 	}
 	@Test
-	public void importNoDatasetName() throws Exception
+	public void importXtfNoDatasetName() throws Exception
 	{
 		Connection jdbcConnection=null;
 		try{
@@ -130,6 +132,7 @@ public class Dataset23Smart1Test {
 					Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 					config.setDatasetName(null);
 					config.setFunction(Config.FC_IMPORT);
+			        config.setDoImplicitSchemaImport(true);
 					config.setCreateFk(config.CREATE_FK_YES);
 					config.setBasketHandling(config.BASKET_HANDLING_READWRITE);
 					config.setBasketHandling(null);
@@ -148,17 +151,14 @@ public class Dataset23Smart1Test {
 					Ili2db.readSettingsFromDb(config);
 					Ili2db.run(config,null);
 				}
-				Assert.assertTrue(stmt.execute("SELECT t_ili2db_dataset.t_id, t_ili2db_dataset.datasetname FROM "+DBSCHEMA+".t_ili2db_dataset WHERE t_ili2db_dataset.t_id = 1"));
+				Assert.assertTrue(stmt.execute("SELECT DISTINCT t_ili2db_dataset.datasetname FROM "+DBSCHEMA+".t_ili2db_dataset"));
 				{
 					ResultSet rs=stmt.getResultSet();
 					Assert.assertTrue(rs.next());
-					Assert.assertEquals("Dataset1a1.xtf-1",rs.getString(2));
-				}
-				Assert.assertTrue(stmt.execute("SELECT t_ili2db_dataset.t_id, t_ili2db_dataset.datasetname FROM "+DBSCHEMA+".t_ili2db_dataset WHERE t_ili2db_dataset.t_id = 11"));
-				{
-					ResultSet rs=stmt.getResultSet();
-					Assert.assertTrue(rs.next());
-					Assert.assertEquals("Dataset1a1.xtf-11",rs.getString(2));
+					Assert.assertTrue(rs.getString(1).startsWith("Dataset1a1.xtf"));
+                    Assert.assertTrue(rs.next());
+                    Assert.assertTrue(rs.getString(1).startsWith("Dataset1a1.xtf"));
+                    Assert.assertFalse(rs.next());
 				}
 			}
 		}finally{
@@ -223,30 +223,27 @@ public class Dataset23Smart1Test {
 			Ili2db.readSettingsFromDb(config);
 			Ili2db.run(config,null);
 			
-			Assert.assertTrue(stmt.execute("SELECT classa1.attr1, classa1.t_id FROM "+DBSCHEMA+".classa1 WHERE classa1.t_id = 14"));
-			{
-				ResultSet rs=stmt.getResultSet();
-				Assert.assertTrue(rs.next());
-				Assert.assertEquals("b1",rs.getString(1));
-			}
-			Assert.assertTrue(stmt.execute("SELECT classa1.attr1, classa1.t_id FROM "+DBSCHEMA+".classa1 WHERE classa1.t_id = 16"));
-			{
-				ResultSet rs=stmt.getResultSet();
-				Assert.assertTrue(rs.next());
-				Assert.assertEquals("b1",rs.getString(1));
-			}
-			Assert.assertTrue(stmt.execute("SELECT classa1.attr1, classa1.t_id FROM "+DBSCHEMA+".classa1 WHERE classa1.t_id = 1002"));
-			{
-				ResultSet rs=stmt.getResultSet();
-				Assert.assertTrue(rs.next());
-				Assert.assertEquals("a2",rs.getString(1));
-			}
-			Assert.assertTrue(stmt.execute("SELECT classa1.attr1, classa1.t_id FROM "+DBSCHEMA+".classa1 WHERE classa1.t_id = 1003"));
-			{
-				ResultSet rs=stmt.getResultSet();
-				Assert.assertTrue(rs.next());
-				Assert.assertEquals("a2",rs.getString(1));
-			}
+            HashSet<String> expectedDatasets= new HashSet<String>(Arrays.asList(new String[]{DATASETNAME_A,DATASETNAME_B}));
+            Assert.assertTrue(stmt.execute("SELECT t_ili2db_dataset.t_id, t_ili2db_dataset.datasetname FROM "+DBSCHEMA+".t_ili2db_dataset"));
+            {
+                ResultSet rs=stmt.getResultSet();
+                while(!expectedDatasets.isEmpty()) {
+                    Assert.assertTrue(rs.next());
+                    Assert.assertTrue(expectedDatasets.remove(rs.getString(2)));
+                }
+                Assert.assertFalse(rs.next());
+            }
+            Assert.assertTrue(stmt.execute("SELECT classa1.attr1 FROM "+DBSCHEMA+".classa1"));
+            {
+                ResultSet rs=stmt.getResultSet();
+                for(int i=0;i<4;i++) {
+                    Assert.assertTrue(rs.next());
+                    String attr1=rs.getString(1);
+                    Assert.assertTrue("b1".equals(attr1) || "a2".equals(attr1));
+                }
+                Assert.assertFalse(rs.next());
+            }
+            
 		}finally{
 			if(jdbcConnection!=null){
 				jdbcConnection.close();

@@ -33,6 +33,17 @@ MODEL Inheritance2
   
   END TestA;
   
+  TOPIC TestB =
+  
+	  CLASS ClassA =
+		attrA3 : TEXT*30;
+	  END ClassA;
+	  
+	  CLASS ClassA2 EXTENDS ClassA =
+		attrA3 (EXTENDED) : MANDATORY TEXT*20;
+	  END ClassA2;
+	  
+  END TestB;
   
 END Inheritance2.
 

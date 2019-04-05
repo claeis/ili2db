@@ -4,6 +4,8 @@ import ch.ehi.ili2db.mapping.IliMetaAttrNames;
 import ch.interlis.ili2c.metamodel.AbstractClassDef;
 import ch.interlis.ili2c.metamodel.AttributeDef;
 import ch.interlis.ili2c.metamodel.CompositionType;
+import ch.interlis.ili2c.metamodel.Domain;
+import ch.interlis.ili2c.metamodel.RoleDef;
 import ch.interlis.ili2c.metamodel.Table;
 import ch.interlis.ili2c.metamodel.TransferDescription;
 import ch.interlis.ili2c.metamodel.Type;
@@ -260,6 +262,41 @@ public class Ili2cUtility {
 		}
 		return false;
 	}
+    public static boolean isJsonAttr(TransferDescription td,
+            AttributeDef attr) {
+        Type typeo=attr.getDomain();
+        if(typeo instanceof CompositionType){
+            if(IliMetaAttrNames.METAATTR_MAPPING_JSON.equals(attr.getMetaValue(IliMetaAttrNames.METAATTR_MAPPING))){
+                return true;
+            }
+        }
+        return false;
+    }
 
+    public static Domain getRootBaseDomain(Domain domain) {
+        Domain base=domain.getExtending();
+        while(base!=null) {
+            domain=base;
+            base=domain.getExtending();
+        }
+        return domain;
+    }
+
+    public static AttributeDef getRootBaseAttr(AttributeDef attr) {
+        AttributeDef base=(AttributeDef) attr.getExtending();
+        while(base!=null) {
+            attr=base;
+            base=(AttributeDef) attr.getExtending();
+        }
+        return attr;
+    }
+    public static RoleDef getRootBaseRole(RoleDef role) {
+        RoleDef base=(RoleDef) role.getExtending();
+        while(base!=null){
+            role=base;
+            base=(RoleDef) role.getExtending();
+        }
+        return role;
+    }
 
 }

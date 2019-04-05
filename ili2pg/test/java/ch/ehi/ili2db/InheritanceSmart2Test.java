@@ -61,9 +61,72 @@ public class InheritanceSmart2Test {
 	//config.setAreaRef(config.AREA_REF_KEEP);
 	// --importTid
 	//config.setTidHandling(config.TID_HANDLING_PROPERTY);
+
+    @Test
+    public void importIliSmart2() throws Exception
+    {
+        Connection jdbcConnection=null;
+        try{
+            Class driverClass = Class.forName("org.postgresql.Driver");
+            jdbcConnection = DriverManager.getConnection(
+                    dburl, dbuser, dbpwd);
+            Statement stmt=jdbcConnection.createStatement();
+            stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");
+            File data=new File("test/data/InheritanceSmart2/Inheritance2.ili");
+            Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+            config.setFunction(Config.FC_SCHEMAIMPORT);
+            config.setCreateFk(Config.CREATE_FK_YES);
+            config.setInheritanceTrafo(Config.INHERITANCE_TRAFO_SMART2);
+            config.setDatasetName(DATASETNAME);
+            config.setTidHandling(Config.TID_HANDLING_PROPERTY);
+            config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
+            //config.setCreatescript(data.getPath()+".sql");
+            Ili2db.readSettingsFromDb(config);
+            Ili2db.run(config,null);
+            // TODO verify content of t_ili2db_attrname
+            {
+                // t_ili2db_attrname
+                String [][] expectedValues=new String[][] {
+                    {"Inheritance2.TestB.ClassA.attrA3",  "attra3",    "classa", null},
+                    {"Inheritance2.TestA.ClassA3b.attrA3b", "attra3b", "classa3b", null},
+                    {"Inheritance2.TestA.ClassB.attrB", "attrb", "classb", null},    
+                    {"Inheritance2.TestA.ClassA3b.attrA3b", "attra3b", "classa3c", null},  
+                    {"Inheritance2.TestA.ClassA3.attrA3", "attra3", "classa3c", null},
+                    {"Inheritance2.TestA.ClassA3.attrA3", "attra3", "classa3b", null},  
+                    {"Inheritance2.TestA.aa2bb.bb", "bb", "aa2bb", "classb"},
+                    {"Inheritance2.TestA.ClassA3c.attrA3c", "attra3c", "classa3c", null},  
+                    {"Inheritance2.TestA.aa2bb.aa", "aa_classa3c", "aa2bb", "classa3c"},
+                    {"Inheritance2.TestA.aa2bb.aa", "aa_classa3b", "aa2bb", "classa3b"},
+                    {"Inheritance2.TestA.a2b.a", "a_classa3b", "classb", "classa3b"},
+                    {"Inheritance2.TestA.a2b.a",  "a_classa3c",    "classb",    "classa3c"},
+                    {"Inheritance2.TestB.ClassA2.attrA3", "attra3", "classa2", null},
+                };
+                Ili2dbAssert.assertAttrNameTable(jdbcConnection,expectedValues, DBSCHEMA);
+                
+            }
+            {
+                // t_ili2db_trafo
+                String [][] expectedValues=new String[][] {
+                    {"Inheritance2.TestA.ClassA3",    "ch.ehi.ili2db.inheritance", "subClass"},
+                    {"Inheritance2.TestB.ClassA", "ch.ehi.ili2db.inheritance", "newAndSubClass"},
+                    {"Inheritance2.TestA.ClassB", "ch.ehi.ili2db.inheritance", "newAndSubClass"},
+                    {"Inheritance2.TestA.ClassA3b",   "ch.ehi.ili2db.inheritance", "newAndSubClass"},
+                    {"Inheritance2.TestA.ClassA3c",   "ch.ehi.ili2db.inheritance", "newAndSubClass"},
+                    {"Inheritance2.TestA.aa2bb",  "ch.ehi.ili2db.inheritance", "newAndSubClass"},
+                    {"Inheritance2.TestB.ClassA2",    "ch.ehi.ili2db.inheritance", "newAndSubClass"},
+                    {"Inheritance2.TestA.a2b",    "ch.ehi.ili2db.inheritance", "embedded"},
+                };
+                Ili2dbAssert.assertTrafoTable(jdbcConnection,expectedValues, DBSCHEMA);
+            }
+        }finally{
+            if(jdbcConnection!=null){
+                jdbcConnection.close();
+            }
+        }            
+    }
 	
 	@Test
-	public void importSmart2() throws Exception
+	public void importXtfSmart2() throws Exception
 	{
 		Connection jdbcConnection=null;
 		try{
@@ -75,10 +138,12 @@ public class InheritanceSmart2Test {
 			File data=new File("test/data/InheritanceSmart2/Inheritance2a.xtf");
 			Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 			config.setFunction(Config.FC_IMPORT);
+	        config.setDoImplicitSchemaImport(true);
 			config.setCreateFk(Config.CREATE_FK_YES);
 			config.setInheritanceTrafo(Config.INHERITANCE_TRAFO_SMART2);
 			config.setDatasetName(DATASETNAME);
 			config.setTidHandling(Config.TID_HANDLING_PROPERTY);
+			config.setImportTid(true);
 			config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
 			//config.setCreatescript(data.getPath()+".sql");
 			Ili2db.readSettingsFromDb(config);
@@ -107,7 +172,7 @@ public class InheritanceSmart2Test {
 	}
 	
 	@Test
-	public void updateSmart2New() throws Exception
+	public void updateXtfSmart2New() throws Exception
 	{
 		Connection jdbcConnection=null;
 		try{
@@ -118,12 +183,8 @@ public class InheritanceSmart2Test {
 			File data=new File("test/data/InheritanceSmart2/Inheritance2a.xtf");
 			Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 			config.setFunction(Config.FC_UPDATE);
-			config.setCreateFk(Config.CREATE_FK_YES);
-			config.setInheritanceTrafo(Config.INHERITANCE_TRAFO_SMART2);
-			config.setDatasetName(DATASETNAME);
-			config.setTidHandling(Config.TID_HANDLING_PROPERTY);
-			config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
-			//config.setCreatescript(data.getPath()+".sql");
+			config.setImportTid(true);
+            config.setDatasetName(DATASETNAME);
 			Ili2db.readSettingsFromDb(config);
 			Ili2db.run(config,null);
 	        
@@ -151,7 +212,7 @@ public class InheritanceSmart2Test {
 	}
 	
 	@Test
-	public void updateSmart2Existing() throws Exception
+	public void updateXtfSmart2Existing() throws Exception
 	{
 		Connection jdbcConnection=null;
 		try{
@@ -198,7 +259,7 @@ public class InheritanceSmart2Test {
 	}
 	
 	@Test
-	public void importSmart2ExtRef() throws Exception
+	public void importXtfSmart2ExtRef() throws Exception
 	{
 		Connection jdbcConnection=null;
 		try{
@@ -212,6 +273,7 @@ public class InheritanceSmart2Test {
 			File data=new File("test/data/InheritanceSmart2/Inheritance2b.xtf");
 			Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 			config.setFunction(Config.FC_IMPORT);
+			config.setImportTid(true);
 			config.setDatasetName(DATASETNAMEX);
 			//config.setCreatescript(data.getPath()+".sql");
 			Ili2db.readSettingsFromDb(config);
@@ -234,7 +296,7 @@ public class InheritanceSmart2Test {
 	}
 	
 	@Test
-	public void exportSmart2() throws Exception
+	public void exportXtfSmart2() throws Exception
 	{
 		Connection jdbcConnection=null;
 		try{
@@ -247,6 +309,7 @@ public class InheritanceSmart2Test {
 			Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 			config.setDatasetName(DATASETNAME);
 			config.setFunction(Config.FC_EXPORT);
+			config.setExportTid(true);
 			Ili2db.readSettingsFromDb(config);
 			Ili2db.run(config,null);
 			HashMap<String,IomObject> objs=new HashMap<String,IomObject>();
@@ -320,6 +383,45 @@ public class InheritanceSmart2Test {
 				Assert.assertTrue(rs.next());
 				Assert.assertEquals("bytea",rs.getString("data_type"));
 			}
+            {
+                // t_ili2db_attrname
+                String [][] expectedValues=new String[][] {
+                    {"StructAttr1.TopicB.ClassB.attr3",   "attr3", "topicb_classc", null},
+                    {"StructAttr1.TopicB.ClassB.attr3",   "attr3", "topicb_classb", null},
+                    {"StructAttr1.TopicA.ClassC.attr4",   "attr4", "topica_classc", null},
+                    {"StructAttr1.TopicB.ClassA.attr2",   "attr2", "topicb_classc", null},
+                    {"StructAttr1.TopicB.ClassA.attr2",   "attr2", "topicb_classb", null},
+                    {"StructAttr1.TopicB.StructA.name",   "aname", "topicb_structa", null},
+                    {"StructAttr1.TopicA.ClassA.attr1",   "topica_classb_attr1",   "topica_structa",    "topica_classb"},
+                    {"StructAttr1.TopicB.ClassA.attr1",   "topicb_classb_attr1",   "topicb_structa",    "topicb_classb"},
+                    {"StructAttr1.TopicA.ClassA.attr1",   "topica_classa_attr1",   "topica_structa",    "topica_classa"},
+                    {"StructAttr1.TopicB.ClassA.attr1",   "topicb_classc_attr1",   "topicb_structa",    "topicb_classc"},
+                    {"StructAttr1.TopicA.ClassB.attr3",   "attr3", "topica_classc", null},
+                    {"StructAttr1.TopicA.ClassB.attr3",   "attr3", "topica_classb", null}, 
+                    {"StructAttr1.TopicA.ClassA.attr2",   "attr2", "topica_classc", null},
+                    {"StructAttr1.TopicA.StructA.name",   "aname", "topica_structa", null},
+                    {"StructAttr1.TopicA.ClassA.attr2",   "attr2", "topica_classb", null}, 
+                    {"StructAttr1.TopicA.ClassA.attr2",   "attr2", "topica_classa", null}, 
+                    {"StructAttr1.TopicA.ClassA.attr1",   "topica_classc_attr1",   "topica_structa",    "topica_classc"},
+                    {"StructAttr1.TopicB.ClassC.attr4",   "attr4", "topicb_classc", null}, 
+                };
+                Ili2dbAssert.assertAttrNameTable(jdbcConnection,expectedValues, DBSCHEMA);
+                
+            }
+            {
+                // t_ili2db_trafo
+                String[][] expectedValues=new String[][] {
+                    {"StructAttr1.TopicB.StructA", "ch.ehi.ili2db.inheritance", "newAndSubClass"},
+                    {"StructAttr1.TopicA.ClassB", "ch.ehi.ili2db.inheritance", "newAndSubClass"},
+                    {"StructAttr1.TopicA.ClassA", "ch.ehi.ili2db.inheritance", "newAndSubClass"},
+                    {"StructAttr1.TopicB.ClassA", "ch.ehi.ili2db.inheritance", "subClass"},
+                    {"StructAttr1.TopicB.ClassB", "ch.ehi.ili2db.inheritance", "newAndSubClass"},
+                    {"StructAttr1.TopicA.StructA",    "ch.ehi.ili2db.inheritance", "newAndSubClass"},
+                    {"StructAttr1.TopicA.ClassC", "ch.ehi.ili2db.inheritance", "newAndSubClass"},
+                    {"StructAttr1.TopicB.ClassC", "ch.ehi.ili2db.inheritance", "newAndSubClass"},
+                };
+                Ili2dbAssert.assertTrafoTable(jdbcConnection,expectedValues, DBSCHEMA);
+            }
 		}finally{
 			if(jdbcConnection!=null){
 				jdbcConnection.close();
@@ -340,6 +442,7 @@ public class InheritanceSmart2Test {
 			File data=new File("test/data/InheritanceSmart2/StructAttr1a.xtf");
 			Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 			config.setFunction(Config.FC_IMPORT);
+	        config.setDoImplicitSchemaImport(true);
 			config.setCreateFk(Config.CREATE_FK_YES);
 			config.setInheritanceTrafo(Config.INHERITANCE_TRAFO_SMART2);
 			config.setDatasetName(DATASETNAME);
@@ -383,6 +486,7 @@ public class InheritanceSmart2Test {
 			File data=new File("test/data/InheritanceSmart2/StructAttr1a-out.xtf");
 			Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 			config.setFunction(Config.FC_EXPORT);
+			config.setExportTid(true);
 			config.setDatasetName(DATASETNAME);
 			Ili2db.readSettingsFromDb(config);
 			Ili2db.run(config,null);

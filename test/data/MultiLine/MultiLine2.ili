@@ -3,6 +3,7 @@ INTERLIS 2.3;
 MODEL MultiLine2
   AT "mailto:ce@eisenhutinformatik.ch" VERSION "2016-09-17" =
   DOMAIN
+    !!@CRS=EPSG:21781
   	Lkoord = COORD 480000.000.. 850000.000 [INTERLIS.m],
 		70000.000 .. 310000.000 [INTERLIS.m],
 		ROTATION 2 -> 1;

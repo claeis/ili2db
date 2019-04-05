@@ -4,8 +4,10 @@ import java.util.HashMap;
 
 import ch.ehi.basics.logging.EhiLogger;
 import ch.ehi.ili2db.base.DbNames;
+import ch.ehi.ili2db.base.Ili2db;
 import ch.ehi.ili2db.base.Ili2dbException;
 import ch.ehi.sqlgen.DbUtility;
+import ch.ehi.sqlgen.generator_impl.jdbc.GeneratorJdbc;
 import ch.ehi.sqlgen.repository.DbTableName;
 import ch.interlis.ili2c.metamodel.AttributeDef;
 import ch.interlis.ili2c.metamodel.Viewable;
@@ -27,7 +29,7 @@ public class TrafoConfig {
 		if(schema!=null){
 			sqlName=schema+"."+sqlName;
 		}
-		if(DbUtility.tableExists(conn,new DbTableName(schema,DbNames.TRAFO_TAB))){
+		if(conn!=null && DbUtility.tableExists(conn,new DbTableName(schema,DbNames.TRAFO_TAB))){
 			try{
 				// select entries
 				String insStmt="SELECT "+DbNames.TRAFO_TAB_ILINAME_COL+","+DbNames.TRAFO_TAB_TAG_COL+","+DbNames.TRAFO_TAB_SETTING_COL+" FROM "+sqlName;
@@ -59,78 +61,94 @@ public class TrafoConfig {
 		}
 		return settings;
 	}
-	public void updateTrafoConfig(java.sql.Connection conn,String schema)
+	public void updateTrafoConfig(GeneratorJdbc gen, java.sql.Connection conn,String schema)
 	throws Ili2dbException
 	{
 
-		HashMap<String, HashMap<String, String>> existingEntries = read(conn,schema);
 		String sqlName=DbNames.TRAFO_TAB;
 		if(schema!=null){
 			sqlName=schema+"."+sqlName;
 		}
-		try{
+		if(conn!=null) {
+	        HashMap<String, HashMap<String, String>> existingEntries = read(conn,schema);
+	        try{
 
-			// update entries
-			{
-				//UPDATE table_name
-				//SET column1=value1,column2=value2,...
-				//WHERE some_column=some_value;
-				String updStmt="UPDATE "+sqlName+" SET "+DbNames.TRAFO_TAB_SETTING_COL+"=? WHERE "+DbNames.TRAFO_TAB_ILINAME_COL+"=? AND "+DbNames.TRAFO_TAB_TAG_COL+"=?";
-				EhiLogger.traceBackendCmd(updStmt);
-				java.sql.PreparedStatement updPrepStmt = conn.prepareStatement(updStmt);
-				try{
-					;
-					for(String iliname:config.keySet()){
-						HashMap<String, String> values=config.get(iliname);
-						for(String tag:values.keySet()){
-							if(containsSetting(existingEntries,iliname,tag)){
-								// update
-								String value=values.get(tag);
-								updPrepStmt.clearParameters();
-								updPrepStmt.setString(1, value);
-								updPrepStmt.setString(2, iliname);
-								updPrepStmt.setString(3, tag);
-								updPrepStmt.executeUpdate();
-							}
-						}
-					}
-				}catch(java.sql.SQLException ex){
-					throw new Ili2dbException("failed to update trafo",ex);
-				}finally{
-					updPrepStmt.close();
-				}
-				
-			}
-			// insert entries
-			{
-				String insStmt="INSERT INTO "+sqlName+" ("+DbNames.TRAFO_TAB_ILINAME_COL+","+DbNames.TRAFO_TAB_TAG_COL+","+DbNames.TRAFO_TAB_SETTING_COL+") VALUES (?,?,?)";
-				EhiLogger.traceBackendCmd(insStmt);
-				java.sql.PreparedStatement insPrepStmt = conn.prepareStatement(insStmt);
-				try{
-					;
-					for(String iliname:config.keySet()){
-						HashMap<String, String> values=config.get(iliname);
-						for(String tag:values.keySet()){
-							if(!containsSetting(existingEntries,iliname,tag)){
-								// insert
-								String value=values.get(tag);
-								insPrepStmt.clearParameters();
-								insPrepStmt.setString(1, iliname);
-								insPrepStmt.setString(2, tag);
-								insPrepStmt.setString(3, value);
-								insPrepStmt.executeUpdate();
-							}
-						}
-					}
-				}catch(java.sql.SQLException ex){
-					throw new Ili2dbException("failed to insert trafo",ex);
-				}finally{
-					insPrepStmt.close();
-				}
-				
-			}
-		}catch(java.sql.SQLException ex){		
-			throw new Ili2dbException("failed to update trafo-table "+sqlName,ex);
+	            // update entries
+	            {
+	                //UPDATE table_name
+	                //SET column1=value1,column2=value2,...
+	                //WHERE some_column=some_value;
+	                String updStmt="UPDATE "+sqlName+" SET "+DbNames.TRAFO_TAB_SETTING_COL+"=? WHERE "+DbNames.TRAFO_TAB_ILINAME_COL+"=? AND "+DbNames.TRAFO_TAB_TAG_COL+"=?";
+	                EhiLogger.traceBackendCmd(updStmt);
+	                java.sql.PreparedStatement updPrepStmt = conn.prepareStatement(updStmt);
+	                try{
+	                    ;
+	                    for(String iliname:config.keySet()){
+	                        HashMap<String, String> values=config.get(iliname);
+	                        for(String tag:values.keySet()){
+	                            if(containsSetting(existingEntries,iliname,tag)){
+	                                // update
+	                                String value=values.get(tag);
+	                                updPrepStmt.clearParameters();
+	                                updPrepStmt.setString(1, value);
+	                                updPrepStmt.setString(2, iliname);
+	                                updPrepStmt.setString(3, tag);
+	                                updPrepStmt.executeUpdate();
+	                            }
+	                        }
+	                    }
+	                }catch(java.sql.SQLException ex){
+	                    throw new Ili2dbException("failed to update trafo",ex);
+	                }finally{
+	                    updPrepStmt.close();
+	                }
+	                
+	            }
+	            // insert entries
+	            {
+	                String insStmt="INSERT INTO "+sqlName+" ("+DbNames.TRAFO_TAB_ILINAME_COL+","+DbNames.TRAFO_TAB_TAG_COL+","+DbNames.TRAFO_TAB_SETTING_COL+") VALUES (?,?,?)";
+	                EhiLogger.traceBackendCmd(insStmt);
+	                java.sql.PreparedStatement insPrepStmt = conn.prepareStatement(insStmt);
+	                try{
+	                    ;
+	                    for(String iliname:config.keySet()){
+	                        HashMap<String, String> values=config.get(iliname);
+	                        for(String tag:values.keySet()){
+	                            if(!containsSetting(existingEntries,iliname,tag)){
+	                                // insert
+	                                String value=values.get(tag);
+	                                insPrepStmt.clearParameters();
+	                                insPrepStmt.setString(1, iliname);
+	                                insPrepStmt.setString(2, tag);
+	                                insPrepStmt.setString(3, value);
+	                                insPrepStmt.executeUpdate();
+	                            }
+	                        }
+	                    }
+	                }catch(java.sql.SQLException ex){
+	                    throw new Ili2dbException("failed to insert trafo",ex);
+	                }finally{
+	                    insPrepStmt.close();
+	                }
+	                
+	            }
+	        }catch(java.sql.SQLException ex){       
+	            throw new Ili2dbException("failed to update trafo-table "+sqlName,ex);
+	        }
+		    
+		}
+		if(gen!=null){
+            for(String iliname:config.keySet()){
+                HashMap<String, String> values=config.get(iliname);
+                for(String tag:values.keySet()){
+                    // insert
+                    String value=values.get(tag);
+                    String insStmt="INSERT INTO "+sqlName+" ("+DbNames.TRAFO_TAB_ILINAME_COL+","+DbNames.TRAFO_TAB_TAG_COL+","+DbNames.TRAFO_TAB_SETTING_COL
+                            +") VALUES ("+Ili2db.quoteSqlStringValue(iliname)+","+Ili2db.quoteSqlStringValue(tag)+","+Ili2db.quoteSqlStringValue(value)+")";
+                    gen.addCreateLine(gen.new Stmt(insStmt));
+                }
+            }
+		    
 		}
 
 	}
@@ -184,6 +202,16 @@ public class TrafoConfig {
         }
         return setting;
     }
+    public String getAttrConfig(Viewable iliclass,AttributeDef attr, Integer epsgCode,String tag) {
+        String iliname=null;
+        if(epsgCode!=null) {
+            iliname=getIliQname(attr)+":"+epsgCode+"("+iliclass.getScopedName()+")";
+        }else {
+            iliname=getIliQname(attr)+"("+iliclass.getScopedName()+")";
+        }
+        String setting=getSetting(config, iliname, tag);
+        return setting;
+    }
 	public String getViewableConfig(Viewable aclass, String tag) {
 		String iliname=aclass.getScopedName(null);
 		return getSetting(config, iliname, tag);
@@ -192,8 +220,8 @@ public class TrafoConfig {
 		String iliname=getIliQname(attr);
 		setSetting(config, iliname, tag,value);
 	}
-    public void setAttrConfig(Viewable iliclass,AttributeDef attr, String tag,String value) {
-        String iliname=getIliQname(attr)+"("+iliclass.getScopedName()+")";
+    public void setAttrConfig(Viewable iliclass,AttributeDef attr, int epsgCode,String tag,String value) {
+        String iliname=getIliQname(attr)+":"+epsgCode+"("+iliclass.getScopedName()+")";
         setSetting(config, iliname, tag,value);
     }
 	public void setViewableConfig(Viewable aclass, String tag,String value) {

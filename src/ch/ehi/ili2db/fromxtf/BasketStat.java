@@ -4,23 +4,23 @@ import java.util.HashMap;
 
 
 public class BasketStat{
-	public BasketStat(String file,
+	public BasketStat(String datasource,
 			String topic, String iliBasketId,HashMap<String, ClassStat> objStat) {
 		super();
 		this.objStat = objStat;
-		this.file = file;
+		this.datasource = datasource;
 		this.topic = topic;
 		this.basketId = iliBasketId;
 	}
 	private HashMap<String, ClassStat> objStat=null;
-	private String file=null;
+	private String datasource=null;
 	private String topic=null;
 	private String basketId=null;
 	public HashMap<String, ClassStat> getObjStat() {
 		return objStat;
 	}
-	public String getFile() {
-		return file;
+	public String getDatasource() {
+		return datasource;
 	}
 	public String getTopic() {
 		return topic;

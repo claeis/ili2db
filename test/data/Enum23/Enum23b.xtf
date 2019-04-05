@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?><TRANSFER xmlns="http://www.interlis.ch/INTERLIS2.3">
+<HEADERSECTION SENDER="ili2pg-developer-workspace" VERSION="2.3"><MODELS><MODEL NAME="Enum23b" VERSION="2017-03-29" URI="mailto:ce@eisenhutinformatik.ch"></MODEL></MODELS></HEADERSECTION>
+<DATASECTION>
+<Enum23b.TestA BID="b1">
+	<Enum23b.TestA.ClassA1 TID="1">
+		<attr1>Test2</attr1>
+		<attr1a>Test2</attr1a>
+		<attr1b>Test2</attr1b>
+	</Enum23b.TestA.ClassA1>
+	<Enum23b.TestA.ClassA2 TID="2">
+		<attr1>Test2</attr1>
+		<attr1a>Test2.Test2a</attr1a>
+		<attr1b>Test2.Test2a</attr1b>
+	</Enum23b.TestA.ClassA2>
+</Enum23b.TestA>
+</DATASECTION>
+</TRANSFER>

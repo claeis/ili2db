@@ -78,13 +78,14 @@ public class MultipleGeomAttrsTest {
 	@Test
 	public void importXtf() throws Exception
 	{
-		EhiLogger.getInstance().setTraceFilter(false);
+		//EhiLogger.getInstance().setTraceFilter(false);
 	    File fgdbFile=new File(FGDBFILENAME);
 	    Fgdb4j.deleteFileGdb(fgdbFile);
 	    Class driverClass = Class.forName(FgdbDriver.class.getName());
 		File data=new File(TEST_OUT,"MultipleGeomAttrs1a.xtf");
 		Config config=initConfig(data.getPath(),data.getPath()+".log");
 		config.setFunction(Config.FC_IMPORT);
+        config.setDoImplicitSchemaImport(true);
 		config.setCreateFk(config.CREATE_FK_YES);
 		config.setCreateNumChecks(true);
 		config.setTidHandling(Config.TID_HANDLING_PROPERTY);
@@ -94,12 +95,7 @@ public class MultipleGeomAttrsTest {
 		config.setMultilingualTrafo(null);
 		config.setInheritanceTrafo(null);
 		//Ili2db.readSettingsFromDb(config);
-		try{
-			Ili2db.run(config,null);
-		}catch(Exception ex){
-			EhiLogger.logError(ex);
-			Assert.fail();
-		}
+        Ili2db.run(config,null);
 	}
 	
 	@Test
@@ -108,7 +104,7 @@ public class MultipleGeomAttrsTest {
 		{
 			importXtf();
 		}
-		EhiLogger.getInstance().setTraceFilter(false);
+		//EhiLogger.getInstance().setTraceFilter(false);
 	    File fgdbFile=new File(FGDBFILENAME);
 	    //Fgdb4j.deleteFileGdb(fgdbFile);
 	    Class driverClass = Class.forName(FgdbDriver.class.getName());

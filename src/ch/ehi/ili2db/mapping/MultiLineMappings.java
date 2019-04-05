@@ -64,5 +64,10 @@ public class MultiLineMappings {
 	public MultiLineMapping getMapping(AttributeDef attr) {
 		return mappings.get(attr);
 	}
+    public AttributeDef getPolylineAttr(AttributeDef attr) {
+        MultiLineMapping attrMapping=getMapping(attr);
+        AttributeDef polylineAttr = (AttributeDef) ((CompositionType) ((AttributeDef) ((CompositionType) attr.getDomainResolvingAll()).getComponentType().getElement(AttributeDef.class, attrMapping.getBagOfLinesAttrName())).getDomain()).getComponentType().getElement(AttributeDef.class,attrMapping.getLineAttrName());
+        return polylineAttr;
+    }
 
 }

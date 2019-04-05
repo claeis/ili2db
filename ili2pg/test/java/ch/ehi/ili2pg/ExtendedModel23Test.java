@@ -63,7 +63,7 @@ public class ExtendedModel23Test {
 	@Test
 	public void importXtf() throws Exception
 	{
-		EhiLogger.getInstance().setTraceFilter(false);
+		//EhiLogger.getInstance().setTraceFilter(false);
 		Connection jdbcConnection=null;
 		try{
 		    Class driverClass = Class.forName("org.postgresql.Driver");
@@ -75,6 +75,7 @@ public class ExtendedModel23Test {
 					File data=new File("test/data/ExtendedModel/ExtendedModel1.xtf");
 		    		Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 		    		config.setFunction(Config.FC_IMPORT);
+		            config.setDoImplicitSchemaImport(true);
 					config.setModels("BaseModel;ExtendedModel");
 		    		config.setCreateFk(config.CREATE_FK_YES);
 		    		config.setTidHandling(Config.TID_HANDLING_PROPERTY);
@@ -87,8 +88,6 @@ public class ExtendedModel23Test {
 		    		Ili2db.run(config,null);
 				}
 			}
-		}catch(Exception e) {
-			throw new IoxException(e);
 		}finally{
 			if(jdbcConnection!=null){
 				jdbcConnection.close();
@@ -109,6 +108,7 @@ public class ExtendedModel23Test {
 			Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 			config.setModels("BaseModel;ExtendedModel");
 			config.setFunction(Config.FC_EXPORT);
+			config.setExportTid(true);
 			Ili2db.readSettingsFromDb(config);
 			Ili2db.run(config,null);
 			
@@ -137,8 +137,6 @@ public class ExtendedModel23Test {
 				 Assert.assertEquals("1.1", obj0.getattrvalue("wert"));
 				 Assert.assertEquals("34", obj0.getattrobj("ap1",0).getobjectrefoid());
 			 }
-		}catch(Exception e) {
-			throw new IoxException(e);
 		}finally{
 			if(jdbcConnection!=null){
 				jdbcConnection.close();
@@ -162,6 +160,7 @@ public class ExtendedModel23Test {
 			config.setModels("BaseModel;ExtendedModel");
 			config.setExportModels("BaseModel");
 			config.setFunction(Config.FC_EXPORT);
+			config.setExportTid(true);
 			Ili2db.readSettingsFromDb(config);
 			Ili2db.run(config,null);
 			

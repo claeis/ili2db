@@ -4,13 +4,18 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import java.io.File;
 import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.Statement;
+
 import org.junit.After;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.MultiPolygon;
 import ch.ehi.basics.logging.EhiLogger;
+import ch.ehi.ili2db.Ili2dbAssert;
 import ch.ehi.ili2db.base.Ili2db;
 import ch.ehi.ili2db.gui.Config;
 import ch.interlis.iom.IomObject;
@@ -29,6 +34,7 @@ public class MultipleGeomAttrsTest {
 	private static final String TEST_OUT="test/data/MultipleGeomAttrs/";
     private static final String GPKGFILENAME=TEST_OUT+"MultipleGeomAttrs.gpkg";
 	private Connection jdbcConnection=null;
+	private Statement stmt=null;
 	
 	public Config initConfig(String xtfFilename,String logfile) {
 		Config config=new Config();
@@ -45,6 +51,22 @@ public class MultipleGeomAttrsTest {
 		return config;
 	}
 	
+    @Before
+    public void initDb() throws Exception
+    {
+        File gpkgFile=new File(GPKGFILENAME);
+        if(gpkgFile.exists()){
+            gpkgFile.delete();
+        }
+    }
+    
+    public void openDb() throws Exception
+    {
+        Class driverClass = Class.forName("org.sqlite.JDBC");
+        jdbcConnection = DriverManager.getConnection("jdbc:sqlite:"+GPKGFILENAME, null, null);
+        stmt=jdbcConnection.createStatement();
+    }
+	
 	@After
 	public void endDb() throws Exception
 	{
@@ -56,7 +78,7 @@ public class MultipleGeomAttrsTest {
 	@Test
 	public void importIli() throws Exception
 	{
-        EhiLogger.getInstance().setTraceFilter(false);
+        //EhiLogger.getInstance().setTraceFilter(false);
 	    File gpkgFile=new File(GPKGFILENAME);
         if(gpkgFile.exists()){ 
             File file = new File(gpkgFile.getAbsolutePath());
@@ -74,11 +96,30 @@ public class MultipleGeomAttrsTest {
 		config.setMultilingualTrafo(null);
 		config.setInheritanceTrafo(null);
 		Ili2db.run(config,null);
+		openDb();
+        {
+            // t_ili2db_attrname
+            String [][] expectedValues=new String[][] {
+                {"MultipleGeomAttrs1.Topic.ClassA.line", "line", "classa_line", null},
+                {"MultipleGeomAttrs1.Topic.ClassA.coord", "coord", "classa", null},
+                {"MultipleGeomAttrs1.Topic.ClassA.surface", "surface", "classa_surface", null},
+            };
+            Ili2dbAssert.assertAttrNameTableFromGpkg(jdbcConnection, expectedValues);
+        }
+        {
+            // t_ili2db_trafo
+            String [][] expectedValues=new String[][] {
+                {"MultipleGeomAttrs1.Topic.ClassA.line:2056(MultipleGeomAttrs1.Topic.ClassA)",  "ch.ehi.ili2db.secondaryTable",  "classa_line"},
+                {"MultipleGeomAttrs1.Topic.ClassA.surface:2056(MultipleGeomAttrs1.Topic.ClassA)",    "ch.ehi.ili2db.secondaryTable",  "classa_surface"},
+                {"MultipleGeomAttrs1.Topic.ClassA",   "ch.ehi.ili2db.inheritance", "newClass"},
+            };
+            Ili2dbAssert.assertTrafoTableFromGpkg(jdbcConnection, expectedValues);
+        }
 	}
     @Test
     public void importIliExtendedClass() throws Exception
     {
-        EhiLogger.getInstance().setTraceFilter(false);
+        //EhiLogger.getInstance().setTraceFilter(false);
         File gpkgFile=new File(GPKGFILENAME);
         if(gpkgFile.exists()){ 
             File file = new File(gpkgFile.getAbsolutePath());
@@ -96,12 +137,37 @@ public class MultipleGeomAttrsTest {
         config.setMultilingualTrafo(null);
         config.setInheritanceTrafo(Config.INHERITANCE_TRAFO_SMART2);
         Ili2db.run(config,null);
+        openDb();
+        {
+            // t_ili2db_attrname
+            String [][] expectedValues=new String[][] {
+                {"MultipleGeomAttrsExtendedClass.Topic.ClassA.coord", "coord", "classap", null},
+                {"MultipleGeomAttrsExtendedClass.Topic.ClassA.line",  "line",  "classa_line",null},
+                {"MultipleGeomAttrsExtendedClass.Topic.ClassA.surface",   "surface",   "classa_surface",null},
+                {"MultipleGeomAttrsExtendedClass.Topic.ClassA.coord", "coord", "classa",null},
+                {"MultipleGeomAttrsExtendedClass.Topic.ClassA.surface",   "surface",   "classap_surface",null},
+                {"MultipleGeomAttrsExtendedClass.Topic.ClassA.line",  "line",  "classap_line", null}                
+            };
+            Ili2dbAssert.assertAttrNameTableFromGpkg(jdbcConnection, expectedValues);
+        }
+        {
+            // t_ili2db_trafo
+            String [][] expectedValues=new String[][] {
+                {"MultipleGeomAttrsExtendedClass.Topic.ClassA.line:2056(MultipleGeomAttrsExtendedClass.Topic.ClassA)", "ch.ehi.ili2db.secondaryTable",  "classa_line"},
+                {"MultipleGeomAttrsExtendedClass.Topic.ClassA.surface:2056(MultipleGeomAttrsExtendedClass.Topic.ClassA)",  "ch.ehi.ili2db.secondaryTable",  "classa_surface"},
+                {"MultipleGeomAttrsExtendedClass.Topic.ClassA",   "ch.ehi.ili2db.inheritance", "newAndSubClass"},
+                {"MultipleGeomAttrsExtendedClass.Topic.ClassA.line:2056(MultipleGeomAttrsExtendedClass.Topic.ClassAp)",    "ch.ehi.ili2db.secondaryTable",  "classap_line"},
+                {"MultipleGeomAttrsExtendedClass.Topic.ClassA.surface:2056(MultipleGeomAttrsExtendedClass.Topic.ClassAp)", "ch.ehi.ili2db.secondaryTable",  "classap_surface"},
+                {"MultipleGeomAttrsExtendedClass.Topic.ClassAp",  "ch.ehi.ili2db.inheritance", "newAndSubClass"}                
+            };
+            Ili2dbAssert.assertTrafoTableFromGpkg(jdbcConnection, expectedValues);
+        }
     }
 	
 	@Test
 	public void importXtf() throws Exception
 	{
-		EhiLogger.getInstance().setTraceFilter(false);
+		//EhiLogger.getInstance().setTraceFilter(false);
 	    File gpkgFile=new File(GPKGFILENAME);
         if (gpkgFile.exists()) {
             File file = new File(gpkgFile.getAbsolutePath());
@@ -110,6 +176,7 @@ public class MultipleGeomAttrsTest {
 		File data=new File(TEST_OUT,"MultipleGeomAttrs1a.xtf");
 		Config config=initConfig(data.getPath(),data.getPath()+".log");
 		config.setFunction(Config.FC_IMPORT);
+        config.setDoImplicitSchemaImport(true);
 		config.setCreateFk(config.CREATE_FK_YES);
 		config.setCreateNumChecks(true);
 		config.setTidHandling(Config.TID_HANDLING_PROPERTY);
@@ -129,7 +196,7 @@ public class MultipleGeomAttrsTest {
     @Test
     public void importXtfExtendedClass() throws Exception
     {
-        EhiLogger.getInstance().setTraceFilter(false);
+        //EhiLogger.getInstance().setTraceFilter(false);
         File gpkgFile=new File(GPKGFILENAME);
         if (gpkgFile.exists()) {
             File file = new File(gpkgFile.getAbsolutePath());
@@ -138,6 +205,7 @@ public class MultipleGeomAttrsTest {
         File data=new File(TEST_OUT,"MultipleGeomAttrsExtendedClass_a.xtf");
         Config config=initConfig(data.getPath(),data.getPath()+".log");
         config.setFunction(Config.FC_IMPORT);
+        config.setDoImplicitSchemaImport(true);
 //        config.setCreateFk(config.CREATE_FK_YES);
         config.setCreateNumChecks(true);
         config.setTidHandling(Config.TID_HANDLING_PROPERTY);
@@ -160,7 +228,7 @@ public class MultipleGeomAttrsTest {
 		{
 			importXtf();
 		}
-		EhiLogger.getInstance().setTraceFilter(false);
+		//EhiLogger.getInstance().setTraceFilter(false);
 	    File gpkgFile=new File(GPKGFILENAME);
 	    //Fgdb4j.deleteFileGdb(fgdbFile);
 		File data=new File(TEST_OUT,"MultipleGeomAttrs1a-out.xtf");
@@ -198,7 +266,7 @@ public class MultipleGeomAttrsTest {
         {
             importXtfExtendedClass();
         }
-        EhiLogger.getInstance().setTraceFilter(false);
+        //EhiLogger.getInstance().setTraceFilter(false);
         File gpkgFile=new File(GPKGFILENAME);
         //Fgdb4j.deleteFileGdb(fgdbFile);
         File data=new File(TEST_OUT,"MultipleGeomAttrsExtendedClass-out.xtf");

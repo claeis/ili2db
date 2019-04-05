@@ -87,7 +87,7 @@ public class DbUtilityExecuteSqlTest {
 	// wenn CREATE SEQUENCE mit 2 Semikolon: "test.t_ili2db_seq;;" beendet wird.
 	@Test
 	public void dbUtilityExecuteSql_TwiceSemicolon_Ok() throws IoxException, SQLException{
-		EhiLogger.getInstance().setTraceFilter(false);
+		//EhiLogger.getInstance().setTraceFilter(false);
 		Connection jdbcConnection=null;
 		ResultSet rs=null;
 		try {
@@ -133,7 +133,7 @@ public class DbUtilityExecuteSqlTest {
 	// wenn CREATE SEQUENCE mit 1 Semikolon: "test.t_ili2db_seq;" beendet wird.
 	@Test
 	public void dbUtilityExecuteSql_SingleSemicolon_Ok() throws IoxException, SQLException{
-		EhiLogger.getInstance().setTraceFilter(false);
+		//EhiLogger.getInstance().setTraceFilter(false);
 		Connection jdbcConnection=null;
 		ResultSet rs=null;
 		try {

@@ -8,7 +8,10 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.Statement;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
+
 import org.junit.Assert;
 import org.junit.Test;
 import com.vividsolutions.jts.geom.Coordinate;
@@ -83,7 +86,7 @@ public class TranslationTest {
 				config.setMultiSurfaceTrafo(null);
 				config.setMultilingualTrafo(null);
 				config.setInheritanceTrafo(null);
-				config.setVer4_translation(true);
+				config.setVer3_translation(false);
 				Ili2db.readSettingsFromDb(config);
 				Ili2db.run(config,null);
 				// class[a] is imported
@@ -99,6 +102,20 @@ public class TranslationTest {
 					ResultSet rs=stmt.getResultSet();
 					Assert.assertFalse(rs.next());
 				}
+                {
+                    // t_ili2db_attrname
+                    String [][] expectedValues=new String[][] {
+                        {"EnumOkA.TopicA.ClassA.attrA",  "attra", "classa", null}, 
+                    };
+                    Ili2dbAssert.assertAttrNameTable(jdbcConnection, expectedValues, DBSCHEMA);
+                }
+                {
+                    // t_ili2db_trafo
+                    String [][] expectedValues=new String[][] {
+                        {"EnumOkA.TopicA.ClassA", "ch.ehi.ili2db.inheritance", "newClass"},
+                    };
+                    Ili2dbAssert.assertTrafoTable(jdbcConnection,expectedValues, DBSCHEMA);
+                }
 		    }
 		}finally{
 			if(jdbcConnection!=null){
@@ -129,6 +146,8 @@ public class TranslationTest {
 				config.setMultilingualTrafo(null);
 				config.setInheritanceTrafo(null);
 				config.setIli1Translation("ModelBsimple10=ModelAsimple10");
+	            config.setDefaultSrsAuthority("EPSG");
+	            config.setDefaultSrsCode("21781");
 				Ili2db.readSettingsFromDb(config);
 				Ili2db.run(config,null);
 				
@@ -145,6 +164,26 @@ public class TranslationTest {
 					ResultSet rs=stmt.getResultSet();
 					Assert.assertFalse(rs.next());
 				}
+	            {
+	                // t_ili2db_attrname
+	                String [][] expectedValues=new String[][] {
+	                    {"ModelAsimple10.TopicA.ClassA3.geomA",  "geoma", "classa3", null},   
+	                    {"ModelAsimple10.TopicA.ClassA2.geomA",   "geoma", "classa2", null},
+	                    {"ModelAsimple10.TopicA.ClassA.attrA",    "attra", "classa", null},
+	                };
+	                Ili2dbAssert.assertAttrNameTable(jdbcConnection, expectedValues, DBSCHEMA);
+	            }
+	            {
+	                // t_ili2db_trafo
+	                String [][] expectedValues=new String[][] {
+	                    {"ModelAsimple10.TopicA.ClassA",  "ch.ehi.ili2db.inheritance", "newClass"},
+	                    {"ModelAsimple10.TopicA.ClassA2", "ch.ehi.ili2db.inheritance", "newClass"},
+	                    {"ModelAsimple10.TopicA.ClassA3", "ch.ehi.ili2db.inheritance", "newClass"},
+	                    
+	                };
+	                Ili2dbAssert.assertTrafoTable(jdbcConnection,expectedValues, DBSCHEMA);
+	            }
+				
 	        }
 		}finally{
 			if(jdbcConnection!=null){
@@ -174,9 +213,10 @@ public class TranslationTest {
 				config.setMultiSurfaceTrafo(null);
 				config.setMultilingualTrafo(null);
 				config.setInheritanceTrafo(null);
-				config.setDoItfLineTables(true);
-				config.setAreaRef(config.AREA_REF_KEEP);
+                Ili2db.setSkipPolygonBuilding(config);
 				config.setIli1Translation("ModelBsimple10=ModelAsimple10");
+	            config.setDefaultSrsAuthority("EPSG");
+	            config.setDefaultSrsCode("21781");
 				Ili2db.readSettingsFromDb(config);
 				Ili2db.run(config,null);
 				// class[a2] is imported
@@ -192,6 +232,26 @@ public class TranslationTest {
 					ResultSet rs=stmt.getResultSet();
 					Assert.assertFalse(rs.next());
 				}
+                {
+                    // t_ili2db_attrname
+                    String [][] expectedValues=new String[][] {
+                        {"ModelAsimple10.TopicA.ClassA2.geomA._geom", "_geom", "classa2_geoma", null}, 
+                        {"ModelAsimple10.TopicA.ClassA3.geomA",   "geoma", "classa3", null},   
+                        {"ModelAsimple10.TopicA.ClassA3.geomA._geom", "_geom", "classa3_geoma", null}, 
+                        {"ModelAsimple10.TopicA.ClassA2.geomA._ref", "_ref", "classa2_geoma", null}, 
+                        {"ModelAsimple10.TopicA.ClassA.attrA", "attra", "classa", null}
+                    };
+                    Ili2dbAssert.assertAttrNameTable(jdbcConnection, expectedValues, DBSCHEMA);
+                }
+                {
+                    // t_ili2db_trafo
+                    String [][] expectedValues=new String[][] {
+                        {"ModelAsimple10.TopicA.ClassA3", "ch.ehi.ili2db.inheritance", "newClass"},
+                        {"ModelAsimple10.TopicA.ClassA2", "ch.ehi.ili2db.inheritance", "newClass"},
+                        {"ModelAsimple10.TopicA.ClassA",  "ch.ehi.ili2db.inheritance", "newClass"}
+                    };
+                    Ili2dbAssert.assertTrafoTable(jdbcConnection,expectedValues, DBSCHEMA);
+                }
 		    }
 		}finally{
 			if(jdbcConnection!=null){
@@ -214,51 +274,39 @@ public class TranslationTest {
 	    		File data=new File(TEST_OUT,"EnumOka.xtf");
 	    		Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 	    		config.setFunction(Config.FC_IMPORT);
+	            config.setDoImplicitSchemaImport(true);
 	    		config.setCreateFk(config.CREATE_FK_YES);
+                config.setImportBid(true);
+                config.setImportTid(true);
 	    		config.setTidHandling(Config.TID_HANDLING_PROPERTY);
 	    		config.setBasketHandling(config.BASKET_HANDLING_READWRITE);
 	    		config.setCatalogueRefTrafo(null);
 	    		config.setMultiSurfaceTrafo(null);
 	    		config.setMultilingualTrafo(null);
 	    		config.setInheritanceTrafo(null);
-	    		config.setVer4_translation(true);
+	    		config.setVer3_translation(false);
 	    		config.setDatasetName("EnumOka");
 	    		Ili2db.readSettingsFromDb(config);
 	    		Ili2db.run(config,null);
 	    		// tid's of class[a]
-				Assert.assertTrue(stmt.execute("SELECT classa.t_id, classa.t_ili_tid FROM "+DBSCHEMA+".classa WHERE classa.t_id = 4"));
+	    		HashSet<String> expectedTids= new HashSet<String>(Arrays.asList(new String[]{"o1","o2","x1","x2"}));
+				Assert.assertTrue(stmt.execute("SELECT classa.t_id, classa.t_ili_tid FROM "+DBSCHEMA+".classa"));
 				{
 					ResultSet rs=stmt.getResultSet();
-					Assert.assertTrue(rs.next());
-					Assert.assertEquals("o1",rs.getString(2));
+					while(!expectedTids.isEmpty()) {
+	                    Assert.assertTrue(rs.next());
+	                    String tid=rs.getString(2);
+					    assertTrue(expectedTids.remove(tid));
+					}
+                    Assert.assertFalse(rs.next());
 				}
-				Assert.assertTrue(stmt.execute("SELECT classa.t_id, classa.t_ili_tid FROM "+DBSCHEMA+".classa WHERE classa.t_id = 5"));
-				{
-					ResultSet rs=stmt.getResultSet();
-					Assert.assertTrue(rs.next());
-					Assert.assertEquals("o2",rs.getString(2));
-				}
-				// tid's of class[b]
-				Assert.assertTrue(stmt.execute("SELECT classa.t_id, classa.t_ili_tid FROM "+DBSCHEMA+".classa WHERE classa.t_id = 9"));
-				{
-					ResultSet rs=stmt.getResultSet();
-					Assert.assertTrue(rs.next());
-					Assert.assertEquals("x1",rs.getString(2));
-				}
-				Assert.assertTrue(stmt.execute("SELECT classa.t_id, classa.t_ili_tid FROM "+DBSCHEMA+".classa WHERE classa.t_id = 10"));
-				{
-					ResultSet rs=stmt.getResultSet();
-					Assert.assertTrue(rs.next());
-					Assert.assertEquals("x2",rs.getString(2));
-				}
-				// bid's of classa and classb are created
-				Assert.assertTrue(stmt.execute("SELECT t_ili2db_basket.t_id, t_ili2db_basket.topic FROM "+DBSCHEMA+".t_ili2db_basket WHERE t_ili2db_basket.t_id = 3"));
+				Assert.assertTrue(stmt.execute("SELECT t_ili2db_basket.t_id, t_ili2db_basket.topic FROM "+DBSCHEMA+".t_ili2db_basket WHERE t_ili2db_basket.t_ili_tid = 'EnumOkA.Test1'"));
 				{
 					ResultSet rs=stmt.getResultSet();
 					Assert.assertTrue(rs.next());
 					Assert.assertEquals("EnumOkA.TopicA",rs.getString(2));
 				}
-				Assert.assertTrue(stmt.execute("SELECT t_ili2db_basket.t_id, t_ili2db_basket.topic FROM "+DBSCHEMA+".t_ili2db_basket WHERE t_ili2db_basket.t_id = 8"));
+				Assert.assertTrue(stmt.execute("SELECT t_ili2db_basket.t_id, t_ili2db_basket.topic FROM "+DBSCHEMA+".t_ili2db_basket WHERE t_ili2db_basket.t_ili_tid = 'EnumOkB.Test1'"));
 				{
 					ResultSet rs=stmt.getResultSet();
 					Assert.assertTrue(rs.next());
@@ -285,17 +333,11 @@ public class TranslationTest {
 	        		dburl, dbuser, dbpwd);
 	        Statement stmt=jdbcConnection.createStatement();
 			
-			EhiLogger.getInstance().setTraceFilter(false);
+			//EhiLogger.getInstance().setTraceFilter(false);
 			File data=new File(TEST_OUT,"EnumOka-out.xtf");
 			Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 			config.setFunction(Config.FC_EXPORT);
-			config.setCreateFk(config.CREATE_FK_YES);
-			config.setTidHandling(Config.TID_HANDLING_PROPERTY);
-			config.setBasketHandling(config.BASKET_HANDLING_READWRITE);
-			config.setCatalogueRefTrafo(null);
-			config.setMultiSurfaceTrafo(null);
-			config.setMultilingualTrafo(null);
-			config.setInheritanceTrafo(null);
+			config.setExportTid(true);
 			config.setDatasetName("EnumOka");
 			Ili2db.readSettingsFromDb(config);
 			Ili2db.run(config,null);
@@ -359,8 +401,11 @@ public class TranslationTest {
 	    		File data=new File(TEST_OUT,"ModelAsimple10a.itf");
 	    		Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 	    		config.setFunction(Config.FC_IMPORT);
+	            config.setDoImplicitSchemaImport(true);
 	    		config.setCreateFk(config.CREATE_FK_YES);
 	    		config.setTidHandling(Config.TID_HANDLING_PROPERTY);
+	    		config.setImportTid(true);
+	    		config.setImportBid(true);
 	    		config.setBasketHandling(config.BASKET_HANDLING_READWRITE);
 	    		config.setCatalogueRefTrafo(null);
 	    		config.setMultiSurfaceTrafo(null);
@@ -368,6 +413,8 @@ public class TranslationTest {
 	    		config.setInheritanceTrafo(null);
 	    		config.setIli1Translation("ModelBsimple10=ModelAsimple10");
 	    		config.setDatasetName("ModelAsimple10");
+	            config.setDefaultSrsAuthority("EPSG");
+	            config.setDefaultSrsCode("21781");
 	    		Ili2db.readSettingsFromDb(config);
 	    		Ili2db.run(config,null);
 	        }
@@ -375,6 +422,8 @@ public class TranslationTest {
 	        	File data=new File(TEST_OUT,"ModelBsimple10a.itf");
 	    		Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 	    		config.setFunction(Config.FC_IMPORT);
+                config.setImportTid(true);
+                config.setImportBid(true);
 	    		config.setDatasetName("ModelBsimple10");
 	    		Ili2db.readSettingsFromDb(config);
 	    		Ili2db.run(config,null);
@@ -387,13 +436,13 @@ public class TranslationTest {
 				Assert.assertEquals("o10",rs.getString(1));
 			}
 			// bid's of classa and classb are created
-			Assert.assertTrue(stmt.execute("SELECT t_ili2db_basket.t_id, t_ili2db_basket.topic FROM "+DBSCHEMA+".t_ili2db_basket WHERE t_ili2db_basket.t_id = 3"));
+			Assert.assertTrue(stmt.execute("SELECT t_ili2db_basket.t_id, t_ili2db_basket.topic FROM "+DBSCHEMA+".t_ili2db_basket WHERE t_ili2db_basket.t_ili_tid = 'ModelAsimple10.TopicA'"));
 			{
 				ResultSet rs=stmt.getResultSet();
 				Assert.assertTrue(rs.next());
 				Assert.assertEquals("ModelAsimple10.TopicA",rs.getString(2));
 			}
-			Assert.assertTrue(stmt.execute("SELECT t_ili2db_basket.t_id, t_ili2db_basket.topic FROM "+DBSCHEMA+".t_ili2db_basket WHERE t_ili2db_basket.t_id = 14"));
+			Assert.assertTrue(stmt.execute("SELECT t_ili2db_basket.t_id, t_ili2db_basket.topic FROM "+DBSCHEMA+".t_ili2db_basket WHERE t_ili2db_basket.t_ili_tid = 'ModelBsimple10.TopicB'"));
 			{
 				ResultSet rs=stmt.getResultSet();
 				Assert.assertTrue(rs.next());
@@ -422,6 +471,7 @@ public class TranslationTest {
 		    		File data=new File(TEST_OUT,"ModelAsimple10a-out.itf");
 		    		Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 		    		config.setFunction(Config.FC_EXPORT);
+		    		config.setExportTid(true);
 		    		config.setDatasetName("ModelAsimple10");
 		    		Ili2db.readSettingsFromDb(config);
 		    		Ili2db.run(config,null);
@@ -525,6 +575,7 @@ public class TranslationTest {
 					File data2=new File(TEST_OUT,"ModelBsimple10a-out.itf");
 					Config config=initConfig(data2.getPath(),DBSCHEMA,data2.getPath()+".log");
 		    		config.setFunction(Config.FC_EXPORT);
+                    config.setExportTid(true);
 		    		config.setDatasetName("ModelBsimple10");
 		    		Ili2db.readSettingsFromDb(config);
 		    		Ili2db.run(config,null);
@@ -645,17 +696,21 @@ public class TranslationTest {
 	    		File data=new File(TEST_OUT,"ModelAsimple10a.itf");
 	    		Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 	    		config.setFunction(Config.FC_IMPORT);
+	            config.setDoImplicitSchemaImport(true);
 	    		config.setCreateFk(config.CREATE_FK_YES);
+                config.setImportBid(true);
+                config.setImportTid(true);
 	    		config.setTidHandling(Config.TID_HANDLING_PROPERTY);
 	    		config.setBasketHandling(config.BASKET_HANDLING_READWRITE);
-	    		config.setDoItfLineTables(true);
+                Ili2db.setSkipPolygonBuilding(config);
 	    		config.setCatalogueRefTrafo(null);
 	    		config.setMultiSurfaceTrafo(null);
 	    		config.setMultilingualTrafo(null);
 	    		config.setInheritanceTrafo(null);
-	    		config.setAreaRef(config.AREA_REF_KEEP);
 	    		config.setIli1Translation("ModelBsimple10=ModelAsimple10");
 	    		config.setDatasetName("ModelAsimple10");
+	            config.setDefaultSrsAuthority("EPSG");
+	            config.setDefaultSrsCode("21781");
 	    		Ili2db.readSettingsFromDb(config);
 	    		Ili2db.run(config,null);
 	        }
@@ -663,6 +718,8 @@ public class TranslationTest {
 	        	File data=new File(TEST_OUT,"ModelBsimple10a.itf");
 	    		Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 	    		config.setFunction(Config.FC_IMPORT);
+                config.setImportTid(true);
+                config.setImportBid(true);
 	    		config.setDatasetName("ModelBsimple10");
 	    		Ili2db.readSettingsFromDb(config);
 	    		Ili2db.run(config,null);
@@ -680,13 +737,13 @@ public class TranslationTest {
  				Assert.assertEquals("SRID=21781;COMPOUNDCURVE((480000 70000,480010 70000,480010 70010,480000 70010,480000 70000))",rs.getString(1));
  			}
  			// bid's of classa and classb are created
- 			Assert.assertTrue(stmt.execute("SELECT t_ili2db_basket.t_id, t_ili2db_basket.topic FROM "+DBSCHEMA+".t_ili2db_basket WHERE t_ili2db_basket.t_id = 3"));
+ 			Assert.assertTrue(stmt.execute("SELECT t_ili2db_basket.t_id, t_ili2db_basket.topic FROM "+DBSCHEMA+".t_ili2db_basket WHERE t_ili2db_basket.t_ili_tid = 'ModelAsimple10.TopicA'"));
  			{
  				ResultSet rs=stmt.getResultSet();
  				Assert.assertTrue(rs.next());
  				Assert.assertEquals("ModelAsimple10.TopicA",rs.getString(2));
  			}
- 			Assert.assertTrue(stmt.execute("SELECT t_ili2db_basket.t_id, t_ili2db_basket.topic FROM "+DBSCHEMA+".t_ili2db_basket WHERE t_ili2db_basket.t_id = 16"));
+ 			Assert.assertTrue(stmt.execute("SELECT t_ili2db_basket.t_id, t_ili2db_basket.topic FROM "+DBSCHEMA+".t_ili2db_basket WHERE t_ili2db_basket.t_ili_tid = 'ModelBsimple10.TopicB'"));
  			{
  				ResultSet rs=stmt.getResultSet();
  				Assert.assertTrue(rs.next());
@@ -707,7 +764,7 @@ public class TranslationTest {
 			importItf10lineTable();
 		}
 		try{
-			EhiLogger.getInstance().setTraceFilter(false);
+			//EhiLogger.getInstance().setTraceFilter(false);
 	        Class driverClass = Class.forName("org.postgresql.Driver");
 	        jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
 	        Statement stmt=jdbcConnection.createStatement();
@@ -715,6 +772,7 @@ public class TranslationTest {
 	        	File data=new File(TEST_OUT,"ModelAsimple10a-out.itf");
 	    		Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 	    		config.setFunction(Config.FC_EXPORT);
+	    		config.setExportTid(true);
 	    		config.setDatasetName("ModelAsimple10");
 	    		Ili2db.readSettingsFromDb(config);
 	    		Ili2db.run(config,null);
@@ -819,6 +877,7 @@ public class TranslationTest {
 	        	File data=new File(TEST_OUT,"ModelBsimple10a-out.itf");
 	    		Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 	    		config.setFunction(Config.FC_EXPORT);
+                config.setExportTid(true);
 	    		config.setDatasetName("ModelBsimple10");
 	    		Ili2db.readSettingsFromDb(config);
 	    		Ili2db.run(config,null);

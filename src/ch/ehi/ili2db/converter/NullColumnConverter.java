@@ -237,13 +237,34 @@ public class NullColumnConverter implements SqlColumnConverter {
 	public void setArrayNull(PreparedStatement ps, int parameterIndex) throws SQLException {
 	}
 	@Override
-	public Object fromIomArray(AttributeDef iliEleAttr, String[] iomValues, EnumCodeMapper enumTypes)
+	public Object fromIomArray(AttributeDef iliEleAttr, String[] iomValues, boolean isEnumInt)
 			throws SQLException, ConverterException {
 		return null;
 	}
 	@Override
-	public String[] toIomArray(AttributeDef iliEleAttr, Object sqlArray, EnumCodeMapper enumTypes)
+	public String[] toIomArray(AttributeDef iliEleAttr, Object sqlArray, boolean isEnumInt)
 			throws SQLException, ConverterException {
 		return null;
 	}
+    @Override
+    public String getSelectValueWrapperJson(String sqlColName) {
+        return null;
+    }
+    @Override
+    public String getInsertValueWrapperJson(String sqlColName) {
+        return null;
+    }
+    @Override
+    public void setJsonNull(PreparedStatement ps, int parameterIndex) throws SQLException {
+    }
+    @Override
+    public Object fromIomStructureToJson(AttributeDef iliEleAttr, IomObject[] iomValues)
+            throws SQLException, ConverterException {
+        return null;
+    }
+    @Override
+    public IomObject[] toIomStructureFromJson(AttributeDef iliEleAttr, Object sqlArray)
+            throws SQLException, ConverterException {
+        return null;
+    }
 }

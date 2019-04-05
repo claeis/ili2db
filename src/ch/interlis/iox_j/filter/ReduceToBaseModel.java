@@ -194,6 +194,11 @@ public class ReduceToBaseModel implements IoxFilter {
 			// no translation required
 			return;
 		}
+		if(isForeignElement(modelElement)) {
+		    // STRUCTURE of a other model (such as a Catalog.Item)
+            // no translation required
+            return;
+		}
 		Viewable aclass=(Viewable)modelElement;
 		Viewable destClass=(Viewable)destModelEle;
 		String destName=destClass.getScopedName();
@@ -227,6 +232,11 @@ public class ReduceToBaseModel implements IoxFilter {
 		Element destEle=(Element)srctag2destElement.get(modelElement.getScopedName());
 		return destEle;
 	}
+    private boolean isForeignElement(Element modelElement) {
+        // a mapping from a scopedName to null means: remove element
+        // therefore test if map contains scopedName as key to check if modelElement is from the current topic
+        return !srctag2destElement.containsKey(modelElement.getScopedName());
+    }
 
 	private void translateAttrValue(IomObject iomObj, AttributeDef srcAttr) {
 		String srcAttrName=srcAttr.getName();

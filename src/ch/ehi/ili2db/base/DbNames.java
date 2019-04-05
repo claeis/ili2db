@@ -6,6 +6,7 @@ public class DbNames {
 	public static final String BASKETS_TAB_TOPIC_COL="topic";
 	public static final String BASKETS_TAB_DATASET_COL="dataset";
 	public static final String BASKETS_TAB_ATTACHMENT_KEY_COL="attachmentKey";
+    public static final String BASKETS_TAB_DOMAINS_COL="domains";
 	public static final String DATASETS_TAB="T_ILI2DB_DATASET";
 	public static final String DATASETS_TAB_DATASETNAME="datasetName";
 	public static final int DATASETNAME_COL_SIZE=200;
@@ -50,7 +51,7 @@ public class DbNames {
 	public static final String T_PARENT_TYPE_COL = "T_ParentType";
 	public static final String T_PARENT_ID_COL = "T_ParentId";
 	public static final String MODELS_TAB="T_ILI2DB_MODEL";
-	public static final String MODELS_TAB_FILE_COL="file";
+	public static final String MODELS_TAB_FILENAME_COL="filename";
 	public static final String MODELS_TAB_ILIVERSION_COL="iliversion";
 	public static final String MODELS_TAB_MODELNAME_COL="modelName";
 	public static final String MODELS_TAB_CONTENT_COL="content";
@@ -58,6 +59,7 @@ public class DbNames {
 	public static final String SETTINGS_TAB="T_ILI2DB_SETTINGS";
 	public static final String SETTINGS_TAB_TAG_COL="tag";
 	public static final String SETTINGS_TAB_SETTING_COL="setting";
+    public static final int SETTING_COL_SIZE=1024;
 	public static final String INHERIT_TAB="T_ILI2DB_INHERITANCE";
 	public static final String INHERIT_TAB_THIS_COL="thisClass";
 	public static final String INHERIT_TAB_BASE_COL="baseClass";
@@ -70,7 +72,7 @@ public class DbNames {
 	public static final String IMPORTS_TAB_STARTTID_COL="start_t_id";
 	public static final String IMPORTS_TAB_ENDTID_COL="end_t_id";
 	public static final String IMPORTS_BASKETS_TAB="T_ILI2DB_IMPORT_BASKET";
-	public static final String IMPORTS_BASKETS_TAB_IMPORT_COL="import";
+	public static final String IMPORTS_BASKETS_TAB_IMPORTRUN_COL="importrun";
 	public static final String IMPORTS_BASKETS_TAB_BASKET_COL="basket";
 	public static final String IMPORTS_OBJECTS_TAB="T_ILI2DB_IMPORT_OBJECT";
 	public static final String IMPORTS_OBJECTS_TAB_CLASS_COL="class";
@@ -79,7 +81,7 @@ public class DbNames {
 	public static final String CLASSNAME_TAB_ILINAME_COL="IliName";
 	public static final String CLASSNAME_TAB_SQLNAME_COL="SqlName";
 	public static final String ATTRNAME_TAB="T_ILI2DB_ATTRNAME";
-	public static final String ATTRNAME_TAB_OWNER_COL="Owner";
+	public static final String ATTRNAME_TAB_COLOWNER_COL="ColOwner";
 	public static final String ATTRNAME_TAB_TARGET_COL="Target";
 	public static final String ATTRNAME_TAB_ILINAME_COL="IliName";
 	public static final String ATTRNAME_TAB_SQLNAME_COL="SqlName";

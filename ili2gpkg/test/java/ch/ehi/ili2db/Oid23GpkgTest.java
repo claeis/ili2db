@@ -33,13 +33,14 @@ public class Oid23GpkgTest {
         jdbcConnection = DriverManager.getConnection("jdbc:sqlite:"+GPKGFILENAME, null, null);
         stmt=jdbcConnection.createStatement();
 	}
-	
+		
     @Before
     public void setupJdbc() throws Exception
     {
         Class driverClass = Class.forName("org.sqlite.JDBC");
     }
-	@After
+
+    @After
 	public void endDb() throws Exception
 	{
 		if(jdbcConnection!=null){
@@ -81,6 +82,26 @@ public class Oid23GpkgTest {
 		config.setInheritanceTrafo(null);
 		Ili2db.readSettingsFromDb(config);
 		Ili2db.run(config,null);
+		initDb();
+        {
+            // t_ili2db_attrname
+            String [][] expectedValues=new String[][] {
+                {"Oid1.TestC.ac.a", "a", "classc1", "classa1"},
+            };
+            Ili2dbAssert.assertAttrNameTableFromGpkg(jdbcConnection, expectedValues);
+        }
+        {
+            // t_ili2db_trafo
+            String [][] expectedValues=new String[][] {
+                {"Oid1.TestA.ClassA1b", "ch.ehi.ili2db.inheritance", "newClass"},
+                {"Oid1.TestA.ClassB1b", "ch.ehi.ili2db.inheritance", "newClass"},
+                {"Oid1.TestC.ac", "ch.ehi.ili2db.inheritance", "embedded"},
+                {"Oid1.TestC.ClassC1", "ch.ehi.ili2db.inheritance", "newClass"},
+                {"Oid1.TestA.ClassB1", "ch.ehi.ili2db.inheritance", "newClass"},
+                {"Oid1.TestA.ClassA1", "ch.ehi.ili2db.inheritance", "newClass"},
+            };
+            Ili2dbAssert.assertTrafoTableFromGpkg(jdbcConnection, expectedValues);
+        }
 	}
 	
 	@Test
@@ -94,6 +115,7 @@ public class Oid23GpkgTest {
     		File data=new File(TEST_OUT,"Oid1a.xtf");
     		Config config=initConfig(data.getPath(),data.getPath()+".log");
     		config.setFunction(Config.FC_IMPORT);
+            config.setDoImplicitSchemaImport(true);
     		config.setCreateFk(config.CREATE_FK_YES);
     		config.setTidHandling(Config.TID_HANDLING_PROPERTY);
     		config.setBasketHandling(config.BASKET_HANDLING_READWRITE);
@@ -107,10 +129,11 @@ public class Oid23GpkgTest {
     		Ili2db.run(config,null);
         }
 		{
-			EhiLogger.getInstance().setTraceFilter(false);
+			//EhiLogger.getInstance().setTraceFilter(false);
 			File data=new File(TEST_OUT,"Oid1c.xtf");
 			Config config=initConfig(data.getPath(),data.getPath()+".log");
 			config.setFunction(Config.FC_IMPORT);
+			config.setImportTid(true); // import unstable TIDs from ClassC1
     		config.setValidation(false);
             config.setImportBid(true);
 			Ili2db.readSettingsFromDb(config);
@@ -124,17 +147,11 @@ public class Oid23GpkgTest {
 		{
 			importXtf();
 		}
-		EhiLogger.getInstance().setTraceFilter(false);
+		//EhiLogger.getInstance().setTraceFilter(false);
 		File data=new File(TEST_OUT,"Oid1a-out.xtf");
 		Config config=initConfig(data.getPath(),data.getPath()+".log");
 		config.setFunction(Config.FC_EXPORT);
-		config.setCreateFk(config.CREATE_FK_YES);
-		config.setTidHandling(Config.TID_HANDLING_PROPERTY);
-		config.setBasketHandling(config.BASKET_HANDLING_READWRITE);
-		config.setCatalogueRefTrafo(null);
-		config.setMultiSurfaceTrafo(null);
-		config.setMultilingualTrafo(null);
-		config.setInheritanceTrafo(null);
+        config.setExportTid(true); // export unstable TIDs from ClassC1
 		config.setBaskets("Oid1.TestC");
 		Ili2db.readSettingsFromDb(config);
 		Ili2db.run(config,null);

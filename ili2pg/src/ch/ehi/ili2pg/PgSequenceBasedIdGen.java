@@ -79,25 +79,27 @@ public class PgSequenceBasedIdGen implements DbIdGen {
 			((GeneratorJdbc) gen).addCreateLine(((GeneratorJdbc) gen).new Stmt(stmt));
 			((GeneratorJdbc) gen).addDropLine(((GeneratorJdbc) gen).new Stmt("DROP SEQUENCE "+sqlName.getQName()+";"));
 		}
-		if(DbUtility.sequenceExists(conn,sqlName)){
-			return;
+		if(conn!=null) {
+	        if(DbUtility.sequenceExists(conn,sqlName)){
+	            return;
+	        }
+	        EhiLogger.traceBackendCmd(stmt);
+	        java.sql.PreparedStatement updstmt = null;
+	        try{
+	            updstmt = conn.prepareStatement(stmt);
+	            updstmt.execute();
+	        }catch(java.sql.SQLException ex){
+	            EhiLogger.logError("failed to create sequence "+sqlName.getQName(),ex);
+	        }finally{
+	            if(updstmt!=null){
+	                try{
+	                    updstmt.close();
+	                }catch(java.sql.SQLException ex){
+	                    EhiLogger.logError(ex);
+	                }
+	            }
+	        }       
 		}
-		EhiLogger.traceBackendCmd(stmt);
-		java.sql.PreparedStatement updstmt = null;
-		try{
-			updstmt = conn.prepareStatement(stmt);
-			updstmt.execute();
-		}catch(java.sql.SQLException ex){
-			EhiLogger.logError("failed to create sequence "+sqlName.getQName(),ex);
-		}finally{
-			if(updstmt!=null){
-				try{
-					updstmt.close();
-				}catch(java.sql.SQLException ex){
-					EhiLogger.logError(ex);
-				}
-			}
-		}		
 	}
 	/** gets a new obj id.
 	 */

@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TRANSFER xmlns="http://www.interlis.ch/INTERLIS2.3">
+	<HEADERSECTION SENDER="ili2pg-2.5.0-20151209" VERSION="2.3">
+		<MODELS>
+			<MODEL NAME="Units" VERSION="2012-02-20" URI="http://www.interlis.ch/models"></MODEL>
+			<MODEL NAME="CoordSys" VERSION="2005-06-16" URI="http://www.interlis.ch/models"></MODEL>
+			<MODEL NAME="GeometryCHLV03_V1" VERSION="2015-02-20" URI="http://www.geo.admin.ch"></MODEL>
+			<MODEL NAME="GeometryCHLV95_V1" VERSION="2015-02-20" URI="http://www.geo.admin.ch"></MODEL>
+			<MODEL NAME="MultiSurface1" VERSION="2015-12-03" URI="mailto:ce@eisenhutinformatik.ch"></MODEL>
+		</MODELS>
+	</HEADERSECTION>
+	<DATASECTION>
+		<MultiSurface1.TestA BID="MultiSurface1.TestA">
+			<MultiSurface1.TestA.ClassA1 TID="o1">
+				<geom>
+					<GeometryCHLV03_V1.MultiSurface>
+						<Surfaces>
+							<GeometryCHLV03_V1.SurfaceStructure>
+							</GeometryCHLV03_V1.SurfaceStructure>
+						</Surfaces>
+					</GeometryCHLV03_V1.MultiSurface>
+				</geom>
+			</MultiSurface1.TestA.ClassA1>
+		</MultiSurface1.TestA>
+	</DATASECTION>
+</TRANSFER>

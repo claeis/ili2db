@@ -85,6 +85,7 @@ public class Dataset23Smart1Test {
 					Config config=initConfig(data.getPath(),null,data.getPath()+".log");
 					config.setDatasetName(DATASETNAME_A);
 					config.setFunction(Config.FC_IMPORT);
+			        config.setDoImplicitSchemaImport(true);
 					config.setCreateFk(config.CREATE_FK_YES);
 					config.setBasketHandling(config.BASKET_HANDLING_READWRITE);
 					config.setCatalogueRefTrafo(null);
@@ -112,7 +113,7 @@ public class Dataset23Smart1Test {
 	@Test
 	public void importNoDatasetName() throws Exception
 	{
-		EhiLogger.getInstance().setTraceFilter(false);
+		//EhiLogger.getInstance().setTraceFilter(false);
 		Connection jdbcConnection=null;
 		try{
 		    File fgdbFile=new File(fgdbFileName);
@@ -127,6 +128,7 @@ public class Dataset23Smart1Test {
 					Config config=initConfig(data.getPath(),null,data.getPath()+".log");
 					config.setDatasetName(null);
 					config.setFunction(Config.FC_IMPORT);
+			        config.setDoImplicitSchemaImport(true);
 					config.setCreateFk(config.CREATE_FK_YES);
 					config.setBasketHandling(config.BASKET_HANDLING_READWRITE);
 					config.setBasketHandling(null);

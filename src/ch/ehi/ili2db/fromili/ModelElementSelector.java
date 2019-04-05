@@ -45,7 +45,7 @@ public class ModelElementSelector {
 		HashSet<Element> accu=new HashSet<Element>();
 		HashSet<Model> accuScope=new HashSet<Model>();
 		for(Model model:models){
-			if(config.getVer4_translation() || config.getIli1Translation()!=null){
+			if(!config.isVer3_translation() || config.getIli1Translation()!=null){
 				visitModel(accu,accuScope,(Model)model.getTranslationOfOrSame());
 			}else{
 				visitModel(accu,accuScope,model);
@@ -73,7 +73,7 @@ public class ModelElementSelector {
 		Iterator<Model> modeli=accuScope.iterator();
 		while(modeli.hasNext()){
 			Model scope=modeli.next();
-			if(config.getVer4_translation() || config.getIli1Translation()!=null){
+			if(!config.isVer3_translation() || config.getIli1Translation()!=null){
 				scope=(Model)scope.getTranslationOfOrSame();
 			}
 			Iterator topici=scope.iterator();

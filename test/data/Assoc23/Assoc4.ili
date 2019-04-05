@@ -1,0 +1,38 @@
+INTERLIS 2.3;
+
+MODEL Assoc4
+  AT "mailto:ce@eisenhutinformatik.ch" VERSION "2019-02-04" =
+    
+  TOPIC Test =
+  
+    CLASS ClassA1 =
+    END ClassA1;
+    CLASS ClassA1p EXTENDS ClassA1 =
+    END ClassA1p;
+
+    CLASS ClassB1 =
+    END ClassB1;
+    CLASS ClassB1p EXTENDS ClassB1 =
+    END ClassB1p;
+
+    ASSOCIATION assocab0 =
+      a0 -- {0..1} ClassA1;
+      b0 -- {0..*} ClassB1;
+    END assocab0;
+    
+    ASSOCIATION assocab1 =
+      a1 -- {0..1} ClassA1;
+      b1 -- {0..*} ClassB1;
+      attrA1 : TEXT*20;
+    END assocab1;
+    
+    ASSOCIATION assocab2 =
+      a2 -- {0..1} ClassA1;
+      b2 -- {0..*} ClassB1;
+    END assocab2;  
+    ASSOCIATION assocab2p EXTENDS assocab2 =
+      attrA2 : TEXT*20;
+    END assocab2p;  
+
+  END Test;
+END Assoc4.

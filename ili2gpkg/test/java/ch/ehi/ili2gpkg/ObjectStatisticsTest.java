@@ -9,6 +9,7 @@ import org.junit.Test;
 
 import ch.ehi.basics.logging.EhiLogger;
 import ch.ehi.basics.logging.LogEvent;
+import ch.ehi.ili2db.LogCollector;
 import ch.ehi.ili2db.base.Ili2db;
 import ch.ehi.ili2db.gui.Config;
 
@@ -62,13 +63,15 @@ public class ObjectStatisticsTest {
                     Config config = initConfig(data.getPath(), null, data.getPath() + ".log", gpkgFileName);
                     config.setDatasetName(DATASETNAME_A);
                     config.setFunction(Config.FC_IMPORT);
-                    config.setCreateFk(config.CREATE_FK_YES);
-                    config.setBasketHandling(config.BASKET_HANDLING_READWRITE);
+                    config.setDoImplicitSchemaImport(true);
+                    config.setCreateFk(Config.CREATE_FK_YES);
+                    config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
                     config.setCatalogueRefTrafo(null);
                     config.setMultiSurfaceTrafo(null);
                     config.setMultilingualTrafo(null);
                     config.setImportBid(true);
-                    config.setInheritanceTrafo(config.INHERITANCE_TRAFO_SMART1);
+                    config.setInheritanceTrafo(Config.INHERITANCE_TRAFO_SMART1);
+                    config.setCreateImportTabs(true);
                     Ili2db.readSettingsFromDb(config);
                     config.setValidation(false);
                     try {

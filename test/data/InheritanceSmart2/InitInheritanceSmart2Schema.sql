@@ -9,6 +9,7 @@ CREATE TABLE InheritanceSmart2.T_ILI2DB_BASKET (
   ,topic varchar(200) NOT NULL
   ,T_Ili_Tid varchar(200) NULL
   ,attachmentKey varchar(200) NOT NULL
+  ,domains varchar(1024) NULL
 )
 ;
 CREATE TABLE InheritanceSmart2.T_ILI2DB_TRAFO (
@@ -56,7 +57,7 @@ CREATE TABLE InheritanceSmart2.T_ILI2DB_IMPORT (
 ;
 COMMENT ON TABLE InheritanceSmart2.T_ILI2DB_IMPORT IS 'DEPRECATED, do not use';
 CREATE TABLE InheritanceSmart2.T_ILI2DB_MODEL (
-  file varchar(250) NOT NULL
+  filename varchar(250) NOT NULL
   ,iliversion varchar(3) NOT NULL
   ,modelName text NOT NULL
   ,content text NOT NULL
@@ -86,9 +87,9 @@ COMMENT ON COLUMN InheritanceSmart2.classa3c.attra3 IS '@iliname attrA3';
 CREATE TABLE InheritanceSmart2.T_ILI2DB_ATTRNAME (
   IliName varchar(1024) NOT NULL
   ,SqlName varchar(1024) NOT NULL
-  ,Owner varchar(1024) NOT NULL
+  ,ColOwner varchar(1024) NOT NULL
   ,Target varchar(1024) NULL
-  ,PRIMARY KEY (SqlName,Owner)
+  ,PRIMARY KEY (SqlName,ColOwner)
 )
 ;
 CREATE TABLE InheritanceSmart2.T_ILI2DB_IMPORT_OBJECT (
@@ -124,7 +125,7 @@ CREATE TABLE InheritanceSmart2.T_ILI2DB_SETTINGS (
 ;
 CREATE TABLE InheritanceSmart2.T_ILI2DB_IMPORT_BASKET (
   T_Id bigint PRIMARY KEY
-  ,import bigint NOT NULL
+  ,importrun bigint NOT NULL
   ,basket bigint NOT NULL
   ,objectCount integer NULL
   ,start_t_id bigint NULL
@@ -140,7 +141,7 @@ ALTER TABLE InheritanceSmart2.classb ADD CONSTRAINT classb_a_classa3c FOREIGN KE
 ALTER TABLE InheritanceSmart2.T_ILI2DB_MODEL ADD CONSTRAINT T_ILI2DB_MODEL_iliversion_modelName UNIQUE (iliversion,modelName)
 ;
 ALTER TABLE InheritanceSmart2.classa3c ADD CONSTRAINT classa3c_T_basket FOREIGN KEY ( T_basket ) REFERENCES InheritanceSmart2.T_ILI2DB_BASKET DEFERRABLE INITIALLY DEFERRED;
-ALTER TABLE InheritanceSmart2.T_ILI2DB_ATTRNAME ADD CONSTRAINT T_ILI2DB_ATTRNAME_SqlName_Owner UNIQUE (SqlName,Owner)
+ALTER TABLE InheritanceSmart2.T_ILI2DB_ATTRNAME ADD CONSTRAINT T_ILI2DB_ATTRNAME_SqlName_Owner UNIQUE (SqlName,ColOwner)
 ;
 ALTER TABLE InheritanceSmart2.aa2bb ADD CONSTRAINT aa2bb_T_basket FOREIGN KEY ( T_basket ) REFERENCES InheritanceSmart2.T_ILI2DB_BASKET DEFERRABLE INITIALLY DEFERRED;
 ALTER TABLE InheritanceSmart2.aa2bb ADD CONSTRAINT aa2bb_aa_classa3b FOREIGN KEY ( aa_classa3b ) REFERENCES InheritanceSmart2.classa3b DEFERRABLE INITIALLY DEFERRED;
@@ -148,7 +149,7 @@ ALTER TABLE InheritanceSmart2.aa2bb ADD CONSTRAINT aa2bb_aa_classa3c FOREIGN KEY
 ALTER TABLE InheritanceSmart2.aa2bb ADD CONSTRAINT aa2bb_bb FOREIGN KEY ( bb ) REFERENCES InheritanceSmart2.classb DEFERRABLE INITIALLY DEFERRED;
 ALTER TABLE InheritanceSmart2.T_ILI2DB_DATASET ADD CONSTRAINT T_ILI2DB_DATASET_datasetName UNIQUE (datasetName)
 ;
-ALTER TABLE InheritanceSmart2.T_ILI2DB_IMPORT_BASKET ADD CONSTRAINT T_ILI2DB_IMPORT_BASKET_import FOREIGN KEY ( import ) REFERENCES InheritanceSmart2.T_ILI2DB_IMPORT DEFERRABLE INITIALLY DEFERRED;
+ALTER TABLE InheritanceSmart2.T_ILI2DB_IMPORT_BASKET ADD CONSTRAINT T_ILI2DB_IMPORT_BASKET_import FOREIGN KEY ( importrun ) REFERENCES InheritanceSmart2.T_ILI2DB_IMPORT DEFERRABLE INITIALLY DEFERRED;
 ALTER TABLE InheritanceSmart2.T_ILI2DB_IMPORT_BASKET ADD CONSTRAINT T_ILI2DB_IMPORT_BASKET_basket FOREIGN KEY ( basket ) REFERENCES InheritanceSmart2.T_ILI2DB_BASKET DEFERRABLE INITIALLY DEFERRED;
 
 

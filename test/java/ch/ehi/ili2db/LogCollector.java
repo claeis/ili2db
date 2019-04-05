@@ -1,4 +1,4 @@
-package ch.ehi.ili2gpkg;
+package ch.ehi.ili2db;
 
 import java.util.ArrayList;
 

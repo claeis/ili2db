@@ -40,9 +40,6 @@ public class PgCustomStrategy extends AbstractJdbcMapping {
 			String targetPk) {
 	}
 
-	@Override
-	public void preConnect(String url, String dbusr, String dbpwd, Config config) {
-	}
 	private final static String[] pgExtensions = new String[]{
 			"postgis", "\"uuid-ossp\""
 	};

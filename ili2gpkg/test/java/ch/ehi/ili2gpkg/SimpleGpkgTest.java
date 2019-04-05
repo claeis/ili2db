@@ -1,16 +1,21 @@
 package ch.ehi.ili2gpkg;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
+
 import java.io.File;
 import java.sql.Connection;
+import java.sql.DriverManager;
+import java.util.HashMap;
+
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
 import ch.ehi.basics.logging.EhiLogger;
+import ch.ehi.ili2db.LogCollector;
 import ch.ehi.ili2db.base.Ili2db;
 import ch.ehi.ili2db.gui.Config;
+import ch.ehi.sqlgen.DbUtility;
 import ch.interlis.iom.IomObject;
 import ch.interlis.iom_j.xtf.XtfReader;
 import ch.interlis.iox.EndBasketEvent;
@@ -24,13 +29,14 @@ public class SimpleGpkgTest {
 	
 	private static final String TEST_OUT="test/data/Simple/";
     private static final String GPKGFILENAME=TEST_OUT+"Simple.gpkg";
+    private static final String DBURL="jdbc:sqlite:"+GPKGFILENAME;
 	private Connection jdbcConnection=null;
 	
 	public Config initConfig(String xtfFilename,String logfile) {
 		Config config=new Config();
 		new ch.ehi.ili2gpkg.GpkgMain().initConfig(config);
 		config.setDbfile(GPKGFILENAME);
-		config.setDburl("jdbc:sqlite:"+GPKGFILENAME);
+		config.setDburl(DBURL);
 		if(logfile!=null){
 			config.setLogfile(logfile);
 		}
@@ -70,6 +76,58 @@ public class SimpleGpkgTest {
 		config.setInheritanceTrafo(null);
 		Ili2db.run(config,null);
 	}
+    @Test
+    public void createScriptFromIliCoord() throws Exception
+    {
+        File data=new File(TEST_OUT,"SimpleCoord23.ili");
+        File outfile=new File(data.getPath()+"-out.sql");
+        Config config=new Config();
+        new ch.ehi.ili2gpkg.GpkgMain().initConfig(config);
+        config.setLogfile(data.getPath()+".log");
+        config.setXtffile(data.getPath());
+        config.setFunction(Config.FC_SCRIPT);
+        config.setCreateFk(config.CREATE_FK_YES);
+        config.setCreateNumChecks(true);
+        config.setTidHandling(Config.TID_HANDLING_PROPERTY);
+        config.setBasketHandling(config.BASKET_HANDLING_READWRITE);
+        config.setCreateMetaInfo(true);
+        config.setCreateEnumDefs(Config.CREATE_ENUM_DEFS_MULTI_WITH_ID);
+        config.setCatalogueRefTrafo(null);
+        config.setMultiSurfaceTrafo(null);
+        config.setMultilingualTrafo(null);
+        config.setInheritanceTrafo(null);
+        config.setCreatescript(outfile.getPath());
+        Ili2db.run(config,null);
+        
+        // verify generated script
+        {
+            config.setDbfile(GPKGFILENAME);
+            config.setDburl(DBURL);
+            // create gpkg file
+            File gpkgFile=new File(GPKGFILENAME);
+            if(gpkgFile.exists()){ 
+                File file = new File(gpkgFile.getAbsolutePath());
+                file.delete();
+            }
+            
+            GpkgMapping gpkgMapping=new GpkgMapping();
+            gpkgMapping.preConnect(DBURL,null,null,config);
+            jdbcConnection = DriverManager.getConnection(DBURL, null, null);
+            gpkgMapping.postConnect(jdbcConnection, config);
+            
+            // execute generated script
+            DbUtility.executeSqlScript(jdbcConnection, new java.io.FileReader(outfile));
+
+            // rum import without schema generation
+            data=new File(TEST_OUT,"SimpleCoord23a.xtf");
+            config.setXtffile(data.getPath());
+            config.setFunction(Config.FC_IMPORT);
+            config.setDoImplicitSchemaImport(false);
+            config.setCreatescript(null);
+            Ili2db.run(config,null);
+            
+        }
+    }
 	
 	@Test
 	public void importIliStruct() throws Exception
@@ -142,7 +200,7 @@ public class SimpleGpkgTest {
 	@Test
 	public void importXtf() throws Exception
 	{
-		EhiLogger.getInstance().setTraceFilter(false);
+		//EhiLogger.getInstance().setTraceFilter(false);
 	    File gpkgFile=new File(GPKGFILENAME);
 	    if (gpkgFile.exists()) {
             File file = new File(gpkgFile.getAbsolutePath());
@@ -151,9 +209,9 @@ public class SimpleGpkgTest {
 		File data=new File(TEST_OUT,"Simple23a.xtf");
 		Config config=initConfig(data.getPath(),data.getPath()+".log");
 		config.setFunction(Config.FC_IMPORT);
+        config.setDoImplicitSchemaImport(true);
 		config.setCreateFk(config.CREATE_FK_YES);
 		config.setCreateNumChecks(true);
-		config.setTidHandling(Config.TID_HANDLING_PROPERTY);
 		config.setBasketHandling(config.BASKET_HANDLING_READWRITE);
 		config.setCatalogueRefTrafo(null);
 		config.setMultiSurfaceTrafo(null);
@@ -170,7 +228,7 @@ public class SimpleGpkgTest {
 	@Test
 	public void importXtfStruct() throws Exception
 	{
-		EhiLogger.getInstance().setTraceFilter(false);
+		//EhiLogger.getInstance().setTraceFilter(false);
 	    File gpkgFile=new File(GPKGFILENAME);
         if (gpkgFile.exists()) {
             File file = new File(gpkgFile.getAbsolutePath());
@@ -179,9 +237,11 @@ public class SimpleGpkgTest {
 		File data=new File(TEST_OUT,"SimpleStruct23a.xtf");
 		Config config=initConfig(data.getPath(),data.getPath()+".log");
 		config.setFunction(Config.FC_IMPORT);
+        config.setDoImplicitSchemaImport(true);
 		config.setCreateFk(config.CREATE_FK_YES);
 		config.setCreateNumChecks(true);
 		config.setTidHandling(Config.TID_HANDLING_PROPERTY);
+		config.setImportTid(true);
 		config.setBasketHandling(config.BASKET_HANDLING_READWRITE);
 		config.setCatalogueRefTrafo(null);
 		config.setMultiSurfaceTrafo(null);
@@ -198,7 +258,7 @@ public class SimpleGpkgTest {
 	@Test
 	public void importXtfInheritanceNewClass() throws Exception
 	{
-		EhiLogger.getInstance().setTraceFilter(false);
+		//EhiLogger.getInstance().setTraceFilter(false);
 	    File gpkgFile=new File(GPKGFILENAME);
         if (gpkgFile.exists()) {
             File file = new File(gpkgFile.getAbsolutePath());
@@ -207,6 +267,7 @@ public class SimpleGpkgTest {
 		File data=new File(TEST_OUT,"SimpleInheritance23a.xtf");
 		Config config=initConfig(data.getPath(),data.getPath()+".log");
 		config.setFunction(Config.FC_IMPORT);
+        config.setDoImplicitSchemaImport(true);
 		config.setCreateFk(config.CREATE_FK_YES);
 		config.setCreateNumChecks(true);
 		config.setTidHandling(Config.TID_HANDLING_PROPERTY);
@@ -226,7 +287,7 @@ public class SimpleGpkgTest {
 	@Test
 	public void importXtfInheritanceSmart1() throws Exception
 	{
-		EhiLogger.getInstance().setTraceFilter(false);
+		//EhiLogger.getInstance().setTraceFilter(false);
 	    File gpkgFile=new File(GPKGFILENAME);
         if (gpkgFile.exists()) {
             File file = new File(gpkgFile.getAbsolutePath());
@@ -235,6 +296,7 @@ public class SimpleGpkgTest {
 		File data=new File(TEST_OUT,"SimpleInheritance23a.xtf");
 		Config config=initConfig(data.getPath(),data.getPath()+".log");
 		config.setFunction(Config.FC_IMPORT);
+        config.setDoImplicitSchemaImport(true);
 		config.setCreateFk(config.CREATE_FK_YES);
 		config.setCreateNumChecks(true);
 		config.setTidHandling(Config.TID_HANDLING_PROPERTY);
@@ -254,7 +316,7 @@ public class SimpleGpkgTest {
 	@Test
 	public void importXtfInheritanceSmart2() throws Exception
 	{
-		EhiLogger.getInstance().setTraceFilter(false);
+		//EhiLogger.getInstance().setTraceFilter(false);
 	    File gpkgFile=new File(GPKGFILENAME);
         if (gpkgFile.exists()) {
             File file = new File(gpkgFile.getAbsolutePath());
@@ -263,9 +325,11 @@ public class SimpleGpkgTest {
 		File data=new File(TEST_OUT,"SimpleInheritance23a.xtf");
 		Config config=initConfig(data.getPath(),data.getPath()+".log");
 		config.setFunction(Config.FC_IMPORT);
+        config.setDoImplicitSchemaImport(true);
 		config.setCreateFk(config.CREATE_FK_YES);
 		config.setCreateNumChecks(true);
 		config.setTidHandling(Config.TID_HANDLING_PROPERTY);
+		config.setImportTid(true);
 		config.setBasketHandling(config.BASKET_HANDLING_READWRITE);
 		config.setCatalogueRefTrafo(null);
 		config.setMultiSurfaceTrafo(null);
@@ -282,7 +346,7 @@ public class SimpleGpkgTest {
 	@Test
 	public void importXtfCoord() throws Exception
 	{
-		EhiLogger.getInstance().setTraceFilter(false);
+		//EhiLogger.getInstance().setTraceFilter(false);
 	    File gpkgFile=new File(GPKGFILENAME);
         if (gpkgFile.exists()) {
             File file = new File(gpkgFile.getAbsolutePath());
@@ -291,9 +355,11 @@ public class SimpleGpkgTest {
 		File data=new File(TEST_OUT,"SimpleCoord23a.xtf");
 		Config config=initConfig(data.getPath(),data.getPath()+".log");
 		config.setFunction(Config.FC_IMPORT);
+        config.setDoImplicitSchemaImport(true);
 		config.setCreateFk(config.CREATE_FK_YES);
 		config.setCreateNumChecks(true);
 		config.setTidHandling(Config.TID_HANDLING_PROPERTY);
+		config.setImportTid(true);
 		config.setBasketHandling(config.BASKET_HANDLING_READWRITE);
 		config.setCatalogueRefTrafo(null);
 		config.setMultiSurfaceTrafo(null);
@@ -312,7 +378,7 @@ public class SimpleGpkgTest {
 	@Ignore("fails with Abort due to constraint violation (UNIQUE constraint failed: T_ILI2DB_SETTINGS.tag)")
 	public void importXtfWithDelete() throws Exception
 	{
-		EhiLogger.getInstance().setTraceFilter(false);
+		//EhiLogger.getInstance().setTraceFilter(false);
 	    File gpkgFile=new File(GPKGFILENAME);
 		File data=new File(TEST_OUT,"Simple23a.xtf");
 		Config config=initConfig(data.getPath(),data.getPath()+".log");
@@ -341,7 +407,7 @@ public class SimpleGpkgTest {
 		{
 			importXtf();
 		}
-		EhiLogger.getInstance().setTraceFilter(false);
+		//EhiLogger.getInstance().setTraceFilter(false);
 		File data=new File(TEST_OUT,"Simple23a-out.xtf");
 		Config config=initConfig(data.getPath(),data.getPath()+".log");
 		config.setFunction(Config.FC_EXPORT);
@@ -363,8 +429,6 @@ public class SimpleGpkgTest {
 			IomObject iomObj=((ObjectEvent)event).getIomObject();
 			int attrCount=iomObj.getattrcount();
 			assertEquals(1,attrCount);
-			String oid=iomObj.getobjectoid();
-			assertEquals("o1",oid);
 			String attrtag=iomObj.getobjecttag();
 			assertEquals("Simple23.TestA.ClassA1",attrtag);
 			{
@@ -375,6 +439,57 @@ public class SimpleGpkgTest {
 			assertTrue(reader.read() instanceof EndTransferEvent);
 		}
 	}
+    @Test
+    public void validateXtf() throws Exception
+    {
+        {
+            importXtf();
+        }
+        //EhiLogger.getInstance().setTraceFilter(false);
+        LogCollector logCollector = new LogCollector();
+        EhiLogger.getInstance().addListener(logCollector);
+        File log=new File(TEST_OUT,"Simple23a-validate.log");
+        Config config=initConfig(null,log.getPath());
+        config.setFunction(Config.FC_VALIDATE);
+        config.setModels("Simple23");
+        Ili2db.readSettingsFromDb(config);
+        try{
+            Ili2db.run(config,null);
+        }catch(Exception ex){
+            EhiLogger.logError(ex);
+            Assert.fail();
+        }
+    }
+    @Test
+    public void validateXtfFail() throws Exception
+    {
+        {
+            importXtf();
+        }
+        // modify data in db so that validation fails
+        {
+            jdbcConnection = DriverManager.getConnection(DBURL, null, null);
+            java.sql.Statement stmt=jdbcConnection.createStatement();
+            stmt.executeUpdate("UPDATE classa1 SET attr1='text with newline\n'");
+            stmt.close();
+            stmt=null;
+        }
+        //EhiLogger.getInstance().setTraceFilter(false);
+        LogCollector logCollector = new LogCollector();
+        EhiLogger.getInstance().addListener(logCollector);
+        File log=new File(TEST_OUT,"Simple23a-validate.log");
+        Config config=initConfig(null,log.getPath());
+        config.setFunction(Config.FC_VALIDATE);
+        config.setModels("Simple23");
+        Ili2db.readSettingsFromDb(config);
+        try{
+            Ili2db.run(config,null);
+            fail();
+        }catch(Exception ex){
+            assertEquals(1,logCollector.getErrs().size());
+            assertEquals("Attribute attr1 must not contain control characters",logCollector.getErrs().get(0).getEventMsg());
+        }
+    }
 	
 	@Test
 	public void exportXtfStruct() throws Exception
@@ -382,10 +497,11 @@ public class SimpleGpkgTest {
 		{
 			importXtfStruct();
 		}
-		EhiLogger.getInstance().setTraceFilter(false);
+		//EhiLogger.getInstance().setTraceFilter(false);
 		File data=new File(TEST_OUT,"SimpleStruct23a-out.xtf");
 		Config config=initConfig(data.getPath(),data.getPath()+".log");
 		config.setFunction(Config.FC_EXPORT);
+		config.setExportTid(true);
 		config.setModels("SimpleStruct23");
 		Ili2db.readSettingsFromDb(config);
 		try{
@@ -429,10 +545,11 @@ public class SimpleGpkgTest {
 		{
 			importXtfInheritanceSmart2();
 		}
-		EhiLogger.getInstance().setTraceFilter(false);
+		//EhiLogger.getInstance().setTraceFilter(false);
 		File data=new File(TEST_OUT,"SimpleInheritance23a-out.xtf");
 		Config config=initConfig(data.getPath(),data.getPath()+".log");
 		config.setFunction(Config.FC_EXPORT);
+		config.setExportTid(true);
 		config.setModels("SimpleInheritance23");
 		Ili2db.readSettingsFromDb(config);
 		try{
@@ -508,10 +625,11 @@ public class SimpleGpkgTest {
 		{
 			importXtfCoord();
 		}
-		EhiLogger.getInstance().setTraceFilter(false);
+		//EhiLogger.getInstance().setTraceFilter(false);
 		File data=new File(TEST_OUT,"SimpleCoord23a-out.xtf");
 		Config config=initConfig(data.getPath(),data.getPath()+".log");
 		config.setFunction(Config.FC_EXPORT);
+		config.setExportTid(true);
 		config.setModels("SimpleCoord23");
 		Ili2db.readSettingsFromDb(config);
 		try{

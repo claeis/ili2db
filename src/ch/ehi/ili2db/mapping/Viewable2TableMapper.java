@@ -1,11 +1,14 @@
 package ch.ehi.ili2db.mapping;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
 import ch.ehi.basics.logging.EhiLogger;
 import ch.ehi.ili2db.base.Ili2cUtility;
+import ch.ehi.ili2db.base.Ili2dbException;
+import ch.ehi.ili2db.fromili.TransferFromIli;
 import ch.ehi.ili2db.gui.Config;
 import ch.interlis.ili2c.metamodel.AbstractClassDef;
 import ch.interlis.ili2c.metamodel.AssociationDef;
@@ -27,7 +30,10 @@ public class Viewable2TableMapper {
 	private boolean coalesceMultiLine=false;
 	private boolean coalesceMultiPoint=false;
 	private boolean coalesceArray=false;
+    private boolean coalesceJson=false;
 	private boolean createItfLineTables=false;
+    private Integer defaultCrsCode=null;
+    private String srsModelAssignment=null;
 	private TransferDescription td=null;
 	private Viewable2TableMapper(Config config1,
 			TrafoConfig trafoConfig1, NameMapping nameMapping1) {	
@@ -35,20 +41,25 @@ public class Viewable2TableMapper {
 		trafoConfig=trafoConfig1;
 		nameMapping=nameMapping1;
 		sqlSchemaname=config.getDbschema();
+        if(config.getDefaultSrsCode()!=null) {
+            defaultCrsCode=Integer.parseInt(config.getDefaultSrsCode());
+        }
+        srsModelAssignment=config.getSrsModelAssignment();
 	}
 
 	public static Viewable2TableMapping getClass2TableMapping(Config config,
-			TrafoConfig trafoConfig, List<Element> eles,NameMapping nameMapping) {
+			TrafoConfig trafoConfig, List<Element> eles,NameMapping nameMapping) throws Ili2dbException {
 		Viewable2TableMapper mapper=new Viewable2TableMapper(config, trafoConfig, nameMapping);
 		mapper.singleGeom=config.isOneGeomPerTable();
 		mapper.coalesceMultiSurface=Config.MULTISURFACE_TRAFO_COALESCE.equals(config.getMultiSurfaceTrafo());
 		mapper.coalesceMultiLine=Config.MULTILINE_TRAFO_COALESCE.equals(config.getMultiLineTrafo());
 		mapper.coalesceMultiPoint=Config.MULTIPOINT_TRAFO_COALESCE.equals(config.getMultiPointTrafo());
 		mapper.coalesceArray=Config.ARRAY_TRAFO_COALESCE.equals(config.getArrayTrafo());
+        mapper.coalesceJson=Config.JSON_TRAFO_COALESCE.equals(config.getJsonTrafo());
 		mapper.createItfLineTables=config.getDoItfLineTables();
 		return mapper.doit(eles);
 	}
-	private Viewable2TableMapping doit(List<Element> eles) {
+	private Viewable2TableMapping doit(List<Element> eles) throws Ili2dbException {
 		// 
 		// setup/update TrafoConfig (mapping strategy per class)
 		//
@@ -73,44 +84,60 @@ public class Viewable2TableMapper {
 				if(TrafoConfigNames.INHERITANCE_TRAFO_NEWCLASS.equals(inheritanceStrategy) || TrafoConfigNames.INHERITANCE_TRAFO_NEWANDSUBCLASS.equals(inheritanceStrategy)){
 					String sqlTablename=nameMapping.mapIliClassDef(aclass);
 					ViewableWrapper wrapper=new ViewableWrapper(sqlSchemaname,sqlTablename,aclass);
-					List<ViewableTransferElement> props=new java.util.ArrayList<ViewableTransferElement>();
-					// defined attrs
-					{
-						addProps(wrapper,props,aclass.getDefinedAttributesAndRoles2());
-					}
-					// defined attrs of bases with subclass or newAndSubclass strategy
-					{
-						Viewable base=(Viewable) aclass.getExtending();
-						while(base!=null){
-							String baseInheritanceStrategy = trafoConfig.getViewableConfig(base, TrafoConfigNames.INHERITANCE_TRAFO);
-							if(!TrafoConfigNames.INHERITANCE_TRAFO_SUBCLASS.equals(baseInheritanceStrategy) 
-									&& !TrafoConfigNames.INHERITANCE_TRAFO_NEWANDSUBCLASS.equals(baseInheritanceStrategy)){
-								break;
-							}
-							addProps(wrapper,props,base.getDefinedAttributesAndRoles2());
-							base=(Viewable) base.getExtending();
-						}
-					}
-					// add attrs of extensions with superclass strategy while visiting extensions
 					
-					wrapper.setAttrv(props);
-					// link to base ViewableWrapper
+                    // link to base ViewableWrapper
+                    {
+                        Viewable base=(Viewable) aclass.getExtending();
+                        while(base!=null){
+                            String baseInheritanceStrategy = trafoConfig.getViewableConfig(base, TrafoConfigNames.INHERITANCE_TRAFO);
+                            if(TrafoConfigNames.INHERITANCE_TRAFO_NEWCLASS.equals(baseInheritanceStrategy)){ // but NOT INHERITANCE_TRAFO_NEWANDSUBCLASS! 
+                                break;
+                            }
+                            base=(Viewable) base.getExtending();
+                        }
+                        if(base!=null){
+                            ViewableWrapper baseWrapper=ret.get(base);
+                            if(baseWrapper!=wrapper){
+                                wrapper.setExtending(baseWrapper);
+                            }
+                        }
+                    }
+					
+                    // add columns
 					{
-						Viewable base=(Viewable) aclass.getExtending();
-						while(base!=null){
-							String baseInheritanceStrategy = trafoConfig.getViewableConfig(base, TrafoConfigNames.INHERITANCE_TRAFO);
-							if(TrafoConfigNames.INHERITANCE_TRAFO_NEWCLASS.equals(baseInheritanceStrategy)){ // but NOT INHERITANCE_TRAFO_NEWANDSUBCLASS! 
-								break;
-							}
-							base=(Viewable) base.getExtending();
-						}
-						if(base!=null){
-							ViewableWrapper baseWrapper=ret.get(base);
-							if(baseWrapper!=wrapper){
-								wrapper.setExtending(baseWrapper);
-							}
-						}
+	                    List<ColumnWrapper> props=new java.util.ArrayList<ColumnWrapper>();
+					    
+	                    // defined attrs
+	                    {
+	                        if(aclass instanceof AssociationDef) {
+	                            addProps(wrapper,props,getRoles((AssociationDef)aclass));
+	                        }
+	                        addProps(wrapper,props,aclass.getDefinedAttributesAndRoles2());
+	                    }
+	                    
+	                    // defined attrs of bases with subclass or newAndSubclass strategy
+	                    {
+	                        Viewable base=(Viewable) aclass.getExtending();
+	                        while(base!=null){
+	                            String baseInheritanceStrategy = trafoConfig.getViewableConfig(base, TrafoConfigNames.INHERITANCE_TRAFO);
+	                            if(!TrafoConfigNames.INHERITANCE_TRAFO_SUBCLASS.equals(baseInheritanceStrategy) 
+	                                    && !TrafoConfigNames.INHERITANCE_TRAFO_NEWANDSUBCLASS.equals(baseInheritanceStrategy)){
+	                                break;
+	                            }
+	                            if(base instanceof AssociationDef) {
+	                                addProps(wrapper,props,getRoles((AssociationDef)base));
+	                            }
+	                            addProps(wrapper,props,base.getDefinedAttributesAndRoles2());
+	                            base=(Viewable) base.getExtending();
+	                        }
+	                    }
+	                    
+	                    // will add attrs of extensions with superclass strategy while visiting extensions
+	                    
+	                    wrapper.setAttrv(props);
 					}
+					
+					
 					// includes more than one type
 					if(wrapper.getExtending()!=null){
 						wrapper.setMultipleTypes(false); // base contains type typediscriminator
@@ -143,13 +170,15 @@ public class Viewable2TableMapper {
 						base=(Viewable) base.getExtending();
 					}
 					ViewableWrapper wrapper=ret.get(base);
-					List<ViewableTransferElement> props=wrapper.getAttrv();
-					// add props of extension
+					List<ColumnWrapper> props=wrapper.getAttrv();
+					// add props of this extension
 					addProps(wrapper,props,aclass.getDefinedAttributesAndRoles2());
 					wrapper.setAttrv(props);
 					ret.add(aclass, wrapper);
 				}else if(TrafoConfigNames.INHERITANCE_TRAFO_SUBCLASS.equals(inheritanceStrategy)){
 					// skip it; props already added when visiting subclass
+                }else if(TrafoConfigNames.INHERITANCE_TRAFO_EMBEDDED.equals(inheritanceStrategy)){
+                    // skip it; props already added when visiting container class
 				}else{
 					throw new IllegalStateException("unexpected inheritance config <"+inheritanceStrategy+">");
 				}
@@ -157,6 +186,15 @@ public class Viewable2TableMapper {
 		}
 		return ret;
 	}
+
+    private Iterator<ViewableTransferElement> getRoles(AssociationDef aclass) {
+        ArrayList<ViewableTransferElement> roles=new ArrayList<ViewableTransferElement>();
+        for(Iterator<RoleDef> roleIt=((AssociationDef)aclass).getRolesIterator();roleIt.hasNext();) {
+            RoleDef role=roleIt.next();
+            roles.add(new ViewableTransferElement(role,false));
+        }
+        return roles.iterator();
+    }
 
 	private void doSmartOff(List<Element> eles) {
 		/*
@@ -169,20 +207,17 @@ public class Viewable2TableMapper {
 				// a Viewable
 				Viewable aclass=(Viewable) ele;
 				if(trafoConfig.getViewableConfig(aclass, TrafoConfigNames.INHERITANCE_TRAFO)==null){
-					// newClass
-					trafoConfig.setViewableConfig(aclass, TrafoConfigNames.INHERITANCE_TRAFO, TrafoConfigNames.INHERITANCE_TRAFO_NEWCLASS);
+				    if(aclass instanceof AssociationDef && TransferFromIli.isLightweightAssociation((AssociationDef)aclass)) {
+                        trafoConfig.setViewableConfig(aclass, TrafoConfigNames.INHERITANCE_TRAFO, TrafoConfigNames.INHERITANCE_TRAFO_EMBEDDED);
+				    }else {
+	                    // newClass
+	                    trafoConfig.setViewableConfig(aclass, TrafoConfigNames.INHERITANCE_TRAFO, TrafoConfigNames.INHERITANCE_TRAFO_NEWCLASS);
+				    }
 				}
 				String sqlTablename=nameMapping.mapIliClassDef(aclass);
 				EhiLogger.traceState("viewable "+aclass.getScopedName(null)+" "+trafoConfig.getViewableConfig(aclass, TrafoConfigNames.INHERITANCE_TRAFO)+", "+sqlTablename);
 			}
 		}
-	}
-	private TransferDescription getTransferDescription(Element e)
-	{
-		if(td==null){
-			td=(TransferDescription) e.getContainer(TransferDescription.class);
-		}
-		return td;
 	}
 	private void doSmart1(List<Element> eles) {
 		/*
@@ -202,7 +237,9 @@ public class Viewable2TableMapper {
 				// a Viewable
 				Viewable aclass=(Viewable) ele;
 				if(trafoConfig.getViewableConfig(aclass, TrafoConfigNames.INHERITANCE_TRAFO)==null){
-					if(isReferenced(aclass) && noBaseIsNewClass(trafoConfig,aclass)){
+                    if(aclass instanceof AssociationDef && TransferFromIli.isLightweightAssociation((AssociationDef)aclass)) {
+                        trafoConfig.setViewableConfig(aclass, TrafoConfigNames.INHERITANCE_TRAFO, TrafoConfigNames.INHERITANCE_TRAFO_EMBEDDED);
+                    }else if(isReferenced(aclass) && noBaseIsNewClass(trafoConfig,aclass)){
 						// newClass
 						trafoConfig.setViewableConfig(aclass, TrafoConfigNames.INHERITANCE_TRAFO, TrafoConfigNames.INHERITANCE_TRAFO_NEWCLASS);
 					}else if(aclass.isAbstract()){
@@ -238,7 +275,9 @@ public class Viewable2TableMapper {
 				// a Viewable
 				Viewable aclass=(Viewable) ele;
 				if(trafoConfig.getViewableConfig(aclass, TrafoConfigNames.INHERITANCE_TRAFO)==null){
-					if(aclass.isAbstract()){
+                    if(aclass instanceof AssociationDef && TransferFromIli.isLightweightAssociation((AssociationDef)aclass)) {
+                        trafoConfig.setViewableConfig(aclass, TrafoConfigNames.INHERITANCE_TRAFO, TrafoConfigNames.INHERITANCE_TRAFO_EMBEDDED);
+                    }else if(aclass.isAbstract()){
 						// subClass
 						trafoConfig.setViewableConfig(aclass, TrafoConfigNames.INHERITANCE_TRAFO, TrafoConfigNames.INHERITANCE_TRAFO_SUBCLASS);
 					}else{
@@ -252,13 +291,21 @@ public class Viewable2TableMapper {
 		}
 	}
 
-	private void addProps(ViewableWrapper viewable,List<ViewableTransferElement> attrv,
-		Iterator<ViewableTransferElement> iter) {
+    private TransferDescription getTransferDescription(Element e)
+    {
+        if(td==null){
+            td=(TransferDescription) e.getContainer(TransferDescription.class);
+        }
+        return td;
+    }
+	private void addProps(ViewableWrapper viewable,List<ColumnWrapper> attrv,
+		Iterator<ViewableTransferElement> iter) throws Ili2dbException {
         Viewable iliclass=viewable.getViewable();
 		boolean hasGeometry=false;
 		// only one geometry column per table?
 		if(singleGeom){
-			for(ViewableTransferElement attrE:attrv){
+			for(ColumnWrapper propE:attrv){
+			    ViewableTransferElement attrE=propE.getViewableTransferElement();
 				if(attrE.obj instanceof AttributeDef){
 					AttributeDef attr=(AttributeDef) attrE.obj;
 					ch.interlis.ili2c.metamodel.Type type=attr.getDomainResolvingAliases();
@@ -277,81 +324,153 @@ public class Viewable2TableMapper {
 			}
 		}
 		while (iter.hasNext()) {
-			ViewableTransferElement obj = iter.next();
-			if (obj.obj instanceof AttributeDef) {
-				AttributeDef attr=(AttributeDef) obj.obj;
-				String sqlname=trafoConfig.getAttrConfig(iliclass,attr, TrafoConfigNames.SECONDARY_TABLE);
-				// attribute configured to be in a secondary table?
-				if(sqlname!=null){
-					// add attribute to given secondary table
-					ViewableWrapper attrWrapper=viewable.getSecondaryTable(sqlname);
-					if(attrWrapper==null){
-						attrWrapper=viewable.createSecondaryTable(sqlname);
-					}
-					List<ViewableTransferElement> attrProps=new java.util.ArrayList<ViewableTransferElement>();
-					attrProps.add(obj);
-					attrWrapper.setAttrv(attrProps);
-				}else{
-					// only one geometry column per table?
-					if(singleGeom){
-						ch.interlis.ili2c.metamodel.Type type=attr.getDomainResolvingAliases();
-						if(type instanceof ch.interlis.ili2c.metamodel.CoordType || type instanceof ch.interlis.ili2c.metamodel.LineType
-							|| (Ili2cUtility.isMultiSurfaceAttr(getTransferDescription(attr), attr) && (coalesceMultiSurface 
-								|| TrafoConfigNames.MULTISURFACE_TRAFO_COALESCE.equals(trafoConfig.getAttrConfig(attr,TrafoConfigNames.MULTISURFACE_TRAFO))))
-							|| (Ili2cUtility.isMultiLineAttr(getTransferDescription(attr), attr) && (coalesceMultiLine 
-									|| TrafoConfigNames.MULTILINE_TRAFO_COALESCE.equals(trafoConfig.getAttrConfig(attr,TrafoConfigNames.MULTILINE_TRAFO))))
-						){						
-							if(createItfLineTables && type instanceof ch.interlis.ili2c.metamodel.SurfaceOrAreaType){
-								// ignore it; will be created by legacy code 
-							}else{
-								// table already has a geometry column?
-								if(hasGeometry){
-									// create a new secondary table
-									sqlname=nameMapping.mapGeometryAsTable(iliclass,attr);
-									ViewableWrapper attrWrapper=viewable.getSecondaryTable(sqlname);
-									if(attrWrapper==null){
-										attrWrapper=viewable.createSecondaryTable(sqlname);
-									}
-									// add attribute to new secondary table
-									List<ViewableTransferElement> attrProps=new java.util.ArrayList<ViewableTransferElement>();
-									attrProps.add(obj);
-									attrWrapper.setAttrv(attrProps);
-									trafoConfig.setAttrConfig(iliclass,attr, TrafoConfigNames.SECONDARY_TABLE, sqlname);
-								}else{
-									// table has not yet a geometry column
-									// add it
-									hasGeometry=true;
-									attrv.add(obj);
-								}
-							}
-						}else{
-							// not a Geom type
-							attrv.add(obj);
-						}
-					}else{
-						attrv.add(obj);
-					}
+			ViewableTransferElement viewableTransferElement = iter.next();
+			if (viewableTransferElement.obj instanceof AttributeDef) {
+				AttributeDef attr=(AttributeDef) viewableTransferElement.obj;
+				attr=getBaseAttr(iliclass,attr); // get the most general attribute definition, but only up to the class of the current table
+				viewableTransferElement.obj=attr;
+				for(Integer epsgCode:getEpsgCodes(attr)) {
+	                String sqlname=trafoConfig.getAttrConfig(iliclass,attr, epsgCode,TrafoConfigNames.SECONDARY_TABLE);
+	                if(sqlname==null) {
+	                    // pre ili2db 3.13.x
+	                    sqlname=trafoConfig.getAttrConfig(iliclass,attr, TrafoConfigNames.SECONDARY_TABLE);
+	                }
+	                // attribute configured to be in a secondary table?
+	                if(sqlname!=null){
+	                    // add attribute to given secondary table
+	                    ViewableWrapper attrWrapper=viewable.getSecondaryTable(sqlname);
+	                    if(attrWrapper==null){
+	                        attrWrapper=viewable.createSecondaryTable(sqlname);
+	                    }
+	                    List<ColumnWrapper> attrProps=new java.util.ArrayList<ColumnWrapper>();
+	                    addColumn(viewable,attrProps,new ColumnWrapper(viewableTransferElement,epsgCode));
+	                    attrWrapper.setAttrv(attrProps);
+	                }else{
+                        ch.interlis.ili2c.metamodel.Type type=attr.getDomainResolvingAliases();
+                        if(type instanceof ch.interlis.ili2c.metamodel.CoordType || type instanceof ch.interlis.ili2c.metamodel.LineType
+                            || (Ili2cUtility.isMultiSurfaceAttr(getTransferDescription(attr), attr) && (coalesceMultiSurface 
+                                || TrafoConfigNames.MULTISURFACE_TRAFO_COALESCE.equals(trafoConfig.getAttrConfig(attr,TrafoConfigNames.MULTISURFACE_TRAFO))))
+                            || (Ili2cUtility.isMultiLineAttr(getTransferDescription(attr), attr) && (coalesceMultiLine 
+                                    || TrafoConfigNames.MULTILINE_TRAFO_COALESCE.equals(trafoConfig.getAttrConfig(attr,TrafoConfigNames.MULTILINE_TRAFO))))
+                            || (Ili2cUtility.isMultiPointAttr(getTransferDescription(attr), attr) && (coalesceMultiPoint 
+                                    || TrafoConfigNames.MULTIPOINT_TRAFO_COALESCE.equals(trafoConfig.getAttrConfig(attr,TrafoConfigNames.MULTIPOINT_TRAFO))))
+                        ){                      
+                            if(epsgCode==null) {
+                                throw new Ili2dbException("no CRS for attribute "+attr.getScopedName());
+                            }
+                            if(createItfLineTables && type instanceof ch.interlis.ili2c.metamodel.SurfaceType){
+                                // no attribute in maintable required
+                            }else{
+                                // table already has a geometry column?
+                                if(singleGeom && hasGeometry){
+                                    // create a new secondary table
+                                    sqlname=nameMapping.mapAttributeAsTable(iliclass,attr,epsgCode);
+                                    ViewableWrapper attrWrapper=viewable.getSecondaryTable(sqlname);
+                                    if(attrWrapper==null){
+                                        attrWrapper=viewable.createSecondaryTable(sqlname);
+                                    }
+                                    // add attribute to new secondary table
+                                    List<ColumnWrapper> attrProps=new java.util.ArrayList<ColumnWrapper>();
+                                    addColumn(viewable,attrProps,new ColumnWrapper(viewableTransferElement,epsgCode));
+                                    attrWrapper.setAttrv(attrProps);
+                                    trafoConfig.setAttrConfig(iliclass,attr, epsgCode,TrafoConfigNames.SECONDARY_TABLE, sqlname);
+                                }else{
+                                    // table has not yet a geometry column
+                                    // add it
+                                    hasGeometry=true;
+                                    addColumn(viewable,attrv,new ColumnWrapper(viewableTransferElement,epsgCode));
+                                }
+                            }
+                        }else{
+                            // not a Geom type
+                            addColumn(viewable,attrv,new ColumnWrapper(viewableTransferElement));
+                        }
+	                }
+				    
 				}
-			}
-			if(obj.obj instanceof RoleDef){
-				RoleDef role = (RoleDef) obj.obj;
+			}else if(viewableTransferElement.obj instanceof RoleDef){
+				RoleDef role = (RoleDef) viewableTransferElement.obj;
 				AssociationDef roleOwner = (AssociationDef) role.getContainer();
-				// not an embedded role and roledef not defined in a lightweight association?
-				if (!obj.embedded && !roleOwner.isLightweight()){
-					attrv.add(obj);
-				}
-				// a role of an embedded association?
-				if(obj.embedded){
-					if(roleOwner.getDerivedFrom()==null){
-						attrv.add(obj);
-					}
+                // a role of an embedded association?
+				if (viewableTransferElement.embedded) {
+				    if(!TransferFromIli.isLightweightAssociation(roleOwner)){
+				        ; // skip it; is added when visiting AssociationDef
+				    }else {
+	                    if(roleOwner.getDerivedFrom()==null){
+	                        addColumn(viewable,attrv,new ColumnWrapper(viewableTransferElement));
+	                    }
+				    }
+				}else {
+                    addColumn(viewable,attrv,new ColumnWrapper(viewableTransferElement));
 				}
 			}
 		}
 		
 	}
 
-	private static boolean noBaseIsNewClass(TrafoConfig trafoConfig,Viewable aclass) {
+	private void addColumn(ViewableWrapper current,List<ColumnWrapper> attrProps, ColumnWrapper columnWrapper) {
+        for(ColumnWrapper exst:attrProps) {
+            if(getRootProp(exst.getViewableTransferElement().obj)==getRootProp(columnWrapper.getViewableTransferElement().obj) && exst.getEpsgCode()==columnWrapper.getEpsgCode()) {
+                // already added
+                return;
+            }
+        }
+        // check also secondaries
+        for(ViewableWrapper secondary:current.getSecondaryTables()){
+            for(ColumnWrapper exst:secondary.getAttrv()) {
+                if(getRootProp(exst.getViewableTransferElement().obj)==getRootProp(columnWrapper.getViewableTransferElement().obj) && exst.getEpsgCode()==columnWrapper.getEpsgCode()) {
+                    // already added
+                    return;
+                }
+            }
+        }
+        ViewableWrapper base=current.getExtending();
+        while(base!=null) {
+            for(ColumnWrapper exst:base.getAttrv()) {
+                if(getRootProp(exst.getViewableTransferElement().obj)==getRootProp(columnWrapper.getViewableTransferElement().obj) && exst.getEpsgCode()==columnWrapper.getEpsgCode()) {
+                    // already added
+                    return;
+                }
+            }
+            // check also secondaries
+            for(ViewableWrapper secondary:base.getSecondaryTables()){
+                for(ColumnWrapper exst:secondary.getAttrv()) {
+                    if(getRootProp(exst.getViewableTransferElement().obj)==getRootProp(columnWrapper.getViewableTransferElement().obj) && exst.getEpsgCode()==columnWrapper.getEpsgCode()) {
+                        // already added
+                        return;
+                    }
+                }
+            }
+            base=base.getExtending();
+        }
+        attrProps.add(columnWrapper);
+    }
+
+    private Object getRootProp(Object obj) {
+        if(obj instanceof AttributeDef) {
+            return Ili2cUtility.getRootBaseAttr((AttributeDef)obj);
+        }else if(obj instanceof RoleDef) {
+            return Ili2cUtility.getRootBaseRole((RoleDef)obj);
+        }
+        throw new IllegalArgumentException("unexpected "+obj);
+    }
+
+    private static AttributeDef getBaseAttr(Viewable iliclass, AttributeDef attr) {
+        AttributeDef baseAttr=attr;
+        while(true){
+            AttributeDef baseAttr1=(AttributeDef)baseAttr.getExtending();
+            if(baseAttr1==null){
+                break;
+            }
+            if(!((Viewable)baseAttr1.getContainer()).isExtending(iliclass)){
+                break;
+            }
+            baseAttr=baseAttr1;
+        }
+        return baseAttr;
+    }
+
+    private static boolean noBaseIsNewClass(TrafoConfig trafoConfig,Viewable aclass) {
 		Viewable base=(Viewable) aclass.getExtending();
 		while(base!=null){
 			String baseInheritanceStrategy = trafoConfig.getViewableConfig(base, TrafoConfigNames.INHERITANCE_TRAFO);
@@ -423,5 +542,34 @@ public class Viewable2TableMapper {
 		}
 		return false;
 	}
+    private Integer[] getEpsgCodes(AttributeDef attr) {
+        TransferDescription td=getTransferDescription(attr);
+        if(Ili2cUtility.isMultiSurfaceAttr(td,attr)) {
+            MultiSurfaceMappings multiSurfaceAttrs=new MultiSurfaceMappings();
+            multiSurfaceAttrs.addMultiSurfaceAttr(attr);
+            AttributeDef surfaceAttr = multiSurfaceAttrs.getSurfaceAttr(attr);
+            attr=surfaceAttr;
+        }else if(Ili2cUtility.isMultiLineAttr(td, attr)) {
+            MultiLineMappings multiLineAttrs=new MultiLineMappings();
+            multiLineAttrs.addMultiLineAttr(attr);
+            AttributeDef polylineAttr=multiLineAttrs.getPolylineAttr(attr);
+            attr=polylineAttr;
+        }else if(Ili2cUtility.isMultiPointAttr(td, attr)) {
+            MultiPointMappings multiPointAttrs=new MultiPointMappings();
+            multiPointAttrs.addMultiPointAttr(attr);
+            AttributeDef multipointAttr=multiPointAttrs.getCoordAttr(attr);
+            attr=multipointAttr;
+        }
+        int epsgCodes[]= TransferFromIli.getEpsgCodes(attr,srsModelAssignment,defaultCrsCode);
+        if(epsgCodes==null) {
+            // not a geometry attribute
+            return new Integer[]{null};
+        }
+        Integer ret[]=new Integer[epsgCodes.length];
+        for(int i=0;i<epsgCodes.length;i++) {
+            ret[i]=epsgCodes[i];
+        }
+        return ret;
+    }
 
 }

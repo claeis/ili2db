@@ -12,6 +12,8 @@ import org.junit.Ignore;
 import org.junit.Test;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Polygon;
+
+import ch.ehi.basics.logging.EhiLogger;
 import ch.ehi.ili2db.base.Ili2db;
 import ch.ehi.ili2db.gui.Config;
 import ch.interlis.iom.IomObject;
@@ -56,7 +58,7 @@ public class Area10Test {
 	}
 
 	@Test
-	public void importAreaOk() throws Exception
+	public void importItfAreaOk() throws Exception
 	{
 		Connection jdbcConnection=null;
 		try{
@@ -69,12 +71,16 @@ public class Area10Test {
 				File data=new File(TEST_OUT,"Beispiel1a.itf");
 				Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 				config.setFunction(Config.FC_IMPORT);
-				config.setCreateFk(config.CREATE_FK_YES);
+		        config.setDoImplicitSchemaImport(true);
+				config.setCreateFk(Config.CREATE_FK_YES);
 				config.setTidHandling(Config.TID_HANDLING_PROPERTY);
+                config.setImportTid(true);
 				config.setCatalogueRefTrafo(null);
 				config.setMultiSurfaceTrafo(null);
 				config.setMultilingualTrafo(null);
 				config.setInheritanceTrafo(null);
+	            config.setDefaultSrsAuthority("EPSG");
+	            config.setDefaultSrsCode("2056");
 				Ili2db.readSettingsFromDb(config);
 				Ili2db.run(config,null);
 				
@@ -84,17 +90,17 @@ public class Area10Test {
 					Assert.assertTrue(rs.next());
 					Assert.assertEquals("Art1",rs.getString(1));
 				}
-				Assert.assertTrue(stmt.execute("SELECT boflaechen.t_id FROM "+DBSCHEMA+".boFlaechen"));
+				Assert.assertTrue(stmt.execute("SELECT count(boflaechen.t_id) FROM "+DBSCHEMA+".boFlaechen"));
 				{
 					ResultSet rs=stmt.getResultSet();
 					Assert.assertTrue(rs.next());
-					Assert.assertEquals("4",rs.getString(1));
+					Assert.assertEquals("1",rs.getString(1));
 				}
-				Assert.assertTrue(stmt.execute("SELECT boflaechen.form FROM "+DBSCHEMA+".boFlaechen"));
+				Assert.assertTrue(stmt.execute("SELECT st_asewkt(boflaechen.form) FROM "+DBSCHEMA+".boFlaechen"));
 				{
 					ResultSet rs=stmt.getResultSet();
 					Assert.assertTrue(rs.next());
-					Assert.assertEquals("010A000020155500000100000001090000000100000001020000000500000000000000F7EB4241000000000E2D304100000000F7EB4241000000002C2D304100000000FCEB4241000000002C2D304100000000FCEB4241000000000E2D304100000000F7EB4241000000000E2D3041",rs.getString(1));
+					Assert.assertEquals("SRID=2056;CURVEPOLYGON(COMPOUNDCURVE((2480110 1060110,2480110 1060140,2480120 1060140,2480120 1060110,2480110 1060110)))",rs.getString(1));
 				}
 	        }
 		}finally{
@@ -105,7 +111,7 @@ public class Area10Test {
 	}
 	
 	@Test
-	public void importOpenPolygonWithValidation() throws Exception
+	public void importItfOpenPolygonWithValidation() throws Exception
 	{
 		Connection jdbcConnection=null;
 		try{
@@ -118,14 +124,19 @@ public class Area10Test {
 				File data=new File(TEST_OUT,"Beispiel1b.itf");
 				Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 				config.setFunction(Config.FC_IMPORT);
+		        config.setDoImplicitSchemaImport(true);
 				config.setCreateFk(config.CREATE_FK_YES);
 				config.setTidHandling(Config.TID_HANDLING_PROPERTY);
+				config.setImportTid(true);
 				config.setCatalogueRefTrafo(null);
 				config.setMultiSurfaceTrafo(null);
 				config.setMultilingualTrafo(null);
 				config.setInheritanceTrafo(null);
 				config.setSkipGeometryErrors(true);
+                config.setSqlNull(Config.SQL_NULL_ENABLE);
 				config.setValidation(true);
+                config.setDefaultSrsAuthority("EPSG");
+                config.setDefaultSrsCode("2056");
 				Ili2db.readSettingsFromDb(config);
 				Ili2db.run(config,null);
 				
@@ -135,11 +146,11 @@ public class Area10Test {
 					Assert.assertTrue(rs.next());
 					Assert.assertEquals("Art1",rs.getString(1));
 				}
-				Assert.assertTrue(stmt.execute("SELECT boflaechen.t_id FROM "+DBSCHEMA+".boFlaechen"));
+				Assert.assertTrue(stmt.execute("SELECT count(boflaechen.t_id) FROM "+DBSCHEMA+".boFlaechen"));
 				{
 					ResultSet rs=stmt.getResultSet();
 					Assert.assertTrue(rs.next());
-					Assert.assertEquals("4",rs.getString(1));
+					Assert.assertEquals("1",rs.getString(1));
 				}
 				Assert.assertTrue(stmt.execute("SELECT t_ili2db_attrname.iliname FROM "+DBSCHEMA+".t_ili2db_attrname"));
 				{
@@ -156,7 +167,7 @@ public class Area10Test {
 	}
 	
 	@Test
-	public void importOpenPolygonWithoutValidation() throws Exception
+	public void importItOpenPolygonWithoutValidation() throws Exception
 	{
 		Connection jdbcConnection=null;
 		try{
@@ -169,14 +180,19 @@ public class Area10Test {
 				File data=new File(TEST_OUT,"Beispiel1b.itf");
 				Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 				config.setFunction(Config.FC_IMPORT);
-				config.setCreateFk(config.CREATE_FK_YES);
+		        config.setDoImplicitSchemaImport(true);
+				config.setCreateFk(Config.CREATE_FK_YES);
 				config.setTidHandling(Config.TID_HANDLING_PROPERTY);
+                config.setImportTid(true);
 				config.setCatalogueRefTrafo(null);
 				config.setMultiSurfaceTrafo(null);
 				config.setMultilingualTrafo(null);
 				config.setInheritanceTrafo(null);
 				config.setSkipGeometryErrors(true);
+                config.setSqlNull(Config.SQL_NULL_ENABLE);
 				config.setValidation(false);
+                config.setDefaultSrsAuthority("EPSG");
+                config.setDefaultSrsCode("2056");
 				Ili2db.readSettingsFromDb(config);
 				Ili2db.run(config,null);
 				Assert.assertTrue(stmt.execute("SELECT boflaechen.art FROM "+DBSCHEMA+".BoFlaechen WHERE t_ili_tid='1'"));
@@ -185,11 +201,11 @@ public class Area10Test {
 					Assert.assertTrue(rs.next());
 					Assert.assertEquals("Art1",rs.getString(1));
 				}
-				Assert.assertTrue(stmt.execute("SELECT boflaechen.t_id FROM "+DBSCHEMA+".boFlaechen"));
+				Assert.assertTrue(stmt.execute("SELECT count(boflaechen.t_id) FROM "+DBSCHEMA+".boFlaechen"));
 				{
 					ResultSet rs=stmt.getResultSet();
 					Assert.assertTrue(rs.next());
-					Assert.assertEquals("4",rs.getString(1));
+					Assert.assertEquals("1",rs.getString(1));
 				}
 				Assert.assertTrue(stmt.execute("SELECT t_ili2db_attrname.iliname FROM "+DBSCHEMA+".t_ili2db_attrname"));
 				{
@@ -209,7 +225,7 @@ public class Area10Test {
 	public void exportAreaOk() throws Exception
 	{
 		{
-			importAreaOk();
+			importItfAreaOk();
 		}
 		File data=null;
 		Connection jdbcConnection=null;

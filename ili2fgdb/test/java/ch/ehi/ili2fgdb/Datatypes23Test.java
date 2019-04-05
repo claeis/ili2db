@@ -81,13 +81,14 @@ public class Datatypes23Test {
 	@Test
 	public void importXtfAttr() throws Exception
 	{
-		EhiLogger.getInstance().setTraceFilter(false);
+		//EhiLogger.getInstance().setTraceFilter(false);
 	    File fgdbFile=new File(FGDBFILENAME);
 	    Fgdb4j.deleteFileGdb(fgdbFile);
 	    Class driverClass = Class.forName(FgdbDriver.class.getName());
 		File data=new File(TEST_OUT,"Datatypes23Attr.xtf");
 		Config config=initConfig(data.getPath(),data.getPath()+".log");
 		config.setFunction(Config.FC_IMPORT);
+        config.setDoImplicitSchemaImport(true);
 		config.setCreateFk(config.CREATE_FK_YES);
 		config.setCreateNumChecks(true);
 		config.setTidHandling(Config.TID_HANDLING_PROPERTY);
@@ -97,24 +98,20 @@ public class Datatypes23Test {
 		config.setMultilingualTrafo(null);
 		config.setInheritanceTrafo(null);
 		//Ili2db.readSettingsFromDb(config);
-		try{
-			Ili2db.run(config,null);
-		}catch(Exception ex){
-			EhiLogger.logError(ex);
-			Assert.fail();
-		}
+        Ili2db.run(config,null);
 	}
 	
 	@Test
 	public void importXtfLine() throws Exception
 	{
-		EhiLogger.getInstance().setTraceFilter(false);
+		//EhiLogger.getInstance().setTraceFilter(false);
 	    File fgdbFile=new File(FGDBFILENAME);
 	    Fgdb4j.deleteFileGdb(fgdbFile);
 	    Class driverClass = Class.forName(FgdbDriver.class.getName());
 		File data=new File(TEST_OUT,"Datatypes23Line.xtf");
 		Config config=initConfig(data.getPath(),data.getPath()+".log");
 		config.setFunction(Config.FC_IMPORT);
+        config.setDoImplicitSchemaImport(true);
 		config.setCreateFk(config.CREATE_FK_YES);
 		config.setCreateNumChecks(true);
 		config.setTidHandling(Config.TID_HANDLING_PROPERTY);
@@ -124,39 +121,31 @@ public class Datatypes23Test {
 		config.setMultilingualTrafo(null);
 		config.setInheritanceTrafo(null);
 		//Ili2db.readSettingsFromDb(config);
-		try{
-			Ili2db.run(config,null);
-		}catch(Exception ex){
-			EhiLogger.logError(ex);
-			Assert.fail();
-		}
+        Ili2db.run(config,null);
 	}
 	
 	@Test
 	public void importXtfSurface() throws Exception
 	{
-		EhiLogger.getInstance().setTraceFilter(false);
+		//EhiLogger.getInstance().setTraceFilter(false);
 	    File fgdbFile=new File(FGDBFILENAME);
 	    Fgdb4j.deleteFileGdb(fgdbFile);
 	    Class driverClass = Class.forName(FgdbDriver.class.getName());
 		File data=new File(TEST_OUT,"Datatypes23Surface.xtf");
 		Config config=initConfig(data.getPath(),data.getPath()+".log");
 		config.setFunction(Config.FC_IMPORT);
+        config.setDoImplicitSchemaImport(true);
 		config.setCreateFk(config.CREATE_FK_YES);
 		config.setCreateNumChecks(true);
 		config.setTidHandling(Config.TID_HANDLING_PROPERTY);
+		config.setImportTid(true);
 		config.setBasketHandling(config.BASKET_HANDLING_READWRITE);
 		config.setCatalogueRefTrafo(null);
 		config.setMultiSurfaceTrafo(null);
 		config.setMultilingualTrafo(null);
 		config.setInheritanceTrafo(null);
 		//Ili2db.readSettingsFromDb(config);
-		try{
-			Ili2db.run(config,null);
-		}catch(Exception ex){
-			EhiLogger.logError(ex);
-			Assert.fail();
-		}
+        Ili2db.run(config,null);
 	}
 	
 	@Test
@@ -167,7 +156,7 @@ public class Datatypes23Test {
 		}
 		String fileName="Datatypes23Line-out.xtf";
 		File data=new File(TEST_OUT,fileName);	
-		EhiLogger.getInstance().setTraceFilter(false);
+		//EhiLogger.getInstance().setTraceFilter(false);
 	    File fgdbFile=new File(FGDBFILENAME);
 	    //Fgdb4j.deleteFileGdb(fgdbFile);
 	    Class driverClass = Class.forName(FgdbDriver.class.getName());
@@ -175,12 +164,7 @@ public class Datatypes23Test {
 		config.setFunction(Config.FC_EXPORT);
 		config.setModels("Datatypes23");
 		Ili2db.readSettingsFromDb(config);
-		try{
-			Ili2db.run(config,null);
-		}catch(Exception ex){
-			EhiLogger.logError(ex);
-			Assert.fail();
-		}
+        Ili2db.run(config,null);
 		{
 			XtfReader reader=new XtfReader(data);
 			assertTrue(reader.read() instanceof StartTransferEvent);
@@ -297,22 +281,18 @@ public class Datatypes23Test {
 		{
 			importXtfSurface();
 		}
-		EhiLogger.getInstance().setTraceFilter(false);
+		//EhiLogger.getInstance().setTraceFilter(false);
 	    File fgdbFile=new File(FGDBFILENAME);
 	    //Fgdb4j.deleteFileGdb(fgdbFile);
 	    Class driverClass = Class.forName(FgdbDriver.class.getName());
 		File data=new File(TEST_OUT,"Datatypes23Surface-out.xtf");
 		Config config=initConfig(data.getPath(),data.getPath()+".log");
 		config.setFunction(Config.FC_EXPORT);
+		config.setExportTid(true);
 		config.setModels("Datatypes23");
 		Ili2db.readSettingsFromDb(config);
 		config.setBasketHandling(null);
-		try{
-			Ili2db.run(config,null);
-		}catch(Exception ex){
-			EhiLogger.logError(ex);
-			Assert.fail();
-		}
+        Ili2db.run(config,null);
 		{
 			XtfReader reader=new XtfReader(data);
 			assertTrue(reader.read() instanceof StartTransferEvent);
@@ -475,7 +455,7 @@ public class Datatypes23Test {
 		{
 			importXtfAttr();
 		}
-		EhiLogger.getInstance().setTraceFilter(false);
+		//EhiLogger.getInstance().setTraceFilter(false);
 	    File fgdbFile=new File(FGDBFILENAME);
 	    //Fgdb4j.deleteFileGdb(fgdbFile);
 	    Class driverClass = Class.forName(FgdbDriver.class.getName());
@@ -484,12 +464,7 @@ public class Datatypes23Test {
 		config.setFunction(Config.FC_EXPORT);
 		config.setModels("Datatypes23");
 		Ili2db.readSettingsFromDb(config);
-		try{
-			Ili2db.run(config,null);
-		}catch(Exception ex){
-			EhiLogger.logError(ex);
-			Assert.fail();
-		}
+        Ili2db.run(config,null);
 		{
 			XtfReader reader=new XtfReader(dataAttr);
 			assertTrue(reader.read() instanceof StartTransferEvent);

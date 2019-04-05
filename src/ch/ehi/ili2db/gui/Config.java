@@ -1,5 +1,7 @@
 package ch.ehi.ili2db.gui;
 
+import java.util.Properties;
+
 import ch.ehi.basics.settings.Settings;
 import ch.ehi.sqlgen.generator.SqlConfiguration;
 
@@ -19,6 +21,7 @@ public class Config extends Settings {
 	public static final String CREATE_ENUM_DEFS_NO="no";
 	public static final String CREATE_ENUM_DEFS_SINGLE="singleTable";
 	public static final String CREATE_ENUM_DEFS_MULTI="multiTable";
+    public static final String CREATE_ENUM_DEFS_MULTI_WITH_ID="multiTableWithId";
 	public static final String CREATE_ENUM_COLS=PREFIX+".createEnumCols";
 	public static final String CREATE_ENUM_TXT_COL="addTxtCol";
 	public static final String CREATE_DATASET_COLS=PREFIX+".createDatasetCols";
@@ -47,12 +50,16 @@ public class Config extends Settings {
 	public static final String MULTIPOINT_TRAFO_COALESCE="coalesce";
 	public static final String ARRAY_TRAFO=PREFIX+".arrayTrafo";
 	public static final String ARRAY_TRAFO_COALESCE="coalesce";
+    public static final String JSON_TRAFO=PREFIX+".jsonTrafo";
+    public static final String JSON_TRAFO_COALESCE="coalesce";
 	public static final String MULTILINGUAL_TRAFO=PREFIX+".multilingualTrafo";
 	public static final String MULTILINGUAL_TRAFO_EXPAND="expand";
 	public static final String UNIQUE_CONSTRAINTS=PREFIX+".uniqueConstraints";
 	public static final String UNIQUE_CONSTRAINTS_CREATE="create";
 	public static final String NUMERIC_CHECK_CONSTRAINTS=PREFIX+".numericCheckConstraints";
 	public static final String NUMERIC_CHECK_CONSTRAINTS_CREATE="create";
+    public static final String IMPORT_TABS=PREFIX+".importTabs";
+    public static final String IMPORT_TABS_CREATE="simple";
 	public static final String GEOMATTR_PER_TABLE=PREFIX+".geomAttrPerTable";
 	public static final String GEOMATTR_PER_TABLE_ONE="oneGeomAttrPerTable";
 	private static final String NAME_OPTIMIZATION=PREFIX+".nameOptimization";
@@ -74,15 +81,24 @@ public class Config extends Settings {
 	private static final String ATTACHMENT_KEY=PREFIX+".attachmentKey";
 	private static final String DO_ITF_LINE_TABLES=PREFIX+".doItfLineTables";
 	private static final String COLNAME_T_ID=PREFIX+".colName_T_ID";
-	public static final String VER4_TRANSLATION=PREFIX+".ver4_translation";
+    public static final String VER3_TRANSLATION=PREFIX+".ver3_translation";
 	public static final String ILI1TRANSLATION=PREFIX+".ili1translation";
 	public static final String DELETE_DATA="data";
 	public static final String CREATE_META_INFO=PREFIX+".createMetaInfo";
+	public static final String USE_EPGS_IN_NAMES=PREFIX+".useEpsgInNames";
+	public static final String SRS_MODEL_ASSIGNMENT=PREFIX+".srsModelAssignment";
 	public static final String MODELS_TAB_MODELNAME_COLSIZE = PREFIX+".modelsTabModelnameColSize";
-	private int function;
+    public static final String ATTRNAME_TAB_SQLNAME_COLSIZE = PREFIX+".attrTabSqlnameColSize";
+    public static final String ATTRNAME_TAB_OWNER_COLSIZE = PREFIX+".attrTabOwnerColSize";
+    public static final String CLASSNAME_TAB_ILINAME_COLSIZE = PREFIX+".classnameTabIlinameColSize";
+    public static final String INHERIT_TAB_THIS_COLSIZE = PREFIX+".inheritTabThisColSize";
+	public static final String CREATE_TYPE_CONSTRAINT=PREFIX+".createTypeConstraint";
+	private int function=FC_UNDEFINED;
 	private String dburl;
 	private String dbusr;
 	private String dbpwd;
+	private Properties dbprops=null;
+    private String dbparams=null;
 	private String dbhost;
 	private String dbport;
 	private String dbdatabase;
@@ -110,23 +126,29 @@ public class Config extends Settings {
 	private boolean configReadFromDb=false;
 	private boolean itfTransferFile=false;
 	private String validConfigFileName=null;
-    private boolean doImplicitSchemaImport=true; // do implicit schema import during data import
+    private boolean doImplicitSchemaImport=false; // do implicit schema import during data import
 	private boolean validation=false;
 	private boolean skipReferenceErrors=false;
+    private boolean exportTid=false;
+    private boolean importTid=false;
     private boolean importBid=false;
     private Long minIdSeqValue=null;
 	private Long maxIdSeqValue=null;
 	private boolean setupPgExt=false;
 	private String transferFileFormat=null;
 	private String iliMetaAttrsFile=null;
+    private String domainAssignments=null;
 	final static public String ILIGML20="ILIGML20"; 
 	
-	static public final int FC_IMPORT=0;
-	static public final int FC_SCHEMAIMPORT=1;
-	static public final int FC_EXPORT=2;
-	static public final int FC_UPDATE=3;
-	static public final int FC_DELETE=4;
-	static public final int FC_REPLACE=5;
+    static public final int FC_UNDEFINED=0;
+	static public final int FC_IMPORT=1;
+	static public final int FC_SCHEMAIMPORT=2;
+	static public final int FC_EXPORT=3;
+	static public final int FC_UPDATE=4;
+	static public final int FC_DELETE=5;
+	static public final int FC_REPLACE=6;
+    static public final int FC_SCRIPT=7;
+    static public final int FC_VALIDATE=8;
 	public String getIdGenerator() {
 		return idGenerator;
 	}
@@ -169,6 +191,12 @@ public class Config extends Settings {
 	public void setDbusr(String dbusr) {
 		this.dbusr = dbusr;
 	}
+    public Properties getDbProperties() {
+        return dbprops;
+    }
+    public void setDbProperties(Properties props) {
+        this.dbprops=props;
+    }
 	public String getDropscript() {
 		return dropscript;
 	}
@@ -223,10 +251,16 @@ public class Config extends Settings {
 	public void setFunction(int function) {
 		this.function = function;
 	}
+    public String getDbParams() {
+        return dbparams;
+    }
+    public void setDbParams(String propFile) {
+        this.dbparams = propFile;
+    }
 	public String getDbfile() {
 		return dbfile;
 	}
-	public void setDbfile(String dbfile) {
+    public void setDbfile(String dbfile) {
 		this.dbfile = dbfile;
 	}
 	public String getDbhost() {
@@ -393,6 +427,12 @@ public class Config extends Settings {
 	public void setArrayTrafo(String value) {
 		setValue(ARRAY_TRAFO,value);
 	}
+    public String getJsonTrafo() {
+        return getValue(JSON_TRAFO);
+    }
+    public void setJsonTrafo(String value) {
+        setValue(JSON_TRAFO,value);
+    }
 	public String getMultilingualTrafo() {
 		return getValue(MULTILINGUAL_TRAFO);
 	}
@@ -443,6 +483,13 @@ public class Config extends Settings {
 	public boolean isCreateCreateNumChecks() {
 		return NUMERIC_CHECK_CONSTRAINTS_CREATE.equals(getValue(NUMERIC_CHECK_CONSTRAINTS));
 	}
+    public void setCreateImportTabs(boolean ignore) {
+        setValue(IMPORT_TABS,ignore?IMPORT_TABS_CREATE:null);
+    }
+    public boolean isCreateImportTabs() {
+        return IMPORT_TABS_CREATE.equals(getValue(IMPORT_TABS));
+    }
+
 	public void setOneGeomPerTable(boolean onlyOne) {
 		setValue(GEOMATTR_PER_TABLE,onlyOne?GEOMATTR_PER_TABLE_ONE:null);
 	}
@@ -467,6 +514,19 @@ public class Config extends Settings {
 	public void setTidHandling(String value) {
 		setValue(TID_HANDLING,value);
 	}
+    public void setImportTid(boolean enable) {
+        importTid=enable;
+    }
+    public boolean isImportTid() {
+        return importTid;
+    }
+    public void setExportTid(boolean enable) {
+        exportTid=enable;
+    }
+    public boolean isExportTid() {
+        return exportTid;
+    }
+	
 	public String getBasketHandling() {
 		return getValue(BASKET_HANDLING);
 	}
@@ -584,11 +644,11 @@ public class Config extends Settings {
 		this.disableAreaValidation = disableAreaValidation;
 	}
 	private boolean disableAreaValidation=false;
-	public void setVer4_translation(boolean b) {
-		setValue(VER4_TRANSLATION,TRUE);
+	public void setVer3_translation(boolean b) {
+		setValue(VER3_TRANSLATION,b?TRUE:FALSE);
 	}
-	public boolean getVer4_translation() {
-		return TRUE.equals(getValue(VER4_TRANSLATION))?true:false;
+	public boolean isVer3_translation() {
+		return TRUE.equals(getValue(VER3_TRANSLATION))?true:false;
 	}
 	public void setIli1Translation(String modelMapping) {
 		setValue(ILI1TRANSLATION,modelMapping);
@@ -633,9 +693,34 @@ public class Config extends Settings {
         this.doImplicitSchemaImport = doImplicitSchemaImport;
     }
     public void setImportBid(boolean enable) {
-        importBid=true;
+        importBid=enable;
     }
     public boolean isImportBid() {
         return importBid;
     }
+
+    public void setUseEpsgInNames(boolean value) {
+        setValue(USE_EPGS_IN_NAMES,value?TRUE:FALSE);
+    }
+    public boolean useEpsgInNames() {
+        return TRUE.equals(getValue(USE_EPGS_IN_NAMES))?true:false;
+    }
+    public void setDomainAssignments(String value) {
+        domainAssignments=value;
+    }
+    public String getDomainAssignments() {
+        return domainAssignments;
+    }
+    public void setSrsModelAssignment(String value) {
+        setValue(SRS_MODEL_ASSIGNMENT,value);
+    }
+    public String getSrsModelAssignment() {
+        return getValue(SRS_MODEL_ASSIGNMENT);
+    }
+    public void setCreateTypeConstraint(boolean value) {
+		setValue(CREATE_TYPE_CONSTRAINT,value?TRUE:FALSE);
+	}
+	public boolean getCreateTypeConstraint() {
+		return TRUE.equals(getValue(CREATE_TYPE_CONSTRAINT))?true:false;
+	}
 }

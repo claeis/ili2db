@@ -59,9 +59,9 @@ public class MultipointTest {
 	}
 	
 	@Test
-	public void importSmartCustom() throws Exception
+	public void importXtfSmartCustom() throws Exception
 	{
-		EhiLogger.getInstance().setTraceFilter(false);
+		//EhiLogger.getInstance().setTraceFilter(false);
 		Connection jdbcConnection=null;
 		try{
 		    Class driverClass = Class.forName("org.postgresql.Driver");
@@ -72,6 +72,7 @@ public class MultipointTest {
 			File data=new File("test/data/MultiPoint/MultiPoint2a.xtf");
 			Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 			config.setFunction(Config.FC_IMPORT);
+	        config.setDoImplicitSchemaImport(true);
 			config.setCreateFk(config.CREATE_FK_YES);
 			config.setTidHandling(Config.TID_HANDLING_PROPERTY);
 			config.setBasketHandling(config.BASKET_HANDLING_READWRITE);
@@ -100,7 +101,7 @@ public class MultipointTest {
 	}
 	
 	@Test
-	public void exportSmartCustom() throws Exception
+	public void exportXtfSmartCustom() throws Exception
 	{
 		Connection jdbcConnection=null;
 		try{
@@ -116,6 +117,7 @@ public class MultipointTest {
 			Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 			config.setModels("MultiPoint2");
 			config.setFunction(Config.FC_EXPORT);
+			config.setExportTid(true);
 			Ili2db.readSettingsFromDb(config);
 			Ili2db.run(config,null);
 			HashMap<String,IomObject> objs=new HashMap<String,IomObject>();

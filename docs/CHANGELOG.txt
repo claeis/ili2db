@@ -4,7 +4,6 @@ ideas/open issues/questions
 - gui: button 'drop tables'
 - gui: button 'create scripts'
 - ordered assocs
-- attributes of 1:n associations
 - make use of quoted identifiers
 - --logValidOverlaps
 - support ili2 views
@@ -14,6 +13,61 @@ ideas/open issues/questions
 
 LATEST
 ---------------------------
+
+ili2db 4.0.0 (2019-04-05) BETA
+------------------------------
+- IMPORTANT: ili2db 4.x breaks schema compatibility with ili2db 3.x
+- T_ILI2DB_MODEL.file -> filename
+- T_ILI2DB_IMPORT_BASKET.import -> importrun
+- T_ILI2DB_ATTRNAME.owner -> colowner
+- T_ILI2DB_SETTINGS.settings new length 1024
+- T_ILI2DB_BASKETS.domains new column
+- set ch.ehi.ili2db.ver3_translation=True (in T_ILI2DB_SETTINGS) to get ver3 translation
+- remove ch.ehi.ili2db.ver4_translation=True (in T_ILI2DB_SETTINGS) to get ver4 translation
+- xtf24: import/export coord generics
+- attributes of 1:n associations
+- ehisqlgen-1.13.7
+- iox-ili-1.20.11
+- ili2c-5.0.0
+- fixed: missing resource ch.ehi.basics.wizard
+- replaced TOML file reader with INI file reader
+- Fehler beim polymorphen Schreiben von Modellen mit CatalogueObjects #229 
+- separate tid import from tid column creation #274
+- --createscript creates wrong sql insert commands #261
+- Wrong dependency scope for ili2db in ili2pg artefact #272
+- remove implicit schema import with --import #112
+- make --ver4-translation the default #271
+- Confusing error message in Export #264
+- failed to insert setting #157
+- cleanup column/table names of ili2db metatables #238
+- check sql table names for reserved words #267
+- check sql names for mysql reserved words #265
+- check sql names for oracle reserved words #266
+- NullPointerException on import after schemaimport with v4-SNAPSHOT #259
+- unexpected namesapce http://www.interlis.ch/INTERLIS2.2 #258
+- --createscript should include CREATE SCHEMA stmt #260
+- Create SQL script should insert values for enumerations and t_ili2db meta tables #124
+- remove default SRS code #111
+- Change --defaultSrsCode to 2056 #80
+- ili2db schema import: missing fk in one-to-many relationships with attributes #228
+- JSON-Stringobjekt vs. JSON-Array #247
+- ili2pg: SSL-connection to DB Server possible? #176
+- add --dbparams option to support additional connection parameters #252
+- remove tag @iliname from db comments #251
+- reference ili2c-5.x #253
+- ignore ordering of JSON properties #245
+- add mysql support #234
+- new option --validate #237
+- ch.ehi.ili2db.c1Min should be the value from the ili-model #226
+- map BAG/LIST to JSON by default #218
+- Add t_type property in meta-info table and constraint on the column #242
+- ili2gpkg: support ARRAY mapping (to JSON) #240
+- use postgis geometry types instead of AddGeometryColumn #236
+- support smart mapping of structures to JSON #128
+- Create SQL script without creating tables in the database #85
+- --createEnumTabs with --createFk should create FKs to enum tabs #19
+- ili2pg Fehler auf AI KKGEO #225
+- ili2mssql: remove db specific default CRS #127
 
 ili2pg 3.12.2 (2018-09-07)
 -----------------------------

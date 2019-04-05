@@ -25,7 +25,7 @@ import ch.interlis.iom.IomObject;
  * @author ce
  * @version $Revision: 1.0 $ $Date: 05.04.2005 $
  */
-public class StructWrapper {
+public class StructWrapper extends AbstractStructWrapper {
 	private long parentSqlId;
 	private IomObject parent;
 	private AttributeDef parentAttr;
@@ -47,6 +47,7 @@ public class StructWrapper {
 	public AttributeDef getParentAttr() {
 		return parentAttr;
 	}
+    @Override
 	public IomObject getParent() {
 		return parent;
 	}

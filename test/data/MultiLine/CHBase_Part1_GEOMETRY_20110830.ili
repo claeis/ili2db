@@ -2,7 +2,7 @@
    CHBASE - BASE MODULES OF THE SWISS FEDERATION FOR MINIMAL GEODATA MODELS
    ======
    BASISMODULE DES BUNDES           MODULES DE BASE DE LA CONFEDERATION
-   F�R MINIMALE GEODATENMODELLE     POUR LES MODELES DE GEODONNEES MINIMAUX
+   FÜR MINIMALE GEODATENMODELLE     POUR LES MODELES DE GEODONNEES MINIMAUX
    
    PROVIDER: GKG/KOGIS - GCS/COSIG             CONTACT: models@geo.admin.ch
    PUBLISHED: 2011-0830
@@ -22,13 +22,15 @@ INTERLIS 2.3;
 
 !! Version    | Who   | Modification
 !!------------------------------------------------------------------------------
-!! 2015-02-20 | KOGIS | WITHOUT OVERLAPS added (line 53, 54, 60 and 61)
-!! 2015-11-12 | KOGIS | WITHOUT OVERLAPS corrected (line 53 and 54)
+!! 2015-02-20 | KOGIS | WITHOUT OVERLAPS added (line 57, 58, 65 and 66)
+!! 2015-11-12 | KOGIS | WITHOUT OVERLAPS corrected (line 57 and 58)
+!! 2017-11-27 | KOGIS | Meta-Attributes @furtherInformation adapted and @CRS added (line 31, 44 and 50)
+!! 2017-12-04 | KOGIS | Meta-Attribute @CRS corrected
 
 !!@technicalContact=models@geo.admin.ch
-!!@furtherInformation=http://www.geo.admin.ch/internet/geoportal/de/home/topics/geobasedata/models.html
+!!@furtherInformation=https://www.geo.admin.ch/de/geoinformation-schweiz/geobasisdaten/geodata-models.html
 TYPE MODEL GeometryCHLV03_V1 (en)
-  AT "http://www.geo.admin.ch" VERSION "2015-11-12" =
+  AT "http://www.geo.admin.ch" VERSION "2017-12-04" =
 
   IMPORTS UNQUALIFIED INTERLIS;
   IMPORTS Units;
@@ -39,11 +41,13 @@ TYPE MODEL GeometryCHLV03_V1 (en)
     OBJECTS OF GeoHeight: SwissOrthometricAlt;
 
   DOMAIN
+    !!@CRS=EPSG:21781
     Coord2 = COORD
       460000.000 .. 870000.000 [m] {CHLV03[1]},
        45000.000 .. 310000.000 [m] {CHLV03[2]},
       ROTATION 2 -> 1;
 
+    !!@CRS=EPSG:21781
     Coord3 = COORD
       460000.000 .. 870000.000 [m] {CHLV03[1]},
        45000.000 .. 310000.000 [m] {CHLV03[2]},
@@ -96,13 +100,15 @@ END GeometryCHLV03_V1.
 
 !! Version    | Who   | Modification
 !!------------------------------------------------------------------------------
-!! 2015-02-20 | KOGIS | WITHOUT OVERLAPS added (line 127, 128, 135 and 136)
-!! 2015-11-12 | KOGIS | WITHOUT OVERLAPS corrected (line 127 and 128)
+!! 2015-02-20 | KOGIS | WITHOUT OVERLAPS added (line 135, 136, 143 and 144)
+!! 2015-11-12 | KOGIS | WITHOUT OVERLAPS corrected (line 135 and 136)
+!! 2017-11-27 | KOGIS | Meta-Attributes @furtherInformation adapted and @CRS added (line 109, 122 and 128)
+!! 2017-12-04 | KOGIS | Meta-Attribute @CRS corrected
 
 !!@technicalContact=models@geo.admin.ch
-!!@furtherInformation=http://www.geo.admin.ch/internet/geoportal/de/home/topics/geobasedata/models.html
+!!@furtherInformation=https://www.geo.admin.ch/de/geoinformation-schweiz/geobasisdaten/geodata-models.html
 TYPE MODEL GeometryCHLV95_V1 (en)
-  AT "http://www.geo.admin.ch" VERSION "2015-11-12" =
+  AT "http://www.geo.admin.ch" VERSION "2017-12-04" =
 
   IMPORTS UNQUALIFIED INTERLIS;
   IMPORTS Units;
@@ -113,11 +119,13 @@ TYPE MODEL GeometryCHLV95_V1 (en)
     OBJECTS OF GeoHeight: SwissOrthometricAlt;
 
   DOMAIN
+    !!@CRS=EPSG:2056
     Coord2 = COORD
       2460000.000 .. 2870000.000 [m] {CHLV95[1]},
       1045000.000 .. 1310000.000 [m] {CHLV95[2]},
       ROTATION 2 -> 1;
 
+    !!@CRS=EPSG:2056
     Coord3 = COORD
       2460000.000 .. 2870000.000 [m] {CHLV95[1]},
       1045000.000 .. 1310000.000 [m] {CHLV95[2]},

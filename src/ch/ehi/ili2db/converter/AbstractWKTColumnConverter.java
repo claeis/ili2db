@@ -374,14 +374,36 @@ public abstract class AbstractWKTColumnConverter implements SqlColumnConverter {
 		throw new UnsupportedOperationException();
 	}
 	@Override
-	public Object fromIomArray(AttributeDef iliEleAttr, String[] iomValues, EnumCodeMapper enumTypes)
+	public Object fromIomArray(AttributeDef iliEleAttr, String[] iomValues, boolean isEnumInt)
 			throws SQLException, ConverterException {
 		throw new UnsupportedOperationException();
 	}
 	@Override
-	public String[] toIomArray(AttributeDef iliEleAttr, Object sqlArray, EnumCodeMapper enumTypes)
+	public String[] toIomArray(AttributeDef iliEleAttr, Object sqlArray, boolean isEnumInt)
 			throws SQLException, ConverterException {
 		throw new UnsupportedOperationException();
 	}
+    @Override
+    public String getSelectValueWrapperJson(String makeColumnRef) {
+        throw new UnsupportedOperationException();
+    }
+    @Override
+    public String getInsertValueWrapperJson(String sqlColName) {
+        throw new UnsupportedOperationException();
+    }
+    @Override
+    public void setJsonNull(PreparedStatement ps, int parameterIndex) throws SQLException {
+        throw new UnsupportedOperationException();
+    }
+    @Override
+    public Object fromIomStructureToJson(AttributeDef iliEleAttr, IomObject[] iomValues)
+            throws SQLException, ConverterException {
+        throw new UnsupportedOperationException();
+    }
+    @Override
+    public IomObject[] toIomStructureFromJson(AttributeDef iliEleAttr, Object sqlArray)
+            throws SQLException, ConverterException {
+        throw new UnsupportedOperationException();
+    }
 
 }

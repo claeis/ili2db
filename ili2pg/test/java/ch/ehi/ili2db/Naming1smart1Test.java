@@ -63,7 +63,7 @@ public class Naming1smart1Test {
 	//config.setTidHandling(config.TID_HANDLING_PROPERTY);
 	
 	@Test
-	public void importDataset() throws Exception
+	public void importXtfDataset() throws Exception
 	{
 		Connection jdbcConnection=null;
 		try{
@@ -77,6 +77,7 @@ public class Naming1smart1Test {
 			Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 			config.setDatasetName(DATASETNAME);
 			config.setFunction(Config.FC_IMPORT);
+	        config.setDoImplicitSchemaImport(true);
 			config.setCreateFk(config.CREATE_FK_YES);
 			config.setBasketHandling(config.BASKET_HANDLING_READWRITE);
 			config.setCatalogueRefTrafo(null);
@@ -85,6 +86,7 @@ public class Naming1smart1Test {
 			config.setInheritanceTrafo(config.INHERITANCE_TRAFO_SMART1);
 			config.setNameOptimization(Config.NAME_OPTIMIZATION_TOPIC);
 			config.setTidHandling(config.TID_HANDLING_PROPERTY);
+			config.setImportTid(true);
 			Ili2db.readSettingsFromDb(config);
 			Ili2db.run(config,null);
 			{
@@ -101,7 +103,7 @@ public class Naming1smart1Test {
 	}
 	
 	@Test
-	public void exportDataset() throws Exception
+	public void exportDataset_3x() throws Exception
 	{
 		Connection jdbcConnection=null;
 		try{
@@ -113,6 +115,7 @@ public class Naming1smart1Test {
 			Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 			config.setDatasetName(DATASETNAME);
 			config.setFunction(Config.FC_EXPORT);
+			config.setExportTid(true);
 			Ili2db.readSettingsFromDb(config);
 			Ili2db.run(config,null);
 			HashMap<String,IomObject> objs=new HashMap<String,IomObject>();
@@ -167,4 +170,71 @@ public class Naming1smart1Test {
 			}
 		}
 	}
+    @Test
+    public void exportXtfDataset() throws Exception
+    {
+        importXtfDataset();
+        Connection jdbcConnection=null;
+        try{
+            Class driverClass = Class.forName("org.postgresql.Driver");
+            jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
+            File data=new File("test/data/Naming1smart1/Naming1a-out.xtf");
+            Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+            config.setDatasetName(DATASETNAME);
+            config.setFunction(Config.FC_EXPORT);
+            config.setExportTid(true);
+            Ili2db.readSettingsFromDb(config);
+            Ili2db.run(config,null);
+            HashMap<String,IomObject> objs=new HashMap<String,IomObject>();
+            XtfReader reader=new XtfReader(data);
+            IoxEvent event=null;
+             do{
+                event=reader.read();
+                if(event instanceof StartTransferEvent){
+                }else if(event instanceof StartBasketEvent){
+                }else if(event instanceof ObjectEvent){
+                    IomObject iomObj=((ObjectEvent)event).getIomObject();
+                    if(iomObj.getobjectoid()!=null){
+                        objs.put(iomObj.getobjectoid(), iomObj);
+                    }
+                }else if(event instanceof EndBasketEvent){
+                }else if(event instanceof EndTransferEvent){
+                }
+             }while(!(event instanceof EndTransferEvent));
+             
+            IomObject a1 = objs.get("a1");
+            Assert.assertNotNull(a1);
+            Assert.assertEquals("Naming1.TestAttr.ClassA1", a1.getobjecttag());
+            Assert.assertEquals("a1 first", a1.getattrvalue("attr1"));
+            Assert.assertEquals("a1 second", a1.getattrvalue("Attr1"));
+
+            IomObject a2 = objs.get("a2");
+            Assert.assertNotNull(a2);
+            Assert.assertEquals("Naming1.TestAttr.ClassA1a", a2.getobjecttag());
+            Assert.assertEquals("a2 first", a2.getattrvalue("attr1"));
+            Assert.assertEquals("a2 second", a2.getattrvalue("Attr1"));
+            Assert.assertEquals("a2", a2.getattrvalue("attrA"));
+
+            IomObject a3 = objs.get("a3");
+            Assert.assertNotNull(a3);
+            Assert.assertEquals("Naming1.TestAttr.ClassA1b", a3.getobjecttag());
+            Assert.assertEquals("a3 first", a3.getattrvalue("attr1"));
+            Assert.assertEquals("a3 second", a3.getattrvalue("Attr1"));
+            Assert.assertEquals("a3", a3.getattrvalue("attrA"));
+
+            IomObject c1 = objs.get("c1");
+            Assert.assertNotNull(c1);
+            Assert.assertEquals("Naming1.TestClass.ClassA1", c1.getobjecttag());
+            Assert.assertEquals("attr1", c1.getattrvalue("attr1"));
+
+            IomObject c2 = objs.get("c2");
+            Assert.assertNotNull(c2);
+            Assert.assertEquals("Naming1.TestClass.Classa1", c2.getobjecttag());
+            Assert.assertEquals("attrA'", c2.getattrvalue("attrA"));
+        }finally{
+            if(jdbcConnection!=null){
+                jdbcConnection.close();
+            }
+        }
+    }
 }

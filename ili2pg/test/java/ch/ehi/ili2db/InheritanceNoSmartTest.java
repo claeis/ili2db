@@ -61,7 +61,7 @@ public class InheritanceNoSmartTest {
 	}
 
 	@Test
-	public void importNoSmart() throws Exception
+	public void importXtfNoSmart() throws Exception
 	{
 		Connection jdbcConnection=null;
 		try{
@@ -74,10 +74,12 @@ public class InheritanceNoSmartTest {
 		        File data=new File("test/data/InheritanceNoSmart/Inheritance1a.xtf");
 				Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 				config.setFunction(Config.FC_IMPORT);
+		        config.setDoImplicitSchemaImport(true);
 				config.setCreateFk(Config.CREATE_FK_YES);
 				config.setInheritanceTrafo(null);
 				config.setDatasetName(DATASETNAME);
 				config.setTidHandling(Config.TID_HANDLING_PROPERTY);
+				config.setImportTid(true);
 				config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
 				Ili2db.readSettingsFromDb(config);
 				Ili2db.run(config,null);
@@ -98,7 +100,7 @@ public class InheritanceNoSmartTest {
 	}
 
 	@Test
-	public void exportNoSmart() throws Exception
+	public void exportXtfNoSmart() throws Exception
 	{
 		Connection jdbcConnection=null;
 		try{
@@ -112,6 +114,7 @@ public class InheritanceNoSmartTest {
 			Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 			config.setModels("Inheritance1");
 			config.setFunction(Config.FC_EXPORT);
+			config.setExportTid(true);
 			Ili2db.readSettingsFromDb(config);
 			Ili2db.run(config,null);
 			// read objects of db and write objectValue to HashMap
@@ -183,6 +186,37 @@ public class InheritanceNoSmartTest {
 				Ili2db.readSettingsFromDb(config);
 				Ili2db.run(config,null);
 				// FIXME check that FK exists on reference from struct table to class table
+                {
+                    // t_ili2db_attrname
+                    String [][] expectedValues=new String[][] {
+                        {"StructAttr1.TopicB.StructA.name",   "aname", "topicb_structa", null},
+                        {"StructAttr1.TopicB.ClassB.attr3",   "attr3", "topicb_classb", null},
+                        {"StructAttr1.TopicB.ClassA.attr1",   "topicb_classa_attr1",   "topicb_structa",    "topicb_classa"},
+                        {"StructAttr1.TopicB.ClassA.attr2",   "attr2", "topicb_classa", null},
+                        {"StructAttr1.TopicA.ClassA.attr1",   "topica_classa_attr1",   "topica_structa",   "topica_classa"},
+                        {"StructAttr1.TopicA.ClassC.attr4",   "attr4", "topica_classc", null},
+                        {"StructAttr1.TopicA.ClassB.attr3",   "attr3", "topica_classb", null},
+                        {"StructAttr1.TopicA.StructA.name",   "aname", "topica_structa", null},
+                        {"StructAttr1.TopicA.ClassA.attr2",   "attr2", "topica_classa", null},
+                        {"StructAttr1.TopicB.ClassC.attr4",   "attr4", "topicb_classc", null}, 
+                    };
+                    Ili2dbAssert.assertAttrNameTable(jdbcConnection,expectedValues, DBSCHEMA);
+                    
+                }
+                {
+                    // t_ili2db_trafo
+                    String [][] expectedValues=new String[][] {
+                        {"StructAttr1.TopicB.StructA", "ch.ehi.ili2db.inheritance", "newClass"},
+                        {"StructAttr1.TopicA.ClassB", "ch.ehi.ili2db.inheritance", "newClass"},
+                        {"StructAttr1.TopicA.ClassA", "ch.ehi.ili2db.inheritance", "newClass"},
+                        {"StructAttr1.TopicB.ClassA", "ch.ehi.ili2db.inheritance", "newClass"},
+                        {"StructAttr1.TopicB.ClassB", "ch.ehi.ili2db.inheritance", "newClass"},
+                        {"StructAttr1.TopicA.StructA", "ch.ehi.ili2db.inheritance", "newClass"},
+                        {"StructAttr1.TopicA.ClassC", "ch.ehi.ili2db.inheritance", "newClass"},
+                        {"StructAttr1.TopicB.ClassC", "ch.ehi.ili2db.inheritance", "newClass"},
+                    };
+                    Ili2dbAssert.assertTrafoTable(jdbcConnection,expectedValues, DBSCHEMA);
+                }
 	        }
 		}finally{
 			if(jdbcConnection!=null){
@@ -205,10 +239,12 @@ public class InheritanceNoSmartTest {
 				File data=new File("test/data/InheritanceNoSmart/StructAttr1a.xtf");
 				Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 				config.setFunction(Config.FC_IMPORT);
+		        config.setDoImplicitSchemaImport(true);
 				config.setCreateFk(Config.CREATE_FK_YES);
 				config.setInheritanceTrafo(null);
 				config.setDatasetName(DATASETNAME);
 				config.setTidHandling(Config.TID_HANDLING_PROPERTY);
+				config.setImportTid(true);
 				config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
 				config.setNameOptimization(Config.NAME_OPTIMIZATION_TOPIC);
 				Ili2db.readSettingsFromDb(config);
@@ -244,6 +280,7 @@ public class InheritanceNoSmartTest {
 			config.setModels("Inheritance1");
 			config.setDatasetName(DATASETNAME);
 			config.setFunction(Config.FC_EXPORT);
+			config.setExportTid(true);
 			Ili2db.readSettingsFromDb(config);
 			Ili2db.run(config,null);
 			// read objects of db and write objectValue to HashMap

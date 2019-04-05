@@ -59,16 +59,37 @@ public class GeomIndex10Test {
 			config.setBasketHandling(config.BASKET_HANDLING_READWRITE);
 			config.setValue(SqlConfiguration.CREATE_GEOM_INDEX,"True");
 			config.setMaxSqlNameLength("20");
-			config.setDoItfLineTables(true);
-			config.setAreaRef(config.AREA_REF_KEEP);
+            Ili2db.setSkipPolygonBuilding(config);
 			config.setCatalogueRefTrafo(null);
 			config.setMultiSurfaceTrafo(null);
 			config.setMultilingualTrafo(null);
 			config.setInheritanceTrafo(null);
+            config.setDefaultSrsAuthority("EPSG");
+            config.setDefaultSrsCode("21781");
 			Ili2db.readSettingsFromDb(config);
 			Ili2db.run(config,null);
 			{
-				// FIXME test if index exists
+                {
+                    // t_ili2db_attrname
+                    String [][] expectedValues=new String[][] {
+                        {"GeomIndex10.Topic.FlaechenTable2.surface._geom",    "_geom", "flaechentable2_suace",null},
+                        {"GeomIndex10.Topic.FlaechenTable2.surface._ref", "_ref",  "flaechentable2_suace",null},
+                        {"GeomIndex10.Topic.FlaechenTable.surface._geom", "_geom", "flaechentable_surace",null},
+                        {"GeomIndex10.Topic.FlaechenTable.surface._ref",  "_ref",  "flaechentable_surace",null},
+                        {"GeomIndex10.Topic.flaace__geom_idx.dy", "dy",    "flaace__geom_idx",null},
+                    };
+                    Ili2dbAssert.assertAttrNameTable(jdbcConnection,expectedValues, DBSCHEMA);
+                    
+                }
+                {
+                    // t_ili2db_trafo
+                    String [][] expectedValues=new String[][] {
+                        {"GeomIndex10.Topic.FlaechenTable2",  "ch.ehi.ili2db.inheritance", "newClass"},
+                        {"GeomIndex10.Topic.FlaechenTable", "ch.ehi.ili2db.inheritance", "newClass"},
+                        {"GeomIndex10.Topic.flaace__geom_idx", "ch.ehi.ili2db.inheritance", "newClass"},
+                    };
+                    Ili2dbAssert.assertTrafoTable(jdbcConnection,expectedValues, DBSCHEMA);
+                }
 			}
 		}finally{
 			if(jdbcConnection!=null){

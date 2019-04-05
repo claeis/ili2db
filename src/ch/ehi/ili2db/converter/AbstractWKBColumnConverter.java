@@ -17,24 +17,32 @@
  */
 package ch.ehi.ili2db.converter;
 
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Time;
 import java.sql.Timestamp;
+import java.sql.Types;
 
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonParser;
 import com.vividsolutions.jts.io.ParseException;
 
 import ch.ehi.basics.settings.Settings;
 import ch.ehi.ili2db.gui.Config;
+import ch.ehi.ili2db.json.Iox2json;
 import ch.interlis.ili2c.metamodel.AttributeDef;
+import ch.interlis.ili2c.metamodel.TransferDescription;
 import ch.interlis.iom.IomObject;
 import ch.interlis.iom_j.itf.EnumCodeMapper;
 import ch.interlis.iox_j.jts.Iox2jtsException;
 
 public abstract class AbstractWKBColumnConverter implements SqlColumnConverter {
 	protected Connection conn=null;
+	private TransferDescription td=null;
 	@Override
 	public void setCoordNull(PreparedStatement stmt, int parameterIndex) throws SQLException {
 		stmt.setNull(parameterIndex,java.sql.Types.BINARY);
@@ -367,27 +375,99 @@ public abstract class AbstractWKBColumnConverter implements SqlColumnConverter {
 	public String toIomBlob(Object obj) throws SQLException, ConverterException {
 		throw new UnsupportedOperationException();
 	}
-	@Override
-	public String getSelectValueWrapperArray(String makeColumnRef) {
-		throw new UnsupportedOperationException();
-	}
-	@Override
-	public String getInsertValueWrapperArray(String sqlColName) {
-		throw new UnsupportedOperationException();
-	}
-	@Override
-	public void setArrayNull(PreparedStatement ps, int parameterIndex) throws SQLException {
-		throw new UnsupportedOperationException();
-	}
-	@Override
-	public Object fromIomArray(AttributeDef iliEleAttr, String[] iomValues, EnumCodeMapper enumTypes)
-			throws SQLException, ConverterException {
-		throw new UnsupportedOperationException();
-	}
-	@Override
-	public String[] toIomArray(AttributeDef iliEleAttr, Object sqlArray, EnumCodeMapper enumTypes)
-			throws SQLException, ConverterException {
-		throw new UnsupportedOperationException();
-	}
+    @Override
+    public String getSelectValueWrapperArray(String sqlColName) {
+        return sqlColName;
+    }
+    @Override
+    public String getInsertValueWrapperArray(String sqlColName) {
+        return sqlColName;
+    }
+    @Override
+    public void setArrayNull(PreparedStatement stmt, int parameterIndex) throws SQLException {
+        stmt.setNull(parameterIndex, Types.VARCHAR);
+    }
+    @Override
+    public Object fromIomArray(AttributeDef iliEleAttr, String[] iomValues, boolean isEnumInt)
+            throws SQLException, ConverterException {
+        JsonFactory jsonF = new JsonFactory();
+        JsonGenerator jg=null;
+        java.io.StringWriter out=new java.io.StringWriter();
+        
+        try {
+            jg = jsonF.createJsonGenerator(out);
+            Iox2json.writeArray(jg, iomValues,iliEleAttr,isEnumInt);
+            jg.flush();
+            jg.close();
+            jg=null;
+        } catch (IOException e) {
+            throw new ConverterException(e);
+        }
+        return out.toString();
+    }
+    @Override
+    public String[] toIomArray(AttributeDef iliEleAttr, Object sqlArray, boolean isEnumInt)
+            throws SQLException, ConverterException {
+        JsonFactory jsonF = new JsonFactory();
+        java.io.StringReader in=new java.io.StringReader((String)sqlArray);
+        String values[]=null;
+        try {
+            JsonParser jg = jsonF.createJsonParser(in);
+            
+            values=Iox2json.readArray(jg);
+        }catch(IOException ex) {
+            throw new ConverterException(ex);
+        }
+        return values;
+    }
+    
+    @Override
+    public String getSelectValueWrapperJson(String sqlColName) {
+        return sqlColName;
+    }
+    @Override
+    public String getInsertValueWrapperJson(String sqlColName) {
+        return sqlColName;
+    }
+    @Override
+    public void setJsonNull(PreparedStatement stmt, int parameterIndex) throws SQLException {
+        stmt.setNull(parameterIndex, Types.VARCHAR);
+    }
+    @Override
+    public Object fromIomStructureToJson(AttributeDef iliEleAttr, IomObject[] iomObjects)
+            throws SQLException, ConverterException {
+        JsonFactory jsonF = new JsonFactory();
+        java.io.StringWriter out=new java.io.StringWriter();
+        JsonGenerator jg=null;
+        
+        try {
+            if(td==null) {
+                td=(TransferDescription) iliEleAttr.getContainer(TransferDescription.class);
+            }
+            jg = jsonF.createJsonGenerator(out);
+            Iox2json.write(jg, iomObjects,td);
+            jg.flush();
+            jg.close();
+            jg=null;
+        } catch (IOException e) {
+            throw new ConverterException(e);
+        }
+        return out.toString();
+    }
+    @Override
+    public IomObject[] toIomStructureFromJson(AttributeDef iliEleAttr, Object sqlArray)
+            throws SQLException, ConverterException {
+        JsonFactory jsonF = new JsonFactory();
+        java.io.StringReader in=new java.io.StringReader((String)sqlArray);
+        IomObject iomObj[]=null;
+        try {
+            JsonParser jg = jsonF.createJsonParser(in);
+            
+            iomObj=Iox2json.read(jg);
+        }catch(IOException ex) {
+            throw new ConverterException(ex);
+        }
+        return iomObj;
+    }
 
 }

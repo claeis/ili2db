@@ -20,6 +20,7 @@ package ch.ehi.ili2db.toxtf;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.sql.Connection;
+import java.sql.ResultSetMetaData;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -31,6 +32,7 @@ import ch.ehi.basics.logging.EhiLogger;
 import ch.ehi.ili2db.base.DbNames;
 import ch.ehi.ili2db.base.Ili2cUtility;
 import ch.ehi.ili2db.base.Ili2db;
+import ch.ehi.ili2db.base.Ili2dbException;
 import ch.ehi.ili2db.converter.ConverterException;
 import ch.ehi.ili2db.converter.SqlColumnConverter;
 import ch.ehi.ili2db.fromili.TransferFromIli;
@@ -49,6 +51,7 @@ import ch.interlis.ili2c.metamodel.AttributeDef;
 import ch.interlis.ili2c.metamodel.CompositionType;
 import ch.interlis.ili2c.metamodel.CoordType;
 import ch.interlis.ili2c.metamodel.Domain;
+import ch.interlis.ili2c.metamodel.Element;
 import ch.interlis.ili2c.metamodel.EnumerationType;
 import ch.interlis.ili2c.metamodel.Model;
 import ch.interlis.ili2c.metamodel.PolylineType;
@@ -71,6 +74,7 @@ import ch.interlis.iom_j.iligml.Iligml10Writer;
 import ch.interlis.iom_j.iligml.Iligml20Writer;
 import ch.interlis.iom_j.itf.ItfWriter;
 import ch.interlis.iom_j.itf.ModelUtilities;
+import ch.interlis.iom_j.xtf.Xtf24Reader;
 import ch.interlis.iox.IoxException;
 import ch.interlis.iox.IoxLogging;
 import ch.interlis.iox.IoxWriter;
@@ -100,6 +104,7 @@ public class TransferToXtf {
 	private boolean createTypeDiscriminator=false;
 	private boolean createGenericStructRef=false;
 	private boolean writeIliTid=false;
+	private boolean hasIliTidCol=false;
 	private SqlColumnConverter geomConv=null;
 	private ToXtfRecordConverter recConv=null;
 	private Viewable2TableMapping class2wrapper=null;
@@ -115,6 +120,10 @@ public class TransferToXtf {
 	private ch.interlis.ili2c.generator.IndentPrintWriter expgen=null;
 	private TranslateToTranslation languageFilter=null;
 	private ReduceToBaseModel exportBaseModelFilter=null;
+    private Integer defaultCrsCode=null;
+    private Map<Element,Element> crsFilter=null;
+    private Map<Element,Element> crsFilterToTarget=null;
+	
 	public TransferToXtf(NameMapping ili2sqlName1,TransferDescription td1,Connection conn1,SqlColumnConverter geomConv,Config config,TrafoConfig trafoConfig,Viewable2TableMapping class2wrapper1){
 		ili2sqlName=ili2sqlName1;
 		td=td1;
@@ -126,25 +135,39 @@ public class TransferToXtf {
 		if(colT_ID==null){
 			colT_ID=DbNames.T_ID_COL;
 		}
+		if(config.getDefaultSrsCode()!=null) {
+	        defaultCrsCode=Integer.parseInt(config.getDefaultSrsCode());
+		}
 		createTypeDiscriminator=config.CREATE_TYPE_DISCRIMINATOR_ALWAYS.equals(config.getCreateTypeDiscriminator());
 		createGenericStructRef=config.STRUCT_MAPPING_GENERICREF.equals(config.getStructMapping());
-		writeIliTid=config.TID_HANDLING_PROPERTY.equals(config.getTidHandling());
+		writeIliTid=config.isExportTid(); 
+		hasIliTidCol=config.TID_HANDLING_PROPERTY.equals(config.getTidHandling());
 		this.geomConv=geomConv;
-		recConv=new ToXtfRecordConverter(td,ili2sqlName,config,null,geomConv,conn,sqlidPool,trafoConfig,class2wrapper);
+		recConv=new ToXtfRecordConverter(td,ili2sqlName,config,null,geomConv,conn,sqlidPool,trafoConfig,class2wrapper,schema);
 		this.config=config;
 
 	}
-	public void doit(String filename,IoxWriter iomFile,String sender,String exportParamModelnames[],long basketSqlIds[],Map<Long,BasketStat> stat)
-	throws ch.interlis.iox.IoxException
+	public void doit(int function,String datasource,IoxWriter iomFile,String sender,String exportParamModelnames[],long basketSqlIds[],Map<Long,BasketStat> stat)
+	throws ch.interlis.iox.IoxException, Ili2dbException
 	{
 		this.basketStat=stat;
 		boolean referrs=false;
 		
-		if(iomFile instanceof ItfWriter){
+		if(!hasIliTidCol && writeIliTid) {
+            throw new Ili2dbException("TID export requires a "+DbNames.T_ILI_TID_COL+" column");
+		}
+		
+		if(function!=Config.FC_VALIDATE && iomFile instanceof ItfWriter){
 			config.setValue(ch.interlis.iox_j.validator.Validator.CONFIG_DO_ITF_LINETABLES, ch.interlis.iox_j.validator.Validator.CONFIG_DO_ITF_LINETABLES_DO);
 		}
-		if(config.getVer4_translation() || config.getIli1Translation()!=null){
+		if(!config.isVer3_translation() || config.getIli1Translation()!=null){
 			languageFilter=new TranslateToTranslation(td, config);
+		}
+		
+		String srsAssignment=config.getSrsModelAssignment();
+		if(srsAssignment!=null) {
+		    crsFilter=TransferFromIli.getSrsMappingToOriginal(td, srsAssignment);
+            crsFilterToTarget=TransferFromIli.getSrsMappingToAlternate(td, srsAssignment);
 		}
 		if(config.getExportModels()!=null){
 			List<Model> exportModels=Ili2db.getModels(config.getExportModels(),td);
@@ -157,8 +180,8 @@ public class TransferToXtf {
 			if(configFilename!=null){
 				try {
 					modelConfig.mergeConfigFile(new File(configFilename));
-				} catch (FileNotFoundException e) {
-					EhiLogger.logError("validator config file <"+configFilename+"> not found");
+				} catch (java.io.IOException e) {
+					EhiLogger.logError("failed to read validator config file <"+configFilename+">");
 				}
 			}
 			modelConfig.setConfigValue(ValidationConfig.PARAMETER, ValidationConfig.AREA_OVERLAP_VALIDATION, config.isDisableAreaValidation()?ValidationConfig.OFF:null);
@@ -166,16 +189,18 @@ public class TransferToXtf {
 			modelConfig.setConfigValue(ValidationConfig.PARAMETER, ValidationConfig.ALLOW_ONLY_MULTIPLICITY_REDUCTION, config.isOnlyMultiplicityReduction()?ValidationConfig.ON:null);
 			IoxLogging errHandler=new ch.interlis.iox_j.logging.Log2EhiLogger();
 			LogEventFactory errFactory=new LogEventFactory();
-			errFactory.setDataSource(filename);
+            errFactory.setDataSource(datasource);
 			if(iomFile instanceof Iligml10Writer || iomFile instanceof Iligml20Writer){
 				String crsAuthority=config.getDefaultSrsAuthority();
 				String crsCode=config.getDefaultSrsCode();
 				if(crsAuthority!=null && crsCode!=null){
-					if(iomFile instanceof Iligml10Writer){
-						((Iligml10Writer)iomFile).setDefaultCrs(crsAuthority+":"+crsCode);
-					}else if(iomFile instanceof Iligml20Writer){
-						((Iligml20Writer)iomFile).setDefaultCrs(crsAuthority+":"+crsCode);
-					}
+				    if(function!=Config.FC_VALIDATE) {
+	                    if(iomFile instanceof Iligml10Writer){
+	                        ((Iligml10Writer)iomFile).setDefaultCrs(crsAuthority+":"+crsCode);
+	                    }else if(iomFile instanceof Iligml20Writer){
+	                        ((Iligml20Writer)iomFile).setDefaultCrs(crsAuthority+":"+crsCode);
+	                    }
+				    }
 				}
 			}
 			PipelinePool pipelinePool=new PipelinePool();
@@ -192,18 +217,25 @@ public class TransferToXtf {
 			startEvent=(StartTransferEvent) exportBaseModelFilter.filter(startEvent);
 		}
 		if(validator!=null)validator.validate(startEvent);
-		iomFile.write(startEvent);
+        if(function!=Config.FC_VALIDATE) {
+            iomFile.write(startEvent);
+        }
 		if(basketSqlIds!=null){
 			for(long basketSqlId : basketSqlIds){
 				StringBuilder basketXtfId=new StringBuilder();
-				Topic topic=getTopicByBasketId(basketSqlId,basketXtfId);
+                Map<String,String> genericDomains=new HashMap<String,String>();
+				Topic topic=getTopicByBasketId(basketSqlId,basketXtfId,genericDomains);
+				if(config.getDomainAssignments()!=null) {
+                    EhiLogger.logState("domain assignments <"+config.getDomainAssignments()+">");
+				    genericDomains=Xtf24Reader.parseDomains(config.getDomainAssignments());
+				}
 				if(topic==null){
 					throw new IoxException("no basketId "+basketSqlId+" in db");
 				}else{
 				    if(basketXtfId.length()==0) {
 				        basketXtfId.append(basketSqlId);
 				    }
-					referrs = referrs || doBasket(filename, iomFile, topic,basketSqlId,basketXtfId.toString());				
+					referrs = referrs || doBasket(function,datasource, iomFile, topic,basketSqlId,basketXtfId.toString(),genericDomains);				
 				}
 			}
 			
@@ -221,7 +253,12 @@ public class TransferToXtf {
 					Object tObj=topici.next();
 					if (tObj instanceof Topic && !(suppressTopic((Topic)tObj))){
 							Topic topic=(Topic)tObj;
-							referrs = referrs || doBasket(filename, iomFile, topic,null,topic.getScopedName(null));
+							Map<String,String> genericDomains=new HashMap<String,String>();
+			                if(config.getDomainAssignments()!=null) {
+			                    EhiLogger.logState("domain assignments <"+config.getDomainAssignments()+">");
+			                    genericDomains=Xtf24Reader.parseDomains(config.getDomainAssignments());
+			                }
+							referrs = referrs || doBasket(function,datasource, iomFile, topic,null,topic.getScopedName(null),genericDomains);
 					}
 				}
 			  }
@@ -238,7 +275,9 @@ public class TransferToXtf {
 			endEvent=(EndTransferEvent) exportBaseModelFilter.filter(endEvent);
 		}
 		if(validator!=null)validator.validate(endEvent);
-		iomFile.write(endEvent);
+		if(function!=Config.FC_VALIDATE) {
+	        iomFile.write(endEvent);
+		}
 		if(validator!=null)validator.close();
 		if(languageFilter!=null){
 			languageFilter.close();
@@ -247,7 +286,7 @@ public class TransferToXtf {
 			exportBaseModelFilter.close();
 		}
 	}
-	private Topic getTopicByBasketId(long basketSqlId, StringBuilder basketXtfId) throws IoxException {
+	private Topic getTopicByBasketId(long basketSqlId, StringBuilder basketXtfId,Map<String,String> genericDomains) throws IoxException {
 		
 		String sqlName=DbNames.BASKETS_TAB;
 		if(schema!=null){
@@ -255,10 +294,11 @@ public class TransferToXtf {
 		}
 		String topicName=null;
 		String bid=null;
+		String domains=null;
 		java.sql.PreparedStatement getstmt=null;
         java.sql.ResultSet res=null;
 		try{
-			String stmt="SELECT "+DbNames.BASKETS_TAB_TOPIC_COL+","+DbNames.T_ILI_TID_COL+" FROM "+sqlName+" WHERE "+colT_ID+"= ?";
+			String stmt="SELECT "+DbNames.BASKETS_TAB_TOPIC_COL+","+DbNames.T_ILI_TID_COL+","+DbNames.BASKETS_TAB_DOMAINS_COL+" FROM "+sqlName+" WHERE "+colT_ID+"= ?";
 			EhiLogger.traceBackendCmd(stmt);
 			getstmt=conn.prepareStatement(stmt);
 			getstmt.setLong(1,basketSqlId);
@@ -266,6 +306,7 @@ public class TransferToXtf {
 			if(res.next()){
 				topicName=res.getString(1);
 				bid=res.getString(2);
+                domains=res.getString(3);
 			}
 		}catch(java.sql.SQLException ex){
 			EhiLogger.logError("failed to query "+sqlName,ex);
@@ -294,11 +335,14 @@ public class TransferToXtf {
 			if(bid!=null){
 	            basketXtfId.append(bid);
 			}
+			if(domains!=null) {
+			    genericDomains.putAll(Xtf24Reader.parseDomains(domains));
+			}
 			return topic;
 		}
 		return null;
 	}
-	public static Topic getTopicDef(TransferDescription td,String topicQName) {
+    public static Topic getTopicDef(TransferDescription td,String topicQName) {
 		String modelName=null;
 		String topicName=null;
 		int endModelName=topicQName.indexOf('.');
@@ -332,7 +376,7 @@ public class TransferToXtf {
 			  }
 		return null;
 	}
-	private boolean doBasket(String filename, IoxWriter iomFile,Topic topic,Long basketSqlId,String basketXtfId) throws IoxException {
+	private boolean doBasket(int function,String datasource, IoxWriter iomFile,Topic topic,Long basketSqlId,String basketXtfId,Map<String,String> genericDomains) throws IoxException {
 		Model model=(Model) topic.getContainer();
 		boolean referrs=false;
 		StartBasketEvent iomBasket=null;
@@ -357,6 +401,13 @@ public class TransferToXtf {
 				if(languageFilter!=null){
 					aclass=(Viewable)aclass.getTranslationOfOrSame();
 				}
+                Viewable iomTargetClass=aclass;
+				if(crsFilter!=null) {
+				    Viewable aclass0=(Viewable) crsFilter.get(aclass);
+				    if(aclass0!=null) {
+				        aclass=aclass0;
+				    }
+				}
 				ViewableWrapper wrapper=class2wrapper.get(aclass);
 				
 				// get sql name
@@ -364,9 +415,9 @@ public class TransferToXtf {
 				// if table exists?
 				if(DbUtility.tableExists(conn,sqlName)){
 					// dump it
-					EhiLogger.logState(aclass.getScopedName(null)+"...");
 					if(iomBasket==null){
-						iomBasket=new StartBasketEvent(topic.getScopedName(null),basketXtfId);
+	                    EhiLogger.logState(topic.getScopedName(null)+" BID <"+basketXtfId+">...");
+						iomBasket=new StartBasketEvent(topic.getScopedName(null),basketXtfId,genericDomains);
 						if(languageFilter!=null){
 							iomBasket=(StartBasketEvent) languageFilter.filter(iomBasket);
 						}
@@ -374,9 +425,12 @@ public class TransferToXtf {
 							iomBasket=(StartBasketEvent) exportBaseModelFilter.filter(iomBasket);
 						}
 						if(validator!=null)validator.validate(iomBasket);
-						iomFile.write(iomBasket);
+						if(function!=Config.FC_VALIDATE) {
+	                        iomFile.write(iomBasket);
+						}
 					}
-					dumpObject(iomFile,aclass,basketSqlId);
+                    EhiLogger.logState(aclass.getScopedName(null)+"...");
+					dumpObject(function,iomFile,aclass,iomTargetClass,basketSqlId,genericDomains);
 				}else{
 					// skip it
 					EhiLogger.traceUnusualState(aclass.getScopedName(null)+"...skipped; no table "+sqlName+" in db");
@@ -386,8 +440,9 @@ public class TransferToXtf {
 		  }else if(obj instanceof AttributeDef){
 			  if(iomFile instanceof ItfWriter){
 					AttributeDef attr=(AttributeDef)obj;
+					Integer epsgCode=TransferFromIli.getEpsgCode(attr, genericDomains, defaultCrsCode);
 					// get sql name
-					DbTableName sqlName=getSqlTableNameItfLineTable(attr);
+					DbTableName sqlName=getSqlTableNameItfLineTable(attr,epsgCode);
 					// if table exists?
 					if(DbUtility.tableExists(conn,sqlName)){
 						// dump it
@@ -401,9 +456,11 @@ public class TransferToXtf {
 								iomBasket=(StartBasketEvent) exportBaseModelFilter.filter(iomBasket);
 							}
 							if(validator!=null)validator.validate(iomBasket);
-							iomFile.write(iomBasket);
+							if(function!=Config.FC_VALIDATE) {
+	                            iomFile.write(iomBasket);
+							}
 						}
-						dumpItfTableObject(iomFile,attr,basketSqlId);
+						dumpItfTableObject(function,iomFile,attr,epsgCode,basketSqlId);
 					}else{
 						// skip it
 						EhiLogger.traceUnusualState(attr.getScopedName(null)+"...skipped; no table "+sqlName+" in db");
@@ -447,7 +504,9 @@ public class TransferToXtf {
 					}
 					if(objEvent!=null) {
 						if(validator!=null)validator.validate(objEvent);
-						iomFile.write(objEvent);
+						if(function!=Config.FC_VALIDATE) {
+	                        iomFile.write(objEvent);
+						}
 					}
 				}
 			}
@@ -459,8 +518,10 @@ public class TransferToXtf {
 				endBasket=(EndBasketEvent) exportBaseModelFilter.filter(endBasket);
 			}
 			if(validator!=null)validator.validate(endBasket);
-			iomFile.write(endBasket);
-			saveObjStat(iomBasket.getBid(),basketSqlId,filename,iomBasket.getType());
+			if(function!=Config.FC_VALIDATE) {
+	            iomFile.write(endBasket);
+			}
+            saveObjStat(iomBasket.getBid(),basketSqlId,datasource,iomBasket.getType());
 		}
 		return referrs;
 	}
@@ -656,14 +717,23 @@ public class TransferToXtf {
 	/** dumps all struct values of a given struct attr.
 	 * @throws IoxException 
 	 */
-	private void dumpStructs(StructWrapper structWrapper,FixIomObjectRefs fixref) throws IoxException
+	private void dumpStructs(int function,AbstractStructWrapper structWrapper,FixIomObjectRefs fixref,Map<String,String> genericDomains,boolean isCrsAlternate) throws IoxException
 	{
-		Viewable baseClass=((CompositionType)structWrapper.getParentAttr().getDomain()).getComponentType();
+		Viewable baseClass=null;
+		String stmt=null;
+		if(structWrapper instanceof StructWrapper) {
+	        baseClass=((CompositionType)((StructWrapper) structWrapper).getParentAttr().getDomain()).getComponentType();
+	        stmt=createQueryStmt4Type(baseClass,(StructWrapper) structWrapper);
+		}else if(structWrapper instanceof EmbeddedLinkWrapper) {
+	        baseClass=(Viewable) ((EmbeddedLinkWrapper) structWrapper).getRole().getContainer();
+	        stmt=createQueryStmt4Type(baseClass,(EmbeddedLinkWrapper)structWrapper);
+		}else {
+		    throw new IllegalArgumentException("unexpected structWrapper "+structWrapper.getClass().getName());
+		}
 
 		HashMap<String,IomObject> structelev=new HashMap<String,IomObject>();
 		HashSet<Viewable> structClassv=new HashSet<Viewable>();
 
-		String stmt=createQueryStmt4Type(baseClass,structWrapper);
 		EhiLogger.traceBackendCmd(stmt);
 		java.sql.Statement dbstmt = null;
         java.sql.ResultSet rs=null;
@@ -681,7 +751,12 @@ public class TransferToXtf {
 					throw new IoxException("unknown "+DbNames.T_TYPE_COL+" '"+structEleSqlType+"' in table "+getStructRootTableName(baseClass));
 				}
 				structClass=(Viewable)tag2class.get(structEleClass);
-				IomObject iomObj=structWrapper.getParent().addattrobj(structWrapper.getParentAttr().getName(),structEleClass);
+                IomObject iomObj=null;
+		        if(structWrapper instanceof StructWrapper) {
+	                iomObj=structWrapper.getParent().addattrobj(((StructWrapper) structWrapper).getParentAttr().getName(),structEleClass);
+		        }else if(structWrapper instanceof EmbeddedLinkWrapper) {
+	                iomObj=structWrapper.getParent().addattrobj(((EmbeddedLinkWrapper) structWrapper).getRole().getName(),structEleClass);
+		        }
 				structelev.put(sqlid,iomObj);
 				structClassv.add(structClass);
 			}
@@ -707,13 +782,29 @@ public class TransferToXtf {
 		Iterator<Viewable> classi=structClassv.iterator();
 		while(classi.hasNext()){
 			Viewable aclass=classi.next();
-			dumpObjHelper(null,aclass,null,fixref,structWrapper,structelev);
+            Viewable iomTargetClass=aclass;
+			{
+		        if(isCrsAlternate) {
+		            iomTargetClass = getCrsMappedToAlternateOrSame(aclass);
+		        }
+			}
+			dumpObjHelper(function,null,aclass,iomTargetClass,null,genericDomains,fixref,structWrapper,structelev);
 		}
 	}
-	private void dumpItfTableObject(IoxWriter out,AttributeDef attr,Long basketSqlId)
+    private Viewable getCrsMappedToAlternateOrSame(Viewable aclass) {
+        if(crsFilterToTarget==null) {
+            return aclass;
+        }
+        Viewable aclass0=(Viewable) crsFilterToTarget.get(aclass);
+        if(aclass0!=null) {
+            return aclass0;
+        }
+        return aclass;
+    }
+	private void dumpItfTableObject(int function,IoxWriter out,AttributeDef attr,Integer epsgCode,Long basketSqlId)
 	{
-		String stmt=createItfLineTableQueryStmt(attr,basketSqlId,geomConv);
-		String sqlTabName=ili2sqlName.mapGeometryAsTable((Viewable)attr.getContainer(),attr);
+		String stmt=createItfLineTableQueryStmt(attr,epsgCode,basketSqlId,geomConv);
+		String sqlTabName=ili2sqlName.mapItfGeometryAsTable((Viewable)attr.getContainer(),attr,epsgCode);
 		EhiLogger.traceBackendCmd(stmt);
 		
 		SurfaceOrAreaType type = (SurfaceOrAreaType)attr.getDomainResolvingAliases();
@@ -740,11 +831,13 @@ public class TransferToXtf {
 				valuei++;
 				
 				String sqlIliTid=null;
-				if(writeIliTid){
-					sqlIliTid=rs.getString(valuei);
-					valuei++;
-				}else{
-					sqlIliTid=Long.toString(sqlid);
+				if(hasIliTidCol) {
+	                if(writeIliTid){
+	                    sqlIliTid=rs.getString(valuei);
+	                }else{
+	                    sqlIliTid=Long.toString(sqlid);
+	                }
+                    valuei++;
 				}
 				
 				Viewable aclass=(Viewable)attr.getContainer();
@@ -785,7 +878,7 @@ public class TransferToXtf {
 				    Iterator attri = lineAttrTable.getAttributes ();
 				    while(attri.hasNext()){
 						AttributeDef lineattr=(AttributeDef)attri.next();
-						valuei = recConv.addAttrValue(rs, valuei, sqlid, iomObj, lineattr,null,class2wrapper.get(lineAttrTable),null);
+						valuei = recConv.addAttrValue(rs, valuei, sqlid, iomObj, lineattr,lineattr,null,null,class2wrapper.get(lineAttrTable),null,null,null);
 				    }
 				}
 				
@@ -799,7 +892,9 @@ public class TransferToXtf {
 						objEvent=(ObjectEvent) exportBaseModelFilter.filter(objEvent);
 					}
 					if(validator!=null)validator.validate(objEvent);
-					out.write(objEvent);
+					if(function!=Config.FC_VALIDATE) {
+	                    out.write(objEvent);
+					}
 				}
 			}
 			}catch(java.sql.SQLException ex){		
@@ -826,15 +921,16 @@ public class TransferToXtf {
 	}
 	/** dumps all objects of a given class.
 	 */
-	private void dumpObject(IoxWriter out,Viewable aclass,Long basketSqlId)
+	private void dumpObject(int function,IoxWriter out,Viewable aclass,Viewable iomTargetClass,Long basketSqlId,Map<String,String> genericDomains)
 	{
-		dumpObjHelper(out,aclass,basketSqlId,null,null,null);
+		dumpObjHelper(function,out,aclass,iomTargetClass,basketSqlId,genericDomains,null,null,null);
 	}
 	/** helper to dump all objects/structvalues of a given class/structure.
 	 */
-	private void dumpObjHelper(IoxWriter out,Viewable aclass,Long basketSqlId,FixIomObjectRefs fixref,StructWrapper structWrapper,HashMap<String,IomObject> structelev)
+	private void dumpObjHelper(int function,IoxWriter out,Viewable aclass,Viewable iomTargetClass,Long basketSqlId,Map<String,String> genericDomains,FixIomObjectRefs fixref,AbstractStructWrapper structWrapper,HashMap<String,IomObject> structelev)
 	{
 		String stmt=recConv.createQueryStmt(aclass,basketSqlId,structWrapper);
+		ViewableWrapper aclassWrapper=class2wrapper.get(aclass);
 		EhiLogger.traceBackendCmd(stmt);
 		java.sql.PreparedStatement dbstmt = null;
         java.sql.ResultSet rs=null;
@@ -845,19 +941,34 @@ public class TransferToXtf {
 			rs=dbstmt.executeQuery();
 			while(rs.next()){
 				// list of not yet processed struct attrs
-				ArrayList<StructWrapper> structQueue=new ArrayList<StructWrapper>();
+				ArrayList<AbstractStructWrapper> structQueue=new ArrayList<AbstractStructWrapper>();
 				long sqlid = recConv.getT_ID(rs);
 				Iom_jObject iomObj=null;
 				if(structWrapper==null){
 					fixref=new FixIomObjectRefs();
 				}
-				iomObj = recConv.convertRecord(rs, aclass, fixref, structWrapper,
-						structelev, structQueue, sqlid);
+				iomObj = recConv.convertRecord(rs, aclassWrapper, aclass,fixref, structWrapper,
+						structelev, structQueue, sqlid,genericDomains,iomTargetClass);
 				updateObjStat(iomObj.getobjecttag(), sqlid);
+				
+				
+		         // add StructWrapper around embedded associations that are mapped to a link table
+		         for(Iterator roleIt=aclass.getAttributesAndRoles2();roleIt.hasNext();) {
+		             ViewableTransferElement roleEle=(ViewableTransferElement) roleIt.next();
+		             if(roleEle.embedded && roleEle.obj instanceof RoleDef) {
+		                 RoleDef role=(RoleDef)roleEle.obj;
+		                 AssociationDef roleOwner = (AssociationDef) role.getContainer();
+		                 if(roleOwner.getDerivedFrom()==null && !TransferFromIli.isLightweightAssociation(roleOwner)){
+                             structQueue.add(new EmbeddedLinkWrapper(sqlid,role,iomObj,aclassWrapper));
+		                 }
+		             }
+		         }
+				
+				
 				// collect structvalues
 				while(!structQueue.isEmpty()){
-					StructWrapper wrapper=(StructWrapper)structQueue.remove(0);
-					dumpStructs(wrapper,fixref);
+					AbstractStructWrapper wrapper=structQueue.remove(0);
+					dumpStructs(function,wrapper,fixref,genericDomains,aclass==iomTargetClass);
 				}
 				if(structWrapper==null){
 					if(!fixref.needsFixing() || out instanceof ItfWriter){
@@ -873,7 +984,9 @@ public class TransferToXtf {
 						if(objEvent!=null) {
 							if(validator!=null)validator.validate(objEvent);
 							if(out!=null){
-								out.write(objEvent);
+							    if(function!=Config.FC_VALIDATE) {
+	                                out.write(objEvent);
+							    }
 							}
 						}
 					}else{
@@ -958,7 +1071,7 @@ public class TransferToXtf {
 						   AttributeDef attr = (AttributeDef) obj.obj;
 						   if(attr.getExtending()==null){
 							String attrName=attr.getName();
-							String sqlAttrName=ili2sqlName.mapIliAttributeDef(attr,recConv.getSqlType(aclass).getName(),null);
+							String sqlAttrName=ili2sqlName.mapIliAttributeDef(attr,null,recConv.getSqlType(aclass).getName(),null);
 							Type type = attr.getDomain();
 							if( (type instanceof TypeAlias) 
 								&& Ili2cUtility.isBoolean(td,type)) {
@@ -971,7 +1084,7 @@ public class TransferToXtf {
 									// enque iomObj as parent
 									//enqueueStructAttr(new StructWrapper(tid,attr,iomObj));
 									CompositionType ct=(CompositionType)type;
-									expgen.println("add"+ct.getComponentType().getName()+"(tid,\""+ili2sqlName.mapIliAttributeDef(attr,recConv.getSqlType(aclass).getName(),null)+"\",iomObj,\""+attr.getName()+"\");");
+									expgen.println("add"+ct.getComponentType().getName()+"(tid,\""+ili2sqlName.mapIliAttributeDef(attr,null,recConv.getSqlType(aclass).getName(),null)+"\",iomObj,\""+attr.getName()+"\");");
 								}else if (type instanceof PolylineType){
 								 }else if(type instanceof SurfaceOrAreaType){
 								 }else if(type instanceof CoordType){
@@ -1155,20 +1268,20 @@ public class TransferToXtf {
 
 	  return false;
 	}
-	private DbTableName getSqlTableNameItfLineTable(AttributeDef def){
-		String sqlname=ili2sqlName.mapGeometryAsTable((Viewable)def.getContainer(),def);
+	private DbTableName getSqlTableNameItfLineTable(AttributeDef def,Integer epsgCode){
+		String sqlname=ili2sqlName.mapItfGeometryAsTable((Viewable)def.getContainer(),def,epsgCode);
 		return new DbTableName(schema,sqlname);
 	}
-	private String createItfLineTableQueryStmt(AttributeDef attr,Long basketSqlId,SqlColumnConverter conv){
+	private String createItfLineTableQueryStmt(AttributeDef attr,Integer epsgCode,Long basketSqlId,SqlColumnConverter conv){
 		StringBuffer ret = new StringBuffer();
 		ret.append("SELECT r0."+colT_ID);
-		if(writeIliTid){
+		if(hasIliTidCol){
 			ret.append(", r0."+DbNames.T_ILI_TID_COL);
 		}
 		String sep=",";
 		
 		SurfaceOrAreaType type = (SurfaceOrAreaType)attr.getDomainResolvingAliases();
-		String sqlTabName=ili2sqlName.mapGeometryAsTable((Viewable)attr.getContainer(),attr);
+		String sqlTabName=ili2sqlName.mapItfGeometryAsTable((Viewable)attr.getContainer(),attr,epsgCode);
 		
 		// geomAttr
 		 ret.append(sep);
@@ -1189,7 +1302,7 @@ public class TransferToXtf {
 			    Iterator attri = lineAttrTable.getAttributes ();
 			    while(attri.hasNext()){
 					AttributeDef lineattr=(AttributeDef)attri.next();
-				   sep = recConv.addAttrToQueryStmt(ret, sep, null,lineattr,sqlTabName);
+				   sep = recConv.addAttrToQueryStmt(ret, sep, null,lineattr,null,sqlTabName);
 			    }
 			}
 		 
@@ -1215,7 +1328,7 @@ public class TransferToXtf {
 		for(ViewableWrapper wrapper:wrappers){
 			ret.append(sep);
 			ret.append("SELECT r"+i+"."+colT_ID);
-			if(writeIliTid || wrapper.getOid()!=null){
+			if(hasIliTidCol || wrapper.getOid()!=null){
 				ret.append(", r"+i+"."+DbNames.T_ILI_TID_COL);
 			}else{
 				ret.append(", NULL "+DbNames.T_ILI_TID_COL);
@@ -1295,7 +1408,7 @@ public class TransferToXtf {
 			if(wrapper!=null){
 				if(createGenericStructRef){
 					ret.append(" WHERE "+tabalias+"."+DbNames.T_PARENT_ID_COL+"="+wrapper.getParentSqlId()+" AND "+tabalias+"."+DbNames.T_PARENT_ATTR_COL+"='"
-							+ili2sqlName.mapIliAttributeDef(wrapper.getParentAttr(),recConv.getSqlType(wrapper.getParentTable().getViewable()).getName(),null));
+							+ili2sqlName.mapIliAttributeDef(wrapper.getParentAttr(),null,recConv.getSqlType(wrapper.getParentTable().getViewable()).getName(),null));
 				}else{
 					ret.append(" WHERE "+tabalias+"."+ili2sqlName.mapIliAttributeDefReverse(wrapper.getParentAttr(),recConv.getSqlType(root.getViewable()).getName(),recConv.getSqlType(wrapper.getParentTable().getViewable()).getName())+"="+wrapper.getParentSqlId());
 				}
@@ -1306,6 +1419,41 @@ public class TransferToXtf {
 
 		return ret.toString();
 	}
+    private String createQueryStmt4Type(Viewable aclass,EmbeddedLinkWrapper wrapper){
+        StringBuffer ret = new StringBuffer();
+        ret.append("SELECT r0."+colT_ID);
+        ret.append(", r0."+DbNames.T_TYPE_COL);
+        ret.append(", 0 AS "+DbNames.T_SEQ_COL);
+        ret.append(" FROM (");
+        
+        // might have multiple tables!
+        int tabidx=0;
+        String subSelectSep="";
+        for(ViewableWrapper root : recConv.getStructWrappers(aclass)){
+            tabidx++;
+            String tabalias="r"+tabidx;
+            ret.append(subSelectSep);
+            ret.append("SELECT ");
+            ret.append(tabalias+"."+colT_ID);
+            if(createTypeDiscriminator || root.includesMultipleTypes()){
+                ret.append(", "+tabalias+"."+DbNames.T_TYPE_COL);
+            }else{
+                ret.append(",'"+root.getSqlTablename()+"' AS "+DbNames.T_TYPE_COL);
+                
+            }
+            ret.append(" FROM ");
+            ret.append(recConv.getSqlType(root.getViewable()));
+            ret.append(" "+tabalias);
+            RoleDef role=wrapper.getRole().getOppEnd();
+            ArrayList<ViewableWrapper> targetTables = recConv.getTargetTables(role.getDestination());
+            String roleSqlName=ili2sqlName.mapIliRoleDef(role,root.getSqlTablename(),wrapper.getParentTable().getSqlTablename(),targetTables.size()>1);
+            ret.append(" WHERE "+tabalias+"."+roleSqlName+"="+wrapper.getParentSqlId());
+            subSelectSep=" UNION ";
+        }
+        ret.append(" ) r0");
+
+        return ret.toString();
+    }
 
 	private Map<Long,BasketStat> basketStat=null;
 	private HashMap<String, ClassStat> objStat=new HashMap<String, ClassStat>();
@@ -1319,10 +1467,10 @@ public class TransferToXtf {
 			objStat.put(tag,stat);
 		}
 	}
-	private void saveObjStat(String iliBasketId,Long basketSqlId,String file,String topic)
+	private void saveObjStat(String iliBasketId,Long basketSqlId,String datasource,String topic)
 	{
 		// save it for later output to log
-		basketStat.put(basketSqlId,new BasketStat(file,topic,iliBasketId,objStat));
+		basketStat.put(basketSqlId,new BasketStat(datasource,topic,iliBasketId,objStat));
 		// setup new collection
 		objStat=new HashMap<String, ClassStat>();
 	}

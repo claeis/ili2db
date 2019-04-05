@@ -74,13 +74,14 @@ public class MultilineTest {
 	@Test
 	public void importXtf() throws Exception
 	{
-		EhiLogger.getInstance().setTraceFilter(false);
+		//EhiLogger.getInstance().setTraceFilter(false);
 	    File fgdbFile=new File(FGDBFILENAME);
 	    Fgdb4j.deleteFileGdb(fgdbFile);
 	    Class driverClass = Class.forName(FgdbDriver.class.getName());
 		File data=new File(TEST_OUT,"MultiLine2b.xtf");
 		Config config=initConfig(data.getPath(),data.getPath()+".log");
 		config.setFunction(Config.FC_IMPORT);
+		config.setDoImplicitSchemaImport(true);
 		config.setCreateFk(config.CREATE_FK_YES);
 		config.setCreateNumChecks(true);
 		config.setTidHandling(Config.TID_HANDLING_PROPERTY);
@@ -91,12 +92,7 @@ public class MultilineTest {
 		config.setMultilingualTrafo(null);
 		config.setInheritanceTrafo(null);
 		//Ili2db.readSettingsFromDb(config);
-		try{
-			Ili2db.run(config,null);
-		}catch(Exception ex){
-			EhiLogger.logError(ex);
-			Assert.fail();
-		}
+        Ili2db.run(config,null);
 	}
 	
 	@Test
@@ -106,7 +102,7 @@ public class MultilineTest {
 		{
 			importXtf();
 		}
-		EhiLogger.getInstance().setTraceFilter(false);
+		//EhiLogger.getInstance().setTraceFilter(false);
 	    File fgdbFile=new File(path2Data+"Simple.gdb");
 	    //Fgdb4j.deleteFileGdb(fgdbFile);
 	    Class driverClass = Class.forName(FgdbDriver.class.getName());
@@ -115,12 +111,7 @@ public class MultilineTest {
 		config.setFunction(Config.FC_EXPORT);
 		config.setModels("MultiLine2");
 		Ili2db.readSettingsFromDb(config);
-		try{
-			Ili2db.run(config,null);
-		}catch(Exception ex){
-			EhiLogger.logError(ex);
-			Assert.fail();
-		}
+        Ili2db.run(config,null);
 		{
 			XtfReader reader=new XtfReader(data);
 			assertTrue(reader.read() instanceof StartTransferEvent);

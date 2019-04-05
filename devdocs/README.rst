@@ -67,6 +67,22 @@ Development dependencies
 ========================
 TODO
 
+
+Coding
+========================
+- only one single thing (bug fix/new feature/...) in one commit/pull request
+- for one thing only one commit/pull request
+- use only ``US-ASCII`` for source encoding
+- do not use ``TAB`` in source files
+- if you make important commits, please add the commit log or something similar to the changelist (<https://github.com/claeis/ili2db/blob/master/docs/CHANGELOG.txt>);
+- if you change anything in an existing feature, make sure that there are unit tests for it and make sure that they (and all other unit tests) pass before you commit the code;
+- if you add a new feature, please document it in a similar manner to the existing code (or better!), and add some minimal unit tests before you commit it;
+- last but not least, please respect the same naming and indentation.
+
+In order to oversee the commit messages more easily and that the changelist looks homogenous please keep the following format:
+
+``- {area}: {fixed|bugfix|changed|new} {what and/or why} (#{issue number})``
+
 Design
 ======
 TODO

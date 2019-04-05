@@ -38,6 +38,7 @@ CREATE TABLE MultiSurface.T_ILI2DB_BASKET (
   ,topic varchar(200) NOT NULL
   ,T_Ili_Tid varchar(200) NULL
   ,attachmentKey varchar(200) NOT NULL
+  ,domains varchar(1024) NULL
 )
 ;
 CREATE TABLE MultiSurface.T_ILI2DB_DATASET (
@@ -56,7 +57,7 @@ CREATE TABLE MultiSurface.T_ILI2DB_IMPORT (
 COMMENT ON TABLE MultiSurface.T_ILI2DB_IMPORT IS 'DEPRECATED, do not use';
 CREATE TABLE MultiSurface.T_ILI2DB_IMPORT_BASKET (
   T_Id bigint PRIMARY KEY
-  ,import bigint NOT NULL
+  ,importrun bigint NOT NULL
   ,basket bigint NOT NULL
   ,objectCount integer NULL
   ,start_t_id bigint NULL
@@ -91,7 +92,7 @@ CREATE TABLE MultiSurface.T_ILI2DB_TRAFO (
 )
 ;
 CREATE TABLE MultiSurface.T_ILI2DB_MODEL (
-  file varchar(250) NOT NULL
+  filename varchar(250) NOT NULL
   ,iliversion varchar(3) NOT NULL
   ,modelName text NOT NULL
   ,content text NOT NULL
@@ -107,9 +108,9 @@ CREATE TABLE MultiSurface.T_ILI2DB_CLASSNAME (
 CREATE TABLE MultiSurface.T_ILI2DB_ATTRNAME (
   IliName varchar(1024) NOT NULL
   ,SqlName varchar(1024) NOT NULL
-  ,Owner varchar(1024) NOT NULL
+  ,ColOwner varchar(1024) NOT NULL
   ,Target varchar(1024) NULL
-  ,PRIMARY KEY (SqlName,Owner)
+  ,PRIMARY KEY (SqlName,ColOwner)
 )
 ;
 ALTER TABLE MultiSurface.surfacestructure ADD CONSTRAINT surfacestructure_T_basket_fkey FOREIGN KEY ( T_basket ) REFERENCES MultiSurface.T_ILI2DB_BASKET DEFERRABLE INITIALLY DEFERRED;
@@ -119,9 +120,9 @@ ALTER TABLE MultiSurface.classa1 ADD CONSTRAINT classa1_T_basket_fkey FOREIGN KE
 ALTER TABLE MultiSurface.T_ILI2DB_BASKET ADD CONSTRAINT T_ILI2DB_BASKET_dataset_fkey FOREIGN KEY ( dataset ) REFERENCES MultiSurface.T_ILI2DB_DATASET DEFERRABLE INITIALLY DEFERRED;
 ALTER TABLE MultiSurface.T_ILI2DB_DATASET ADD CONSTRAINT T_ILI2DB_DATASET_datasetName_key UNIQUE (datasetName)
 ;
-ALTER TABLE MultiSurface.T_ILI2DB_IMPORT_BASKET ADD CONSTRAINT T_ILI2DB_IMPORT_BASKET_import_fkey FOREIGN KEY ( import ) REFERENCES MultiSurface.T_ILI2DB_IMPORT DEFERRABLE INITIALLY DEFERRED;
+ALTER TABLE MultiSurface.T_ILI2DB_IMPORT_BASKET ADD CONSTRAINT T_ILI2DB_IMPORT_BASKET_import_fkey FOREIGN KEY ( importrun ) REFERENCES MultiSurface.T_ILI2DB_IMPORT DEFERRABLE INITIALLY DEFERRED;
 ALTER TABLE MultiSurface.T_ILI2DB_IMPORT_BASKET ADD CONSTRAINT T_ILI2DB_IMPORT_BASKET_basket_fkey FOREIGN KEY ( basket ) REFERENCES MultiSurface.T_ILI2DB_BASKET DEFERRABLE INITIALLY DEFERRED;
 ALTER TABLE MultiSurface.T_ILI2DB_MODEL ADD CONSTRAINT T_ILI2DB_MODEL_iliversion_modelName_key UNIQUE (iliversion,modelName)
 ;
-ALTER TABLE MultiSurface.T_ILI2DB_ATTRNAME ADD CONSTRAINT T_ILI2DB_ATTRNAME_SqlName_Owner_key UNIQUE (SqlName,Owner)
+ALTER TABLE MultiSurface.T_ILI2DB_ATTRNAME ADD CONSTRAINT T_ILI2DB_ATTRNAME_SqlName_Owner_key UNIQUE (SqlName,ColOwner)
 ;

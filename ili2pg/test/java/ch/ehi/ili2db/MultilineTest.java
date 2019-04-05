@@ -54,7 +54,7 @@ public class MultilineTest {
 	}
 
 	@Test
-	public void importNoSmartChbase() throws Exception
+	public void importXtfNoSmartChbase() throws Exception
 	{
 		Connection jdbcConnection=null;
 		try{
@@ -66,6 +66,7 @@ public class MultilineTest {
 			File data=new File("test/data/MultiLine/MultiLine1a.xtf");
 			Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 			config.setFunction(Config.FC_IMPORT);
+	        config.setDoImplicitSchemaImport(true);
 			config.setCreateFk(config.CREATE_FK_YES);
 			config.setTidHandling(Config.TID_HANDLING_PROPERTY);
 			config.setBasketHandling(config.BASKET_HANDLING_READWRITE);
@@ -195,7 +196,7 @@ public class MultilineTest {
 	}
 	
 	@Test
-	public void importSmartChbase() throws Exception
+	public void importXtfSmartChbase() throws Exception
 	{
 		Connection jdbcConnection=null;
 		try{
@@ -207,6 +208,7 @@ public class MultilineTest {
 			File data=new File("test/data/MultiLine/MultiLine1a.xtf");
 			Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 			config.setFunction(Config.FC_IMPORT);
+	        config.setDoImplicitSchemaImport(true);
 			config.setCreateFk(config.CREATE_FK_YES);
 			config.setTidHandling(Config.TID_HANDLING_PROPERTY);
 			config.setBasketHandling(config.BASKET_HANDLING_READWRITE);
@@ -314,7 +316,7 @@ public class MultilineTest {
 	}
 
 	@Test
-	public void importSmartChbaseStrokeArcs() throws Exception
+	public void importXtfSmartChbaseStrokeArcs() throws Exception
 	{
 		Connection jdbcConnection=null;
 		try{
@@ -326,6 +328,7 @@ public class MultilineTest {
 			File data=new File("test/data/MultiLine/MultiLine1a.xtf");
 			Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 			config.setFunction(Config.FC_IMPORT);
+	        config.setDoImplicitSchemaImport(true);
 			Config.setStrokeArcs(config,Config.STROKE_ARCS_ENABLE);
 			config.setCreateFk(config.CREATE_FK_YES);
 			config.setTidHandling(Config.TID_HANDLING_PROPERTY);
@@ -434,7 +437,7 @@ public class MultilineTest {
 	}
 	
 	@Test
-	public void importSmartCustom() throws Exception
+	public void importXtfSmartCustom() throws Exception
 	{
 		Connection jdbcConnection=null;
 		try{
@@ -446,6 +449,7 @@ public class MultilineTest {
 			File data=new File("test/data/MultiLine/MultiLine2a.xtf");
 			Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 			config.setFunction(Config.FC_IMPORT);
+	        config.setDoImplicitSchemaImport(true);
 			config.setCreateFk(config.CREATE_FK_YES);
 			config.setTidHandling(Config.TID_HANDLING_PROPERTY);
 			config.setBasketHandling(config.BASKET_HANDLING_READWRITE);
@@ -550,7 +554,7 @@ public class MultilineTest {
 	}
 	
 	@Test
-	public void importSmartChbaseSingleGeom() throws Exception
+	public void importXtfSmartChbaseSingleGeom() throws Exception
 	{
 		Connection jdbcConnection=null;
 		try{
@@ -562,6 +566,7 @@ public class MultilineTest {
 			File data=new File("test/data/MultiLine/MultiLine1a.xtf");
 			Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 			config.setFunction(Config.FC_IMPORT);
+	        config.setDoImplicitSchemaImport(true);
 			config.setCreateFk(config.CREATE_FK_YES);
 			config.setTidHandling(Config.TID_HANDLING_PROPERTY);
 			config.setBasketHandling(config.BASKET_HANDLING_READWRITE);

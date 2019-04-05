@@ -3,7 +3,9 @@ package ch.ehi.ili2db.mapping;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
+import ch.ehi.ili2db.fromili.TransferFromIli;
 import ch.ehi.sqlgen.repository.DbTableName;
 import ch.interlis.ili2c.metamodel.AbstractClassDef;
 import ch.interlis.ili2c.metamodel.AssociationDef;
@@ -11,7 +13,6 @@ import ch.interlis.ili2c.metamodel.AttributeDef;
 import ch.interlis.ili2c.metamodel.Domain;
 import ch.interlis.ili2c.metamodel.Table;
 import ch.interlis.ili2c.metamodel.Viewable;
-import ch.interlis.ili2c.metamodel.ViewableTransferElement;
 
 /** Wrapper around a Viewable to  
  * make it aware of all attributes of all specializations.
@@ -50,18 +51,18 @@ public class ViewableWrapper {
 	/** the attributes and roles that this Record has.
 	 * list<Viewable.TransferElement>
 	 */
-	private List<ViewableTransferElement> attrv=new java.util.ArrayList<ViewableTransferElement>();
+	private List<ColumnWrapper> attrv=new java.util.ArrayList<ColumnWrapper>();
 	private ArrayList<ViewableWrapper> allTablev=null;
 	/** the attributes and roles that this record has.
 	 * @return list<ViewableTransferElement>
 	 */
-	public List<ViewableTransferElement> getAttrv() {
+	public List<ColumnWrapper> getAttrv() {
 		return attrv;
 	}
-	public void setAttrv(List<ViewableTransferElement> list) {
+	public void setAttrv(List<ColumnWrapper> list) {
 		attrv = list;
 	}
-	public java.util.Iterator<ViewableTransferElement> getAttrIterator() {
+	public java.util.Iterator<ColumnWrapper> getAttrIterator() {
 		return attrv.iterator();
 	}
 	public ArrayList<ViewableWrapper> getSecondaryTables() {
@@ -121,9 +122,6 @@ public class ViewableWrapper {
 	public void setMultipleTypes(boolean multipleTypes) {
 		incMultipleTypes=multipleTypes;
 	}
-	public boolean isAssocLightweight() {
-		return (viewable instanceof AssociationDef) && ((AssociationDef)viewable).isLightweight();
-	}
 	public ViewableWrapper getExtending() {
 		return base;
 	}
@@ -145,15 +143,14 @@ public class ViewableWrapper {
 	public boolean isSecondaryTable() {
 		return mainTable!=null;
 	}
-	public boolean containsAttributes(HashSet<AttributeDef> iomObjectAttrs) {
-		for(ViewableTransferElement ele:attrv){
-			if(ele.obj instanceof AttributeDef){
-				if(iomObjectAttrs.contains(ele.obj)){
+	public boolean containsAttributes(Set<AttributeDef> iomObjectAttrs) {
+		for(ColumnWrapper ele:attrv){
+			if(ele.getViewableTransferElement().obj instanceof AttributeDef){
+				if(iomObjectAttrs.contains(ele.getViewableTransferElement().obj)){
 					return true;
 				}
 			}
 		}
 		return false;
 	}
-
 }

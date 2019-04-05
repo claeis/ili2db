@@ -142,67 +142,60 @@ public class SimpleFgdbTest {
 	@Test
 	public void importXtf() throws Exception
 	{
-		EhiLogger.getInstance().setTraceFilter(false);
+		//EhiLogger.getInstance().setTraceFilter(false);
 	    File fgdbFile=new File(FGDBFILENAME);
 	    Fgdb4j.deleteFileGdb(fgdbFile);
 	    Class driverClass = Class.forName(FgdbDriver.class.getName());
 		File data=new File(TEST_OUT,"Simple23a.xtf");
 		Config config=initConfig(data.getPath(),data.getPath()+".log");
 		config.setFunction(Config.FC_IMPORT);
+		config.setDoImplicitSchemaImport(true);
 		config.setCreateFk(config.CREATE_FK_YES);
 		config.setCreateNumChecks(true);
-		config.setTidHandling(Config.TID_HANDLING_PROPERTY);
 		config.setBasketHandling(config.BASKET_HANDLING_READWRITE);
 		config.setCatalogueRefTrafo(null);
 		config.setMultiSurfaceTrafo(null);
 		config.setMultilingualTrafo(null);
 		config.setInheritanceTrafo(null);
 		//Ili2db.readSettingsFromDb(config);
-		try{
-			Ili2db.run(config,null);
-		}catch(Exception ex){
-			EhiLogger.logError(ex);
-			Assert.fail();
-		}
+        Ili2db.run(config,null);
 	}
 	
 	@Test
 	public void importXtfStruct() throws Exception
 	{
-		EhiLogger.getInstance().setTraceFilter(false);
+		//EhiLogger.getInstance().setTraceFilter(false);
 	    File fgdbFile=new File(FGDBFILENAME);
 	    Fgdb4j.deleteFileGdb(fgdbFile);
 	    Class driverClass = Class.forName(FgdbDriver.class.getName());
 		File data=new File(TEST_OUT,"SimpleStruct23a.xtf");
 		Config config=initConfig(data.getPath(),data.getPath()+".log");
 		config.setFunction(Config.FC_IMPORT);
+        config.setDoImplicitSchemaImport(true);
 		config.setCreateFk(config.CREATE_FK_YES);
 		config.setCreateNumChecks(true);
 		config.setTidHandling(Config.TID_HANDLING_PROPERTY);
+		config.setImportTid(true);
 		config.setBasketHandling(config.BASKET_HANDLING_READWRITE);
 		config.setCatalogueRefTrafo(null);
 		config.setMultiSurfaceTrafo(null);
 		config.setMultilingualTrafo(null);
 		config.setInheritanceTrafo(null);
 		//Ili2db.readSettingsFromDb(config);
-		try{
-			Ili2db.run(config,null);
-		}catch(Exception ex){
-			EhiLogger.logError(ex);
-			Assert.fail();
-		}
+        Ili2db.run(config,null);
 	}
 	
 	@Test
 	public void importXtfInheritanceNewClass() throws Exception
 	{
-		EhiLogger.getInstance().setTraceFilter(false);
+		//EhiLogger.getInstance().setTraceFilter(false);
 	    File fgdbFile=new File(FGDBFILENAME);
 	    Fgdb4j.deleteFileGdb(fgdbFile);
 	    Class driverClass = Class.forName(FgdbDriver.class.getName());
 		File data=new File(TEST_OUT,"SimpleInheritance23a.xtf");
 		Config config=initConfig(data.getPath(),data.getPath()+".log");
 		config.setFunction(Config.FC_IMPORT);
+		config.setDoImplicitSchemaImport(true);
 		config.setCreateFk(config.CREATE_FK_YES);
 		config.setCreateNumChecks(true);
 		config.setTidHandling(Config.TID_HANDLING_PROPERTY);
@@ -212,24 +205,20 @@ public class SimpleFgdbTest {
 		config.setMultilingualTrafo(null);
 		config.setInheritanceTrafo(null);
 		//Ili2db.readSettingsFromDb(config);
-		try{
-			Ili2db.run(config,null);
-		}catch(Exception ex){
-			EhiLogger.logError(ex);
-			Assert.fail();
-		}
+        Ili2db.run(config,null);
 	}
 	
 	@Test
 	public void importXtfInheritanceSmart1() throws Exception
 	{
-		EhiLogger.getInstance().setTraceFilter(false);
+		//EhiLogger.getInstance().setTraceFilter(false);
 	    File fgdbFile=new File(FGDBFILENAME);
 	    Fgdb4j.deleteFileGdb(fgdbFile);
 	    Class driverClass = Class.forName(FgdbDriver.class.getName());
 		File data=new File(TEST_OUT,"SimpleInheritance23a.xtf");
 		Config config=initConfig(data.getPath(),data.getPath()+".log");
 		config.setFunction(Config.FC_IMPORT);
+        config.setDoImplicitSchemaImport(true);
 		config.setCreateFk(config.CREATE_FK_YES);
 		config.setCreateNumChecks(true);
 		config.setTidHandling(Config.TID_HANDLING_PROPERTY);
@@ -239,54 +228,48 @@ public class SimpleFgdbTest {
 		config.setMultilingualTrafo(null);
 		config.setInheritanceTrafo(Config.INHERITANCE_TRAFO_SMART1);
 		//Ili2db.readSettingsFromDb(config);
-		try{
-			Ili2db.run(config,null);
-		}catch(Exception ex){
-			EhiLogger.logError(ex);
-			Assert.fail();
-		}
+        Ili2db.run(config,null);
 	}
 	
 	@Test
 	public void importXtfInheritanceSmart2() throws Exception
 	{
-		EhiLogger.getInstance().setTraceFilter(false);
+		//EhiLogger.getInstance().setTraceFilter(false);
 	    File fgdbFile=new File(FGDBFILENAME);
 	    Fgdb4j.deleteFileGdb(fgdbFile);
 	    Class driverClass = Class.forName(FgdbDriver.class.getName());
 		File data=new File(TEST_OUT,"SimpleInheritance23a.xtf");
 		Config config=initConfig(data.getPath(),data.getPath()+".log");
 		config.setFunction(Config.FC_IMPORT);
+        config.setDoImplicitSchemaImport(true);
 		config.setCreateFk(config.CREATE_FK_YES);
 		config.setCreateNumChecks(true);
 		config.setTidHandling(Config.TID_HANDLING_PROPERTY);
+		config.setImportTid(true);
 		config.setBasketHandling(config.BASKET_HANDLING_READWRITE);
 		config.setCatalogueRefTrafo(null);
 		config.setMultiSurfaceTrafo(null);
 		config.setMultilingualTrafo(null);
 		config.setInheritanceTrafo(Config.INHERITANCE_TRAFO_SMART2);
 		//Ili2db.readSettingsFromDb(config);
-		try{
-			Ili2db.run(config,null);
-		}catch(Exception ex){
-			EhiLogger.logError(ex);
-			Assert.fail();
-		}
+        Ili2db.run(config,null);
 	}
 	
 	@Test
 	public void importXtfCoord() throws Exception
 	{
-		EhiLogger.getInstance().setTraceFilter(false);
+		//EhiLogger.getInstance().setTraceFilter(false);
 	    File fgdbFile=new File(FGDBFILENAME);
 	    Fgdb4j.deleteFileGdb(fgdbFile);
 	    Class driverClass = Class.forName(FgdbDriver.class.getName());
 		File data=new File(TEST_OUT,"SimpleCoord23a.xtf");
 		Config config=initConfig(data.getPath(),data.getPath()+".log");
 		config.setFunction(Config.FC_IMPORT);
+        config.setDoImplicitSchemaImport(true);
 		config.setCreateFk(config.CREATE_FK_YES);
 		config.setCreateNumChecks(true);
 		config.setTidHandling(Config.TID_HANDLING_PROPERTY);
+		config.setImportTid(true);
 		config.setBasketHandling(config.BASKET_HANDLING_READWRITE);
 		config.setCatalogueRefTrafo(null);
 		config.setMultiSurfaceTrafo(null);
@@ -296,41 +279,32 @@ public class SimpleFgdbTest {
 		config.setValue(GeneratorFgdb.XY_RESOLUTION, "0.0005");
 		config.setValue(GeneratorFgdb.XY_TOLERANCE, "0.005");
 		//Ili2db.readSettingsFromDb(config);
-		try{
-			Ili2db.run(config,null);
-		}catch(Exception ex){
-			EhiLogger.logError(ex);
-			Assert.fail();
-		}
+        Ili2db.run(config,null);
 	}
 	
 	@Test
 	public void importXtfWithDelete() throws Exception
 	{
-		EhiLogger.getInstance().setTraceFilter(false);
+		//EhiLogger.getInstance().setTraceFilter(false);
 	    File fgdbFile=new File(FGDBFILENAME);
-	    //Fgdb4j.deleteFileGdb(fgdbFile);
+	    Fgdb4j.deleteFileGdb(fgdbFile);
 	    Class driverClass = Class.forName(FgdbDriver.class.getName());
 		File data=new File(TEST_OUT,"Simple23a.xtf");
 		Config config=initConfig(data.getPath(),data.getPath()+".log");
 		config.setFunction(Config.FC_IMPORT);
+		config.setDoImplicitSchemaImport(true);
 		config.setDatasetName("importXtfWithDelete");
-		config.setCreateFk(config.CREATE_FK_YES);
+		config.setCreateFk(Config.CREATE_FK_YES);
 		config.setCreateNumChecks(true);
 		config.setTidHandling(Config.TID_HANDLING_PROPERTY);
-		config.setBasketHandling(config.BASKET_HANDLING_READWRITE);
+		config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
 		config.setDeleteMode(Config.DELETE_DATA);
 		config.setCatalogueRefTrafo(null);
 		config.setMultiSurfaceTrafo(null);
 		config.setMultilingualTrafo(null);
 		config.setInheritanceTrafo(null);
 		//Ili2db.readSettingsFromDb(config);
-		try{
-			Ili2db.run(config,null);
-		}catch(Exception ex){
-			EhiLogger.logError(ex);
-			Assert.fail();
-		}
+        Ili2db.run(config,null);
 	}
 	
 	@Test
@@ -339,7 +313,7 @@ public class SimpleFgdbTest {
 		{
 			importXtf();
 		}
-		EhiLogger.getInstance().setTraceFilter(false);
+		//EhiLogger.getInstance().setTraceFilter(false);
 	    File fgdbFile=new File(FGDBFILENAME);
 	    //Fgdb4j.deleteFileGdb(fgdbFile);
 	    Class driverClass = Class.forName(FgdbDriver.class.getName());
@@ -348,12 +322,7 @@ public class SimpleFgdbTest {
 		config.setFunction(Config.FC_EXPORT);
 		config.setModels("Simple23");
 		Ili2db.readSettingsFromDb(config);
-		try{
-			Ili2db.run(config,null);
-		}catch(Exception ex){
-			EhiLogger.logError(ex);
-			Assert.fail();
-		}
+        Ili2db.run(config,null);
 		{
 			XtfReader reader=new XtfReader(data);
 			assertTrue(reader.read() instanceof StartTransferEvent);
@@ -364,8 +333,6 @@ public class SimpleFgdbTest {
 			IomObject iomObj=((ObjectEvent)event).getIomObject();
 			int attrCount=iomObj.getattrcount();
 			assertEquals(1,attrCount);
-			String oid=iomObj.getobjectoid();
-			assertEquals("o1",oid);
 			String attrtag=iomObj.getobjecttag();
 			assertEquals("Simple23.TestA.ClassA1",attrtag);
 			{
@@ -383,21 +350,17 @@ public class SimpleFgdbTest {
 		{
 			importXtfStruct();
 		}
-		EhiLogger.getInstance().setTraceFilter(false);
+		//EhiLogger.getInstance().setTraceFilter(false);
 	    File fgdbFile=new File(FGDBFILENAME);
 	    //Fgdb4j.deleteFileGdb(fgdbFile);
 	    Class driverClass = Class.forName(FgdbDriver.class.getName());
 		File data=new File(TEST_OUT,"SimpleStruct23a-out.xtf");
 		Config config=initConfig(data.getPath(),data.getPath()+".log");
 		config.setFunction(Config.FC_EXPORT);
+		config.setExportTid(true);
 		config.setModels("SimpleStruct23");
 		Ili2db.readSettingsFromDb(config);
-		try{
-			Ili2db.run(config,null);
-		}catch(Exception ex){
-			EhiLogger.logError(ex);
-			Assert.fail();
-		}
+        Ili2db.run(config,null);
 		{
 			XtfReader reader=new XtfReader(data);
 			assertTrue(reader.read() instanceof StartTransferEvent);
@@ -428,26 +391,22 @@ public class SimpleFgdbTest {
 	}
 	
 	@Test
-	public void exportXtfInheritance() throws Exception
+	public void exportXtfInheritanceSmart2() throws Exception
 	{
 		{
 			importXtfInheritanceSmart2();
 		}
-		EhiLogger.getInstance().setTraceFilter(false);
+		//EhiLogger.getInstance().setTraceFilter(false);
 	    File fgdbFile=new File(FGDBFILENAME);
 	    //Fgdb4j.deleteFileGdb(fgdbFile);
 	    Class driverClass = Class.forName(FgdbDriver.class.getName());
 		File data=new File(TEST_OUT,"SimpleInheritance23a-out.xtf");
 		Config config=initConfig(data.getPath(),data.getPath()+".log");
 		config.setFunction(Config.FC_EXPORT);
+		config.setExportTid(true);
 		config.setModels("SimpleInheritance23");
 		Ili2db.readSettingsFromDb(config);
-		try{
-			Ili2db.run(config,null);
-		}catch(Exception ex){
-			EhiLogger.logError(ex);
-			Assert.fail();
-		}
+        Ili2db.run(config,null);
 		{
 			XtfReader reader=new XtfReader(data);
 			assertTrue(reader.read() instanceof StartTransferEvent);
@@ -515,21 +474,17 @@ public class SimpleFgdbTest {
 		{
 			importXtfCoord();
 		}
-		EhiLogger.getInstance().setTraceFilter(false);
+		//EhiLogger.getInstance().setTraceFilter(false);
 	    File fgdbFile=new File(FGDBFILENAME);
 	    //Fgdb4j.deleteFileGdb(fgdbFile);
 	    Class driverClass = Class.forName(FgdbDriver.class.getName());
 		File data=new File(TEST_OUT,"SimpleCoord23a-out.xtf");
 		Config config=initConfig(data.getPath(),data.getPath()+".log");
 		config.setFunction(Config.FC_EXPORT);
+		config.setExportTid(true);
 		config.setModels("SimpleCoord23");
 		Ili2db.readSettingsFromDb(config);
-		try{
-			Ili2db.run(config,null);
-		}catch(Exception ex){
-			EhiLogger.logError(ex);
-			Assert.fail();
-		}
+        Ili2db.run(config,null);
 		{
 			XtfReader reader=new XtfReader(data);
 			assertTrue(reader.read() instanceof StartTransferEvent);

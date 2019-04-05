@@ -17,8 +17,10 @@
  */
 package ch.ehi.ili2db.base;
 
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -61,7 +63,10 @@ import ch.ehi.sqlgen.generator.Generator;
 import ch.ehi.sqlgen.generator.GeneratorDriver;
 //import ch.ehi.sqlgen.generator_impl.oracle.GeneratorOracle;
 import ch.ehi.sqlgen.generator_impl.jdbc.GeneratorJdbc;
+import ch.ehi.sqlgen.generator_impl.jdbc.GeneratorJdbc.Stmt;
+import ch.ehi.sqlgen.repository.DbColumn;
 import ch.ehi.sqlgen.repository.DbSchema;
+import ch.ehi.sqlgen.repository.DbTable;
 import ch.ehi.sqlgen.repository.DbTableName;
 import ch.interlis.ili2c.config.Configuration;
 import ch.interlis.ili2c.metamodel.Element;
@@ -76,6 +81,7 @@ import ch.interlis.iom_j.itf.ItfReader;
 import ch.interlis.iom_j.itf.ItfReader2;
 import ch.interlis.iom_j.itf.ItfWriter;
 import ch.interlis.iom_j.itf.ItfWriter2;
+import ch.interlis.iom_j.xtf.Xtf24Reader;
 import ch.interlis.iom_j.xtf.XtfReader;
 import ch.interlis.iom_j.xtf.XtfWriter;
 import ch.interlis.iox.IoxException;
@@ -182,7 +188,9 @@ public class Ili2db {
 			TransferFromIli.readSettings(conn,config,config.getDbschema());
 		} catch (SQLException e) {
 			EhiLogger.logError(e);
-		}finally{
+		} catch (IOException e) {
+            EhiLogger.logError(e);
+        }finally{
 			if(!connectionFromExtern && conn!=null){
 				try{
 					conn.close();
@@ -201,6 +209,8 @@ public class Ili2db {
 	{
 		if(config.getFunction()==Config.FC_IMPORT){
 			runImport(config,appHome);
+        }else if(config.getFunction()==Config.FC_VALIDATE){
+            runExport(config,appHome,Config.FC_VALIDATE);
 		}else if(config.getFunction()==Config.FC_UPDATE){
 			runUpdate(config,appHome,Config.FC_UPDATE);
 		}else if(config.getFunction()==Config.FC_REPLACE){
@@ -208,8 +218,8 @@ public class Ili2db {
 		}else if(config.getFunction()==Config.FC_DELETE){
 			runUpdate(config,appHome,Config.FC_DELETE);
 		}else if(config.getFunction()==Config.FC_EXPORT){
-			runExport(config,appHome);
-		}else if(config.getFunction()==Config.FC_SCHEMAIMPORT){
+			runExport(config,appHome,Config.FC_EXPORT);
+		}else if(config.getFunction()==Config.FC_SCHEMAIMPORT || config.getFunction()==Config.FC_SCRIPT){
 			runSchemaImport(config,appHome);
 		}else{
 			throw new Ili2dbException("function not supported");
@@ -246,6 +256,10 @@ public class Ili2db {
 				if(config.getDatasetName()==null){
 					throw new Ili2dbException("no datasetName given");
 				}
+			}else if(function==Config.FC_VALIDATE){
+                if(config.getDatasetName()==null){
+                    throw new Ili2dbException("no datasetName given");
+                }
 			}else{
 				if(inputFilename==null){
 					throw new Ili2dbException("no xtf-file given");
@@ -375,7 +389,9 @@ public class Ili2db {
 					customMapping.postConnect(conn, config);
 				} catch (SQLException ex) {
 					throw new Ili2dbException("failed to get db connection", ex);
-				}
+				} catch (IOException e) {
+                    throw new Ili2dbException("failed to get db connection", e);
+                }
 			  logDBVersion(conn);
 			  
 			  if(!connectionFromExtern){
@@ -400,14 +416,16 @@ public class Ili2db {
 				  }
 			  }
 
-			  // create db schema
-				if(function==Config.FC_IMPORT){
-				  	if(config.getDbschema()!=null){
-				  		if(!DbUtility.schemaExists(conn, config.getDbschema())){
-					  		DbUtility.createSchema(conn, config.getDbschema());
-				  		}
-				  	}
-				}
+                // create db schema
+                if (function == Config.FC_IMPORT) {
+                    if (config.getDbschema() != null) {
+                        if (!DbUtility.schemaExists(conn, config.getDbschema())) {
+                            DbUtility.createSchema(conn, config.getDbschema());
+                        }
+                    }
+                }
+				
+                // verify dataset/basket settings
 				if(function==Config.FC_DELETE){
 					boolean createBasketCol=config.BASKET_HANDLING_READWRITE.equals(config.getBasketHandling());
 					if(!createBasketCol){
@@ -420,8 +438,7 @@ public class Ili2db {
 						throw new Ili2dbException("dataset <"+datasetName+"> doesn't exist");
 					}
 					getBasketSqlIdsFromDatasetId(datasetId,modelv,conn,config);
-				}
-				if(function==Config.FC_IMPORT){
+				}else if(function==Config.FC_IMPORT){
 					String datasetName=config.getDatasetName();
 					if(datasetName!=null){
 						if(DbUtility.tableExists(conn,new DbTableName(config.getDbschema(),DbNames.DATASETS_TAB))){
@@ -467,8 +484,8 @@ public class Ili2db {
                     if(config.getCreateMetaInfo()){
                         try{
                             EhiLogger.logState("import meta-attributes from toml file");
-                            MetaAttrUtility.addMetaAttrsFromToml(td, new java.io.FileReader(config.getIliMetaAttrsFile()));
-                        }catch(FileNotFoundException e){
+                            MetaAttrUtility.addMetaAttrsFromConfigFile(td, new java.io.File(config.getIliMetaAttrsFile()));
+                        }catch(IOException e){
                             throw new Ili2dbException("import meta-attributes failed",e);
                         }
                     }else{
@@ -544,15 +561,17 @@ public class Ili2db {
 						}
 
 						trsfFromIli.addBasketsTable(schema);
-						trsfFromIli.addImportsTable(schema);
+	                    if(config.isCreateImportTabs()) {
+	                        trsfFromIli.addImportsTable(schema);
+	                    }
 
-						TransferFromIli.addInheritanceTable(schema,Integer.parseInt(config.getMaxSqlNameLength()));
+						TransferFromIli.addInheritanceTable(schema,config);
 						TransferFromIli.addSettingsTable(schema);
 						TransferFromIli.addTrafoConfigTable(schema);
 						TransferFromIli.addModelsTable(schema,config);
 						trsfFromIli.addEnumTable(schema);
-						TransferFromIli.addTableMappingTable(schema);
-						TransferFromIli.addAttrMappingTable(schema);
+						TransferFromIli.addTableMappingTable(schema,config);
+						TransferFromIli.addAttrMappingTable(schema,config);
 						DbExtMetaInfo.addMetaInfoTables(schema);
 						idGen.addMappingTable(schema);
 						
@@ -562,37 +581,38 @@ public class Ili2db {
 						
 						GeneratorDriver drv=new GeneratorDriver(gen);
 						drv.visitSchema(config,schema);
-						// create script requested by user?
-						String createscript=config.getCreatescript();
-						if(createscript!=null && (gen instanceof GeneratorJdbc)){
-							writeScript(createscript,((GeneratorJdbc)gen).iteratorCreateLines());
+						{
+		                    GeneratorJdbc insertCollector = config.getCreatescript()!=null?(GeneratorJdbc)gen:null;
+                            // update mapping table
+                            mapping.updateTableMappingTable(insertCollector,conn,config.getDbschema());
+                            mapping.updateAttrMappingTable(insertCollector,conn,config.getDbschema());
+                            trafoConfig.updateTrafoConfig(insertCollector,conn, config.getDbschema());
+                            // update inheritance table
+                            trsfFromIli.updateInheritanceTable(insertCollector,conn,config.getDbschema());
+                            // update enumerations table
+                            trsfFromIli.updateEnumTable(insertCollector,conn);
+                            trsfFromIli.updateMetaInfoTables(insertCollector,conn);
+                            TransferFromIli.addModels(insertCollector,conn,td,config.getDbschema(),customMapping);
+                            if(!config.isConfigReadFromDb()){
+                                TransferFromIli.updateSettings(insertCollector,conn,config,config.getDbschema());
+                            }
+                            if(config.getCreateMetaInfo()){
+                                // update meta-attributes table
+                                MetaAttrUtility.updateMetaAttributesTable(insertCollector,conn, config.getDbschema(), td);
+                                // set elements' meta-attributes
+                                MetaAttrUtility.addMetaAttrsFromDb(td, conn, config.getDbschema());
+                            }
 						}
-						// drop script requested by user?
-						String dropscript=config.getDropscript();
-						if(dropscript!=null && (gen instanceof GeneratorJdbc)){
-							writeScript(dropscript,((GeneratorJdbc)gen).iteratorDropLines());
-						}
-							// update mapping table
-							mapping.updateTableMappingTable(conn,config.getDbschema());
-							mapping.updateAttrMappingTable(conn,config.getDbschema());
-							trafoConfig.updateTrafoConfig(conn, config.getDbschema());
-							// update inheritance table
-							trsfFromIli.updateInheritanceTable(conn,config.getDbschema());
-							// update enumerations table
-							trsfFromIli.updateEnumTable(conn);
-							trsfFromIli.updateMetaInfoTables(conn);
-							TransferFromIli.addModels(conn,td,config.getDbschema(),customMapping);
-							if(!config.isConfigReadFromDb()){
-								TransferFromIli.updateSettings(conn,config,config.getDbschema());
-							}
-			                if(config.getCreateMetaInfo()){
-			                    if(DbUtility.tableExists(conn,new DbTableName(config.getDbschema(),DbNames.META_ATTRIBUTES_TAB))){
-			                        // update meta-attributes table
-			                        MetaAttrUtility.updateMetaAttributesTable(conn, config.getDbschema(), td);
-			                        // set elements' meta-attributes
-			                        MetaAttrUtility.addMetaAttrsFromDb(td, conn, config.getDbschema());
-			                    }
-			                }
+	                        // create script requested by user?
+	                        String createscript=config.getCreatescript();
+	                        if(createscript!=null && (gen instanceof GeneratorJdbc)){
+	                            writeScript(createscript,((GeneratorJdbc)gen).iteratorCreateLines());
+	                        }
+	                        // drop script requested by user?
+	                        String dropscript=config.getDropscript();
+	                        if(dropscript!=null && (gen instanceof GeneratorJdbc)){
+	                            writeScript(dropscript,((GeneratorJdbc)gen).iteratorDropLines());
+	                        }
 					}catch(java.io.IOException ex){
 						throw new Ili2dbException(ex);
 					}
@@ -685,8 +705,11 @@ public class Ili2db {
 										((ItfReader2)ioxReader).setModel(td);		
 										((ItfReader2)ioxReader).setBidPrefix(config.getDatasetName());		
 									}
-								}else{
-									ioxReader=new XtfReader(new java.io.File(inputFilename));
+                                }else{
+                                    ioxReader=Xtf24Reader.createReader(new java.io.File(inputFilename));
+                                    if(ioxReader instanceof ch.interlis.iox_j.IoxIliReader) {
+                                        ((ch.interlis.iox_j.IoxIliReader) ioxReader).setModel(td);
+                                    }
 								}
 						}
 						transferFromXtf(conn,ioxReader,function,mapping,td,dbusr,geomConverter,idGen,config,stat,trafoConfig,class2wrapper);
@@ -781,20 +804,35 @@ public class Ili2db {
 	}
 	private static void setupIli2cMetaAttrs(Ili2cMetaAttrs ili2cMetaAttrs,
 			Config config,ch.interlis.ili2c.config.Configuration modelv) {
-
-		String ili2translation=config.getIli1Translation();
-		if(ili2translation!=null){
-		    String modelNames[]=ili2translation.split("=");
-		    String translatedModelName=modelNames[0];
-		    String originLanguageModelName=modelNames[1];
-		    if(translatedModelName!=null && originLanguageModelName!=null){
-		    	ili2cMetaAttrs.setMetaAttrValue(translatedModelName, Ili2cMetaAttrs.ILI2C_TRANSLATION_OF, originLanguageModelName);
-		    	if(modelv!=null){
-			    	modelv.addFileEntry(new ch.interlis.ili2c.config.FileEntry(originLanguageModelName,ch.interlis.ili2c.config.FileEntryKind.ILIMODELFILE));
-			    	modelv.addFileEntry(new ch.interlis.ili2c.config.FileEntry(translatedModelName,ch.interlis.ili2c.config.FileEntryKind.ILIMODELFILE));
-		    	}
-		    }
+	    {
+    		String ili2translation=config.getIli1Translation();
+    		if(ili2translation!=null){
+    		    String modelNames[]=ili2translation.split("=");
+    		    String translatedModelName=modelNames[0];
+    		    String originLanguageModelName=modelNames[1];
+    		    if(translatedModelName!=null && originLanguageModelName!=null){
+    		    	ili2cMetaAttrs.setMetaAttrValue(translatedModelName, Ili2cMetaAttrs.ILI2C_TRANSLATION_OF, originLanguageModelName);
+    		    	if(modelv!=null){
+    			    	modelv.addFileEntry(new ch.interlis.ili2c.config.FileEntry(originLanguageModelName,ch.interlis.ili2c.config.FileEntryKind.ILIMODELFILE));
+    			    	modelv.addFileEntry(new ch.interlis.ili2c.config.FileEntry(translatedModelName,ch.interlis.ili2c.config.FileEntryKind.ILIMODELFILE));
+    		    	}
+    		    }
+    		}
 		}
+	    {
+	        String srsModelAssignment=config.getSrsModelAssignment();
+	        if(srsModelAssignment!=null){
+	            String modelNames[]=srsModelAssignment.split("=");
+	            String originalSrsModelName=modelNames[0];
+	            String alternativeSrsModelName=modelNames[1];
+	            if(originalSrsModelName!=null && alternativeSrsModelName!=null){
+	                if(modelv!=null){
+	                    modelv.addFileEntry(new ch.interlis.ili2c.config.FileEntry(originalSrsModelName,ch.interlis.ili2c.config.FileEntryKind.ILIMODELFILE));
+	                    modelv.addFileEntry(new ch.interlis.ili2c.config.FileEntry(alternativeSrsModelName,ch.interlis.ili2c.config.FileEntryKind.ILIMODELFILE));
+	                }
+	            }
+	        }
+	    }
 	}
 	private static void logStatistics(boolean isIli1,Map<Long,BasketStat> stat)
 	{
@@ -802,7 +840,7 @@ public class Ili2db {
 		java.util.Collections.sort(statv,new java.util.Comparator<BasketStat>(){
 			@Override
 			public int compare(BasketStat b0, BasketStat b1) {
-				int ret=b0.getFile().compareTo(b1.getFile());
+				int ret=b0.getDatasource().compareTo(b1.getDatasource());
 				if(ret==0){
 					ret=b0.getTopic().compareTo(b1.getTopic());
 					if(ret==0){
@@ -815,9 +853,9 @@ public class Ili2db {
 		});
 		for(BasketStat basketStat:statv){
 			if(isIli1){
-				EhiLogger.logState(basketStat.getFile()+": "+basketStat.getTopic());
+				EhiLogger.logState(basketStat.getDatasource()+": "+basketStat.getTopic());
 			}else{
-				EhiLogger.logState(basketStat.getFile()+": "+basketStat.getTopic()+" BID="+basketStat.getBasketId());
+				EhiLogger.logState(basketStat.getDatasource()+": "+basketStat.getTopic()+" BID="+basketStat.getBasketId());
 			}
 			HashMap<String, ClassStat> objStat=basketStat.getObjStat();
 			ArrayList<String> classv=new ArrayList<String>(objStat.keySet());
@@ -877,11 +915,13 @@ public class Ili2db {
 		EhiLogger.getInstance().addListener(logStderr);
 		EhiLogger.getInstance().removeListener(StdListener.getInstance());
 		
+        final boolean importToDb = config.getFunction()!=Config.FC_SCRIPT;
 		try{
 			boolean connectionFromExtern=config.getJdbcConnection()!=null;
 			logGeneralInfo(config);
 			
 			Ili2dbLibraryInit ao=null;
+            Connection conn=null;
 			try{
 				ao=getInitStrategy(config); 
 				ao.init();
@@ -915,7 +955,7 @@ public class Ili2db {
 			String dburl=config.getDburl();
 			String dbusr=config.getDbusr();
 			String dbpwd=config.getDbpwd();
-			if(!connectionFromExtern && dburl==null){
+            if(!connectionFromExtern && dburl==null && importToDb){
 				throw new Ili2dbException("no dburl given");
 			}
 			if(dbusr==null){
@@ -958,38 +998,45 @@ public class Ili2db {
 
 			CustomMapping customMapping=getCustomMappingStrategy(config);
 			// open db connection
-			Connection conn=null;
 			String url = dburl;
-			try{
-				if(connectionFromExtern){
-					conn=config.getJdbcConnection();
-				}else{
-					conn = connect(url, dbusr, dbpwd, config, customMapping);
-				}
-				customMapping.postConnect(conn, config);
-			  logDBVersion(conn);
-			  
-			  if(!connectionFromExtern){
-				  // switch off auto-commit
-				  conn.setAutoCommit(false);
-			  }
-			  	            
-			}catch(SQLException ex){
-				throw new Ili2dbException(ex);
+			if(importToDb) {
+	            try{
+	                if(connectionFromExtern){
+	                    conn=config.getJdbcConnection();
+	                }else{
+	                    conn = connect(url, dbusr, dbpwd, config, customMapping);
+	                }
+	                customMapping.postConnect(conn, config);
+	              logDBVersion(conn);
+	              
+	              if(!connectionFromExtern){
+	                  // switch off auto-commit
+	                  conn.setAutoCommit(false);
+	              }
+	                            
+	            }catch(SQLException ex){
+	                throw new Ili2dbException(ex);
+	            } catch (IOException e) {
+                    throw new Ili2dbException(e);
+                }
 			}
 
             // run DB specific pre-processing
-            customMapping.prePreScript(conn, config);
+            if(importToDb) {
+                customMapping.prePreScript(conn, config);
+            }
 			
 			// run pre-script
-			if(config.getPreScript()!=null){
-				try {
-					EhiLogger.logState("run schemaImport pre-script...");
-					DbUtility.executeSqlScript(conn, new java.io.FileReader(config.getPreScript()));
-				} catch (FileNotFoundException e) {
-					throw new Ili2dbException("schemaImport pre-script statements failed",e);
-				}
-			}
+            if(importToDb) {
+                if(config.getPreScript()!=null){
+                    try {
+                        EhiLogger.logState("run schemaImport pre-script...");
+                        DbUtility.executeSqlScript(conn, new java.io.FileReader(config.getPreScript()));
+                    } catch (FileNotFoundException e) {
+                        throw new Ili2dbException("schemaImport pre-script statements failed",e);
+                    }
+                }
+            }
 			
 			// setup ilidirs+pathmap for ili2c
 			setupIli2cPathmap(config, appHome, ilifile,conn,customMapping);
@@ -1011,8 +1058,8 @@ public class Ili2db {
                 if(config.getCreateMetaInfo()){
                     try{
                         EhiLogger.logState("import meta-attributes from toml file");
-                        MetaAttrUtility.addMetaAttrsFromToml(td, new java.io.FileReader(config.getIliMetaAttrsFile()));
-                    }catch(FileNotFoundException e){
+                        MetaAttrUtility.addMetaAttrsFromConfigFile(td, new java.io.File(config.getIliMetaAttrsFile()));
+                    }catch(IOException e){
                         throw new Ili2dbException("import meta-attributes failed",e);
                     }
                 }else{
@@ -1031,11 +1078,18 @@ public class Ili2db {
 				throw new Ili2dbException("failed to load/create DDL generator",ex);
 			}
 			  // create db schema
-		  	if(config.getDbschema()!=null){
-		  		if(!DbUtility.schemaExists(conn, config.getDbschema())){
-			  		DbUtility.createSchema(conn, config.getDbschema());
-		  		}
-		  	}
+            if(config.getDbschema()!=null){
+                if(importToDb) {
+                    if(!DbUtility.schemaExists(conn, config.getDbschema())){
+                        DbUtility.createSchema(conn, config.getDbschema());
+                    }
+                }else {
+                    if(gen instanceof GeneratorJdbc){
+                        String sql="CREATE SCHEMA IF NOT EXISTS "+config.getDbschema();
+                        ((GeneratorJdbc) gen).addCreateLine(((GeneratorJdbc) gen).new Stmt(sql));
+                    }
+                }
+            }
 			DbIdGen idGen=null;
 			try{
 				idGen=(DbIdGen)Class.forName(idGenerator).newInstance();
@@ -1046,14 +1100,17 @@ public class Ili2db {
 
 			// read mapping file
 			NameMapping mapping=new NameMapping(config);
-			  if(DbUtility.tableExists(conn,new DbTableName(config.getDbschema(),DbNames.CLASSNAME_TAB))){
-				  // read mapping from db
-				  mapping.readTableMappingTable(conn,config.getDbschema());
-			  }
-			  if(DbUtility.tableExists(conn,new DbTableName(config.getDbschema(),DbNames.ATTRNAME_TAB))){
-				  // read mapping from db
-				  mapping.readAttrMappingTable(conn,config.getDbschema());
-			  }
+            if(importToDb) {
+                if(DbUtility.tableExists(conn,new DbTableName(config.getDbschema(),DbNames.CLASSNAME_TAB))){
+                    // read mapping from db
+                    mapping.readTableMappingTable(conn,config.getDbschema());
+                }
+                if(DbUtility.tableExists(conn,new DbTableName(config.getDbschema(),DbNames.ATTRNAME_TAB))){
+                    // read mapping from db
+                    mapping.readAttrMappingTable(conn,config.getDbschema());
+                }
+            }
+            
 			  TrafoConfig trafoConfig=new TrafoConfig();
 			  trafoConfig.readTrafoConfig(conn, config.getDbschema());
 
@@ -1084,14 +1141,16 @@ public class Ili2db {
 			}
 			geomConverter.setup(conn, config);
 
-			if(config.getDefaultSrsCode()!=null && config.getDefaultSrsAuthority()!=null){
-				try {
-					if(geomConverter.getSrsid(config.getDefaultSrsAuthority(), config.getDefaultSrsCode(), conn)==null){
-						throw new Ili2dbException(config.getDefaultSrsAuthority()+"/"+config.getDefaultSrsCode()+" does not exist");
-					}
-				} catch (ConverterException ex) {
-					throw new Ili2dbException("failed to query existence of SRS",ex);
-				}
+			if(importToDb) {
+	            if(config.getDefaultSrsCode()!=null && config.getDefaultSrsAuthority()!=null){
+	                try {
+	                    if(geomConverter.getSrsid(config.getDefaultSrsAuthority(), config.getDefaultSrsCode(), conn)==null){
+	                        throw new Ili2dbException(config.getDefaultSrsAuthority()+"/"+config.getDefaultSrsCode()+" does not exist");
+	                    }
+	                } catch (ConverterException ex) {
+	                    throw new Ili2dbException("failed to query existence of SRS",ex);
+	                }
+	            }
 			}
 			
 			// create table structure
@@ -1113,14 +1172,16 @@ public class Ili2db {
 
 				if(!(conn instanceof GeodbConnection)){
 					trsfFromIli.addBasketsTable(schema);
-					trsfFromIli.addImportsTable(schema);
-					TransferFromIli.addInheritanceTable(schema,Integer.parseInt(config.getMaxSqlNameLength()));
+					if(config.isCreateImportTabs()) {
+	                    trsfFromIli.addImportsTable(schema);
+					}
+					TransferFromIli.addInheritanceTable(schema,config);
 					TransferFromIli.addSettingsTable(schema);
 					TransferFromIli.addTrafoConfigTable(schema);
 					TransferFromIli.addModelsTable(schema,config);
 					trsfFromIli.addEnumTable(schema);
-					TransferFromIli.addTableMappingTable(schema);
-					TransferFromIli.addAttrMappingTable(schema);
+					TransferFromIli.addTableMappingTable(schema,config);
+					TransferFromIli.addAttrMappingTable(schema,config);
 					DbExtMetaInfo.addMetaInfoTables(schema);
 					idGen.addMappingTable(schema);
 
@@ -1139,93 +1200,98 @@ public class Ili2db {
 				idGen.initDbDefs(gen);
 				
 				drv.visitSchema(config,schema);
-				// is a create script requested by user?
-				String createscript=config.getCreatescript();
-				if(createscript!=null && (gen instanceof GeneratorJdbc)){
-					writeScript(createscript,((GeneratorJdbc)gen).iteratorCreateLines());
-				}
-				// is a drop script requested by user?
-				String dropscript=config.getDropscript();
-				if(dropscript!=null && (gen instanceof GeneratorJdbc)){
-					writeScript(dropscript,((GeneratorJdbc)gen).iteratorDropLines());
-				}
-				if(!(conn instanceof GeodbConnection)){
-					// update mapping table
-					mapping.updateTableMappingTable(conn,config.getDbschema());
-					mapping.updateAttrMappingTable(conn,config.getDbschema());
-					trafoConfig.updateTrafoConfig(conn, config.getDbschema());
-					
-					// update inheritance table
-					trsfFromIli.updateInheritanceTable(conn,config.getDbschema());
-					// update enum table
-					trsfFromIli.updateEnumTable(conn);
-					trsfFromIli.updateMetaInfoTables(conn);
-					TransferFromIli.addModels(conn,td,config.getDbschema(),customMapping);
-					if(!config.isConfigReadFromDb()){
-						TransferFromIli.updateSettings(conn,config,config.getDbschema());
-					}
-					if(config.getCreateMetaInfo()){
-						// update meta-attributes table
-						MetaAttrUtility.updateMetaAttributesTable(conn, config.getDbschema(), td);
-						// set elements' meta-attributes
-						MetaAttrUtility.addMetaAttrsFromDb(td, conn, config.getDbschema());
-					}
-				}
+				validateSchemaNames(schema,mapping);
+
+                if(!(conn instanceof GeodbConnection)){
+                    GeneratorJdbc insertCollector = config.getCreatescript()!=null?(GeneratorJdbc)gen:null;
+                    // update mapping table
+                    mapping.updateTableMappingTable(insertCollector,conn,config.getDbschema());
+                    mapping.updateAttrMappingTable(insertCollector,conn,config.getDbschema());
+                    trafoConfig.updateTrafoConfig(insertCollector,conn, config.getDbschema());
+                    
+                    // update inheritance table
+                    trsfFromIli.updateInheritanceTable(insertCollector,conn,config.getDbschema());
+                    // update enum table
+                    trsfFromIli.updateEnumTable(insertCollector,conn);
+                    trsfFromIli.updateMetaInfoTables(insertCollector,conn);
+                    TransferFromIli.addModels(insertCollector,conn,td,config.getDbschema(),customMapping);
+                    if(!config.isConfigReadFromDb()){
+                        TransferFromIli.updateSettings(insertCollector,conn,config,config.getDbschema());
+                    }
+                    if(config.getCreateMetaInfo()){
+                        // update meta-attributes table
+                        MetaAttrUtility.updateMetaAttributesTable(insertCollector,conn, config.getDbschema(), td);
+                        // set elements' meta-attributes
+                        if(conn!=null) {
+                            MetaAttrUtility.addMetaAttrsFromDb(td, conn, config.getDbschema());
+                        }
+                    }
+                }
+				
+                // is a create script requested by user?
+                String createscript=config.getCreatescript();
+                if(createscript!=null && (gen instanceof GeneratorJdbc)){
+                    writeScript(createscript,((GeneratorJdbc) gen).iteratorCreateLines());
+                }
+                
+                // is a drop script requested by user?
+                String dropscript=config.getDropscript();
+                if(dropscript!=null && (gen instanceof GeneratorJdbc)){
+                    writeScript(dropscript,((GeneratorJdbc) gen).iteratorDropLines());
+                }
 				
 				// run post-script
-				if(config.getPostScript()!=null){
-					try {
-						EhiLogger.logState("run schemaImport post-script...");
-						DbUtility.executeSqlScript(conn, new java.io.FileReader(config.getPostScript()));
-					} catch (FileNotFoundException e) {
-						throw new Ili2dbException("schemaImport post-script statements failed",e);
-					}
+				if(importToDb) {
+	                if(config.getPostScript()!=null){
+	                    try {
+	                        EhiLogger.logState("run schemaImport post-script...");
+	                        DbUtility.executeSqlScript(conn, new java.io.FileReader(config.getPostScript()));
+	                    } catch (FileNotFoundException e) {
+	                        throw new Ili2dbException("schemaImport post-script statements failed",e);
+	                    }
+	                }
 				}
 				
                 // run DB specific post processing
-                customMapping.postPostScript(conn, config);
+                if(importToDb) {
+                    customMapping.postPostScript(conn, config);
+                }
 				
-				//if(conn instanceof ch.ehi.ili2geodb.jdbc.GeodbConnection){
-				//	String xmlfile=null;
-				//	try{
-				//		com.esri.arcgis.geodatabasedistributed.GdbExporter exp=new com.esri.arcgis.geodatabasedistributed.GdbExporter();
-				//		xmlfile=config.getDbfile()+".xml";
-				//		exp.exportWorkspaceSchema(((ch.ehi.ili2geodb.jdbc.GeodbConnection)conn).getGeodbWorkspace(), xmlfile, false,false);
-				//	}catch(Throwable ex){
-				//		EhiLogger.logError("failed to export gdb to "+xmlfile,ex);
-				//	}
-				//}
-				if(!connectionFromExtern){
-					try {
-						conn.commit();
-					} catch (SQLException e) {
-						throw new Ili2dbException("failed to commit",e);
-					}
-				}
+                if(importToDb) {
+                    if(!connectionFromExtern){
+                        try {
+                            conn.commit();
+                        } catch (SQLException e) {
+                            throw new Ili2dbException("failed to commit",e);
+                        }
+                    }
+                }
 				
 			}catch(java.io.IOException ex){
 				throw new Ili2dbException(ex);
 			}
 			
-			try{
-				if(!connectionFromExtern){
-					if(conn!=null){
-						try{
-							conn.close();
-						}finally{
-							conn=null;
-							config.setJdbcConnection(null);
-						}
-					}
-				}
-				EhiLogger.logState("...done");
-			}catch(java.sql.SQLException ex){
-				EhiLogger.logError(ex);
-			}
 				
 			}finally{
+	            try{
+	                if(importToDb) {
+	                    if(!connectionFromExtern){
+	                        if(conn!=null){
+	                            try{
+	                                conn.close();
+	                            }finally{
+	                                conn=null;
+	                                config.setJdbcConnection(null);
+	                            }
+	                        }
+	                    }
+	                }
+	            }catch(java.sql.SQLException ex){
+	                EhiLogger.logError(ex);
+	            }
 				ao.end();
 			}
+            EhiLogger.logState("...done");
 			
 		}catch(Ili2dbException ex){
 			if(logfile!=null){
@@ -1250,7 +1316,31 @@ public class Ili2db {
 		}
 		
 }
-	private static void logGeneralInfo(Config config) {
+	private static void validateSchemaNames(DbSchema schema, NameMapping mapping) {
+	    if(false) {
+	        boolean invalidNames=false;
+	        for(DbTable table:schema.getTables()) {
+	            String tabName=table.getName().getName();
+	            if(!mapping.isValidSqlName(tabName)) {
+	                EhiLogger.logAdaption("invalid table name "+tabName);
+	                invalidNames=true;
+	            }
+	            for(Iterator colIt=table.iteratorColumn();colIt.hasNext();) {
+	                DbColumn dbCol=(DbColumn) colIt.next();
+	                String colName=dbCol.getName();
+	                if(!mapping.isValidSqlName(colName)) {
+	                    EhiLogger.logAdaption("invalid column name "+tabName+"."+colName);
+	                    invalidNames=true;
+	                }
+	            }
+	        }
+	        if(invalidNames) {
+	            throw new IllegalStateException("invalid names found");
+	        }
+	    }
+        
+    }
+    private static void logGeneralInfo(Config config) {
 		EhiLogger.logState(config.getSender());
 		EhiLogger.logState("ili2c-"+ch.interlis.ili2c.Main.getVersion());
 		EhiLogger.logState("iox-ili-"+ch.interlis.iox_j.IoxUtility.getVersion());
@@ -1299,9 +1389,13 @@ public class Ili2db {
 			}		  	
 		}
 	}
-	public static void runExport(Config config,String appHome)
+	public static void runExport(Config config,String appHome,int function)
 	throws Ili2dbException
 	{
+	    String functionName="export";
+        if(function==Config.FC_VALIDATE) {
+            functionName="validate";
+        }
 		ch.ehi.basics.logging.FileListener logfile=null;
 		if(config.getLogfile()!=null){
 			logfile=new FileLogger(new java.io.File(config.getLogfile()));
@@ -1316,8 +1410,10 @@ public class Ili2db {
 			logGeneralInfo(config);
 			
 			String xtffile=config.getXtffile();
-			if(xtffile==null){
-				throw new Ili2dbException("no xtf-file given");
+			if(function!=Config.FC_VALIDATE) {
+	            if(xtffile==null){
+	                throw new Ili2dbException("no xtf-file given");
+	            }
 			}
 			String modeldir=config.getModeldir();
 			if(modeldir==null){
@@ -1384,7 +1480,9 @@ public class Ili2db {
 					customMapping.postConnect(conn, config);
 			} catch (SQLException e) {
 				throw new Ili2dbException("failed to get db connection",e);
-			}
+			} catch (IOException e) {
+                throw new Ili2dbException("failed to get db connection",e);
+            }
 			logDBVersion(conn);
 			  
             // run DB specific pre-processing
@@ -1393,10 +1491,10 @@ public class Ili2db {
 			// run pre-script 
 			if(config.getPreScript()!=null){
 				try {
-					EhiLogger.logState("run export pre-script...");
+					EhiLogger.logState("run "+functionName+" pre-script...");
 					DbUtility.executeSqlScript(conn, new java.io.FileReader(config.getPreScript()));
 				} catch (FileNotFoundException e) {
-					throw new Ili2dbException("export pre-script statements failed",e);
+					throw new Ili2dbException(functionName+" pre-script statements failed",e);
 				}
 			}
 			  
@@ -1406,7 +1504,7 @@ public class Ili2db {
 			long basketSqlIds[]=null;
 			if(datasetName!=null){
 				if(!createBasketCol){
-					throw new Ili2dbException("dataset wise export requires column "+DbNames.T_BASKET_COL);
+					throw new Ili2dbException("dataset wise "+functionName+" requires column "+DbNames.T_BASKET_COL);
 				}
 				// map datasetName to sqlBasketId and modelnames
 				String datasetNames[] = datasetName.split(ch.interlis.ili2c.Main.MODELS_SEPARATOR);
@@ -1429,7 +1527,7 @@ public class Ili2db {
 				}
 			}else if(baskets!=null){
 				if(!createBasketCol){
-					throw new Ili2dbException("basket wise export requires column "+DbNames.T_BASKET_COL);
+					throw new Ili2dbException("basket wise "+functionName+" requires column "+DbNames.T_BASKET_COL);
 				}
 				// BIDs
 				String basketids[]=baskets.split(ch.interlis.ili2c.Main.MODELS_SEPARATOR);
@@ -1437,7 +1535,7 @@ public class Ili2db {
 				basketSqlIds=getBasketSqlIdsFromBID(basketids,modelv,conn,config);
 			}else if(topics!=null){
 				if(!createBasketCol){
-					throw new Ili2dbException("topic wise export requires column "+DbNames.T_BASKET_COL);
+					throw new Ili2dbException("topic wise "+functionName+" requires column "+DbNames.T_BASKET_COL);
 				}
 				// TOPICs
 				String topicv[]=topics.split(ch.interlis.ili2c.Main.MODELS_SEPARATOR);
@@ -1525,21 +1623,31 @@ public class Ili2db {
 				}
 				
 				// use models explicitly given by user (--models, --baskets, --dataset, --topics)
+				// but remove model models that are crs translated
+				String srsModelAssignment=config.getSrsModelAssignment();
+				if(srsModelAssignment!=null) {
+	                String srsModelNames[]=srsModelAssignment.split("=");
+	                String originalSrsModelName=srsModelNames[0];
+	                String alternativeSrsModelName=srsModelNames[1];
+				    modelNames.remove(alternativeSrsModelName);
+				}
 			  java.util.List<Element> eles=ms.getModelElements(modelNames,td, td.getIli1Format()!=null && config.getDoItfLineTables(),Config.CREATE_ENUM_DEFS_MULTI.equals(config.getCreateEnumDefs()),config);
 			  Viewable2TableMapping class2wrapper=Viewable2TableMapper.getClass2TableMapping(config,trafoConfig,eles,mapping);
 
 			  // process xtf files
 			  EhiLogger.logState("process data...");
-			  EhiLogger.logState("data <"+xtffile+">");
+			  if(function!=Config.FC_VALIDATE) {
+	              EhiLogger.logState("data <"+xtffile+">");
+			  }
 				Map<Long,BasketStat> stat=new HashMap<Long,BasketStat>();
 				ch.ehi.basics.logging.ErrorTracker errs=new ch.ehi.basics.logging.ErrorTracker();
 				EhiLogger.getInstance().addListener(errs);
-				transferToXtf(conn,xtffile,mapping,td,geomConverter,config.getSender(),config,exportModelnames,basketSqlIds,stat,trafoConfig,class2wrapper);
+				transferToXtf(conn,function,xtffile,customMapping,mapping,td,geomConverter,config.getSender(),config,exportModelnames,basketSqlIds,stat,trafoConfig,class2wrapper);
 				if (errs.hasSeenErrors()) {
-					throw new Ili2dbException("...export failed");
+					throw new Ili2dbException("..."+functionName+" failed");
 				} else {
 					logStatistics(td.getIli1Format() != null, stat);
-					EhiLogger.logState("...export done");
+					EhiLogger.logState("..."+functionName+" done");
 				}
 			  EhiLogger.getInstance().removeListener(errs);
 			  
@@ -1547,9 +1655,9 @@ public class Ili2db {
 				if(config.getPostScript()!=null){
 					try {
 						DbUtility.executeSqlScript(conn, new java.io.FileReader(config.getPostScript()));
-						EhiLogger.logState("run export post-script...");
+						EhiLogger.logState("run "+functionName+" post-script...");
 					} catch (FileNotFoundException e) {
-						throw new Ili2dbException("export post-script statements failed",e);
+						throw new Ili2dbException(functionName+" post-script statements failed",e);
 					}
 				}
 				
@@ -1593,10 +1701,30 @@ public class Ili2db {
 		}
 	}
 	private static Connection connect(String url, String dbusr, String dbpwd,
-			Config config, CustomMapping customMapping) throws SQLException {
+			Config config, CustomMapping customMapping) throws SQLException, IOException {
 		Connection conn;
 		EhiLogger.logState("dburl <" + url + ">");
 		EhiLogger.logState("dbusr <" + dbusr + ">");
+		String dbParams=config.getDbParams();
+		if(dbParams!=null) {
+	        EhiLogger.logState("dbparams <" + dbParams + ">");
+		    java.io.Reader reader=null;
+		    try {
+	            reader=new java.io.InputStreamReader(new FileInputStream(dbParams),"UTF-8");
+	            java.util.Properties props=new java.util.Properties();
+	            props.load(reader);
+	            config.setDbProperties(props);
+            }finally {
+		        if(reader!=null) {
+		            try {
+                        reader.close();
+                    } catch (IOException e) {
+                        ; // igonre
+                    }
+		            reader=null;
+		        }
+		    }
+		}
 		customMapping.preConnect(url, dbusr, dbpwd, config);
 		conn = customMapping.connect(url, dbusr, dbpwd,config);
 		config.setJdbcConnection(conn);
@@ -1913,7 +2041,7 @@ public class Ili2db {
 			}
 		}
 		if(bids.size()==0){
-			throw new Ili2dbException("no baskets with given topic names in table "+sqlName);
+			throw new Ili2dbException("no baskets with given model names in table "+sqlName);
 		}
 		long ret[]=new long[bids.size()];
 		idx=0;
@@ -2053,7 +2181,7 @@ public class Ili2db {
 	}
 	/** transfer data from database to xml file
 	*/
-	static private void transferToXtf(Connection conn,String xtffile,NameMapping ili2sqlName,TransferDescription td
+	static private void transferToXtf(Connection conn,int function,String xtffile,CustomMapping customMapping,NameMapping ili2sqlName,TransferDescription td
 			,SqlColumnConverter geomConv
 			,String sender
 			,Config config
@@ -2063,42 +2191,55 @@ public class Ili2db {
 			,TrafoConfig trafoConfig
 			,Viewable2TableMapping class2wrapper){	
 
-		java.io.File outfile=new java.io.File(xtffile);
-		IoxWriter ioxWriter=null;
-		try{
-			if(Config.ILIGML20.equals(config.getTransferFileFormat())){
-				ioxWriter=new Iligml20Writer(outfile,td);
-			}else{
-				String ext=ch.ehi.basics.view.GenericFileFilter.getFileExtension(xtffile).toLowerCase();
-				if(config.isItfTransferfile()){
-					if(!config.getDoItfLineTables()){
-						ioxWriter=new ItfWriter2(outfile,td);
-					}else{
-						ioxWriter=new ItfWriter(outfile,td);
-					}
-					config.setValue(ch.interlis.iox_j.validator.Validator.CONFIG_DO_ITF_OIDPERTABLE, ch.interlis.iox_j.validator.Validator.CONFIG_DO_ITF_OIDPERTABLE_DO);
-				}else if(ext!=null && ext.equals("gml")){
-					ioxWriter=new Iligml10Writer(outfile,td);
-				}else{
-					ioxWriter=new XtfWriter(outfile,td);
-				}
-			}
-			TransferToXtf trsfr=new TransferToXtf(ili2sqlName,td,conn,geomConv,config,trafoConfig,class2wrapper);
-			trsfr.doit(outfile.getName(),ioxWriter,sender,exportParamModelnames,basketSqlIds,stat);
-			//trsfr.doitJava();
-			ioxWriter.flush();
-		}catch(ch.interlis.iox.IoxException ex){
-			EhiLogger.logError("failed to write xml output",ex);
-		}finally{
-			if(ioxWriter!=null){
-				try{
-					ioxWriter.close();
-				}catch(ch.interlis.iox.IoxException ex){
-					EhiLogger.logError("failed to close xml output",ex);
-				}
-			}
-			ioxWriter=null;
-		}
+	    if(function==Config.FC_VALIDATE) {
+	        try{
+	            TransferToXtf trsfr=new TransferToXtf(ili2sqlName,td,conn,geomConv,config,trafoConfig,class2wrapper);
+	            trsfr.doit(function,customMapping.shortenConnectUrl4Log(config.getDburl()),null,sender,exportParamModelnames,basketSqlIds,stat);
+	        }catch(ch.interlis.iox.IoxException ex){
+	            EhiLogger.logError("failed to validate data from db",ex);
+	        } catch (Ili2dbException ex) {
+                EhiLogger.logError("failed to validate data from db",ex);
+            }
+	    }else {
+	        java.io.File outfile=new java.io.File(xtffile);
+	        IoxWriter ioxWriter=null;
+	        try{
+	            if(Config.ILIGML20.equals(config.getTransferFileFormat())){
+	                ioxWriter=new Iligml20Writer(outfile,td);
+	            }else{
+	                String ext=ch.ehi.basics.view.GenericFileFilter.getFileExtension(xtffile).toLowerCase();
+	                if(config.isItfTransferfile()){
+	                    if(!config.getDoItfLineTables()){
+	                        ioxWriter=new ItfWriter2(outfile,td);
+	                    }else{
+	                        ioxWriter=new ItfWriter(outfile,td);
+	                    }
+	                    config.setValue(ch.interlis.iox_j.validator.Validator.CONFIG_DO_ITF_OIDPERTABLE, ch.interlis.iox_j.validator.Validator.CONFIG_DO_ITF_OIDPERTABLE_DO);
+	                }else if(ext!=null && ext.equals("gml")){
+	                    ioxWriter=new Iligml10Writer(outfile,td);
+	                }else{
+	                    ioxWriter=new XtfWriter(outfile,td);
+	                }
+	            }
+	            TransferToXtf trsfr=new TransferToXtf(ili2sqlName,td,conn,geomConv,config,trafoConfig,class2wrapper);
+	            trsfr.doit(function,outfile.getName(),ioxWriter,sender,exportParamModelnames,basketSqlIds,stat);
+	            //trsfr.doitJava();
+	            ioxWriter.flush();
+	        }catch(ch.interlis.iox.IoxException ex){
+	            EhiLogger.logError("failed to write xml output",ex);
+	        } catch (Ili2dbException ex) {
+                EhiLogger.logError("failed to write xml output",ex);
+            }finally{
+	            if(ioxWriter!=null){
+	                try{
+	                    ioxWriter.close();
+	                }catch(ch.interlis.iox.IoxException ex){
+	                    EhiLogger.logError("failed to close xml output",ex);
+	                }
+	            }
+	            ioxWriter=null;
+	        }
+	    }
 	}
 	
 	static private HashSet getModelNames(ArrayList modelv){
@@ -2139,8 +2280,8 @@ public class Ili2db {
 	}
 	public static boolean isItfFilename(String filename)
 	{
-		String xtfExt=ch.ehi.basics.view.GenericFileFilter.getFileExtension(new java.io.File(filename)).toLowerCase();
-		if("itf".equals(xtfExt)){
+		String xtfExt=ch.ehi.basics.view.GenericFileFilter.getFileExtension(new java.io.File(filename));
+		if(xtfExt!=null && "itf".equals(xtfExt.toLowerCase())){
 			return true;
 		}
 		return false;
@@ -2199,6 +2340,7 @@ public class Ili2db {
 		config.setMultiLineTrafo(null);
 		config.setMultiPointTrafo(null);
 		config.setArrayTrafo(null);
+        config.setJsonTrafo(null);
 		config.setMultilingualTrafo(null);
 		config.setInheritanceTrafo(null);
 	}
@@ -2217,5 +2359,11 @@ public class Ili2db {
 		}
 		return models;
 	}
+    public static String quoteSqlStringValue(String value) {
+        if(value==null) {
+            return "NULL";
+        }
+        return "'"+value.replace("'", "''")+"'";
+    }
 
 }

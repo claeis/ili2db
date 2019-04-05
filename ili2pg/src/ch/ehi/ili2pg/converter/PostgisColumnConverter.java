@@ -22,6 +22,7 @@ import ch.ehi.basics.settings.Settings;
 import ch.ehi.ili2db.converter.AbstractWKBColumnConverter;
 import ch.ehi.ili2db.converter.ConverterException;
 import ch.ehi.ili2db.gui.Config;
+import ch.ehi.ili2db.json.Iox2json;
 import ch.ehi.ili2db.toxtf.ToXtfRecordConverter;
 import ch.ehi.sqlgen.repository.DbColBlob;
 import ch.ehi.sqlgen.repository.DbColBoolean;
@@ -47,9 +48,13 @@ import java.util.GregorianCalendar;
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.XMLGregorianCalendar;
 
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonParser;
 import com.vividsolutions.jts.io.ParseException;
 import com.vividsolutions.jts.io.WKBReader;
 
+import ch.interlis.ili2c.metamodel.AttributeDef;
 import ch.interlis.ili2c.metamodel.BasketType;
 import ch.interlis.ili2c.metamodel.BlackboxType;
 import ch.interlis.ili2c.metamodel.EnumerationType;
@@ -57,6 +62,7 @@ import ch.interlis.ili2c.metamodel.NumericType;
 import ch.interlis.ili2c.metamodel.PolylineType;
 import ch.interlis.ili2c.metamodel.PrecisionDecimal;
 import ch.interlis.ili2c.metamodel.TextType;
+import ch.interlis.ili2c.metamodel.TransferDescription;
 import ch.interlis.iom.IomObject;
 import ch.interlis.iom_j.itf.EnumCodeMapper;
 import ch.interlis.iox_j.jts.Iox2jtsException;
@@ -66,12 +72,12 @@ import ch.interlis.iox_j.wkb.Wkb2iox;
 
 public class PostgisColumnConverter extends AbstractWKBColumnConverter {
 	private boolean strokeArcs=true;
-	private boolean createEnumColAsItfCode=false;
+    private JsonGenerator jg=null;
+    private TransferDescription td=null;
 	@Override
 	public void setup(Connection conn, Settings config) {
 		super.setup(conn,config);
 		strokeArcs=Config.STROKE_ARCS_ENABLE.equals(Config.getStrokeArcs(config));
-		createEnumColAsItfCode=Config.CREATE_ENUMCOL_AS_ITFCODE_YES.equals(config.getValue(Config.CREATE_ENUMCOL_AS_ITFCODE));
 	}
 	
 	@Override
@@ -262,7 +268,7 @@ public class PostgisColumnConverter extends AbstractWKBColumnConverter {
 			return null;
 		}
 		@Override
-		public Object fromIomArray(ch.interlis.ili2c.metamodel.AttributeDef attr,String[] iomValues,EnumCodeMapper enumTypes) throws SQLException, ConverterException {
+		public Object fromIomArray(ch.interlis.ili2c.metamodel.AttributeDef attr,String[] iomValues,boolean isEnumInt) throws SQLException, ConverterException {
 			java.sql.Array array=null;
 			ch.interlis.ili2c.metamodel.Type type=attr.getDomainResolvingAliases();
 			if (attr.isDomainBoolean()) {
@@ -330,14 +336,14 @@ public class PostgisColumnConverter extends AbstractWKBColumnConverter {
 				}
 				array=conn.createArrayOf("TIME", values);
 			}else if(type instanceof EnumerationType){
-				if(createEnumColAsItfCode){
-					Integer values[]=new Integer[iomValues.length];
+				if(isEnumInt){
+					Long values[]=new Long[iomValues.length];
 					for(int i=0;i<values.length;i++) {
 						String iomValue=iomValues[i];
-						int itfCode=Integer.parseInt(enumTypes.mapXtfCode2ItfCode((EnumerationType)type, iomValue));
+						long itfCode=Long.parseLong(iomValue);
 						values[i]=itfCode;
 					}
-					array=conn.createArrayOf("INTEGER", values);
+					array=conn.createArrayOf("BIGINT", values);
 				}else {
 					array=conn.createArrayOf("VARCHAR", iomValues);
 				}
@@ -490,7 +496,7 @@ public class PostgisColumnConverter extends AbstractWKBColumnConverter {
 	    return s;
 	}
 	@Override
-	public String[] toIomArray(ch.interlis.ili2c.metamodel.AttributeDef attr,Object sqlArray,EnumCodeMapper enumTypes) throws SQLException, ConverterException {
+	public String[] toIomArray(ch.interlis.ili2c.metamodel.AttributeDef attr,Object sqlArray,boolean isEnumInt) throws SQLException, ConverterException {
 		java.sql.Array array=(java.sql.Array)sqlArray;
 		String[] ret=null;
 		ch.interlis.ili2c.metamodel.Type type=attr.getDomainResolvingAliases();
@@ -548,11 +554,11 @@ public class PostgisColumnConverter extends AbstractWKBColumnConverter {
 				ret[i]=fmt.format(values[i]);
 			}
 		}else if(type instanceof EnumerationType){
-			if(createEnumColAsItfCode){
-				Integer values[]=(Integer[])array.getArray();
+			if(isEnumInt){
+				Long values[]=(Long[])array.getArray();
 				ret=new String[values.length];
 				for(int i=0;i<values.length;i++) {
-					ret[i]=enumTypes.mapItfCode2XtfCode((EnumerationType)type,values[i].toString());
+					ret[i]=values[i].toString();
 				}
 			}else {
 				ret=((String[])array.getArray());			}
@@ -617,5 +623,52 @@ public class PostgisColumnConverter extends AbstractWKBColumnConverter {
 		public void setArrayNull(PreparedStatement stmt, int parameterIndex) throws SQLException {
 			 stmt.setNull(parameterIndex, Types.ARRAY);
 		}
+        @Override
+        public String getSelectValueWrapperJson(String sqlColName) {
+            //return "from_jsonb("+sqlColName+")";
+            return "cast("+sqlColName+" as text)";
+        }
+        @Override
+        public String getInsertValueWrapperJson(String sqlColName) {
+            //return "to_jsonb("+sqlColName+")";
+            return "cast("+sqlColName+" as jsonb)";
+        }
+        @Override
+        public void setJsonNull(PreparedStatement stmt, int parameterIndex) throws SQLException {
+            stmt.setNull(parameterIndex, Types.VARCHAR);
+        }
+        @Override
+        public Object fromIomStructureToJson(AttributeDef iliEleAttr, IomObject[] iomObjects)
+                throws SQLException, ConverterException {
+            JsonFactory jsonF = new JsonFactory();
+            java.io.StringWriter out=new java.io.StringWriter();
+            
+            try {
+                if(jg==null) {
+                    jg = jsonF.createJsonGenerator(out);
+                    td=(TransferDescription) iliEleAttr.getContainer(TransferDescription.class);
+                }
+                Iox2json.write(jg, iomObjects,td);
+                jg.flush();
+            } catch (IOException e) {
+                throw new ConverterException(e);
+            }
+            return out.toString();
+        }
+        @Override
+        public IomObject[] toIomStructureFromJson(AttributeDef iliEleAttr, Object sqlArray)
+                throws SQLException, ConverterException {
+            JsonFactory jsonF = new JsonFactory();
+            java.io.StringReader in=new java.io.StringReader(sqlArray.toString());
+            IomObject iomObj[]=null;
+            try {
+                JsonParser jg = jsonF.createJsonParser(in);
+                
+                iomObj=Iox2json.read(jg);
+            }catch(IOException ex) {
+                throw new ConverterException(ex);
+            }
+            return iomObj;
+        }
 
 }

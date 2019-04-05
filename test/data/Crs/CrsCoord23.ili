@@ -20,6 +20,7 @@ MODEL CrsCoord23
     	attr1 : TEXT*60;
     	attrLV03 : CoordLV03;
     	attrLV95 : POLYLINE WITH (STRAIGHTS, ARCS) VERTEX CoordLV95;
+    	attrWGS84 : COORD -180.0 ..180.0, -90.0..90.0;
     END ClassA1;
     
   END TestA;

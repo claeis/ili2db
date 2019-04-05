@@ -1,9 +1,11 @@
 package ch.ehi.ili2db;
 
 import java.io.File;
+import java.sql.Array;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.HashMap;
 
@@ -102,6 +104,26 @@ public class Oid23Test {
 					Assert.assertTrue(rs.next());
 					Assert.assertEquals("classb1",rs.getString(2));
 				}
+				{
+				    // t_ili2db_attrname
+				    String [][] expectedValues=new String[][] {
+				        {"Oid1.TestC.ac.a", "a", "classc1", "classa1"},
+				    };
+				    Ili2dbAssert.assertAttrNameTable(jdbcConnection,expectedValues, DBSCHEMA);
+				    
+				}
+                {
+                    // t_ili2db_trafo
+                    String [][] expectedValues=new String[][] {
+                        {"Oid1.TestA.ClassA1b", "ch.ehi.ili2db.inheritance", "newClass"},
+                        {"Oid1.TestA.ClassB1b", "ch.ehi.ili2db.inheritance", "newClass"},
+                        {"Oid1.TestC.ac", "ch.ehi.ili2db.inheritance", "embedded"},
+                        {"Oid1.TestC.ClassC1", "ch.ehi.ili2db.inheritance", "newClass"},
+                        {"Oid1.TestA.ClassB1", "ch.ehi.ili2db.inheritance", "newClass"},
+                        {"Oid1.TestA.ClassA1", "ch.ehi.ili2db.inheritance", "newClass"},
+                    };
+                    Ili2dbAssert.assertTrafoTable(jdbcConnection,expectedValues, DBSCHEMA);
+                }
 			}
 		}finally{
 			if(jdbcConnection!=null){
@@ -110,10 +132,11 @@ public class Oid23Test {
 		}
 	}
 	
-	@Test
+
+    @Test
 	public void importXtf() throws Exception
 	{
-		EhiLogger.getInstance().setTraceFilter(false);
+		//EhiLogger.getInstance().setTraceFilter(false);
 		Connection jdbcConnection=null;
 		try{
 		    Class driverClass = Class.forName("org.postgresql.Driver");
@@ -125,6 +148,7 @@ public class Oid23Test {
 					File data=new File("test/data/Oid23/Oid1a.xtf");
 		    		Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 		    		config.setFunction(Config.FC_IMPORT);
+		            config.setDoImplicitSchemaImport(true);
 		    		config.setCreateFk(config.CREATE_FK_YES);
 		    		config.setTidHandling(Config.TID_HANDLING_PROPERTY);
 		    		config.setBasketHandling(config.BASKET_HANDLING_READWRITE);
@@ -151,15 +175,17 @@ public class Oid23Test {
 				}
 			}
 			// import-test: Oid1a.xtf
+			Integer a1_tid=null;
 			{
-				String stmtTxt="SELECT classa1.t_id, classa1.t_ili_tid FROM "+DBSCHEMA+".classa1 WHERE classa1.t_id = 4";
+				String stmtTxt="SELECT classa1.t_id, classa1.t_ili_tid FROM "+DBSCHEMA+".classa1 WHERE classa1.t_ili_tid = 'c34c86ec-2a75-4a89-a194-f9ebc422f8bc'";
 				Assert.assertTrue(stmt.execute(stmtTxt));
 				ResultSet rs=stmt.getResultSet();
 				Assert.assertTrue(rs.next());
 				Assert.assertEquals("c34c86ec-2a75-4a89-a194-f9ebc422f8bc",rs.getString(2));
+				a1_tid=rs.getInt(1);
 			}
 			{
-				String stmtTxt="SELECT classb1.t_id, classb1.t_ili_tid FROM "+DBSCHEMA+".classb1 WHERE classb1.t_id = 5";
+				String stmtTxt="SELECT classb1.t_id, classb1.t_ili_tid FROM "+DBSCHEMA+".classb1 WHERE classb1.t_ili_tid = '81fc3941-01ec-4c51-b1ba-46b6295d9b4e'";
 				Assert.assertTrue(stmt.execute(stmtTxt));
 				ResultSet rs=stmt.getResultSet();
 				Assert.assertTrue(rs.next());
@@ -167,11 +193,12 @@ public class Oid23Test {
 			}
 			// import-test_ Oid1c.xtf
 			{
-				String stmtTxt="SELECT classc1.t_id, classc1.a FROM "+DBSCHEMA+".classc1 WHERE classc1.t_id = 12";
+				String stmtTxt="SELECT classc1.t_id, classc1.a FROM "+DBSCHEMA+".classc1";
 				Assert.assertTrue(stmt.execute(stmtTxt));
 				ResultSet rs=stmt.getResultSet();
 				Assert.assertTrue(rs.next());
-				Assert.assertEquals("4",rs.getString(2));
+				Assert.assertEquals((int)a1_tid,rs.getInt(2));
+                Assert.assertFalse(rs.next());
 			}
 		}finally{
 			if(jdbcConnection!=null){
@@ -267,7 +294,7 @@ public class Oid23Test {
     public void importXtfExtendedTopic() throws Exception
     {
         importIliExtendedTopic();
-        EhiLogger.getInstance().setTraceFilter(false);
+        //EhiLogger.getInstance().setTraceFilter(false);
         Connection jdbcConnection=null;
         try{
             Class driverClass = Class.forName("org.postgresql.Driver");
