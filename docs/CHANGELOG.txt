@@ -31,6 +31,7 @@ ili2db 4.0.0 (2019-04-05) BETA
 - ili2c-5.0.0
 - fixed: missing resource ch.ehi.basics.wizard
 - replaced TOML file reader with INI file reader
+- Fehler beim polymorphen Schreiben von Modellen mit CatalogueObjects #229 
 - separate tid import from tid column creation #274
 - --createscript creates wrong sql insert commands #261
 - Wrong dependency scope for ili2db in ili2pg artefact #272
