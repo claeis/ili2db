@@ -71,6 +71,7 @@ public class ObjectStatisticsTest {
                     config.setMultilingualTrafo(null);
                     config.setImportBid(true);
                     config.setInheritanceTrafo(config.INHERITANCE_TRAFO_SMART1);
+                    config.setCreateImportTabs(true);
                     Ili2db.readSettingsFromDb(config);
                     config.setValidation(false);
                     try {

@@ -867,7 +867,6 @@ public class TransferFromIli {
 		{
 			DbTable tab=new DbTable();
 			tab.setName(new DbTableName(schema.getName(),DbNames.IMPORTS_TAB));
-			tab.setComment(DbNames.DEPRECATED);
 			
 			recConv.addKeyCol(tab);
 			
@@ -906,7 +905,6 @@ public class TransferFromIli {
 		{
 			DbTable tab=new DbTable();
 			tab.setName(new DbTableName(schema.getName(),DbNames.IMPORTS_BASKETS_TAB));
-			tab.setComment(DbNames.DEPRECATED);
 			
 			recConv.addKeyCol(tab);
 			
@@ -939,20 +937,10 @@ public class TransferFromIli {
 			dbColObjc.setNotNull(false);
 			tab.addColumn(dbColObjc);
 
-			DbColId dbColStartId=new DbColId();
-			dbColStartId.setName(DbNames.IMPORTS_TAB_STARTTID_COL);
-			dbColStartId.setNotNull(false);
-			tab.addColumn(dbColStartId);
-
-			DbColId dbColEndId=new DbColId();
-			dbColEndId.setName(DbNames.IMPORTS_TAB_ENDTID_COL);
-			dbColEndId.setNotNull(false);
-			tab.addColumn(dbColEndId);
-
 			schema.addTable(tab);
 			
 		}
-		{
+		if(false){
 			DbTable tab=new DbTable();
 			tab.setName(new DbTableName(schema.getName(),DbNames.IMPORTS_OBJECTS_TAB));
 			tab.setComment(DbNames.DEPRECATED);

@@ -1677,9 +1677,7 @@ public class TransferFromXtf {
 			+", "+DbNames.IMPORTS_BASKETS_TAB_IMPORTRUN_COL
 			+", "+DbNames.IMPORTS_BASKETS_TAB_BASKET_COL
 			+", "+DbNames.IMPORTS_TAB_OBJECTCOUNT_COL
-			+", "+DbNames.IMPORTS_TAB_STARTTID_COL
-			+", "+DbNames.IMPORTS_TAB_ENDTID_COL
-			+") VALUES (?,?,?,?,?,?)";
+			+") VALUES (?,?,?,?)";
 		EhiLogger.traceBackendCmd(insert);
 		PreparedStatement ps = conn.prepareStatement(insert);
 		try{
@@ -1698,12 +1696,6 @@ public class TransferFromXtf {
 			ps.setLong(valuei, objCount);
 			valuei++;
 
-			ps.setLong(valuei, startTid);
-			valuei++;
-			
-			ps.setLong(valuei, endTid);
-			valuei++;
-			
 			ps.executeUpdate();
 			
 			return key;
@@ -1716,45 +1708,47 @@ public class TransferFromXtf {
 	private void writeImportStatDetail(long importSqlId,long startTid,long endTid,long objCount,String importClassName)
 	throws java.sql.SQLException
 	{
-		String sqlname=DbNames.IMPORTS_OBJECTS_TAB;
-		if(schema!=null){
-			sqlname=schema+"."+sqlname;
-		}
-		String insert = "INSERT INTO "+sqlname
-			+"("+colT_ID 
-			+", "+DbNames.IMPORTS_OBJECTS_TAB_IMPORT_COL
-			+", "+DbNames.IMPORTS_OBJECTS_TAB_CLASS_COL
-			+", "+DbNames.IMPORTS_TAB_OBJECTCOUNT_COL
-			+", "+DbNames.IMPORTS_TAB_STARTTID_COL
-			+", "+DbNames.IMPORTS_TAB_ENDTID_COL
-			+") VALUES (?,?,?,?,?,?)";
-		EhiLogger.traceBackendCmd(insert);
-		PreparedStatement ps = conn.prepareStatement(insert);
-		try{
-			int valuei=1;
-			
-			ps.setLong(valuei, oidPool.newObjSqlId());
-			valuei++;
-			
-			ps.setLong(valuei, importSqlId);
-			valuei++;
+	    if(false) {
+	        String sqlname=DbNames.IMPORTS_OBJECTS_TAB;
+	        if(schema!=null){
+	            sqlname=schema+"."+sqlname;
+	        }
+	        String insert = "INSERT INTO "+sqlname
+	            +"("+colT_ID 
+	            +", "+DbNames.IMPORTS_OBJECTS_TAB_IMPORT_COL
+	            +", "+DbNames.IMPORTS_OBJECTS_TAB_CLASS_COL
+	            +", "+DbNames.IMPORTS_TAB_OBJECTCOUNT_COL
+	            +", "+DbNames.IMPORTS_TAB_STARTTID_COL
+	            +", "+DbNames.IMPORTS_TAB_ENDTID_COL
+	            +") VALUES (?,?,?,?,?,?)";
+	        EhiLogger.traceBackendCmd(insert);
+	        PreparedStatement ps = conn.prepareStatement(insert);
+	        try{
+	            int valuei=1;
+	            
+	            ps.setLong(valuei, oidPool.newObjSqlId());
+	            valuei++;
+	            
+	            ps.setLong(valuei, importSqlId);
+	            valuei++;
 
-			ps.setString(valuei, importClassName);
-			valuei++;
+	            ps.setString(valuei, importClassName);
+	            valuei++;
 
-			ps.setLong(valuei, objCount);
-			valuei++;
+	            ps.setLong(valuei, objCount);
+	            valuei++;
 
-			ps.setLong(valuei, startTid);
-			valuei++;
-			
-			ps.setLong(valuei, endTid);
-			valuei++;
-			
-			ps.executeUpdate();
-		}finally{
-			ps.close();
-		}
+	            ps.setLong(valuei, startTid);
+	            valuei++;
+	            
+	            ps.setLong(valuei, endTid);
+	            valuei++;
+	            
+	            ps.executeUpdate();
+	        }finally{
+	            ps.close();
+	        }
+	    }
 		
 	}
 
