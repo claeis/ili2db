@@ -457,7 +457,9 @@ public abstract class AbstractMain {
 					System.err.println("--skipReferenceErrors  ignore/do not report reference errors.");
 					System.err.println("--skipGeometryErrors   ignore/do not report geometry errors.");
 					System.err.println("--keepAreaRef          keep arreaRef as additional column on import.");
-					System.err.println("--importTid            read transient TIDs into an additional column "+DbNames.T_ILI_TID_COL);
+                    System.err.println("--createTidCol         create an additional column "+DbNames.T_ILI_TID_COL);
+                    System.err.println("--importTid            read transient TIDs into column "+DbNames.T_ILI_TID_COL);
+					System.err.println("--exportTid            write transient TIDs from column "+DbNames.T_ILI_TID_COL);
                     System.err.println("--importBid            read transient BIDs into "+DbNames.BASKETS_TAB+"."+DbNames.T_ILI_TID_COL);
                     System.err.println("--createImportTabs     create tables with import statistics. ("+DbNames.IMPORTS_TAB+")");
 					System.err.println("--createBasketCol      generate "+DbNames.T_BASKET_COL+" column.");
