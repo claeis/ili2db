@@ -59,7 +59,7 @@ public class Config extends Settings {
 	public static final String NUMERIC_CHECK_CONSTRAINTS=PREFIX+".numericCheckConstraints";
 	public static final String NUMERIC_CHECK_CONSTRAINTS_CREATE="create";
     public static final String IMPORT_TABS=PREFIX+".importTabs";
-    public static final String IMPORT_TABS_CREATE="create";
+    public static final String IMPORT_TABS_CREATE="simple";
 	public static final String GEOMATTR_PER_TABLE=PREFIX+".geomAttrPerTable";
 	public static final String GEOMATTR_PER_TABLE_ONE="oneGeomAttrPerTable";
 	private static final String NAME_OPTIMIZATION=PREFIX+".nameOptimization";
