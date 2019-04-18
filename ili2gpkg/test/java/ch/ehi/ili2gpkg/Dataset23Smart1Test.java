@@ -95,6 +95,65 @@ public class Dataset23Smart1Test {
             }
         }
     }
+    @Test
+    public void importDatasetEmpty() throws Exception {
+        Connection jdbcConnection = null;
+        try {
+            File gpkgFile = new File(gpkgFileName);
+            if (gpkgFile.exists()) {
+                File file = new File(gpkgFile.getAbsolutePath());
+                boolean fileDeleted = file.delete();
+                Assert.assertTrue(fileDeleted);
+            }
+
+            {
+                {
+                    File data = new File("test/data/Dataset23Smart1/Dataset1c1.xtf");
+                    Config config = initConfig(data.getPath(), null, data.getPath() + ".log");
+                    config.setDatasetName(DATASETNAME_A);
+                    config.setFunction(Config.FC_IMPORT);
+                    config.setDoImplicitSchemaImport(true);
+                    config.setCreateFk(config.CREATE_FK_YES);
+                    config.setBasketHandling(config.BASKET_HANDLING_READWRITE);
+                    config.setCatalogueRefTrafo(null);
+                    config.setMultiSurfaceTrafo(null);
+                    config.setMultilingualTrafo(null);
+                    config.setInheritanceTrafo(config.INHERITANCE_TRAFO_SMART1);
+                    Ili2db.readSettingsFromDb(config);
+                    Ili2db.run(config, null);
+                }
+            }
+        } finally {
+            if (jdbcConnection != null) {
+                jdbcConnection.close();
+            }
+        }
+    }
+    @Test
+    public void replaceDatasetEmpty() throws Exception {
+        {
+            importDatasetEmpty();
+        }
+        
+        Connection jdbcConnection = null;
+        try {
+
+            {
+                {
+                    File data = new File("test/data/Dataset23Smart1/Dataset1c2.xtf");
+                    Config config = initConfig(data.getPath(), null, data.getPath() + ".log");
+                    config.setDatasetName(DATASETNAME_A);
+                    config.setFunction(Config.FC_REPLACE);
+                    Ili2db.readSettingsFromDb(config);
+                    Ili2db.run(config, null);
+                }
+            }
+        } finally {
+            if (jdbcConnection != null) {
+                jdbcConnection.close();
+            }
+        }
+    }
 
     @Test
     public void exportDataset() throws Exception {
