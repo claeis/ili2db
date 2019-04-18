@@ -369,7 +369,16 @@ public class MemResultSet implements ResultSet {
                                 return false;
                             }
                         }else {
-                            if(leftValue==null || !leftValue.equals(param)) {
+                            if(leftValue==null) {
+                                return false;
+                            }
+                            if((leftValue instanceof Short || leftValue instanceof Integer || leftValue instanceof Long) && (param instanceof Short || param instanceof Integer || param instanceof Long)) {
+                                if(((Number) leftValue).longValue()==((Number) param).longValue()) {
+                                    return true;
+                                }
+                                return false;
+                            }
+                            if(!leftValue.equals(param)) {
                                 return false;
                             }
                         }
