@@ -140,6 +140,7 @@ public class TransferFromXtf {
     private Integer defaultCrsCode=null;
     private String srsModelAssignment=null;
     private Map<Element,Element> crsFilter=null;
+    private boolean createImportTabs=false;
 	public TransferFromXtf(int function,NameMapping ili2sqlName1,
 			TransferDescription td1,
 			Connection conn1,
@@ -179,6 +180,7 @@ public class TransferFromXtf {
 		if(createItfLineTables){
 			config.setValue(ch.interlis.iox_j.validator.Validator.CONFIG_DO_ITF_LINETABLES, ch.interlis.iox_j.validator.Validator.CONFIG_DO_ITF_LINETABLES_DO);
 		}
+		createImportTabs=config.isCreateImportTabs();
 		xtffilename=config.getXtffile();
 		functionCode=function;
 		if(!config.isVer3_translation() || config.getIli1Translation()!=null){
@@ -1029,28 +1031,30 @@ public class TransferFromXtf {
 		}		
 		dropExistingStructEles(topicQName,basketSqlId);
 		
-		String sqlName=DbNames.IMPORTS_BASKETS_TAB;
-		if(schema!=null){
-			sqlName=schema+"."+sqlName;
-		}
-		java.sql.PreparedStatement getstmt=null;
-		try{
-			String stmt="DELETE FROM "+sqlName+" WHERE "+DbNames.IMPORTS_BASKETS_TAB_BASKET_COL+"= ?";
-			EhiLogger.traceBackendCmd(stmt);
-			getstmt=conn.prepareStatement(stmt);
-			getstmt.setLong(1,basketSqlId);
-			getstmt.executeUpdate();
-		}catch(java.sql.SQLException ex){
-			throw new Ili2dbException("failed to delete from "+sqlName,ex);
-		}finally{
-			if(getstmt!=null){
-				try{
-					getstmt.close();
-					getstmt=null;
-				}catch(java.sql.SQLException ex){
-					EhiLogger.logError(ex);
-				}
-			}
+		if(createImportTabs) {
+	        String sqlName=DbNames.IMPORTS_BASKETS_TAB;
+	        if(schema!=null){
+	            sqlName=schema+"."+sqlName;
+	        }
+	        java.sql.PreparedStatement getstmt=null;
+	        try{
+	            String stmt="DELETE FROM "+sqlName+" WHERE "+DbNames.IMPORTS_BASKETS_TAB_BASKET_COL+"= ?";
+	            EhiLogger.traceBackendCmd(stmt);
+	            getstmt=conn.prepareStatement(stmt);
+	            getstmt.setLong(1,basketSqlId);
+	            getstmt.executeUpdate();
+	        }catch(java.sql.SQLException ex){
+	            throw new Ili2dbException("failed to delete from "+sqlName,ex);
+	        }finally{
+	            if(getstmt!=null){
+	                try{
+	                    getstmt.close();
+	                    getstmt=null;
+	                }catch(java.sql.SQLException ex){
+	                    EhiLogger.logError(ex);
+	                }
+	            }
+	        }
 		}
 		
 	}
