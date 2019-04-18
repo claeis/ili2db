@@ -54,7 +54,7 @@ public class Dataset23Smart1Test {
     }
 
     @Test
-    public void importDataset() throws Exception {
+    public void importXtf() throws Exception {
         Connection jdbcConnection = null;
         try {
             File gpkgFile = new File(gpkgFileName);
@@ -156,9 +156,9 @@ public class Dataset23Smart1Test {
     }
 
     @Test
-    public void exportDataset() throws Exception {
+    public void exportXtf() throws Exception {
 
-        importDataset();
+        importXtf();
 
         try {
 

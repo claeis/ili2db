@@ -65,7 +65,7 @@ public class Dataset23Smart1Test {
 	//config.setTidHandling(config.TID_HANDLING_PROPERTY);
 	
 	@Test
-	public void importXtfDataset() throws Exception
+	public void importXtf() throws Exception
 	{
 		Connection jdbcConnection=null;
 		try{
@@ -87,6 +87,7 @@ public class Dataset23Smart1Test {
 					config.setMultiSurfaceTrafo(null);
 					config.setMultilingualTrafo(null);
 					config.setInheritanceTrafo(config.INHERITANCE_TRAFO_SMART1);
+					config.setCreateImportTabs(true);
 					Ili2db.readSettingsFromDb(config);
 					Ili2db.run(config,null);
 				}
@@ -227,7 +228,7 @@ public class Dataset23Smart1Test {
 	}
 	
 	@Test
-	public void deleteSmart1() throws Exception
+	public void deleteXtf() throws Exception
 	{
 		Connection jdbcConnection=null;
 		try{
@@ -263,7 +264,7 @@ public class Dataset23Smart1Test {
 	}
 	
 	@Test
-	public void replaceSmart1() throws Exception
+	public void replaceXtf() throws Exception
 	{
 		Connection jdbcConnection=null;
 		try{
@@ -310,7 +311,7 @@ public class Dataset23Smart1Test {
 	}
 	
 	@Test
-	public void exportSmart1() throws Exception
+	public void exportXtf() throws Exception
 	{
 		Connection jdbcConnection=null;
 		try{
