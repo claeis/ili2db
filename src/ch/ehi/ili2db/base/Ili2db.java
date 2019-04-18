@@ -592,7 +592,7 @@ public class Ili2db {
                             // update enumerations table
                             trsfFromIli.updateEnumTable(insertCollector,conn);
                             trsfFromIli.updateMetaInfoTables(insertCollector,conn);
-                            TransferFromIli.addModels(insertCollector,conn,td,config.getDbschema(),customMapping);
+                            TransferFromIli.addModels(insertCollector,conn,td,config.getDbschema(),customMapping,false);
                             if(!config.isConfigReadFromDb()){
                                 TransferFromIli.updateSettings(insertCollector,conn,config,config.getDbschema());
                             }
@@ -1214,7 +1214,7 @@ public class Ili2db {
                     // update enum table
                     trsfFromIli.updateEnumTable(insertCollector,conn);
                     trsfFromIli.updateMetaInfoTables(insertCollector,conn);
-                    TransferFromIli.addModels(insertCollector,conn,td,config.getDbschema(),customMapping);
+                    TransferFromIli.addModels(insertCollector,conn,td,config.getDbschema(),customMapping,false);
                     if(!config.isConfigReadFromDb()){
                         TransferFromIli.updateSettings(insertCollector,conn,config,config.getDbschema());
                     }
@@ -1368,7 +1368,7 @@ public class Ili2db {
 			try {
 				url=conn.getMetaData().getURL();
 				url=mapping.shortenConnectUrl4IliCache(url);
-				iliFiles=TransferFromIli.readIliFiles(conn,config.getDbschema(),mapping);
+				iliFiles=TransferFromIli.readIliFiles(conn,config.getDbschema(),mapping,config.isVer3_export());
 			} catch (SQLException e) {
 				throw new Ili2dbException(e);
 			}
@@ -1385,7 +1385,7 @@ public class Ili2db {
 						iliFiles);
 				config.setTransientObject(
 						ch.interlis.ili2c.gui.UserSettings.CUSTOM_ILI_RESOLVER,
-						new IliFromDb(url,conn,dbSchema));
+						new IliFromDb(url,conn,dbSchema,config));
 			}		  	
 		}
 	}

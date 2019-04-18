@@ -50,6 +50,7 @@ public class NameMapping {
 	private static final int TOPIC_QUALIFIED_NAMES=1;
 	private static final int FULL_QUALIFIED_NAMES=2;
 	private boolean useEpsg=false;
+    private boolean isVer3_export=false;
 	private NameMapping(){};
 	public NameMapping(ch.ehi.ili2db.gui.Config config)
 	{
@@ -62,6 +63,7 @@ public class NameMapping {
 			nameing=UNQUALIFIED_NAMES;
 		}
 		useEpsg=config.useEpsgInNames();
+		isVer3_export=config.isVer3_export();
 	}
 	private String makeSqlTableName(String modelName,String topicName,String className,String attrName,int maxSqlNameLength)
 	{
@@ -547,7 +549,7 @@ public class NameMapping {
 	public void readAttrMappingTable(java.sql.Connection conn,String schema)
 	throws Ili2dbException
 	{
-		columnMapping.readAttrMappingTable(conn, schema);
+		columnMapping.readAttrMappingTable(conn, schema,isVer3_export);
 	}
 
 	public int getMaxSqlNameLength()

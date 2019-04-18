@@ -52,6 +52,7 @@ public class DbNames {
 	public static final String T_PARENT_ID_COL = "T_ParentId";
 	public static final String MODELS_TAB="T_ILI2DB_MODEL";
 	public static final String MODELS_TAB_FILENAME_COL="filename";
+	public static final String MODELS_TAB_FILENAME_COL_VER3="file";
 	public static final String MODELS_TAB_ILIVERSION_COL="iliversion";
 	public static final String MODELS_TAB_MODELNAME_COL="modelName";
 	public static final String MODELS_TAB_CONTENT_COL="content";
@@ -82,6 +83,7 @@ public class DbNames {
 	public static final String CLASSNAME_TAB_SQLNAME_COL="SqlName";
 	public static final String ATTRNAME_TAB="T_ILI2DB_ATTRNAME";
 	public static final String ATTRNAME_TAB_COLOWNER_COL="ColOwner";
+	public static final String ATTRNAME_TAB_COLOWNER_COL_VER3="Owner";
 	public static final String ATTRNAME_TAB_TARGET_COL="Target";
 	public static final String ATTRNAME_TAB_ILINAME_COL="IliName";
 	public static final String ATTRNAME_TAB_SQLNAME_COL="SqlName";

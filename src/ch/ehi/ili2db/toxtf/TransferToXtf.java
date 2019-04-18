@@ -299,6 +299,9 @@ public class TransferToXtf {
         java.sql.ResultSet res=null;
 		try{
 			String stmt="SELECT "+DbNames.BASKETS_TAB_TOPIC_COL+","+DbNames.T_ILI_TID_COL+","+DbNames.BASKETS_TAB_DOMAINS_COL+" FROM "+sqlName+" WHERE "+colT_ID+"= ?";
+			if(config.isVer3_export()) {
+	            stmt="SELECT "+DbNames.BASKETS_TAB_TOPIC_COL+","+DbNames.T_ILI_TID_COL+" FROM "+sqlName+" WHERE "+colT_ID+"= ?";
+			}
 			EhiLogger.traceBackendCmd(stmt);
 			getstmt=conn.prepareStatement(stmt);
 			getstmt.setLong(1,basketSqlId);
@@ -306,7 +309,9 @@ public class TransferToXtf {
 			if(res.next()){
 				topicName=res.getString(1);
 				bid=res.getString(2);
-                domains=res.getString(3);
+	            if(!config.isVer3_export()) {
+	                domains=res.getString(3);
+	            }
 			}
 		}catch(java.sql.SQLException ex){
 			EhiLogger.logError("failed to query "+sqlName,ex);

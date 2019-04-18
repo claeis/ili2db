@@ -130,6 +130,7 @@ public class Config extends Settings {
 	private boolean validation=false;
 	private boolean skipReferenceErrors=false;
     private boolean exportTid=false;
+    private boolean ver3_export=false;
     private boolean importTid=false;
     private boolean importBid=false;
     private Long minIdSeqValue=null;
@@ -723,4 +724,10 @@ public class Config extends Settings {
 	public boolean getCreateTypeConstraint() {
 		return TRUE.equals(getValue(CREATE_TYPE_CONSTRAINT))?true:false;
 	}
+    public void setVer3_export(boolean b) {
+        ver3_export=true;
+    }
+    public boolean isVer3_export() {
+        return ver3_export;
+    }
 }

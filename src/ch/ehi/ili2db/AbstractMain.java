@@ -137,6 +137,10 @@ public abstract class AbstractMain {
 			}else if(arg.equals("--export")){
 				config.setFunction(Config.FC_EXPORT);
 				argi++;
+            }else if(arg.equals("--export3")){
+                config.setFunction(Config.FC_EXPORT);
+                config.setVer3_export(true);
+                argi++;
 			}else if(arg.equals("--schemaimport")){
 				config.setFunction(Config.FC_SCHEMAIMPORT);
 				argi++;

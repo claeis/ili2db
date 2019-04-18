@@ -71,7 +71,7 @@ public class GeneratorOracleSpatial extends GeneratorJdbc {
 		}
 		String name=column.getName();
 		
-		if(name.equals(DbNames.MODELS_TAB_FILENAME_COL) && dbTab.getName().getName().equals(DbNames.MODELS_TAB)) {
+		if(name.equals(DbNames.MODELS_TAB_FILENAME_COL_VER3) && dbTab.getName().getName().equals(DbNames.MODELS_TAB)) {
 			name = "\"" + name + "\"";
 		}
 		
