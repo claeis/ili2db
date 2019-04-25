@@ -23,5 +23,11 @@ public abstract class AbstractTestSetup {
     protected Connection createDbSchema() throws SQLException {
         return createConnection();
     }
+    protected String prefixName(String name) {
+        return name;
+    }
+    protected String getSchema() {
+        return null;
+    }
 
 }

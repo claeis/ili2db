@@ -354,7 +354,7 @@ public abstract class SimpleTest {
             Connection jdbcConnection = setup.createConnection();
             try{
                 java.sql.Statement stmt=jdbcConnection.createStatement();
-                stmt.executeUpdate("UPDATE classa1 SET attr1='text with newline\n'");
+                stmt.executeUpdate("UPDATE "+setup.prefixName("classa1")+" SET attr1='text with newline\n'");
                 stmt.close();
                 stmt=null;
             }finally {

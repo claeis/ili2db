@@ -807,16 +807,19 @@ public class Ili2db {
 	    {
     		String ili2translation=config.getIli1Translation();
     		if(ili2translation!=null){
-    		    String modelNames[]=ili2translation.split("=");
-    		    String translatedModelName=modelNames[0];
-    		    String originLanguageModelName=modelNames[1];
-    		    if(translatedModelName!=null && originLanguageModelName!=null){
-    		    	ili2cMetaAttrs.setMetaAttrValue(translatedModelName, Ili2cMetaAttrs.ILI2C_TRANSLATION_OF, originLanguageModelName);
-    		    	if(modelv!=null){
-    			    	modelv.addFileEntry(new ch.interlis.ili2c.config.FileEntry(originLanguageModelName,ch.interlis.ili2c.config.FileEntryKind.ILIMODELFILE));
-    			    	modelv.addFileEntry(new ch.interlis.ili2c.config.FileEntry(translatedModelName,ch.interlis.ili2c.config.FileEntryKind.ILIMODELFILE));
-    		    	}
-    		    }
+                String modelNameMappings[]=ili2translation.split(";");
+                for(String modelNameMapping:modelNameMappings) {
+                    String modelNames[]=modelNameMapping.split("=");
+                    String translatedModelName=modelNames[0];
+                    String originLanguageModelName=modelNames[1];
+                    if(translatedModelName!=null && originLanguageModelName!=null){
+                        ili2cMetaAttrs.setMetaAttrValue(translatedModelName, Ili2cMetaAttrs.ILI2C_TRANSLATION_OF, originLanguageModelName);
+                        if(modelv!=null){
+                            modelv.addFileEntry(new ch.interlis.ili2c.config.FileEntry(originLanguageModelName,ch.interlis.ili2c.config.FileEntryKind.ILIMODELFILE));
+                            modelv.addFileEntry(new ch.interlis.ili2c.config.FileEntry(translatedModelName,ch.interlis.ili2c.config.FileEntryKind.ILIMODELFILE));
+                        }
+                    }
+                }
     		}
 		}
 	    {
