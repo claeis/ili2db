@@ -223,8 +223,15 @@ public class FgdbStatement implements Statement {
 	}
 
 	@Override
-	public int executeUpdate(String arg0) throws SQLException {
-		// TODO Auto-generated method stub
+	public int executeUpdate(String stmtStr) throws SQLException {
+        EnumRows rows=new EnumRows();
+          int err=0;
+        err=conn.getGeodatabase().ExecuteSQL(stmtStr, true, rows);
+        if(err!=0){
+            StringBuffer errDesc=new StringBuffer();
+            fgbd4j.GetErrorDescription(err, errDesc);
+            throw new SQLException(errDesc.toString());
+        }
 		return 0;
 	}
 
