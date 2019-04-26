@@ -6,6 +6,7 @@ import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.Statement;
+import java.util.HashMap;
 
 import org.junit.After;
 import org.junit.Assert;
@@ -117,7 +118,58 @@ public class MultipleGeomAttrsTest {
         }
 	}
     @Test
-    public void importIliExtendedClass() throws Exception
+    public void importIliExtendedClassSmart1() throws Exception
+    {
+        //EhiLogger.getInstance().setTraceFilter(false);
+        File gpkgFile=new File(GPKGFILENAME);
+        if(gpkgFile.exists()){ 
+            File file = new File(gpkgFile.getAbsolutePath());
+            file.delete();
+        }
+        File data=new File(TEST_OUT,"MultipleGeomAttrsExtendedClass.ili");
+        Config config=initConfig(data.getPath(),data.getPath()+".log");
+        config.setFunction(Config.FC_SCHEMAIMPORT);
+        //config.setCreateFk(config.CREATE_FK_YES);
+        config.setCreateNumChecks(true);
+        config.setTidHandling(Config.TID_HANDLING_PROPERTY);
+        config.setBasketHandling(config.BASKET_HANDLING_READWRITE);
+        config.setCatalogueRefTrafo(null);
+        config.setMultiSurfaceTrafo(null);
+        config.setMultilingualTrafo(null);
+        config.setInheritanceTrafo(Config.INHERITANCE_TRAFO_SMART1);
+        Ili2db.run(config,null);
+        openDb();
+        {
+            // t_ili2db_attrname
+            String [][] expectedValues=new String[][] {
+                {"MultipleGeomAttrsExtendedClass.Topic.ClassA.coord", "coord", "classa",null},                    
+                {"MultipleGeomAttrsExtendedClass.Topic.ClassA.line",  "line",  "classa_line",null},   
+                {"MultipleGeomAttrsExtendedClass.Topic.ClassA.surface",   "surface",   "classa_surface",null},    
+                {"MultipleGeomAttrsExtendedClass.TopicB.ClassB2.coord",   "coord", "multpldclasstopicb_classb_coord",null},   
+                {"MultipleGeomAttrsExtendedClass.TopicB.ClassB1.coord",   "coord", "classb_coord" ,null}, 
+                {"MultipleGeomAttrsExtendedClass.TopicB.ClassB.geom", "geom",  "classb",null}    
+            };
+            Ili2dbAssert.assertAttrNameTableFromGpkg(jdbcConnection, expectedValues);
+        }
+        {
+            // t_ili2db_trafo
+            String [][] expectedValues=new String[][] {
+                {"MultipleGeomAttrsExtendedClass.Topic.ClassA.line:2056(MultipleGeomAttrsExtendedClass.Topic.ClassA)",    "ch.ehi.ili2db.secondaryTable",  "classa_line"},
+                {"MultipleGeomAttrsExtendedClass.Topic.ClassAp",  "ch.ehi.ili2db.inheritance", "superClass"},
+                {"MultipleGeomAttrsExtendedClass.Topic.ClassA",   "ch.ehi.ili2db.inheritance", "newClass"},
+                {"MultipleGeomAttrsExtendedClass.Topic.ClassA.surface:2056(MultipleGeomAttrsExtendedClass.Topic.ClassA)", "ch.ehi.ili2db.secondaryTable",  "classa_surface"},
+                {"MultipleGeomAttrsExtendedClass.TopicB.ClassB",  "ch.ehi.ili2db.inheritance", "newClass"},
+                {"MultipleGeomAttrsExtendedClass.TopicB.ClassB2.coord:2056(MultipleGeomAttrsExtendedClass.TopicB.ClassB)",    "ch.ehi.ili2db.secondaryTable",  "multpldclasstopicb_classb_coord"},
+                {"MultipleGeomAttrsExtendedClass.TopicB.ClassB1", "ch.ehi.ili2db.inheritance", "superClass"},
+                {"MultipleGeomAttrsExtendedClass.TopicB.ClassB2", "ch.ehi.ili2db.inheritance", "superClass"  },              
+                {"MultipleGeomAttrsExtendedClass.TopicB.ClassB1.coord:2056(MultipleGeomAttrsExtendedClass.TopicB.ClassB)",    "ch.ehi.ili2db.secondaryTable",  "classb_coord"}
+                
+            };
+            Ili2dbAssert.assertTrafoTableFromGpkg(jdbcConnection, expectedValues);
+        }
+    }
+    @Test
+    public void importIliExtendedClassSmart2() throws Exception
     {
         //EhiLogger.getInstance().setTraceFilter(false);
         File gpkgFile=new File(GPKGFILENAME);
@@ -146,7 +198,12 @@ public class MultipleGeomAttrsTest {
                 {"MultipleGeomAttrsExtendedClass.Topic.ClassA.surface",   "surface",   "classa_surface",null},
                 {"MultipleGeomAttrsExtendedClass.Topic.ClassA.coord", "coord", "classa",null},
                 {"MultipleGeomAttrsExtendedClass.Topic.ClassA.surface",   "surface",   "classap_surface",null},
-                {"MultipleGeomAttrsExtendedClass.Topic.ClassA.line",  "line",  "classap_line", null}                
+                {"MultipleGeomAttrsExtendedClass.Topic.ClassA.line",  "line",  "classap_line", null},                
+                {"MultipleGeomAttrsExtendedClass.TopicB.ClassB2.coord",   "coord", "classb2", null},   
+                {"MultipleGeomAttrsExtendedClass.TopicB.ClassB1.coord",   "coord", "classb1", null},   
+                {"MultipleGeomAttrsExtendedClass.TopicB.ClassB.geom", "geom",  "classb1_geom", null},  
+                {"MultipleGeomAttrsExtendedClass.TopicB.ClassB.geom", "geom",  "classb", null},    
+                {"MultipleGeomAttrsExtendedClass.TopicB.ClassB.geom", "geom",  "classb2_geom", null}                  
             };
             Ili2dbAssert.assertAttrNameTableFromGpkg(jdbcConnection, expectedValues);
         }
@@ -158,7 +215,12 @@ public class MultipleGeomAttrsTest {
                 {"MultipleGeomAttrsExtendedClass.Topic.ClassA",   "ch.ehi.ili2db.inheritance", "newAndSubClass"},
                 {"MultipleGeomAttrsExtendedClass.Topic.ClassA.line:2056(MultipleGeomAttrsExtendedClass.Topic.ClassAp)",    "ch.ehi.ili2db.secondaryTable",  "classap_line"},
                 {"MultipleGeomAttrsExtendedClass.Topic.ClassA.surface:2056(MultipleGeomAttrsExtendedClass.Topic.ClassAp)", "ch.ehi.ili2db.secondaryTable",  "classap_surface"},
-                {"MultipleGeomAttrsExtendedClass.Topic.ClassAp",  "ch.ehi.ili2db.inheritance", "newAndSubClass"}                
+                {"MultipleGeomAttrsExtendedClass.Topic.ClassAp",  "ch.ehi.ili2db.inheritance", "newAndSubClass"},                
+                {"MultipleGeomAttrsExtendedClass.TopicB.ClassB.geom:2056(MultipleGeomAttrsExtendedClass.TopicB.ClassB2)", "ch.ehi.ili2db.secondaryTable",  "classb2_geom"},
+                {"MultipleGeomAttrsExtendedClass.TopicB.ClassB",  "ch.ehi.ili2db.inheritance", "newAndSubClass"},
+                {"MultipleGeomAttrsExtendedClass.TopicB.ClassB1", "ch.ehi.ili2db.inheritance", "newAndSubClass"},
+                {"MultipleGeomAttrsExtendedClass.TopicB.ClassB2", "ch.ehi.ili2db.inheritance", "newAndSubClass"},
+                {"MultipleGeomAttrsExtendedClass.TopicB.ClassB.geom:2056(MultipleGeomAttrsExtendedClass.TopicB.ClassB1)", "ch.ehi.ili2db.secondaryTable",  "classb1_geom"}                
             };
             Ili2dbAssert.assertTrafoTableFromGpkg(jdbcConnection, expectedValues);
         }
@@ -194,7 +256,7 @@ public class MultipleGeomAttrsTest {
 	}
 
     @Test
-    public void importXtfExtendedClass() throws Exception
+    public void importXtfExtendedClassSmart1() throws Exception
     {
         //EhiLogger.getInstance().setTraceFilter(false);
         File gpkgFile=new File(GPKGFILENAME);
@@ -209,6 +271,36 @@ public class MultipleGeomAttrsTest {
 //        config.setCreateFk(config.CREATE_FK_YES);
         config.setCreateNumChecks(true);
         config.setTidHandling(Config.TID_HANDLING_PROPERTY);
+        config.setImportTid(true);
+        config.setBasketHandling(config.BASKET_HANDLING_READWRITE);
+        config.setCatalogueRefTrafo(null);
+        config.setMultiSurfaceTrafo(null);
+        config.setMultilingualTrafo(null);
+        config.setInheritanceTrafo(Config.INHERITANCE_TRAFO_SMART1);
+        try{
+            Ili2db.run(config,null);
+        }catch(Exception ex){
+            EhiLogger.logError(ex);
+            Assert.fail();
+        }
+    }
+    @Test
+    public void importXtfExtendedClassSmart2() throws Exception
+    {
+        //EhiLogger.getInstance().setTraceFilter(false);
+        File gpkgFile=new File(GPKGFILENAME);
+        if (gpkgFile.exists()) {
+            File file = new File(gpkgFile.getAbsolutePath());
+            file.delete();
+        }
+        File data=new File(TEST_OUT,"MultipleGeomAttrsExtendedClass_a.xtf");
+        Config config=initConfig(data.getPath(),data.getPath()+".log");
+        config.setFunction(Config.FC_IMPORT);
+        config.setDoImplicitSchemaImport(true);
+//        config.setCreateFk(config.CREATE_FK_YES);
+        config.setCreateNumChecks(true);
+        config.setTidHandling(Config.TID_HANDLING_PROPERTY);
+        config.setImportTid(true);
         config.setBasketHandling(config.BASKET_HANDLING_READWRITE);
         config.setCatalogueRefTrafo(null);
         config.setMultiSurfaceTrafo(null);
@@ -261,10 +353,10 @@ public class MultipleGeomAttrsTest {
 	}
 	
 	@Test
-    public void exportXtfExtendedClass() throws Exception
+    public void exportXtfExtendedClassSmart1() throws Exception
     {
         {
-            importXtfExtendedClass();
+            importXtfExtendedClassSmart1();
         }
         //EhiLogger.getInstance().setTraceFilter(false);
         File gpkgFile=new File(GPKGFILENAME);
@@ -272,6 +364,7 @@ public class MultipleGeomAttrsTest {
         File data=new File(TEST_OUT,"MultipleGeomAttrsExtendedClass-out.xtf");
         Config config=initConfig(data.getPath(),data.getPath()+".log");
         config.setFunction(Config.FC_EXPORT);
+        config.setExportTid(true);
         config.setModels("MultipleGeomAttrsExtendedClass");
         Ili2db.readSettingsFromDb(config);
         try{
@@ -281,29 +374,104 @@ public class MultipleGeomAttrsTest {
             Assert.fail();
         }
         {
+            HashMap<String,IomObject> objs=new HashMap<String,IomObject>();
             XtfReader reader=new XtfReader(data);
-            assertTrue(reader.read() instanceof StartTransferEvent);
-            assertTrue(reader.read() instanceof StartBasketEvent);
-            IoxEvent event=reader.read();
-            {
-                assertTrue(event instanceof ObjectEvent);
-                IomObject iomObj=((ObjectEvent)event).getIomObject();
-                String attrtag=iomObj.getobjecttag();
-                assertEquals("MultipleGeomAttrsExtendedClass.Topic.ClassA",attrtag);
-                
-                assertObjectProperties(iomObj);
-            }
-            event=reader.read();
-            {
-                assertTrue(event instanceof ObjectEvent);
-                IomObject iomObj=((ObjectEvent)event).getIomObject();
-                String attrtag=iomObj.getobjecttag();
-                assertEquals("MultipleGeomAttrsExtendedClass.Topic.ClassAp",attrtag);
-                
-                assertObjectProperties(iomObj);
-            }
-            assertTrue(reader.read() instanceof EndBasketEvent);
-            assertTrue(reader.read() instanceof EndTransferEvent);
+            IoxEvent event=null;
+             do{
+                event=reader.read();
+                if(event instanceof StartTransferEvent){
+                }else if(event instanceof StartBasketEvent){
+                }else if(event instanceof ObjectEvent){
+                    IomObject iomObj=((ObjectEvent)event).getIomObject();
+                    if(iomObj.getobjectoid()!=null){
+                        objs.put(iomObj.getobjectoid(), iomObj);
+                    }
+                }else if(event instanceof EndBasketEvent){
+                }else if(event instanceof EndTransferEvent){
+                }
+             }while(!(event instanceof EndTransferEvent));
+             Assert.assertEquals(5, objs.size());
+             {
+                 IomObject obj0 = objs.get("ClassA.1");
+                 Assert.assertEquals("MultipleGeomAttrsExtendedClass.Topic.ClassA oid ClassA.1 {coord COORD {C1 2460001.0, C2 1045001.0}, line POLYLINE {sequence SEGMENTS {segment [COORD {C1 2460002.0, C2 1045002.0}, COORD {C1 2460010.0, C2 1045010.0}]}}, surface MULTISURFACE {surface SURFACE {boundary BOUNDARY {polyline POLYLINE {sequence SEGMENTS {segment [COORD {C1 2460005.0, C2 1045005.0}, COORD {C1 2460010.0, C2 1045010.0}, COORD {C1 2460005.0, C2 1045010.0}, COORD {C1 2460005.0, C2 1045005.0}]}}}}}}", obj0.toString());
+             }
+             {
+                 IomObject obj0 = objs.get("ClassAp.1");
+                 Assert.assertEquals("MultipleGeomAttrsExtendedClass.Topic.ClassAp oid ClassAp.1 {coord COORD {C1 2460001.0, C2 1045001.0}, line POLYLINE {sequence SEGMENTS {segment [COORD {C1 2460002.0, C2 1045002.0}, COORD {C1 2460010.0, C2 1045010.0}]}}, surface MULTISURFACE {surface SURFACE {boundary BOUNDARY {polyline POLYLINE {sequence SEGMENTS {segment [COORD {C1 2460005.0, C2 1045005.0}, COORD {C1 2460010.0, C2 1045010.0}, COORD {C1 2460005.0, C2 1045010.0}, COORD {C1 2460005.0, C2 1045005.0}]}}}}}}", obj0.toString());
+             }
+             {
+                 IomObject obj0 = objs.get("ClassB.1");
+                 Assert.assertEquals("MultipleGeomAttrsExtendedClass.TopicB.ClassB oid ClassB.1 {geom COORD {C1 2460001.0, C2 1045001.0}}", obj0.toString());
+             }
+             {
+                 IomObject obj0 = objs.get("ClassB1.1");
+                 Assert.assertEquals("MultipleGeomAttrsExtendedClass.TopicB.ClassB1 oid ClassB1.1 {coord COORD {C1 2460002.1, C2 1045002.1}, geom COORD {C1 2460002.0, C2 1045002.0}}", obj0.toString());
+             }
+             {
+                 IomObject obj0 = objs.get("ClassB2.1");
+                 Assert.assertEquals("MultipleGeomAttrsExtendedClass.TopicB.ClassB2 oid ClassB2.1 {coord COORD {C1 2460003.1, C2 1045003.1}, geom COORD {C1 2460003.0, C2 1045003.0}}", obj0.toString());
+             }
+        }
+    }
+    @Test
+    public void exportXtfExtendedClassSmart2() throws Exception
+    {
+        {
+            importXtfExtendedClassSmart2();
+        }
+        //EhiLogger.getInstance().setTraceFilter(false);
+        File gpkgFile=new File(GPKGFILENAME);
+        //Fgdb4j.deleteFileGdb(fgdbFile);
+        File data=new File(TEST_OUT,"MultipleGeomAttrsExtendedClass-out.xtf");
+        Config config=initConfig(data.getPath(),data.getPath()+".log");
+        config.setFunction(Config.FC_EXPORT);
+        config.setExportTid(true);
+        config.setModels("MultipleGeomAttrsExtendedClass");
+        Ili2db.readSettingsFromDb(config);
+        try{
+            Ili2db.run(config,null);
+        }catch(Exception ex){
+            EhiLogger.logError(ex);
+            Assert.fail();
+        }
+        {
+            HashMap<String,IomObject> objs=new HashMap<String,IomObject>();
+            XtfReader reader=new XtfReader(data);
+            IoxEvent event=null;
+             do{
+                event=reader.read();
+                if(event instanceof StartTransferEvent){
+                }else if(event instanceof StartBasketEvent){
+                }else if(event instanceof ObjectEvent){
+                    IomObject iomObj=((ObjectEvent)event).getIomObject();
+                    if(iomObj.getobjectoid()!=null){
+                        objs.put(iomObj.getobjectoid(), iomObj);
+                    }
+                }else if(event instanceof EndBasketEvent){
+                }else if(event instanceof EndTransferEvent){
+                }
+             }while(!(event instanceof EndTransferEvent));
+             Assert.assertEquals(5, objs.size());
+             {
+                 IomObject obj0 = objs.get("ClassA.1");
+                 Assert.assertEquals("MultipleGeomAttrsExtendedClass.Topic.ClassA oid ClassA.1 {coord COORD {C1 2460001.0, C2 1045001.0}, line POLYLINE {sequence SEGMENTS {segment [COORD {C1 2460002.0, C2 1045002.0}, COORD {C1 2460010.0, C2 1045010.0}]}}, surface MULTISURFACE {surface SURFACE {boundary BOUNDARY {polyline POLYLINE {sequence SEGMENTS {segment [COORD {C1 2460005.0, C2 1045005.0}, COORD {C1 2460010.0, C2 1045010.0}, COORD {C1 2460005.0, C2 1045010.0}, COORD {C1 2460005.0, C2 1045005.0}]}}}}}}", obj0.toString());
+             }
+             {
+                 IomObject obj0 = objs.get("ClassAp.1");
+                 Assert.assertEquals("MultipleGeomAttrsExtendedClass.Topic.ClassAp oid ClassAp.1 {coord COORD {C1 2460001.0, C2 1045001.0}, line POLYLINE {sequence SEGMENTS {segment [COORD {C1 2460002.0, C2 1045002.0}, COORD {C1 2460010.0, C2 1045010.0}]}}, surface MULTISURFACE {surface SURFACE {boundary BOUNDARY {polyline POLYLINE {sequence SEGMENTS {segment [COORD {C1 2460005.0, C2 1045005.0}, COORD {C1 2460010.0, C2 1045010.0}, COORD {C1 2460005.0, C2 1045010.0}, COORD {C1 2460005.0, C2 1045005.0}]}}}}}}", obj0.toString());
+             }
+             {
+                 IomObject obj0 = objs.get("ClassB.1");
+                 Assert.assertEquals("MultipleGeomAttrsExtendedClass.TopicB.ClassB oid ClassB.1 {geom COORD {C1 2460001.0, C2 1045001.0}}", obj0.toString());
+             }
+             {
+                 IomObject obj0 = objs.get("ClassB1.1");
+                 Assert.assertEquals("MultipleGeomAttrsExtendedClass.TopicB.ClassB1 oid ClassB1.1 {coord COORD {C1 2460002.1, C2 1045002.1}, geom COORD {C1 2460002.0, C2 1045002.0}}", obj0.toString());
+             }
+             {
+                 IomObject obj0 = objs.get("ClassB2.1");
+                 Assert.assertEquals("MultipleGeomAttrsExtendedClass.TopicB.ClassB2 oid ClassB2.1 {coord COORD {C1 2460003.1, C2 1045003.1}, geom COORD {C1 2460003.0, C2 1045003.0}}", obj0.toString());
+             }
         }
     }
 

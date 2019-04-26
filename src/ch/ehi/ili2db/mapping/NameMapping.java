@@ -212,17 +212,13 @@ public class NameMapping {
 		return sqlname;
 	}
     public String mapAttributeAsTable(Viewable aclass,ch.interlis.ili2c.metamodel.AttributeDef def,Integer epsgCode){
-        String iliqname=aclass.getScopedName(null)+"."+def.getName();
+        String iliqname=def.getContainer().getScopedName(null)+"."+def.getName();
         String sqlname=null;
         if(useEpsg && epsgCode!=null) {
-            String iliqname2 = iliqname+":"+epsgCode;
-            sqlname=(String)classNameIli2sql.get(iliqname2);
-            if(sqlname==null) {
-                // pre 3.13.x
-                sqlname=(String)classNameIli2sql.get(iliqname);
-            }
-            iliqname=iliqname2;
+            iliqname = iliqname+":"+epsgCode+"("+aclass.getScopedName()+")";
+            sqlname=(String)classNameIli2sql.get(iliqname);
         }else {
+            iliqname=iliqname+"("+aclass.getScopedName()+")";
             sqlname=(String)classNameIli2sql.get(iliqname);
         }
         if(sqlname==null){
