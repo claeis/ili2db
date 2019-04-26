@@ -480,16 +480,17 @@ public class TransferToXtf {
 				boolean skipObj=false;
 				for(IomObject ref:fixref.getRefs()){
 					long sqlid=fixref.getTargetSqlid(ref);
-					if(sqlidPool.containsSqlid(sqlid)){
+                    String sqlTargetTable=fixref.getTargetSqlTable(ref);
+					if(sqlidPool.containsSqlid(sqlTargetTable,sqlid)){
 						// fix it
-						ref.setobjectrefoid(sqlidPool.getXtfid(sqlid));
+						ref.setobjectrefoid(sqlidPool.getXtfid(sqlTargetTable,sqlid));
 					}else{
 						// object in another basket
 						Viewable aclass=fixref.getTargetClass(ref);
 						// read object
 						String tid=readObjectTid(aclass,sqlid);
 						if(tid==null){
-							EhiLogger.logError("unknown referenced object "+aclass.getScopedName(null)+" sqlid "+fixref.getTargetSqlid(ref)+" referenced from "+fixref.getRoot().getobjecttag()+" TID "+fixref.getRoot().getobjectoid());
+							EhiLogger.logError("unknown referenced object "+aclass.getScopedName(null)+" (sqltable "+sqlTargetTable+", sqlid "+sqlid+") referenced from "+fixref.getRoot().getobjecttag()+" TID "+fixref.getRoot().getobjectoid());
 							referrs=true;
 							skipObj=true;
 						}else{
@@ -548,7 +549,8 @@ public class TransferToXtf {
 					if(rs.wasNull()){
 						sqlIliTid = Long.toString(sqlid);
 					}
-					sqlidPool.putSqlid2Xtfid(sqlid, sqlIliTid);
+                    String sqlType = rs.getString(3);
+					sqlidPool.putSqlid2Xtfid(sqlType,sqlid, sqlIliTid);
 				}else{
 					// unknown object
 					return null;
@@ -574,7 +576,7 @@ public class TransferToXtf {
 			}
 		}else{
 			sqlIliTid = Long.toString(sqlid);
-			sqlidPool.putSqlid2Xtfid(sqlid, sqlIliTid);
+			sqlidPool.putSqlid2Xtfid(recConv.getSqlType(aclass).getName(),sqlid, sqlIliTid);
 		}
 		return sqlIliTid;
 	}
@@ -868,11 +870,12 @@ public class TransferToXtf {
 					// -> mainTable
 					IomObject ref=iomObj.addattrobj(refAttrName,"REF");
 					long refSqlId=rs.getLong(valuei);
-					if(sqlidPool.containsSqlid(refSqlId)){
-						String refTid=sqlidPool.getXtfid(refSqlId);
+					String sqlTargetTable=recConv.getSqlType(aclass).getName(); // sql name of main table
+					if(sqlidPool.containsSqlid(sqlTargetTable,refSqlId)){
+						String refTid=sqlidPool.getXtfid(sqlTargetTable,refSqlId);
 						ref.setobjectrefoid(refTid);
 					}else{
-						EhiLogger.logError("unknown referenced object "+attr.getContainer().getScopedName(null)+" sqlid "+refSqlId+" referenced from "+sqlTabName+" "+colT_ID+" "+sqlid);
+						EhiLogger.logError("unknown referenced object "+attr.getContainer().getScopedName(null)+" (sqltable "+sqlTargetTable+", sqlid "+refSqlId+") referenced from "+sqlTabName+" "+colT_ID+" "+sqlid);
 					}
 					valuei++;
 					

@@ -61,7 +61,7 @@ public class InheritanceNoSmartTest {
 	}
 
 	@Test
-	public void importXtfNoSmart() throws Exception
+	public void importXtf() throws Exception
 	{
 		Connection jdbcConnection=null;
 		try{
@@ -100,7 +100,7 @@ public class InheritanceNoSmartTest {
 	}
 
 	@Test
-	public void exportXtfNoSmart() throws Exception
+	public void exportXtf() throws Exception
 	{
 		Connection jdbcConnection=null;
 		try{
@@ -161,6 +161,63 @@ public class InheritanceNoSmartTest {
 			}
 		}
 	}	
+
+    @Test
+    public void exportXtf_IdPerTable() throws Exception
+    {
+        Connection jdbcConnection=null;
+        try{
+            Class driverClass = Class.forName("org.postgresql.Driver");
+            jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
+            stmt=jdbcConnection.createStatement();
+            stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");
+            DbUtility.executeSqlScript(jdbcConnection, new java.io.FileReader("test/data/InheritanceNoSmart/CreateTable.sql"));
+            DbUtility.executeSqlScript(jdbcConnection, new java.io.FileReader("test/data/InheritanceNoSmart/InsertIntoTable_IdPerTable.sql"));
+            File data=new File("test/data/InheritanceNoSmart/Inheritance1a-out.xtf");
+            Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+            config.setTopics("Inheritance1.TestD");
+            config.setFunction(Config.FC_EXPORT);
+            config.setExportTid(true);
+            Ili2db.readSettingsFromDb(config);
+            Ili2db.run(config,null);
+            // read objects of db and write objectValue to HashMap
+            HashMap<String,IomObject> objs=new HashMap<String,IomObject>();
+            XtfReader reader=new XtfReader(data);
+            IoxEvent event=null;
+             do{
+                event=reader.read();
+                if(event instanceof StartTransferEvent){
+                }else if(event instanceof StartBasketEvent){
+                }else if(event instanceof ObjectEvent){
+                    IomObject iomObj=((ObjectEvent)event).getIomObject();
+                    if(iomObj.getobjectoid()!=null){
+                        objs.put(iomObj.getobjectoid(), iomObj);
+                    }else {
+                        objs.put(iomObj.getattrobj("d2",0).getobjectrefoid()+iomObj.getattrobj("x2",0).getobjectrefoid(), iomObj);
+                    }
+                }else if(event instanceof EndBasketEvent){
+                }else if(event instanceof EndTransferEvent){
+                }
+             }while(!(event instanceof EndTransferEvent));
+             Assert.assertEquals(3, objs.size());
+             {
+                 IomObject obj1 = objs.get("20");
+                 Assert.assertEquals("Inheritance1.TestD.ClassD1b oid 20 {attrD1 20_d1, attrD1b 20_d1b}", obj1.toString());
+             }
+             {
+                 IomObject obj1 = objs.get("21");
+                 Assert.assertEquals("Inheritance1.TestD.ClassD1x oid 21 {attrD1x 21_d1x, d1 -> 20 REF {}}", obj1.toString());
+             }
+             {
+                 IomObject obj1 = objs.get("2021");
+                 Assert.assertEquals("Inheritance1.TestD.d2x {d2 -> 20 REF {}, x2 -> 21 REF {}}", obj1.toString());
+             }
+        }finally{
+            if(jdbcConnection!=null){
+                jdbcConnection.close();
+            }
+        }
+    }   
 	
 	@Test
 	public void importIliStructAttrFK() throws Exception

@@ -128,6 +128,8 @@ public class ViewableWrapper {
 	public void setExtending(ViewableWrapper base1) {
 		base=base1;
 	}
+	/** returns the unqualified db tablename.
+	 */
 	public String getSqlTablename() {
 		return sqlTablename.getName();
 	}
