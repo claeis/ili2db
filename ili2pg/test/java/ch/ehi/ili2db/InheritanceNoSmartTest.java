@@ -271,10 +271,13 @@ public class InheritanceNoSmartTest {
 		try{
 	        Class driverClass = Class.forName("org.postgresql.Driver");
 	        jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
+	        jdbcConnection.setAutoCommit(false);
 	        stmt=jdbcConnection.createStatement();
 			stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");
-	        DbUtility.executeSqlScript(jdbcConnection, new java.io.FileReader("test/data/InheritanceNoSmart/CreateTable.sql"));
-	        DbUtility.executeSqlScript(jdbcConnection, new java.io.FileReader("test/data/InheritanceNoSmart/InsertIntoTable.sql"));
+	        DbUtility.executeSqlScript(jdbcConnection, new java.io.FileReader("test/data/InheritanceNoSmart/StructAttr1.ili.sql"));
+	        jdbcConnection.commit();
+	        DbUtility.executeSqlScript(jdbcConnection, new java.io.FileReader("test/data/InheritanceNoSmart/StructAttr1a.data.sql"));
+            jdbcConnection.commit();
 	        File data=new File("test/data/InheritanceNoSmart/StructAttr1a-out.xtf");
 			Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 			config.setModels("Inheritance1");
@@ -300,26 +303,26 @@ public class InheritanceNoSmartTest {
 		        }else if(event instanceof EndTransferEvent){
 		        }
 			 }while(!(event instanceof EndTransferEvent));
+             Assert.assertEquals(5, objs.size());
 			 {
-				 IomObject obj1 = objs.get("17");
-				 Assert.assertNotNull(obj1);
-				 Assert.assertEquals("Inheritance1.TestB.ClassB1", obj1.getobjecttag());
+				 IomObject obj1 = objs.get("a1");
+                 Assert.assertEquals("StructAttr1.TopicA.ClassA oid a1 {attr1 StructAttr1.TopicA.StructA {name Anna}, attr2 text2}", obj1.toString());
 			 }
 			 {
-				 IomObject obj1 = objs.get("17");
-				 Assert.assertEquals("x2", obj1.getattrobj("s3b", 0).getattrvalue("attrB3b"));
+				 IomObject obj1 = objs.get("a2");
+                 Assert.assertEquals("StructAttr1.TopicA.ClassB oid a2 {attr1 StructAttr1.TopicA.StructA {name Berta}, attr2 text2, attr3 text3}", obj1.toString());
 			 }
 			 {
-				 IomObject obj1 = objs.get("17");
-				 Assert.assertEquals("b2", obj1.getattrobj("s2", 0).getattrvalue("attrB2b"));
+				 IomObject obj1 = objs.get("a3");
+                 Assert.assertEquals("StructAttr1.TopicA.ClassC oid a3 {attr1 StructAttr1.TopicA.StructA {name Claudia}, attr2 text2, attr3 text3, attr4 text4}", obj1.toString());
 			 }
 			 {
-				 IomObject obj1 = objs.get("17");
-				 Assert.assertEquals("b3a", obj1.getattrobj("s3a", 0).getattrvalue("attrB3"));
+				 IomObject obj1 = objs.get("b2");
+                 Assert.assertEquals("StructAttr1.TopicB.ClassB oid b2 {attr1 StructAttr1.TopicB.StructA {name Berta}, attr2 text2, attr3 text3}", obj1.toString());
 			 }
 			 {
-				 IomObject obj1 = objs.get("17");
-				 Assert.assertEquals("b1", obj1.getattrobj("s1", 0).getattrvalue("attrB1"));
+				 IomObject obj1 = objs.get("b3");
+				 Assert.assertEquals("StructAttr1.TopicB.ClassC oid b3 {attr1 StructAttr1.TopicB.StructA {name Claudia}, attr2 text2, attr3 text3, attr4 text4}", obj1.toString());
 			 }
 		}finally{
 			if(jdbcConnection!=null){
