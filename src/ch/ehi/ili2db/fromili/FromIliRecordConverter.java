@@ -9,8 +9,6 @@ import java.util.Collections;
 import java.io.IOException;
 import java.io.StringWriter;
 
-import javax.xml.ws.Holder;
-
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerator;
 
@@ -25,9 +23,6 @@ import ch.ehi.ili2db.gui.Config;
 import ch.ehi.ili2db.mapping.ArrayMapping;
 import ch.ehi.ili2db.mapping.ColumnWrapper;
 import ch.ehi.ili2db.mapping.IliMetaAttrNames;
-import ch.ehi.ili2db.mapping.MultiLineMapping;
-import ch.ehi.ili2db.mapping.MultiPointMapping;
-import ch.ehi.ili2db.mapping.MultiSurfaceMapping;
 import ch.ehi.ili2db.mapping.NameMapping;
 import ch.ehi.ili2db.mapping.TrafoConfig;
 import ch.ehi.ili2db.mapping.TrafoConfigNames;
@@ -51,7 +46,6 @@ import ch.ehi.sqlgen.repository.DbIndex;
 import ch.ehi.sqlgen.repository.DbSchema;
 import ch.ehi.sqlgen.repository.DbTable;
 import ch.ehi.sqlgen.repository.DbTableName;
-import ch.interlis.ili2c.metamodel.AbstractClassDef;
 import ch.interlis.ili2c.metamodel.AreaType;
 import ch.interlis.ili2c.metamodel.AssociationDef;
 import ch.interlis.ili2c.metamodel.AttributeDef;
@@ -59,10 +53,7 @@ import ch.interlis.ili2c.metamodel.AttributeRef;
 import ch.interlis.ili2c.metamodel.BasketType;
 import ch.interlis.ili2c.metamodel.BlackboxType;
 import ch.interlis.ili2c.metamodel.CompositionType;
-import ch.interlis.ili2c.metamodel.Container;
 import ch.interlis.ili2c.metamodel.CoordType;
-import ch.interlis.ili2c.metamodel.Domain;
-import ch.interlis.ili2c.metamodel.Element;
 import ch.interlis.ili2c.metamodel.EnumerationType;
 import ch.interlis.ili2c.metamodel.Evaluable;
 import ch.interlis.ili2c.metamodel.LineType;
@@ -86,7 +77,6 @@ import ch.interlis.ili2c.metamodel.UniqueEl;
 import ch.interlis.ili2c.metamodel.UniquenessConstraint;
 import ch.interlis.ili2c.metamodel.Unit;
 import ch.interlis.ili2c.metamodel.Viewable;
-import ch.interlis.ili2c.metamodel.ViewableTransferElement;
 
 public class FromIliRecordConverter extends AbstractRecordConverter {
 	private DbSchema schema=null;

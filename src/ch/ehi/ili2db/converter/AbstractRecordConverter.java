@@ -41,8 +41,6 @@ import ch.interlis.ili2c.metamodel.NumericalType;
 import ch.interlis.ili2c.metamodel.ObjectType;
 import ch.interlis.ili2c.metamodel.ReferenceType;
 import ch.interlis.ili2c.metamodel.RoleDef;
-import ch.interlis.ili2c.metamodel.SurfaceOrAreaType;
-import ch.interlis.ili2c.metamodel.Table;
 import ch.interlis.ili2c.metamodel.TransferDescription;
 import ch.interlis.ili2c.metamodel.Type;
 import ch.interlis.ili2c.metamodel.Viewable;
