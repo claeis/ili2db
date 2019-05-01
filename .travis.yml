@@ -13,7 +13,7 @@ addons:
     - libmaven-ant-tasks-java
     - python3
     - python3-pip
-#    - postgresql-9.6-postgis-2.3
+    - postgresql-9.6-postgis-2.4
 #    - python3-docutils    
     
 install: true
