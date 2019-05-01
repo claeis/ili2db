@@ -8,9 +8,11 @@ branches:
     - master
     - stable
 
+services:
+  - mysql
+  
 addons:
   postgresql: "9.6"
-  myql: "5.7"
   apt:
     packages:
     - libmaven-ant-tasks-java
