@@ -24,7 +24,7 @@ addons:
 install: true
 
 before_script:
-    - mysql -u root -p -e 'SHOW VARIABLES LIKE "%version%";'
+    - mysql -u root --password="" -e 'SHOW VARIABLES LIKE "%version%";'
     - psql -c 'create database ili2db;' -U postgres
     - psql -c 'select version();' -d ili2db -U postgres
     - psql -c 'create extension postgis;' -d ili2db -U postgres
