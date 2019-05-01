@@ -85,6 +85,7 @@ import ch.interlis.iox_j.PipelinePool;
 import ch.interlis.iox_j.StartBasketEvent;
 import ch.interlis.iox_j.StartTransferEvent;
 import ch.interlis.iox_j.filter.ReduceToBaseModel;
+import ch.interlis.iox_j.filter.Rounder;
 import ch.interlis.iox_j.filter.TranslateToOrigin;
 import ch.interlis.iox_j.filter.TranslateToTranslation;
 import ch.interlis.iox_j.logging.LogEventFactory;
@@ -119,6 +120,7 @@ public class TransferToXtf {
 	private ArrayList<FixIomObjectRefs> delayedObjects=null;
 	private ch.interlis.ili2c.generator.IndentPrintWriter expgen=null;
 	private TranslateToTranslation languageFilter=null;
+	private Rounder rounder=null;
 	private ReduceToBaseModel exportBaseModelFilter=null;
     private Integer defaultCrsCode=null;
     private Map<Element,Element> crsFilter=null;
@@ -163,6 +165,11 @@ public class TransferToXtf {
 		if(!config.isVer3_translation() || config.getIli1Translation()!=null){
 			languageFilter=new TranslateToTranslation(td, config);
 		}
+		if(config.isDisableRounding()) {
+		    rounder=null;
+		}else {
+	        rounder=new Rounder(td,config);
+		}
 		
 		String srsAssignment=config.getSrsModelAssignment();
 		if(srsAssignment!=null) {
@@ -187,6 +194,9 @@ public class TransferToXtf {
 			modelConfig.setConfigValue(ValidationConfig.PARAMETER, ValidationConfig.AREA_OVERLAP_VALIDATION, config.isDisableAreaValidation()?ValidationConfig.OFF:null);
 			modelConfig.setConfigValue(ValidationConfig.PARAMETER, ValidationConfig.DEFAULT_GEOMETRY_TYPE_VALIDATION, config.isSkipGeometryErrors()?ValidationConfig.OFF:null);
 			modelConfig.setConfigValue(ValidationConfig.PARAMETER, ValidationConfig.ALLOW_ONLY_MULTIPLICITY_REDUCTION, config.isOnlyMultiplicityReduction()?ValidationConfig.ON:null);
+            if(rounder==null) {
+                modelConfig.setConfigValue(ValidationConfig.PARAMETER, ValidationConfig.DISABLE_ROUNDING, ValidationConfig.TRUE);
+            }
 			IoxLogging errHandler=new ch.interlis.iox_j.logging.Log2EhiLogger();
 			LogEventFactory errFactory=new LogEventFactory();
             errFactory.setDataSource(datasource);
@@ -216,7 +226,12 @@ public class TransferToXtf {
 		if(exportBaseModelFilter!=null){
 			startEvent=(StartTransferEvent) exportBaseModelFilter.filter(startEvent);
 		}
-		if(validator!=null)validator.validate(startEvent);
+        if(rounder!=null) {
+            startEvent=(StartTransferEvent) rounder.filter(startEvent);
+        }
+		if(validator!=null) {
+		    validator.validate(startEvent);
+		}
         if(function!=Config.FC_VALIDATE) {
             iomFile.write(startEvent);
         }
@@ -274,7 +289,12 @@ public class TransferToXtf {
 		if(exportBaseModelFilter!=null){
 			endEvent=(EndTransferEvent) exportBaseModelFilter.filter(endEvent);
 		}
-		if(validator!=null)validator.validate(endEvent);
+        if(rounder!=null) {
+            endEvent=(EndTransferEvent) rounder.filter(endEvent);
+        }
+		if(validator!=null) {
+		    validator.validate(endEvent);
+		}
 		if(function!=Config.FC_VALIDATE) {
 	        iomFile.write(endEvent);
 		}
@@ -429,7 +449,12 @@ public class TransferToXtf {
 						if(exportBaseModelFilter!=null) {
 							iomBasket=(StartBasketEvent) exportBaseModelFilter.filter(iomBasket);
 						}
-						if(validator!=null)validator.validate(iomBasket);
+                        if(rounder!=null) {
+                            iomBasket=(StartBasketEvent) rounder.filter(iomBasket);
+                        }
+						if(validator!=null) {
+						    validator.validate(iomBasket);
+						}
 						if(function!=Config.FC_VALIDATE) {
 	                        iomFile.write(iomBasket);
 						}
@@ -460,7 +485,12 @@ public class TransferToXtf {
 							if(exportBaseModelFilter!=null){
 								iomBasket=(StartBasketEvent) exportBaseModelFilter.filter(iomBasket);
 							}
-							if(validator!=null)validator.validate(iomBasket);
+	                        if(rounder!=null) {
+	                            iomBasket=(StartBasketEvent) rounder.filter(iomBasket);
+	                        }
+							if(validator!=null) {
+							    validator.validate(iomBasket);
+							}
 							if(function!=Config.FC_VALIDATE) {
 	                            iomFile.write(iomBasket);
 							}
@@ -509,7 +539,12 @@ public class TransferToXtf {
 						objEvent=(ObjectEvent) exportBaseModelFilter.filter(objEvent);
 					}
 					if(objEvent!=null) {
-						if(validator!=null)validator.validate(objEvent);
+                        if(rounder!=null) {
+                            objEvent=(ObjectEvent) rounder.filter(objEvent);
+                        }
+						if(validator!=null) {
+						    validator.validate(objEvent);
+						}
 						if(function!=Config.FC_VALIDATE) {
 	                        iomFile.write(objEvent);
 						}
@@ -523,7 +558,12 @@ public class TransferToXtf {
 			if(exportBaseModelFilter!=null){
 				endBasket=(EndBasketEvent) exportBaseModelFilter.filter(endBasket);
 			}
-			if(validator!=null)validator.validate(endBasket);
+            if(rounder!=null) {
+                endBasket=(EndBasketEvent) rounder.filter(endBasket);
+            }
+			if(validator!=null) {
+			    validator.validate(endBasket);
+			}
 			if(function!=Config.FC_VALIDATE) {
 	            iomFile.write(endBasket);
 			}
@@ -899,7 +939,12 @@ public class TransferToXtf {
 					if(exportBaseModelFilter!=null){
 						objEvent=(ObjectEvent) exportBaseModelFilter.filter(objEvent);
 					}
-					if(validator!=null)validator.validate(objEvent);
+                    if(rounder!=null) {
+                        objEvent=(ObjectEvent) rounder.filter(objEvent);
+                    }
+					if(validator!=null) {
+					    validator.validate(objEvent);
+					}
 					if(function!=Config.FC_VALIDATE) {
 	                    out.write(objEvent);
 					}
@@ -990,7 +1035,12 @@ public class TransferToXtf {
 							objEvent=(ObjectEvent) exportBaseModelFilter.filter(objEvent);
 						}
 						if(objEvent!=null) {
-							if(validator!=null)validator.validate(objEvent);
+						    if(rounder!=null) {
+						        objEvent=(ObjectEvent) rounder.filter(objEvent);
+						    }
+							if(validator!=null) {
+							    validator.validate(objEvent);
+							}
 							if(out!=null){
 							    if(function!=Config.FC_VALIDATE) {
 	                                out.write(objEvent);

@@ -87,6 +87,7 @@ import ch.interlis.iox_j.IoxInvalidDataException;
 import ch.interlis.iox_j.ObjectEvent;
 import ch.interlis.iox_j.PipelinePool;
 import ch.interlis.iox_j.StartBasketEvent;
+import ch.interlis.iox_j.filter.Rounder;
 import ch.interlis.iox_j.filter.TranslateToOrigin;
 import ch.interlis.iox_j.logging.LogEventFactory;
 import ch.interlis.iox_j.validator.ValidationConfig;
@@ -134,6 +135,7 @@ public class TransferFromXtf {
 	private FromXtfRecordConverter recConv=null;
 	private Viewable2TableMapping class2wrapper=null;
 	private TranslateToOrigin languageFilter=null;
+	private Rounder rounder=null;
 	/** list of not yet processed struct values
 	 */
 	private ArrayList<AbstractStructWrapper> structQueue=null;
@@ -190,6 +192,11 @@ public class TransferFromXtf {
 	        crsFilter=TransferFromIli.getSrsMappingToOriginal(td, config.getSrsModelAssignment());
 	    }
 
+	    if(config.isDisableRounding()) {
+	        rounder=null;
+	    }else {
+	        rounder=new Rounder(td,config);
+	    }
 	}
 		
 	public void doit(IoxReader reader,Config config,Map<Long,BasketStat> stat)
@@ -390,6 +397,9 @@ public class TransferFromXtf {
 				modelConfig.setConfigValue(ValidationConfig.PARAMETER, ValidationConfig.AREA_OVERLAP_VALIDATION, config.isDisableAreaValidation()?ValidationConfig.OFF:null);
 				modelConfig.setConfigValue(ValidationConfig.PARAMETER, ValidationConfig.DEFAULT_GEOMETRY_TYPE_VALIDATION, config.isSkipGeometryErrors()?ValidationConfig.OFF:null);
 				modelConfig.setConfigValue(ValidationConfig.PARAMETER, ValidationConfig.ALLOW_ONLY_MULTIPLICITY_REDUCTION, config.isOnlyMultiplicityReduction()?ValidationConfig.ON:null);
+				if(rounder==null) {
+				    modelConfig.setConfigValue(ValidationConfig.PARAMETER, ValidationConfig.DISABLE_ROUNDING, ValidationConfig.TRUE);
+				}
 				IoxLogging errHandler=new ch.interlis.iox_j.logging.Log2EhiLogger();
 				LogEventFactory errFactory=new LogEventFactory();
 				errFactory.setDataSource(xtffilename);
@@ -417,7 +427,12 @@ public class TransferFromXtf {
 							// do not import this basket
 							skipBasket=true;
 							EhiLogger.logState("Skip Basket "+basket.getType()+"(oid "+basket.getBid()+")");
-							if(validator!=null)validator.validate(event);
+							if(rounder!=null) {
+							    event=rounder.filter(event);
+							}
+							if(validator!=null) {
+							    validator.validate(event);
+							}
 							if(languageFilter!=null){
 								event=languageFilter.filter(event);
 							}
@@ -427,7 +442,12 @@ public class TransferFromXtf {
 							EhiLogger.logState("Basket "+basket.getType()+"(oid "+basket.getBid()+")...");
 							skipBasket=false;
 							try {
-								if(validator!=null)validator.validate(event);
+	                            if(rounder!=null) {
+	                                event=rounder.filter(event);
+	                            }
+								if(validator!=null) {
+								    validator.validate(event);
+								}
 								if(languageFilter!=null){
 									event=languageFilter.filter(event);
 								}
@@ -474,7 +494,12 @@ public class TransferFromXtf {
 							objCount=0;
 						}
 					}else if(event instanceof EndBasketEvent){
-						if(validator!=null)validator.validate(event);
+                        if(rounder!=null) {
+                            event=rounder.filter(event);
+                        }
+						if(validator!=null) {
+						    validator.validate(event);
+						}
 						if(languageFilter!=null){
 							event=languageFilter.filter(event);
 						}
@@ -538,7 +563,12 @@ public class TransferFromXtf {
 						
 						skipBasket=false;
 					}else if(event instanceof ObjectEvent){
-						if(validator!=null)validator.validate(event);
+                        if(rounder!=null) {
+                            event=rounder.filter(event);
+                        }
+						if(validator!=null) {
+						    validator.validate(event);
+						}
 						if(!skipBasket){
 							if(languageFilter!=null){
 								event=languageFilter.filter(event);
@@ -551,7 +581,12 @@ public class TransferFromXtf {
 							}
 						}
 					}else if(event instanceof EndTransferEvent){
-						if(validator!=null)validator.validate(event);
+                        if(rounder!=null) {
+                            event=rounder.filter(event);
+                        }
+						if(validator!=null) {
+						    validator.validate(event);
+						}
 						if(languageFilter!=null){
 							event=languageFilter.filter(event);
 						}
@@ -596,7 +631,12 @@ public class TransferFromXtf {
 						
 						break;
 					}else if(event instanceof StartTransferEvent){
-						if(validator!=null)validator.validate(event);
+                        if(rounder!=null) {
+                            event=rounder.filter(event);
+                        }
+						if(validator!=null) {
+						    validator.validate(event);
+						}
 						if(languageFilter!=null){
 							event=languageFilter.filter(event);
 						}
@@ -607,6 +647,10 @@ public class TransferFromXtf {
 					throw new IoxException("dangling references");
 				}
 			}finally{
+                if(rounder!=null) {
+                    rounder.close();
+                    rounder=null;
+                }
 				if(validator!=null){
 					validator.close();
 					validator=null;

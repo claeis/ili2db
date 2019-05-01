@@ -211,6 +211,9 @@ public abstract class AbstractMain {
 			}else if(arg.equals("--disableAreaValidation")){
 				argi++;
 				config.setDisableAreaValidation(true);
+            }else if(arg.equals("--disableRounding")){
+                argi++;
+                config.setDisableRounding(true);
 			}else if(arg.equals("--forceTypeValidation")){
 				argi++;
 				config.setOnlyMultiplicityReduction(true);
@@ -416,6 +419,7 @@ public abstract class AbstractMain {
 					System.err.println("--disableValidation    Disable validation of data.");
 					System.err.println("--disableAreaValidation Disable AREA validation.");
 					System.err.println("--forceTypeValidation  restrict customization of validation related to \"multiplicity\"");
+                    System.err.println("--disableRounding      Disable rounding of import/export data.");
 					System.err.println("--deleteData           on schema/data import, delete existing data from existing tables.");
 					System.err.println("--defaultSrsAuth  auth Default SRS authority "+config.getDefaultSrsAuthority());
 					System.err.println("--defaultSrsCode  code Default SRS code");

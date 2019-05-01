@@ -133,6 +133,7 @@ public class Config extends Settings {
     private boolean ver3_export=false;
     private boolean importTid=false;
     private boolean importBid=false;
+    private boolean disableRounding=false;
     private Long minIdSeqValue=null;
 	private Long maxIdSeqValue=null;
 	private boolean setupPgExt=false;
@@ -729,5 +730,11 @@ public class Config extends Settings {
     }
     public boolean isVer3_export() {
         return ver3_export;
+    }
+    public boolean isDisableRounding() {
+        return disableRounding;
+    }
+    public void setDisableRounding(boolean disableRounding) {
+        this.disableRounding = disableRounding;
     }
 }
