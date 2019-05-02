@@ -468,20 +468,6 @@ public class InheritanceSmart2Test {
 			//config.setCreatescript(data.getPath()+".sql");
 			Ili2db.readSettingsFromDb(config);
 			Ili2db.run(config,null);
-			{
-				String stmtTxt="SELECT data_type FROM information_schema.columns WHERE table_schema ='blackboxtypes23' AND table_name = 'classa' AND column_name = 'xmlbox'";
-				Assert.assertTrue(stmt.execute(stmtTxt));
-				ResultSet rs=stmt.getResultSet();
-				Assert.assertTrue(rs.next());
-				Assert.assertEquals("xml",rs.getString("data_type"));
-			}
-			{
-				String stmtTxt="SELECT data_type FROM information_schema.columns WHERE table_schema ='blackboxtypes23' AND table_name = 'classa' AND column_name = 'binbox'";
-				Assert.assertTrue(stmt.execute(stmtTxt));
-				ResultSet rs=stmt.getResultSet();
-				Assert.assertTrue(rs.next());
-				Assert.assertEquals("bytea",rs.getString("data_type"));
-			}
             {
                 // t_ili2db_attrname
                 String [][] expectedValues=new String[][] {
@@ -552,20 +538,6 @@ public class InheritanceSmart2Test {
 			Ili2db.readSettingsFromDb(config);
 			Ili2db.run(config,null);
 			
-			{
-				String stmtTxt="SELECT data_type FROM information_schema.columns WHERE table_schema ='blackboxtypes23' AND table_name = 'classa' AND column_name = 'xmlbox'";
-				Assert.assertTrue(stmt.execute(stmtTxt));
-				ResultSet rs=stmt.getResultSet();
-				Assert.assertTrue(rs.next());
-				Assert.assertEquals("xml",rs.getString("data_type"));
-			}
-			{
-				String stmtTxt="SELECT data_type FROM information_schema.columns WHERE table_schema ='blackboxtypes23' AND table_name = 'classa' AND column_name = 'binbox'";
-				Assert.assertTrue(stmt.execute(stmtTxt));
-				ResultSet rs=stmt.getResultSet();
-				Assert.assertTrue(rs.next());
-				Assert.assertEquals("bytea",rs.getString("data_type"));
-			}
 		}finally{
 			if(jdbcConnection!=null){
 				jdbcConnection.close();
