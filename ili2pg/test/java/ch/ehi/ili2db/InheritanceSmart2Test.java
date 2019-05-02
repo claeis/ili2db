@@ -63,7 +63,6 @@ public class InheritanceSmart2Test {
 	//config.setTidHandling(config.TID_HANDLING_PROPERTY);
 	
 	@Test
-	public void importSmart2() throws Exception
 	{
 		Connection jdbcConnection=null;
 		try{
@@ -107,7 +106,6 @@ public class InheritanceSmart2Test {
 	}
 	
 	@Test
-	public void updateSmart2New() throws Exception
 	{
 		Connection jdbcConnection=null;
 		try{
@@ -118,12 +116,6 @@ public class InheritanceSmart2Test {
 			File data=new File("test/data/InheritanceSmart2/Inheritance2a.xtf");
 			Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 			config.setFunction(Config.FC_UPDATE);
-			config.setCreateFk(Config.CREATE_FK_YES);
-			config.setInheritanceTrafo(Config.INHERITANCE_TRAFO_SMART2);
-			config.setDatasetName(DATASETNAME);
-			config.setTidHandling(Config.TID_HANDLING_PROPERTY);
-			config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
-			//config.setCreatescript(data.getPath()+".sql");
 			Ili2db.readSettingsFromDb(config);
 			Ili2db.run(config,null);
 	        
@@ -151,7 +143,6 @@ public class InheritanceSmart2Test {
 	}
 	
 	@Test
-	public void updateSmart2Existing() throws Exception
 	{
 		Connection jdbcConnection=null;
 		try{
@@ -198,7 +189,6 @@ public class InheritanceSmart2Test {
 	}
 	
 	@Test
-	public void importSmart2ExtRef() throws Exception
 	{
 		Connection jdbcConnection=null;
 		try{
@@ -234,7 +224,6 @@ public class InheritanceSmart2Test {
 	}
 	
 	@Test
-	public void exportSmart2() throws Exception
 	{
 		Connection jdbcConnection=null;
 		try{
@@ -249,34 +238,6 @@ public class InheritanceSmart2Test {
 			config.setFunction(Config.FC_EXPORT);
 			Ili2db.readSettingsFromDb(config);
 			Ili2db.run(config,null);
-			HashMap<String,IomObject> objs=new HashMap<String,IomObject>();
-			XtfReader reader=new XtfReader(data);
-			IoxEvent event=null;
-			 do{
-		        event=reader.read();
-		        if(event instanceof StartTransferEvent){
-		        }else if(event instanceof StartBasketEvent){
-		        }else if(event instanceof ObjectEvent){
-		        	IomObject iomObj=((ObjectEvent)event).getIomObject();
-		        	if(iomObj.getobjectoid()!=null){
-			        	objs.put(iomObj.getobjectoid(), iomObj);
-		        	}
-		        }else if(event instanceof EndBasketEvent){
-		        }else if(event instanceof EndTransferEvent){
-		        }
-			 }while(!(event instanceof EndTransferEvent));
-			 {
-				 IomObject obj0 = objs.get("1");
-				 Assert.assertNotNull(obj0);
-				 Assert.assertEquals("Inheritance2.TestA.ClassA3b", obj0.getobjecttag());
-				 Assert.assertEquals("attra3-10", obj0.getattrvalue("attrA3"));
-				 Assert.assertEquals("attra3b-10", obj0.getattrvalue("attrA3b"));
-			 }
-			 {
-				 IomObject obj0 = objs.get("2");
-				 Assert.assertNotNull(obj0);
-				 Assert.assertEquals("Inheritance2.TestA.ClassA3c", obj0.getobjecttag());
-			 }
 		}finally{
 			if(jdbcConnection!=null){
 				jdbcConnection.close();
@@ -306,20 +267,6 @@ public class InheritanceSmart2Test {
 			//config.setCreatescript(data.getPath()+".sql");
 			Ili2db.readSettingsFromDb(config);
 			Ili2db.run(config,null);
-			{
-				String stmtTxt="SELECT data_type FROM information_schema.columns WHERE table_schema ='blackboxtypes23' AND table_name = 'classa' AND column_name = 'xmlbox'";
-				Assert.assertTrue(stmt.execute(stmtTxt));
-				ResultSet rs=stmt.getResultSet();
-				Assert.assertTrue(rs.next());
-				Assert.assertEquals("xml",rs.getString("data_type"));
-			}
-			{
-				String stmtTxt="SELECT data_type FROM information_schema.columns WHERE table_schema ='blackboxtypes23' AND table_name = 'classa' AND column_name = 'binbox'";
-				Assert.assertTrue(stmt.execute(stmtTxt));
-				ResultSet rs=stmt.getResultSet();
-				Assert.assertTrue(rs.next());
-				Assert.assertEquals("bytea",rs.getString("data_type"));
-			}
 		}finally{
 			if(jdbcConnection!=null){
 				jdbcConnection.close();
@@ -350,20 +297,6 @@ public class InheritanceSmart2Test {
 			Ili2db.readSettingsFromDb(config);
 			Ili2db.run(config,null);
 			
-			{
-				String stmtTxt="SELECT data_type FROM information_schema.columns WHERE table_schema ='blackboxtypes23' AND table_name = 'classa' AND column_name = 'xmlbox'";
-				Assert.assertTrue(stmt.execute(stmtTxt));
-				ResultSet rs=stmt.getResultSet();
-				Assert.assertTrue(rs.next());
-				Assert.assertEquals("xml",rs.getString("data_type"));
-			}
-			{
-				String stmtTxt="SELECT data_type FROM information_schema.columns WHERE table_schema ='blackboxtypes23' AND table_name = 'classa' AND column_name = 'binbox'";
-				Assert.assertTrue(stmt.execute(stmtTxt));
-				ResultSet rs=stmt.getResultSet();
-				Assert.assertTrue(rs.next());
-				Assert.assertEquals("bytea",rs.getString("data_type"));
-			}
 		}finally{
 			if(jdbcConnection!=null){
 				jdbcConnection.close();
