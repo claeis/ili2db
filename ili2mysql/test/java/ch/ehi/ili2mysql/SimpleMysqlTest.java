@@ -1,5 +1,7 @@
 package ch.ehi.ili2mysql;
 
+import org.junit.Test;
+
 import ch.ehi.ili2db.AbstractTestSetup;
 
 public class SimpleMysqlTest extends ch.ehi.ili2db.SimpleTest {
@@ -14,6 +16,12 @@ public class SimpleMysqlTest extends ch.ehi.ili2db.SimpleTest {
         return new MysqlTestSetup(dburl,dbuser,dbpwd);
     } 
 
-    
+    @Override
+    @Test
+    public void importXtfCoord() throws Exception
+    {
+        ch.ehi.basics.logging.EhiLogger.getInstance().setTraceFilter(false);
+        super.importXtfCoord();
+    }    
 	
 }
