@@ -527,8 +527,8 @@ public abstract class SimpleTest {
 				{
 					{
 						IomObject coord=iomObj.getattrobj("attr2", 0);
-						assertTrue(coord.getattrvalue("C1").equals("2460001.0"));
-						assertTrue(coord.getattrvalue("C2").equals("1045001.0"));
+                        assertEquals("2460001.000",coord.getattrvalue("C1"));
+                        assertEquals("1045001.000",coord.getattrvalue("C2"));
 					}
 				}
 			}
@@ -543,8 +543,8 @@ public abstract class SimpleTest {
 				{
 					{
 						IomObject coord=iomObj2.getattrobj("attr2", 0);
-						assertTrue(coord.getattrvalue("C1").equals("2460002.0"));
-						assertTrue(coord.getattrvalue("C2").equals("1045002.0"));
+						assertEquals("2460002.000",coord.getattrvalue("C1"));
+						assertEquals("1045002.000",coord.getattrvalue("C2"));
 					}
 				}
 			}

@@ -515,7 +515,7 @@ public class Datatypes23Test {
 				Assert.assertNotNull(obj1);
 				Assert.assertEquals("Datatypes23.Topic.Line3", obj1.getobjecttag());
 				IomObject lineSegment=obj1.getattrobj("straightsarcs3d",0);
-				Assert.assertEquals("POLYLINE {sequence SEGMENTS {segment [COORD {C1 2460001.0, C2 1045001.0, C3 300.0}, ARC {A1 2460005.0, A2 1045004.0, C1 2460006.0, C2 1045006.0, C3 300.0}, COORD {C1 2460010.0, C2 1045010.0, C3 300.0}]}}", lineSegment.toString());
+				Assert.assertEquals("POLYLINE {sequence SEGMENTS {segment [COORD {C1 2460001.000, C2 1045001.000, C3 300.000}, ARC {A1 2460005.000, A2 1045004.000, C1 2460006.000, C2 1045006.000, C3 300.000}, COORD {C1 2460010.000, C2 1045010.000, C3 300.000}]}}", lineSegment.toString());
 			 }
 		}catch(SQLException e) {
 			throw new IoxException(e);
@@ -572,7 +572,7 @@ public class Datatypes23Test {
 				Assert.assertNotNull(obj1);
 				Assert.assertEquals("Datatypes23.Topic.Surface2", obj1.getobjecttag());
 				IomObject surface = obj1.getattrobj("surfacearcs2d", 0);
-				Assert.assertEquals("MULTISURFACE {surface SURFACE {boundary [BOUNDARY {polyline POLYLINE {sequence SEGMENTS {segment [COORD {C1 2460001.0, C2 1045001.0}, COORD {C1 2460020.0, C2 1045015.0}, ARC {A1 2460010.0, A2 1045018.0, C1 2460001.0, C2 1045015.0}, COORD {C1 2460001.0, C2 1045001.0}]}}}, BOUNDARY {polyline POLYLINE {sequence SEGMENTS {segment [COORD {C1 2460005.0, C2 1045005.0}, COORD {C1 2460010.0, C2 1045010.0}, ARC {A1 2460007.0, A2 1045009.0, C1 2460005.0, C2 1045010.0}, COORD {C1 2460005.0, C2 1045005.0}]}}}]}}", surface.toString());
+				Assert.assertEquals("MULTISURFACE {surface SURFACE {boundary [BOUNDARY {polyline POLYLINE {sequence SEGMENTS {segment [COORD {C1 2460001.000, C2 1045001.000}, COORD {C1 2460020.000, C2 1045015.000}, ARC {A1 2460010.000, A2 1045018.000, C1 2460001.000, C2 1045015.000}, COORD {C1 2460001.000, C2 1045001.000}]}}}, BOUNDARY {polyline POLYLINE {sequence SEGMENTS {segment [COORD {C1 2460005.000, C2 1045005.000}, COORD {C1 2460010.000, C2 1045010.000}, ARC {A1 2460007.000, A2 1045009.000, C1 2460005.000, C2 1045010.000}, COORD {C1 2460005.000, C2 1045005.000}]}}}]}}", surface.toString());
 			 }
 		}catch(SQLException e) {
 			throw new IoxException(e);

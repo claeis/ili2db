@@ -124,61 +124,8 @@ public class MultilineTest {
 				assertEquals("MultiLine2.TestA.ClassA1",attrtag);
 				
 				IomObject multiline=iomObj.getattrobj("geom", 0);
+                assertEquals("MultiLine2.MultiLinie2D {Linien [MultiLine2.LinieStruktur2D {Linie POLYLINE {sequence SEGMENTS {segment [COORD {C1 600001.000, C2 205001.000}, COORD {C1 600020.000, C2 205015.000}, ARC {A1 600010.000, A2 205018.000, C1 600001.000, C2 205015.000}, COORD {C1 600001.000, C2 205001.000}]}}}, MultiLine2.LinieStruktur2D {Linie POLYLINE {sequence SEGMENTS {segment [COORD {C1 600005.000, C2 205005.000}, COORD {C1 600010.000, C2 205010.000}, ARC {A1 600007.000, A2 205009.000, C1 600005.000, C2 205010.000}, COORD {C1 600005.000, C2 205005.000}]}}}]}",multiline.toString());
 				
-				IomObject multipolylineObj=multiline.getattrobj("Linien", 0);
-				{
-					IomObject polylineObj=multipolylineObj.getattrobj("Linie", 0);
-					IomObject sequence=polylineObj.getattrobj("sequence", 0);
-					{
-						IomObject segment=sequence.getattrobj("segment", 0);
-						assertTrue(segment.getattrvalue("C1").equals("600001.0"));
-						assertTrue(segment.getattrvalue("C2").equals("205001.0"));
-					}
-					{
-						IomObject segment=sequence.getattrobj("segment", 1);
-						assertTrue(segment.getattrvalue("C1").equals("600020.0"));
-						assertTrue(segment.getattrvalue("C2").equals("205015.0"));
-					}
-					{
-						IomObject segment=sequence.getattrobj("segment", 2);
-						assertTrue(segment.getattrvalue("A1").equals("600010.0"));
-						assertTrue(segment.getattrvalue("A2").equals("205018.0"));
-						assertTrue(segment.getattrvalue("C1").equals("600001.0"));
-						assertTrue(segment.getattrvalue("C2").equals("205015.0"));
-					}
-					{
-						IomObject segment=sequence.getattrobj("segment", 3);
-						assertTrue(segment.getattrvalue("C1").equals("600001.0"));
-						assertTrue(segment.getattrvalue("C2").equals("205001.0"));
-					}
-				}
-				IomObject multipolylineObj2=multiline.getattrobj("Linien", 1);
-				{
-					IomObject polylineObj=multipolylineObj2.getattrobj("Linie", 0);
-					IomObject sequence=polylineObj.getattrobj("sequence", 0);
-					{
-						IomObject segment=sequence.getattrobj("segment", 0);
-						assertTrue(segment.getattrvalue("C1").equals("600005.0"));
-						assertTrue(segment.getattrvalue("C2").equals("205005.0"));
-					}
-					{
-						IomObject segment=sequence.getattrobj("segment", 1);
-						assertTrue(segment.getattrvalue("C1").equals("600010.0"));
-						assertTrue(segment.getattrvalue("C2").equals("205010.0"));
-					}
-					{
-						IomObject segment=sequence.getattrobj("segment", 2);
-						assertTrue(segment.getattrvalue("A1").equals("600007.0"));
-						assertTrue(segment.getattrvalue("A2").equals("205009.0"));
-						assertTrue(segment.getattrvalue("C1").equals("600005.0"));
-						assertTrue(segment.getattrvalue("C2").equals("205010.0"));
-					}
-					{
-						IomObject segment=sequence.getattrobj("segment", 3);
-						assertTrue(segment.getattrvalue("C1").equals("600005.0"));
-						assertTrue(segment.getattrvalue("C2").equals("205005.0"));
-					}
-				}
 			}
 		}
 	}

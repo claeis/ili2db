@@ -393,23 +393,23 @@ public class MultipleGeomAttrsTest {
              Assert.assertEquals(5, objs.size());
              {
                  IomObject obj0 = objs.get("ClassA.1");
-                 Assert.assertEquals("MultipleGeomAttrsExtendedClass.Topic.ClassA oid ClassA.1 {coord COORD {C1 2460001.0, C2 1045001.0}, line POLYLINE {sequence SEGMENTS {segment [COORD {C1 2460002.0, C2 1045002.0}, COORD {C1 2460010.0, C2 1045010.0}]}}, surface MULTISURFACE {surface SURFACE {boundary BOUNDARY {polyline POLYLINE {sequence SEGMENTS {segment [COORD {C1 2460005.0, C2 1045005.0}, COORD {C1 2460010.0, C2 1045010.0}, COORD {C1 2460005.0, C2 1045010.0}, COORD {C1 2460005.0, C2 1045005.0}]}}}}}}", obj0.toString());
+                 Assert.assertEquals("MultipleGeomAttrsExtendedClass.Topic.ClassA oid ClassA.1 {coord COORD {C1 2460001.000, C2 1045001.000}, line POLYLINE {sequence SEGMENTS {segment [COORD {C1 2460002.000, C2 1045002.000}, COORD {C1 2460010.000, C2 1045010.000}]}}, surface MULTISURFACE {surface SURFACE {boundary BOUNDARY {polyline POLYLINE {sequence SEGMENTS {segment [COORD {C1 2460005.000, C2 1045005.000}, COORD {C1 2460010.000, C2 1045010.000}, COORD {C1 2460005.000, C2 1045010.000}, COORD {C1 2460005.000, C2 1045005.000}]}}}}}}", obj0.toString());
              }
              {
                  IomObject obj0 = objs.get("ClassAp.1");
-                 Assert.assertEquals("MultipleGeomAttrsExtendedClass.Topic.ClassAp oid ClassAp.1 {coord COORD {C1 2460001.0, C2 1045001.0}, line POLYLINE {sequence SEGMENTS {segment [COORD {C1 2460002.0, C2 1045002.0}, COORD {C1 2460010.0, C2 1045010.0}]}}, surface MULTISURFACE {surface SURFACE {boundary BOUNDARY {polyline POLYLINE {sequence SEGMENTS {segment [COORD {C1 2460005.0, C2 1045005.0}, COORD {C1 2460010.0, C2 1045010.0}, COORD {C1 2460005.0, C2 1045010.0}, COORD {C1 2460005.0, C2 1045005.0}]}}}}}}", obj0.toString());
+                 Assert.assertEquals("MultipleGeomAttrsExtendedClass.Topic.ClassAp oid ClassAp.1 {coord COORD {C1 2460001.000, C2 1045001.000}, line POLYLINE {sequence SEGMENTS {segment [COORD {C1 2460002.000, C2 1045002.000}, COORD {C1 2460010.000, C2 1045010.000}]}}, surface MULTISURFACE {surface SURFACE {boundary BOUNDARY {polyline POLYLINE {sequence SEGMENTS {segment [COORD {C1 2460005.000, C2 1045005.000}, COORD {C1 2460010.000, C2 1045010.000}, COORD {C1 2460005.000, C2 1045010.000}, COORD {C1 2460005.000, C2 1045005.000}]}}}}}}", obj0.toString());
              }
              {
                  IomObject obj0 = objs.get("ClassB.1");
-                 Assert.assertEquals("MultipleGeomAttrsExtendedClass.TopicB.ClassB oid ClassB.1 {geom COORD {C1 2460001.0, C2 1045001.0}}", obj0.toString());
+                 Assert.assertEquals("MultipleGeomAttrsExtendedClass.TopicB.ClassB oid ClassB.1 {geom COORD {C1 2460001.000, C2 1045001.000}}", obj0.toString());
              }
              {
                  IomObject obj0 = objs.get("ClassB1.1");
-                 Assert.assertEquals("MultipleGeomAttrsExtendedClass.TopicB.ClassB1 oid ClassB1.1 {coord COORD {C1 2460002.1, C2 1045002.1}, geom COORD {C1 2460002.0, C2 1045002.0}}", obj0.toString());
+                 Assert.assertEquals("MultipleGeomAttrsExtendedClass.TopicB.ClassB1 oid ClassB1.1 {coord COORD {C1 2460002.100, C2 1045002.100}, geom COORD {C1 2460002.000, C2 1045002.000}}", obj0.toString());
              }
              {
                  IomObject obj0 = objs.get("ClassB2.1");
-                 Assert.assertEquals("MultipleGeomAttrsExtendedClass.TopicB.ClassB2 oid ClassB2.1 {coord COORD {C1 2460003.1, C2 1045003.1}, geom COORD {C1 2460003.0, C2 1045003.0}}", obj0.toString());
+                 Assert.assertEquals("MultipleGeomAttrsExtendedClass.TopicB.ClassB2 oid ClassB2.1 {coord COORD {C1 2460003.100, C2 1045003.100}, geom COORD {C1 2460003.000, C2 1045003.000}}", obj0.toString());
              }
         }
     }
@@ -454,23 +454,23 @@ public class MultipleGeomAttrsTest {
              Assert.assertEquals(5, objs.size());
              {
                  IomObject obj0 = objs.get("ClassA.1");
-                 Assert.assertEquals("MultipleGeomAttrsExtendedClass.Topic.ClassA oid ClassA.1 {coord COORD {C1 2460001.0, C2 1045001.0}, line POLYLINE {sequence SEGMENTS {segment [COORD {C1 2460002.0, C2 1045002.0}, COORD {C1 2460010.0, C2 1045010.0}]}}, surface MULTISURFACE {surface SURFACE {boundary BOUNDARY {polyline POLYLINE {sequence SEGMENTS {segment [COORD {C1 2460005.0, C2 1045005.0}, COORD {C1 2460010.0, C2 1045010.0}, COORD {C1 2460005.0, C2 1045010.0}, COORD {C1 2460005.0, C2 1045005.0}]}}}}}}", obj0.toString());
+                 Assert.assertEquals("MultipleGeomAttrsExtendedClass.Topic.ClassA oid ClassA.1 {coord COORD {C1 2460001.000, C2 1045001.000}, line POLYLINE {sequence SEGMENTS {segment [COORD {C1 2460002.000, C2 1045002.000}, COORD {C1 2460010.000, C2 1045010.000}]}}, surface MULTISURFACE {surface SURFACE {boundary BOUNDARY {polyline POLYLINE {sequence SEGMENTS {segment [COORD {C1 2460005.000, C2 1045005.000}, COORD {C1 2460010.000, C2 1045010.000}, COORD {C1 2460005.000, C2 1045010.000}, COORD {C1 2460005.000, C2 1045005.000}]}}}}}}", obj0.toString());
              }
              {
                  IomObject obj0 = objs.get("ClassAp.1");
-                 Assert.assertEquals("MultipleGeomAttrsExtendedClass.Topic.ClassAp oid ClassAp.1 {coord COORD {C1 2460001.0, C2 1045001.0}, line POLYLINE {sequence SEGMENTS {segment [COORD {C1 2460002.0, C2 1045002.0}, COORD {C1 2460010.0, C2 1045010.0}]}}, surface MULTISURFACE {surface SURFACE {boundary BOUNDARY {polyline POLYLINE {sequence SEGMENTS {segment [COORD {C1 2460005.0, C2 1045005.0}, COORD {C1 2460010.0, C2 1045010.0}, COORD {C1 2460005.0, C2 1045010.0}, COORD {C1 2460005.0, C2 1045005.0}]}}}}}}", obj0.toString());
+                 Assert.assertEquals("MultipleGeomAttrsExtendedClass.Topic.ClassAp oid ClassAp.1 {coord COORD {C1 2460001.000, C2 1045001.000}, line POLYLINE {sequence SEGMENTS {segment [COORD {C1 2460002.000, C2 1045002.000}, COORD {C1 2460010.000, C2 1045010.000}]}}, surface MULTISURFACE {surface SURFACE {boundary BOUNDARY {polyline POLYLINE {sequence SEGMENTS {segment [COORD {C1 2460005.000, C2 1045005.000}, COORD {C1 2460010.000, C2 1045010.000}, COORD {C1 2460005.000, C2 1045010.000}, COORD {C1 2460005.000, C2 1045005.000}]}}}}}}", obj0.toString());
              }
              {
                  IomObject obj0 = objs.get("ClassB.1");
-                 Assert.assertEquals("MultipleGeomAttrsExtendedClass.TopicB.ClassB oid ClassB.1 {geom COORD {C1 2460001.0, C2 1045001.0}}", obj0.toString());
+                 Assert.assertEquals("MultipleGeomAttrsExtendedClass.TopicB.ClassB oid ClassB.1 {geom COORD {C1 2460001.000, C2 1045001.000}}", obj0.toString());
              }
              {
                  IomObject obj0 = objs.get("ClassB1.1");
-                 Assert.assertEquals("MultipleGeomAttrsExtendedClass.TopicB.ClassB1 oid ClassB1.1 {coord COORD {C1 2460002.1, C2 1045002.1}, geom COORD {C1 2460002.0, C2 1045002.0}}", obj0.toString());
+                 Assert.assertEquals("MultipleGeomAttrsExtendedClass.TopicB.ClassB1 oid ClassB1.1 {coord COORD {C1 2460002.100, C2 1045002.100}, geom COORD {C1 2460002.000, C2 1045002.000}}", obj0.toString());
              }
              {
                  IomObject obj0 = objs.get("ClassB2.1");
-                 Assert.assertEquals("MultipleGeomAttrsExtendedClass.TopicB.ClassB2 oid ClassB2.1 {coord COORD {C1 2460003.1, C2 1045003.1}, geom COORD {C1 2460003.0, C2 1045003.0}}", obj0.toString());
+                 Assert.assertEquals("MultipleGeomAttrsExtendedClass.TopicB.ClassB2 oid ClassB2.1 {coord COORD {C1 2460003.100, C2 1045003.100}, geom COORD {C1 2460003.000, C2 1045003.000}}", obj0.toString());
              }
         }
     }
@@ -478,20 +478,20 @@ public class MultipleGeomAttrsTest {
     public void assertObjectProperties(IomObject iomObj) throws Iox2jtsException {
         IomObject coordObj=iomObj.getattrobj("coord", 0);
         {
-            assertTrue(coordObj.getattrvalue("C1").equals("2460001.0"));
-            assertTrue(coordObj.getattrvalue("C2").equals("1045001.0"));
+            assertEquals("2460001.000",coordObj.getattrvalue("C1"));
+            assertEquals("1045001.000",coordObj.getattrvalue("C2"));
         }
         IomObject polylineObj=iomObj.getattrobj("line", 0);
         IomObject sequence=polylineObj.getattrobj("sequence", 0);
         {
             IomObject segment=sequence.getattrobj("segment", 0);
-            assertTrue(segment.getattrvalue("C1").equals("2460002.0"));
-            assertTrue(segment.getattrvalue("C2").equals("1045002.0"));
+            assertEquals("2460002.000",segment.getattrvalue("C1"));
+            assertEquals("1045002.000",segment.getattrvalue("C2"));
         }
         {
             IomObject segment=sequence.getattrobj("segment", 1);
-            assertTrue(segment.getattrvalue("C1").equals("2460010.0"));
-            assertTrue(segment.getattrvalue("C2").equals("1045010.0"));
+            assertEquals("2460010.000",segment.getattrvalue("C1"));
+            assertEquals("1045010.000",segment.getattrvalue("C2"));
         }
         IomObject attrObj=iomObj.getattrobj("surface", 0);
         

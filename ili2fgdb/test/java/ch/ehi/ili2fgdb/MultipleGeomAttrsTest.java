@@ -132,20 +132,20 @@ public class MultipleGeomAttrsTest {
 				
 				IomObject coordObj=iomObj.getattrobj("coord", 0);
 				{
-					assertTrue(coordObj.getattrvalue("C1").equals("2460001.0"));
-					assertTrue(coordObj.getattrvalue("C2").equals("1045001.0"));
+					assertEquals("2460001.000",coordObj.getattrvalue("C1"));
+					assertEquals("1045001.000",coordObj.getattrvalue("C2"));
 				}
 				IomObject polylineObj=iomObj.getattrobj("line", 0);
 				IomObject sequence=polylineObj.getattrobj("sequence", 0);
 				{
 					IomObject segment=sequence.getattrobj("segment", 0);
-					assertTrue(segment.getattrvalue("C1").equals("2460002.0"));
-					assertTrue(segment.getattrvalue("C2").equals("1045002.0"));
+					assertEquals("2460002.000",segment.getattrvalue("C1"));
+					assertEquals("1045002.000",segment.getattrvalue("C2"));
 				}
 				{
 					IomObject segment=sequence.getattrobj("segment", 1);
-					assertTrue(segment.getattrvalue("C1").equals("2460010.0"));
-					assertTrue(segment.getattrvalue("C2").equals("1045010.0"));
+					assertEquals("2460010.000",segment.getattrvalue("C1"));
+					assertEquals("1045010.000",segment.getattrvalue("C2"));
 				}
 				IomObject attrObj=iomObj.getattrobj("surface", 0);
 				

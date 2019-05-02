@@ -152,7 +152,7 @@ public class MultipointTest {
 			 {
 				 IomObject obj0 = objs.get("13");
 				 Assert.assertNotNull(obj0);
-				 Assert.assertEquals("MultiPoint2.MultiPoint2D {points [MultiPoint2.PointStruktur2D {coord COORD {C1 600030.0, C2 200020.0}}, MultiPoint2.PointStruktur2D {coord COORD {C1 600015.0, C2 200005.0}}]}", obj0.getattrobj("geom", 0).toString());
+				 Assert.assertEquals("MultiPoint2.MultiPoint2D {points [MultiPoint2.PointStruktur2D {coord COORD {C1 600030.000, C2 200020.000}}, MultiPoint2.PointStruktur2D {coord COORD {C1 600015.000, C2 200005.000}}]}", obj0.getattrobj("geom", 0).toString());
 			 }
 		}catch(Exception e) {
 			throw new IoxException(e);
