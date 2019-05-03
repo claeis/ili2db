@@ -93,6 +93,7 @@ public class Dataset23NoSmartTest {
 				config.setMultiSurfaceTrafo(null);
 				config.setMultilingualTrafo(null);
 				config.setInheritanceTrafo(null);
+				config.setCreateImportTabs(true);
 				Ili2db.readSettingsFromDb(config);
 				Ili2db.run(config,null);
 			}
@@ -163,7 +164,7 @@ public class Dataset23NoSmartTest {
 	}
 	
 	@Test
-	public void deleteDataset() throws Exception
+	public void deleteXtfDataset() throws Exception
 	{
 		Connection jdbcConnection=null;
 		try{
@@ -201,7 +202,7 @@ public class Dataset23NoSmartTest {
 	}
 
 	@Test
-	public void replaceDataset() throws Exception
+	public void replaceXtfDataset() throws Exception
 	{
 		Connection jdbcConnection=null;
 		try{
@@ -247,7 +248,7 @@ public class Dataset23NoSmartTest {
 	}
 	
 	@Test
-	public void exportDataset() throws Exception
+	public void exportXtfDataset() throws Exception
 	{
 		Connection jdbcConnection=null;
 		try{

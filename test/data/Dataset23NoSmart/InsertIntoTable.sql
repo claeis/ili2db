@@ -72,6 +72,7 @@ INSERT INTO dataset1nosmart.t_ili2db_settings VALUES ('ch.interlis.ili2c.ilidirs
 INSERT INTO dataset1nosmart.t_ili2db_settings VALUES ('ch.ehi.ili2db.BasketHandling', 'readWrite');
 INSERT INTO dataset1nosmart.t_ili2db_settings VALUES ('ch.ehi.ili2db.createForeignKey', 'yes');
 INSERT INTO dataset1nosmart.t_ili2db_settings VALUES ('ch.ehi.ili2db.defaultSrsAuthority', 'EPSG');
+INSERT INTO dataset1nosmart.t_ili2db_settings VALUES ('ch.ehi.ili2db.importTabs', 'simple');
 INSERT INTO dataset1nosmart.t_ili2db_trafo VALUES ('Dataset1.TestA.ClassA1b', 'ch.ehi.ili2db.inheritance', 'newClass');
 INSERT INTO dataset1nosmart.t_ili2db_trafo VALUES ('Dataset1.TestA.StructS1b', 'ch.ehi.ili2db.inheritance', 'newClass');
 INSERT INTO dataset1nosmart.t_ili2db_trafo VALUES ('Dataset1.TestA.StructS1', 'ch.ehi.ili2db.inheritance', 'newClass');

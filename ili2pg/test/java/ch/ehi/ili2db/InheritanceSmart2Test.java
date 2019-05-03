@@ -63,7 +63,7 @@ public class InheritanceSmart2Test {
 	//config.setTidHandling(config.TID_HANDLING_PROPERTY);
 
     @Test
-    public void importIliSmart2() throws Exception
+    public void importIli() throws Exception
     {
         Connection jdbcConnection=null;
         try{
@@ -126,7 +126,7 @@ public class InheritanceSmart2Test {
     }
 	
 	@Test
-	public void importXtfSmart2() throws Exception
+	public void importXtf() throws Exception
 	{
 		Connection jdbcConnection=null;
 		try{
@@ -172,7 +172,7 @@ public class InheritanceSmart2Test {
 	}
 	
 	@Test
-	public void updateXtfSmart2New() throws Exception
+	public void updateXtfNew() throws Exception
 	{
 		Connection jdbcConnection=null;
 		try{
@@ -212,7 +212,7 @@ public class InheritanceSmart2Test {
 	}
 	
 	@Test
-	public void updateXtfSmart2Existing() throws Exception
+	public void updateXtfExisting() throws Exception
 	{
 		Connection jdbcConnection=null;
 		try{
@@ -296,7 +296,7 @@ public class InheritanceSmart2Test {
 	}
 	
 	@Test
-	public void exportXtfSmart2() throws Exception
+	public void exportXtf() throws Exception
 	{
 		Connection jdbcConnection=null;
 		try{
@@ -312,40 +312,139 @@ public class InheritanceSmart2Test {
 			config.setExportTid(true);
 			Ili2db.readSettingsFromDb(config);
 			Ili2db.run(config,null);
-			HashMap<String,IomObject> objs=new HashMap<String,IomObject>();
-			XtfReader reader=new XtfReader(data);
-			IoxEvent event=null;
-			 do{
-		        event=reader.read();
-		        if(event instanceof StartTransferEvent){
-		        }else if(event instanceof StartBasketEvent){
-		        }else if(event instanceof ObjectEvent){
-		        	IomObject iomObj=((ObjectEvent)event).getIomObject();
-		        	if(iomObj.getobjectoid()!=null){
-			        	objs.put(iomObj.getobjectoid(), iomObj);
-		        	}
-		        }else if(event instanceof EndBasketEvent){
-		        }else if(event instanceof EndTransferEvent){
-		        }
-			 }while(!(event instanceof EndTransferEvent));
-			 {
-				 IomObject obj0 = objs.get("1");
-				 Assert.assertNotNull(obj0);
-				 Assert.assertEquals("Inheritance2.TestA.ClassA3b", obj0.getobjecttag());
-				 Assert.assertEquals("attra3-10", obj0.getattrvalue("attrA3"));
-				 Assert.assertEquals("attra3b-10", obj0.getattrvalue("attrA3b"));
-			 }
-			 {
-				 IomObject obj0 = objs.get("2");
-				 Assert.assertNotNull(obj0);
-				 Assert.assertEquals("Inheritance2.TestA.ClassA3c", obj0.getobjecttag());
-			 }
+            // read objects of db and write objectValue to HashMap
+            HashMap<String,IomObject> objs=new HashMap<String,IomObject>();
+            XtfReader reader=new XtfReader(data);
+            IoxEvent event=null;
+             do{
+                event=reader.read();
+                if(event instanceof StartTransferEvent){
+                }else if(event instanceof StartBasketEvent){
+                }else if(event instanceof ObjectEvent){
+                    IomObject iomObj=((ObjectEvent)event).getIomObject();
+                    if(iomObj.getobjectoid()!=null){
+                        objs.put(iomObj.getobjectoid(), iomObj);
+                    }else {
+                        objs.put(iomObj.getattrobj("aa",0).getobjectrefoid()+iomObj.getattrobj("bb",0).getobjectrefoid(), iomObj);
+                    }
+                }else if(event instanceof EndBasketEvent){
+                }else if(event instanceof EndTransferEvent){
+                }
+             }while(!(event instanceof EndTransferEvent));
+             Assert.assertEquals(8, objs.size());
+             {
+                 IomObject obj1 = objs.get("1");
+                 Assert.assertEquals("Inheritance2.TestA.ClassA3b oid 1 {attrA3 attra3-10, attrA3b attra3b-10}", obj1.toString());
+             }
+             {
+                 IomObject obj1 = objs.get("2");
+                 Assert.assertEquals("Inheritance2.TestA.ClassA3c oid 2 {attrA3 attra3-20, attrA3b attra3b-20, attrA3c attra3c-20}", obj1.toString());
+             }
+             {
+                 IomObject obj1 = objs.get("3");
+                 Assert.assertEquals("Inheritance2.TestA.ClassB oid 3 {a -> 1 REF {}, attrB attrb-30}", obj1.toString());
+             }
+             {
+                 IomObject obj1 = objs.get("4");
+                 Assert.assertEquals("Inheritance2.TestA.ClassB oid 4 {a -> 2 REF {}, attrB attrb-40}", obj1.toString());
+             }
+             {
+                 IomObject obj1 = objs.get("5");
+                 Assert.assertEquals("Inheritance2.TestA.ClassB oid 5 {a -> 1 REF {}, attrB attrb-50}", obj1.toString());
+             }
+             {
+                 IomObject obj1 = objs.get("14");
+                 Assert.assertEquals("Inheritance2.TestA.aa2bb {aa -> 1 REF {}, bb -> 4 REF {}}", obj1.toString());
+             }
+             {
+                 IomObject obj1 = objs.get("24");
+                 Assert.assertEquals("Inheritance2.TestA.aa2bb {aa -> 2 REF {}, bb -> 4 REF {}}", obj1.toString());
+             }
+             {
+                 IomObject obj1 = objs.get("15");
+                 Assert.assertEquals("Inheritance2.TestA.aa2bb {aa -> 1 REF {}, bb -> 5 REF {}}", obj1.toString());
+             }
 		}finally{
 			if(jdbcConnection!=null){
 				jdbcConnection.close();
 			}
 		}
 	}
+    @Test
+    public void exportXtf_IdPerTable() throws Exception
+    {
+        Connection jdbcConnection=null;
+        try{
+            Class driverClass = Class.forName("org.postgresql.Driver");
+            jdbcConnection = DriverManager.getConnection(
+                    dburl, dbuser, dbpwd);
+            DbUtility.executeSqlScript(jdbcConnection, new java.io.FileReader("test/data/InheritanceSmart2/InitInheritanceSmart2Schema.sql"));
+            DbUtility.executeSqlScript(jdbcConnection, new java.io.FileReader("test/data/InheritanceSmart2/InitInheritanceSmart2a_IdPerTable.sql"));       
+            File data=new File("test/data/InheritanceSmart2/Inheritance2a-out.xtf");
+            Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+            config.setDatasetName(DATASETNAME);
+            config.setFunction(Config.FC_EXPORT);
+            config.setExportTid(true);
+            Ili2db.readSettingsFromDb(config);
+            Ili2db.run(config,null);
+            // read objects of db and write objectValue to HashMap
+            HashMap<String,IomObject> objs=new HashMap<String,IomObject>();
+            XtfReader reader=new XtfReader(data);
+            IoxEvent event=null;
+             do{
+                event=reader.read();
+                if(event instanceof StartTransferEvent){
+                }else if(event instanceof StartBasketEvent){
+                }else if(event instanceof ObjectEvent){
+                    IomObject iomObj=((ObjectEvent)event).getIomObject();
+                    if(iomObj.getobjectoid()!=null){
+                        objs.put(iomObj.getobjectoid(), iomObj);
+                    }else {
+                        objs.put(iomObj.getattrobj("aa",0).getobjectrefoid()+iomObj.getattrobj("bb",0).getobjectrefoid(), iomObj);
+                    }
+                }else if(event instanceof EndBasketEvent){
+                }else if(event instanceof EndTransferEvent){
+                }
+             }while(!(event instanceof EndTransferEvent));
+             Assert.assertEquals(8, objs.size());
+             {
+                 IomObject obj1 = objs.get("1");
+                 Assert.assertEquals("Inheritance2.TestA.ClassA3b oid 1 {attrA3 attra3-10, attrA3b attra3b-10}", obj1.toString());
+             }
+             {
+                 IomObject obj1 = objs.get("2");
+                 Assert.assertEquals("Inheritance2.TestA.ClassA3c oid 2 {attrA3 attra3-20, attrA3b attra3b-20, attrA3c attra3c-20}", obj1.toString());
+             }
+             {
+                 IomObject obj1 = objs.get("3");
+                 Assert.assertEquals("Inheritance2.TestA.ClassB oid 3 {a -> 1 REF {}, attrB attrb-30}", obj1.toString());
+             }
+             {
+                 IomObject obj1 = objs.get("4");
+                 Assert.assertEquals("Inheritance2.TestA.ClassB oid 4 {a -> 2 REF {}, attrB attrb-40}", obj1.toString());
+             }
+             {
+                 IomObject obj1 = objs.get("5");
+                 Assert.assertEquals("Inheritance2.TestA.ClassB oid 5 {a -> 1 REF {}, attrB attrb-50}", obj1.toString());
+             }
+             {
+                 IomObject obj1 = objs.get("14");
+                 Assert.assertEquals("Inheritance2.TestA.aa2bb {aa -> 1 REF {}, bb -> 4 REF {}}", obj1.toString());
+             }
+             {
+                 IomObject obj1 = objs.get("24");
+                 Assert.assertEquals("Inheritance2.TestA.aa2bb {aa -> 2 REF {}, bb -> 4 REF {}}", obj1.toString());
+             }
+             {
+                 IomObject obj1 = objs.get("15");
+                 Assert.assertEquals("Inheritance2.TestA.aa2bb {aa -> 1 REF {}, bb -> 5 REF {}}", obj1.toString());
+             }
+        }finally{
+            if(jdbcConnection!=null){
+                jdbcConnection.close();
+            }
+        }
+    }
 	
 	@Test
 	public void importIliStructAttrFK() throws Exception
@@ -369,20 +468,6 @@ public class InheritanceSmart2Test {
 			//config.setCreatescript(data.getPath()+".sql");
 			Ili2db.readSettingsFromDb(config);
 			Ili2db.run(config,null);
-			{
-				String stmtTxt="SELECT data_type FROM information_schema.columns WHERE table_schema ='blackboxtypes23' AND table_name = 'classa' AND column_name = 'xmlbox'";
-				Assert.assertTrue(stmt.execute(stmtTxt));
-				ResultSet rs=stmt.getResultSet();
-				Assert.assertTrue(rs.next());
-				Assert.assertEquals("xml",rs.getString("data_type"));
-			}
-			{
-				String stmtTxt="SELECT data_type FROM information_schema.columns WHERE table_schema ='blackboxtypes23' AND table_name = 'classa' AND column_name = 'binbox'";
-				Assert.assertTrue(stmt.execute(stmtTxt));
-				ResultSet rs=stmt.getResultSet();
-				Assert.assertTrue(rs.next());
-				Assert.assertEquals("bytea",rs.getString("data_type"));
-			}
             {
                 // t_ili2db_attrname
                 String [][] expectedValues=new String[][] {
@@ -453,20 +538,6 @@ public class InheritanceSmart2Test {
 			Ili2db.readSettingsFromDb(config);
 			Ili2db.run(config,null);
 			
-			{
-				String stmtTxt="SELECT data_type FROM information_schema.columns WHERE table_schema ='blackboxtypes23' AND table_name = 'classa' AND column_name = 'xmlbox'";
-				Assert.assertTrue(stmt.execute(stmtTxt));
-				ResultSet rs=stmt.getResultSet();
-				Assert.assertTrue(rs.next());
-				Assert.assertEquals("xml",rs.getString("data_type"));
-			}
-			{
-				String stmtTxt="SELECT data_type FROM information_schema.columns WHERE table_schema ='blackboxtypes23' AND table_name = 'classa' AND column_name = 'binbox'";
-				Assert.assertTrue(stmt.execute(stmtTxt));
-				ResultSet rs=stmt.getResultSet();
-				Assert.assertTrue(rs.next());
-				Assert.assertEquals("bytea",rs.getString("data_type"));
-			}
 		}finally{
 			if(jdbcConnection!=null){
 				jdbcConnection.close();

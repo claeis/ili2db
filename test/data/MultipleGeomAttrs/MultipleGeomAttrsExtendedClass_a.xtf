@@ -96,5 +96,43 @@
 				</surface>
 			</MultipleGeomAttrsExtendedClass.Topic.ClassAp>
 		</MultipleGeomAttrsExtendedClass.Topic>
+		<MultipleGeomAttrsExtendedClass.TopicB BID="b2">
+			<MultipleGeomAttrsExtendedClass.TopicB.ClassB TID="ClassB.1">
+				<geom>
+					<COORD>
+							<C1>2460001.000</C1>
+							<C2>1045001.000</C2>
+					</COORD>
+				</geom>
+			</MultipleGeomAttrsExtendedClass.TopicB.ClassB>
+			<MultipleGeomAttrsExtendedClass.TopicB.ClassB1 TID="ClassB1.1">
+				<geom>
+					<COORD>
+							<C1>2460002.000</C1>
+							<C2>1045002.000</C2>
+					</COORD>
+				</geom>
+				<coord>
+					<COORD>
+							<C1>2460002.100</C1>
+							<C2>1045002.100</C2>
+					</COORD>
+				</coord>
+			</MultipleGeomAttrsExtendedClass.TopicB.ClassB1>
+			<MultipleGeomAttrsExtendedClass.TopicB.ClassB2 TID="ClassB2.1">
+				<geom>
+					<COORD>
+							<C1>2460003.000</C1>
+							<C2>1045003.000</C2>
+					</COORD>
+				</geom>
+				<coord>
+					<COORD>
+							<C1>2460003.100</C1>
+							<C2>1045003.100</C2>
+					</COORD>
+				</coord>
+			</MultipleGeomAttrsExtendedClass.TopicB.ClassB2>
+		</MultipleGeomAttrsExtendedClass.TopicB>
 	</DATASECTION>
 </TRANSFER>

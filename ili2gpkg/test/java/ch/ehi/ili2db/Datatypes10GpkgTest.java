@@ -261,7 +261,7 @@ public class Datatypes10GpkgTest {
         }
         // AREA georef table
         {
-            String stmtTxt="SELECT "+DbNames.CLASSNAME_TAB_SQLNAME_COL+" FROM "+DbNames.CLASSNAME_TAB+" WHERE "+DbNames.CLASSNAME_TAB_ILINAME_COL+"='Datatypes10.Topic.TableA.area'";
+            String stmtTxt="SELECT "+DbNames.CLASSNAME_TAB_SQLNAME_COL+" FROM "+DbNames.CLASSNAME_TAB+" WHERE "+DbNames.CLASSNAME_TAB_ILINAME_COL+"='Datatypes10.Topic.TableA.area(Datatypes10.Topic.TableA)'";
             Assert.assertTrue(stmt.execute(stmtTxt));
             ResultSet rs=stmt.getResultSet();
             Assert.assertTrue(rs.next());

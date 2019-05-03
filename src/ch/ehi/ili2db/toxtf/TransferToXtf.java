@@ -85,6 +85,7 @@ import ch.interlis.iox_j.PipelinePool;
 import ch.interlis.iox_j.StartBasketEvent;
 import ch.interlis.iox_j.StartTransferEvent;
 import ch.interlis.iox_j.filter.ReduceToBaseModel;
+import ch.interlis.iox_j.filter.Rounder;
 import ch.interlis.iox_j.filter.TranslateToOrigin;
 import ch.interlis.iox_j.filter.TranslateToTranslation;
 import ch.interlis.iox_j.logging.LogEventFactory;
@@ -119,6 +120,7 @@ public class TransferToXtf {
 	private ArrayList<FixIomObjectRefs> delayedObjects=null;
 	private ch.interlis.ili2c.generator.IndentPrintWriter expgen=null;
 	private TranslateToTranslation languageFilter=null;
+	private Rounder rounder=null;
 	private ReduceToBaseModel exportBaseModelFilter=null;
     private Integer defaultCrsCode=null;
     private Map<Element,Element> crsFilter=null;
@@ -163,6 +165,11 @@ public class TransferToXtf {
 		if(!config.isVer3_translation() || config.getIli1Translation()!=null){
 			languageFilter=new TranslateToTranslation(td, config);
 		}
+		if(config.isDisableRounding()) {
+		    rounder=null;
+		}else {
+	        rounder=new Rounder(td,config);
+		}
 		
 		String srsAssignment=config.getSrsModelAssignment();
 		if(srsAssignment!=null) {
@@ -187,6 +194,9 @@ public class TransferToXtf {
 			modelConfig.setConfigValue(ValidationConfig.PARAMETER, ValidationConfig.AREA_OVERLAP_VALIDATION, config.isDisableAreaValidation()?ValidationConfig.OFF:null);
 			modelConfig.setConfigValue(ValidationConfig.PARAMETER, ValidationConfig.DEFAULT_GEOMETRY_TYPE_VALIDATION, config.isSkipGeometryErrors()?ValidationConfig.OFF:null);
 			modelConfig.setConfigValue(ValidationConfig.PARAMETER, ValidationConfig.ALLOW_ONLY_MULTIPLICITY_REDUCTION, config.isOnlyMultiplicityReduction()?ValidationConfig.ON:null);
+            if(rounder==null) {
+                modelConfig.setConfigValue(ValidationConfig.PARAMETER, ValidationConfig.DISABLE_ROUNDING, ValidationConfig.TRUE);
+            }
 			IoxLogging errHandler=new ch.interlis.iox_j.logging.Log2EhiLogger();
 			LogEventFactory errFactory=new LogEventFactory();
             errFactory.setDataSource(datasource);
@@ -216,7 +226,12 @@ public class TransferToXtf {
 		if(exportBaseModelFilter!=null){
 			startEvent=(StartTransferEvent) exportBaseModelFilter.filter(startEvent);
 		}
-		if(validator!=null)validator.validate(startEvent);
+        if(rounder!=null) {
+            startEvent=(StartTransferEvent) rounder.filter(startEvent);
+        }
+		if(validator!=null) {
+		    validator.validate(startEvent);
+		}
         if(function!=Config.FC_VALIDATE) {
             iomFile.write(startEvent);
         }
@@ -274,7 +289,12 @@ public class TransferToXtf {
 		if(exportBaseModelFilter!=null){
 			endEvent=(EndTransferEvent) exportBaseModelFilter.filter(endEvent);
 		}
-		if(validator!=null)validator.validate(endEvent);
+        if(rounder!=null) {
+            endEvent=(EndTransferEvent) rounder.filter(endEvent);
+        }
+		if(validator!=null) {
+		    validator.validate(endEvent);
+		}
 		if(function!=Config.FC_VALIDATE) {
 	        iomFile.write(endEvent);
 		}
@@ -299,6 +319,9 @@ public class TransferToXtf {
         java.sql.ResultSet res=null;
 		try{
 			String stmt="SELECT "+DbNames.BASKETS_TAB_TOPIC_COL+","+DbNames.T_ILI_TID_COL+","+DbNames.BASKETS_TAB_DOMAINS_COL+" FROM "+sqlName+" WHERE "+colT_ID+"= ?";
+			if(config.isVer3_export()) {
+	            stmt="SELECT "+DbNames.BASKETS_TAB_TOPIC_COL+","+DbNames.T_ILI_TID_COL+" FROM "+sqlName+" WHERE "+colT_ID+"= ?";
+			}
 			EhiLogger.traceBackendCmd(stmt);
 			getstmt=conn.prepareStatement(stmt);
 			getstmt.setLong(1,basketSqlId);
@@ -306,7 +329,9 @@ public class TransferToXtf {
 			if(res.next()){
 				topicName=res.getString(1);
 				bid=res.getString(2);
-                domains=res.getString(3);
+	            if(!config.isVer3_export()) {
+	                domains=res.getString(3);
+	            }
 			}
 		}catch(java.sql.SQLException ex){
 			EhiLogger.logError("failed to query "+sqlName,ex);
@@ -424,7 +449,12 @@ public class TransferToXtf {
 						if(exportBaseModelFilter!=null) {
 							iomBasket=(StartBasketEvent) exportBaseModelFilter.filter(iomBasket);
 						}
-						if(validator!=null)validator.validate(iomBasket);
+                        if(rounder!=null) {
+                            iomBasket=(StartBasketEvent) rounder.filter(iomBasket);
+                        }
+						if(validator!=null) {
+						    validator.validate(iomBasket);
+						}
 						if(function!=Config.FC_VALIDATE) {
 	                        iomFile.write(iomBasket);
 						}
@@ -455,7 +485,12 @@ public class TransferToXtf {
 							if(exportBaseModelFilter!=null){
 								iomBasket=(StartBasketEvent) exportBaseModelFilter.filter(iomBasket);
 							}
-							if(validator!=null)validator.validate(iomBasket);
+	                        if(rounder!=null) {
+	                            iomBasket=(StartBasketEvent) rounder.filter(iomBasket);
+	                        }
+							if(validator!=null) {
+							    validator.validate(iomBasket);
+							}
 							if(function!=Config.FC_VALIDATE) {
 	                            iomFile.write(iomBasket);
 							}
@@ -475,16 +510,17 @@ public class TransferToXtf {
 				boolean skipObj=false;
 				for(IomObject ref:fixref.getRefs()){
 					long sqlid=fixref.getTargetSqlid(ref);
-					if(sqlidPool.containsSqlid(sqlid)){
+                    String sqlTargetTable=fixref.getTargetSqlTable(ref);
+					if(sqlidPool.containsSqlid(sqlTargetTable,sqlid)){
 						// fix it
-						ref.setobjectrefoid(sqlidPool.getXtfid(sqlid));
+						ref.setobjectrefoid(sqlidPool.getXtfid(sqlTargetTable,sqlid));
 					}else{
 						// object in another basket
 						Viewable aclass=fixref.getTargetClass(ref);
 						// read object
 						String tid=readObjectTid(aclass,sqlid);
 						if(tid==null){
-							EhiLogger.logError("unknown referenced object "+aclass.getScopedName(null)+" sqlid "+fixref.getTargetSqlid(ref)+" referenced from "+fixref.getRoot().getobjecttag()+" TID "+fixref.getRoot().getobjectoid());
+							EhiLogger.logError("unknown referenced object "+aclass.getScopedName(null)+" (sqltable "+sqlTargetTable+", sqlid "+sqlid+") referenced from "+fixref.getRoot().getobjecttag()+" TID "+fixref.getRoot().getobjectoid());
 							referrs=true;
 							skipObj=true;
 						}else{
@@ -503,7 +539,12 @@ public class TransferToXtf {
 						objEvent=(ObjectEvent) exportBaseModelFilter.filter(objEvent);
 					}
 					if(objEvent!=null) {
-						if(validator!=null)validator.validate(objEvent);
+                        if(rounder!=null) {
+                            objEvent=(ObjectEvent) rounder.filter(objEvent);
+                        }
+						if(validator!=null) {
+						    validator.validate(objEvent);
+						}
 						if(function!=Config.FC_VALIDATE) {
 	                        iomFile.write(objEvent);
 						}
@@ -517,7 +558,12 @@ public class TransferToXtf {
 			if(exportBaseModelFilter!=null){
 				endBasket=(EndBasketEvent) exportBaseModelFilter.filter(endBasket);
 			}
-			if(validator!=null)validator.validate(endBasket);
+            if(rounder!=null) {
+                endBasket=(EndBasketEvent) rounder.filter(endBasket);
+            }
+			if(validator!=null) {
+			    validator.validate(endBasket);
+			}
 			if(function!=Config.FC_VALIDATE) {
 	            iomFile.write(endBasket);
 			}
@@ -543,7 +589,8 @@ public class TransferToXtf {
 					if(rs.wasNull()){
 						sqlIliTid = Long.toString(sqlid);
 					}
-					sqlidPool.putSqlid2Xtfid(sqlid, sqlIliTid);
+                    String sqlType = rs.getString(3);
+					sqlidPool.putSqlid2Xtfid(sqlType,sqlid, sqlIliTid);
 				}else{
 					// unknown object
 					return null;
@@ -569,7 +616,7 @@ public class TransferToXtf {
 			}
 		}else{
 			sqlIliTid = Long.toString(sqlid);
-			sqlidPool.putSqlid2Xtfid(sqlid, sqlIliTid);
+			sqlidPool.putSqlid2Xtfid(recConv.getSqlType(aclass).getName(),sqlid, sqlIliTid);
 		}
 		return sqlIliTid;
 	}
@@ -863,11 +910,12 @@ public class TransferToXtf {
 					// -> mainTable
 					IomObject ref=iomObj.addattrobj(refAttrName,"REF");
 					long refSqlId=rs.getLong(valuei);
-					if(sqlidPool.containsSqlid(refSqlId)){
-						String refTid=sqlidPool.getXtfid(refSqlId);
+					String sqlTargetTable=recConv.getSqlType(aclass).getName(); // sql name of main table
+					if(sqlidPool.containsSqlid(sqlTargetTable,refSqlId)){
+						String refTid=sqlidPool.getXtfid(sqlTargetTable,refSqlId);
 						ref.setobjectrefoid(refTid);
 					}else{
-						EhiLogger.logError("unknown referenced object "+attr.getContainer().getScopedName(null)+" sqlid "+refSqlId+" referenced from "+sqlTabName+" "+colT_ID+" "+sqlid);
+						EhiLogger.logError("unknown referenced object "+attr.getContainer().getScopedName(null)+" (sqltable "+sqlTargetTable+", sqlid "+refSqlId+") referenced from "+sqlTabName+" "+colT_ID+" "+sqlid);
 					}
 					valuei++;
 					
@@ -891,7 +939,12 @@ public class TransferToXtf {
 					if(exportBaseModelFilter!=null){
 						objEvent=(ObjectEvent) exportBaseModelFilter.filter(objEvent);
 					}
-					if(validator!=null)validator.validate(objEvent);
+                    if(rounder!=null) {
+                        objEvent=(ObjectEvent) rounder.filter(objEvent);
+                    }
+					if(validator!=null) {
+					    validator.validate(objEvent);
+					}
 					if(function!=Config.FC_VALIDATE) {
 	                    out.write(objEvent);
 					}
@@ -982,7 +1035,12 @@ public class TransferToXtf {
 							objEvent=(ObjectEvent) exportBaseModelFilter.filter(objEvent);
 						}
 						if(objEvent!=null) {
-							if(validator!=null)validator.validate(objEvent);
+						    if(rounder!=null) {
+						        objEvent=(ObjectEvent) rounder.filter(objEvent);
+						    }
+							if(validator!=null) {
+							    validator.validate(objEvent);
+							}
 							if(out!=null){
 							    if(function!=Config.FC_VALIDATE) {
 	                                out.write(objEvent);

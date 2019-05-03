@@ -65,7 +65,7 @@ public class Dataset23Smart1Test {
 	//config.setTidHandling(config.TID_HANDLING_PROPERTY);
 	
 	@Test
-	public void importXtfDataset() throws Exception
+	public void importXtf() throws Exception
 	{
 		Connection jdbcConnection=null;
 		try{
@@ -87,6 +87,7 @@ public class Dataset23Smart1Test {
 					config.setMultiSurfaceTrafo(null);
 					config.setMultilingualTrafo(null);
 					config.setInheritanceTrafo(config.INHERITANCE_TRAFO_SMART1);
+					config.setCreateImportTabs(true);
 					Ili2db.readSettingsFromDb(config);
 					Ili2db.run(config,null);
 				}
@@ -116,6 +117,64 @@ public class Dataset23Smart1Test {
 			}
 		}
 	}
+    @Test
+    public void importXtfDatasetEmpty() throws Exception
+    {
+        Connection jdbcConnection=null;
+        try{
+            Class driverClass = Class.forName("org.postgresql.Driver");
+            jdbcConnection = DriverManager.getConnection(
+                    dburl, dbuser, dbpwd);
+            Statement stmt=jdbcConnection.createStatement();
+            stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");
+            {
+                {
+                    File data=new File("test/data/Dataset23Smart1/Dataset1c1.xtf");
+                    Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+                    config.setDatasetName(DATASETNAME_A);
+                    config.setFunction(Config.FC_IMPORT);
+                    config.setDoImplicitSchemaImport(true);
+                    config.setCreateFk(config.CREATE_FK_YES);
+                    config.setBasketHandling(config.BASKET_HANDLING_READWRITE);
+                    config.setCatalogueRefTrafo(null);
+                    config.setMultiSurfaceTrafo(null);
+                    config.setMultilingualTrafo(null);
+                    config.setInheritanceTrafo(config.INHERITANCE_TRAFO_SMART1);
+                    Ili2db.readSettingsFromDb(config);
+                    Ili2db.run(config,null);
+                }
+            }
+        }finally{
+            if(jdbcConnection!=null){
+                jdbcConnection.close();
+            }
+        }
+    }
+    @Test
+    public void replaceXtfDatasetEmpty() throws Exception
+    {
+        {
+            importXtfDatasetEmpty();
+        }
+        Connection jdbcConnection=null;
+        try{
+            Class driverClass = Class.forName("org.postgresql.Driver");
+            {
+                {
+                    File data=new File("test/data/Dataset23Smart1/Dataset1c2.xtf");
+                    Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+                    config.setDatasetName(DATASETNAME_A);
+                    config.setFunction(Config.FC_REPLACE);
+                    Ili2db.readSettingsFromDb(config);
+                    Ili2db.run(config,null);
+                }
+            }
+        }finally{
+            if(jdbcConnection!=null){
+                jdbcConnection.close();
+            }
+        }
+    }
 	@Test
 	public void importXtfNoDatasetName() throws Exception
 	{
@@ -169,7 +228,7 @@ public class Dataset23Smart1Test {
 	}
 	
 	@Test
-	public void deleteSmart1() throws Exception
+	public void deleteXtf() throws Exception
 	{
 		Connection jdbcConnection=null;
 		try{
@@ -205,7 +264,7 @@ public class Dataset23Smart1Test {
 	}
 	
 	@Test
-	public void replaceSmart1() throws Exception
+	public void replaceXtf() throws Exception
 	{
 		Connection jdbcConnection=null;
 		try{
@@ -252,7 +311,7 @@ public class Dataset23Smart1Test {
 	}
 	
 	@Test
-	public void exportSmart1() throws Exception
+	public void exportXtf() throws Exception
 	{
 		Connection jdbcConnection=null;
 		try{

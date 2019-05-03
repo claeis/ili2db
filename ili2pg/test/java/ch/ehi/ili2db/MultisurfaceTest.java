@@ -136,8 +136,8 @@ public class MultisurfaceTest {
 			 {
 				 IomObject obj0 = objs.get("o1");
 				 Assert.assertNotNull(obj0);
-				 Assert.assertEquals("COORD {C1 600031.0, C2 200021.0}", obj0.getattrobj("point", 0).toString());
-				 Assert.assertEquals("GeometryCHLV03_V1.MultiSurface {Surfaces [GeometryCHLV03_V1.SurfaceStructure {Surface MULTISURFACE {surface SURFACE {boundary BOUNDARY {polyline POLYLINE {sequence SEGMENTS {segment [COORD {C1 600030.0, C2 200020.0}, COORD {C1 600045.0, C2 200040.0}, COORD {C1 600010.0, C2 200040.0}, COORD {C1 600030.0, C2 200020.0}]}}}}}}, GeometryCHLV03_V1.SurfaceStructure {Surface MULTISURFACE {surface SURFACE {boundary BOUNDARY {polyline POLYLINE {sequence SEGMENTS {segment [COORD {C1 600015.0, C2 200005.0}, COORD {C1 600040.0, C2 200010.0}, COORD {C1 600010.0, C2 200020.0}, COORD {C1 600005.0, C2 200010.0}, COORD {C1 600015.0, C2 200005.0}]}}}}}}]}", obj0.getattrobj("geom", 0).toString());
+                 Assert.assertEquals("COORD {C1 600031.000, C2 200021.000}", obj0.getattrobj("point", 0).toString());
+                 Assert.assertEquals("GeometryCHLV03_V1.MultiSurface {Surfaces [GeometryCHLV03_V1.SurfaceStructure {Surface MULTISURFACE {surface SURFACE {boundary BOUNDARY {polyline POLYLINE {sequence SEGMENTS {segment [COORD {C1 600030.000, C2 200020.000}, COORD {C1 600045.000, C2 200040.000}, COORD {C1 600010.000, C2 200040.000}, COORD {C1 600030.000, C2 200020.000}]}}}}}}, GeometryCHLV03_V1.SurfaceStructure {Surface MULTISURFACE {surface SURFACE {boundary BOUNDARY {polyline POLYLINE {sequence SEGMENTS {segment [COORD {C1 600015.000, C2 200005.000}, COORD {C1 600040.000, C2 200010.000}, COORD {C1 600010.000, C2 200020.000}, COORD {C1 600005.000, C2 200010.000}, COORD {C1 600015.000, C2 200005.000}]}}}}}}]}", obj0.getattrobj("geom", 0).toString());
 			 }
 		}finally{
 			if(jdbcConnection!=null){
@@ -274,8 +274,8 @@ public class MultisurfaceTest {
 			 {
 				 IomObject obj0 = objs.get("o1");
 				 Assert.assertNotNull(obj0);
-				 Assert.assertEquals("COORD {C1 600031.0, C2 200021.0}", obj0.getattrobj("point", 0).toString());
-				 Assert.assertEquals("GeometryCHLV03_V1.MultiSurface {Surfaces [GeometryCHLV03_V1.SurfaceStructure {Surface MULTISURFACE {surface SURFACE {boundary BOUNDARY {polyline POLYLINE {sequence SEGMENTS {segment [COORD {C1 600030.0, C2 200020.0}, COORD {C1 600045.0, C2 200040.0}, COORD {C1 600010.0, C2 200040.0}, COORD {C1 600030.0, C2 200020.0}]}}}}}}, GeometryCHLV03_V1.SurfaceStructure {Surface MULTISURFACE {surface SURFACE {boundary BOUNDARY {polyline POLYLINE {sequence SEGMENTS {segment [COORD {C1 600015.0, C2 200005.0}, COORD {C1 600040.0, C2 200010.0}, COORD {C1 600010.0, C2 200020.0}, COORD {C1 600005.0, C2 200010.0}, COORD {C1 600015.0, C2 200005.0}]}}}}}}]}", obj0.getattrobj("geom", 0).toString());
+                 Assert.assertEquals("COORD {C1 600031.000, C2 200021.000}", obj0.getattrobj("point", 0).toString());
+                 Assert.assertEquals("GeometryCHLV03_V1.MultiSurface {Surfaces [GeometryCHLV03_V1.SurfaceStructure {Surface MULTISURFACE {surface SURFACE {boundary BOUNDARY {polyline POLYLINE {sequence SEGMENTS {segment [COORD {C1 600030.000, C2 200020.000}, COORD {C1 600045.000, C2 200040.000}, COORD {C1 600010.000, C2 200040.000}, COORD {C1 600030.000, C2 200020.000}]}}}}}}, GeometryCHLV03_V1.SurfaceStructure {Surface MULTISURFACE {surface SURFACE {boundary BOUNDARY {polyline POLYLINE {sequence SEGMENTS {segment [COORD {C1 600015.000, C2 200005.000}, COORD {C1 600040.000, C2 200010.000}, COORD {C1 600010.000, C2 200020.000}, COORD {C1 600005.000, C2 200010.000}, COORD {C1 600015.000, C2 200005.000}]}}}}}}]}", obj0.getattrobj("geom", 0).toString());
 			 }
 		}finally{
 			if(jdbcConnection!=null){
@@ -375,7 +375,7 @@ public class MultisurfaceTest {
 			 {
 				 IomObject obj0 = objs.get("13");
 				 Assert.assertNotNull(obj0);
-				 Assert.assertEquals("MultiSurface2.MultiFlaeche2D {Flaechen [MultiSurface2.FlaecheStruktur2D {Flaeche MULTISURFACE {surface SURFACE {boundary BOUNDARY {polyline POLYLINE {sequence SEGMENTS {segment [COORD {C1 600030.0, C2 200020.0}, COORD {C1 600045.0, C2 200040.0}, COORD {C1 600010.0, C2 200040.0}, COORD {C1 600030.0, C2 200020.0}]}}}}}}, MultiSurface2.FlaecheStruktur2D {Flaeche MULTISURFACE {surface SURFACE {boundary BOUNDARY {polyline POLYLINE {sequence SEGMENTS {segment [COORD {C1 600015.0, C2 200005.0}, COORD {C1 600040.0, C2 200010.0}, COORD {C1 600010.0, C2 200020.0}, COORD {C1 600005.0, C2 200010.0}, COORD {C1 600015.0, C2 200005.0}]}}}}}}]}", obj0.getattrobj("geom", 0).toString());
+				 Assert.assertEquals("MultiSurface2.MultiFlaeche2D {Flaechen [MultiSurface2.FlaecheStruktur2D {Flaeche MULTISURFACE {surface SURFACE {boundary BOUNDARY {polyline POLYLINE {sequence SEGMENTS {segment [COORD {C1 600030.000, C2 200020.000}, COORD {C1 600045.000, C2 200040.000}, COORD {C1 600010.000, C2 200040.000}, COORD {C1 600030.000, C2 200020.000}]}}}}}}, MultiSurface2.FlaecheStruktur2D {Flaeche MULTISURFACE {surface SURFACE {boundary BOUNDARY {polyline POLYLINE {sequence SEGMENTS {segment [COORD {C1 600015.000, C2 200005.000}, COORD {C1 600040.000, C2 200010.000}, COORD {C1 600010.000, C2 200020.000}, COORD {C1 600005.000, C2 200010.000}, COORD {C1 600015.000, C2 200005.000}]}}}}}}]}", obj0.getattrobj("geom", 0).toString());
 			 }
 		}finally{
 			if(jdbcConnection!=null){
@@ -477,8 +477,8 @@ public class MultisurfaceTest {
 			 {
 				 IomObject obj0 = objs.get("o1");
 				 Assert.assertNotNull(obj0);
-				 Assert.assertEquals("COORD {C1 600031.0, C2 200021.0}", obj0.getattrobj("point", 0).toString());
-				 Assert.assertEquals("GeometryCHLV03_V1.MultiSurface {Surfaces [GeometryCHLV03_V1.SurfaceStructure {Surface MULTISURFACE {surface SURFACE {boundary BOUNDARY {polyline POLYLINE {sequence SEGMENTS {segment [COORD {C1 600030.0, C2 200020.0}, COORD {C1 600045.0, C2 200040.0}, COORD {C1 600010.0, C2 200040.0}, COORD {C1 600030.0, C2 200020.0}]}}}}}}, GeometryCHLV03_V1.SurfaceStructure {Surface MULTISURFACE {surface SURFACE {boundary BOUNDARY {polyline POLYLINE {sequence SEGMENTS {segment [COORD {C1 600015.0, C2 200005.0}, COORD {C1 600040.0, C2 200010.0}, COORD {C1 600010.0, C2 200020.0}, COORD {C1 600005.0, C2 200010.0}, COORD {C1 600015.0, C2 200005.0}]}}}}}}]}", obj0.getattrobj("geom", 0).toString());
+				 Assert.assertEquals("COORD {C1 600031.000, C2 200021.000}", obj0.getattrobj("point", 0).toString());
+				 Assert.assertEquals("GeometryCHLV03_V1.MultiSurface {Surfaces [GeometryCHLV03_V1.SurfaceStructure {Surface MULTISURFACE {surface SURFACE {boundary BOUNDARY {polyline POLYLINE {sequence SEGMENTS {segment [COORD {C1 600030.000, C2 200020.000}, COORD {C1 600045.000, C2 200040.000}, COORD {C1 600010.000, C2 200040.000}, COORD {C1 600030.000, C2 200020.000}]}}}}}}, GeometryCHLV03_V1.SurfaceStructure {Surface MULTISURFACE {surface SURFACE {boundary BOUNDARY {polyline POLYLINE {sequence SEGMENTS {segment [COORD {C1 600015.000, C2 200005.000}, COORD {C1 600040.000, C2 200010.000}, COORD {C1 600010.000, C2 200020.000}, COORD {C1 600005.000, C2 200010.000}, COORD {C1 600015.000, C2 200005.000}]}}}}}}]}", obj0.getattrobj("geom", 0).toString());
 			 }
 		}finally{
 			if(jdbcConnection!=null){

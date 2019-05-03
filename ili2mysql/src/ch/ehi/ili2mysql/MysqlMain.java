@@ -34,7 +34,7 @@ public class MysqlMain extends ch.ehi.ili2db.AbstractMain {
 		config.setGeometryConverter(ch.ehi.ili2mysql.MysqlColumnConverter.class.getName());
 		config.setDdlGenerator(ch.ehi.ili2mysql.GeneratorMysql.class.getName());
 		config.setJdbcDriver("com.mysql.jdbc.Driver");
-		config.setIdGenerator(ch.ehi.ili2db.base.TableBasedIdGen.class.getName());
+		config.setIdGenerator(ch.ehi.ili2mysql.MySqlIdGen.class.getName());
 		config.setIli2dbCustomStrategy(ch.ehi.ili2mysql.MysqlCustomStrategy.class.getName());
 		config.setUuidDefaultValue("uuid()");
         config.setValue(Config.MODELS_TAB_MODELNAME_COLSIZE, "400");

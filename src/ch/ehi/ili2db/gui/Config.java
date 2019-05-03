@@ -130,8 +130,10 @@ public class Config extends Settings {
 	private boolean validation=false;
 	private boolean skipReferenceErrors=false;
     private boolean exportTid=false;
+    private boolean ver3_export=false;
     private boolean importTid=false;
     private boolean importBid=false;
+    private boolean disableRounding=false;
     private Long minIdSeqValue=null;
 	private Long maxIdSeqValue=null;
 	private boolean setupPgExt=false;
@@ -723,4 +725,16 @@ public class Config extends Settings {
 	public boolean getCreateTypeConstraint() {
 		return TRUE.equals(getValue(CREATE_TYPE_CONSTRAINT))?true:false;
 	}
+    public void setVer3_export(boolean b) {
+        ver3_export=true;
+    }
+    public boolean isVer3_export() {
+        return ver3_export;
+    }
+    public boolean isDisableRounding() {
+        return disableRounding;
+    }
+    public void setDisableRounding(boolean disableRounding) {
+        this.disableRounding = disableRounding;
+    }
 }

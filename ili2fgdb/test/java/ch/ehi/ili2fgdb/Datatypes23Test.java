@@ -184,13 +184,13 @@ public class Datatypes23Test {
 				IomObject sequence=polylineObj.getattrobj("sequence", 0);
 				{
 					IomObject segment=sequence.getattrobj("segment", 0);
-					assertTrue(segment.getattrvalue("C1").equals("2460001.0"));
-					assertTrue(segment.getattrvalue("C2").equals("1045001.0"));
+					assertEquals("2460001.000",segment.getattrvalue("C1"));
+					assertEquals("1045001.000",segment.getattrvalue("C2"));
 				}
 				{
 					IomObject segment=sequence.getattrobj("segment", 1);
-					assertTrue(segment.getattrvalue("C1").equals("2460010.0"));
-					assertTrue(segment.getattrvalue("C2").equals("1045010.0"));
+					assertEquals("2460010.000",segment.getattrvalue("C1"));
+					assertEquals("1045010.000",segment.getattrvalue("C2"));
 				}
 			}
 			event=reader.read();
@@ -201,15 +201,15 @@ public class Datatypes23Test {
 				IomObject sequence=polylineObj.getattrobj("sequence", 0);
 				{
 					IomObject segment=sequence.getattrobj("segment", 0);
-					assertTrue(segment.getattrvalue("C1").equals("2460001.0"));
-					assertTrue(segment.getattrvalue("C2").equals("1045001.0"));
-					assertTrue(segment.getattrvalue("C3").equals("300.0"));
+					assertEquals("2460001.000",segment.getattrvalue("C1"));
+					assertEquals("1045001.000",segment.getattrvalue("C2"));
+					assertEquals("300.000",segment.getattrvalue("C3"));
 				}
 				{
 					IomObject segment=sequence.getattrobj("segment", 1);
-					assertTrue(segment.getattrvalue("C1").equals("2460010.0"));
-					assertTrue(segment.getattrvalue("C2").equals("1045010.0"));
-					assertTrue(segment.getattrvalue("C3").equals("300.0"));
+					assertEquals("2460010.000",segment.getattrvalue("C1"));
+					assertEquals("1045010.000",segment.getattrvalue("C2"));
+					assertEquals("300.000",segment.getattrvalue("C3"));
 				}
 			}
 			event=reader.read();
@@ -227,20 +227,20 @@ public class Datatypes23Test {
 				IomObject sequence=polylineObj.getattrobj("sequence", 0);
 				{
 					IomObject segment=sequence.getattrobj("segment", 0);
-					assertTrue(segment.getattrvalue("C1").equals("2460001.0"));
-					assertTrue(segment.getattrvalue("C2").equals("1045001.0"));
+					assertEquals("2460001.000",segment.getattrvalue("C1"));
+					assertEquals("1045001.000",segment.getattrvalue("C2"));
 				}
 				{
 					IomObject segment=sequence.getattrobj("segment", 1);
-					assertTrue(segment.getattrvalue("A1").equals("2460005.0"));
-					assertTrue(segment.getattrvalue("A2").equals("1045004.0"));
-					assertTrue(segment.getattrvalue("C1").equals("2460006.0"));
-					assertTrue(segment.getattrvalue("C2").equals("1045006.0"));
+					assertEquals("2460005.000",segment.getattrvalue("A1"));
+					assertEquals("1045004.000",segment.getattrvalue("A2"));
+					assertEquals("2460006.000",segment.getattrvalue("C1"));
+					assertEquals("1045006.000",segment.getattrvalue("C2"));
 				}
 				{
 					IomObject segment=sequence.getattrobj("segment", 2);
-					assertTrue(segment.getattrvalue("C1").equals("2460010.0"));
-					assertTrue(segment.getattrvalue("C2").equals("1045010.0"));
+					assertEquals("2460010.000",segment.getattrvalue("C1"));
+					assertEquals("1045010.000",segment.getattrvalue("C2"));
 				}
 			}
 			event=reader.read();
@@ -251,23 +251,23 @@ public class Datatypes23Test {
 				IomObject sequence=polylineObj.getattrobj("sequence", 0);
 				{
 					IomObject segment=sequence.getattrobj("segment", 0);
-					assertTrue(segment.getattrvalue("C1").equals("2460001.0"));
-					assertTrue(segment.getattrvalue("C2").equals("1045001.0"));
-					assertTrue(segment.getattrvalue("C3").equals("300.0"));
+					assertEquals("2460001.000",segment.getattrvalue("C1"));
+					assertEquals("1045001.000",segment.getattrvalue("C2"));
+					assertEquals("300.000",segment.getattrvalue("C3"));
 				}
 				{
 					IomObject segment=sequence.getattrobj("segment", 1);
-					assertTrue(segment.getattrvalue("A1").equals("2460005.0"));
-					assertTrue(segment.getattrvalue("A2").equals("1045004.0"));
-					assertTrue(segment.getattrvalue("C1").equals("2460006.0"));
-					assertTrue(segment.getattrvalue("C2").equals("1045006.0"));
-					assertTrue(segment.getattrvalue("C3").equals("300.0"));
+					assertEquals("2460005.000",segment.getattrvalue("A1"));
+					assertEquals("1045004.000",segment.getattrvalue("A2"));
+					assertEquals("2460006.000",segment.getattrvalue("C1"));
+					assertEquals("1045006.000",segment.getattrvalue("C2"));
+					assertEquals("300.000",segment.getattrvalue("C3"));
 				}
 				{
 					IomObject segment=sequence.getattrobj("segment", 2);
-					assertTrue(segment.getattrvalue("C1").equals("2460010.0"));
-					assertTrue(segment.getattrvalue("C2").equals("1045010.0"));
-					assertTrue(segment.getattrvalue("C3").equals("300.0"));
+					assertEquals("2460010.000",segment.getattrvalue("C1"));
+					assertEquals("1045010.000",segment.getattrvalue("C2"));
+					assertEquals("300.000",segment.getattrvalue("C3"));
 				}
 			}
 			assertTrue(reader.read() instanceof EndBasketEvent);

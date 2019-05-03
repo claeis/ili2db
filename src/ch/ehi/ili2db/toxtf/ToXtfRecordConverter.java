@@ -380,11 +380,11 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 			if(!aclass.isStructure()){
 				if(exportTid || aclass.getOid()!=null){
 					sqlIliTid=rs.getString(valuei);
-					sqlid2xtfid.putSqlid2Xtfid(sqlid, sqlIliTid);
+					sqlid2xtfid.putSqlid2Xtfid(aclass.getSqlTablename(),sqlid, sqlIliTid);
 					valuei++;
 				}else{
 					sqlIliTid=Long.toString(sqlid);
-					sqlid2xtfid.putSqlid2Xtfid(sqlid, sqlIliTid);
+					sqlid2xtfid.putSqlid2Xtfid(aclass.getSqlTablename(),sqlid, sqlIliTid);
 				}
 			}
 		}
@@ -448,7 +448,7 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 	                                                EhiLogger.logAdaption("Table "+table.getSqlTablename()+"(id "+sqlid+") more than one value for role "+roleName+"; value of "+sqlRoleName+" ignored");
 	                                            }else{
 	                                                IomObject ref=iomObj.addattrobj(roleName,roleOwner.getScopedName(null));
-	                                                mapSqlid2Xtfid(fixref,value,ref,role.getDestination());
+	                                                mapSqlid2Xtfid(fixref,value,ref,role.getDestination(),targetTable.getSqlTablename());
 	                                                refAlreadyDefined=true;
 	                                            }
 	                                        }
@@ -462,7 +462,7 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 	                                                EhiLogger.logAdaption("Table "+table.getSqlTablename()+"(id "+sqlid+") more than one value for role "+roleName+"; value of "+sqlRoleName+" ignored");
 	                                            }else{
 	                                                IomObject ref=iomObj.addattrobj(roleName,"REF");
-	                                                mapSqlid2Xtfid(fixref,value,ref,role.getDestination());
+	                                                mapSqlid2Xtfid(fixref,value,ref,role.getDestination(),targetTable.getSqlTablename());
 	                                                refAlreadyDefined=true;
 	                                            }
 	                                        }
@@ -476,7 +476,7 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
                                              EhiLogger.logAdaption("Table "+table.getSqlTablename()+"(id "+sqlid+") more than one value for role "+roleName+"; value of "+sqlRoleName+" ignored");
                                          }else{
                                              if(role==((EmbeddedLinkWrapper) structWrapper).getRole()) {
-                                                 mapSqlid2Xtfid(fixref,value,iomObj,role.getDestination());
+                                                 mapSqlid2Xtfid(fixref,value,iomObj,role.getDestination(),targetTable.getSqlTablename());
                                              }
                                              refAlreadyDefined=true;
                                          }
@@ -589,7 +589,7 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 	                                    Table catalogueReferenceTyp = ((CompositionType) type).getComponentType();
 	                                    IomObject catref=iomObj.addattrobj(attrName,catalogueReferenceTyp.getScopedName(null));
 	                                    IomObject ref=catref.addattrobj(IliNames.CHBASE1_CATALOGUEREFERENCE_REFERENCE,"REF");
-	                                    mapSqlid2Xtfid(fixref,value,ref,getCatalogueRefTarget(type));
+	                                    mapSqlid2Xtfid(fixref,value,ref,getCatalogueRefTarget(type),targetTable.getSqlTablename());
 	                                    refAlreadyDefined=true;
 	                                }
 	                            }
@@ -904,7 +904,7 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 	                                EhiLogger.logAdaption("Table "+table.getSqlTablename()+"(id "+sqlid+") more than one value for refattr "+attrName+"; value of "+sqlAttrName+" ignored");
 	                            }else{
 	                                IomObject ref=iomObj.addattrobj(attrName,"REF");
-	                                mapSqlid2Xtfid(fixref,value,ref,((ReferenceType)type).getReferred());
+	                                mapSqlid2Xtfid(fixref,value,ref,((ReferenceType)type).getReferred(),targetTable.getSqlTablename());
 	                                refAlreadyDefined=true;
 	                            }
 	                        }
@@ -967,11 +967,11 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
         }
         return map.mapIdValue(value);
     }
-    private String mapSqlid2Xtfid(FixIomObjectRefs fixref, long sqlid,IomObject refobj,Viewable targetClass) {
-		if(sqlid2xtfid.containsSqlid(sqlid)){
-			refobj.setobjectrefoid(sqlid2xtfid.getXtfid(sqlid));
+    private String mapSqlid2Xtfid(FixIomObjectRefs fixref, long sqlid,IomObject refobj,Viewable targetClass,String targetSqlTable) {
+		if(sqlid2xtfid.containsSqlid(targetSqlTable,sqlid)){
+			refobj.setobjectrefoid(sqlid2xtfid.getXtfid(targetSqlTable,sqlid));
 		}else{
-			fixref.addFix(refobj,sqlid,targetClass);
+			fixref.addFix(refobj,sqlid,targetClass,targetSqlTable);
 		}
 		return null;
 	}

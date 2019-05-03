@@ -242,13 +242,13 @@ public class MultiCrs23Test {
 				 IomObject obj0 = objs.get("1");
 				 Assert.assertNotNull(obj0);
                  Assert.assertEquals("MultiCrs23_LV95.TestA.ClassA1", obj0.getobjecttag());
-                 Assert.assertEquals("COORD {C1 2460001.0, C2 1045001.0}", obj0.getattrobj("attr2", 0).toString());
+                 Assert.assertEquals("COORD {C1 2460001.000, C2 1045001.000}", obj0.getattrobj("attr2", 0).toString());
 			 }
 			 {
 				 IomObject obj0 = objs.get("2");
 				 Assert.assertNotNull(obj0);
                  Assert.assertEquals("MultiCrs23_LV03.TestA.ClassA1", obj0.getobjecttag());
-				 Assert.assertEquals("COORD {C1 460002.0, C2 45002.0}", obj0.getattrobj("attr2", 0).toString());
+				 Assert.assertEquals("COORD {C1 460002.000, C2 45002.000}", obj0.getattrobj("attr2", 0).toString());
 			 }
 		}catch(Exception e) {
 			throw new IoxException(e);

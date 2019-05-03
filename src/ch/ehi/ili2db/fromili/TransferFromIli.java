@@ -432,7 +432,7 @@ public class TransferFromIli {
 		tab.addIndex(pk);
 		schema.addTable(tab);
 	}
-	public static ch.interlis.ilirepository.IliFiles readIliFiles(java.sql.Connection conn,String schema,CustomMapping mapping)
+	public static ch.interlis.ilirepository.IliFiles readIliFiles(java.sql.Connection conn,String schema,CustomMapping mapping,boolean isVer3_export)
 	throws Ili2dbException
 	{
 		String sqlName=DbNames.MODELS_TAB;
@@ -449,9 +449,12 @@ public class TransferFromIli {
 			}
 			// select entries
 			String insStmt="SELECT "+DbNames.MODELS_TAB_FILENAME_COL+","+DbNames.MODELS_TAB_ILIVERSION_COL+","+DbNames.MODELS_TAB_MODELNAME_COL+" FROM "+sqlName;
-			if(isMsSqlServer(conn) || isOracle(conn)) {
-				// 'file' is keyword in sql server and oracle
-				insStmt="SELECT \""+DbNames.MODELS_TAB_FILENAME_COL+"\","+DbNames.MODELS_TAB_ILIVERSION_COL+","+DbNames.MODELS_TAB_MODELNAME_COL+" FROM "+sqlName;
+			if(isVer3_export) {
+	            insStmt="SELECT "+DbNames.MODELS_TAB_FILENAME_COL_VER3+","+DbNames.MODELS_TAB_ILIVERSION_COL+","+DbNames.MODELS_TAB_MODELNAME_COL+" FROM "+sqlName;
+	            if(isMsSqlServer(conn) || isOracle(conn)) {
+	                // 'file' is keyword in sql server and oracle
+	                insStmt="SELECT \""+DbNames.MODELS_TAB_FILENAME_COL_VER3+"\","+DbNames.MODELS_TAB_ILIVERSION_COL+","+DbNames.MODELS_TAB_MODELNAME_COL+" FROM "+sqlName;
+	            }
 			}
 			EhiLogger.traceBackendCmd(insStmt);
 			java.sql.PreparedStatement insPrepStmt = conn.prepareStatement(insStmt);
@@ -490,7 +493,7 @@ public class TransferFromIli {
 	private static boolean isOracle(java.sql.Connection conn) throws SQLException {
 		return conn.getMetaData().getURL().startsWith("jdbc:oracle:thin:@");
 	}	
-	public static String readIliFile(java.sql.Connection conn,String schema,String filename)
+	public static String readIliFile(java.sql.Connection conn,String schema,String filename,boolean isVer3_export)
 	throws Ili2dbException
 	{
 		String sqlName=DbNames.MODELS_TAB;
@@ -500,8 +503,11 @@ public class TransferFromIli {
 		try{
 			// select entries
 			String selStmt="SELECT "+DbNames.MODELS_TAB_CONTENT_COL+" FROM "+sqlName+" WHERE "+DbNames.MODELS_TAB_FILENAME_COL+"=?";
-			if(isMsSqlServer(conn) || isOracle(conn)) {
-				selStmt="SELECT "+DbNames.MODELS_TAB_CONTENT_COL+" FROM "+sqlName+" WHERE \""+DbNames.MODELS_TAB_FILENAME_COL+"\"=?";
+			if(isVer3_export) {
+	            selStmt="SELECT "+DbNames.MODELS_TAB_CONTENT_COL+" FROM "+sqlName+" WHERE "+DbNames.MODELS_TAB_FILENAME_COL_VER3+"=?";
+	            if(isMsSqlServer(conn) || isOracle(conn)) {
+	                selStmt="SELECT "+DbNames.MODELS_TAB_CONTENT_COL+" FROM "+sqlName+" WHERE \""+DbNames.MODELS_TAB_FILENAME_COL_VER3+"\"=?";
+	            }
 			}
 			EhiLogger.traceBackendCmd(selStmt);
 			java.sql.PreparedStatement selPrepStmt = conn.prepareStatement(selStmt);
@@ -528,11 +534,11 @@ public class TransferFromIli {
 		}
 		return null;
 	}
-	public static void addModels(GeneratorJdbc gen, java.sql.Connection conn,TransferDescription td,String schema,CustomMapping mapping)
+	public static void addModels(GeneratorJdbc gen, java.sql.Connection conn,TransferDescription td,String schema,CustomMapping mapping,boolean isVer3_export)
 	throws Ili2dbException
 	{
 		// read existing models from db
-		IliFiles iliModelsInDb = TransferFromIli.readIliFiles(conn,schema,mapping);
+		IliFiles iliModelsInDb = TransferFromIli.readIliFiles(conn,schema,mapping,isVer3_export);
 
 		String sqlName=DbNames.MODELS_TAB;
 		if(schema!=null){

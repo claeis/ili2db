@@ -45,7 +45,7 @@ public class ColumnNameMapping {
 		}
 		return attrNameIli2sql.get(new AttrMappingKey(iliAttrqname,ownerSqlTablename,targetSqlTablename));
 	}
-	private static HashSet<AttrMappingKey> readAttrMappingTableEntries(java.sql.Connection conn,String schema)
+	private static HashSet<AttrMappingKey> readAttrMappingTableEntries(java.sql.Connection conn,String schema,boolean isVer3_export)
 	throws Ili2dbException
 	{
 		HashSet<AttrMappingKey> ret=new HashSet<AttrMappingKey>();
@@ -55,7 +55,10 @@ public class ColumnNameMapping {
 		}
 		try{
 			String exstStmt=null;
-			exstStmt="SELECT "+DbNames.ATTRNAME_TAB_ILINAME_COL+","+DbNames.ATTRNAME_TAB_COLOWNER_COL+","+DbNames.ATTRNAME_TAB_TARGET_COL+" FROM "+sqlName;
+            exstStmt="SELECT "+DbNames.ATTRNAME_TAB_ILINAME_COL+","+DbNames.ATTRNAME_TAB_COLOWNER_COL+","+DbNames.ATTRNAME_TAB_TARGET_COL+" FROM "+sqlName;
+			if(isVer3_export) {
+	            exstStmt="SELECT "+DbNames.ATTRNAME_TAB_ILINAME_COL+","+DbNames.ATTRNAME_TAB_COLOWNER_COL_VER3+","+DbNames.ATTRNAME_TAB_TARGET_COL+" FROM "+sqlName;
+			}
 			EhiLogger.traceBackendCmd(exstStmt);
 			java.sql.PreparedStatement exstPrepStmt = conn.prepareStatement(exstStmt);
             java.sql.ResultSet rs=null;
@@ -88,7 +91,7 @@ public class ColumnNameMapping {
 			mapTabName=schema+"."+mapTabName;
 		}
 		if(conn!=null) {
-	        HashSet<AttrMappingKey> exstEntries=readAttrMappingTableEntries(conn,schema);
+	        HashSet<AttrMappingKey> exstEntries=readAttrMappingTableEntries(conn,schema,false);
 	        // create table
 	        try{
 
@@ -131,7 +134,7 @@ public class ColumnNameMapping {
 		}
 
 	}
-	public void readAttrMappingTable(java.sql.Connection conn,String schema)
+	public void readAttrMappingTable(java.sql.Connection conn,String schema,boolean isVer3_export)
 	throws Ili2dbException
 	{
 		String mapTableName=DbNames.ATTRNAME_TAB;
@@ -139,7 +142,11 @@ public class ColumnNameMapping {
 			mapTableName=schema+"."+mapTableName;
 		}
 		// create table
-		String stmt="SELECT "+DbNames.ATTRNAME_TAB_ILINAME_COL+", "+DbNames.ATTRNAME_TAB_SQLNAME_COL+", "+DbNames.ATTRNAME_TAB_COLOWNER_COL+", "+DbNames.ATTRNAME_TAB_TARGET_COL+" FROM "+mapTableName;
+		String ownerCol=DbNames.ATTRNAME_TAB_COLOWNER_COL;
+        if(isVer3_export) {
+            ownerCol=DbNames.ATTRNAME_TAB_COLOWNER_COL_VER3;
+        }
+		String stmt="SELECT "+DbNames.ATTRNAME_TAB_ILINAME_COL+", "+DbNames.ATTRNAME_TAB_SQLNAME_COL+", "+ownerCol+", "+DbNames.ATTRNAME_TAB_TARGET_COL+" FROM "+mapTableName;
 		java.sql.Statement dbstmt = null;
         java.sql.ResultSet rs=null;
 		try{
@@ -149,7 +156,7 @@ public class ColumnNameMapping {
 			while(rs.next()){
 				String iliname=rs.getString(DbNames.ATTRNAME_TAB_ILINAME_COL);
 				String sqlname=rs.getString(DbNames.ATTRNAME_TAB_SQLNAME_COL);
-				String owner=rs.getString(DbNames.ATTRNAME_TAB_COLOWNER_COL);
+				String owner=rs.getString(ownerCol);
 				String target=rs.getString(DbNames.ATTRNAME_TAB_TARGET_COL);
 				//EhiLogger.debug("map: "+iliname+"->"+sqlname);
 				addAttrNameMapping(iliname,sqlname,owner,target);

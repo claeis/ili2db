@@ -1,3 +1,6 @@
+DROP SCHEMA IF EXISTS InheritanceNoSmart CASCADE;
+CREATE SCHEMA InheritanceNoSmart;
+
 CREATE SEQUENCE InheritanceNoSmart.t_ili2db_seq;;
 -- StructAttr1.TopicA.StructA
 CREATE TABLE InheritanceNoSmart.topica_structa (
@@ -156,6 +159,23 @@ CREATE TABLE InheritanceNoSmart.T_ILI2DB_ATTRNAME (
   ,PRIMARY KEY (ColOwner,SqlName)
 )
 ;
+
+CREATE TABLE InheritanceNoSmart.T_ILI2DB_COLUMN_PROP (
+    tablename character varying(255) NOT NULL,
+    subtype character varying(255),
+    columnname character varying(255) NOT NULL,
+    tag character varying(1024) NOT NULL,
+    setting character varying(1024) NOT NULL
+)
+;
+
+CREATE TABLE InheritanceNoSmart.T_ILI2DB_TABLE_PROP (
+    tablename character varying(255) NOT NULL,
+    tag character varying(1024) NOT NULL,
+    setting character varying(1024) NOT NULL
+);
+
+
 ALTER TABLE InheritanceNoSmart.topica_structa ADD CONSTRAINT topica_structa_T_basket_fkey FOREIGN KEY ( T_basket ) REFERENCES InheritanceNoSmart.T_ILI2DB_BASKET DEFERRABLE INITIALLY DEFERRED;
 ALTER TABLE InheritanceNoSmart.topica_structa ADD CONSTRAINT topica_structa_topica_classa_attr1_fkey FOREIGN KEY ( topica_classa_attr1 ) REFERENCES InheritanceNoSmart.topica_classa DEFERRABLE INITIALLY DEFERRED;
 ALTER TABLE InheritanceNoSmart.topica_classa ADD CONSTRAINT topica_classa_T_basket_fkey FOREIGN KEY ( T_basket ) REFERENCES InheritanceNoSmart.T_ILI2DB_BASKET DEFERRABLE INITIALLY DEFERRED;
@@ -173,7 +193,7 @@ ALTER TABLE InheritanceNoSmart.topicb_classc ADD CONSTRAINT topicb_classc_T_bask
 ALTER TABLE InheritanceNoSmart.T_ILI2DB_BASKET ADD CONSTRAINT T_ILI2DB_BASKET_dataset_fkey FOREIGN KEY ( dataset ) REFERENCES InheritanceNoSmart.T_ILI2DB_DATASET DEFERRABLE INITIALLY DEFERRED;
 ALTER TABLE InheritanceNoSmart.T_ILI2DB_DATASET ADD CONSTRAINT T_ILI2DB_DATASET_datasetName_key UNIQUE (datasetName)
 ;
-ALTER TABLE InheritanceNoSmart.T_ILI2DB_IMPORT_BASKET ADD CONSTRAINT T_ILI2DB_IMPORT_BASKET_import_fkey FOREIGN KEY ( import ) REFERENCES InheritanceNoSmart.T_ILI2DB_IMPORT DEFERRABLE INITIALLY DEFERRED;
+ALTER TABLE InheritanceNoSmart.T_ILI2DB_IMPORT_BASKET ADD CONSTRAINT T_ILI2DB_IMPORT_BASKET_import_fkey FOREIGN KEY ( importrun ) REFERENCES InheritanceNoSmart.T_ILI2DB_IMPORT DEFERRABLE INITIALLY DEFERRED;
 ALTER TABLE InheritanceNoSmart.T_ILI2DB_IMPORT_BASKET ADD CONSTRAINT T_ILI2DB_IMPORT_BASKET_basket_fkey FOREIGN KEY ( basket ) REFERENCES InheritanceNoSmart.T_ILI2DB_BASKET DEFERRABLE INITIALLY DEFERRED;
 ALTER TABLE InheritanceNoSmart.T_ILI2DB_MODEL ADD CONSTRAINT T_ILI2DB_MODEL_iliversion_modelName_key UNIQUE (iliversion,modelName)
 ;

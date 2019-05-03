@@ -592,7 +592,7 @@ public class Ili2db {
                             // update enumerations table
                             trsfFromIli.updateEnumTable(insertCollector,conn);
                             trsfFromIli.updateMetaInfoTables(insertCollector,conn);
-                            TransferFromIli.addModels(insertCollector,conn,td,config.getDbschema(),customMapping);
+                            TransferFromIli.addModels(insertCollector,conn,td,config.getDbschema(),customMapping,false);
                             if(!config.isConfigReadFromDb()){
                                 TransferFromIli.updateSettings(insertCollector,conn,config,config.getDbschema());
                             }
@@ -807,16 +807,19 @@ public class Ili2db {
 	    {
     		String ili2translation=config.getIli1Translation();
     		if(ili2translation!=null){
-    		    String modelNames[]=ili2translation.split("=");
-    		    String translatedModelName=modelNames[0];
-    		    String originLanguageModelName=modelNames[1];
-    		    if(translatedModelName!=null && originLanguageModelName!=null){
-    		    	ili2cMetaAttrs.setMetaAttrValue(translatedModelName, Ili2cMetaAttrs.ILI2C_TRANSLATION_OF, originLanguageModelName);
-    		    	if(modelv!=null){
-    			    	modelv.addFileEntry(new ch.interlis.ili2c.config.FileEntry(originLanguageModelName,ch.interlis.ili2c.config.FileEntryKind.ILIMODELFILE));
-    			    	modelv.addFileEntry(new ch.interlis.ili2c.config.FileEntry(translatedModelName,ch.interlis.ili2c.config.FileEntryKind.ILIMODELFILE));
-    		    	}
-    		    }
+                String modelNameMappings[]=ili2translation.split(";");
+                for(String modelNameMapping:modelNameMappings) {
+                    String modelNames[]=modelNameMapping.split("=");
+                    String translatedModelName=modelNames[0];
+                    String originLanguageModelName=modelNames[1];
+                    if(translatedModelName!=null && originLanguageModelName!=null){
+                        ili2cMetaAttrs.setMetaAttrValue(translatedModelName, Ili2cMetaAttrs.ILI2C_TRANSLATION_OF, originLanguageModelName);
+                        if(modelv!=null){
+                            modelv.addFileEntry(new ch.interlis.ili2c.config.FileEntry(originLanguageModelName,ch.interlis.ili2c.config.FileEntryKind.ILIMODELFILE));
+                            modelv.addFileEntry(new ch.interlis.ili2c.config.FileEntry(translatedModelName,ch.interlis.ili2c.config.FileEntryKind.ILIMODELFILE));
+                        }
+                    }
+                }
     		}
 		}
 	    {
@@ -1214,7 +1217,7 @@ public class Ili2db {
                     // update enum table
                     trsfFromIli.updateEnumTable(insertCollector,conn);
                     trsfFromIli.updateMetaInfoTables(insertCollector,conn);
-                    TransferFromIli.addModels(insertCollector,conn,td,config.getDbschema(),customMapping);
+                    TransferFromIli.addModels(insertCollector,conn,td,config.getDbschema(),customMapping,false);
                     if(!config.isConfigReadFromDb()){
                         TransferFromIli.updateSettings(insertCollector,conn,config,config.getDbschema());
                     }
@@ -1368,7 +1371,7 @@ public class Ili2db {
 			try {
 				url=conn.getMetaData().getURL();
 				url=mapping.shortenConnectUrl4IliCache(url);
-				iliFiles=TransferFromIli.readIliFiles(conn,config.getDbschema(),mapping);
+				iliFiles=TransferFromIli.readIliFiles(conn,config.getDbschema(),mapping,config.isVer3_export());
 			} catch (SQLException e) {
 				throw new Ili2dbException(e);
 			}
@@ -1385,7 +1388,7 @@ public class Ili2db {
 						iliFiles);
 				config.setTransientObject(
 						ch.interlis.ili2c.gui.UserSettings.CUSTOM_ILI_RESOLVER,
-						new IliFromDb(url,conn,dbSchema));
+						new IliFromDb(url,conn,dbSchema,config));
 			}		  	
 		}
 	}

@@ -72,7 +72,6 @@ import ch.interlis.iox_j.wkb.Wkb2iox;
 
 public class PostgisColumnConverter extends AbstractWKBColumnConverter {
 	private boolean strokeArcs=true;
-    private JsonGenerator jg=null;
     private TransferDescription td=null;
 	@Override
 	public void setup(Connection conn, Settings config) {
@@ -642,7 +641,7 @@ public class PostgisColumnConverter extends AbstractWKBColumnConverter {
                 throws SQLException, ConverterException {
             JsonFactory jsonF = new JsonFactory();
             java.io.StringWriter out=new java.io.StringWriter();
-            
+            JsonGenerator jg=null;
             try {
                 if(jg==null) {
                     jg = jsonF.createJsonGenerator(out);

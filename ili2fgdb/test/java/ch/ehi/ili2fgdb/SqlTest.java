@@ -70,7 +70,7 @@ public class SqlTest {
         Ili2db.run(config,null);
     }
     @Test
-    public void testQry() throws Exception {
+    public void testSubQryByString() throws Exception {
         importXtf();
         String stmt="SELECT T_Id,T_Ili_Tid,T_Type FROM (SELECT r1.T_Id, r1.T_Ili_Tid, 'classa1' T_Type FROM classa1 r1) r0 WHERE r0.T_Ili_Tid=?";
         //String stmt="SELECT T_Id, T_Ili_Tid, 'kt_codelisten_kt_code' T_Type FROM kt_codelisten_kt_code WHERE T_Ili_Tid=?";
@@ -100,19 +100,60 @@ public class SqlTest {
             fail();
         } finally {
             if (rs != null) {
-                try {
-                    rs.close();
-                    rs=null;
-                } catch (java.sql.SQLException ex) {
-                    fail();
-                }
+                rs.close();
+                rs=null;
             }
             if (dbstmt != null) {
-                try {
-                    dbstmt.close();
-                } catch (java.sql.SQLException ex) {
-                    fail();
-                }
+                dbstmt.close();
+                dbstmt=null;
+            }
+            if (conn != null) {
+                conn.close();
+                conn=null;
+            }
+        }
+    }
+    @Test
+    public void testSubQryByLong() throws Exception {
+        importXtf();
+        String stmt="SELECT T_Id,T_Ili_Tid,T_Type FROM (SELECT r1.T_Id, r1.T_Ili_Tid, 'classa1' T_Type FROM classa1 r1) r0 WHERE r0.T_Id=?";
+        //String stmt="SELECT T_Id, T_Ili_Tid, 'kt_codelisten_kt_code' T_Type FROM kt_codelisten_kt_code WHERE T_Ili_Tid=?";
+        Class driverClass = Class.forName(FgdbDriver.class.getName());
+        Connection conn = DriverManager.getConnection(
+                FgdbDriver.BASE_URL+FGDBFILENAME, null, null);
+        
+        java.sql.PreparedStatement dbstmt = null;
+        java.sql.ResultSet rs = null;
+        String tid=null;
+        String sqlType=null;
+        try {
+
+            dbstmt = conn.prepareStatement(stmt);
+            dbstmt.clearParameters();
+            dbstmt.setLong(1, 5);
+            rs = dbstmt.executeQuery();
+            if(rs.next()) {
+                tid = rs.getString(2);
+                sqlType=rs.getString(3);
+                assertEquals("o2",tid);
+            }else{
+                // unknown object
+                fail();
+            }
+        } catch (java.sql.SQLException ex) {
+            fail();
+        } finally {
+            if (rs != null) {
+                rs.close();
+                rs=null;
+            }
+            if (dbstmt != null) {
+                dbstmt.close();
+                dbstmt=null;
+            }
+            if (conn != null) {
+                conn.close();
+                conn=null;
             }
         }
     }
