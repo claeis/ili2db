@@ -14,7 +14,7 @@ ideas/open issues/questions
 LATEST
 ---------------------------
 
-ili2db 4.1.0 (2019-04-03)
+ili2db 4.1.0 (2019-05-03)
 ------------------------------
 - added --export3 to export from ili2db-3.x schemas
 - fixed --delete if no import meta tables
