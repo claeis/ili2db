@@ -13,8 +13,18 @@ ideas/open issues/questions
 
 LATEST
 ---------------------------
+
+ili2db 4.1.0 (2019-04-03)
+------------------------------
 - added --export3 to export from ili2db-3.x schemas
 - fixed --delete if no import meta tables
+- round numeric values on import/export (--disableRounding) #201
+- ili2mysql: failed to create table T_KEY_OBJECT #280
+- ili2gpkg: fixed multiple geometry attr in extended classes #257
+- remove constraint that t_id must be unqiue across all tables #145
+- support multiple translated ili1 models #224
+- fixed data import into json mapped structures #277
+- ili2fgdb: fixed "dangling references" on export #276
 
 ili2db 4.0.0 (2019-04-05) BETA
 ------------------------------
