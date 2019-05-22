@@ -12,6 +12,7 @@ public class Config extends Settings {
 	public static final String SENDER=PREFIX+".sender";
 	private static final String DEFAULT_SRS_AUTHORITY=PREFIX+".defaultSrsAuthority";
 	private static final String DEFAULT_SRS_CODE=PREFIX+".defaultSrsCode";
+    private static final String MODEL_SRS_CODE=PREFIX+".modelSrsCode";
 	private static final String UUID_DEFAULT_VALUE=PREFIX+".uuidDefaultValue";
 	public static final String CREATE_ENUMCOL_AS_ITFCODE=PREFIX+".createEnumColAsItfCode";
 	public static final String CREATE_ENUMCOL_AS_ITFCODE_YES="yes";
@@ -313,6 +314,12 @@ public class Config extends Settings {
 	public void setDefaultSrsCode(String value) {
 		setValue(DEFAULT_SRS_CODE,value);
 	}
+    public String getModelSrsCode() {
+        return getValue(MODEL_SRS_CODE);
+    }
+    public void setModelSrsCode(String value) {
+        setValue(MODEL_SRS_CODE,value);
+    }
 	public String getUuidDefaultValue() {
 		return getValue(UUID_DEFAULT_VALUE);
 	}

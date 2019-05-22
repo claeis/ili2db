@@ -186,6 +186,10 @@ public abstract class AbstractMain {
 				argi++;
 				config.setDefaultSrsCode(args[argi]);
 				argi++;
+            }else if(arg.equals("--modelSrsCode")){
+                argi++;
+                config.setModelSrsCode(args[argi]);
+                argi++;
             }else if(arg.equals("--multiSrs")){
                 argi++;
                 config.setUseEpsgInNames(true);
@@ -423,6 +427,7 @@ public abstract class AbstractMain {
 					System.err.println("--deleteData           on schema/data import, delete existing data from existing tables.");
 					System.err.println("--defaultSrsAuth  auth Default SRS authority "+config.getDefaultSrsAuthority());
 					System.err.println("--defaultSrsCode  code Default SRS code");
+                    System.err.println("--modelSrsCode  model=code SRS code per model");
                     System.err.println("--multiSrs             create a DB schema that supports multiple SRS codes");
                     System.err.println("--domains genericDomain=concreteDomain overrides the generic domain assignments on export");
                     System.err.println("--altSrsModel originalSrsModel=alternativeSrsModel assigns a model with an alternative SRS (but same structure as orinal model)");

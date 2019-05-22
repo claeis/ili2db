@@ -13,6 +13,7 @@ ideas/open issues/questions
 
 LATEST
 ---------------------------
+- new option --modelSrsCode model=epsgCode
 
 ili2db 4.1.0 (2019-05-03)
 ------------------------------
