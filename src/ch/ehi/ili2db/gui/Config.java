@@ -108,6 +108,7 @@ public class Config extends Settings {
 	private String modeldir;
 	private String models=null;
 	private String exportModels=null;
+    private String exportCrsModels=null;
 	private String datasetName=null;
 	private String baskets=null;
 	private String topics=null;
@@ -224,6 +225,12 @@ public class Config extends Settings {
 	public void setExportModels(String models) {
 		this.exportModels = models;
 	}
+    public String getCrsExportModels() {
+        return exportCrsModels;
+    }
+    public void setCrsExportModels(String models) {
+        this.exportCrsModels = models;
+    }
 	public String getDatasetName() {
 		return datasetName;
 	}

@@ -104,6 +104,10 @@ public abstract class AbstractMain {
 				argi++;
 				config.setExportModels(args[argi]);
 				argi++;
+            }else if(arg.equals("--exportCrsModels")){
+                argi++;
+                config.setCrsExportModels(args[argi]);
+                argi++;
 			}else if(arg.equals("--dataset")){
 				argi++;
 				config.setDatasetName(args[argi]);
@@ -483,6 +487,7 @@ public abstract class AbstractMain {
 					System.err.println("--createNumChecks      create CHECK db constraints for numeric data types.");
 					System.err.println("--ILIGML20             use eCH-0118-2.0 as transferformat");
 					System.err.println("--exportModels modelname  export data according to the given base ili-models");
+                    System.err.println("--exportCrsModels modelname  export data according to the given ili-model (with alternate CRS)");
 					System.err.println("--ver4-noSchemaImport  do no implicit schema import during data import");
                     System.err.println("--doSchemaImport       do implicit schema import during data import");
 					System.err.println("--ver4-translation     supports TRANSLATION OF in ili2db 4.x mode (incompatible with ili2db 3.x versions).");

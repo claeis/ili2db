@@ -357,6 +357,17 @@ public class TransferToXtf {
 			if(topic==null){
 				throw new IoxException("unknown Topic "+topicName+" in table "+sqlName);
 			}
+			if(config.getCrsExportModels()!=null) {
+			    // crs translate topic
+			    Topic crsTranslatedTopic1=(Topic)crsFilter.get(topic);
+                Topic crsTranslatedTopic2=(Topic)crsFilterToTarget.get(topic);
+			    // if translated topic is in export model, use translated one
+			    if(crsTranslatedTopic1!=null && crsTranslatedTopic1.getContainer().getName().equals(config.getCrsExportModels())) {
+			        topic=crsTranslatedTopic1;
+			    }else if(crsTranslatedTopic2!=null && crsTranslatedTopic2.getContainer().getName().equals(config.getCrsExportModels())) {
+                    topic=crsTranslatedTopic2;
+			    }
+			}
 			if(bid!=null){
 	            basketXtfId.append(bid);
 			}
