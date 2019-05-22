@@ -399,7 +399,7 @@ public class MultiCrs23Test {
             jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
             stmt=jdbcConnection.createStatement();
             stmt.execute("UPDATE "+DBSCHEMA+".classa1 " + 
-                    "SET attr2_2056 = ST_Transform(attr2_21781,2056) " + 
+                    "SET attr2_2056 = ST_GeomFromEWKT('SRID=2056;POINT(2460002.000 1045002.000)') " + 
                     "WHERE attr1='2'");
             
             File data=new File("test/data/Crs/MultiCrs23-out.xtf");
@@ -445,7 +445,7 @@ public class MultiCrs23Test {
                  IomObject obj0 = objs.get("2");
                  Assert.assertNotNull(obj0);
                  Assert.assertEquals("MultiCrs23_LV95.TestA.ClassA1", obj0.getobjecttag());
-                 Assert.assertEquals("COORD {C1 2460002.040, C2 1045001.945}", obj0.getattrobj("attr2", 0).toString());
+                 Assert.assertEquals("COORD {C1 2460002.000, C2 1045002.000}", obj0.getattrobj("attr2", 0).toString());
              }
         }catch(Exception e) {
             throw new IoxException(e);
@@ -465,7 +465,7 @@ public class MultiCrs23Test {
             jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
             stmt=jdbcConnection.createStatement();
             stmt.execute("UPDATE "+DBSCHEMA+".classa1 " + 
-                    "SET attr2_21781 = ST_Transform(attr2_2056,21781) " + 
+                    "SET attr2_21781 = ST_GeomFromEWKT('SRID=21781;POINT(460001.000 45001.000)') " + 
                     "WHERE attr1='1'");
             
             File data=new File("test/data/Crs/MultiCrs23-out.xtf");
@@ -505,7 +505,7 @@ public class MultiCrs23Test {
                  IomObject obj0 = objs.get("1");
                  Assert.assertNotNull(obj0);
                  Assert.assertEquals("MultiCrs23_LV03.TestA.ClassA1", obj0.getobjecttag());
-                 Assert.assertEquals("COORD {C1 460000.960, C2 45001.055}", obj0.getattrobj("attr2", 0).toString());
+                 Assert.assertEquals("COORD {C1 460001.000, C2 45001.000}", obj0.getattrobj("attr2", 0).toString());
              }
              {
                  IomObject obj0 = objs.get("2");
