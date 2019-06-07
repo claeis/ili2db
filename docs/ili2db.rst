@@ -34,6 +34,9 @@ Datenbankschema angelegt.
 
 Diverse Optionen beeinflussen die Abbildung.
 
+Den Geometrien kann mittels Parameter ein EPSG-Code zugewiesen werden.
+Die Geometrie-Attribute können optional indexiert werden.
+
 Beispiel::
 	
   java -jar ili2gpkg.jar --schemaimport --dbfile mogis.gpkg path/to/dm01av.ili
@@ -50,9 +53,6 @@ Area- und Surface-Geometrien werden bei Interlis 1 polygoniert.
 
 Kreisbögen werden als Kreisbögen importiert und somit nicht segmentiert
 (oder können optional auch segmentiert werden).
-
-Den Geometrien kann mittels Parameter ein EPSG-Code zugewiesen werden.
-Die Geometrie-Attribute können optional indexiert werden.
 
 Beispiel::
 	
