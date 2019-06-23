@@ -10,6 +10,7 @@ import java.util.HashMap;
 import org.junit.Assert;
 import org.junit.Test;
 
+import ch.ehi.basics.logging.EhiLogger;
 import ch.ehi.ili2db.base.DbUrlConverter;
 import ch.ehi.ili2db.base.Ili2db;
 import ch.ehi.ili2db.base.Ili2dbException;
@@ -114,6 +115,7 @@ public abstract class MultilingualTextTest {
 			config.setModels("MultilingualText1");
 			config.setFunction(Config.FC_EXPORT);
 			config.setExportTid(true);
+			EhiLogger.getInstance().setTraceFilter(false);
 			Ili2db.readSettingsFromDb(config);
 			Ili2db.run(config,null);
 			
@@ -136,17 +138,17 @@ public abstract class MultilingualTextTest {
 			 {
 				 IomObject obj0 = objs.get("a1.1");
 				 Assert.assertNotNull(obj0);
-				 Assert.assertEquals("MultilingualText1.TestA.ClassA1 oid a1.1 {atext LocalisationCH_V1.MultilingualText {LocalisedText [LocalisationCH_V1.LocalisedText {Text a1.1-null}, LocalisationCH_V1.LocalisedText {Language de, Text a1.1-de}, LocalisationCH_V1.LocalisedText {Language fr, Text a1.1-fr}, LocalisationCH_V1.LocalisedText {Language rm, Text a1.1-rm}, LocalisationCH_V1.LocalisedText {Language it, Text a1.1-it}, LocalisationCH_V1.LocalisedText {Language en, Text a1.1-en}]}}", obj0.toString());
+				 Assert.assertEquals("MultilingualText0.TestA.ClassA1 oid a1.1 {atext LocalisationCH_V1.MultilingualText {LocalisedText [LocalisationCH_V1.LocalisedText {Text a1.1-null}, LocalisationCH_V1.LocalisedText {Language de, Text a1.1-de}, LocalisationCH_V1.LocalisedText {Language fr, Text a1.1-fr}, LocalisationCH_V1.LocalisedText {Language rm, Text a1.1-rm}, LocalisationCH_V1.LocalisedText {Language it, Text a1.1-it}, LocalisationCH_V1.LocalisedText {Language en, Text a1.1-en}]}}", obj0.toString());
 			 }
              {
                  IomObject obj0 = objs.get("a1.2");
                  Assert.assertNotNull(obj0);
-                 Assert.assertEquals("MultilingualText1.TestA.ClassA1 oid a1.2 {}", obj0.toString());
+                 Assert.assertEquals("MultilingualText0.TestA.ClassA1 oid a1.2 {}", obj0.toString());
              }
              {
                  IomObject obj0 = objs.get("b1.1");
                  Assert.assertNotNull(obj0);
-                 Assert.assertEquals("MultilingualText1.TestA.ClassB1 oid b1.1 {atext LocalisationCH_V1.MultilingualText {LocalisedText LocalisationCH_V1.LocalisedText {Language de, Text b1.1-de}}}", obj0.toString());
+                 Assert.assertEquals("MultilingualText0.TestA.ClassB1 oid b1.1 {atext LocalisationCH_V1.MultilingualText {LocalisedText LocalisationCH_V1.LocalisedText {Language de, Text b1.1-de}}}", obj0.toString());
              }
 		}finally{
 			if(jdbcConnection!=null){

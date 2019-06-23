@@ -1,6 +1,6 @@
 INTERLIS 2.3;
 
-MODEL MultilingualText1
+MODEL MultilingualText0
   AT "mailto:ce@eisenhutinformatik.ch" VERSION "2019-06-23" =
   IMPORTS LocalisationCH_V1;
   
@@ -16,6 +16,17 @@ MODEL MultilingualText1
 	  atext : MANDATORY LocalisationCH_V1.MultilingualText;
     END ClassB1;
     
+  END TestA;
+  
+  
+END MultilingualText0.
+
+MODEL MultilingualText1
+  AT "mailto:ce@eisenhutinformatik.ch" VERSION "2019-06-23" =
+  IMPORTS MultilingualText0;
+  
+  TOPIC TestA EXTENDS MultilingualText0.TestA =
+      
   END TestA;
   
   

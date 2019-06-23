@@ -12,8 +12,8 @@
 	</HEADERSECTION>
 	<DATASECTION>
 		<MultilingualText1.TestA BID="2">
-			<MultilingualText1.TestA.ClassA1 TID="a1.2"></MultilingualText1.TestA.ClassA1>
-			<MultilingualText1.TestA.ClassA1 TID="a1.1">
+			<MultilingualText0.TestA.ClassA1 TID="a1.2"></MultilingualText0.TestA.ClassA1>
+			<MultilingualText0.TestA.ClassA1 TID="a1.1">
 				<atext>
 					<LocalisationCH_V1.MultilingualText>
 						<LocalisedText>
@@ -43,8 +43,8 @@
 						</LocalisedText>
 					</LocalisationCH_V1.MultilingualText>
 				</atext>
-			</MultilingualText1.TestA.ClassA1>
-			<MultilingualText1.TestA.ClassB1 TID="b1.1">
+			</MultilingualText0.TestA.ClassA1>
+			<MultilingualText0.TestA.ClassB1 TID="b1.1">
 				<atext>
 					<LocalisationCH_V1.MultilingualText>
 						<LocalisedText>
@@ -55,7 +55,7 @@
 						</LocalisedText>
 					</LocalisationCH_V1.MultilingualText>
 				</atext>
-			</MultilingualText1.TestA.ClassB1>
+			</MultilingualText0.TestA.ClassB1>
 		</MultilingualText1.TestA>
 	</DATASECTION>
 </TRANSFER>
