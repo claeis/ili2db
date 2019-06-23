@@ -1,0 +1,22 @@
+INTERLIS 2.3;
+
+MODEL MultilingualText1
+  AT "mailto:ce@eisenhutinformatik.ch" VERSION "2019-06-23" =
+  IMPORTS LocalisationCH_V1;
+  
+  TOPIC TestA =
+  
+    CLASS ClassA1 =
+      attr : TEXT*20;
+	  atext : LocalisationCH_V1.MultilingualText;
+    END ClassA1;
+    
+    CLASS ClassB1 =
+      attr : TEXT*20;
+	  atext : MANDATORY LocalisationCH_V1.MultilingualText;
+    END ClassB1;
+    
+  END TestA;
+  
+  
+END MultilingualText1.
