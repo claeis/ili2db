@@ -141,6 +141,7 @@ public class InheritanceSmart1Test {
 	}
 	
 	@Test
+	@Ignore("#292")
 	public void exportXtf() throws Exception
 	{
 		Connection jdbcConnection=null;
