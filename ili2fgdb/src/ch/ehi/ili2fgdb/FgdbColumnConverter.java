@@ -38,6 +38,7 @@ import com.vividsolutions.jts.io.ParseException;
 import ch.interlis.iom.IomObject;
 import ch.interlis.iox.IoxException;
 import ch.interlis.iox_j.wkb.Iox2wkbException;
+import net.iharder.Base64;
 
 public class FgdbColumnConverter extends AbstractWKBColumnConverter {
 	@Override
@@ -296,7 +297,7 @@ public class FgdbColumnConverter extends AbstractWKBColumnConverter {
 		@Override
 		public String toIomBlob(Object obj) throws java.sql.SQLException,
 				ConverterException {
-		    String s = new sun.misc.BASE64Encoder().encode((byte[])obj);
+		    String s = Base64.encodeBytes((byte[])obj);
 		    return s;
 		}
 

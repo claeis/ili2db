@@ -44,6 +44,7 @@ import ch.interlis.iom.IomObject;
 import ch.interlis.iom_j.Iom_jObject;
 import ch.interlis.iom_j.itf.EnumCodeMapper;
 import ch.interlis.iox_j.wkb.Iox2wkbException;
+import net.iharder.Base64;
 
 public class GpkgColumnConverter extends AbstractWKBColumnConverter {
     private TransferDescription td=null;
@@ -147,7 +148,7 @@ public class GpkgColumnConverter extends AbstractWKBColumnConverter {
 
 	    byte[] bytearray;
 		try {
-			bytearray = new sun.misc.BASE64Decoder().decodeBuffer(blob);
+			bytearray = Base64.decode(blob);
 		} catch (IOException e) {
 			throw new ConverterException(e);
 		}
@@ -334,7 +335,7 @@ public class GpkgColumnConverter extends AbstractWKBColumnConverter {
 		@Override
 		public String toIomBlob(Object obj) throws java.sql.SQLException,
 				ConverterException {
-		    String s = new sun.misc.BASE64Encoder().encode((byte[])obj);
+		    String s = Base64.encodeBytes((byte[])obj);
 		    return s;
 		}
 
