@@ -2311,7 +2311,7 @@ public class Ili2db {
 	static private void writeScript(String filename,Iterator linei)
 	throws java.io.IOException
 	{
-		java.io.PrintWriter out=new java.io.PrintWriter(new java.io.BufferedOutputStream(new java.io.FileOutputStream(filename)));
+		java.io.PrintStream out=new java.io.PrintStream(new java.io.BufferedOutputStream(new java.io.FileOutputStream(filename)),false,"UTF-8");
 		while(linei.hasNext()){
 		  GeneratorJdbc.AbstractStmt stmt=(GeneratorJdbc.AbstractStmt)linei.next();
 		  String line=stmt.getLine();
