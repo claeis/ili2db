@@ -208,7 +208,7 @@ public class Ili2db {
 	throws Ili2dbException
 	{
 		if(config.getFunction()==Config.FC_IMPORT){
-			runImport(config,appHome);
+			runUpdate(config,appHome,Config.FC_IMPORT);
         }else if(config.getFunction()==Config.FC_VALIDATE){
             runExport(config,appHome,Config.FC_VALIDATE);
 		}else if(config.getFunction()==Config.FC_UPDATE){
@@ -742,6 +742,14 @@ public class Ili2db {
                 // run DB specific post processing
                 customMapping.postPostScript(conn, config);
 				
+                String functionTxt="import";
+                if(function==Config.FC_DELETE) {
+                    functionTxt="delete";
+                }else if(function==Config.FC_UPDATE) {
+                    functionTxt="update";
+                }else if(function==Config.FC_REPLACE) {
+                    functionTxt="replace";
+                }
 				if(errs.hasSeenErrors()){
 					if(!connectionFromExtern){
 						try {
@@ -750,18 +758,18 @@ public class Ili2db {
 							EhiLogger.logError("rollback failed",e);
 						}
 					}
-					throw new Ili2dbException("...import failed");
+					throw new Ili2dbException("..."+functionTxt+" failed");
 				}else{
 					if(!connectionFromExtern){
 						try {
 							conn.commit();
 						} catch (SQLException e) {
 							EhiLogger.logError("commit failed",e);
-							throw new Ili2dbException("...import failed");
+							throw new Ili2dbException("..."+functionTxt+" failed");
 						}
 					}
 					logStatistics(td.getIli1Format()!=null,stat);
-					EhiLogger.logState("...import done");
+					EhiLogger.logState("..."+functionTxt+" done");
 				}
 			}finally{
 				if(!connectionFromExtern){
