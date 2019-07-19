@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?><TRANSFER xmlns="http://www.interlis.ch/INTERLIS2.3">
+<HEADERSECTION SENDER="ili2pg-developer-workspace" VERSION="2.3"><MODELS><MODEL NAME="Model" VERSION="2019-07-15" URI="mailto:PC4@localhost"></MODEL></MODELS></HEADERSECTION>
+<DATASECTION>
+<Model.Topic BID="Model.Topic">
+<Model.Topic.FirstLevelClass TID="1"><my_geometry><COORD><C1>994919.860</C1><C2>1001361.737</C2></COORD></my_geometry><my_another_geometry><COORD><C1>995331.491</C1><C2>1001263.590</C2></COORD></my_another_geometry></Model.Topic.FirstLevelClass>
+<Model.Topic.SecondLevelClass TID="2"><my_geometry><COORD><C1>994741.144</C1><C2>1000904.694</C2></COORD></my_geometry><my_another_geometry><COORD><C1>995247.993</C1><C2>1000947.176</C2></COORD></my_another_geometry></Model.Topic.SecondLevelClass>
+</Model.Topic>
+</DATASECTION>
+</TRANSFER>

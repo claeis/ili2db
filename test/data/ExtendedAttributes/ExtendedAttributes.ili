@@ -1,0 +1,25 @@
+INTERLIS 2.3;
+
+MODEL Model (en_US)
+AT "mailto:omartellezf@gmail.com"
+VERSION "2019-07-15"  =
+
+  DOMAIN
+
+    Point = COORD 165000.000 .. 1806900.000 [INTERLIS.m], 23000.000 .. 1984900.000 [INTERLIS.m] ,ROTATION 2 -> 1;
+
+  TOPIC Topic =
+
+    CLASS FirstLevelClass =
+      my_geometry : Model.Point;
+      my_another_geometry : Model.Point;
+    END FirstLevelClass;
+
+    CLASS SecondLevelClass
+    EXTENDS FirstLevelClass =
+      my_geometry (EXTENDED) : MANDATORY Model.Point;
+    END SecondLevelClass;
+
+  END Topic;
+
+END Model.

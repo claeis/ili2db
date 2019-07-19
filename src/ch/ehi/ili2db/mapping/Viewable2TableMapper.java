@@ -330,6 +330,23 @@ public class Viewable2TableMapper {
 				attr=getBaseAttr(iliclass,attr); // get the most general attribute definition, but only up to the class of the current table
 				viewableTransferElement.obj=attr;
 				for(Integer epsgCode:getEpsgCodes(attr)) {
+                    // Make sure than an attribute has been mapped one single time
+                    boolean breakloop = false; 
+                    if(Config.INHERITANCE_TRAFO_SMART2.equals(config.getInheritanceTrafo())){
+                        if(attr.getExtensions().size()>1) {
+                            Set<AttributeDef> extensions = attr.getExtensions();
+                            extensions.remove(attr);
+                            
+                            for(AttributeDef attrDef : extensions) {
+                                if(attrDef.getBeanContext().equals(iliclass)) {
+                                    breakloop = true;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    if(breakloop)
+                        continue;
 	                String sqlname=trafoConfig.getAttrConfig(iliclass,attr, epsgCode,TrafoConfigNames.SECONDARY_TABLE);
 	                if(sqlname==null) {
 	                    // pre ili2db 3.13.x
