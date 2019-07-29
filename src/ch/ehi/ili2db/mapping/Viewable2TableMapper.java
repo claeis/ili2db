@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.HashSet;
 
 import ch.ehi.basics.logging.EhiLogger;
 import ch.ehi.ili2db.base.Ili2cUtility;
@@ -334,11 +335,11 @@ public class Viewable2TableMapper {
                     boolean breakloop = false; 
                     if(Config.INHERITANCE_TRAFO_SMART2.equals(config.getInheritanceTrafo())){
                         if(attr.getExtensions().size()>1) {
-                            Set<AttributeDef> extensions = attr.getExtensions();
+                            Set<AttributeDef> extensions = new HashSet<AttributeDef>(attr.getExtensions());
                             extensions.remove(attr);
                             
                             for(AttributeDef attrDef : extensions) {
-                                if(attrDef.getBeanContext().equals(iliclass)) {
+                                if(attrDef.getBeanContext().equals(iliclass)) {//Checks if attr belongs to a parent class of the class that is being mapped
                                     breakloop = true;
                                     break;
                                 }
