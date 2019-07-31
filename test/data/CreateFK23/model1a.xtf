@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TRANSFER xmlns="http://www.interlis.ch/INTERLIS2.3">
+	<HEADERSECTION SENDER="ili2gpkg-developer-workspace" VERSION="2.3">
+		<MODELS>
+			<MODEL NAME="model1" VERSION="2015-12-03" URI="mailto:ce@eisenhutinformatik.ch"></MODEL>
+		</MODELS>
+	</HEADERSECTION>
+	<DATASECTION>
+		<model1.topic1 BID="model1.Topic1">
+			<model1.topic1.ClassB1 TID="101">
+				<a2_a REF="100"></a2_a>
+			</model1.topic1.ClassB1>
+			<model1.topic1.ClassA1 TID="100">
+				<a1_b REF="101"></a1_b>
+			</model1.topic1.ClassA1>
+		</model1.topic1>
+	</DATASECTION>
+</TRANSFER>
