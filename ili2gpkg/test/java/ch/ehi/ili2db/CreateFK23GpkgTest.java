@@ -10,7 +10,6 @@ import ch.ehi.ili2db.gui.Config;
 import ch.ehi.ili2gpkg.GpkgTestSetup;
 import ch.ehi.sqlgen.DbUtility;
 
-@Ignore("await fixed ehisqlgen#3")
 public class CreateFK23GpkgTest {
 	
 	private static final String TEST_OUT="test/data/CreateFK23/";

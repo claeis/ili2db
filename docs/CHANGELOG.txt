@@ -16,6 +16,7 @@ LATEST
 - new option --modelSrsCode model=epsgCode
 - new option --exportCrsModels modelname
 - remove reference to javax.xml.bind.DatatypeConverter/sun.misc (because of removal in jdk11) 
+- ili2gpkg: allow relationship loops
 
 
 ili2db 4.1.0 (2019-05-03)
