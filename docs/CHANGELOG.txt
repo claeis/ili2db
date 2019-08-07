@@ -15,6 +15,10 @@ ideas/open issues/questions
 LATEST
 ---------------------------
 
+ili2db 3.12.3 (2019-08-07)
+-----------------------------
+- ili2gpkg: Add two SRSs to init.sql (32635 and 4686) (#300)
+
 ili2pg 3.12.2 (2018-09-07)
 -----------------------------
 - Add geometry meta info to T_ILI2DB_COLUMN_PROP

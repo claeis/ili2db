@@ -1,16 +1,20 @@
 language: java
   
+jdk:
+  - openjdk8
 branches:
   only:
     - master
     - stable
+    - ili2db-3.12.x
+    - stable-3.12
 
 addons:
   postgresql: "9.6"
   apt:
     packages:
     - libmaven-ant-tasks-java
-    - postgresql-9.6-postgis-2.3
+    - postgresql-9.6-postgis-2.4
     - python3
     - python3-pip
 #    - python3-docutils    
@@ -42,7 +46,7 @@ script:
   - gradle ili2oraJar ili2oraTest
   - gradle -Drst2html=`which rst2html.py` usrdoc testreport ili2pgBindist ili2fgdbBindist ili2mssqlBindist ili2oraBindist
 after_failure:
-  - cat  build/junitreport/junit-noframes.html
+  - cat  build/junitreport/junit-noframes.html && sleep 10
 deploy:
   - provider: script
     skip_cleanup: true
@@ -51,9 +55,19 @@ deploy:
       branch: master
   - provider: script
     skip_cleanup: true
-    script: gradle -Drst2html=`which rst2html.py` -Drepos_pwd=${repos_pwd} -Drepos_usr=jql_jars-INTE -Drelease=final upload
+    script: gradle -Drst2html=`which rst2html.py` -Drepos_pwd=${repos_pwd} -Drepos_usr=jql_jars-INTE upload
+    on:
+      branch: ili2db-3.12.x
+  - provider: script
+    skip_cleanup: true
+    script: gradle -Drst2html=`which rst2html.py` -Drepos_pwd=${repos_pwd} -Drepos_usr=jql_jars-INTE '-Drelease=' upload
     on:
       branch: stable
+  - provider: script
+    skip_cleanup: true
+    script: gradle -Drst2html=`which rst2html.py` -Drepos_pwd=${repos_pwd} -Drepos_usr=jql_jars-INTE '-Drelease=' upload
+    on:
+      branch: stable-3.12
 notifications:
   email:
     on_success: change # default: change
