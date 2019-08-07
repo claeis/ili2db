@@ -63,6 +63,7 @@ public class InheritanceSmart2Test {
 	//config.setTidHandling(config.TID_HANDLING_PROPERTY);
 	
 	@Test
+    public void importIli() throws Exception
 	{
 		Connection jdbcConnection=null;
 		try{
@@ -106,6 +107,7 @@ public class InheritanceSmart2Test {
 	}
 	
 	@Test
+	public void updateXtfNew() throws Exception
 	{
 		Connection jdbcConnection=null;
 		try{
@@ -116,6 +118,7 @@ public class InheritanceSmart2Test {
 			File data=new File("test/data/InheritanceSmart2/Inheritance2a.xtf");
 			Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 			config.setFunction(Config.FC_UPDATE);
+            config.setDatasetName(DATASETNAME);
 			Ili2db.readSettingsFromDb(config);
 			Ili2db.run(config,null);
 	        
@@ -143,6 +146,7 @@ public class InheritanceSmart2Test {
 	}
 	
 	@Test
+	public void updateXtfExisting() throws Exception
 	{
 		Connection jdbcConnection=null;
 		try{
@@ -189,6 +193,7 @@ public class InheritanceSmart2Test {
 	}
 	
 	@Test
+	public void importXtfSmart2ExtRef() throws Exception
 	{
 		Connection jdbcConnection=null;
 		try{
@@ -224,6 +229,7 @@ public class InheritanceSmart2Test {
 	}
 	
 	@Test
+	public void exportXtf() throws Exception
 	{
 		Connection jdbcConnection=null;
 		try{
