@@ -12,6 +12,7 @@ import java.util.HashMap;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import ch.ehi.basics.logging.EhiLogger;
@@ -342,6 +343,7 @@ public class Oid23Test {
         }
     }
     @Test
+    @Ignore("enable when export by modelname is implemented  ili2db#287")
     public void exportXtfExtendedTopic() throws Exception
     {
         {
