@@ -617,6 +617,16 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 						values.append(",?");
 					}
 					sep=",";
+	                if(createEnumTxtCol){
+	                    ret.append(sep);
+	                    ret.append(attrSqlName+DbNames.ENUM_TXT_COL_SUFFIX);
+	                    if(isUpdate){
+	                        ret.append("=?");
+	                    }else{
+	                        values.append(",?");
+	                    }
+	                    sep=",";
+	                }
 			}else if (type instanceof CompositionType){
 				if(TrafoConfigNames.CATALOGUE_REF_TRAFO_COALESCE.equals(trafoConfig.getAttrConfig(attr, TrafoConfigNames.CATALOGUE_REF_TRAFO))){
 	                ArrayList<ViewableWrapper> targetTables = getTargetTables(getCatalogueRefTarget(type));
@@ -798,6 +808,14 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 						ps.setNull(valuei,Types.BIT);
 					}
 					valuei++;
+                    if(createEnumTxtCol){
+                        if(value!=null){
+                            ps.setString(valuei, beautifyEnumDispName(value));
+                        }else{
+                            ps.setNull(valuei,Types.VARCHAR);
+                        }
+                        valuei++;
+                    }
 			}else if(tableAttr.isDomainIliUuid()){
 				String value= classAttr==null ? null : iomObj.getattrvalue(attrName);
 				if(value==null){
