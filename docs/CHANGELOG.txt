@@ -18,7 +18,7 @@ LATEST
 - remove reference to javax.xml.bind.DatatypeConverter/sun.misc (because of removal in jdk11) 
 - ili2gpkg: allow relationship loops
 - ili2gpkg: Add two SRSs to init.sql (32635 and 4686) (#300)
-
+- fixed incomplete schema import if reference to class in other model 
 
 ili2db 4.1.0 (2019-05-03)
 ------------------------------

@@ -1,8 +1,8 @@
 INTERLIS 2.3;
 
-MODEL Assoc2
+MODEL Assoc2_0
   AT "mailto:ce@eisenhutinformatik.ch" VERSION "2015-11-28" =
-    
+  
   TOPIC TestA =
   
     CLASS ClassA1 =
@@ -20,29 +20,35 @@ MODEL Assoc2
     
   END TestA;
   
+END Assoc2_0.
+  
+MODEL Assoc2
+  AT "mailto:ce@eisenhutinformatik.ch" VERSION "2015-11-28" =
+  IMPORTS Assoc2_0;  
+  
   TOPIC TestB =
-  	DEPENDS ON TestA;
+  	DEPENDS ON Assoc2_0.TestA;
   	
     ASSOCIATION a2b1=
-      a1 (EXTERNAL) -- {0..*} Assoc2.TestA.ClassA1;
-      b1 (EXTERNAL) -- {0..*} Assoc2.TestA.ClassB1;
+      a1 (EXTERNAL) -- {0..*} Assoc2_0.TestA.ClassA1;
+      b1 (EXTERNAL) -- {0..*} Assoc2_0.TestA.ClassB1;
     END a2b1;
 
     STRUCTURE StructA2 =
-    	refa2 : REFERENCE TO (EXTERNAL) Assoc2.TestA.ClassA2;
+    	refa2 : REFERENCE TO (EXTERNAL) Assoc2_0.TestA.ClassA2;
     END StructA2;
     CLASS ClassB2 =
     	strA2 : LIST OF StructA2;
     END ClassB2;
     ASSOCIATION a2b2=
-      a2 (EXTERNAL) -- {0..1} Assoc2.TestA.ClassA2;
+      a2 (EXTERNAL) -- {0..1} Assoc2_0.TestA.ClassA2;
       b2 -- {0..1} ClassB2;
     END a2b2;
 
     CLASS ClassA3 =
     END ClassA3;
     ASSOCIATION a2b3=
-      b3 (EXTERNAL) -- {0..1} Assoc2.TestA.ClassB3;
+      b3 (EXTERNAL) -- {0..1} Assoc2_0.TestA.ClassB3;
       a3 -- {0..1} ClassA3;
     END a2b3;
     
