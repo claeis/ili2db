@@ -379,12 +379,20 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 		if(structWrapper==null){
 			if(!aclass.isStructure()){
 				if(exportTid || aclass.getOid()!=null){
-					sqlIliTid=rs.getString(valuei);
-					sqlid2xtfid.putSqlid2Xtfid(aclass.getSqlTablename(),sqlid, sqlIliTid);
+				    if(iliClassForSelect instanceof AssociationDef && !((AssociationDef)iliClassForXtf).isIdentifiable()) {
+				        ; // no TID; standalone association without TID
+				    }else {
+	                    sqlIliTid=rs.getString(valuei);
+	                    sqlid2xtfid.putSqlid2Xtfid(aclass.getSqlTablename(),sqlid, sqlIliTid);
+				    }
 					valuei++;
 				}else{
-					sqlIliTid=Long.toString(sqlid);
-					sqlid2xtfid.putSqlid2Xtfid(aclass.getSqlTablename(),sqlid, sqlIliTid);
+	                if(iliClassForSelect instanceof AssociationDef && !((AssociationDef)iliClassForXtf).isIdentifiable()) {
+	                    ; // no TID; standalone association without TID
+	                }else {
+	                    sqlIliTid=Long.toString(sqlid);
+	                    sqlid2xtfid.putSqlid2Xtfid(aclass.getSqlTablename(),sqlid, sqlIliTid);
+	                }
 				}
 			}
 		}
