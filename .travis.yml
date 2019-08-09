@@ -54,12 +54,12 @@ after_failure:
 deploy:
   - provider: script
     skip_cleanup: true
-    script: gradle -Drst2html=`which rst2html.py` -Drepos_pwd=${repos_pwd} -Drepos_usr=jql_jars-INTE upload
+    script: ssh-keyscan -H ftp.interlis.ch >> ~/.ssh/known_hosts;gradle -Drst2html=`which rst2html.py` -Drepos_pwd=${repos_pwd} -Drepos_usr=jql_jars-INTE upload
     on:
       branch: master
   - provider: script
     skip_cleanup: true
-    script: gradle -Drst2html=`which rst2html.py` -Drepos_pwd=${repos_pwd} -Drepos_usr=jql_jars-INTE '-Drelease=' upload
+    script: ssh-keyscan -H ftp.interlis.ch >> ~/.ssh/known_hosts;gradle -Drst2html=`which rst2html.py` -Drepos_pwd=${repos_pwd} -Drepos_usr=jql_jars-INTE '-Drelease=' upload
     on:
       branch: stable
 notifications:

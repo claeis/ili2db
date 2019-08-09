@@ -303,7 +303,8 @@ dependencies {
 	ili2mssqlImplementation group: 'com.microsoft.sqlserver', name: 'mssql-jdbc', version: '6.4.0.jre7'
 	ili2oraImplementation files('lib/ojdbc14.jar')
 	ili2db group: project.group, name: project.name, version: project.version
-    deployerJars "org.apache.maven.wagon:wagon-ftp:3.0.0"
+    deployerJars "org.apache.maven.wagon:wagon-ftp:3.3.3"
+    deployerJars "org.apache.maven.wagon:wagon-ssh:3.3.3"
 }
 
 
