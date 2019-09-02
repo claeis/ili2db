@@ -118,7 +118,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 		createNumCheck=config.isCreateCreateNumChecks();
 		this.metaInfo=metaInfo;
         createTypeConstraint=config.getCreateTypeConstraint();
-        createIliTidCol=config.TID_HANDLING_PROPERTY.equals(config.getTidHandling());
+        createIliTidCol=Config.TID_HANDLING_PROPERTY.equals(config.getTidHandling());
 	}
 
 	public void generateTable(ViewableWrapper def,int pass)

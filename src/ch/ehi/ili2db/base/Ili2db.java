@@ -479,6 +479,11 @@ public class Ili2db {
 					throw new Ili2dbException("compiler failed");
 				}
 				
+				// if meta attribute table already exists, read it
+                if(config.getCreateMetaInfo() && DbUtility.tableExists(conn,new DbTableName(config.getDbschema(),DbNames.META_ATTRIBUTES_TAB))){
+                    // set elements' meta-attributes
+                    MetaAttrUtility.addMetaAttrsFromDb(td, conn, config.getDbschema());
+                }
                 // import meta-attributes from .toml file
                 if(config.getIliMetaAttrsFile()!=null){
                     if(config.getCreateMetaInfo()){

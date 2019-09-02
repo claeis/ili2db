@@ -5,13 +5,16 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import ch.ehi.ili2db.base.Ili2cUtility;
 import ch.ehi.ili2db.fromili.TransferFromIli;
 import ch.ehi.sqlgen.repository.DbTableName;
 import ch.interlis.ili2c.metamodel.AbstractClassDef;
 import ch.interlis.ili2c.metamodel.AssociationDef;
 import ch.interlis.ili2c.metamodel.AttributeDef;
 import ch.interlis.ili2c.metamodel.Domain;
+import ch.interlis.ili2c.metamodel.OIDType;
 import ch.interlis.ili2c.metamodel.Table;
+import ch.interlis.ili2c.metamodel.TransferDescription;
 import ch.interlis.ili2c.metamodel.Viewable;
 
 /** Wrapper around a Viewable to  
@@ -108,11 +111,17 @@ public class ViewableWrapper {
 		if(aclass.getOid()!=null){
 			return aclass.getOid();
 		}
+		if(Ili2cUtility.getOidDomainFromMetaAttr(aclass)!=null) {
+		   return  Ili2cUtility.getOidDomainFromMetaAttr(aclass);
+		}
 		for(Object exto : aclass.getExtensions()){
 			AbstractClassDef ext=(AbstractClassDef) exto;
 			if(ext.getOid()!=null){
 				return ext.getOid();
 			}
+	        if(Ili2cUtility.getOidDomainFromMetaAttr(ext)!=null) {
+	            return  Ili2cUtility.getOidDomainFromMetaAttr(ext);
+	        }
 		}
 		return null;
 	}

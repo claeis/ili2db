@@ -140,10 +140,10 @@ public class TransferToXtf {
 		if(config.getDefaultSrsCode()!=null) {
 	        defaultCrsCode=Integer.parseInt(config.getDefaultSrsCode());
 		}
-		createTypeDiscriminator=config.CREATE_TYPE_DISCRIMINATOR_ALWAYS.equals(config.getCreateTypeDiscriminator());
-		createGenericStructRef=config.STRUCT_MAPPING_GENERICREF.equals(config.getStructMapping());
+		createTypeDiscriminator=Config.CREATE_TYPE_DISCRIMINATOR_ALWAYS.equals(config.getCreateTypeDiscriminator());
+		createGenericStructRef=Config.STRUCT_MAPPING_GENERICREF.equals(config.getStructMapping());
 		writeIliTid=config.isExportTid(); 
-		hasIliTidCol=config.TID_HANDLING_PROPERTY.equals(config.getTidHandling());
+		hasIliTidCol=Config.TID_HANDLING_PROPERTY.equals(config.getTidHandling());
 		this.geomConv=geomConv;
 		recConv=new ToXtfRecordConverter(td,ili2sqlName,config,null,geomConv,conn,sqlidPool,trafoConfig,class2wrapper,schema);
 		this.config=config;
