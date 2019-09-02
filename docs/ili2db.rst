@@ -1140,6 +1140,10 @@ Bei den folgenden Strukturen wird bei Smart-Mapping für die Strukturattribute e
 
 - LocalisationCH_V1.MultilingualText
 
+- LocalisationCH_V1.LocalisedMText
+
+- LocalisationCH_V1.LocalisedText
+
 Aufzählungen
 ~~~~~~~~~~~~
 
