@@ -2395,6 +2395,7 @@ public class Ili2db {
 		config.setArrayTrafo(null);
         config.setJsonTrafo(null);
 		config.setMultilingualTrafo(null);
+        config.setLocalisedTrafo(null);
 		config.setInheritanceTrafo(null);
 	}
 	public static List<Model> getModels(String modelNames, TransferDescription td) {

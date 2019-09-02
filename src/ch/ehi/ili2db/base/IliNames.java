@@ -23,9 +23,11 @@ public class IliNames {
 	public static final String CHBASE1_ITEM = "Item"; // CLASS
 	public static final String CHBASE1_CATALOGUES_ITEM = CHBASE1_CATALOGUEOBJECTS_CATALOGUES+"."+CHBASE1_ITEM; // CLASS
 	public static final String CHBASE1_LOCALISATIONCH = "LocalisationCH_V1";
+    public static final String CHBASE1_LOCALISEDMTEXT = "LocalisedMText";
+    public static final String CHBASE1_LOCALISEDTEXT = "LocalisedText";
 	public static final String CHBASE1_MULTILINGUALMTEXT = "MultilingualMText";
 	public static final String CHBASE1_MULTILINGUALTEXT = "MultilingualText";
-	public static final String CHBASE1_LOCALISEDTEXT = "LocalisedText";
+	public static final String CHBASE1_MULTILINFUALTEXT_LOCALISEDTEXT = "LocalisedText";
 	public static final String CHBASE1_LOCALISEDTEXT_TEXT = "Text";
 	public static final String CHBASE1_LOCALISEDTEXT_LANGUAGE = "Language";
 	public static final String CHBASE1_LOCALISEDTEXT_LANG_DE = "de";

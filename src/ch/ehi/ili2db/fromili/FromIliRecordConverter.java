@@ -90,6 +90,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 	private boolean coalesceArray=true;
     private boolean coalesceJson=true;
 	private boolean expandMultilingual=true;
+    private boolean expandLocalised=true;
 	private boolean createUnique=true;
 	private boolean createNumCheck=false;
 	private DbExtMetaInfo metaInfo=null;
@@ -112,6 +113,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 		coalesceArray=Config.ARRAY_TRAFO_COALESCE.equals(config.getArrayTrafo());
         coalesceJson=Config.JSON_TRAFO_COALESCE.equals(config.getJsonTrafo());
 		expandMultilingual=Config.MULTILINGUAL_TRAFO_EXPAND.equals(config.getMultilingualTrafo());
+        expandLocalised=Config.LOCALISED_TRAFO_EXPAND.equals(config.getLocalisedTrafo());
 		createUnique=config.isCreateUniqueConstraints();
 		createNumCheck=config.isCreateCreateNumChecks();
 		this.metaInfo=metaInfo;
@@ -667,6 +669,24 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 						dbColExts.add(ret);
 					}
 					trafoConfig.setAttrConfig(attr, TrafoConfigNames.MULTILINGUAL_TRAFO,TrafoConfigNames.MULTILINGUAL_TRAFO_EXPAND);
+                }else if(isChbaseLocalised(td, attr) && (expandLocalised 
+                        || TrafoConfigNames.LOCALISED_TRAFO_EXPAND.equals(trafoConfig.getAttrConfig(attr,TrafoConfigNames.LOCALISED_TRAFO)))){
+                    
+                    DbColVarchar ret=new DbColVarchar();
+                    ret.setName(getSqlAttrName(attr,null,dbTable.getName().getName(),null));
+                    ret.setSize(DbColVarchar.UNLIMITED);
+                    ret.setNotNull(false);
+                    ret.setPrimaryKey(false);
+                    
+                    dbCol.value=ret;
+                    ret=new DbColVarchar();
+                    ret.setName(getSqlAttrName(attr,null,dbTable.getName().getName(),null)+DbNames.LOCALISED_TXT_COL_SUFFIX);
+                    ret.setSize(2);
+                    ret.setNotNull(false);
+                    
+                    ret.setPrimaryKey(false);
+                    dbColExts.add(ret);
+                    trafoConfig.setAttrConfig(attr, TrafoConfigNames.LOCALISED_TRAFO,TrafoConfigNames.LOCALISED_TRAFO_EXPAND);
 				}else{
 					// add reference col from struct ele to parent obj to struct table
 					addParentRef(aclass,attr);
@@ -901,6 +921,16 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 		}
 		return false;
 	}
+    private boolean isChbaseLocalised(TransferDescription td,
+            AttributeDef attr) {
+        if(Ili2cUtility.isPureChbaseLocalisedText(td, attr) || Ili2cUtility.isPureChbaseLocalisedMText(td, attr)){
+            CompositionType type=(CompositionType)attr.getDomain();
+            if(type.getCardinality().getMaximum()==1){
+                return true;
+            }
+        }
+        return false;
+    }
 
 	private boolean isChbaseCatalogueRef(TransferDescription td,
 			AttributeDef attr) {

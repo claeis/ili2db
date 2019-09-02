@@ -43,6 +43,12 @@
 						</LocalisedText>
 					</LocalisationCH_V1.MultilingualText>
 				</atext>
+				<btext>
+					<LocalisationCH_V1.LocalisedText>
+						<Language>de</Language>
+						<Text>a1.1-de</Text>
+					</LocalisationCH_V1.LocalisedText>
+				</btext>
 			</MultilingualText0.TestA.ClassA1>
 			<MultilingualText0.TestA.ClassB1 TID="b1.1">
 				<atext>
@@ -55,6 +61,12 @@
 						</LocalisedText>
 					</LocalisationCH_V1.MultilingualText>
 				</atext>
+				<btext>
+					<LocalisationCH_V1.LocalisedText>
+						<Language>fr</Language>
+						<Text>b1.1-fr</Text>
+					</LocalisationCH_V1.LocalisedText>
+				</btext>
 			</MultilingualText0.TestA.ClassB1>
 		</MultilingualText1.TestA>
 	</DATASECTION>

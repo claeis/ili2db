@@ -47,7 +47,7 @@ public abstract class AbstractMain {
 		config.setDefaultSrsAuthority("EPSG");
 		config.setMaxSqlNameLength(Integer.toString(NameMapping.DEFAULT_NAME_LENGTH));
 		config.setIdGenerator(ch.ehi.ili2db.base.TableBasedIdGen.class.getName());
-		config.setInheritanceTrafo(config.INHERITANCE_TRAFO_SMART1);
+		config.setInheritanceTrafo(Config.INHERITANCE_TRAFO_SMART1);
 		config.setCatalogueRefTrafo(Config.CATALOGUE_REF_TRAFO_COALESCE);
 		config.setMultiSurfaceTrafo(Config.MULTISURFACE_TRAFO_COALESCE);
 		config.setMultiLineTrafo(Config.MULTILINE_TRAFO_COALESCE);
@@ -55,6 +55,7 @@ public abstract class AbstractMain {
 		config.setArrayTrafo(Config.ARRAY_TRAFO_COALESCE);
         config.setJsonTrafo(Config.JSON_TRAFO_COALESCE);
 		config.setMultilingualTrafo(Config.MULTILINGUAL_TRAFO_EXPAND);
+        config.setLocalisedTrafo(Config.LOCALISED_TRAFO_EXPAND);
 		config.setValidation(true);
 	}
 	protected abstract DbUrlConverter getDbUrlConverter();
@@ -227,58 +228,61 @@ public abstract class AbstractMain {
 				config.setOnlyMultiplicityReduction(true);
 			}else if(arg.equals("--createSingleEnumTab")){
 				argi++;
-				config.setCreateEnumDefs(config.CREATE_ENUM_DEFS_SINGLE);
+				config.setCreateEnumDefs(Config.CREATE_ENUM_DEFS_SINGLE);
 			}else if(arg.equals("--createEnumTabs")){
 				argi++;
-				config.setCreateEnumDefs(config.CREATE_ENUM_DEFS_MULTI);
+				config.setCreateEnumDefs(Config.CREATE_ENUM_DEFS_MULTI);
             }else if(arg.equals("--createEnumTabsWithId")){
                 argi++;
-                config.setCreateEnumDefs(config.CREATE_ENUM_DEFS_MULTI_WITH_ID);
+                config.setCreateEnumDefs(Config.CREATE_ENUM_DEFS_MULTI_WITH_ID);
 			}else if(arg.equals("--createEnumTxtCol")){
 				argi++;
-				config.setCreateEnumCols(config.CREATE_ENUM_TXT_COL);
+				config.setCreateEnumCols(Config.CREATE_ENUM_TXT_COL);
 			}else if(arg.equals("--createEnumColAsItfCode")){
 				argi++;
 				config.setValue(Config.CREATE_ENUMCOL_AS_ITFCODE,Config.CREATE_ENUMCOL_AS_ITFCODE_YES);
 			}else if(arg.equals("--beautifyEnumDispName")){
 				argi++;
-				config.setBeautifyEnumDispName(config.BEAUTIFY_ENUM_DISPNAME_UNDERSCORE);
+				config.setBeautifyEnumDispName(Config.BEAUTIFY_ENUM_DISPNAME_UNDERSCORE);
 			}else if(arg.equals("--noSmartMapping")){
 				argi++;
 				Ili2db.setNoSmartMapping(config);
 			}else if(arg.equals("--smart1Inheritance")){
 				argi++;
-				config.setInheritanceTrafo(config.INHERITANCE_TRAFO_SMART1);
+				config.setInheritanceTrafo(Config.INHERITANCE_TRAFO_SMART1);
 			}else if(arg.equals("--smart2Inheritance")){
 				argi++;
-				config.setInheritanceTrafo(config.INHERITANCE_TRAFO_SMART2);
+				config.setInheritanceTrafo(Config.INHERITANCE_TRAFO_SMART2);
 			}else if(arg.equals("--coalesceCatalogueRef")){
 				argi++;
-				config.setCatalogueRefTrafo(config.CATALOGUE_REF_TRAFO_COALESCE);
+				config.setCatalogueRefTrafo(Config.CATALOGUE_REF_TRAFO_COALESCE);
 			}else if(arg.equals("--coalesceMultiSurface")){
 				argi++;
-				config.setMultiSurfaceTrafo(config.MULTISURFACE_TRAFO_COALESCE);
+				config.setMultiSurfaceTrafo(Config.MULTISURFACE_TRAFO_COALESCE);
 			}else if(arg.equals("--coalesceMultiLine")){
 				argi++;
-				config.setMultiLineTrafo(config.MULTILINE_TRAFO_COALESCE);
+				config.setMultiLineTrafo(Config.MULTILINE_TRAFO_COALESCE);
 			}else if(arg.equals("--coalesceMultiPoint")){
 				argi++;
-				config.setMultiPointTrafo(config.MULTIPOINT_TRAFO_COALESCE);
+				config.setMultiPointTrafo(Config.MULTIPOINT_TRAFO_COALESCE);
 			}else if(arg.equals("--coalesceArray")){
 				argi++;
-				config.setArrayTrafo(config.ARRAY_TRAFO_COALESCE);
+				config.setArrayTrafo(Config.ARRAY_TRAFO_COALESCE);
             }else if(arg.equals("--coalesceJson")){
                 argi++;
-                config.setJsonTrafo(config.JSON_TRAFO_COALESCE);
+                config.setJsonTrafo(Config.JSON_TRAFO_COALESCE);
 			}else if(arg.equals("--expandMultilingual")){
 				argi++;
-				config.setMultilingualTrafo(config.MULTILINGUAL_TRAFO_EXPAND);
+				config.setMultilingualTrafo(Config.MULTILINGUAL_TRAFO_EXPAND);
+            }else if(arg.equals("--expandLocalised")){
+                argi++;
+                config.setLocalisedTrafo(Config.LOCALISED_TRAFO_EXPAND);
 			}else if(arg.equals("--createFk")){
 				argi++;
-				config.setCreateFk(config.CREATE_FK_YES);
+				config.setCreateFk(Config.CREATE_FK_YES);
 			}else if(arg.equals("--createFkIdx")){
 				argi++;
-				config.setCreateFkIdx(config.CREATE_FKIDX_YES);
+				config.setCreateFkIdx(Config.CREATE_FKIDX_YES);
 			}else if(arg.equals("--createUnique")){
 				argi++;
 				config.setCreateUniqueConstraints(true);
@@ -290,7 +294,7 @@ public abstract class AbstractMain {
                 config.setCreateImportTabs(true);
 			}else if(arg.equals("--createStdCols")){
 				argi++;
-				config.setCreateStdCols(config.CREATE_STD_COLS_ALL);
+				config.setCreateStdCols(Config.CREATE_STD_COLS_ALL);
 			}else if(arg.equals("--t_id_Name")){
 				argi++;
 				config.setColT_ID(args[argi]);
@@ -305,29 +309,29 @@ public abstract class AbstractMain {
 				argi++;
 			}else if(arg.equals("--createTypeDiscriminator")){
 				argi++;
-				config.setCreateTypeDiscriminator(config.CREATE_TYPE_DISCRIMINATOR_ALWAYS);
+				config.setCreateTypeDiscriminator(Config.CREATE_TYPE_DISCRIMINATOR_ALWAYS);
 			}else if(arg.equals("--createGeomIdx")){
 				argi++;
 				config.setValue(Config.CREATE_GEOM_INDEX,Config.TRUE);
 			}else if(arg.equals("--disableNameOptimization")){
 				argi++;
-				config.setNameOptimization(config.NAME_OPTIMIZATION_DISABLE);
+				config.setNameOptimization(Config.NAME_OPTIMIZATION_DISABLE);
 			}else if(arg.equals("--nameByTopic")){
 				argi++;
-				config.setNameOptimization(config.NAME_OPTIMIZATION_TOPIC);
+				config.setNameOptimization(Config.NAME_OPTIMIZATION_TOPIC);
 			}else if(arg.equals("--maxNameLength")){
 				argi++;
 				config.setMaxSqlNameLength(args[argi]);
 				argi++;
 			}else if(arg.equals("--structWithGenericRef")){
 				argi++;
-				config.setStructMapping(config.STRUCT_MAPPING_GENERICREF);
+				config.setStructMapping(Config.STRUCT_MAPPING_GENERICREF);
 			}else if(arg.equals("--sqlEnableNull")){
 				argi++;
-				config.setSqlNull(config.SQL_NULL_ENABLE);
+				config.setSqlNull(Config.SQL_NULL_ENABLE);
 			}else if(arg.equals("--strokeArcs")){
 				argi++;
-				Config.setStrokeArcs(config,config.STROKE_ARCS_ENABLE);
+				Config.setStrokeArcs(config,Config.STROKE_ARCS_ENABLE);
 			}else if(arg.equals("--skipPolygonBuilding")){
 				argi++;
 				Ili2db.setSkipPolygonBuilding(config);
@@ -343,7 +347,7 @@ public abstract class AbstractMain {
 				config.setSkipGeometryErrors(true);
 			}else if(arg.equals("--keepAreaRef")){
 				argi++;
-				config.setAreaRef(config.AREA_REF_KEEP);
+				config.setAreaRef(Config.AREA_REF_KEEP);
             }else if(arg.equals("--createTidCol")){
                 argi++;
                 config.setTidHandling(Config.TID_HANDLING_PROPERTY);
@@ -358,10 +362,10 @@ public abstract class AbstractMain {
                 config.setImportBid(true);
 			}else if(arg.equals("--createBasketCol")){
 				argi++;
-				config.setBasketHandling(config.BASKET_HANDLING_READWRITE);
+				config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
 			}else if(arg.equals("--createDatasetCol")){
 				argi++;
-				config.setCreateDatasetCols(config.CREATE_DATASET_COL);
+				config.setCreateDatasetCols(Config.CREATE_DATASET_COL);
 			}else if(arg.equals("--ILIGML20")){
 				argi++;
 				config.setTransferFileFormat(Config.ILIGML20);
@@ -452,6 +456,7 @@ public abstract class AbstractMain {
 					System.err.println("--coalesceArray        enable smart mapping of ARRAY structures");
                     System.err.println("--coalesceJson         enable smart mapping of JSON structures");
 					System.err.println("--expandMultilingual   enable smart mapping of CHBase:MultilingualText");
+                    System.err.println("--expandLocalised      enable smart mapping of CHBase:LocalisedText");
 					System.err.println("--createGeomIdx        create a spatial index on geometry columns.");
 					System.err.println("--createEnumColAsItfCode create enum type column with value according to ITF (instead of XTF).");
 					System.err.println("--createEnumTxtCol     create an additional column with the text of the enumeration value.");

@@ -55,6 +55,8 @@ public class Config extends Settings {
     public static final String JSON_TRAFO_COALESCE="coalesce";
 	public static final String MULTILINGUAL_TRAFO=PREFIX+".multilingualTrafo";
 	public static final String MULTILINGUAL_TRAFO_EXPAND="expand";
+    public static final String LOCALISED_TRAFO=PREFIX+".localisedTrafo";
+    public static final String LOCALISED_TRAFO_EXPAND="expand";
 	public static final String UNIQUE_CONSTRAINTS=PREFIX+".uniqueConstraints";
 	public static final String UNIQUE_CONSTRAINTS_CREATE="create";
 	public static final String NUMERIC_CHECK_CONSTRAINTS=PREFIX+".numericCheckConstraints";
@@ -455,6 +457,12 @@ public class Config extends Settings {
 	public void setMultilingualTrafo(String value) {
 		setValue(MULTILINGUAL_TRAFO,value);
 	}
+    public String getLocalisedTrafo() {
+        return getValue(LOCALISED_TRAFO);
+    }
+    public void setLocalisedTrafo(String value) {
+        setValue(LOCALISED_TRAFO,value);
+    }
 	public String getNameOptimization() {
 		return getValue(NAME_OPTIMIZATION);
 	}

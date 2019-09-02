@@ -702,6 +702,23 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 						}
 						sep=",";
 					}
+                }else if(TrafoConfigNames.LOCALISED_TRAFO_EXPAND.equals(trafoConfig.getAttrConfig(attr, TrafoConfigNames.LOCALISED_TRAFO))){
+                    ret.append(sep);
+                    ret.append(attrSqlName);
+                    if(isUpdate){
+                        ret.append("=?");
+                    }else{
+                        values.append(",?");
+                    }
+                    sep=",";
+                    ret.append(sep);
+                    ret.append(attrSqlName+DbNames.LOCALISED_TXT_COL_SUFFIX);
+                    if(isUpdate){
+                        ret.append("=?");
+                    }else{
+                        values.append(",?");
+                    }
+                    sep=",";
 				}
 			}else if (type instanceof PolylineType){
 				 ret.append(sep);
@@ -1032,6 +1049,31 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 							 }
 							valuei++;
 						}
+                    }else if(TrafoConfigNames.LOCALISED_TRAFO_EXPAND.equals(trafoConfig.getAttrConfig(tableAttr, TrafoConfigNames.LOCALISED_TRAFO))){
+                        IomObject iomTxt= classAttr==null ? null : iomObj.getattrobj(attrName,0);
+                        if(iomTxt!=null) {
+                            String text=iomTxt.getattrvalue(IliNames.CHBASE1_LOCALISEDTEXT_TEXT);
+                            String lang=null;
+                            if(text!=null){
+                                ps.setString(valuei, text);
+                                lang=iomTxt.getattrvalue(IliNames.CHBASE1_LOCALISEDTEXT_LANGUAGE);
+                            }else{
+                                ps.setNull(valuei,Types.VARCHAR);
+                            }
+                            valuei++;
+                            if(lang!=null){
+                                ps.setString(valuei, lang);
+                            }else{
+                                ps.setNull(valuei,Types.VARCHAR);
+                            }
+                            valuei++;
+                        }else {
+                            ps.setNull(valuei,Types.VARCHAR);
+                            valuei++;
+                            ps.setNull(valuei,Types.VARCHAR);
+                            valuei++;
+                        }
+                        
 					}else{
 						 // enqueue struct values
 						 for(int structi=0;structi<structc;structi++){
@@ -1233,9 +1275,9 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 			// remove leading '_'
 			sfx=sfx.substring(LEN_LANG_PREFIX);
 		}
-	 	int txtc=iomMulti.getattrvaluecount(IliNames.CHBASE1_LOCALISEDTEXT);
+	 	int txtc=iomMulti.getattrvaluecount(IliNames.CHBASE1_MULTILINFUALTEXT_LOCALISEDTEXT);
 	 	for(int txti=0;txti<txtc;txti++){
-			IomObject iomTxt=iomMulti.getattrobj(IliNames.CHBASE1_LOCALISEDTEXT,txti);
+			IomObject iomTxt=iomMulti.getattrobj(IliNames.CHBASE1_MULTILINFUALTEXT_LOCALISEDTEXT,txti);
 			String lang=iomTxt.getattrvalue(IliNames.CHBASE1_LOCALISEDTEXT_LANGUAGE);
 			if(lang==null)lang="";
 			if(lang.equals(sfx)){

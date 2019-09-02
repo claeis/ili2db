@@ -157,10 +157,56 @@ public class Ili2cUtility {
 		return false;
 	}
 
+    public static boolean isPureChbaseLocalisedMText(TransferDescription td,
+            AttributeDef attr) {
+        return isPureChbaseMultilingualText(td, attr, IliNames.CHBASE1_MULTILINGUALMTEXT);
+    }
+    public static boolean isPureChbaseLocalisedText(TransferDescription td,
+                AttributeDef attr) {
+        return isPureChbaseLocalisedText(td, attr, IliNames.CHBASE1_LOCALISEDTEXT);
+    }
 	public static boolean isPureChbaseMultilingualMText(TransferDescription td,
 			AttributeDef attr) {
-		return isPureChbaseMultilingualText(td, attr, IliNames.CHBASE1_MULTILINGUALMTEXT);
+		return isPureChbaseLocalisedText(td, attr, IliNames.CHBASE1_LOCALISEDMTEXT);
 	}
+    private static boolean isPureChbaseLocalisedText(TransferDescription td,
+            AttributeDef attr,String textType) {
+        Type typeo=attr.getDomain();
+        if(typeo instanceof CompositionType){
+            CompositionType type=(CompositionType)typeo;
+            Table struct=type.getComponentType();
+            Table base=null;
+            if(struct.getContainer().getScopedName(null).equals(IliNames.CHBASE1_LOCALISATIONCH)){
+                base=struct;
+            }else{
+                base=(Table) struct.getExtending();
+                if(base==null){
+                    base=struct;
+                }
+                while(base!=null && !base.getContainer().getScopedName(null).equals(IliNames.CHBASE1_LOCALISATIONCH)){
+                    base=(Table) base.getExtending();
+                }
+                
+            }
+            if(base==null){
+                return false;
+            }
+            // ASSERT: base.getContainer().getScopedName(null).equals("LocalisationCH_V1"))
+                if(base.getName().equals(textType)){
+                    java.util.Iterator it=struct.getAttributesAndRoles2();
+                    int c=0;
+                    while(it.hasNext()){
+                        it.next();
+                        c++;
+                    }
+                    if(c==2){
+                        // only two attributes text + language
+                        return true;
+                    }
+                }
+        }
+        return false;
+    }
 	public static boolean isPureChbaseMultilingualText(TransferDescription td,
 				AttributeDef attr) {
 		return isPureChbaseMultilingualText(td, attr, IliNames.CHBASE1_MULTILINGUALTEXT);
