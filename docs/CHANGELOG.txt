@@ -17,6 +17,7 @@ LATEST
 - new option --exportCrsModels modelname
 - new option --expandLocalised (#289)
 - new meta attribute to flag a CLASS as having OID (#207)
+- skiped topics during import should not be validated (#125)
 - remove reference to javax.xml.bind.DatatypeConverter/sun.misc (because of removal in jdk11) 
 - ili2gpkg: allow relationship loops
 - ili2gpkg: Add two SRSs to init.sql (32635 and 4686) (#300)
