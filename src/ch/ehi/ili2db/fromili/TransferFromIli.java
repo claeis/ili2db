@@ -1742,6 +1742,8 @@ public class TransferFromIli {
 					metaInfo.setTableInfo(v.getSqlTablename(), DbExtMetaInfo.TAG_TAB_TABLEKIND, DbExtMetaInfo.TAG_TAB_TABLEKIND_ASSOCIATION);
 				}else if(Ili2cUtility.isChbaseCatalogueItem(td, v.getViewable())){
 					metaInfo.setTableInfo(v.getSqlTablename(), DbExtMetaInfo.TAG_TAB_TABLEKIND, DbExtMetaInfo.TAG_TAB_TABLEKIND_CATALOGUE);
+                }else if(v.getViewable() instanceof Table){
+                    metaInfo.setTableInfo(v.getSqlTablename(), DbExtMetaInfo.TAG_TAB_TABLEKIND, DbExtMetaInfo.TAG_TAB_TABLEKIND_CLASS);
 				}
 			}
 
