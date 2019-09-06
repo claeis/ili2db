@@ -140,10 +140,10 @@ public class TransferToXtf {
 		if(config.getDefaultSrsCode()!=null) {
 	        defaultCrsCode=Integer.parseInt(config.getDefaultSrsCode());
 		}
-		createTypeDiscriminator=config.CREATE_TYPE_DISCRIMINATOR_ALWAYS.equals(config.getCreateTypeDiscriminator());
-		createGenericStructRef=config.STRUCT_MAPPING_GENERICREF.equals(config.getStructMapping());
+		createTypeDiscriminator=Config.CREATE_TYPE_DISCRIMINATOR_ALWAYS.equals(config.getCreateTypeDiscriminator());
+		createGenericStructRef=Config.STRUCT_MAPPING_GENERICREF.equals(config.getStructMapping());
 		writeIliTid=config.isExportTid(); 
-		hasIliTidCol=config.TID_HANDLING_PROPERTY.equals(config.getTidHandling());
+		hasIliTidCol=Config.TID_HANDLING_PROPERTY.equals(config.getTidHandling());
 		this.geomConv=geomConv;
 		recConv=new ToXtfRecordConverter(td,ili2sqlName,config,null,geomConv,conn,sqlidPool,trafoConfig,class2wrapper,schema);
 		this.config=config;
@@ -356,6 +356,17 @@ public class TransferToXtf {
 			Topic topic=getTopicDef(td,topicName);
 			if(topic==null){
 				throw new IoxException("unknown Topic "+topicName+" in table "+sqlName);
+			}
+			if(config.getCrsExportModels()!=null) {
+			    // crs translate topic
+			    Topic crsTranslatedTopic1=(Topic)crsFilter.get(topic);
+                Topic crsTranslatedTopic2=(Topic)crsFilterToTarget.get(topic);
+			    // if translated topic is in export model, use translated one
+			    if(crsTranslatedTopic1!=null && crsTranslatedTopic1.getContainer().getName().equals(config.getCrsExportModels())) {
+			        topic=crsTranslatedTopic1;
+			    }else if(crsTranslatedTopic2!=null && crsTranslatedTopic2.getContainer().getName().equals(config.getCrsExportModels())) {
+                    topic=crsTranslatedTopic2;
+			    }
 			}
 			if(bid!=null){
 	            basketXtfId.append(bid);

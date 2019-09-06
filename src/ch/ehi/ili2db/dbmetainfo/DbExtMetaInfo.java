@@ -37,6 +37,7 @@ public class DbExtMetaInfo {
 	public static final String TAG_TAB_TABLEKIND = Config.PREFIX+".tableKind";
 	public static final String TAG_TAB_TABLEKIND_ENUM = "ENUM";
 	public static final String TAG_TAB_TABLEKIND_SECONDARY = "SECONDARY";
+    public static final String TAG_TAB_TABLEKIND_CLASS = "CLASS";
 	public static final String TAG_TAB_TABLEKIND_ASSOCIATION = "ASSOCIATION";
 	public static final String TAG_TAB_TABLEKIND_STRUCTURE = "STRUCTURE";
 	public static final String TAG_TAB_TABLEKIND_CATALOGUE = "CATALOGUE";

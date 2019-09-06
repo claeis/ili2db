@@ -90,11 +90,11 @@ public class AbstractRecordConverter {
 		createEnumTable=config.getCreateEnumDefs();
 		class2wrapper=class2wrapper1;
 		createEnumColAsItfCode=Config.CREATE_ENUMCOL_AS_ITFCODE_YES.equals(config.getValue(Config.CREATE_ENUMCOL_AS_ITFCODE));
-		createStdCols=config.CREATE_STD_COLS_ALL.equals(config.getCreateStdCols());
-		createEnumTxtCol=config.CREATE_ENUM_TXT_COL.equals(config.getCreateEnumCols());
-		removeUnderscoreFromEnumDispName=config.BEAUTIFY_ENUM_DISPNAME_UNDERSCORE.equals(config.getBeautifyEnumDispName());
-		createFk=config.CREATE_FK_YES.equals(config.getCreateFk());
-		createFkIdx=config.CREATE_FKIDX_YES.equals(config.getCreateFkIdx());
+		createStdCols=Config.CREATE_STD_COLS_ALL.equals(config.getCreateStdCols());
+		createEnumTxtCol=Config.CREATE_ENUM_TXT_COL.equals(config.getCreateEnumCols());
+		removeUnderscoreFromEnumDispName=Config.BEAUTIFY_ENUM_DISPNAME_UNDERSCORE.equals(config.getBeautifyEnumDispName());
+		createFk=Config.CREATE_FK_YES.equals(config.getCreateFk());
+		createFkIdx=Config.CREATE_FKIDX_YES.equals(config.getCreateFkIdx());
 		colT_ID=config.getColT_ID();
 		if(colT_ID==null){
 			colT_ID=DbNames.T_ID_COL;
@@ -103,19 +103,19 @@ public class AbstractRecordConverter {
 		this.idGen=idGen1;
 		schemaName=config.getDbschema();
 
-		deleteExistingData=config.DELETE_DATA.equals(config.getDeleteMode());
+		deleteExistingData=Config.DELETE_DATA.equals(config.getDeleteMode());
 		
-		createTypeDiscriminator=config.CREATE_TYPE_DISCRIMINATOR_ALWAYS.equals(config.getCreateTypeDiscriminator());
-		createGenericStructRef=config.STRUCT_MAPPING_GENERICREF.equals(config.getStructMapping());
-		sqlEnableNull=config.SQL_NULL_ENABLE.equals(config.getSqlNull());
-		strokeArcs=config.STROKE_ARCS_ENABLE.equals(Config.getStrokeArcs(config));
+		createTypeDiscriminator=Config.CREATE_TYPE_DISCRIMINATOR_ALWAYS.equals(config.getCreateTypeDiscriminator());
+		createGenericStructRef=Config.STRUCT_MAPPING_GENERICREF.equals(config.getStructMapping());
+		sqlEnableNull=Config.SQL_NULL_ENABLE.equals(config.getSqlNull());
+		strokeArcs=Config.STROKE_ARCS_ENABLE.equals(Config.getStrokeArcs(config));
 		
-		createBasketCol=config.BASKET_HANDLING_READWRITE.equals(config.getBasketHandling());
-		createDatasetCol=config.CREATE_DATASET_COL.equals(config.getCreateDatasetCols());
+		createBasketCol=Config.BASKET_HANDLING_READWRITE.equals(config.getBasketHandling());
+		createDatasetCol=Config.CREATE_DATASET_COL.equals(config.getCreateDatasetCols());
 		
 		isIli1Model=td1.getIli1Format()!=null;
 		createItfLineTables=isIli1Model && config.getDoItfLineTables();
-		createItfAreaRef=isIli1Model && config.AREA_REF_KEEP.equals(config.getAreaRef());
+		createItfAreaRef=isIli1Model && Config.AREA_REF_KEEP.equals(config.getAreaRef());
 		
 	}
 	public String beautifyEnumDispName(String value) {

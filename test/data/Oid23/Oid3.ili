@@ -1,0 +1,34 @@
+INTERLIS 2.3;
+
+MODEL Oid3
+  AT "mailto:ce@eisenhutinformatik.ch" VERSION "2019-09-02" =
+    
+  TOPIC TestA =
+  
+    CLASS ClassA1 =
+    	!!OID AS INTERLIS.UUIDOID;
+    END ClassA1;
+    CLASS ClassA1b EXTENDS ClassA1 =
+    END ClassA1b;
+    CLASS ClassB1 =
+    END ClassB1;
+    CLASS ClassB1b EXTENDS ClassB1=
+    	!!OID AS INTERLIS.UUIDOID;
+    END ClassB1b;
+    
+  END TestA;
+  
+  TOPIC TestC =
+    DEPENDS ON TestA;
+    
+    CLASS ClassC1 =
+    END ClassC1;
+    
+    ASSOCIATION =
+      a (EXTERNAL)-- {0..1} Oid3.TestA.ClassA1;
+      c -- {0..*} ClassC1;
+    END;
+    
+  END TestC;
+  
+END Oid3.

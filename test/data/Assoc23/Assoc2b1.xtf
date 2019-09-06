@@ -2,17 +2,17 @@
 <TRANSFER xmlns="http://www.interlis.ch/INTERLIS2.3">
 	<HEADERSECTION SENDER="ili2pg-2.2.0-20150910" VERSION="2.3">
 		<MODELS>
-			<MODEL NAME="Assoc2" VERSION="2015-11-28" URI="mailto:ce@eisenhutinformatik.ch"></MODEL>
+			<MODEL NAME="Assoc2_0" VERSION="2015-11-28" URI="mailto:ce@eisenhutinformatik.ch"></MODEL>
 		</MODELS>
 	</HEADERSECTION>
 	<DATASECTION>
 		<!-- erster Basket, der von zweitem Basket referenziert wird -->
-		<Assoc2.TestA BID="Assoc2.TestA">
-			<Assoc2.TestA.ClassA1 TID="a1"></Assoc2.TestA.ClassA1>
-			<Assoc2.TestA.ClassA1b TID="a1b"></Assoc2.TestA.ClassA1b>
-			<Assoc2.TestA.ClassB1 TID="b1"></Assoc2.TestA.ClassB1>
-			<Assoc2.TestA.ClassA2 TID="a2"></Assoc2.TestA.ClassA2>
-			<Assoc2.TestA.ClassB3 TID="b3"></Assoc2.TestA.ClassB3>
-		</Assoc2.TestA>
+		<Assoc2_0.TestA BID="Assoc2.TestA">
+			<Assoc2_0.TestA.ClassA1 TID="a1"></Assoc2_0.TestA.ClassA1>
+			<Assoc2_0.TestA.ClassA1b TID="a1b"></Assoc2_0.TestA.ClassA1b>
+			<Assoc2_0.TestA.ClassB1 TID="b1"></Assoc2_0.TestA.ClassB1>
+			<Assoc2_0.TestA.ClassA2 TID="a2"></Assoc2_0.TestA.ClassA2>
+			<Assoc2_0.TestA.ClassB3 TID="b3"></Assoc2_0.TestA.ClassB3>
+		</Assoc2_0.TestA>
 	</DATASECTION>
 </TRANSFER>

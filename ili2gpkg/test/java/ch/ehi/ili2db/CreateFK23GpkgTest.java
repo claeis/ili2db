@@ -1,110 +1,111 @@
 package ch.ehi.ili2db;
 
-import static org.junit.Assert.fail;
-
 import java.io.File;
-import java.io.IOException;
 import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.Statement;
-import org.junit.After;
-import org.junit.Assert;
+
+import org.junit.Ignore;
 import org.junit.Test;
-import ch.ehi.basics.logging.EhiLogger;
 import ch.ehi.ili2db.base.Ili2db;
-import ch.ehi.ili2db.base.Ili2dbException;
 import ch.ehi.ili2db.gui.Config;
+import ch.ehi.ili2gpkg.GpkgTestSetup;
+import ch.ehi.sqlgen.DbUtility;
 
 public class CreateFK23GpkgTest {
 	
 	private static final String TEST_OUT="test/data/CreateFK23/";
-    private static final String GPKGFILENAME=TEST_OUT+"test.gpkg";
-	private Connection jdbcConnection=null;
-	
-	public void initDb() throws Exception
-	{
-	    Class driverClass = Class.forName("org.sqlite.JDBC");
-        jdbcConnection = DriverManager.getConnection("jdbc:sqlite:"+GPKGFILENAME, null, null);
-        Statement stmt=jdbcConnection.createStatement();
-	}
-	
-	@After
-	public void endDb() throws Exception
-	{
-		if(jdbcConnection!=null){
-			jdbcConnection.close();
-		}
-	}
-	
-	public Config initConfig(String xtfFilename,String logfile) {
-		Config config=new Config();
-		new ch.ehi.ili2gpkg.GpkgMain().initConfig(config);
-		config.setDbfile(GPKGFILENAME);
-		config.setDburl("jdbc:sqlite:"+GPKGFILENAME);
-		if(logfile!=null){
-			config.setLogfile(logfile);
-		}
-		config.setXtffile(xtfFilename);
-		if(xtfFilename!=null && Ili2db.isItfFilename(xtfFilename)){
-			config.setItfTransferfile(true);
-		}
-		return config;
-	}	
+    private static final String GPKGFILENAME=TEST_OUT+"createfk23.gpkg";
+    private static final String DBURL="jdbc:sqlite:"+GPKGFILENAME;
+    
+	protected AbstractTestSetup setup=createTestSetup();
+    protected AbstractTestSetup createTestSetup() {
+        return new GpkgTestSetup(GPKGFILENAME,DBURL);
+    }
+		
 	@Test
-	public void importIli_CreateFK_fail() throws Exception
+	public void importIli_CreateFK() throws Exception
 	{
 		//EhiLogger.getInstance().setTraceFilter(false);
-		File gpkgFile=new File(GPKGFILENAME);
-		if(gpkgFile.exists()){
-			gpkgFile.delete();
-		}
-		File data=new File(TEST_OUT,"model1.ili");
-		Config config=initConfig(data.getPath(),data.getPath()+".log");
+        setup.resetDb();
+        File data=new File(TEST_OUT,"model1.ili");
+        Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
 		config.setFunction(Config.FC_SCHEMAIMPORT);
 		config.setCreateFk(Config.CREATE_FK_YES);
 		config.setCreateNumChecks(true);
 		config.setTidHandling(Config.TID_HANDLING_PROPERTY);
-		config.setBasketHandling(config.BASKET_HANDLING_READWRITE);
+		config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
 		config.setCatalogueRefTrafo(null);
 		config.setMultiSurfaceTrafo(null);
 		config.setMultilingualTrafo(null);
 		config.setInheritanceTrafo(null);
 		config.setCreatescript(TEST_OUT+"importIli_CreateFK.sql");
 		Ili2db.readSettingsFromDb(config);
-		try {
-            Ili2db.run(config,null);
-            fail();
-        } catch (Exception e) {
-        	e.printStackTrace();
-            Assert.assertEquals("loop in create table statements: classa1->classb1->classa1", e.getCause().getMessage());
-        }
+        Ili2db.run(config,null);
 	}
     @Test
-    public void importIli_CreateFKrecursive_fail() throws Exception
+    public void createScript_CreateFK() throws Exception
+    {
+        File data=new File(TEST_OUT,"model1.ili");
+        File outfile=new File(data.getPath()+"-out.sql");
+        Config config=new Config();
+        setup.initConfig(config);
+        config.setLogfile(data.getPath()+".log");
+        config.setXtffile(data.getPath());
+        config.setFunction(Config.FC_SCRIPT);
+        config.setCreateFk(Config.CREATE_FK_YES);
+        config.setCreateNumChecks(true);
+        config.setTidHandling(Config.TID_HANDLING_PROPERTY);
+        config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
+        config.setCreateMetaInfo(true);
+        config.setCreateEnumDefs(Config.CREATE_ENUM_DEFS_MULTI_WITH_ID);
+        config.setCatalogueRefTrafo(null);
+        config.setMultiSurfaceTrafo(null);
+        config.setMultilingualTrafo(null);
+        config.setInheritanceTrafo(null);
+        config.setCreatescript(outfile.getPath());
+        Ili2db.run(config,null);
+        
+        // verify generated script
+        {
+            setup.resetDb();
+            
+            Connection jdbcConnection=setup.createDbSchema();
+            try {
+                // execute generated script
+                DbUtility.executeSqlScript(jdbcConnection, new java.io.FileReader(outfile));
+            }finally {
+                jdbcConnection.close();
+                jdbcConnection=null;
+            }
+
+            // rum import without schema generation
+            data=new File(TEST_OUT,"model1a.xtf");
+            config=setup.initConfig(data.getPath(),data.getPath()+".log");
+            config.setXtffile(data.getPath());
+            config.setFunction(Config.FC_IMPORT);
+            config.setDoImplicitSchemaImport(false);
+            config.setCreatescript(null);
+            Ili2db.readSettingsFromDb(config);
+            Ili2db.run(config,null);
+            
+        }
+    }
+    @Test
+    public void importIli_CreateFKrecursive() throws Exception
     {
         //EhiLogger.getInstance().setTraceFilter(false);
-        File gpkgFile=new File(GPKGFILENAME);
-        if(gpkgFile.exists()){
-            gpkgFile.delete();
-        }
+        setup.resetDb();
         File data=new File(TEST_OUT,"modelrecursive.ili");
-        Config config=initConfig(data.getPath(),data.getPath()+".log");
+        Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
         config.setFunction(Config.FC_SCHEMAIMPORT);
         config.setCreateFk(Config.CREATE_FK_YES);
         config.setCreateNumChecks(true);
         config.setTidHandling(Config.TID_HANDLING_PROPERTY);
-        config.setBasketHandling(config.BASKET_HANDLING_READWRITE);
+        config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
         config.setCatalogueRefTrafo(null);
         config.setMultiSurfaceTrafo(null);
         config.setMultilingualTrafo(null);
         config.setInheritanceTrafo(null);
         Ili2db.readSettingsFromDb(config);
-        try {
-            Ili2db.run(config,null);
-            fail();
-        } catch (Exception e) {
-            e.printStackTrace();
-            Assert.assertEquals("loop in create table statements: classa1->classa1", e.getCause().getMessage());
-        }
+        Ili2db.run(config,null);
     }
 }

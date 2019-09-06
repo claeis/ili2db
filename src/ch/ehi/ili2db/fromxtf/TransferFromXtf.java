@@ -427,16 +427,6 @@ public class TransferFromXtf {
 							// do not import this basket
 							skipBasket=true;
 							EhiLogger.logState("Skip Basket "+basket.getType()+"(oid "+basket.getBid()+")");
-							if(rounder!=null) {
-							    event=rounder.filter(event);
-							}
-							if(validator!=null) {
-							    validator.validate(event);
-							}
-							if(languageFilter!=null){
-								event=languageFilter.filter(event);
-							}
-							// FIXME do not validate/filter at all
 						}else{
 							// import this basket
 							EhiLogger.logState("Basket "+basket.getType()+"(oid "+basket.getBid()+")...");
@@ -494,15 +484,6 @@ public class TransferFromXtf {
 							objCount=0;
 						}
 					}else if(event instanceof EndBasketEvent){
-                        if(rounder!=null) {
-                            event=rounder.filter(event);
-                        }
-						if(validator!=null) {
-						    validator.validate(event);
-						}
-						if(languageFilter!=null){
-							event=languageFilter.filter(event);
-						}
 						if(reader instanceof ItfReader2){
 				        	ArrayList<IoxInvalidDataException> dataerrs = ((ItfReader2) reader).getDataErrs();
 				        	if(dataerrs.size()>0){
@@ -517,6 +498,15 @@ public class TransferFromXtf {
 				        	}
 						}
 						if(!skipBasket){
+	                        if(rounder!=null) {
+	                            event=rounder.filter(event);
+	                        }
+	                        if(validator!=null) {
+	                            validator.validate(event);
+	                        }
+	                        if(languageFilter!=null){
+	                            event=languageFilter.filter(event);
+	                        }
 							// fix external/forward references
 							ArrayList<FixIomObjectExtRefs> fixedObjects=new ArrayList<FixIomObjectExtRefs>();
 							for(FixIomObjectExtRefs fixref : delayedObjects){
@@ -563,13 +553,13 @@ public class TransferFromXtf {
 						
 						skipBasket=false;
 					}else if(event instanceof ObjectEvent){
-                        if(rounder!=null) {
-                            event=rounder.filter(event);
-                        }
-						if(validator!=null) {
-						    validator.validate(event);
-						}
 						if(!skipBasket){
+	                        if(rounder!=null) {
+	                            event=rounder.filter(event);
+	                        }
+	                        if(validator!=null) {
+	                            validator.validate(event);
+	                        }
 							if(languageFilter!=null){
 								event=languageFilter.filter(event);
 							}

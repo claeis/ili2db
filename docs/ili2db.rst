@@ -11,46 +11,68 @@ Interlis-Transferdatei (itf oder xtf) einem Interlis-Modell entsprechend
 GeoPackage) schreibt oder aus der Datenbank mittels einem 1:1-Transfer
 eine solche Transferdatei erstellt. Folgende Funktionen sind möglich:
 
--  1:1-Umwandlung einer Modelldatei in ein Datenbankschema.
+- erstellt das Datenbankschema aus einem Interlis Modell
 
--  1:1-Import einer beliebigen Transferdatei mit dazugehöriger
-   Modelldatei in eine Datenbank.
+- importiert Daten aus einer Transferdatei in die Datenbank
 
--  1:1-Export von Datenbanktabellen in eine Interlis-Transferdatei.
+- exportiert Daten aus der Datenbank in eine Transferdatei
 
--  1:1-Export von Datenbanktabellen in eine GML-Transferdatei [1]_.
 
-1:1-Import in die Datenbank
----------------------------
+Folgende Transferformate werden unterstützt:
 
-Der 1:1-Import schreibt alle Objekte (im Sinne der eigentlichen Daten)
-der Interlis-Transferdatei in die Datenbank. Falls die Tabellen in der
-Datenbank resp. im Schema noch nicht existieren, werden die Tabellen und
-falls nötig das Schema beim Import angelegt.
+-  INTERLIS 1
 
-Es besteht die Möglichkeit ein Schema mit leeren Tabellen aus dem
-Interlis-Modell in der Datenbank zu erstellen (nur PostGIS).
+-  INTERLIS 2
 
-Area- und Surface-Geometrien können bei Interlis 1 optional polygoniert
-werden.
+-  GML 3.2 [1]_
 
-Kreisbögen werden als Kreisbögen importiert und somit nicht segmentiert
-oder können optional auch segmentiert werden.
 
-Attribute vom Interlis-Datentyp „Enumeration“ können wahlweise auch
-zusätzlich als Text importiert werden (z.B. BB-Art 0 = „Gebaeude“).
+Schemaimport in die Datenbank
+-----------------------------
+Beim Schemaimport (``--schemaimport``) wird anhand des INTERLIS Modells das 
+Datenbankschema angelegt. 
+
+Diverse Optionen beeinflussen die Abbildung.
 
 Den Geometrien kann mittels Parameter ein EPSG-Code zugewiesen werden.
 Die Geometrie-Attribute können optional indexiert werden.
 
-1:1-Export aus der Datenbank
+Beispiel::
+	
+  java -jar ili2gpkg.jar --schemaimport --dbfile mogis.gpkg path/to/dm01av.ili
+
+Import in die Datenbank
+---------------------------
+
+Der Import (``--import``) schreibt alle Objekte (im Sinne der eigentlichen Daten)
+der Transferdatei in die Datenbank. 
+
+Diverse Optionen beeinflussen, was mit den bestehenden Daten in der DB geschieht.
+
+Area- und Surface-Geometrien werden bei Interlis 1 polygoniert.
+
+Kreisbögen werden als Kreisbögen importiert und somit nicht segmentiert
+(oder können optional auch segmentiert werden).
+
+Beispiel::
+	
+  java -jar ili2gpkg.jar --import --dbfile mogis.gpkg path/to/data.xtf
+
+Export aus der Datenbank
 ----------------------------
 
-Der 1:1-Export schreibt alle Tabellen eines Interlis-Modells in eine
-Interlis-Transferdatei.
+Der Export (``--export``) schreibt alle Daten aus der Datenbank in eine
+Transferdatei.
+
+Mit weiteren Optionen wird gesteuert, welche Daten aus der Datenbank exportiert 
+werden.
 
 Geometrien vom Typ Area und Surface werden bei Interlis 1 während dem
 Export in Linien umgewandelt.
+
+Beispiel::
+	
+  java -jar ili2gpkg.jar --export --models DM01 --dbfile mogis.gpkg path/to/output.xtf
 
 Log-Meldungen
 -------------
@@ -105,23 +127,23 @@ In den folgenden Abschnitten wird die Funktionsweise anhand einzelner
 Anwendungsfälle beispielhaft beschrieben. Die detaillierte Beschreibung
 einzelner Funktionen ist im Kapitel „Referenz“ zu finden.
 
-Import-Funktionen
------------------
+Schemaimport-Funktionen
+-----------------------
 
-Fall 1
-~~~~~~
+Fall 1.1
+~~~~~~~~
 
 Die Tabellen existieren nicht und sollen in der Datenbank angelegt
-werden.
+werden (``--schemaimport``).
 
 **PostGIS:** ``java -jar ili2pg.jar --schemaimport --dbdatabase mogis
---dbusr julia --dbpwd romeo path/to/dm01av.ili``
+--dbusr julia --dbpwd romeo path/to/dm01.ili``
 
 **GeoPackage:** ``java -jar ili2gpkg.jar --schemaimport --dbfile
-mogis.gpkg path/to/dm01av.ili``
+mogis.gpkg path/to/dm01.ili``
 
 **FileGDB:** ``java -jar ili2fgdb.jar --schemaimport --dbfile
-mogis.gdb path/to/dm01av.ili``
+mogis.gdb path/to/dm01.ili``
 
 
 Es werden keine Daten importiert, sondern nur die leeren Tabellen
@@ -144,55 +166,122 @@ Falls die Datei schon existiert, werden die Tabellen ergänzt.
 **FileGDB:** Falls die Datei mogis.gdb noch nicht existiert, wird sie erzeugt.
 Falls die Datei schon existiert, werden die Tabellen ergänzt.
 
-Fall 2 (nur PostGIS)
-~~~~~~~~~~~~~~~~~~~~
+Fall 1.2 (nur PostGIS)
+~~~~~~~~~~~~~~~~~~~~~~
 
 Das gewünschte Schema und die Tabellen existieren nicht und es soll das
 DB-Schema und -Datenmodell angelegt werden:
 
 **PostGIS:** ``java -jar ili2pg.jar --schemaimport --dbdatabase mogis
---dbschema dm01av --dbusr julia --dbpwd romeo path/to/dm01av.ili``
+--dbschema dm01av --dbusr julia --dbpwd romeo path/to/dm01.ili``
 
-Es werden keine Daten importiert, sondern nur das Schema dm01av und die
+Es werden keine Daten importiert, sondern nur das Schema dm01av (``--dbschema dm01av``) und die
 leeren Tabellen angelegt. Die Geometrie-Spalten werden in der Tabelle
 public.geometry\_columns registriert.
 
-Fall 3
-~~~~~~
+Fall 1.3
+~~~~~~~~
 
 Die Tabellen existieren nicht und sollen in der Datenbank angelegt
-werden und die Daten sollen importiert werden:
+werden. Es werden keine Daten importiert, sondern nur die leeren Tabellen
+angelegt:
 
-**PostGIS:** ``java -jar ili2pg.jar --import --dbhost ofaioi4531 --dbport
+**PostGIS:** ``java -jar ili2pg.jar --schemaimport --dbhost ofaioi4531 --dbport
 5432 --dbdatabase mogis --dbusr julia --dbpwd romeo 
---createEnumTabs --createBasketCol --log path/to/logfile path/to/260100.itf``
+--createEnumTabs --createBasketCol --log path/to/logfile path/to/dm01.ili``
 
-**GeoPackage:** ``java -jar ili2gpkg.jar --import --dbfile mogis.gpkg
---createEnumTabs --createBasketCol --log path/to/logfile path/to/260100.itf``
+**GeoPackage:** ``java -jar ili2gpkg.jar --schemaimport --dbfile mogis.gpkg
+--createEnumTabs --createBasketCol --log path/to/logfile path/to/dm01.ili``
 
-**FileGDB:** ``java -jar ili2fgdb.jar --import --dbfile mogis.gdb
---createEnumTabs --createBasketCol --log path/to/logfile path/to/260100.itf``
+**FileGDB:** ``java -jar ili2fgdb.jar --schemaimport --dbfile mogis.gdb
+--createEnumTabs --createBasketCol --log path/to/logfile path/to/dm01.ili``
 
-Alle Tabellen werden in der Datenbank erstellt und das Itf 260100.itf
-importiert. Die Geometrie-Spalten werden registriert. Als Primary-Key
+Alle Tabellen werden in der Datenbank erstellt. 
+Die Geometrie-Spalten werden registriert. Als Primary-Key
 wird ein zusätzliches Attribut erstellt (t\_id). Zusätzlich wir ein
-t\_basket Attribut erstellt. Dieses zeigt als Fremdschlüssel auf eine
+t\_basket Attribut erstellt (``--createBasketCol``). Dieses zeigt als Fremdschlüssel auf eine
 Meta-Hilfstabelle (Importdatum, Benutzer, Modellname, Pfad der
 Itf-Datei).
 
-Die Aufzähltypen werden in Lookup-Tables abgebildet.
+Die Aufzähltypen werden in Lookup-Tables abgebildet (``--createEnumTabs``).
 
-Es wird ein Logfile angelegt. Dieses enthält Zeitpunkt des Imports, Name
+Es wird ein Logfile angelegt (``--log path/to/logfile``). 
+Dieses enthält Zeitpunkt des Schemaimports, Name
 des Benutzers, Datenbankparameter (ohne Passwort), Name (ganzer Pfade)
-der Ili- und Itf-Datei, sämtliche Namen der importierten Tabellen inkl.
-Anzahl der importierten Elemente pro Tabelle. Allfällige Fehlermeldungen
+der Ili-Datei, sämtliche Namen der importierten Tabellen. Allfällige Fehlermeldungen
 (bei Importabbruch) werden auch in die Logdatei geschrieben.
 
-Fall 4
-~~~~~~
+Fall 1.4
+~~~~~~~~
+
+Enumerations werden zusätzlich als Textattribut hinzugefügt:
+
+**PostGIS:** ``java -jar ili2pg.jar --schemaimport --createEnumTxtCol
+--dbdatabase mogis --dbusr julia --dbpwd romeo path/to/dm01.ili``
+
+**GeoPackage:** ``java -jar ili2gpkg.jar --schemaimport --createEnumTxtCol
+--dbfile mogis.gpkg path/to/dm01.ili``
+
+**FileGDB:** ``java -jar ili2fgdb.jar --schemaimport --createEnumTxtCol
+--dbfile mogis.gdb path/to/dm01.ili``
+
+Das Modell wird in die Datenbank importiert. Es werden keine Daten importiert, sondern nur die leeren Tabellen
+angelegt.
+Zusätzlich werden die
+Attribute vom Typ Enumeration in ihrer Textrepräsentation (Attribut
+„art“ = 0 ⇒ „art\_txt“ = „Gebaeude“) hinzugefügt (``--createEnumTxtCol``).
+
+Fall 1.5
+~~~~~~~~
+
+Den Geometrien wird ein spezieller SRS (Spatial Reference System)
+Identifikator hinzugefügt:
+
+**PostGIS:** ``java -jar ili2pg.jar --schemaimport --defaultSrsAuth EPSG
+--defaultSrsCode 2056 --dbdatabase mogis --dbusr julia --dbpwd romeo
+path/to/dm01.ili``
+
+**GeoPackage:** ``java -jar ili2gpkg.jar --schemaimport --defaultSrsAuth EPSG
+--defaultSrsCode 2056 --dbfile mogis.gpkg path/to/dm01.ili``
+
+**FileGDB:** ``java -jar ili2fgdb.jar --schemaimport --defaultSrsAuth EPSG
+--defaultSrsCode 2056 --dbfile mogis.gdb path/to/dm01.ili``
+
+Das Modell wird in die Datenbank importiert. Es werden keine Daten importiert, sondern nur die leeren Tabellen
+angelegt.
+Zusätzlich wird jeder
+Geometrie eine SRS-ID (EPSG-Code 2056) hinzugefügt 
+(``--defaultSrsAuth EPSG --defaultSrsCode 2056``). 
+Ebenfalls wird derselbe Identifikator für
+die Registrierung der Geometriespalten in den Metatabellen der Datenbank
+benutzt.
+
+Fall 1.6
+~~~~~~~~
+
+Geometrien werden indexiert:
+
+**PostGIS:** ``java -jar ili2pg.jar --schemaimport --createGeomIdx --dbdatabase
+mogis --dbusr julia --dbpwd romeo path/to/dm01.ili``
+
+**GeoPackage:** ``java -jar ili2gpkg.jar --schemaimport --createGeomIdx --dbfile
+mogis.gpkg path/to/dm01.ili``
+
+Das Modell wird in die Datenbank importiert. Es werden keine Daten importiert, sondern nur die leeren Tabellen
+angelegt.
+Die Geometrien werden
+indexiert (``--createGeomIdx``).
+
+**FileGDB:** Die Geometrien sind grundsätzlich immer indexiert.
+
+Import-Funktionen
+-----------------
+
+Fall 2.1
+~~~~~~~~
 
 Die Tabellen existieren bereits und der Inhalt der Tabellen soll
-erweitert werden:
+erweitert werden (``--import``):
 
 **PostGIS:** ``java -jar ili2pg.jar --import --dbdatabase mogis --dbusr
 julia --dbpwd romeo path/to/260100.itf``
@@ -207,83 +296,34 @@ Das Itf 260100.itf wird importiert und die Daten den bereits vorhanden
 Tabellen hinzugefügt. Die Tabellen können zusätzliche Attribute
 enthalten (z.B. bfsnr, datum etc.), welche beim Import leer bleiben.
 
-Fall 5
-~~~~~~
+Fall 2.2
+~~~~~~~~
 
 Die Tabellen existieren bereits und der Inhalt der Tabellen soll durch
-den Inhalt des itf ersetzt werden:
+den Inhalt des itf ersetzt werden (``--import``):
 
 **PostGIS:** ``java -jar ili2pg.jar --import --deleteData --dbdatabase
-mogis --dbusr julia --dbpwd romeo path/to/260100.itf``
+mogis --dbusr julia --dbpwd romeo --log path/to/logfile path/to/260100.itf``
 
 **GeoPackage:** ``java -jar ili2gpkg.jar --import --deleteData --dbfile
-mogis.gpkg path/to/260100.itf``
+mogis.gpkg --log path/to/logfile path/to/260100.itf``
 
 **FileGDB:** ``java -jar ili2fgdb.jar --import --deleteData --dbfile
-mogis.gdb path/to/260100.itf``
+mogis.gdb --log path/to/logfile path/to/260100.itf``
 
 Das Itf 260100.itf wird importiert und die bestehenden Daten in den
-bereits vorhanden Tabellen gelöscht. Die Tabellen können zusätzliche
+bereits vorhanden Tabellen gelöscht (``--deleteData``). Die Tabellen können zusätzliche
 Attribute enthalten (z.B. bfsnr, datum etc.), welche beim Import leer
 bleiben.
 
-Fall 6
-~~~~~~
+Es wird ein Logfile angelegt (``--log path/to/logfile``). Dieses enthält Zeitpunkt des Imports, Name
+des Benutzers, Datenbankparameter (ohne Passwort), Name (ganzer Pfade)
+der Ili- und Itf-Datei, sämtliche Namen der importierten Tabellen inkl.
+Anzahl der importierten Elemente pro Tabelle. Allfällige Fehlermeldungen
+(bei Importabbruch) werden auch in die Logdatei geschrieben.
 
-Enumerations werden zusätzlich als Textattribut hinzugefügt:
-
-**PostGIS:** ``java -jar ili2pg.jar --import --createEnumTxtCol
---dbdatabase mogis --dbusr julia --dbpwd romeo path/to/260100.itf``
-
-**GeoPackage:** ``java -jar ili2gpkg.jar --import --createEnumTxtCol
---dbfile mogis.gpkg path/to/260100.itf``
-
-**FileGDB:** ``java -jar ili2fgdb.jar --import --createEnumTxtCol
---dbfile mogis.gdb path/to/260100.itf``
-
-Das Itf wird in die Datenbank importiert. Zusätzlich werden die
-Attribute vom Typ Enumeration in ihrer Textrepräsentation (Attribut
-„art“ = 0 ⇒ „art\_txt“ = „Gebaeude“) hinzugefügt.
-
-Fall 7
-~~~~~~
-
-Den Geometrien wird ein spezieller SRS (Spatial Reference System)
-Identifikator hinzugefügt:
-
-**PostGIS:** ``java -jar ili2pg.jar --import --defaultSrsAuth EPSG
---defaultSrsCode 2056 --dbdatabase mogis --dbusr julia --dbpwd romeo
-path/to/260100.itf``
-
-**GeoPackage:** ``java -jar ili2gpkg.jar --import --defaultSrsAuth EPSG
---defaultSrsCode 2056 --dbfile mogis.gpkg path/to/260100.itf``
-
-**FileGDB:** ``java -jar ili2fgdb.jar --import --defaultSrsAuth EPSG
---defaultSrsCode 2056 --dbfile mogis.gdb path/to/260100.itf``
-
-Das Itf wird in die Datenbank importiert. Zusätzlich wird jeder
-Geometrie eine SRS-ID (EPSG-Code 2056) hinzugefügt. Ebenfalls wird derselbe Identifikator für
-die Registrierung der Geometriespalten in den Metatabellen der Datenbank
-benutzt.
-
-Fall 8
-~~~~~~
-
-Geometrien werden indexiert:
-
-**PostGIS:** ``java -jar ili2pg.jar --import --createGeomIdx --dbdatabase
-mogis --dbusr julia --dbpwd romeo path/to/260100.itf``
-
-**GeoPackage:** ``java -jar ili2gpkg.jar --import --createGeomIdx --dbfile
-mogis.gpkg path/to/260100.itf``
-
-Das Itf wird in die Datenbank importiert. Die Geometrien werden
-indexiert.
-
-**FileGDB:** Die Geometrien sind grundsätzlich immer indexiert.
-
-Fall 9
-~~~~~~
+Fall 2.3
+~~~~~~~~
 
 Tauchen beim Import des Itf Fehler auf (z. B. mangelnde
 Modellkonformität oder verletzte Constraints in der DB), bricht der
@@ -299,11 +339,11 @@ inkonsistenten Zustand.
 Export-Funktionen
 -----------------
 
-Fall 1
-~~~~~~
+Fall 3.1
+~~~~~~~~
 
 Die Tabellen werden aus der Datenbank in eine Interlis 1-Transfer-Datei
-geschrieben:
+geschrieben (``--export``):
 
 **PostGIS:** ``java -jar ili2pg.jar --export --models DM01AV --dbhost
 ofaioi4531 --dbport 5432 --dbdatabase mogis --dbusr julia --dbpwd romeo
@@ -315,7 +355,8 @@ mogis.gpkg path/to/output.itf``
 **FileGDB:** ``java -jar ili2fgdb.jar --export --models DM01AV --dbfile
 mogis.gdb path/to/output.itf``
 
-Die Tabellen werden dem Interlis-Modell DM01AV entsprechend in die
+Die Daten aller Tabellen des Interlis-Modells DM01AV (``--models DM01AV``) 
+werden in die
 Interlis 1-Transferdatei output.itf geschrieben. Fehlende Tabellen in
 der Datenbank werden dementsprechend als leere Tabellen oder gar nicht
 (gemäss Definition im Datenmodell) in die Datei geschrieben. Fehlende
@@ -326,11 +367,11 @@ werden. Alternativ kann auch der Parameter --topics, --baskets oder --dataset
 verwendet werden, um die zu exportierenden Daten auszuwählen. Einer
 dieser Parameter muss also zwingend beim Export angegeben werden.
 
-Fall 2
-~~~~~~
+Fall 3.2
+~~~~~~~~
 
 Die Tabellen werden aus der Datenbank in eine Interlis 2-Transfer-Datei
-geschrieben:
+geschrieben (``--export``):
 
 **PostGIS:** ``java -jar ili2pg.jar --export --models DM01AV --dbhost
 ofaioi4531 --dbport 5432 --dbdatabase mogis --dbusr julia --dbpwd romeo
@@ -342,7 +383,8 @@ mogis.gpkg path/to/output.xtf``
 **FileGDB:** ``java -jar ili2fgdb.jar --export --models DM01AV --dbfile
 mogis.gdb path/to/output.xtf``
 
-Die Tabellen werden dem Interlis-Modell DM01AV entsprechend in das die
+Die Daten aller Tabellen des Interlis-Modells DM01AV (``--models DM01AV``) 
+werden in die
 Interlis 2-Transferdatei output.xtf geschrieben. Fehlende Tabellen und
 Attribute in der Datenbank werden gar nicht in die Datei geschrieben.
 
@@ -354,10 +396,10 @@ dieser Parameter muss also zwingend beim Export angegeben werden.
 Prüf-Funktionen
 -----------------
 
-Fall 1
-~~~~~~
+Fall 4.1
+~~~~~~~~
 
-Die Daten in der Datenbank werden anhand des Interlis-Modells geprüft:
+Die Daten in der Datenbank werden anhand des Interlis-Modells geprüft (``--validate``):
 
 **PostGIS:** ``java -jar ili2pg.jar --validate --models DM01AV --dbhost
 ofaioi4531 --dbport 5432 --dbdatabase mogis --dbusr julia --dbpwd romeo``
@@ -372,6 +414,60 @@ Anhand des Parameters --models wird definiert, welche Daten geprüft
 werden. Alternativ kann auch der Parameter --topics, --baskets oder --dataset
 verwendet werden, um die zu prüfenden Daten auszuwählen. Einer
 dieser Parameter muss also zwingend beim Prüfen angegeben werden.
+
+Migration von 3.x nach 4.x
+--------------------------
+Die von ili2b 4.x benutzten Schemaabbildungsregeln sind zum Teil nicht 
+kompatibel mit den Regeln von ili2db 3.x.
+Das einfachste für die Datenmigration ist darum:
+
+- Daten mit 3.x exportieren
+
+- Schema mit 4.x anlegen
+
+- Daten mit 4.x importieren
+
+Ab ili2db 4.1 gibt es eine Option ``--export3`` um Daten aus einer mit 3.x angelegten 
+DB zu exportieren.
+
+Die wichtigsten Optionen, um zu 3.x kompatibles Verhalten zu erhalten sind:
+
+- ``--createTidCol``  damit ``--importTid`` und ``--exportTid`` funktioniert
+
+- ``--doSchemaImport`` damit ``--import`` auch die Tabellen anlegt
+
+- ``--ver3-translation`` um bei Modellen mit ``TRANSLATION OF`` die 3.x Tabellen zu erhalten
+
+Fall 5.1
+~~~~~~~~
+
+Die Tabellen existieren nicht und sollen in der Datenbank angelegt
+werden und die Daten sollen importiert werden (``--import``):
+
+**PostGIS:** ``java -jar ili2pg.jar --import --doSchemaImport --dbhost ofaioi4531 --dbport
+5432 --dbdatabase mogis --dbusr julia --dbpwd romeo 
+--createEnumTabs --createBasketCol --log path/to/logfile path/to/260100.itf``
+
+**GeoPackage:** ``java -jar ili2gpkg.jar --import --doSchemaImport --dbfile mogis.gpkg
+--createEnumTabs --createBasketCol --log path/to/logfile path/to/260100.itf``
+
+**FileGDB:** ``java -jar ili2fgdb.jar --import --doSchemaImport --dbfile mogis.gdb
+--createEnumTabs --createBasketCol --log path/to/logfile path/to/260100.itf``
+
+Alle Tabellen werden in der Datenbank erstellt (``--doSchemaImport``) und das Itf 260100.itf
+importiert. Die Geometrie-Spalten werden registriert. Als Primary-Key
+wird ein zusätzliches Attribut erstellt (t\_id). Zusätzlich wir ein
+t\_basket Attribut erstellt (``--createBasketCol``). Dieses zeigt als Fremdschlüssel auf eine
+Meta-Hilfstabelle (Importdatum, Benutzer, Modellname, Pfad der
+Itf-Datei).
+
+Die Aufzähltypen werden in Lookup-Tables abgebildet (``--createEnumTabs``).
+
+Es wird ein Logfile angelegt (``--log path/to/logfile``). Dieses enthält Zeitpunkt des Imports, Name
+des Benutzers, Datenbankparameter (ohne Passwort), Name (ganzer Pfade)
+der Ili- und Itf-Datei, sämtliche Namen der importierten Tabellen inkl.
+Anzahl der importierten Elemente pro Tabelle. Allfällige Fehlermeldungen
+(bei Importabbruch) werden auch in die Logdatei geschrieben.
 
 Referenz
 ========
@@ -419,6 +515,8 @@ Optionen:
 |                               | Ob die Daten im Interlis 1-, Interlis 2- oder GML-Format geschrieben werden, ergibt sich aus der Dateinamenserweiterung der Ausgabedatei. Für eine Interlis 1-Transferdatei muss die Erweiterung .itf verwendet werden. Für eine GML-Transferdatei muss die Erweiterung .gml verwendet werden.                                                                                                                                                                                                                                             |
 |                               |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
 |                               | Die Optionen --topics und --baskets bedingen, dass das Datenbankschema mit der Option --createBasketCol erstellt wurde.                                                                                                                                                                                                                                                                                                                                                                                                                    |
++-------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| --export3                     | Exportiert Daten aus einer Datenbank die mit ili2db 3.x angelegt wurde in eine Transferdatei.                                                                                                                                                                                                                                                                                                                                                                                                                                              |
 +-------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | --validate                    | Prüft die Daten in der Datenbank (ohne Export in eine Transferdatei).                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
 |                               |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
@@ -468,6 +566,8 @@ Optionen:
 +-------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | --defaultSrsCode code         | SRS Code für Geometriespalten, wo sich dieser Wert nicht ermitteln lässt. Kein Default                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 +-------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| --modelSrsCode model=epsgCode | SRS Code für Geometriespalten des gegebenen Modells, wo sich dieser Wert nicht pro Attribut ermitteln lässt. Mehrere Definitionen können durch Strichpunkt getrennt wrden, z.B.: --modelSrsCode ModelA=2056;ModelB=21781                                                                                                                                                                                                                                                                                                                   |
++-------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | --fgdbXyResolution value      | **FileGDB:** XY-Auflösung für Geometriespalten                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
 +-------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | --fgdbXyTolerance value       | **FileGDB:** XY-Toleranz für Geometriespalten                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
@@ -506,7 +606,7 @@ Optionen:
 +-------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | --postScript filename         | SQL-Skript, das nach dem (Schema-)Import/Export ausgeführt wird.                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
 +-------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| --noSmartMapping              | Alle strukturellen Abbildungsoptimierungen werden ausgeschaltet. (s.a. --smart1Inheritance, --coalesceCatalogueRef, --coalesceMultiSurface, --coalesceMultiLine, --coalesceMultiPoint, --expandMultilingual, --coalesceArray)                                                                                                                                                                                                                                                                                                              |
+| --noSmartMapping              | Alle strukturellen Abbildungsoptimierungen werden ausgeschaltet. (s.a. --smart1Inheritance, --coalesceCatalogueRef, --coalesceMultiSurface, --coalesceMultiLine, --coalesceMultiPoint, --expandMultilingual, --expandLocalised, --coalesceArray)                                                                                                                                                                                                                                                                                           |
 +-------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | --smart1Inheritance           | Bildet die Vererbungshierarchie mit einer dymamischen Strategie ab. Für Klassen, die referenziert werden und deren Basisklassen nicht mit einer NewClass-Strategie abgebildet werden, wird die NewClass-Strategie verwendet. Abstrakte Klassen werden mit einer SubClass-Strategie abgebildet. Konkrete Klassen, ohne Basisklasse oder deren direkte Basisklassen mit einer SubClass-Strategie abgebildet werden, werden mit einer NewClass-Strategie abgebildet. Alle anderen Klassen werden mit einer SuperClass-Strategie abgebildet.   |
 +-------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
@@ -525,6 +625,8 @@ Optionen:
 | --coalesceJson                | Strukturattribute mit dem Metaattribut ``ili2db.mapping=JSON``, werden direkt als Spalte mit dem Typ JSON abgebildet.                                                                                                                                                                                                                                                                                                                                                                                                                      |
 +-------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | --expandMultilingual          | Strukturattribute deren maximale Kardinalität 1 ist, deren Basistyp LocalisationCH\_V1.MultilingualText oder LocalisationCH\_V1.MultilingualMText ist und die ausser „LocalisedText“ keine weiteren Attribute haben, werden direkt als Spalten in der Tabelle des Strukturattributes abgebildet, d.h. keine Records in den Tabellen für die Multilingual-Strukturen.                                                                                                                                                                       |
++-------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| --expandLocalised             | Strukturattribute deren maximale Kardinalität 1 ist, deren Basistyp LocalisationCH\_V1.LocalisedText oder LocalisationCH\_V1.LocalisedMText ist und die ausser „Language“ und „Text“ keine weiteren Attribute haben, werden direkt als Spalten in der Tabelle des Strukturattributes abgebildet, d.h. keine Records in den Tabellen für die Multilingual-Strukturen.                                                                                                                                                                       |
 +-------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | --createGeomIdx               | Erstellt für jede Geometriespalte in der Datenbank einen räumlichen Index. (siehe Kapitel Abbildungsregeln/Geometrieattribute)                                                                                                                                                                                                                                                                                                                                                                                                             |
 +-------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
@@ -611,6 +713,8 @@ Optionen:
 +-------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | --exportModels modelname      | Beim Export/Prüfen werden die Daten gem. dem gegebenen Basis-Modell exportiert/geprüft. Ohne die Option ``--exportModels`` werden die Daten so wie sie erfasst sind, exportiert/validiert. Mehrere Modellnamen können durch Semikolon ‚;‘ getrennt werden.                                                                                                                                                                                                                                                                                 |
 +-------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| --exportCrsModels modelname   | Beim Export/Prüfen werden die Daten gem. dem gegebenen Modell, das ein alternatives CRS zum Original Modell hat, exportiert/geprüft. Ohne die Option ``--exportCrsModels`` werden die Daten so wie sie erfasst sind, exportiert/validiert.                                                                                                                                                                                                                                                                                                 |
++-------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | --ILIGML20                    | Verwendet beim Export eCH-0118-2.0 als Transferformat.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 +-------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | --log filename                | Schreibt die log-Meldungen in eine Datei.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
@@ -675,13 +779,21 @@ Namenskonventionen beschrieben.
 |              |                         |  );                                 |                                                                                                                                                                                                                                                                                                                                                                                    |
 |              |                         |                                     |                                                                                                                                                                                                                                                                                                                                                                                    |
 +--------------+-------------------------+-------------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| 5            | ::                      | ::                                  | Mit der Option --t\_id\_Name oidname wird der Namen der Spalte für den Datenbank internen Primärschlüssel (nicht die Spalte für die TID aus der Transferdatei) festgelegt.                                                                                                                                                                                                         |
+| 5            | ::                      | ::                                  | Mit dem Metaattribut ili2db.oid erhält die Tabelle (die eine Klasse repräsentiert, die keine Basisklasse hat) eine zusätzliche Spalte T\_Ili\_Tid, wie wenn die Klasse eine OID hätte. Diese Spalte enthält die TID aus der Transferdatei.                                                                                                                                         |
+|              |                         |                                     |                                                                                                                                                                                                                                                                                                                                                                                    |
+|              |  !!@ili2db.oid=MyOID    |  CREATE TABLE A (                   | MyOID muss eine im Modell vorhandene OID-Domain Definition sein (z.b. INTERLIS.UUIDOID). Das Metaattribut steht typischerweise in einer externen Datei, die beim Schemaimport mit --iliMetaAttrs mitgegeben wird.                                                                                                                                                                  |
+|              |  CLASS A =              |   T_Id integer PRIMARY KEY,         |                                                                                                                                                                                                                                                                                                                                                                                    |
+|              |  END A;                 |   T_Ili_Tid varchar(200) NULL       | Diese Spalte ist NICHT der Datenbank interne Primärschlüssel.                                                                                                                                                                                                                                                                                                                      |
+|              |                         |  );                                 |                                                                                                                                                                                                                                                                                                                                                                                    |
+|              |                         |                                     |                                                                                                                                                                                                                                                                                                                                                                                    |
++--------------+-------------------------+-------------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| 6            | ::                      | ::                                  | Mit der Option --t\_id\_Name oidname wird der Namen der Spalte für den Datenbank internen Primärschlüssel (nicht die Spalte für die TID aus der Transferdatei) festgelegt.                                                                                                                                                                                                         |
 |              |                         |                                     |                                                                                                                                                                                                                                                                                                                                                                                    |
 |              |  CLASS A =              |  CREATE TABLE A (                   |                                                                                                                                                                                                                                                                                                                                                                                    |
 |              |  END A;                 |   oidname integer PRIMARY KEY       |                                                                                                                                                                                                                                                                                                                                                                                    |
 |              |                         |  );                                 |                                                                                                                                                                                                                                                                                                                                                                                    |
 +--------------+-------------------------+-------------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| 6            | ::                      | ::                                  | Strukturen werden im Allgemeinen abgebildet wie Klassen.                                                                                                                                                                                                                                                                                                                           |
+| 7            | ::                      | ::                                  | Strukturen werden im Allgemeinen abgebildet wie Klassen.                                                                                                                                                                                                                                                                                                                           |
 |              |                         |                                     |                                                                                                                                                                                                                                                                                                                                                                                    |
 |              |  STRUCTURE C =          |  CREATE TABLE C (                   | Die Strukturtabelle enthält zusätzlich eine Spalte T\_seq, die die Reihenfolge der Strukturelement festlegt.                                                                                                                                                                                                                                                                       |
 |              |  END C;                 |   T_Id integer PRIMARY KEY,         |                                                                                                                                                                                                                                                                                                                                                                                    |
@@ -689,7 +801,7 @@ Namenskonventionen beschrieben.
 |              |                         |  );                                 |                                                                                                                                                                                                                                                                                                                                                                                    |
 |              |                         |                                     |                                                                                                                                                                                                                                                                                                                                                                                    |
 +--------------+-------------------------+-------------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| 7            | ::                      | ::                                  | Mit der Option --createBasketCol erhält jede Tabelle eine zusätzliche Spalte T\_basket. Diese Spalte enthält den Fremschlüssel auf die Tabelle t\_ili2db\_basket.                                                                                                                                                                                                                  |
+| 8            | ::                      | ::                                  | Mit der Option --createBasketCol erhält jede Tabelle eine zusätzliche Spalte T\_basket. Diese Spalte enthält den Fremschlüssel auf die Tabelle t\_ili2db\_basket.                                                                                                                                                                                                                  |
 |              |                         |                                     |                                                                                                                                                                                                                                                                                                                                                                                    |
 |              |  CLASS A =              |  CREATE TABLE A (                   |                                                                                                                                                                                                                                                                                                                                                                                    |
 |              |  END A;                 |   T_Id integer PRIMARY KEY,         |                                                                                                                                                                                                                                                                                                                                                                                    |
@@ -697,7 +809,7 @@ Namenskonventionen beschrieben.
 |              |                         |  );                                 |                                                                                                                                                                                                                                                                                                                                                                                    |
 |              |                         |                                     |                                                                                                                                                                                                                                                                                                                                                                                    |
 +--------------+-------------------------+-------------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| 8            | ::                      | ::                                  | Mit der Option --createDatasetCol erhält jede Tabelle eine zusätzliche Spalte T\_datasetname.                                                                                                                                                                                                                                                                                      |
+| 9            | ::                      | ::                                  | Mit der Option --createDatasetCol erhält jede Tabelle eine zusätzliche Spalte T\_datasetname.                                                                                                                                                                                                                                                                                      |
 |              |                         |                                     |                                                                                                                                                                                                                                                                                                                                                                                    |
 |              |  CLASS A =              |  CREATE TABLE A (                   | Die Spalte ist redunant zur Spalte datasetname der Tabelle t_ili2db_dataset (siehe Kapitel Abbildungsregeln/Metadaten)                                                                                                                                                                                                                                                             |
 |              |  END A;                 |   T_Id integer PRIMARY KEY,         |                                                                                                                                                                                                                                                                                                                                                                                    |
@@ -1035,6 +1147,10 @@ Bei den folgenden Strukturen wird bei Smart-Mapping für die Strukturattribute e
 - LocalisationCH_V1.MultilingualMText
 
 - LocalisationCH_V1.MultilingualText
+
+- LocalisationCH_V1.LocalisedMText
+
+- LocalisationCH_V1.LocalisedText
 
 Aufzählungen
 ~~~~~~~~~~~~

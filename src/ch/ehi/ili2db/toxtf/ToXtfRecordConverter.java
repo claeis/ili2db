@@ -294,6 +294,13 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 						 sep=",";
 						 ret.append(makeColumnRef(tableAlias,attrSqlName+sfx));
 					}
+                }else if(TrafoConfigNames.LOCALISED_TRAFO_EXPAND.equals(trafoConfig.getAttrConfig(attr, TrafoConfigNames.LOCALISED_TRAFO))){
+                    ret.append(sep);
+                    sep=",";
+                    ret.append(makeColumnRef(tableAlias,attrSqlName));
+                    ret.append(sep);
+                    sep=",";
+                    ret.append(makeColumnRef(tableAlias,attrSqlName+DbNames.LOCALISED_TXT_COL_SUFFIX));
 				}
 			}else if (type instanceof PolylineType){
 				 ret.append(sep);
@@ -379,12 +386,20 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 		if(structWrapper==null){
 			if(!aclass.isStructure()){
 				if(exportTid || aclass.getOid()!=null){
-					sqlIliTid=rs.getString(valuei);
-					sqlid2xtfid.putSqlid2Xtfid(aclass.getSqlTablename(),sqlid, sqlIliTid);
+				    if(iliClassForSelect instanceof AssociationDef && !((AssociationDef)iliClassForXtf).isIdentifiable()) {
+				        ; // no TID; standalone association without TID
+				    }else {
+	                    sqlIliTid=rs.getString(valuei);
+	                    sqlid2xtfid.putSqlid2Xtfid(aclass.getSqlTablename(),sqlid, sqlIliTid);
+				    }
 					valuei++;
 				}else{
-					sqlIliTid=Long.toString(sqlid);
-					sqlid2xtfid.putSqlid2Xtfid(aclass.getSqlTablename(),sqlid, sqlIliTid);
+	                if(iliClassForSelect instanceof AssociationDef && !((AssociationDef)iliClassForXtf).isIdentifiable()) {
+	                    ; // no TID; standalone association without TID
+	                }else {
+	                    sqlIliTid=Long.toString(sqlid);
+	                    sqlid2xtfid.putSqlid2Xtfid(aclass.getSqlTablename(),sqlid, sqlIliTid);
+	                }
 				}
 			}
 		}
@@ -759,7 +774,7 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 	                                if(iomMulti==null){
 	                                    iomMulti=new Iom_jObject(multilingualTextQname, null);
 	                                }
-	                                IomObject iomTxt=iomMulti.addattrobj(IliNames.CHBASE1_LOCALISEDTEXT,localizedTextQname);
+	                                IomObject iomTxt=iomMulti.addattrobj(IliNames.CHBASE1_MULTILINFUALTEXT_LOCALISEDTEXT,localizedTextQname);
 	                                if(sfx.length()==0) {
 	                                    iomTxt.setattrundefined(IliNames.CHBASE1_LOCALISEDTEXT_LANGUAGE);
 	                                }else {
@@ -772,6 +787,29 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 						if(iomMulti!=null){
 							iomObj.addattrobj(attrName, iomMulti);
 						}
+                    }else if(TrafoConfigNames.LOCALISED_TRAFO_EXPAND.equals(trafoConfig.getAttrConfig(tableAttr, TrafoConfigNames.LOCALISED_TRAFO))){
+                        IomObject iomTxt=null;
+                        Table localisedTextType = ((CompositionType) type).getComponentType();
+                        String localisedTextQname=localisedTextType.getScopedName(null);
+                        if(classAttr==null) {
+                            valuei++;
+                            valuei++;
+                        }else {
+                            String text=rs.getString(valuei);
+                            valuei++;
+                            if(!rs.wasNull()){
+                                iomTxt=new Iom_jObject(localisedTextQname, null);
+                                iomTxt.setattrvalue(IliNames.CHBASE1_LOCALISEDTEXT_TEXT,text);
+                                String lang=rs.getString(valuei);
+                                if(!rs.wasNull()){
+                                    iomTxt.setattrvalue(IliNames.CHBASE1_LOCALISEDTEXT_LANGUAGE,lang);
+                                }
+                            }
+                            valuei++;
+                        }
+                        if(iomTxt!=null){
+                            iomObj.addattrobj(attrName, iomTxt);
+                        }
 					}else{
 		                if(classAttr==null) {
 		                    valuei++;

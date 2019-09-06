@@ -66,9 +66,9 @@ public class Enum23Test {
 				File data=new File("test/data/Enum23/Enum23.ili");
 				Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 				config.setFunction(Config.FC_SCHEMAIMPORT);
-				config.setCreateFk(config.CREATE_FK_YES);
+				config.setCreateFk(Config.CREATE_FK_YES);
 				config.setTidHandling(Config.TID_HANDLING_PROPERTY);
-				config.setBasketHandling(config.BASKET_HANDLING_READWRITE);
+				config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
 				config.setCreateEnumDefs(Config.CREATE_ENUM_DEFS_MULTI);
 				config.setCatalogueRefTrafo(null);
 				config.setMultiSurfaceTrafo(null);
@@ -109,11 +109,11 @@ public class Enum23Test {
             config.setLogfile(data.getPath()+".log");
             config.setXtffile(data.getPath());
             config.setFunction(Config.FC_SCRIPT);
-            config.setCreateFk(config.CREATE_FK_YES);
+            config.setCreateFk(Config.CREATE_FK_YES);
             config.setDbschema(DBSCHEMA);
             config.setCreateNumChecks(true);
             config.setTidHandling(Config.TID_HANDLING_PROPERTY);
-            config.setBasketHandling(config.BASKET_HANDLING_READWRITE);
+            config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
             config.setCreateMetaInfo(true);
             config.setCreateEnumDefs(Config.CREATE_ENUM_DEFS_MULTI_WITH_ID);
             config.setCatalogueRefTrafo(null);
@@ -178,11 +178,11 @@ public class Enum23Test {
             config.setLogfile(data.getPath()+".log");
             config.setXtffile(data.getPath());
             config.setFunction(Config.FC_SCRIPT);
-            config.setCreateFk(config.CREATE_FK_YES);
+            config.setCreateFk(Config.CREATE_FK_YES);
             config.setDbschema(DBSCHEMA);
             config.setCreateNumChecks(true);
             config.setTidHandling(Config.TID_HANDLING_PROPERTY);
-            config.setBasketHandling(config.BASKET_HANDLING_READWRITE);
+            config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
             config.setCreateMetaInfo(true);
             config.setCreateEnumDefs(Config.CREATE_ENUM_DEFS_SINGLE);
             config.setCatalogueRefTrafo(null);
@@ -247,11 +247,11 @@ public class Enum23Test {
             config.setLogfile(data.getPath()+".log");
             config.setXtffile(data.getPath());
             config.setFunction(Config.FC_SCRIPT);
-            config.setCreateFk(config.CREATE_FK_YES);
+            config.setCreateFk(Config.CREATE_FK_YES);
             config.setDbschema(DBSCHEMA);
             config.setCreateNumChecks(true);
             config.setTidHandling(Config.TID_HANDLING_PROPERTY);
-            config.setBasketHandling(config.BASKET_HANDLING_READWRITE);
+            config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
             config.setCreateMetaInfo(true);
             config.setCreateEnumDefs(Config.CREATE_ENUM_DEFS_MULTI);
             config.setCatalogueRefTrafo(null);
@@ -319,9 +319,9 @@ public class Enum23Test {
 				File data=new File("test/data/Enum23/Enum23.ili");
 				Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 				config.setFunction(Config.FC_SCHEMAIMPORT);
-				config.setCreateFk(config.CREATE_FK_YES);
+				config.setCreateFk(Config.CREATE_FK_YES);
 				config.setTidHandling(Config.TID_HANDLING_PROPERTY);
-				config.setBasketHandling(config.BASKET_HANDLING_READWRITE);
+				config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
 				config.setCreateEnumDefs(Config.CREATE_ENUM_DEFS_MULTI);
 				config.setBeautifyEnumDispName(Config.BEAUTIFY_ENUM_DISPNAME_UNDERSCORE);
 				config.setCatalogueRefTrafo(null);
@@ -369,6 +369,135 @@ public class Enum23Test {
 			}
 		}		
 	}
+    @Test
+    public void importIliWithTxtCol() throws Exception
+    {
+        Connection jdbcConnection=null;
+        try{
+            Class driverClass = Class.forName("org.postgresql.Driver");
+            jdbcConnection = DriverManager.getConnection(
+                    dburl, dbuser, dbpwd);
+            stmt=jdbcConnection.createStatement();          
+            stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");
+            {
+                File data=new File("test/data/Enum23/Enum23.ili");
+                Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+                config.setFunction(Config.FC_SCHEMAIMPORT);
+                config.setCreateFk(Config.CREATE_FK_YES);
+                config.setTidHandling(Config.TID_HANDLING_PROPERTY);
+                config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
+                config.setCreateEnumCols(Config.CREATE_ENUM_TXT_COL);
+                config.setBeautifyEnumDispName(Config.BEAUTIFY_ENUM_DISPNAME_UNDERSCORE);
+                config.setCatalogueRefTrafo(null);
+                config.setMultiSurfaceTrafo(null);
+                config.setMultilingualTrafo(null);
+                config.setInheritanceTrafo(null);
+                Ili2db.readSettingsFromDb(config);
+                Ili2db.run(config,null);
+        
+                if(false){
+                    String stmtTxt="SELECT dispName FROM "+DBSCHEMA+".enum1 WHERE ilicode ='Test2_ele'";
+                    Assert.assertTrue(stmt.execute(stmtTxt));
+                    ResultSet rs=stmt.getResultSet();
+                    Assert.assertTrue(rs.next());
+                    Assert.assertEquals("Test2 ele",rs.getString(1));
+                }
+                if(false){
+                    String stmtTxt="SELECT dispName FROM "+DBSCHEMA+".enum1 WHERE ilicode ='Test3.ele_2'";
+                    Assert.assertTrue(stmt.execute(stmtTxt));
+                    ResultSet rs=stmt.getResultSet();
+                    Assert.assertTrue(rs.next());
+                    Assert.assertEquals("Test3.ele 2",rs.getString(1));
+                }
+                if(false){
+                    String stmtTxt="SELECT dispName FROM "+DBSCHEMA+".classa1_attr3 WHERE ilicode ='Test2_ele'";
+                    Assert.assertTrue(stmt.execute(stmtTxt));
+                    ResultSet rs=stmt.getResultSet();
+                    Assert.assertTrue(rs.next());
+                    Assert.assertEquals("Test2 ele",rs.getString(1));
+                }
+                if(false){
+                    String stmtTxt="SELECT dispName FROM "+DBSCHEMA+".classa1_attr3 WHERE ilicode ='Test3.ele_2'";
+                    Assert.assertTrue(stmt.execute(stmtTxt));
+                    ResultSet rs=stmt.getResultSet();
+                    Assert.assertTrue(rs.next());
+                    Assert.assertEquals("Test3.ele 2",rs.getString(1));
+                }
+            }
+        }finally{
+            if(jdbcConnection!=null){
+                jdbcConnection.close();
+            }
+        }       
+    }
+    @Test
+    public void importXtfWithTxtCol() throws Exception
+    {
+        {
+            importIliWithTxtCol();
+        }
+        Connection jdbcConnection=null;
+        try{
+            Class driverClass = Class.forName("org.postgresql.Driver");
+            jdbcConnection = DriverManager.getConnection(
+                    dburl, dbuser, dbpwd);
+            stmt=jdbcConnection.createStatement();          
+            {
+                File data=new File("test/data/Enum23/Enum23a.xtf");
+                Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+                config.setFunction(Config.FC_IMPORT);
+                Ili2db.readSettingsFromDb(config);
+                Ili2db.run(config,null);
+        
+                {
+                    String stmtTxt="SELECT attr2_txt FROM "+DBSCHEMA+".classa1 WHERE attr2 ='Test2_ele'";
+                    Assert.assertTrue(stmt.execute(stmtTxt));
+                    ResultSet rs=stmt.getResultSet();
+                    Assert.assertTrue(rs.next());
+                    Assert.assertEquals("Test2 ele",rs.getString(1));
+                }
+                {
+                    String stmtTxt="SELECT attr2_txt FROM "+DBSCHEMA+".classa1 WHERE attr2 ='Test3.ele_2'";
+                    Assert.assertTrue(stmt.execute(stmtTxt));
+                    ResultSet rs=stmt.getResultSet();
+                    Assert.assertTrue(rs.next());
+                    Assert.assertEquals("Test3.ele 2",rs.getString(1));
+                }
+                {
+                    String stmtTxt="SELECT attr3_txt FROM "+DBSCHEMA+".classa1 WHERE attr3 ='Test2_ele'";
+                    Assert.assertTrue(stmt.execute(stmtTxt));
+                    ResultSet rs=stmt.getResultSet();
+                    Assert.assertTrue(rs.next());
+                    Assert.assertEquals("Test2 ele",rs.getString(1));
+                }
+                {
+                    String stmtTxt="SELECT attr3_txt FROM "+DBSCHEMA+".classa1 WHERE attr3 ='Test3.ele_2'";
+                    Assert.assertTrue(stmt.execute(stmtTxt));
+                    ResultSet rs=stmt.getResultSet();
+                    Assert.assertTrue(rs.next());
+                    Assert.assertEquals("Test3.ele 2",rs.getString(1));
+                }
+                {
+                    String stmtTxt="SELECT attr4_txt FROM "+DBSCHEMA+".classa1 WHERE attr4 is null";
+                    Assert.assertTrue(stmt.execute(stmtTxt));
+                    ResultSet rs=stmt.getResultSet();
+                    Assert.assertTrue(rs.next());
+                    Assert.assertEquals(null,rs.getString(1));
+                }
+                {
+                    String stmtTxt="SELECT attr4_txt FROM "+DBSCHEMA+".classa1 WHERE attr4=true";
+                    Assert.assertTrue(stmt.execute(stmtTxt));
+                    ResultSet rs=stmt.getResultSet();
+                    Assert.assertTrue(rs.next());
+                    Assert.assertEquals("true",rs.getString(1));
+                }
+            }
+        }finally{
+            if(jdbcConnection!=null){
+                jdbcConnection.close();
+            }
+        }       
+    }
 	
 	@Test
 	public void importIliExtendedMultiTable() throws Exception
@@ -384,9 +513,9 @@ public class Enum23Test {
 				File data=new File("test/data/Enum23/Enum23b.ili");
 				Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 				config.setFunction(Config.FC_SCHEMAIMPORT);
-				config.setCreateFk(config.CREATE_FK_YES);
+				config.setCreateFk(Config.CREATE_FK_YES);
 				config.setTidHandling(Config.TID_HANDLING_PROPERTY);
-				config.setBasketHandling(config.BASKET_HANDLING_READWRITE);
+				config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
 				config.setCreateEnumDefs(Config.CREATE_ENUM_DEFS_MULTI);
 				config.setCatalogueRefTrafo(null);
 				config.setMultiSurfaceTrafo(null);
@@ -421,7 +550,7 @@ public class Enum23Test {
                 File data=new File("test/data/Enum23/Enum23b.ili");
                 Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
                 config.setFunction(Config.FC_SCHEMAIMPORT);
-                config.setCreateFk(config.CREATE_FK_YES);
+                config.setCreateFk(Config.CREATE_FK_YES);
                 config.setTidHandling(Config.TID_HANDLING_PROPERTY);
                 //config.setBasketHandling(config.BASKET_HANDLING_READWRITE);
                 config.setCreateEnumDefs(Config.CREATE_ENUM_DEFS_MULTI_WITH_ID);
@@ -464,10 +593,10 @@ public class Enum23Test {
                 Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
                 config.setFunction(Config.FC_IMPORT);
                 config.setDoImplicitSchemaImport(true);
-                config.setCreateFk(config.CREATE_FK_YES);
+                config.setCreateFk(Config.CREATE_FK_YES);
                 config.setTidHandling(Config.TID_HANDLING_PROPERTY);
                 config.setImportTid(true);
-                config.setBasketHandling(config.BASKET_HANDLING_READWRITE);
+                config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
                 config.setCreateEnumDefs(Config.CREATE_ENUM_DEFS_MULTI_WITH_ID);
                 config.setCatalogueRefTrafo(null);
                 config.setMultiSurfaceTrafo(null);
@@ -569,9 +698,9 @@ public class Enum23Test {
 				File data=new File("test/data/Enum23/Enum23.ili");
 				Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 				config.setFunction(Config.FC_SCHEMAIMPORT);
-				config.setCreateFk(config.CREATE_FK_YES);
+				config.setCreateFk(Config.CREATE_FK_YES);
 				config.setTidHandling(Config.TID_HANDLING_PROPERTY);
-				config.setBasketHandling(config.BASKET_HANDLING_READWRITE);
+				config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
 				config.setCreateEnumDefs(Config.CREATE_ENUM_DEFS_SINGLE);
 				config.setCatalogueRefTrafo(null);
 				config.setMultiSurfaceTrafo(null);

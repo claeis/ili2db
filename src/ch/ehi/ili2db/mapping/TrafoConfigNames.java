@@ -19,6 +19,8 @@ public class TrafoConfigNames {
     public static final String JSON_TRAFO_COALESCE=Config.JSON_TRAFO_COALESCE;
 	public static final String MULTILINGUAL_TRAFO=Config.MULTILINGUAL_TRAFO;
 	public static final String MULTILINGUAL_TRAFO_EXPAND=Config.MULTILINGUAL_TRAFO_EXPAND;
+    public static final String LOCALISED_TRAFO=Config.LOCALISED_TRAFO;
+    public static final String LOCALISED_TRAFO_EXPAND=Config.LOCALISED_TRAFO_EXPAND;
 	public static final String INHERITANCE_TRAFO=Config.PREFIX+".inheritance";
 	public static final String INHERITANCE_TRAFO_NEWCLASS="newClass";
 	public static final String INHERITANCE_TRAFO_NEWANDSUBCLASS="newAndSubClass";

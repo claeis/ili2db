@@ -208,7 +208,7 @@ public class Ili2db {
 	throws Ili2dbException
 	{
 		if(config.getFunction()==Config.FC_IMPORT){
-			runImport(config,appHome);
+			runUpdate(config,appHome,Config.FC_IMPORT);
         }else if(config.getFunction()==Config.FC_VALIDATE){
             runExport(config,appHome,Config.FC_VALIDATE);
 		}else if(config.getFunction()==Config.FC_UPDATE){
@@ -479,6 +479,11 @@ public class Ili2db {
 					throw new Ili2dbException("compiler failed");
 				}
 				
+				// if meta attribute table already exists, read it
+                if(config.getCreateMetaInfo() && DbUtility.tableExists(conn,new DbTableName(config.getDbschema(),DbNames.META_ATTRIBUTES_TAB))){
+                    // set elements' meta-attributes
+                    MetaAttrUtility.addMetaAttrsFromDb(td, conn, config.getDbschema());
+                }
                 // import meta-attributes from .toml file
                 if(config.getIliMetaAttrsFile()!=null){
                     if(config.getCreateMetaInfo()){
@@ -491,6 +496,9 @@ public class Ili2db {
                     }else{
                         throw new Ili2dbException("import meta-attributes requires --createMetaInfo option");
                     }
+                }
+                if(config.getModelSrsCode()!=null) {
+                    addModellSrsCode(td,config.getModelSrsCode());
                 }
 			  	
 				// read mapping file
@@ -739,6 +747,14 @@ public class Ili2db {
                 // run DB specific post processing
                 customMapping.postPostScript(conn, config);
 				
+                String functionTxt="import";
+                if(function==Config.FC_DELETE) {
+                    functionTxt="delete";
+                }else if(function==Config.FC_UPDATE) {
+                    functionTxt="update";
+                }else if(function==Config.FC_REPLACE) {
+                    functionTxt="replace";
+                }
 				if(errs.hasSeenErrors()){
 					if(!connectionFromExtern){
 						try {
@@ -747,18 +763,18 @@ public class Ili2db {
 							EhiLogger.logError("rollback failed",e);
 						}
 					}
-					throw new Ili2dbException("...import failed");
+					throw new Ili2dbException("..."+functionTxt+" failed");
 				}else{
 					if(!connectionFromExtern){
 						try {
 							conn.commit();
 						} catch (SQLException e) {
 							EhiLogger.logError("commit failed",e);
-							throw new Ili2dbException("...import failed");
+							throw new Ili2dbException("..."+functionTxt+" failed");
 						}
 					}
 					logStatistics(td.getIli1Format()!=null,stat);
-					EhiLogger.logState("...import done");
+					EhiLogger.logState("..."+functionTxt+" done");
 				}
 			}finally{
 				if(!connectionFromExtern){
@@ -802,7 +818,23 @@ public class Ili2db {
 		
 
 	}
-	private static void setupIli2cMetaAttrs(Ili2cMetaAttrs ili2cMetaAttrs,
+	private static void addModellSrsCode(TransferDescription td, String modelSrsCodeTxt) {
+        String modelNameSrsCodes[]=modelSrsCodeTxt.split(";");
+        for(String modelNameSrsCode:modelNameSrsCodes) {
+            String srsMapping[]=modelNameSrsCode.split("=");
+            String modelName=srsMapping[0];
+            String epsgCode=srsMapping[1];
+            if(modelName!=null && epsgCode!=null){
+                Model model=(Model)td.getElement(modelName);
+                if(model!=null) {
+                    model.setMetaValue(Ili2cMetaAttrs.ILI2C_CRS, TransferFromIli.EPSG+":"+epsgCode);
+                }else {
+                    EhiLogger.logAdaption("SRS assignment to model ignored; unkonwn model <"+modelName+">");
+                }
+            }
+        }
+    }
+    private static void setupIli2cMetaAttrs(Ili2cMetaAttrs ili2cMetaAttrs,
 			Config config,ch.interlis.ili2c.config.Configuration modelv) {
 	    {
     		String ili2translation=config.getIli1Translation();
@@ -1069,6 +1101,9 @@ public class Ili2db {
                     throw new Ili2dbException("import meta-attributes requires --createMetaInfo option");
                 }
             }
+            if(config.getModelSrsCode()!=null) {
+                addModellSrsCode(td,config.getModelSrsCode());
+            }
 			
 			// an INTERLIS 1 model?
 			if(td.getIli1Format()!=null){
@@ -1152,6 +1187,23 @@ public class Ili2db {
 	                    }
 	                } catch (ConverterException ex) {
 	                    throw new Ili2dbException("failed to query existence of SRS",ex);
+	                }
+	            }else if(config.getModelSrsCode()!=null && config.getDefaultSrsAuthority()!=null){
+	                String modelSrsCodeTxt=config.getModelSrsCode();
+	                String modelNameSrsCodes[]=modelSrsCodeTxt.split(";");
+	                for(String modelNameSrsCode:modelNameSrsCodes) {
+	                    String srsMapping[]=modelNameSrsCode.split("=");
+	                    String modelName=srsMapping[0];
+	                    String srsCode=srsMapping[1];
+	                    if(modelName!=null && srsCode!=null){
+	                        try {
+	                            if(geomConverter.getSrsid(config.getDefaultSrsAuthority(), srsCode, conn)==null){
+	                                throw new Ili2dbException(config.getDefaultSrsAuthority()+"/"+srsCode+" does not exist");
+	                            }
+	                        } catch (ConverterException ex) {
+	                            throw new Ili2dbException("failed to query existence of SRS",ex);
+	                        }
+	                    }
 	                }
 	            }
 			}
@@ -1595,6 +1647,9 @@ public class Ili2db {
 					if(DbUtility.tableExists(conn,new DbTableName(config.getDbschema(),DbNames.META_ATTRIBUTES_TAB))){
 						MetaAttrUtility.addMetaAttrsFromDb(td, conn, config.getDbschema());
 					}
+				}
+				if(config.getModelSrsCode()!=null) {
+				    addModellSrsCode(td,config.getModelSrsCode());
 				}
 			  
 			  geomConverter.setup(conn, config);
@@ -2269,7 +2324,7 @@ public class Ili2db {
 	static private void writeScript(String filename,Iterator linei)
 	throws java.io.IOException
 	{
-		java.io.PrintWriter out=new java.io.PrintWriter(new java.io.BufferedOutputStream(new java.io.FileOutputStream(filename)));
+		java.io.PrintStream out=new java.io.PrintStream(new java.io.BufferedOutputStream(new java.io.FileOutputStream(filename)),false,"UTF-8");
 		while(linei.hasNext()){
 		  GeneratorJdbc.AbstractStmt stmt=(GeneratorJdbc.AbstractStmt)linei.next();
 		  String line=stmt.getLine();
@@ -2345,6 +2400,7 @@ public class Ili2db {
 		config.setArrayTrafo(null);
         config.setJsonTrafo(null);
 		config.setMultilingualTrafo(null);
+        config.setLocalisedTrafo(null);
 		config.setInheritanceTrafo(null);
 	}
 	public static List<Model> getModels(String modelNames, TransferDescription td) {

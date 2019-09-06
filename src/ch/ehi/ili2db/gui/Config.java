@@ -12,6 +12,7 @@ public class Config extends Settings {
 	public static final String SENDER=PREFIX+".sender";
 	private static final String DEFAULT_SRS_AUTHORITY=PREFIX+".defaultSrsAuthority";
 	private static final String DEFAULT_SRS_CODE=PREFIX+".defaultSrsCode";
+    private static final String MODEL_SRS_CODE=PREFIX+".modelSrsCode";
 	private static final String UUID_DEFAULT_VALUE=PREFIX+".uuidDefaultValue";
 	public static final String CREATE_ENUMCOL_AS_ITFCODE=PREFIX+".createEnumColAsItfCode";
 	public static final String CREATE_ENUMCOL_AS_ITFCODE_YES="yes";
@@ -54,6 +55,8 @@ public class Config extends Settings {
     public static final String JSON_TRAFO_COALESCE="coalesce";
 	public static final String MULTILINGUAL_TRAFO=PREFIX+".multilingualTrafo";
 	public static final String MULTILINGUAL_TRAFO_EXPAND="expand";
+    public static final String LOCALISED_TRAFO=PREFIX+".localisedTrafo";
+    public static final String LOCALISED_TRAFO_EXPAND="expand";
 	public static final String UNIQUE_CONSTRAINTS=PREFIX+".uniqueConstraints";
 	public static final String UNIQUE_CONSTRAINTS_CREATE="create";
 	public static final String NUMERIC_CHECK_CONSTRAINTS=PREFIX+".numericCheckConstraints";
@@ -107,6 +110,7 @@ public class Config extends Settings {
 	private String modeldir;
 	private String models=null;
 	private String exportModels=null;
+    private String exportCrsModels=null;
 	private String datasetName=null;
 	private String baskets=null;
 	private String topics=null;
@@ -223,6 +227,12 @@ public class Config extends Settings {
 	public void setExportModels(String models) {
 		this.exportModels = models;
 	}
+    public String getCrsExportModels() {
+        return exportCrsModels;
+    }
+    public void setCrsExportModels(String models) {
+        this.exportCrsModels = models;
+    }
 	public String getDatasetName() {
 		return datasetName;
 	}
@@ -313,6 +323,12 @@ public class Config extends Settings {
 	public void setDefaultSrsCode(String value) {
 		setValue(DEFAULT_SRS_CODE,value);
 	}
+    public String getModelSrsCode() {
+        return getValue(MODEL_SRS_CODE);
+    }
+    public void setModelSrsCode(String value) {
+        setValue(MODEL_SRS_CODE,value);
+    }
 	public String getUuidDefaultValue() {
 		return getValue(UUID_DEFAULT_VALUE);
 	}
@@ -441,6 +457,12 @@ public class Config extends Settings {
 	public void setMultilingualTrafo(String value) {
 		setValue(MULTILINGUAL_TRAFO,value);
 	}
+    public String getLocalisedTrafo() {
+        return getValue(LOCALISED_TRAFO);
+    }
+    public void setLocalisedTrafo(String value) {
+        setValue(LOCALISED_TRAFO,value);
+    }
 	public String getNameOptimization() {
 		return getValue(NAME_OPTIMIZATION);
 	}

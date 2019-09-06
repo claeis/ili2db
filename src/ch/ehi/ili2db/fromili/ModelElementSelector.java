@@ -12,6 +12,8 @@ import ch.interlis.ili2c.metamodel.Domain;
 import ch.interlis.ili2c.metamodel.Element;
 import ch.interlis.ili2c.metamodel.EnumerationType;
 import ch.interlis.ili2c.metamodel.Model;
+import ch.interlis.ili2c.metamodel.ReferenceType;
+import ch.interlis.ili2c.metamodel.RoleDef;
 import ch.interlis.ili2c.metamodel.SurfaceOrAreaType;
 import ch.interlis.ili2c.metamodel.Table;
 import ch.interlis.ili2c.metamodel.Topic;
@@ -166,6 +168,10 @@ public class ModelElementSelector {
 						Viewable rest=(Viewable)resti.next();
 						visitViewable(visitedElements,accuScope,rest);
 					}
+                }else if(type instanceof ReferenceType){
+                    ReferenceType refType=(ReferenceType)type;
+                    Viewable targetClass=refType.getReferred();
+                    visitTopic(visitedElements,accuScope,(Topic)targetClass.getContainer(Topic.class));
 				}else if(createItfLineTables && attr.getDomainResolvingAll() instanceof SurfaceOrAreaType){
 					visitItfLineTable(visitedElements,accuScope,attr);
 				}else if(includeEnums && attr.getDomainResolvingAll() instanceof EnumerationType){
@@ -175,6 +181,13 @@ public class ModelElementSelector {
 				if(type instanceof TypeAlias){
 					visitDomain(visitedElements,accuScope,((TypeAlias)type).getAliasing());
 				}
+			}else if(attro instanceof RoleDef){
+			    RoleDef role=(RoleDef)attro;
+			    for(Iterator<ReferenceType> refTypeIt=role.iteratorReference();refTypeIt.hasNext();) {
+			        ReferenceType refType=refTypeIt.next();
+                    Viewable targetClass=refType.getReferred();
+                    visitTopic(visitedElements,accuScope,(Topic)targetClass.getContainer(Topic.class));
+			    }
 			}
 		}
 		// base viewable

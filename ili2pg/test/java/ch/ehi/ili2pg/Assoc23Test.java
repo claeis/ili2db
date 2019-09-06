@@ -70,9 +70,9 @@ public class Assoc23Test {
                 File data=new File(TEST_OUT,"Assoc4.ili");
                 Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
                 config.setFunction(Config.FC_SCHEMAIMPORT);
-                config.setCreateFk(config.CREATE_FK_YES);
+                config.setCreateFk(Config.CREATE_FK_YES);
                 config.setTidHandling(Config.TID_HANDLING_PROPERTY);
-                config.setBasketHandling(config.BASKET_HANDLING_READWRITE);
+                config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
                 config.setCatalogueRefTrafo(null);
                 config.setMultiSurfaceTrafo(null);
                 config.setMultilingualTrafo(null);
@@ -127,9 +127,9 @@ public class Assoc23Test {
                 File data=new File(TEST_OUT,"Assoc4.ili");
                 Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
                 config.setFunction(Config.FC_SCHEMAIMPORT);
-                config.setCreateFk(config.CREATE_FK_YES);
+                config.setCreateFk(Config.CREATE_FK_YES);
                 config.setTidHandling(Config.TID_HANDLING_PROPERTY);
-                config.setBasketHandling(config.BASKET_HANDLING_READWRITE);
+                config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
                 config.setCatalogueRefTrafo(null);
                 config.setMultiSurfaceTrafo(null);
                 config.setMultilingualTrafo(null);
@@ -184,9 +184,9 @@ public class Assoc23Test {
                 File data=new File(TEST_OUT,"Assoc4.ili");
                 Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
                 config.setFunction(Config.FC_SCHEMAIMPORT);
-                config.setCreateFk(config.CREATE_FK_YES);
+                config.setCreateFk(Config.CREATE_FK_YES);
                 config.setTidHandling(Config.TID_HANDLING_PROPERTY);
-                config.setBasketHandling(config.BASKET_HANDLING_READWRITE);
+                config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
                 config.setCatalogueRefTrafo(null);
                 config.setMultiSurfaceTrafo(null);
                 config.setMultilingualTrafo(null);
@@ -329,10 +329,10 @@ public class Assoc23Test {
                 Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
                 config.setFunction(Config.FC_IMPORT);
                 config.setDoImplicitSchemaImport(true);
-                config.setCreateFk(config.CREATE_FK_YES);
+                config.setCreateFk(Config.CREATE_FK_YES);
                 config.setTidHandling(Config.TID_HANDLING_PROPERTY);
                 config.setImportTid(true);
-                config.setBasketHandling(config.BASKET_HANDLING_READWRITE);
+                config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
                 config.setCatalogueRefTrafo(null);
                 config.setMultiSurfaceTrafo(null);
                 config.setMultilingualTrafo(null);
@@ -470,10 +470,10 @@ public class Assoc23Test {
 	    		Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 	    		config.setFunction(Config.FC_IMPORT);
 	            config.setDoImplicitSchemaImport(true);
-	    		config.setCreateFk(config.CREATE_FK_YES);
+	    		config.setCreateFk(Config.CREATE_FK_YES);
 	    		config.setTidHandling(Config.TID_HANDLING_PROPERTY);
 	    		config.setImportTid(true);
-	    		config.setBasketHandling(config.BASKET_HANDLING_READWRITE);
+	    		config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
 	    		config.setCatalogueRefTrafo(null);
 	    		config.setMultiSurfaceTrafo(null);
 	    		config.setMultilingualTrafo(null);
@@ -536,9 +536,9 @@ public class Assoc23Test {
 	    		Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 	    		config.setFunction(Config.FC_IMPORT);
 	            config.setDoImplicitSchemaImport(true);
-	    		config.setCreateFk(config.CREATE_FK_YES);
+	    		config.setCreateFk(Config.CREATE_FK_YES);
 	    		config.setTidHandling(Config.TID_HANDLING_PROPERTY);
-	    		config.setBasketHandling(config.BASKET_HANDLING_READWRITE);
+	    		config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
 	    		config.setCatalogueRefTrafo(null);
 	    		config.setMultiSurfaceTrafo(null);
 	    		config.setMultilingualTrafo(null);
@@ -591,30 +591,56 @@ public class Assoc23Test {
 		}
 	}
 	
+    @Test
+    public void importIliExtFileRef() throws Exception
+    {
+        //EhiLogger.getInstance().setTraceFilter(false);
+        Connection jdbcConnection=null;
+        try{
+            Class driverClass = Class.forName("org.postgresql.Driver");
+            jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
+            stmt=jdbcConnection.createStatement();
+            stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");
+            {
+                {
+                    File data=new File(TEST_OUT,"Assoc2.ili");
+                    Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+                    config.setFunction(Config.FC_SCHEMAIMPORT);
+                    config.setCreateFk(Config.CREATE_FK_YES);
+                    config.setTidHandling(Config.TID_HANDLING_PROPERTY);
+                    config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
+                    config.setCatalogueRefTrafo(null);
+                    config.setMultiSurfaceTrafo(null);
+                    config.setMultilingualTrafo(null);
+                    config.setInheritanceTrafo(null);
+                    Ili2db.readSettingsFromDb(config);
+                    Ili2db.run(config,null);
+                }
+            }
+        }finally{
+            if(jdbcConnection!=null){
+                jdbcConnection.close();
+            }
+        }
+    }
 	@Test
 	public void importXtfExtFileRefBackward() throws Exception
 	{
 		//EhiLogger.getInstance().setTraceFilter(false);
+	    {
+	        importIliExtFileRef();
+	    }
 		Connection jdbcConnection=null;
 		try{
 		    Class driverClass = Class.forName("org.postgresql.Driver");
 	        jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
 	        stmt=jdbcConnection.createStatement();
-			stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");
 			{
 				{
 					File data=new File(TEST_OUT,"Assoc2b1.xtf");
 		    		Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 		    		config.setFunction(Config.FC_IMPORT);
-		            config.setDoImplicitSchemaImport(true);
-		    		config.setCreateFk(config.CREATE_FK_YES);
-		    		config.setTidHandling(Config.TID_HANDLING_PROPERTY);
 		    		config.setImportTid(true);
-		    		config.setBasketHandling(config.BASKET_HANDLING_READWRITE);
-		    		config.setCatalogueRefTrafo(null);
-		    		config.setMultiSurfaceTrafo(null);
-		    		config.setMultilingualTrafo(null);
-		    		config.setInheritanceTrafo(null);
 		    		Ili2db.readSettingsFromDb(config);
 		    		Ili2db.run(config,null);
 				}
@@ -905,100 +931,9 @@ public class Assoc23Test {
 		}
 	}
 	
-	@Test
-	public void exportXtfExtRefBackward() throws Exception
-	{
-		{
-			importXtfExtRefBackward();
-		}
-		File data=null;
-		//EhiLogger.getInstance().setTraceFilter(false);
-		Connection jdbcConnection=null;
-		try{
-		    Class driverClass = Class.forName("org.postgresql.Driver");
-	        jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
-	        stmt=jdbcConnection.createStatement();
-			{
-				data=new File(TEST_OUT,"Assoc2a-out.xtf");
-	    		Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
-	    		config.setFunction(Config.FC_EXPORT);
-	    		config.setExportTid(true);
-	    		config.setModels("Assoc2");
-	    		Ili2db.readSettingsFromDb(config);
-	    		Ili2db.run(config,null);
-			}
-		}finally{
-			if(jdbcConnection!=null){
-				jdbcConnection.close();
-			}
-		}
-		{
-			HashMap<String,IomObject> objs=new HashMap<String,IomObject>();
-			XtfReader reader=new XtfReader(data);
-			IoxEvent event=null;
-			 do{
-		        event=reader.read();
-		        if(event instanceof StartTransferEvent){
-		        }else if(event instanceof StartBasketEvent){
-		        }else if(event instanceof ObjectEvent){
-		        	IomObject iomObj=((ObjectEvent)event).getIomObject();
-		        	if(iomObj.getobjectoid()!=null){
-			        	objs.put(iomObj.getobjectoid(), iomObj);
-		        	}
-		        }else if(event instanceof EndBasketEvent){
-		        }else if(event instanceof EndTransferEvent){
-		        }
-			 }while(!(event instanceof EndTransferEvent));
-			 {
-				 {
-					 IomObject obj0 = objs.get("a1b");
-					 Assert.assertNotNull(obj0);
-					 Assert.assertEquals("Assoc2.TestA.ClassA1b", obj0.getobjecttag());
-				 }
-				 {
-					 IomObject obj0 = objs.get("b1");
-					 Assert.assertNotNull(obj0);
-					 Assert.assertEquals("Assoc2.TestA.ClassB1", obj0.getobjecttag());
-				 }
-				 {
-					 IomObject obj0 = objs.get("a3");
-					 Assert.assertNotNull(obj0);
-					 Assert.assertEquals("Assoc2.TestB.ClassA3", obj0.getobjecttag());
-					 IomObject obj1=obj0.getattrobj("b3",0);
-					 assertEquals("b3",obj1.getobjectrefoid());
-				 }
-				 {
-					 IomObject obj0 = objs.get("b3");
-					 Assert.assertNotNull(obj0);
-					 Assert.assertEquals("Assoc2.TestA.ClassB3", obj0.getobjecttag());
-				 }
-				 {
-					 IomObject obj0 = objs.get("a1");
-					 Assert.assertNotNull(obj0);
-					 Assert.assertEquals("Assoc2.TestA.ClassA1", obj0.getobjecttag());
-				 }
-				 {
-					 IomObject obj0 = objs.get("b2");
-					 Assert.assertNotNull(obj0);
-					 Assert.assertEquals("Assoc2.TestB.ClassB2", obj0.getobjecttag());
-					 IomObject obj1=obj0.getattrobj("a2",0);
-					 assertEquals("a2",obj1.getobjectrefoid());
-					 
-					 IomObject obj2=obj0.getattrobj("strA2",0);
-					 IomObject obj3=obj2.getattrobj("refa2",0);
-					 assertEquals("a2",obj3.getobjectrefoid());
-				 }
-				 {
-					 IomObject obj0 = objs.get("a2");
-					 Assert.assertNotNull(obj0);
-					 Assert.assertEquals("Assoc2.TestA.ClassA2", obj0.getobjecttag());
-				 }
-			 }
-		}
-	}
 	
 	@Test
-	public void exportXtfExtFileRefBackward() throws Exception
+	public void exportXtfExtFileRef() throws Exception
 	{
 		{
 			importXtfExtFileRefBackward();
@@ -1011,15 +946,6 @@ public class Assoc23Test {
 	        jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
 	        stmt=jdbcConnection.createStatement();
 			{
-				{
-					data=new File(TEST_OUT,"Assoc2b1-out.xtf");
-		    		Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
-		    		config.setFunction(Config.FC_EXPORT);
-		    		config.setExportTid(true);
-		    		config.setModels("Assoc2");
-		    		Ili2db.readSettingsFromDb(config);
-		    		Ili2db.run(config,null);
-				}
 				{
 					data=new File(TEST_OUT,"Assoc2b2-out.xtf");
 		    		Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
@@ -1053,38 +979,12 @@ public class Assoc23Test {
 		        }
 			 }while(!(event instanceof EndTransferEvent));
 			 {
-				 // assoc2b1
-				 {
-					 IomObject obj0 = objs.get("b1");
-					 Assert.assertNotNull(obj0);
-					 Assert.assertEquals("Assoc2.TestA.ClassB1", obj0.getobjecttag());
-				 }
-				 {
-					 IomObject obj0 = objs.get("a1b");
-					 Assert.assertNotNull(obj0);
-					 Assert.assertEquals("Assoc2.TestA.ClassA1b", obj0.getobjecttag());
-				 }
-				 {
-					 IomObject obj0 = objs.get("b3");
-					 Assert.assertNotNull(obj0);
-					 Assert.assertEquals("Assoc2.TestA.ClassB3", obj0.getobjecttag());
-				 }
 				 {
 					 IomObject obj0 = objs.get("a3");
 					 Assert.assertNotNull(obj0);
 					 Assert.assertEquals("Assoc2.TestB.ClassA3", obj0.getobjecttag());
 					 IomObject obj1=obj0.getattrobj("b3",0);
 					 assertEquals("b3",obj1.getobjectrefoid());
-				 }
-				 {
-					 IomObject obj0 = objs.get("a1");
-					 Assert.assertNotNull(obj0);
-					 Assert.assertEquals("Assoc2.TestA.ClassA1", obj0.getobjecttag());
-				 }
-				 {
-					 IomObject obj0 = objs.get("a2");
-					 Assert.assertNotNull(obj0);
-					 Assert.assertEquals("Assoc2.TestA.ClassA2", obj0.getobjecttag());
 				 }
 				 // assoc2b2
 				 {
@@ -1103,7 +1003,7 @@ public class Assoc23Test {
 	}
 	
 	@Test
-	public void exportXtfExtRefForward() throws Exception
+	public void exportXtfExtRef() throws Exception
 	{
 		{
 			importXtfExtRefForward();
@@ -1120,7 +1020,7 @@ public class Assoc23Test {
 	    		Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 	    		config.setFunction(Config.FC_EXPORT);
 	    		config.setExportTid(true);
-	    		config.setModels("Assoc2");
+	    		config.setModels("Assoc2_0;Assoc2");
 	    		Ili2db.readSettingsFromDb(config);
 	    		Ili2db.run(config,null);
 			}
@@ -1150,27 +1050,27 @@ public class Assoc23Test {
 				 {
 					 IomObject obj0 = objs.get("a1");
 					 Assert.assertNotNull(obj0);
-					 Assert.assertEquals("Assoc2.TestA.ClassA1", obj0.getobjecttag());
+					 Assert.assertEquals("Assoc2_0.TestA.ClassA1", obj0.getobjecttag());
 				 }
 				 {
 					 IomObject obj0 = objs.get("a2");
 					 Assert.assertNotNull(obj0);
-					 Assert.assertEquals("Assoc2.TestA.ClassA2", obj0.getobjecttag());
+					 Assert.assertEquals("Assoc2_0.TestA.ClassA2", obj0.getobjecttag());
 				 }
 				 {
 					 IomObject obj0 = objs.get("b3");
 					 Assert.assertNotNull(obj0);
-					 Assert.assertEquals("Assoc2.TestA.ClassB3", obj0.getobjecttag());
+					 Assert.assertEquals("Assoc2_0.TestA.ClassB3", obj0.getobjecttag());
 				 }
 				 {
 					 IomObject obj0 = objs.get("a1b");
 					 Assert.assertNotNull(obj0);
-					 Assert.assertEquals("Assoc2.TestA.ClassA1b", obj0.getobjecttag());
+					 Assert.assertEquals("Assoc2_0.TestA.ClassA1b", obj0.getobjecttag());
 				 }
 				 {
 					 IomObject obj0 = objs.get("b1");
 					 Assert.assertNotNull(obj0);
-					 Assert.assertEquals("Assoc2.TestA.ClassB1", obj0.getobjecttag());
+					 Assert.assertEquals("Assoc2_0.TestA.ClassB1", obj0.getobjecttag());
 				 }
 			 }
 		}

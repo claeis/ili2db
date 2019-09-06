@@ -1,10 +1,12 @@
 package ch.ehi.ili2db.base;
 
+import ch.ehi.basics.logging.EhiLogger;
 import ch.ehi.ili2db.mapping.IliMetaAttrNames;
 import ch.interlis.ili2c.metamodel.AbstractClassDef;
 import ch.interlis.ili2c.metamodel.AttributeDef;
 import ch.interlis.ili2c.metamodel.CompositionType;
 import ch.interlis.ili2c.metamodel.Domain;
+import ch.interlis.ili2c.metamodel.OIDType;
 import ch.interlis.ili2c.metamodel.RoleDef;
 import ch.interlis.ili2c.metamodel.Table;
 import ch.interlis.ili2c.metamodel.TransferDescription;
@@ -56,11 +58,17 @@ public class Ili2cUtility {
 		if(aclass.getOid()!=null){
 			return true;
 		}
+        if(Ili2cUtility.getOidDomainFromMetaAttr(aclass)!=null) {
+            return  true;
+         }
 		for(Object exto : aclass.getExtensions()){
 			AbstractClassDef ext=(AbstractClassDef) exto;
 			if(ext.getOid()!=null){
 				return true;
 			}
+	        if(Ili2cUtility.getOidDomainFromMetaAttr(ext)!=null) {
+	            return  true;
+	         }
 		}
 		return false;
 	}
@@ -157,10 +165,56 @@ public class Ili2cUtility {
 		return false;
 	}
 
+    public static boolean isPureChbaseLocalisedMText(TransferDescription td,
+            AttributeDef attr) {
+        return isPureChbaseMultilingualText(td, attr, IliNames.CHBASE1_MULTILINGUALMTEXT);
+    }
+    public static boolean isPureChbaseLocalisedText(TransferDescription td,
+                AttributeDef attr) {
+        return isPureChbaseLocalisedText(td, attr, IliNames.CHBASE1_LOCALISEDTEXT);
+    }
 	public static boolean isPureChbaseMultilingualMText(TransferDescription td,
 			AttributeDef attr) {
-		return isPureChbaseMultilingualText(td, attr, IliNames.CHBASE1_MULTILINGUALMTEXT);
+		return isPureChbaseLocalisedText(td, attr, IliNames.CHBASE1_LOCALISEDMTEXT);
 	}
+    private static boolean isPureChbaseLocalisedText(TransferDescription td,
+            AttributeDef attr,String textType) {
+        Type typeo=attr.getDomain();
+        if(typeo instanceof CompositionType){
+            CompositionType type=(CompositionType)typeo;
+            Table struct=type.getComponentType();
+            Table base=null;
+            if(struct.getContainer().getScopedName(null).equals(IliNames.CHBASE1_LOCALISATIONCH)){
+                base=struct;
+            }else{
+                base=(Table) struct.getExtending();
+                if(base==null){
+                    base=struct;
+                }
+                while(base!=null && !base.getContainer().getScopedName(null).equals(IliNames.CHBASE1_LOCALISATIONCH)){
+                    base=(Table) base.getExtending();
+                }
+                
+            }
+            if(base==null){
+                return false;
+            }
+            // ASSERT: base.getContainer().getScopedName(null).equals("LocalisationCH_V1"))
+                if(base.getName().equals(textType)){
+                    java.util.Iterator it=struct.getAttributesAndRoles2();
+                    int c=0;
+                    while(it.hasNext()){
+                        it.next();
+                        c++;
+                    }
+                    if(c==2){
+                        // only two attributes text + language
+                        return true;
+                    }
+                }
+        }
+        return false;
+    }
 	public static boolean isPureChbaseMultilingualText(TransferDescription td,
 				AttributeDef attr) {
 		return isPureChbaseMultilingualText(td, attr, IliNames.CHBASE1_MULTILINGUALTEXT);
@@ -297,6 +351,37 @@ public class Ili2cUtility {
             base=(RoleDef) role.getExtending();
         }
         return role;
+    }
+    private static java.util.Set<String> illegalOidNames=new java.util.HashSet<String>();
+    public static Domain getOidDomainFromMetaAttr(AbstractClassDef aclass) {
+        String metaOidName=aclass.getMetaValue(IliMetaAttrNames.METAATTR_OID);
+        if(metaOidName!=null) {
+            TransferDescription td=(TransferDescription) aclass.getContainer(TransferDescription.class);
+            ch.interlis.ili2c.metamodel.Element ele=td.getElement(metaOidName);
+            if(ele==null) {
+                if(!illegalOidNames.contains(metaOidName)) {
+                    EhiLogger.logAdaption("Unknown OID domain <"+metaOidName+"> at <"+aclass.getScopedName()+"> ignored");
+                    illegalOidNames.add(metaOidName);
+                }
+                return null;
+            }
+            if(!(ele instanceof Domain)) {
+                if(!illegalOidNames.contains(metaOidName)) {
+                    EhiLogger.logAdaption("Element <"+metaOidName+"> at <"+aclass.getScopedName()+"> is not a domain; ignored");
+                    illegalOidNames.add(metaOidName);
+                }
+                return null;
+            }
+            if(!(((Domain)ele).getType() instanceof OIDType)){
+                if(!illegalOidNames.contains(metaOidName)) {
+                    EhiLogger.logAdaption("Domain <"+metaOidName+"> at <"+aclass.getScopedName()+"> is not an OID domain; ignored");
+                    illegalOidNames.add(metaOidName);
+                }
+                return null;
+            }
+            return (Domain)ele;
+        }
+        return null;
     }
 
 }

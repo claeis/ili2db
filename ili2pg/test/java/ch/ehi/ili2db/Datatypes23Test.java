@@ -25,6 +25,7 @@ import ch.interlis.iox.IoxException;
 import ch.interlis.iox.ObjectEvent;
 import ch.interlis.iox.StartBasketEvent;
 import ch.interlis.iox.StartTransferEvent;
+import net.iharder.Base64;
 
 //-Ddburl=jdbc:postgresql:dbname -Ddbusr=usrname -Ddbpwd=1234
 public class Datatypes23Test {
@@ -217,7 +218,7 @@ public class Datatypes23Test {
 				Assert.assertTrue(rs.next());
 				byte[] bytes=(byte[])rs.getObject("binbox");
 				Assert.assertFalse(rs.wasNull());
-				String wkbText=javax.xml.bind.DatatypeConverter.printBase64Binary(bytes);
+				String wkbText=Base64.encodeBytes(bytes);
 				Assert.assertEquals("AAAA", wkbText);
 			}
 		}catch(SQLException e) {
