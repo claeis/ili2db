@@ -13,6 +13,9 @@ ideas/open issues/questions
 
 LATEST
 ---------------------------
+
+ili2db 4.2.0 (2019-09-06)
+------------------------------
 - new option --modelSrsCode model=epsgCode
 - new option --exportCrsModels modelname
 - new option --expandLocalised (#289)
@@ -23,6 +26,9 @@ LATEST
 - ili2gpkg: allow relationship loops
 - ili2gpkg: Add two SRSs to init.sql (32635 and 4686) (#300)
 - fixed incomplete schema import if reference to class in other model 
+- iox-ili-1.20.13
+- ili2c-5.0.2
+- ehisqlgen-1.13.8
 
 ili2db 4.1.0 (2019-05-03)
 ------------------------------
