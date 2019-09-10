@@ -25,5 +25,5 @@ public interface CustomMapping {
     public void postPostScript(Connection conn, Config config);
     public String shortenConnectUrl4IliCache(String url);
     public String shortenConnectUrl4Log(String url);
-
+    public String getCreateSchemaStmt(String dbschema);
 }

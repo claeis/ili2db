@@ -1118,8 +1118,10 @@ public class Ili2db {
                     }
                 }else {
                     if(gen instanceof GeneratorJdbc){
-                        String sql="CREATE SCHEMA IF NOT EXISTS "+config.getDbschema();
-                        ((GeneratorJdbc) gen).addCreateLine(((GeneratorJdbc) gen).new Stmt(sql));
+                        String sql=customMapping.getCreateSchemaStmt(config.getDbschema());
+                        if(sql!=null) {
+                            ((GeneratorJdbc) gen).addCreateLine(((GeneratorJdbc) gen).new Stmt(sql));
+                        }
                     }
                 }
             }

@@ -121,4 +121,11 @@ public class MsSqlCustomStrategy  extends AbstractJdbcMapping {
         String[] parts = url.split(";");
         return parts[0]; //the first part contains host, port and instance
     }
+    @Override
+    public String getCreateSchemaStmt(String dbschema) {
+        String stmt = ""; 
+        stmt += "IF NOT EXISTS (SELECT  schema_name FROM information_schema.schemata WHERE schema_name = '"+dbschema+"')";
+        stmt += "EXEC sp_executesql N'CREATE SCHEMA "+dbschema+"'";
+        return stmt;
+    }
 }
