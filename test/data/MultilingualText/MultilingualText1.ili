@@ -10,12 +10,16 @@ MODEL MultilingualText0
       attr : TEXT*20;
 	  atext : LocalisationCH_V1.MultilingualText;
 	  btext : LocalisationCH_V1.LocalisedText;
+	  ctext : LocalisationCH_V1.MultilingualMText;
+	  dtext : LocalisationCH_V1.LocalisedMText;
     END ClassA1;
     
     CLASS ClassB1 =
       attr : TEXT*20;
 	  atext : MANDATORY LocalisationCH_V1.MultilingualText;
 	  btext : MANDATORY LocalisationCH_V1.LocalisedText;
+	  ctext : MANDATORY LocalisationCH_V1.MultilingualMText;
+	  dtext : MANDATORY LocalisationCH_V1.LocalisedMText;
     END ClassB1;
     
   END TestA;

@@ -167,7 +167,7 @@ public class Ili2cUtility {
 
     public static boolean isPureChbaseLocalisedMText(TransferDescription td,
             AttributeDef attr) {
-        return isPureChbaseMultilingualText(td, attr, IliNames.CHBASE1_MULTILINGUALMTEXT);
+        return isPureChbaseMultilingualText(td, attr, IliNames.CHBASE1_LOCALISEDMTEXT);
     }
     public static boolean isPureChbaseLocalisedText(TransferDescription td,
                 AttributeDef attr) {
@@ -175,7 +175,7 @@ public class Ili2cUtility {
     }
 	public static boolean isPureChbaseMultilingualMText(TransferDescription td,
 			AttributeDef attr) {
-		return isPureChbaseLocalisedText(td, attr, IliNames.CHBASE1_LOCALISEDMTEXT);
+		return isPureChbaseLocalisedText(td, attr, IliNames.CHBASE1_MULTILINGUALMTEXT);
 	}
     private static boolean isPureChbaseLocalisedText(TransferDescription td,
             AttributeDef attr,String textType) {
