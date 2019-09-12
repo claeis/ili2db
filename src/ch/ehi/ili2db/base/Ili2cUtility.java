@@ -167,16 +167,12 @@ public class Ili2cUtility {
 
     public static boolean isPureChbaseLocalisedMText(TransferDescription td,
             AttributeDef attr) {
-        return isPureChbaseMultilingualText(td, attr, IliNames.CHBASE1_LOCALISEDMTEXT);
+        return isPureChbaseLocalisedText(td, attr, IliNames.CHBASE1_LOCALISEDMTEXT);
     }
     public static boolean isPureChbaseLocalisedText(TransferDescription td,
                 AttributeDef attr) {
         return isPureChbaseLocalisedText(td, attr, IliNames.CHBASE1_LOCALISEDTEXT);
     }
-	public static boolean isPureChbaseMultilingualMText(TransferDescription td,
-			AttributeDef attr) {
-		return isPureChbaseLocalisedText(td, attr, IliNames.CHBASE1_MULTILINGUALMTEXT);
-	}
     private static boolean isPureChbaseLocalisedText(TransferDescription td,
             AttributeDef attr,String textType) {
         Type typeo=attr.getDomain();
@@ -219,6 +215,10 @@ public class Ili2cUtility {
 				AttributeDef attr) {
 		return isPureChbaseMultilingualText(td, attr, IliNames.CHBASE1_MULTILINGUALTEXT);
 	}
+    public static boolean isPureChbaseMultilingualMText(TransferDescription td,
+            AttributeDef attr) {
+        return isPureChbaseMultilingualText(td, attr, IliNames.CHBASE1_MULTILINGUALMTEXT);
+    }
 	private static boolean isPureChbaseMultilingualText(TransferDescription td,
 			AttributeDef attr,String textType) {
 		Type typeo=attr.getDomain();

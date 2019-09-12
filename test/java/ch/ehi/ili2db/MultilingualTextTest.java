@@ -86,7 +86,12 @@ public abstract class MultilingualTextTest {
             Connection jdbcConnection = setup.createConnection();
             try{
                 java.sql.Statement stmt=jdbcConnection.createStatement();
-                Assert.assertTrue(stmt.execute("SELECT atext,atext_de,atext_fr,atext_it,atext_rm,atext_en,btext,btext_lang FROM "+DBSCHEMA+".classa1 WHERE classa1.t_ili_tid = 'a1.1'"));
+                Assert.assertTrue(stmt.execute("SELECT"
+                        + " atext,atext_de,atext_fr,atext_it,atext_rm,atext_en"
+                        + ",btext,btext_lang"
+                        + ",ctext,ctext_de,ctext_fr,ctext_it,ctext_rm,ctext_en"
+                        + ",dtext,dtext_lang"
+                        + " FROM "+DBSCHEMA+".classa1 WHERE classa1.t_ili_tid = 'a1.1'"));
                 {
                     ResultSet rs=stmt.getResultSet();
                     Assert.assertTrue(rs.next());
@@ -96,10 +101,25 @@ public abstract class MultilingualTextTest {
                     Assert.assertEquals("a1.1-it", rs.getString(4));
                     Assert.assertEquals("a1.1-rm", rs.getString(5));
                     Assert.assertEquals("a1.1-en", rs.getString(6));
+                    
                     Assert.assertEquals("a1.1-de", rs.getString(7));
                     Assert.assertEquals("de", rs.getString(8));
+                    
+                    Assert.assertEquals("a1.1-null", rs.getString(9));
+                    Assert.assertEquals("a1.1-de", rs.getString(10));
+                    Assert.assertEquals("a1.1-fr", rs.getString(11));
+                    Assert.assertEquals("a1.1-it", rs.getString(12));
+                    Assert.assertEquals("a1.1-rm", rs.getString(13));
+                    Assert.assertEquals("a1.1-en", rs.getString(14));
+                    Assert.assertEquals("a1.1-de", rs.getString(15));
+                    Assert.assertEquals("de", rs.getString(16));
                 }
-                Assert.assertTrue(stmt.execute("SELECT atext,atext_de,atext_fr,atext_it,atext_rm,atext_en,btext,btext_lang FROM "+DBSCHEMA+".classa1 WHERE classa1.t_ili_tid = 'a1.2'"));
+                Assert.assertTrue(stmt.execute("SELECT"
+                        + " atext,atext_de,atext_fr,atext_it,atext_rm,atext_en"
+                        + ",btext,btext_lang"
+                        + ",ctext,ctext_de,ctext_fr,ctext_it,ctext_rm,ctext_en"
+                        + ",dtext,dtext_lang"
+                        + " FROM "+DBSCHEMA+".classa1 WHERE classa1.t_ili_tid = 'a1.2'"));
                 {
                     ResultSet rs=stmt.getResultSet();
                     Assert.assertTrue(rs.next());
@@ -109,21 +129,49 @@ public abstract class MultilingualTextTest {
                     Assert.assertEquals(null, rs.getString(4));
                     Assert.assertEquals(null, rs.getString(5));
                     Assert.assertEquals(null, rs.getString(6));
+                    
                     Assert.assertEquals(null, rs.getString(7));
                     Assert.assertEquals(null, rs.getString(8));
+                    
+                    Assert.assertEquals(null, rs.getString(9));
+                    Assert.assertEquals(null, rs.getString(10));
+                    Assert.assertEquals(null, rs.getString(11));
+                    Assert.assertEquals(null, rs.getString(12));
+                    Assert.assertEquals(null, rs.getString(13));
+                    Assert.assertEquals(null, rs.getString(14));
+                    
+                    Assert.assertEquals(null, rs.getString(15));
+                    Assert.assertEquals(null, rs.getString(16));
                 }
-                Assert.assertTrue(stmt.execute("SELECT atext,atext_de,atext_fr,atext_it,atext_rm,atext_en,btext,btext_lang FROM "+DBSCHEMA+".classb1 WHERE classb1.t_ili_tid = 'b1.1'"));
+                Assert.assertTrue(stmt.execute("SELECT"
+                        + " atext,atext_de,atext_fr,atext_it,atext_rm,atext_en"
+                        + ",btext,btext_lang"
+                        + ",ctext,ctext_de,ctext_fr,ctext_it,ctext_rm,ctext_en"
+                        + ",dtext,dtext_lang"
+                        + " FROM "+DBSCHEMA+".classb1 WHERE classb1.t_ili_tid = 'b1.1'"));
                 {
                     ResultSet rs=stmt.getResultSet();
                     Assert.assertTrue(rs.next());
+                    
                     Assert.assertEquals(null, rs.getString(1));
                     Assert.assertEquals("b1.1-de", rs.getString(2));
                     Assert.assertEquals(null, rs.getString(3));
                     Assert.assertEquals(null, rs.getString(4));
                     Assert.assertEquals(null, rs.getString(5));
                     Assert.assertEquals(null, rs.getString(6));
+                    
                     Assert.assertEquals("b1.1-fr", rs.getString(7));
                     Assert.assertEquals("fr", rs.getString(8));
+                    
+                    Assert.assertEquals(null, rs.getString(9));
+                    Assert.assertEquals("b1.1-de", rs.getString(10));
+                    Assert.assertEquals(null, rs.getString(11));
+                    Assert.assertEquals(null, rs.getString(12));
+                    Assert.assertEquals(null, rs.getString(13));
+                    Assert.assertEquals(null, rs.getString(14));
+                    
+                    Assert.assertEquals("b1.1-fr", rs.getString(15));
+                    Assert.assertEquals("fr", rs.getString(16));
                 }
                 stmt.close();
                 stmt=null;
