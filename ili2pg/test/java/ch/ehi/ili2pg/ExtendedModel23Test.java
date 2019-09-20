@@ -5,6 +5,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import org.junit.After;
@@ -23,6 +24,8 @@ import ch.ehi.sqlgen.DbUtility;
 import ch.ehi.sqlgen.repository.DbTableName;
 import ch.interlis.iom.IomObject;
 import ch.interlis.iom_j.xtf.XtfReader;
+import ch.interlis.iom_j.xtf.XtfStartTransferEvent;
+import ch.interlis.iom_j.xtf.impl.MyHandler;
 import ch.interlis.iox.EndBasketEvent;
 import ch.interlis.iox.EndTransferEvent;
 import ch.interlis.iox.IoxEvent;
@@ -118,6 +121,12 @@ public class ExtendedModel23Test {
 			 do{
 		        event=reader.read();
 		        if(event instanceof StartTransferEvent){
+                    Assert.assertTrue(event instanceof XtfStartTransferEvent);
+                    XtfStartTransferEvent startEvent=(XtfStartTransferEvent)event;
+                    ArrayList<String> models=getModels(startEvent);
+                    Assert.assertEquals(2,models.size());
+                    Assert.assertTrue(models.contains("BaseModel"));
+                    Assert.assertTrue(models.contains("ExtendedModel"));
 		        }else if(event instanceof StartBasketEvent){
 		        }else if(event instanceof ObjectEvent){
 		        	IomObject iomObj=((ObjectEvent)event).getIomObject();
@@ -170,6 +179,11 @@ public class ExtendedModel23Test {
 			 do{
 		        event=reader.read();
 		        if(event instanceof StartTransferEvent){
+		            Assert.assertTrue(event instanceof XtfStartTransferEvent);
+		            XtfStartTransferEvent startEvent=(XtfStartTransferEvent)event;
+		            ArrayList<String> models=getModels(startEvent);
+		            Assert.assertEquals(1,models.size());
+		            Assert.assertEquals("BaseModel", models.get(0));
 		        }else if(event instanceof StartBasketEvent){
 		        }else if(event instanceof ObjectEvent){
 		        	IomObject iomObj=((ObjectEvent)event).getIomObject();
@@ -197,5 +211,18 @@ public class ExtendedModel23Test {
 			}
 		}
 	}
+    private static ArrayList<String> getModels(XtfStartTransferEvent xtfStart) {
+        ArrayList<String> ret=new ArrayList<String>();
+        java.util.HashMap<String, IomObject> objs=xtfStart.getHeaderObjects();
+        if(objs!=null){
+            for(String tid:objs.keySet()){
+                IomObject obj=objs.get(tid);
+                if(obj.getobjecttag().equals(MyHandler.HEADER_OBJECT_MODELENTRY)){
+                    ret.add(obj.getattrvalue(MyHandler.HEADER_OBJECT_MODELENTRY_NAME));
+                }
+            }
+        }
+        return ret;
+    }
 	
 }
