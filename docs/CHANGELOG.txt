@@ -13,7 +13,11 @@ ideas/open issues/questions
 
 LATEST
 ---------------------------
+
+ili2db 4.3.0 (2019-09-20)
+------------------------------
 - fix LocalisedMText, MultilingualMText smart mapping (#306)
+- export XTF in a different language (#222)
 
 ili2db 4.2.0 (2019-09-06)
 ------------------------------

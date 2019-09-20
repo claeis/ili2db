@@ -6,28 +6,24 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import ch.ehi.basics.settings.Settings;
 import ch.interlis.ili2c.metamodel.AbstractClassDef;
 import ch.interlis.ili2c.metamodel.AttributeDef;
 import ch.interlis.ili2c.metamodel.CompositionType;
-import ch.interlis.ili2c.metamodel.Container;
 import ch.interlis.ili2c.metamodel.Element;
 import ch.interlis.ili2c.metamodel.Enumeration;
 import ch.interlis.ili2c.metamodel.EnumerationType;
 import ch.interlis.ili2c.metamodel.Model;
 import ch.interlis.ili2c.metamodel.ObjectType;
 import ch.interlis.ili2c.metamodel.RoleDef;
-import ch.interlis.ili2c.metamodel.SurfaceOrAreaType;
-import ch.interlis.ili2c.metamodel.SurfaceType;
-import ch.interlis.ili2c.metamodel.Table;
 import ch.interlis.ili2c.metamodel.Topic;
 import ch.interlis.ili2c.metamodel.TransferDescription;
 import ch.interlis.ili2c.metamodel.Type;
 import ch.interlis.ili2c.metamodel.Viewable;
 import ch.interlis.ili2c.metamodel.ViewableTransferElement;
 import ch.interlis.iom.IomObject;
-import ch.interlis.iom_j.itf.ModelUtilities;
 import ch.interlis.iox.EndBasketEvent;
 import ch.interlis.iox.EndTransferEvent;
 import ch.interlis.iox.IoxEvent;
@@ -43,66 +39,118 @@ public class ReduceToBaseModel implements IoxFilter {
 
 	private IoxLogging loggingHandler=null;
 	private TransferDescription td=null;
-	private List<Model> baseModels=null;
+    private boolean doItfLineTables=false;
+	private List<Model> destModels=null;
 	/** mappings from xml-tags to Viewable|AttributeDef
 	 */
 	private HashMap<String,Object> tag2class=null;
 	private HashMap<String,Topic> tag2topic=new HashMap<String,Topic>();
 	private HashMap<String,Object> srctag2destElement=new HashMap<String,Object>();
+    private HashMap<Topic,ArrayList<Topic>> topicTranslatedBy=new HashMap<Topic,ArrayList<Topic>>();
 	
 	public ReduceToBaseModel(List<Model> exportModels,TransferDescription td,Settings config)
 	{
 		this.td=td;
-		this.baseModels=exportModels;
-		tag2class=ch.interlis.ili2c.generator.XSDGenerator.getTagMap(td);
+		this.destModels=exportModels;
+        this.doItfLineTables = Validator.CONFIG_DO_ITF_LINETABLES_DO.equals(config.getValue(Validator.CONFIG_DO_ITF_LINETABLES));
+        if(doItfLineTables){
+            tag2class=ch.interlis.iom_j.itf.ModelUtilities.getTagMap(td);
+        }else{
+            tag2class=ch.interlis.ili2c.generator.XSDGenerator.getTagMap(td);
+        }
 		for(Iterator<Model> models=td.iterator();models.hasNext();){
 			Model model=models.next();
 			for(Iterator<Element> topics=model.iterator();topics.hasNext();){
 				Element topic=topics.next();
 				if(topic instanceof Topic){
 					tag2topic.put(topic.getScopedName(), (Topic)topic);
+					ArrayList<Topic> translatedBy=topicTranslatedBy.get(topic);
+					if(translatedBy==null) {
+					    translatedBy=new ArrayList<Topic>();
+					    topicTranslatedBy.put((Topic) topic,translatedBy);
+					}
+					Topic originTopic=(Topic) topic.getTranslationOf();
+					if(originTopic!=null) {
+					    translatedBy=topicTranslatedBy.get(originTopic);
+					    translatedBy.add((Topic) topic);
+					}
 				}
 			}
 			
 		}
 	}
 	private void setupTranslation(Topic srcTopic){
-		Topic baseTopic=srcTopic;
+		Topic destTopic=srcTopic;
 		do{
-			if(baseModels.contains(baseTopic.getContainer(Model.class))) {
+			if(destModels.contains(destTopic.getContainer(Model.class))) {
 				// setup mapping of topic content
-				setupTopicTranslation(srcTopic,baseTopic);
+				setupTopicTranslation(srcTopic,destTopic);
 				return;
 			}
-			baseTopic=(Topic) srcTopic.getExtending();
-		}while(baseTopic!=null);
+			// find dest topic
+			// translated topics, origin topics
+			Set<Topic> destTopics=getTranslationsOf(destTopic);
+			for(Topic d:destTopics) {
+	            if(destModels.contains(d.getContainer(Model.class))) {
+	                // setup mapping of topic content
+	                setupTopicTranslation(srcTopic,d);
+	                return;
+	            }
+			}
+            // base topic
+			destTopic=(Topic) destTopic.getExtending();
+		}while(destTopic!=null);
 		return;
 	}
 	
-	private void setupTopicTranslation(Topic srcTopic, Topic baseTopic) {
-		srctag2destElement.put(srcTopic.getScopedName(), baseTopic);
-		if(srcTopic==baseTopic) {
+	private Set<Topic> getTranslationsOf(Topic start) {
+	    Set<Topic> ret=new HashSet<Topic>();
+	    ArrayList<Topic> queue=new ArrayList<Topic>();
+	    Topic topic=(Topic) start.getTranslationOfOrSame();
+	    queue.add(topic);
+        ret.add(topic);
+	    while(queue.size()>0){
+            topic=queue.remove(0);
+	        ArrayList<Topic> translatedBy=topicTranslatedBy.get(topic);
+	        ret.addAll(translatedBy);
+	        queue.addAll(translatedBy);
+	    }
+	    ret.remove(start);
+        return ret;
+    }
+    private void setupTopicTranslation(Topic srcTopic, Topic destTopic) {
+		srctag2destElement.put(srcTopic.getScopedName(), destTopic);
+		if(srcTopic==destTopic) {
 			// no translation required
 			return;
 		}
-		// for each class of srcTopic, find base in baseTopic
+		Topic originDestTopic=(Topic) destTopic.getTranslationOfOrSame();
+		// for each class of srcTopic, find dest in destTopic
 		while(srcTopic!=null) {
-			if(srcTopic.isExtending(baseTopic) && srcTopic!=baseTopic) {
+			if((srcTopic.isExtending(destTopic) || srcTopic.getTranslationOfOrSame()==originDestTopic) && srcTopic!=destTopic) {
 				Iterator<Element> eleIt=srcTopic.iterator();
 				while(eleIt.hasNext()) {
 					Element srcEle=eleIt.next();
 					if(srcEle instanceof AbstractClassDef) {
-						AbstractClassDef baseEle=(AbstractClassDef) srcEle;
-						while(baseEle!=null){
-							if(baseEle.getContainer()==baseTopic) {
+                        AbstractClassDef originSrcEle=(AbstractClassDef) srcEle.getTranslationOfOrSame();
+					    // find equivalent class in dest topic
+						AbstractClassDef originDestEle=originSrcEle;
+						while(originDestEle!=null){
+							if(originDestEle.getContainer()==originDestTopic) {
 								break;
 							}
-							baseEle=(AbstractClassDef)baseEle.getExtending();
+							originDestEle=(AbstractClassDef)originDestEle.getExtending();
 						}
-						if(baseEle!=null) {
-							srctag2destElement.put(srcEle.getScopedName(), baseEle);
-							if(srcEle!=baseEle) {
-								setupClassTranslation((AbstractClassDef) srcEle,baseEle);
+                        // found destEle in original language?
+                        AbstractClassDef destEle=null;
+						if(originDestEle!=null) {
+						    destEle=findTranslatedEle(originDestEle,destTopic);
+						    if(destEle==null) {
+						        throw new IllegalStateException("destEle "+originDestEle.getScopedName()+" in "+destTopic.getScopedName()+"not found");
+						    }
+							srctag2destElement.put(srcEle.getScopedName(), destEle);
+							if(srcEle!=destEle) {
+								setupClassTranslation((AbstractClassDef) srcEle,destEle);
 							}else {
 								// no object translation required
 								// setupClassTranslation((AbstractClassDef) srcEle,baseEle);
@@ -119,8 +167,8 @@ public class ReduceToBaseModel implements IoxFilter {
 				while(eleIt.hasNext()) {
 					Element srcEle=eleIt.next();
 					if(srcEle instanceof AbstractClassDef) {
-						AbstractClassDef baseEle=(AbstractClassDef) srcEle;
-						srctag2destElement.put(srcEle.getScopedName(), baseEle);
+						AbstractClassDef destEle=(AbstractClassDef) srcEle;
+						srctag2destElement.put(srcEle.getScopedName(), destEle);
 						// no object translation required
 						// setupClassTranslation((AbstractClassDef) srcEle,baseEle);
 					}
@@ -129,21 +177,34 @@ public class ReduceToBaseModel implements IoxFilter {
 			srcTopic=(Topic)srcTopic.getExtending();
 		}
 	}
-	private void setupClassTranslation(AbstractClassDef srcEle, AbstractClassDef baseEle) {
-		HashMap<String,ViewableTransferElement> baseAttrs=new HashMap<String,ViewableTransferElement>();
-		Iterator<ViewableTransferElement> basePropIt=baseEle.getAttributesAndRoles2();
-		while(basePropIt.hasNext()){
-			ViewableTransferElement baseProp=basePropIt.next();
-			String basePropName = ((Element)baseProp.obj).getName();
-			baseAttrs.put(basePropName,baseProp);
+	private AbstractClassDef findTranslatedEle(AbstractClassDef originDestEle, Topic destTopic) {
+        Iterator<Element> eleIt=destTopic.iterator();
+        while(eleIt.hasNext()) {
+            Element destEle=eleIt.next();
+            if(destEle instanceof AbstractClassDef) {
+                AbstractClassDef originEle=(AbstractClassDef) destEle.getTranslationOfOrSame();
+                if(originEle==originDestEle) {
+                    return (AbstractClassDef)destEle;
+                }
+            }
+        }
+        return null;
+    }
+    private void setupClassTranslation(AbstractClassDef srcEle, AbstractClassDef destEle) {
+		HashMap<String,ViewableTransferElement> destAttrs=new HashMap<String,ViewableTransferElement>();
+		Iterator<ViewableTransferElement> destPropIt=destEle.getAttributesAndRoles2();
+		while(destPropIt.hasNext()){
+			ViewableTransferElement destProp=destPropIt.next();
+			String destOriginPropName = ((Element)destProp.obj).getTranslationOfOrSame().getName();
+			destAttrs.put(destOriginPropName,destProp);
 		}
 		Iterator<ViewableTransferElement> srcPropIt=srcEle.getAttributesAndRoles2();
 		while(srcPropIt.hasNext()) {
 			ViewableTransferElement srcProp=srcPropIt.next();
-			String srcPropName = ((Element)srcProp.obj).getName();
-			if(baseAttrs.containsKey(srcPropName)) {
+			String srcOriginPropName = ((Element)srcProp.obj).getTranslationOfOrSame().getName();
+			if(destAttrs.containsKey(srcOriginPropName)) {
 				// attribute exists in base class
-				srctag2destElement.put(((Element)srcProp.obj).getScopedName(), baseAttrs.get(srcPropName));
+				srctag2destElement.put(((Element)srcProp.obj).getScopedName(), destAttrs.get(srcOriginPropName).obj);
 			}else {
 				// attribute doesn't exist in base class
 				// remove it from export
@@ -199,6 +260,10 @@ public class ReduceToBaseModel implements IoxFilter {
             // no translation required
             return;
 		}
+		if(doItfLineTables && modelElement instanceof AttributeDef){
+			// TODO see TranslateToOrigin
+		}
+
 		Viewable aclass=(Viewable)modelElement;
 		Viewable destClass=(Viewable)destModelEle;
 		String destName=destClass.getScopedName();
@@ -208,8 +273,8 @@ public class ReduceToBaseModel implements IoxFilter {
 		Iterator iter = aclass.getAttributesAndRoles2();
 		while (iter.hasNext()) {
 			ViewableTransferElement srcProp = (ViewableTransferElement)iter.next();
-			ViewableTransferElement destProp=(ViewableTransferElement) srctag2destElement.get(((Element)srcProp.obj).getScopedName());
-			if(destProp==null) {
+			Element destEle=(Element) srctag2destElement.get(((Element)srcProp.obj).getScopedName());
+			if(destEle==null) {
 				iomObj.setattrundefined(((Element)srcProp.obj).getName());
 			}else {
 				if (srcProp.obj instanceof AttributeDef) {
@@ -222,6 +287,15 @@ public class ReduceToBaseModel implements IoxFilter {
 							translateAttrValue(iomObj,attr);
 						}
 					}
+				}else if (srcProp.obj instanceof RoleDef) {
+                    RoleDef srcRole = (RoleDef) srcProp.obj;
+                    RoleDef destRole=(RoleDef)getTranslatedElement(srcRole);
+                    String srcRoleName = srcRole.getName();
+                    if(iomObj.getattrvaluecount(srcRoleName)>0){
+                        IomObject structvalue = iomObj.getattrobj(srcRoleName, 0);
+                        iomObj.deleteattrobj(srcRoleName, 0);
+                        iomObj.addattrobj(destRole.getName(), structvalue);
+                    }
 				}
 			}
 		}
@@ -250,18 +324,34 @@ public class ReduceToBaseModel implements IoxFilter {
 		if(isEnumType){
 			srcEnumType=(EnumerationType)srcAttr.getDomainResolvingAliases();
 		}
-		AttributeDef destAttr=(AttributeDef)((ViewableTransferElement)srctag2destElement.get(srcAttr.getScopedName())).obj;
+		AttributeDef destAttr=(AttributeDef)srctag2destElement.get(srcAttr.getScopedName());
+        String destAttrName=destAttr.getName();
+		
+		ArrayList<Object> attrValues=new ArrayList<Object>();
 		for(int attri=0;attri<attrc;attri++){
 			String attrValue=iomObj.getattrprim(srcAttrName,attri);
 			if(attrValue!=null){
-				if(isEnumType){
-					attrValue=translateEnumValue((String)attrValue,srcEnumType,(EnumerationType)destAttr.getDomainResolvingAliases());
-					iomObj.setattrvalue(srcAttrName, (String)attrValue);
-				}
+				attrValues.add(attrValue);
 			}else{
 				IomObject structValue=iomObj.getattrobj(srcAttrName,attri);
-				if(isCompType){
-					translateObject(structValue);
+				attrValues.add(structValue);
+			}
+		}
+		iomObj.setattrundefined(srcAttrName);
+		for(int attri=0;attri<attrc;attri++){
+			Object attrValue=attrValues.get(attri);
+			if(attrValue!=null){
+				if(attrValue instanceof String){
+					if(isEnumType){
+						attrValue=translateEnumValue((String)attrValue,srcEnumType,(EnumerationType)destAttr.getDomainResolvingAliases());
+					}
+					iomObj.setattrvalue(destAttrName, (String)attrValue);
+				}else{
+					IomObject structValue=(IomObject)attrValue;
+					if(isCompType){
+						translateObject(structValue);
+					}
+					iomObj.addattrobj(destAttrName,structValue);
 				}
 			}
 		}
@@ -279,45 +369,54 @@ public class ReduceToBaseModel implements IoxFilter {
 	private Topic destTopic;
 	private Map<String, String> getEnumMapping(
 			EnumerationType srcEnumType,EnumerationType destEnumType) {
-		Map<String,String> src2dest=src2destEles.get(srcEnumType);
-		if(src2dest==null){
-			src2dest=new HashMap<String,String>(); 
-			List<String> srcVals=new java.util.ArrayList<String>();
-		      buildEnumList(src2dest,"",srcEnumType.getConsolidatedEnumeration(),destEnumType.getConsolidatedEnumeration(),null);
-			src2destEles.put(srcEnumType,src2dest);
-		}
-		return src2dest;
+        Map<String, String> src2dest = src2destEles.get(srcEnumType);
+        if (src2dest == null) {
+            src2dest = new HashMap<String, String>();
+            buildEnumList(src2dest, "", srcEnumType.getConsolidatedEnumeration(), "",
+                    destEnumType.getConsolidatedEnumeration(), null);
+            src2destEles.put(srcEnumType, src2dest);
+        }
+        return src2dest;
 	}
-	  public static void buildEnumList(java.util.Map<String,String> accu,String prefix1,Enumeration srcEnumer,Enumeration destEnumer,String destEeName){
-	      String prefix="";
-	      if(prefix1.length()>0){
-	        prefix=prefix1+".";
-	      }
-	      Iterator srcIter = srcEnumer.getElements();
-	      Iterator destIter = null;
-	      if(destEnumer!=null) {
-		      destIter=destEnumer.getElements();
-	      }
-	      while (srcIter.hasNext()) {
-	        Enumeration.Element srcEe=(Enumeration.Element) srcIter.next();
-	        Enumeration srcSubEnum = srcEe.getSubEnumeration();
-	        Enumeration destSubEnum=null;
-		      if(destEnumer!=null) {
-			        Enumeration.Element destEe=(Enumeration.Element) destIter.next();
-			        destSubEnum = destEe.getSubEnumeration();
-			        if(destSubEnum==null) {
-			        	destEeName=prefix+destEe.getName();
-			        }
-		      }
-	        if (srcSubEnum != null)
-	        {
-	          // ee is not leaf, add its name to prefix and add sub elements to accu
-	          buildEnumList(accu,prefix+srcEe.getName(),srcSubEnum,destSubEnum,destEeName);
-	        }else{
-	          // ee is a leaf, add it to accu
-	          accu.put(prefix+srcEe.getName(),destEeName);
-	        }
-	      }
+	  public static void buildEnumList(java.util.Map<String,String> accu,String srcPrefix1,Enumeration srcEnumer,String destPrefix1,Enumeration destEnumer,String destEeName){
+        String srcPrefix = "";
+        String destPrefix = "";
+        if (srcPrefix1.length() > 0) {
+            srcPrefix = srcPrefix1 + ".";
+        }
+        if (destPrefix1!=null && destPrefix1.length() > 0) {
+            destPrefix = destPrefix1 + ".";
+        }
+        Iterator srcIter = srcEnumer.getElements();
+        Iterator destIter = null;
+        if (destEnumer != null) {
+            destIter = destEnumer.getElements();
+        }
+        while (srcIter.hasNext()) {
+            Enumeration.Element srcEe = (Enumeration.Element) srcIter.next();
+            Enumeration srcSubEnum = srcEe.getSubEnumeration();
+            Enumeration destSubEnum = null;
+            Enumeration.Element destEe = null;
+            if (destIter != null) {
+                destEe = (Enumeration.Element) destIter.next();
+                destSubEnum = destEe.getSubEnumeration();
+                if (destSubEnum == null) {
+                    destEeName = destPrefix + destEe.getName();
+                }
+            }
+            if (srcSubEnum != null) {
+                if(destSubEnum!=null) {
+                    // ee is not leaf, add its name to prefix and add sub elements to accu
+                    buildEnumList(accu, srcPrefix + srcEe.getName(), srcSubEnum, destPrefix+destEe.getName(), destSubEnum, null);
+                }else {
+                    // ee is not leaf, add its name to prefix and add sub elements to accu
+                    buildEnumList(accu, srcPrefix + srcEe.getName(), srcSubEnum, null, null, destEeName);
+                }
+            } else {
+                // ee is a leaf, add it to accu
+                accu.put(srcPrefix + srcEe.getName(), destEeName);
+            }
+        }
 	  }
 	
 
