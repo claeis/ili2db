@@ -1,11 +1,21 @@
 INTERLIS 2.3;
 
-MODEL EnumOkA (de) AT "http://www.interlis.ch/ili2c/tests/" VERSION "1" =
+MODEL Basis (de) AT "http://www.interlis.ch/ili2db/tests/" VERSION "1" =
 
+	STRUCTURE Struct =
+			attrA : (a1,a3(a31,a32));
+	END Struct;
+	
+END Basis.
+
+MODEL EnumOkA (de) AT "http://www.interlis.ch/ili2c/tests/" VERSION "1" =
+	IMPORTS Basis;
+	
 	TOPIC TopicA =
 
 		CLASS ClassA =
 			attrA : (a1,a2(a21,a22));
+			attrA2 : Basis.Struct;
 		END ClassA;
 
 		CLASS ClassA2 =
@@ -28,11 +38,13 @@ END EnumOkA.
 MODEL EnumOkB (fr) AT "http://www.interlis.ch/ili2c/tests/" VERSION "1" 
 TRANSLATION OF EnumOkA [ "1"]
 =
+	IMPORTS Basis;
 
 	TOPIC TopicB =
 
 		CLASS ClassB =
 			attrB : (b1,b2(b21,b22));
+			attrB2 : Basis.Struct;
 		END ClassB;
 
 		CLASS ClassB2 =
