@@ -72,6 +72,7 @@ import ch.interlis.ili2c.config.Configuration;
 import ch.interlis.ili2c.metamodel.Element;
 import ch.interlis.ili2c.metamodel.Ili2cMetaAttrs;
 import ch.interlis.ili2c.metamodel.Model;
+import ch.interlis.ili2c.metamodel.PredefinedModel;
 import ch.interlis.ili2c.metamodel.TransferDescription;
 import ch.interlis.ilirepository.IliFiles;
 import ch.interlis.iom_j.iligml.Iligml10Writer;
@@ -82,6 +83,7 @@ import ch.interlis.iom_j.itf.ItfReader2;
 import ch.interlis.iom_j.itf.ItfWriter;
 import ch.interlis.iom_j.itf.ItfWriter2;
 import ch.interlis.iom_j.xtf.Xtf24Reader;
+import ch.interlis.iom_j.xtf.XtfModel;
 import ch.interlis.iom_j.xtf.XtfReader;
 import ch.interlis.iom_j.xtf.XtfWriter;
 import ch.interlis.iox.IoxException;
@@ -2277,6 +2279,9 @@ public class Ili2db {
 	                    ioxWriter=new Iligml10Writer(outfile,td);
 	                }else{
 	                    ioxWriter=new XtfWriter(outfile,td);
+	                    if(config.getExportModels()!=null) {
+	                        ((XtfWriter) ioxWriter).setModels(buildModelList(td,config.getExportModels()));
+	                    }
 	                }
 	            }
 	            TransferToXtf trsfr=new TransferToXtf(ili2sqlName,td,conn,geomConv,config,trafoConfig,class2wrapper);
@@ -2299,6 +2304,20 @@ public class Ili2db {
 	        }
 	    }
 	}
+    private static XtfModel[] buildModelList(TransferDescription td,String modelNames){
+        List modelv=getModels(modelNames, td);
+        XtfModel[] ret=new XtfModel[modelv.size()];
+        for(int i=0;i<modelv.size();i++){
+            Model model=(Model)modelv.get(i);
+            ret[i]=new XtfModel();
+            ret[i].setName(model.getName());
+            String version=model.getModelVersion();
+            ret[i].setVersion(version==null?"":version);
+            String issuer=model.getIssuer();
+            ret[i].setUri(issuer==null?"":issuer);
+        }
+        return ret;
+    }
 	
 	static private HashSet getModelNames(ArrayList modelv){
 		HashSet ret=new HashSet();

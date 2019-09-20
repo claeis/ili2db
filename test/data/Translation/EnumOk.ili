@@ -1,13 +1,36 @@
 INTERLIS 2.3;
 
-MODEL EnumOkA (de) AT "http://www.interlis.ch/ili2c/tests/" VERSION "1" =
+MODEL Basis (de) AT "http://www.interlis.ch/ili2db/tests/" VERSION "1" =
 
+	STRUCTURE Struct =
+			attrA : (a1,a3(a31,a32));
+	END Struct;
+	
+END Basis.
+
+MODEL EnumOkA (de) AT "http://www.interlis.ch/ili2c/tests/" VERSION "1" =
+	IMPORTS Basis;
+	
 	TOPIC TopicA =
 
 		CLASS ClassA =
 			attrA : (a1,a2(a21,a22));
+			attrA2 : Basis.Struct;
 		END ClassA;
 
+		CLASS ClassA2 =
+		END ClassA2;
+		
+		ASSOCIATION n_nA =
+			n_nA_A -- {0..*} ClassA;
+			n_nA_A2 -- {0..*} ClassA2;
+		END n_nA;
+
+		ASSOCIATION n_1A =
+			n_1A_A -- {0..*} ClassA;
+			n_1A_A2 -- {0..1} ClassA2;
+		END n_1A;
+		
 	END TopicA;
 
 END EnumOkA.
@@ -15,13 +38,28 @@ END EnumOkA.
 MODEL EnumOkB (fr) AT "http://www.interlis.ch/ili2c/tests/" VERSION "1" 
 TRANSLATION OF EnumOkA [ "1"]
 =
+	IMPORTS Basis;
 
 	TOPIC TopicB =
 
 		CLASS ClassB =
 			attrB : (b1,b2(b21,b22));
+			attrB2 : Basis.Struct;
 		END ClassB;
 
+		CLASS ClassB2 =
+		END ClassB2;
+		
+		ASSOCIATION n_nB =
+			n_nB_B -- {0..*} ClassB;
+			n_nB_B2 -- {0..*} ClassB2;
+		END n_nB;
+
+		ASSOCIATION n_1B =
+			n_1B_B -- {0..*} ClassB;
+			n_1B_B2 -- {0..1} ClassB2;
+		END n_1B;
+		
 	END TopicB;
 
 END EnumOkB.

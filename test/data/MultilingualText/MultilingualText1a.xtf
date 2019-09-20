@@ -49,6 +49,41 @@
 						<Text>a1.1-de</Text>
 					</LocalisationCH_V1.LocalisedText>
 				</btext>
+				<ctext>
+					<LocalisationCH_V1.MultilingualMText>
+						<LocalisedText>
+							<LocalisationCH_V1.LocalisedMText>
+								<Text>a1.1-null</Text>
+							</LocalisationCH_V1.LocalisedMText>
+							<LocalisationCH_V1.LocalisedMText>
+								<Language>de</Language>
+								<Text>a1.1-de</Text>
+							</LocalisationCH_V1.LocalisedMText>
+							<LocalisationCH_V1.LocalisedMText>
+								<Language>fr</Language>
+								<Text>a1.1-fr</Text>
+							</LocalisationCH_V1.LocalisedMText>
+							<LocalisationCH_V1.LocalisedMText>
+								<Language>rm</Language>
+								<Text>a1.1-rm</Text>
+							</LocalisationCH_V1.LocalisedMText>
+							<LocalisationCH_V1.LocalisedMText>
+								<Language>it</Language>
+								<Text>a1.1-it</Text>
+							</LocalisationCH_V1.LocalisedMText>
+							<LocalisationCH_V1.LocalisedMText>
+								<Language>en</Language>
+								<Text>a1.1-en</Text>
+							</LocalisationCH_V1.LocalisedMText>
+						</LocalisedText>
+					</LocalisationCH_V1.MultilingualMText>
+				</ctext>
+				<dtext>
+					<LocalisationCH_V1.LocalisedMText>
+						<Language>de</Language>
+						<Text>a1.1-de</Text>
+					</LocalisationCH_V1.LocalisedMText>
+				</dtext>
 			</MultilingualText0.TestA.ClassA1>
 			<MultilingualText0.TestA.ClassB1 TID="b1.1">
 				<atext>
@@ -67,6 +102,22 @@
 						<Text>b1.1-fr</Text>
 					</LocalisationCH_V1.LocalisedText>
 				</btext>
+				<ctext>
+					<LocalisationCH_V1.MultilingualMText>
+						<LocalisedText>
+							<LocalisationCH_V1.LocalisedMText>
+								<Language>de</Language>
+								<Text>b1.1-de</Text>
+							</LocalisationCH_V1.LocalisedMText>
+						</LocalisedText>
+					</LocalisationCH_V1.MultilingualMText>
+				</ctext>
+				<dtext>
+					<LocalisationCH_V1.LocalisedMText>
+						<Language>fr</Language>
+						<Text>b1.1-fr</Text>
+					</LocalisationCH_V1.LocalisedMText>
+				</dtext>
 			</MultilingualText0.TestA.ClassB1>
 		</MultilingualText1.TestA>
 	</DATASECTION>

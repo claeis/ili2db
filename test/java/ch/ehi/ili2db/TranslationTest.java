@@ -77,14 +77,23 @@ public abstract class TranslationTest {
                 {
                     // t_ili2db_attrname
                     String [][] expectedValues=new String[][] {
-                        {"EnumOkA.TopicA.ClassA.attrA",  "attra", "classa", null}, 
+                        {"EnumOkA.TopicA.n_1A.n_1A_A2", "n_1a_a2", "classa",  "classa2"},
+                        {"EnumOkA.TopicA.n_nA.n_nA_A2", "n_na_a2", "n_na",    "classa2"},
+                        {"EnumOkA.TopicA.ClassA.attrA", "attra",   "classa",  null},
+                        {"EnumOkA.TopicA.ClassA.attrA2", "classa_attra2",   "struct",  "classa"},
+                        {"EnumOkA.TopicA.n_nA.n_nA_A",  "n_na_a",  "n_na",    "classa"},
+                        {"Basis.Struct.attrA", "attra",   "struct",  null},
                     };
                     Ili2dbAssert.assertAttrNameTable(jdbcConnection, expectedValues, setup.getSchema());
                 }
                 {
                     // t_ili2db_trafo
                     String [][] expectedValues=new String[][] {
-                        {"EnumOkA.TopicA.ClassA", "ch.ehi.ili2db.inheritance", "newClass"},
+                        {"EnumOkA.TopicA.n_1A", "ch.ehi.ili2db.inheritance",   "embedded"},
+                        {"EnumOkA.TopicA.ClassA2",  "ch.ehi.ili2db.inheritance",   "newClass"},
+                        {"EnumOkA.TopicA.ClassA",   "ch.ehi.ili2db.inheritance",   "newClass"},
+                        {"EnumOkA.TopicA.n_nA", "ch.ehi.ili2db.inheritance",   "newClass"},
+                        {"Basis.Struct",   "ch.ehi.ili2db.inheritance",   "newClass"},
                     };
                     Ili2dbAssert.assertTrafoTable(jdbcConnection,expectedValues, setup.getSchema());
                 }
@@ -352,7 +361,7 @@ public abstract class TranslationTest {
 	}
 	
 	@Test
-	public void exportXtf23() throws Exception
+	public void exportXtf23Original() throws Exception
 	{
 		Connection jdbcConnection=null;
 		{
@@ -380,8 +389,9 @@ public abstract class TranslationTest {
 		        }else if(event instanceof StartBasketEvent){
 		        }else if(event instanceof ObjectEvent){
 		        	IomObject iomObj=((ObjectEvent)event).getIomObject();
-		        	if(iomObj.getobjectoid()!=null){
-			        	objs.put(iomObj.getobjectoid(), iomObj);
+		        	String oid=getOid(iomObj);
+		        	if(oid!=null){
+			        	objs.put(oid, iomObj);
 		        	}
 		        }else if(event instanceof EndBasketEvent){
 		        }else if(event instanceof EndTransferEvent){
@@ -397,7 +407,21 @@ public abstract class TranslationTest {
 				 Assert.assertNotNull(obj0);
 				 Assert.assertEquals("EnumOkA.TopicA.ClassA", obj0.getobjecttag());
 				 Assert.assertEquals("a2.a21", obj0.getattrvalue("attrA"));
+				 IomObject struct=obj0.getattrobj("attrA2", 0);
+                 Assert.assertNotNull(struct);
+                 Assert.assertEquals("Basis.Struct", struct.getobjecttag());
+                 Assert.assertEquals("a3.a32", struct.getattrvalue("attrA"));
 			 }
+             {
+                 IomObject obj0 = objs.get("o3");
+                 Assert.assertNotNull(obj0);
+                 Assert.assertEquals("EnumOkA.TopicA.ClassA2", obj0.getobjecttag());
+             }
+             {
+                 IomObject obj0 = objs.get("o1:o3");
+                 Assert.assertNotNull(obj0);
+                 Assert.assertEquals("EnumOkA.TopicA.n_nA", obj0.getobjecttag());
+             }
 			 {
 				 IomObject obj0 = objs.get("x1");
 				 Assert.assertNotNull(obj0);
@@ -408,13 +432,251 @@ public abstract class TranslationTest {
 				 Assert.assertNotNull(obj0);
 				 Assert.assertEquals("EnumOkB.TopicB.ClassB", obj0.getobjecttag());
 				 Assert.assertEquals("b2.b21", obj0.getattrvalue("attrB"));
+                 IomObject struct=obj0.getattrobj("attrB2", 0);
+                 Assert.assertNotNull(struct);
+                 Assert.assertEquals("Basis.Struct", struct.getobjecttag());
+                 Assert.assertEquals("a3.a32", struct.getattrvalue("attrA"));
 			 }
+             {
+                 IomObject obj0 = objs.get("x3");
+                 Assert.assertNotNull(obj0);
+                 Assert.assertEquals("EnumOkB.TopicB.ClassB2", obj0.getobjecttag());
+             }
+             {
+                 IomObject obj0 = objs.get("x1:x3");
+                 Assert.assertNotNull(obj0);
+                 Assert.assertEquals("EnumOkB.TopicB.n_nB", obj0.getobjecttag());
+             }
 		}finally{
 			if(jdbcConnection!=null){
 				jdbcConnection.close();
 			}
 		}
 	}
+    private String getOid(IomObject iomObj) {
+        String oid=iomObj.getobjectoid();
+        if(oid!=null) {
+            return oid;
+        }
+        String tag=iomObj.getobjecttag();
+        if(tag.equals("EnumOkA.TopicA.n_nA")) {
+            oid=getAssocId(iomObj, "n_nA_A", "n_nA_A2");
+            return oid;
+        }else if(tag.equals("EnumOkB.TopicB.n_nB")) {
+            oid=getAssocId(iomObj, "n_nB_B", "n_nB_B2");
+            return oid;
+        }
+        return null;
+    }
+
+    private String getAssocId(IomObject iomObj, String roleName1, String roleName2) {
+        IomObject refObj1=iomObj.getattrobj(roleName1, 0);
+        if(refObj1==null) {
+            return null;
+        }
+        IomObject refObj2=iomObj.getattrobj(roleName2, 0);
+        if(refObj2==null) {
+            return null;
+        }
+        String ref1=refObj1.getobjectrefoid();
+        if(ref1==null) {
+            return null;
+        }
+        String ref2=refObj2.getobjectrefoid();
+        if(ref2==null) {
+            return null;
+        }
+        return ref1+":"+ref2;
+    }
+
+    @Test
+    public void exportXtf23Translated() throws Exception
+    {
+        Connection jdbcConnection=null;
+        {
+            importXtf23();
+        }
+        try{
+            jdbcConnection = setup.createConnection();
+            Statement stmt=jdbcConnection.createStatement();
+            
+            //EhiLogger.getInstance().setTraceFilter(false);
+            File data=new File(TEST_OUT,"EnumOka-out.xtf");
+            Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+            config.setFunction(Config.FC_EXPORT);
+            config.setExportTid(true);
+            config.setDatasetName("EnumOka");
+            config.setExportModels("EnumOkB");
+            Ili2db.readSettingsFromDb(config);
+            Ili2db.run(config,null);
+            
+            HashMap<String,IomObject> objs=new HashMap<String,IomObject>();
+            XtfReader reader=new XtfReader(data);
+            IoxEvent event=null;
+             do{
+                event=reader.read();
+                if(event instanceof StartTransferEvent){
+                }else if(event instanceof StartBasketEvent){
+                }else if(event instanceof ObjectEvent){
+                    IomObject iomObj=((ObjectEvent)event).getIomObject();
+                    String oid=getOid(iomObj);
+                    if(oid!=null){
+                        objs.put(oid, iomObj);
+                    }
+                }else if(event instanceof EndBasketEvent){
+                }else if(event instanceof EndTransferEvent){
+                }
+             }while(!(event instanceof EndTransferEvent));
+             {
+                 IomObject obj0 = objs.get("o1");
+                 Assert.assertNotNull(obj0);
+                 Assert.assertEquals("EnumOkB.TopicB.ClassB", obj0.getobjecttag());
+             }
+             {
+                 IomObject obj0 = objs.get("o2");
+                 Assert.assertNotNull(obj0);
+                 Assert.assertEquals("EnumOkB.TopicB.ClassB", obj0.getobjecttag());
+                 Assert.assertEquals("b2.b21", obj0.getattrvalue("attrB"));
+                 IomObject struct=obj0.getattrobj("attrB2", 0);
+                 Assert.assertNotNull(struct);
+                 Assert.assertEquals("Basis.Struct", struct.getobjecttag());
+                 Assert.assertEquals("a3.a32", struct.getattrvalue("attrA"));
+             }
+             {
+                 IomObject obj0 = objs.get("o3");
+                 Assert.assertNotNull(obj0);
+                 Assert.assertEquals("EnumOkB.TopicB.ClassB2", obj0.getobjecttag());
+             }
+             {
+                 IomObject obj0 = objs.get("o1:o3");
+                 Assert.assertNotNull(obj0);
+                 Assert.assertEquals("EnumOkB.TopicB.n_nB", obj0.getobjecttag());
+             }
+             {
+                 IomObject obj0 = objs.get("x1");
+                 Assert.assertNotNull(obj0);
+                 Assert.assertEquals("EnumOkB.TopicB.ClassB", obj0.getobjecttag());
+             }
+             {
+                 IomObject obj0 = objs.get("x2");
+                 Assert.assertNotNull(obj0);
+                 Assert.assertEquals("EnumOkB.TopicB.ClassB", obj0.getobjecttag());
+                 Assert.assertEquals("b2.b21", obj0.getattrvalue("attrB"));
+                 IomObject struct=obj0.getattrobj("attrB2", 0);
+                 Assert.assertNotNull(struct);
+                 Assert.assertEquals("Basis.Struct", struct.getobjecttag());
+                 Assert.assertEquals("a3.a32", struct.getattrvalue("attrA"));
+             }
+             {
+                 IomObject obj0 = objs.get("x3");
+                 Assert.assertNotNull(obj0);
+                 Assert.assertEquals("EnumOkB.TopicB.ClassB2", obj0.getobjecttag());
+             }
+             {
+                 IomObject obj0 = objs.get("x1:x3");
+                 Assert.assertNotNull(obj0);
+                 Assert.assertEquals("EnumOkB.TopicB.n_nB", obj0.getobjecttag());
+             }
+        }finally{
+            if(jdbcConnection!=null){
+                jdbcConnection.close();
+            }
+        }
+    }
+    @Test
+    public void exportXtf23OriginLang() throws Exception
+    {
+        Connection jdbcConnection=null;
+        {
+            importXtf23();
+        }
+        try{
+            jdbcConnection = setup.createConnection();
+            Statement stmt=jdbcConnection.createStatement();
+            
+            //EhiLogger.getInstance().setTraceFilter(false);
+            File data=new File(TEST_OUT,"EnumOka-out.xtf");
+            Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+            config.setFunction(Config.FC_EXPORT);
+            config.setExportTid(true);
+            config.setDatasetName("EnumOka");
+            config.setExportModels("EnumOkA");
+            Ili2db.readSettingsFromDb(config);
+            Ili2db.run(config,null);
+            
+            HashMap<String,IomObject> objs=new HashMap<String,IomObject>();
+            XtfReader reader=new XtfReader(data);
+            IoxEvent event=null;
+             do{
+                event=reader.read();
+                if(event instanceof StartTransferEvent){
+                }else if(event instanceof StartBasketEvent){
+                }else if(event instanceof ObjectEvent){
+                    IomObject iomObj=((ObjectEvent)event).getIomObject();
+                    String oid=getOid(iomObj);
+                    if(oid!=null){
+                        objs.put(oid, iomObj);
+                    }
+                }else if(event instanceof EndBasketEvent){
+                }else if(event instanceof EndTransferEvent){
+                }
+             }while(!(event instanceof EndTransferEvent));
+             {
+                 IomObject obj0 = objs.get("o1");
+                 Assert.assertNotNull(obj0);
+                 Assert.assertEquals("EnumOkA.TopicA.ClassA", obj0.getobjecttag());
+             }
+             {
+                 IomObject obj0 = objs.get("o2");
+                 Assert.assertNotNull(obj0);
+                 Assert.assertEquals("EnumOkA.TopicA.ClassA", obj0.getobjecttag());
+                 Assert.assertEquals("a2.a21", obj0.getattrvalue("attrA"));
+                 IomObject struct=obj0.getattrobj("attrA2", 0);
+                 Assert.assertNotNull(struct);
+                 Assert.assertEquals("Basis.Struct", struct.getobjecttag());
+                 Assert.assertEquals("a3.a32", struct.getattrvalue("attrA"));
+             }
+             {
+                 IomObject obj0 = objs.get("o3");
+                 Assert.assertNotNull(obj0);
+                 Assert.assertEquals("EnumOkA.TopicA.ClassA2", obj0.getobjecttag());
+             }
+             {
+                 IomObject obj0 = objs.get("o1:o3");
+                 Assert.assertNotNull(obj0);
+                 Assert.assertEquals("EnumOkA.TopicA.n_nA", obj0.getobjecttag());
+             }
+             {
+                 IomObject obj0 = objs.get("x1");
+                 Assert.assertNotNull(obj0);
+                 Assert.assertEquals("EnumOkA.TopicA.ClassA", obj0.getobjecttag());
+             }
+             {
+                 IomObject obj0 = objs.get("x2");
+                 Assert.assertNotNull(obj0);
+                 Assert.assertEquals("EnumOkA.TopicA.ClassA", obj0.getobjecttag());
+                 Assert.assertEquals("a2.a21", obj0.getattrvalue("attrA"));
+                 IomObject struct=obj0.getattrobj("attrA2", 0);
+                 Assert.assertNotNull(struct);
+                 Assert.assertEquals("Basis.Struct", struct.getobjecttag());
+                 Assert.assertEquals("a3.a32", struct.getattrvalue("attrA"));
+             }
+             {
+                 IomObject obj0 = objs.get("x3");
+                 Assert.assertNotNull(obj0);
+                 Assert.assertEquals("EnumOkA.TopicA.ClassA2", obj0.getobjecttag());
+             }
+             {
+                 IomObject obj0 = objs.get("x1:x3");
+                 Assert.assertNotNull(obj0);
+                 Assert.assertEquals("EnumOkA.TopicA.n_nA", obj0.getobjecttag());
+             }
+        }finally{
+            if(jdbcConnection!=null){
+                jdbcConnection.close();
+            }
+        }
+    }
 	
 	@Test
 	public void importItf10() throws Exception
