@@ -13,6 +13,8 @@ ideas/open issues/questions
 
 LATEST
 ---------------------------
+- fix --replace if forward reference in xtf (#299)
+- fix missing objects in exported xtf
 
 ili2db 4.3.0 (2019-09-20)
 ------------------------------

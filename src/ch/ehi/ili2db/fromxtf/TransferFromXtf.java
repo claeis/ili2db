@@ -523,7 +523,8 @@ public class TransferFromXtf {
 									}
 								}
 								if(!skipObj){
-									doObject(datasetName,basketSqlId,fixref.getGenericDomains(),objPool.get(fixref.getRootTid()),objStat);
+								    HashMap<String, ClassStat> fixrefObjStat=stat.get(fixref.getBasketSqlId()).getObjStat();
+									doObject(datasetName,fixref.getBasketSqlId(),fixref.getGenericDomains(),objPool.get(fixref.getRootTid()),fixrefObjStat);
 									fixedObjects.add(fixref);
 								}
 							}
