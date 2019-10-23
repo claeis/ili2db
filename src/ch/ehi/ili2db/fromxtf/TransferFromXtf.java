@@ -482,6 +482,12 @@ public class TransferFromXtf {
 							startTid=oidPool.getLastSqlId();
 							objStat=new HashMap<String, ClassStat>();
 							objCount=0;
+                            String filename=null;
+                            if(xtffilename!=null){
+                                filename=new java.io.File(xtffilename).getName();
+                            }
+                            // save it for later output to log
+                            stat.put(basketSqlId,new BasketStat(filename,basket.getType(),basket.getBid(),objStat));
 						}
 					}else if(event instanceof EndBasketEvent){
 						if(reader instanceof ItfReader2){
@@ -536,15 +542,10 @@ public class TransferFromXtf {
 							// TODO update import counters
 							endTid=oidPool.getLastSqlId();
 							try {
-								String filename=null;
-								if(xtffilename!=null){
-									filename=new java.io.File(xtffilename).getName();
-								}
 								if(config.isCreateImportTabs()) {
 	                                long importId=writeImportBasketStat(importSqlId,basketSqlId,startTid,endTid,objCount);
 	                                writeObjStat(importId,basketSqlId,objStat);
 								}
-								saveObjStat(stat,basket.getBid(),basketSqlId,filename,basket.getType(),objStat);
 							} catch (SQLException ex) {
 								EhiLogger.logError("Basket "+basket.getType()+"(oid "+basket.getBid()+")",ex);
 							} catch (ConverterException ex) {
@@ -1655,11 +1656,6 @@ public class TransferFromXtf {
             writeImportStatDetail(sqlImportId,stat.getStartid(),stat.getEndid(),stat.getObjcount(),className);
         }
     }
-	private void saveObjStat(Map<Long,BasketStat> basketStat,String iliBasketId,long basketSqlId,String file,String topic,HashMap<String, ClassStat> objStat) throws SQLException
-	{
-		// save it for later output to log
-		basketStat.put(basketSqlId,new BasketStat(file,topic,iliBasketId,objStat));
-	}
 
 	private long writeImportStat(long datasetSqlId,String importFile,java.sql.Timestamp importDate,String importUsr)
 	throws java.sql.SQLException,ConverterException
