@@ -4,11 +4,16 @@ import static org.junit.Assert.*;
 
 import java.io.File;
 import java.sql.Connection;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.HashSet;
+
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
 import ch.ehi.basics.logging.EhiLogger;
+import ch.ehi.ili2db.base.DbNames;
 import ch.ehi.ili2db.base.Ili2db;
 import ch.ehi.ili2db.gui.Config;
 import ch.ehi.sqlgen.DbUtility;
@@ -171,23 +176,134 @@ public abstract class SimpleTest {
 	@Test
 	public void importXtfStruct() throws Exception
 	{
-		//EhiLogger.getInstance().setTraceFilter(false);
-	    setup.resetDb();
-		File data=new File(TEST_OUT,"SimpleStruct23a.xtf");
-		Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
-		config.setFunction(Config.FC_IMPORT);
-        config.setDoImplicitSchemaImport(true);
-		config.setCreateFk(Config.CREATE_FK_YES);
-		config.setCreateNumChecks(true);
-		config.setTidHandling(Config.TID_HANDLING_PROPERTY);
-		config.setImportTid(true);
-		config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
-		config.setCatalogueRefTrafo(null);
-		config.setMultiSurfaceTrafo(null);
-		config.setMultilingualTrafo(null);
-		config.setInheritanceTrafo(null);
-		Ili2db.run(config,null);
+        Connection jdbcConnection=null;
+        Statement stmt=null;
+        try{
+            //EhiLogger.getInstance().setTraceFilter(false);
+            setup.resetDb();
+            jdbcConnection = setup.createConnection();
+            stmt=jdbcConnection.createStatement();
+            {
+                File data=new File(TEST_OUT,"SimpleStruct23a.xtf");
+                Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+                config.setFunction(Config.FC_IMPORT);
+                config.setDoImplicitSchemaImport(true);
+                config.setCreateFk(Config.CREATE_FK_YES);
+                config.setCreateNumChecks(true);
+                config.setTidHandling(Config.TID_HANDLING_PROPERTY);
+                config.setImportTid(true);
+                config.setImportBid(true);
+                config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
+                config.setCatalogueRefTrafo(null);
+                config.setMultiSurfaceTrafo(null);
+                config.setMultilingualTrafo(null);
+                config.setInheritanceTrafo(null);
+                Ili2db.run(config,null);
+                
+            }
+            // verify
+            {
+                Assert.assertTrue(stmt.execute("SELECT attra FROM "+setup.prefixName("structa1")));
+                {
+                    HashSet<String> attraValues=new HashSet<String>();
+                    ResultSet rs=stmt.getResultSet();
+                    while(rs.next()) {
+                        attraValues.add(rs.getString(1));
+                    }
+                    Assert.assertEquals(2, attraValues.size());
+                    Assert.assertTrue(attraValues.contains("me"));
+                    Assert.assertTrue(attraValues.contains("do"));
+                }
+                Assert.assertTrue(stmt.execute("SELECT attrb1 FROM "+setup.prefixName("classb1")));
+                {
+                    HashSet<String> attraValues=new HashSet<String>();
+                    ResultSet rs=stmt.getResultSet();
+                    while(rs.next()) {
+                        attraValues.add(rs.getString(1));
+                    }
+                    Assert.assertEquals(1, attraValues.size());
+                    Assert.assertTrue(attraValues.contains("gugus"));
+                }
+            }
+        }finally {
+            if(stmt!=null) {
+                stmt.close();
+            }
+            if(jdbcConnection!=null) {
+                jdbcConnection.close();
+            }
+        }
+
+		
+		
 	}
+    @Test
+    public void importXtfStructWithDelete() throws Exception
+    {
+        {
+            importXtfStruct();
+        }
+        Connection jdbcConnection=null;
+        Statement stmt=null;
+        try{
+            jdbcConnection = setup.createConnection();
+            stmt=jdbcConnection.createStatement();
+            {
+                //EhiLogger.getInstance().setTraceFilter(false);
+                File data=new File(TEST_OUT,"SimpleStruct23b.xtf");
+                Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+                config.setFunction(Config.FC_IMPORT);
+                config.setImportTid(true);
+                config.setImportBid(true);
+                config.setDeleteMode(Config.DELETE_DATA);
+                Ili2db.readSettingsFromDb(config);
+                Ili2db.run(config,null);
+            }
+            // verify
+            {
+                Assert.assertTrue(stmt.execute("SELECT attra FROM "+setup.prefixName("structa1")));
+                {
+                    HashSet<String> attraValues=new HashSet<String>();
+                    ResultSet rs=stmt.getResultSet();
+                    while(rs.next()) {
+                        attraValues.add(rs.getString(1));
+                    }
+                    Assert.assertEquals(2, attraValues.size());
+                    Assert.assertTrue(attraValues.contains("me2"));
+                    Assert.assertTrue(attraValues.contains("do2"));
+                }
+                Assert.assertTrue(stmt.execute("SELECT attrb1 FROM "+setup.prefixName("classb1")));
+                {
+                    HashSet<String> attraValues=new HashSet<String>();
+                    ResultSet rs=stmt.getResultSet();
+                    while(rs.next()) {
+                        attraValues.add(rs.getString(1));
+                    }
+                    Assert.assertEquals(1, attraValues.size());
+                    Assert.assertTrue(attraValues.contains("gugus2"));
+                }
+                Assert.assertTrue(stmt.execute("SELECT count(*) FROM "+setup.prefixName(DbNames.BASKETS_TAB)));
+                {
+                    ResultSet rs=stmt.getResultSet();
+                    Assert.assertTrue(rs.next());
+                    Assert.assertEquals(1, rs.getLong(1));
+                }
+                Assert.assertTrue(stmt.execute("SELECT count(*) FROM "+setup.prefixName(DbNames.DATASETS_TAB)));
+                {
+                    ResultSet rs=stmt.getResultSet();
+                    Assert.assertTrue(rs.next());
+                    Assert.assertEquals(1, rs.getLong(1));
+                }
+            }
+        }finally {
+            if(stmt!=null) {
+                stmt.close();
+            }
+            if(jdbcConnection!=null) {
+                jdbcConnection.close();
+            }
+        }
+    }
 	
 	@Test
 	public void importXtfInheritanceNewClass() throws Exception

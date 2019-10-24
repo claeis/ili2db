@@ -28,6 +28,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 
 import ch.ehi.basics.logging.EhiLogger;
 import ch.ehi.ili2db.base.DbIdGen;
@@ -163,7 +164,7 @@ public class TransferFromXtf {
 		this.geomConv=geomConv;
 		this.idGen=idGen;
 		oidPool=new XtfidPool(idGen);
-		createStdCols=config.CREATE_STD_COLS_ALL.equals(config.getCreateStdCols());
+		createStdCols=Config.CREATE_STD_COLS_ALL.equals(config.getCreateStdCols());
 		colT_ID=config.getColT_ID();
 		if(colT_ID==null){
 			colT_ID=DbNames.T_ID_COL;
@@ -172,11 +173,11 @@ public class TransferFromXtf {
 	        defaultCrsCode=Integer.parseInt(config.getDefaultSrsCode());
 		}
         srsModelAssignment=config.getSrsModelAssignment();
-		createGenericStructRef=config.STRUCT_MAPPING_GENERICREF.equals(config.getStructMapping());
+		createGenericStructRef=Config.STRUCT_MAPPING_GENERICREF.equals(config.getStructMapping());
 		readIliTid=config.isImportTid();
 		readIliBid=config.isImportBid();
-		createBasketCol=config.BASKET_HANDLING_READWRITE.equals(config.getBasketHandling());
-		createDatasetCol=config.CREATE_DATASET_COL.equals(config.getCreateDatasetCols());
+		createBasketCol=Config.BASKET_HANDLING_READWRITE.equals(config.getBasketHandling());
+		createDatasetCol=Config.CREATE_DATASET_COL.equals(config.getCreateDatasetCols());
 		doItfLineTables=config.isItfTransferfile();
 		createItfLineTables=doItfLineTables && config.getDoItfLineTables();
 		if(createItfLineTables){
@@ -212,6 +213,7 @@ public class TransferFromXtf {
                 throw new Ili2dbException("TID import requires a "+DbNames.T_ILI_TID_COL+" column");
             }
         }
+        
 		// limit import to given BIDs
 		HashSet<String> limitedToBids=null;
 		{
@@ -360,6 +362,28 @@ public class TransferFromXtf {
 							datasetSqlId=oidPool.newObjSqlId();
 						}
 					}
+					
+			        if(Config.DELETE_DATA.equals(config.getDeleteMode())){
+			            EhiLogger.logState("delete existing data...");
+			            Set<DbTableName> tables=new HashSet<DbTableName>();
+			            for(Viewable viewable:class2wrapper.getViewables()) {
+			                ViewableWrapper wrapper=class2wrapper.get(viewable);
+			                DbTableName sqltableName = wrapper.getSqlTable();
+			                if(!tables.contains(sqltableName)) {
+			                    tables.add(sqltableName);
+			                    if(DbUtility.tableExists(conn,sqltableName)) {
+			                        // drop data
+			                        deleteExistingObjectsHelper(sqltableName, null);
+			                    }
+			                }
+			            }
+			            // drop datasets
+                        deleteExistingObjectsHelper(new DbTableName(schema,DbNames.DATASETS_TAB), null);
+			            // drop baskets
+                        deleteExistingObjectsHelper(new DbTableName(schema,DbNames.BASKETS_TAB), null);
+			        }
+
+					
 					writeDataset(datasetSqlId,datasetName);
 					if(config.isCreateImportTabs()) {
 	                    importSqlId=writeImportStat(datasetSqlId,xtffilename,today,dbusr);
@@ -813,7 +837,12 @@ public class TransferFromXtf {
 	private void deleteExistingObjectsHelper(DbTableName sqlTableName,
 			String ids) {
 		// DELETE FROM products WHERE t_id in (10,20);
-		String stmt = "DELETE FROM "+sqlTableName.getQName()+" WHERE "+colT_ID+" in ("+ids+")";
+		String stmt = null;
+		if(ids!=null) {
+	        stmt="DELETE FROM "+sqlTableName.getQName()+" WHERE "+colT_ID+" in ("+ids+")";
+		}else {
+	        stmt="DELETE FROM "+sqlTableName.getQName();
+		}
 		EhiLogger.traceBackendCmd(stmt);
 		java.sql.PreparedStatement dbstmt = null;
 		try {
