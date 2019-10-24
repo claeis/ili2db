@@ -17,6 +17,7 @@ LATEST
 - fix missing objects in exported xtf
 - fix "--deleteData" has no effect (#295)
 - move --deleteData from schemaimport to import code (#291)
+- fixed duplicate metainfo records (#255)
 
 ili2db 4.3.0 (2019-09-20)
 ------------------------------
