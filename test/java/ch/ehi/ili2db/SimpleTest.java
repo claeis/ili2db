@@ -393,7 +393,7 @@ public abstract class SimpleTest {
 	public void importXtfWithDelete() throws Exception
 	{
         setup.resetDb();
-		EhiLogger.getInstance().setTraceFilter(false);
+		//EhiLogger.getInstance().setTraceFilter(false);
 		File data=new File(TEST_OUT,"Simple23a.xtf");
 		Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
 		config.setFunction(Config.FC_IMPORT);
