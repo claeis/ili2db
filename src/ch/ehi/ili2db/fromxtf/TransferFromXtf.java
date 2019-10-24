@@ -377,10 +377,15 @@ public class TransferFromXtf {
 			                    }
 			                }
 			            }
-			            // drop datasets
-                        deleteExistingObjectsHelper(new DbTableName(schema,DbNames.DATASETS_TAB), null);
-			            // drop baskets
-                        deleteExistingObjectsHelper(new DbTableName(schema,DbNames.BASKETS_TAB), null);
+			            // drop datasets+baskets
+			            DbTableName sqltableName=new DbTableName(schema,DbNames.DATASETS_TAB);
+                        if(DbUtility.tableExists(conn,sqltableName)) {
+                            deleteExistingObjectsHelper(sqltableName, null);
+                        }
+                        sqltableName=new DbTableName(schema,DbNames.BASKETS_TAB);
+                        if(DbUtility.tableExists(conn,sqltableName)) {
+                            deleteExistingObjectsHelper(sqltableName, null);
+                        }
 			        }
 
 					

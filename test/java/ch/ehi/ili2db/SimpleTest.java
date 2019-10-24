@@ -390,13 +390,14 @@ public abstract class SimpleTest {
 	}
 	
 	@Test
-	@Ignore("fails with Abort due to constraint violation (UNIQUE constraint failed: T_ILI2DB_SETTINGS.tag)")
 	public void importXtfWithDelete() throws Exception
 	{
-		//EhiLogger.getInstance().setTraceFilter(false);
+        setup.resetDb();
+		EhiLogger.getInstance().setTraceFilter(false);
 		File data=new File(TEST_OUT,"Simple23a.xtf");
 		Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
 		config.setFunction(Config.FC_IMPORT);
+		config.setDoImplicitSchemaImport(true);
 		config.setDatasetName("importXtfWithDelete");
 		config.setCreateFk(Config.CREATE_FK_YES);
 		config.setCreateNumChecks(true);

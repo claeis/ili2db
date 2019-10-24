@@ -151,9 +151,6 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 		}
 		}
 		
-		if(deleteExistingData){
-			dbTable.setDeleteDataIfTableExists(true);
-		}
 		if(base==null && !def.isSecondaryTable()){
 		  dbTable.setRequiresSequence(true);
 		}

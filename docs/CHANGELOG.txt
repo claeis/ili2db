@@ -15,6 +15,8 @@ LATEST
 ---------------------------
 - fix --replace if forward reference in xtf (#299)
 - fix missing objects in exported xtf
+- fix "--deleteData" has no effect (#295)
+- move --deleteData from schemaimport to import code (#291)
 
 ili2db 4.3.0 (2019-09-20)
 ------------------------------

@@ -70,7 +70,6 @@ public class AbstractRecordConverter {
 	protected boolean createFk=false;
 	protected boolean createFkIdx=false;
 	protected boolean isIli1Model=false;
-	protected boolean deleteExistingData=false;
 	protected String colT_ID=null;
 	private String uuid_default_value=null;
 	private DbIdGen idGen=null;
@@ -103,8 +102,6 @@ public class AbstractRecordConverter {
 		this.idGen=idGen1;
 		schemaName=config.getDbschema();
 
-		deleteExistingData=Config.DELETE_DATA.equals(config.getDeleteMode());
-		
 		createTypeDiscriminator=Config.CREATE_TYPE_DISCRIMINATOR_ALWAYS.equals(config.getCreateTypeDiscriminator());
 		createGenericStructRef=Config.STRUCT_MAPPING_GENERICREF.equals(config.getStructMapping());
 		sqlEnableNull=Config.SQL_NULL_ENABLE.equals(config.getSqlNull());
