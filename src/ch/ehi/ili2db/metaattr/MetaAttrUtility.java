@@ -1,5 +1,6 @@
 package ch.ehi.ili2db.metaattr;
 
+import java.util.HashMap;
 import java.util.Iterator;
 import java.io.File;
 import java.sql.Connection;
@@ -22,6 +23,7 @@ import ch.ehi.sqlgen.repository.DbSchema;
 import ch.ehi.sqlgen.repository.DbTable;
 import ch.ehi.sqlgen.repository.DbTableName;
 import ch.ehi.sqlgen.generator_impl.jdbc.GeneratorJdbc;
+import ch.ehi.sqlgen.generator_impl.jdbc.GeneratorJdbc.Stmt;
 import ch.ehi.sqlgen.repository.DbColVarchar;
 
 public class MetaAttrUtility{
@@ -131,70 +133,131 @@ public class MetaAttrUtility{
 	public static void updateMetaAttributesTable(GeneratorJdbc gen, java.sql.Connection conn, String schema, TransferDescription td) 
 	throws Ili2dbException
 	{
-	    // TODO insert/update instead of insert
+	    HashMap<String,HashMap<String,String>> entries=new HashMap<String,HashMap<String,String>>();
 		Iterator transIter = td.iterator();
 		while(transIter.hasNext()){
 			Object transElem=transIter.next();
 			if(transElem instanceof ch.interlis.ili2c.metamodel.PredefinedModel){
 				continue;
 			}else if(transElem instanceof ch.interlis.ili2c.metamodel.DataModel){
-				visitElement(gen,(Element)transElem, conn, schema);
+				visitElement(entries,(Element)transElem);
 			}
 		}
+		saveTableTab(gen,conn,schema,entries);
 	}
 
 	// Recursively iterate data model and write all found meta-attributes
-	private static void visitElement(GeneratorJdbc gen, Element el, java.sql.Connection conn, String schema)
+	private static void visitElement(HashMap<String,HashMap<String,String>> entries, Element el)
 	throws Ili2dbException
 	{
 		Settings metaValues = el.getMetaValues();
 		if(metaValues.getValues().size() > 0){
 			for(String attr:metaValues.getValues()){
-				insertMetaAttributeEntry(gen,conn, schema, el.getScopedName(), attr, metaValues.getValue(attr));
+			    
+                HashMap<String,String> exstValues=entries.get(el.getScopedName());
+                if(exstValues==null){
+                    exstValues=new HashMap<String,String>(); 
+                    entries.put(el.getScopedName(), exstValues);
+                }
+                exstValues.put(attr, metaValues.getValue(attr));
 			}
 		}
 		if(el instanceof Container){
 			Container e = (Container) el;
 			Iterator it = e.iterator();
 			while(it.hasNext()){
-				visitElement(gen,(Element)it.next(), conn, schema);
+				visitElement(entries,(Element)it.next());
 			}
 		}
 	}
 
-	// Write meta-attribute into db
-	private static void insertMetaAttributeEntry(GeneratorJdbc gen, Connection conn, String schema, String ilielement, String attrname, String attrvalue)
-	throws Ili2dbException
-	{
-		String sqlName=DbNames.META_ATTRIBUTES_TAB;
-		if(schema!=null){
-			sqlName=schema+"."+sqlName;
-		}
-		if(conn!=null) {
-	        try{
-	            String stmt="INSERT INTO "+sqlName+" (" + 
-	                DbNames.META_ATTRIBUTES_TAB_ILIELEMENT_COL + "," + 
-	                DbNames.META_ATTRIBUTES_TAB_ATTRNAME_COL + "," +
-	                DbNames.META_ATTRIBUTES_TAB_ATTRVALUE_COL +
-	                ") VALUES (?, ?, ?)";
-	            EhiLogger.traceBackendCmd(stmt);
-	            PreparedStatement ps = conn.prepareStatement(stmt);
-	            ps.setString(1, ilielement);
-	            ps.setString(2, attrname);
-	            ps.setString(3, attrvalue);
-	            ps.executeUpdate();
-	        }catch(java.sql.SQLException ex){
-	            throw new Ili2dbException("failed to insert meta-attribute", ex);
-	        }
-		    
-		}
-		if(gen!=null){
-            String stmt="INSERT INTO "+sqlName+" (" + 
-                    DbNames.META_ATTRIBUTES_TAB_ILIELEMENT_COL + "," + 
-                    DbNames.META_ATTRIBUTES_TAB_ATTRNAME_COL + "," +
-                    DbNames.META_ATTRIBUTES_TAB_ATTRVALUE_COL +
-                    ") VALUES ("+Ili2db.quoteSqlStringValue(ilielement)+","+ Ili2db.quoteSqlStringValue(attrname)+","+ Ili2db.quoteSqlStringValue(attrvalue)+")";
-            gen.addCreateLine(gen.new Stmt(stmt));
-		}
-	} 
+	
+	
+    private static void saveTableTab(GeneratorJdbc gen, Connection conn,String schemaName,HashMap<String,HashMap<String,String>> tabInfo)
+    throws Ili2dbException
+    {
+        DbTableName tabName=new DbTableName(schemaName,DbNames.META_ATTRIBUTES_TAB);
+        String sqlName=tabName.getQName();
+        if(conn!=null) {
+            HashMap<String,HashMap<String,String>> exstEntries=readTableTab(conn,sqlName);
+            try{
+
+                // insert entries
+                String insStmt="INSERT INTO "+sqlName+" ("+DbNames.META_ATTRIBUTES_TAB_ILIELEMENT_COL+","+DbNames.META_ATTRIBUTES_TAB_ATTRNAME_COL+","+DbNames.META_ATTRIBUTES_TAB_ATTRVALUE_COL+") VALUES (?,?,?)";
+                EhiLogger.traceBackendCmd(insStmt);
+                java.sql.PreparedStatement insPrepStmt = conn.prepareStatement(insStmt);
+                try{
+                    for(String table:tabInfo.keySet()){
+                        HashMap<String,String> exstValues=exstEntries.get(table);
+                        if(exstValues==null){
+                            exstValues=new HashMap<String,String>(); 
+                        }
+                        HashMap<String,String> newValues=tabInfo.get(table);
+                        for(String tag:newValues.keySet()){
+                            if(!exstValues.containsKey(tag)){
+                                String value=newValues.get(tag);
+                                insPrepStmt.setString(1, table);
+                                insPrepStmt.setString(2, tag);
+                                insPrepStmt.setString(3, value);
+                                insPrepStmt.executeUpdate();
+                            }
+                        }
+                    }
+                }catch(java.sql.SQLException ex){
+                    throw new Ili2dbException("failed to insert meta info values to "+sqlName,ex);
+                }finally{
+                    insPrepStmt.close();
+                }
+            }catch(java.sql.SQLException ex){       
+                throw new Ili2dbException("failed to update meta-info table "+sqlName,ex);
+            }
+        }
+        if(gen!=null){
+            for(String table:tabInfo.keySet()){
+                HashMap<String,String> newValues=tabInfo.get(table);
+                for(String tag:newValues.keySet()){
+                    String value=newValues.get(tag);
+                    String insStmt="INSERT INTO "+sqlName+" ("+DbNames.META_ATTRIBUTES_TAB_ILIELEMENT_COL+","+DbNames.META_ATTRIBUTES_TAB_ATTRNAME_COL+","+DbNames.META_ATTRIBUTES_TAB_ATTRVALUE_COL
+                            +") VALUES ('"+table+"','"+tag+"','"+value+"')";
+                    gen.addCreateLine(gen.new Stmt(insStmt));
+                }
+            }
+        }
+        
+    }
+    private static HashMap<String, HashMap<String, String>> readTableTab(
+            Connection conn, String sqlName) throws Ili2dbException {
+        HashMap<String,HashMap<String,String>> exstEntries=new HashMap<String,HashMap<String,String>>();
+        try{
+
+            // select entries
+            String selStmt="SELECT "+DbNames.META_ATTRIBUTES_TAB_ILIELEMENT_COL+","+DbNames.META_ATTRIBUTES_TAB_ATTRNAME_COL+","+DbNames.META_ATTRIBUTES_TAB_ATTRVALUE_COL+" FROM "+sqlName;
+            EhiLogger.traceBackendCmd(selStmt);
+            java.sql.PreparedStatement selPrepStmt = conn.prepareStatement(selStmt);
+            ResultSet rs = selPrepStmt.executeQuery();
+            try{
+                while(rs.next()){
+                    String table=rs.getString(1);
+                    String tag=rs.getString(2);
+                    String value=rs.getString(3);
+                    HashMap<String,String> exstValues=exstEntries.get(table);
+                    if(exstValues==null){
+                        exstValues=new HashMap<String,String>(); 
+                        exstEntries.put(table, exstValues);
+                    }
+                    exstValues.put(tag, value);
+                }
+            }catch(java.sql.SQLException ex){
+                throw new Ili2dbException("failed to read meta info values from "+sqlName,ex);
+            }finally{
+                rs.close();
+                selPrepStmt.close();
+            }
+        }catch(java.sql.SQLException ex){       
+            throw new Ili2dbException("failed to read meta-info table "+sqlName,ex);
+        }
+        
+        return exstEntries;
+    }
+	
 }

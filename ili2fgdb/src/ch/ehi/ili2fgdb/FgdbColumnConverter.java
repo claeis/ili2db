@@ -17,7 +17,6 @@
  */
 package ch.ehi.ili2fgdb;
 
-import ch.ehi.basics.logging.EhiLogger;
 import ch.ehi.basics.settings.Settings;
 import ch.ehi.ili2db.converter.AbstractWKBColumnConverter;
 import ch.ehi.ili2db.converter.ConverterException;
@@ -25,12 +24,9 @@ import ch.ehi.ili2db.gui.Config;
 import ch.ehi.sqlgen.generator_impl.fgdb.GeneratorFgdb;
 
 import java.io.IOException;
-import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Connection;
-import java.sql.Time;
-import java.sql.Timestamp;
 import java.sql.Types;
 
 import com.vividsolutions.jts.io.ParseException;
@@ -127,7 +123,7 @@ public class FgdbColumnConverter extends AbstractWKBColumnConverter {
 
 	    byte[] bytearray;
 		try {
-			bytearray = new sun.misc.BASE64Decoder().decodeBuffer(blob);
+			bytearray = Base64.decode(blob);
 		} catch (IOException e) {
 			throw new ConverterException(e);
 		}

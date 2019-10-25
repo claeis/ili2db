@@ -14,6 +14,14 @@ ideas/open issues/questions
 LATEST
 ---------------------------
 
+ili2db 4.3.1 (2019-10-25)
+------------------------------
+- fix --replace if forward reference in xtf (#299)
+- fix missing objects in exported xtf
+- fix "--deleteData" has no effect (#295)
+- move --deleteData from schemaimport to import code (#291)
+- fixed duplicate metainfo records (#255)
+
 ili2db 4.3.0 (2019-09-20)
 ------------------------------
 - fix LocalisedMText, MultilingualMText smart mapping (#306)
@@ -32,6 +40,7 @@ ili2db 4.2.0 (2019-09-06)
 - ili2gpkg: allow relationship loops
 - ili2gpkg: Add two SRSs to init.sql (32635 and 4686) (#300)
 - fixed incomplete schema import if reference to class in other model 
+- fixed export of superfluous TID in standalone assocs (#292)
 - iox-ili-1.20.13
 - ili2c-5.0.2
 - ehisqlgen-1.13.8

@@ -93,20 +93,19 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 		this.dbSchema=dbSchema;
 		today=new java.sql.Timestamp(System.currentTimeMillis());
 		importTid=config.isImportTid();
-		try{
-			Integer srsid=geomConv.getSrsid(defaultCrsAuthority,defaultCrsCode,conn);
-			if(srsid==null){
-				defaultSrsid=-1;
-			} else {
-				defaultSrsid = srsid;
-			}
-		}catch(UnsupportedOperationException ex){
-			EhiLogger.logAdaption("no CRS support by converter; use -1 as default srsid");
-			defaultSrsid=-1;
-		}catch(ConverterException ex){
-			throw new IllegalArgumentException("failed to get srsid for "+defaultCrsAuthority+":"+defaultCrsCode+", "+ex.getLocalizedMessage());
-		}
+        defaultSrsid=-1;
 		if(defaultCrsAuthority!=null && defaultCrsCode!=null) {
+	        try{
+	            Integer srsid=geomConv.getSrsid(defaultCrsAuthority,defaultCrsCode,conn);
+	            if(srsid!=null){
+	                defaultSrsid = srsid;
+	            }
+	        }catch(UnsupportedOperationException ex){
+	            EhiLogger.logAdaption("no CRS support by converter; use -1 as default srsid");
+	            defaultSrsid=-1;
+	        }catch(ConverterException ex){
+	            throw new IllegalArgumentException("failed to get srsid for "+defaultCrsAuthority+":"+defaultCrsCode+", "+ex.getLocalizedMessage());
+	        }
 	        defaultEpsgCode=TransferFromIli.parseEpsgCode(defaultCrsAuthority+":"+defaultCrsCode);
 		}
 		

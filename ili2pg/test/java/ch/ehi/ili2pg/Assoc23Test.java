@@ -13,6 +13,7 @@ import org.junit.Test;
 
 import ch.ehi.basics.logging.EhiLogger;
 import ch.ehi.ili2db.Ili2dbAssert;
+import ch.ehi.ili2db.base.DbNames;
 import ch.ehi.ili2db.base.Ili2db;
 import ch.ehi.ili2db.base.Ili2dbException;
 import ch.ehi.ili2db.gui.Config;
@@ -30,6 +31,7 @@ public class Assoc23Test {
 	
 	private static final String DBSCHEMA = "Assoc23";
 	private static final String TEST_OUT="test/data/Assoc23/";
+    private static final String EXTREFFORWARD = "ExtRefForward";
 	Connection jdbcConnection=null;
 	Statement stmt=null;
 	
@@ -678,20 +680,80 @@ public class Assoc23Test {
 	    		config.setCreateFk(Config.CREATE_FK_YES);
 	    		config.setTidHandling(Config.TID_HANDLING_PROPERTY);
 	    		config.setImportTid(true);
+                config.setImportBid(true);
 	    		config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
 	    		config.setCatalogueRefTrafo(null);
 	    		config.setMultiSurfaceTrafo(null);
 	    		config.setMultilingualTrafo(null);
 	    		config.setInheritanceTrafo(null);
+	    		config.setDatasetName(EXTREFFORWARD);
 	    		Ili2db.readSettingsFromDb(config);
 	    		Ili2db.run(config,null);
 			}
+            // verify db content
+            {
+                // BID=Assoc2.TestB
+                // BID=Assoc2.TestA
+                ResultSet rs=null;
+                rs=stmt.executeQuery("SELECT t_id FROM "+DBSCHEMA+"."+DbNames.BASKETS_TAB+" WHERE t_ili_tid='Assoc2.TestB'");
+                assertTrue(rs.next());
+                long bid_basket1=rs.getLong(1);
+
+                
+                rs=stmt.executeQuery("SELECT t_basket FROM "+DBSCHEMA+".classb2 WHERE t_ili_tid='b2'");
+                assertTrue(rs.next());
+                long b2_bid=rs.getLong(1);
+                assertEquals(bid_basket1,b2_bid);
+            }
 		}finally{
 			if(jdbcConnection!=null){
 				jdbcConnection.close();
 			}
 		}
 	}
+    @Test
+    public void replaceXtfExtRefForward() throws Exception
+    {
+        {
+            importXtfExtRefForward();
+        }
+        //EhiLogger.getInstance().setTraceFilter(false);
+        Connection jdbcConnection=null;
+        try{
+            Class driverClass = Class.forName("org.postgresql.Driver");
+            jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
+            stmt=jdbcConnection.createStatement();
+            {
+                File data=new File(TEST_OUT,"Assoc2c.xtf");
+                Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+                config.setFunction(Config.FC_REPLACE);
+                config.setImportTid(true);
+                config.setImportBid(true);
+                config.setDatasetName(EXTREFFORWARD);
+                Ili2db.readSettingsFromDb(config);
+                Ili2db.run(config,null);
+            }
+            // verify db content
+            {
+                // BID=Assoc2.TestB
+                // BID=Assoc2.TestA
+                ResultSet rs=null;
+                rs=stmt.executeQuery("SELECT t_id FROM "+DBSCHEMA+"."+DbNames.BASKETS_TAB+" WHERE t_ili_tid='Assoc2.TestB'");
+                assertTrue(rs.next());
+                long bid_basket1=rs.getLong(1);
+
+                
+                rs=stmt.executeQuery("SELECT t_basket FROM "+DBSCHEMA+".classb2 WHERE t_ili_tid='b2'");
+                assertTrue(rs.next());
+                long b2_bid=rs.getLong(1);
+                assertEquals(bid_basket1,b2_bid);
+            }
+        }finally{
+            if(jdbcConnection!=null){
+                jdbcConnection.close();
+            }
+        }
+    }
 	
 	@Test
 	public void exportXtfRefBackward() throws Exception

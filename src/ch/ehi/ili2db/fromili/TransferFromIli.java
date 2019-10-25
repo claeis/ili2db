@@ -107,7 +107,6 @@ public class TransferFromIli {
 	private boolean createFk=false;
 	private boolean createFkIdx=false;
 	private boolean isIli1Model=false;
-	private boolean deleteExistingData=false;
 	private String colT_ID=null;
 	private String nl=System.getProperty("line.separator");
 	private FromIliRecordConverter recConv=null;
@@ -125,10 +124,6 @@ public class TransferFromIli {
 		colT_ID=config.getColT_ID();
 		if(colT_ID==null){
 			colT_ID=DbNames.T_ID_COL;
-		}
-		deleteExistingData=config.DELETE_DATA.equals(config.getDeleteMode());
-		if(deleteExistingData){
-			EhiLogger.logState("delete existing data...");
 		}
 		
 		createIliTidCol=Config.TID_HANDLING_PROPERTY.equals(config.getTidHandling());
@@ -287,10 +282,7 @@ public class TransferFromIli {
 		if(cmt.length()>0){
 			dbTable.setComment(cmt.toString());
 		}
-		if(deleteExistingData){
-			dbTable.setDeleteDataIfTableExists(true);
-		}
-		  dbTable.setRequiresSequence(true);
+		dbTable.setRequiresSequence(true);
 		DbColId dbColId=recConv.addKeyCol(dbTable);
 		  if(createIliTidCol){
 				recConv.addIliTidCol(dbTable,null);

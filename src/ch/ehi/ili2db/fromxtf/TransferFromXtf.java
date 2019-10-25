@@ -28,6 +28,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 
 import ch.ehi.basics.logging.EhiLogger;
 import ch.ehi.ili2db.base.DbIdGen;
@@ -163,7 +164,7 @@ public class TransferFromXtf {
 		this.geomConv=geomConv;
 		this.idGen=idGen;
 		oidPool=new XtfidPool(idGen);
-		createStdCols=config.CREATE_STD_COLS_ALL.equals(config.getCreateStdCols());
+		createStdCols=Config.CREATE_STD_COLS_ALL.equals(config.getCreateStdCols());
 		colT_ID=config.getColT_ID();
 		if(colT_ID==null){
 			colT_ID=DbNames.T_ID_COL;
@@ -172,11 +173,11 @@ public class TransferFromXtf {
 	        defaultCrsCode=Integer.parseInt(config.getDefaultSrsCode());
 		}
         srsModelAssignment=config.getSrsModelAssignment();
-		createGenericStructRef=config.STRUCT_MAPPING_GENERICREF.equals(config.getStructMapping());
+		createGenericStructRef=Config.STRUCT_MAPPING_GENERICREF.equals(config.getStructMapping());
 		readIliTid=config.isImportTid();
 		readIliBid=config.isImportBid();
-		createBasketCol=config.BASKET_HANDLING_READWRITE.equals(config.getBasketHandling());
-		createDatasetCol=config.CREATE_DATASET_COL.equals(config.getCreateDatasetCols());
+		createBasketCol=Config.BASKET_HANDLING_READWRITE.equals(config.getBasketHandling());
+		createDatasetCol=Config.CREATE_DATASET_COL.equals(config.getCreateDatasetCols());
 		doItfLineTables=config.isItfTransferfile();
 		createItfLineTables=doItfLineTables && config.getDoItfLineTables();
 		if(createItfLineTables){
@@ -212,6 +213,7 @@ public class TransferFromXtf {
                 throw new Ili2dbException("TID import requires a "+DbNames.T_ILI_TID_COL+" column");
             }
         }
+        
 		// limit import to given BIDs
 		HashSet<String> limitedToBids=null;
 		{
@@ -360,6 +362,33 @@ public class TransferFromXtf {
 							datasetSqlId=oidPool.newObjSqlId();
 						}
 					}
+					
+			        if(Config.DELETE_DATA.equals(config.getDeleteMode())){
+			            EhiLogger.logState("delete existing data...");
+			            Set<DbTableName> tables=new HashSet<DbTableName>();
+			            for(Viewable viewable:class2wrapper.getViewables()) {
+			                ViewableWrapper wrapper=class2wrapper.get(viewable);
+			                DbTableName sqltableName = wrapper.getSqlTable();
+			                if(!tables.contains(sqltableName)) {
+			                    tables.add(sqltableName);
+			                    if(DbUtility.tableExists(conn,sqltableName)) {
+			                        // drop data
+			                        deleteExistingObjectsHelper(sqltableName, null);
+			                    }
+			                }
+			            }
+			            // drop datasets+baskets
+			            DbTableName sqltableName=new DbTableName(schema,DbNames.DATASETS_TAB);
+                        if(DbUtility.tableExists(conn,sqltableName)) {
+                            deleteExistingObjectsHelper(sqltableName, null);
+                        }
+                        sqltableName=new DbTableName(schema,DbNames.BASKETS_TAB);
+                        if(DbUtility.tableExists(conn,sqltableName)) {
+                            deleteExistingObjectsHelper(sqltableName, null);
+                        }
+			        }
+
+					
 					writeDataset(datasetSqlId,datasetName);
 					if(config.isCreateImportTabs()) {
 	                    importSqlId=writeImportStat(datasetSqlId,xtffilename,today,dbusr);
@@ -482,6 +511,12 @@ public class TransferFromXtf {
 							startTid=oidPool.getLastSqlId();
 							objStat=new HashMap<String, ClassStat>();
 							objCount=0;
+                            String filename=null;
+                            if(xtffilename!=null){
+                                filename=new java.io.File(xtffilename).getName();
+                            }
+                            // save it for later output to log
+                            stat.put(basketSqlId,new BasketStat(filename,basket.getType(),basket.getBid(),objStat));
 						}
 					}else if(event instanceof EndBasketEvent){
 						if(reader instanceof ItfReader2){
@@ -523,7 +558,8 @@ public class TransferFromXtf {
 									}
 								}
 								if(!skipObj){
-									doObject(datasetName,basketSqlId,fixref.getGenericDomains(),objPool.get(fixref.getRootTid()),objStat);
+								    HashMap<String, ClassStat> fixrefObjStat=stat.get(fixref.getBasketSqlId()).getObjStat();
+									doObject(datasetName,fixref.getBasketSqlId(),fixref.getGenericDomains(),objPool.get(fixref.getRootTid()),fixrefObjStat);
 									fixedObjects.add(fixref);
 								}
 							}
@@ -535,15 +571,10 @@ public class TransferFromXtf {
 							// TODO update import counters
 							endTid=oidPool.getLastSqlId();
 							try {
-								String filename=null;
-								if(xtffilename!=null){
-									filename=new java.io.File(xtffilename).getName();
-								}
 								if(config.isCreateImportTabs()) {
 	                                long importId=writeImportBasketStat(importSqlId,basketSqlId,startTid,endTid,objCount);
 	                                writeObjStat(importId,basketSqlId,objStat);
 								}
-								saveObjStat(stat,basket.getBid(),basketSqlId,filename,basket.getType(),objStat);
 							} catch (SQLException ex) {
 								EhiLogger.logError("Basket "+basket.getType()+"(oid "+basket.getBid()+")",ex);
 							} catch (ConverterException ex) {
@@ -811,7 +842,12 @@ public class TransferFromXtf {
 	private void deleteExistingObjectsHelper(DbTableName sqlTableName,
 			String ids) {
 		// DELETE FROM products WHERE t_id in (10,20);
-		String stmt = "DELETE FROM "+sqlTableName.getQName()+" WHERE "+colT_ID+" in ("+ids+")";
+		String stmt = null;
+		if(ids!=null) {
+	        stmt="DELETE FROM "+sqlTableName.getQName()+" WHERE "+colT_ID+" in ("+ids+")";
+		}else {
+	        stmt="DELETE FROM "+sqlTableName.getQName();
+		}
 		EhiLogger.traceBackendCmd(stmt);
 		java.sql.PreparedStatement dbstmt = null;
 		try {
@@ -1654,11 +1690,6 @@ public class TransferFromXtf {
             writeImportStatDetail(sqlImportId,stat.getStartid(),stat.getEndid(),stat.getObjcount(),className);
         }
     }
-	private void saveObjStat(Map<Long,BasketStat> basketStat,String iliBasketId,long basketSqlId,String file,String topic,HashMap<String, ClassStat> objStat) throws SQLException
-	{
-		// save it for later output to log
-		basketStat.put(basketSqlId,new BasketStat(file,topic,iliBasketId,objStat));
-	}
 
 	private long writeImportStat(long datasetSqlId,String importFile,java.sql.Timestamp importDate,String importUsr)
 	throws java.sql.SQLException,ConverterException
