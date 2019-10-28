@@ -8,13 +8,14 @@ INSERT INTO extendedmodel23.classa1 VALUES (16, 15, '31');
 INSERT INTO extendedmodel23.classa3 VALUES (6, 3, '3');
 INSERT INTO extendedmodel23.classa3 VALUES (18, 15, '33');
 INSERT INTO extendedmodel23.classap1 VALUES (19, 15, '34');
-INSERT INTO extendedmodel23.classa2 VALUES (5, 3, 'classa2', '2', 'rot', 6, NULL, NULL);
-INSERT INTO extendedmodel23.classa2 VALUES (17, 15, 'extendedmodeltestap_classa2', '32', 'rot.dunkel', 18, 1.1, 19);
+INSERT INTO extendedmodel23.classa2 VALUES (5, 3, 'classa2', '2', 'felix','rot', 6, NULL, NULL);
+INSERT INTO extendedmodel23.classa2 VALUES (17, 15, 'extendedmodeltestap_classa2', '32', 'urs','rot.dunkel', 18, 1.1, 19);
 INSERT INTO extendedmodel23.classb1 VALUES (12, 11, '20');
 INSERT INTO extendedmodel23.extendedmodeltestbp_classb1 VALUES (26, 25, '40');
 INSERT INTO extendedmodel23.t_ili2db_attrname VALUES ('ExtendedModel.TestAp.ClassA2.wert', 'wert', 'classa2', NULL);
 INSERT INTO extendedmodel23.t_ili2db_attrname VALUES ('BaseModel.TestA.AssocA1.a3', 'a3', 'classa2', 'classa3');
 INSERT INTO extendedmodel23.t_ili2db_attrname VALUES ('BaseModel.TestA.ClassA2.farbe', 'farbe', 'classa2', NULL);
+INSERT INTO extendedmodel23.t_ili2db_attrname VALUES ('BaseModel.TestA.ClassA2.name', 'aname', 'classa2', NULL);
 INSERT INTO extendedmodel23.t_ili2db_attrname VALUES ('ExtendedModel.TestAp.AssocAp1.ap1', 'ap1', 'classa2', 'classap1');
 INSERT INTO extendedmodel23.t_ili2db_classname VALUES ('BaseModel.TestA.AssocA1', 'assoca1');
 INSERT INTO extendedmodel23.t_ili2db_classname VALUES ('ExtendedModel.TestAp.AssocAp1', 'assocap1');
@@ -62,6 +63,7 @@ MODEL BaseModel
     END ClassA1;
 
     CLASS ClassA2 =
+      name : TEXT*20;
       farbe : Farbe;
     END ClassA2;
 
@@ -101,6 +103,7 @@ MODEL ExtendedModel
     !!   Aufzaehlung spezialisiert
     !!   zusaetzliche eingebettete Rolle
 	CLASS ClassA2 (EXTENDED) =
+      name (EXTENDED) : TEXT*20;
 	  farbe (EXTENDED) : ExtendedModel.Farbe;
 	  wert : 1.0 .. 100.0;
     END ClassA2;
@@ -142,8 +145,8 @@ INSERT INTO extendedmodel23.t_ili2db_settings VALUES ('ch.ehi.ili2db.inheritance
 INSERT INTO extendedmodel23.t_ili2db_settings VALUES ('ch.ehi.ili2db.multiPointTrafo', 'coalesce');
 INSERT INTO extendedmodel23.t_ili2db_settings VALUES ('ch.ehi.ili2db.multiLineTrafo', 'coalesce');
 INSERT INTO extendedmodel23.t_ili2db_settings VALUES ('ch.ehi.ili2db.ver3_translation','True');
-INSERT INTO extendedmodel23.t_ili2db_trafo VALUES ('BaseModel.TestA.AssocA1', 'ch.ehi.ili2db.inheritance', 'newClass');
-INSERT INTO extendedmodel23.t_ili2db_trafo VALUES ('ExtendedModel.TestAp.AssocAp1', 'ch.ehi.ili2db.inheritance', 'newClass');
+INSERT INTO extendedmodel23.t_ili2db_trafo VALUES ('BaseModel.TestA.AssocA1', 'ch.ehi.ili2db.inheritance', 'embedded');
+INSERT INTO extendedmodel23.t_ili2db_trafo VALUES ('ExtendedModel.TestAp.AssocAp1', 'ch.ehi.ili2db.inheritance', 'embedded');
 INSERT INTO extendedmodel23.t_ili2db_trafo VALUES ('ExtendedModel.TestBp.ClassB1', 'ch.ehi.ili2db.inheritance', 'newClass');
 INSERT INTO extendedmodel23.t_ili2db_trafo VALUES ('ExtendedModel.TestAp.ClassAp1', 'ch.ehi.ili2db.inheritance', 'newClass');
 INSERT INTO extendedmodel23.t_ili2db_trafo VALUES ('ExtendedModel.TestAp.ClassA2', 'ch.ehi.ili2db.inheritance', 'superClass');

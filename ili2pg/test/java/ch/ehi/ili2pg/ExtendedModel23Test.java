@@ -64,7 +64,7 @@ public class ExtendedModel23Test {
 	
 	
 	@Test
-	public void importXtf() throws Exception
+	public void importXtfSmart1() throws Exception
 	{
 		//EhiLogger.getInstance().setTraceFilter(false);
 		Connection jdbcConnection=null;
@@ -80,9 +80,11 @@ public class ExtendedModel23Test {
 		    		config.setFunction(Config.FC_IMPORT);
 		            config.setDoImplicitSchemaImport(true);
 					config.setModels("BaseModel;ExtendedModel");
-		    		config.setCreateFk(config.CREATE_FK_YES);
+		    		config.setCreateFk(Config.CREATE_FK_YES);
+		    		config.setImportTid(true);
+                    config.setImportBid(true);
 		    		config.setTidHandling(Config.TID_HANDLING_PROPERTY);
-		    		config.setBasketHandling(config.BASKET_HANDLING_READWRITE);
+		    		config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
 		    		config.setCatalogueRefTrafo(null);
 		    		config.setMultiSurfaceTrafo(null);
 		    		config.setMultilingualTrafo(null);
@@ -99,7 +101,7 @@ public class ExtendedModel23Test {
 	}	
 	
 	@Test
-	public void exportXtfOriginal() throws Exception
+	public void exportXtfSmart1Original() throws Exception
 	{
 		Connection jdbcConnection=null;
 		try{
@@ -141,6 +143,7 @@ public class ExtendedModel23Test {
 				 IomObject obj0 = objs.get("32");
 				 Assert.assertNotNull(obj0);
 				 Assert.assertEquals("ExtendedModel.TestAp.ClassA2", obj0.getobjecttag());
+                 Assert.assertEquals("urs", obj0.getattrvalue("name"));
 				 Assert.assertEquals("rot.dunkel", obj0.getattrvalue("farbe"));
 				 Assert.assertEquals("33", obj0.getattrobj("a3",0).getobjectrefoid());
 				 Assert.assertEquals("1.1", obj0.getattrvalue("wert"));
@@ -154,8 +157,11 @@ public class ExtendedModel23Test {
 	}
 	
 	@Test
-	public void exportXtfBase() throws Exception
+	public void exportXtfSmart1Base() throws Exception
 	{
+	    //{
+	    //    importXtf();
+	    //}
 		Connection jdbcConnection=null;
 		try{
 	        Class driverClass = Class.forName("org.postgresql.Driver");
@@ -198,6 +204,7 @@ public class ExtendedModel23Test {
 				 IomObject obj0 = objs.get("32");
 				 Assert.assertNotNull(obj0);
 				 Assert.assertEquals("BaseModel.TestA.ClassA2", obj0.getobjecttag());
+                 Assert.assertEquals("urs", obj0.getattrvalue("name"));
 				 Assert.assertEquals("rot", obj0.getattrvalue("farbe"));
 				 Assert.assertEquals("33", obj0.getattrobj("a3",0).getobjectrefoid());
 				 Assert.assertEquals(null, obj0.getattrvalue("wert"));
@@ -211,6 +218,160 @@ public class ExtendedModel23Test {
 			}
 		}
 	}
+    @Test
+    public void importXtfSmart2() throws Exception
+    {
+        //EhiLogger.getInstance().setTraceFilter(false);
+        Connection jdbcConnection=null;
+        try{
+            Class driverClass = Class.forName("org.postgresql.Driver");
+            jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
+            stmt=jdbcConnection.createStatement();
+            stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");
+            {
+                {
+                    File data=new File("test/data/ExtendedModel/ExtendedModel1.xtf");
+                    Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+                    config.setFunction(Config.FC_IMPORT);
+                    config.setDoImplicitSchemaImport(true);
+                    config.setModels("BaseModel;ExtendedModel");
+                    config.setCreateFk(Config.CREATE_FK_YES);
+                    config.setImportTid(true);
+                    config.setImportBid(true);
+                    config.setTidHandling(Config.TID_HANDLING_PROPERTY);
+                    config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
+                    config.setCatalogueRefTrafo(null);
+                    config.setMultiSurfaceTrafo(null);
+                    config.setMultilingualTrafo(null);
+                    config.setInheritanceTrafo(Config.INHERITANCE_TRAFO_SMART2);
+                    Ili2db.readSettingsFromDb(config);
+                    Ili2db.run(config,null);
+                }
+            }
+        }finally{
+            if(jdbcConnection!=null){
+                jdbcConnection.close();
+            }
+        }
+    }   
+    
+    @Test
+    public void exportXtfSmart2Original() throws Exception
+    {
+        {
+            importXtfSmart2();
+        }
+        Connection jdbcConnection=null;
+        try{
+            Class driverClass = Class.forName("org.postgresql.Driver");
+            jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
+            File data=new File("test/data/ExtendedModel/ExtendedModel1-out.xtf");
+            Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+            config.setModels("BaseModel;ExtendedModel");
+            config.setFunction(Config.FC_EXPORT);
+            config.setExportTid(true);
+            Ili2db.readSettingsFromDb(config);
+            Ili2db.run(config,null);
+            
+            HashMap<String,IomObject> objs=new HashMap<String,IomObject>();
+            XtfReader reader=new XtfReader(data);
+            IoxEvent event=null;
+             do{
+                event=reader.read();
+                if(event instanceof StartTransferEvent){
+                    Assert.assertTrue(event instanceof XtfStartTransferEvent);
+                    XtfStartTransferEvent startEvent=(XtfStartTransferEvent)event;
+                    ArrayList<String> models=getModels(startEvent);
+                    Assert.assertEquals(2,models.size());
+                    Assert.assertTrue(models.contains("BaseModel"));
+                    Assert.assertTrue(models.contains("ExtendedModel"));
+                }else if(event instanceof StartBasketEvent){
+                }else if(event instanceof ObjectEvent){
+                    IomObject iomObj=((ObjectEvent)event).getIomObject();
+                    if(iomObj.getobjectoid()!=null){
+                        objs.put(iomObj.getobjectoid(), iomObj);
+                    }
+                }else if(event instanceof EndBasketEvent){
+                }else if(event instanceof EndTransferEvent){
+                }
+             }while(!(event instanceof EndTransferEvent));
+             {
+                 IomObject obj0 = objs.get("32");
+                 Assert.assertNotNull(obj0);
+                 Assert.assertEquals("ExtendedModel.TestAp.ClassA2", obj0.getobjecttag());
+                 Assert.assertEquals("urs", obj0.getattrvalue("name"));
+                 Assert.assertEquals("rot.dunkel", obj0.getattrvalue("farbe"));
+                 Assert.assertEquals("33", obj0.getattrobj("a3",0).getobjectrefoid());
+                 Assert.assertEquals("1.1", obj0.getattrvalue("wert"));
+                 Assert.assertEquals("34", obj0.getattrobj("ap1",0).getobjectrefoid());
+             }
+        }finally{
+            if(jdbcConnection!=null){
+                jdbcConnection.close();
+            }
+        }
+    }
+    
+    @Test
+    public void exportXtfSmart2Base() throws Exception
+    {
+        {
+            importXtfSmart2();
+        }
+        Connection jdbcConnection=null;
+        try{
+            Class driverClass = Class.forName("org.postgresql.Driver");
+            jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
+            
+            File data=new File("test/data/ExtendedModel/ExtendedModel1-out.xtf");
+            
+            Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+            config.setModels("BaseModel;ExtendedModel");
+            config.setExportModels("BaseModel");
+            config.setFunction(Config.FC_EXPORT);
+            config.setExportTid(true);
+            Ili2db.readSettingsFromDb(config);
+            Ili2db.run(config,null);
+            
+            HashMap<String,IomObject> objs=new HashMap<String,IomObject>();
+            XtfReader reader=new XtfReader(data);
+            IoxEvent event=null;
+             do{
+                event=reader.read();
+                if(event instanceof StartTransferEvent){
+                    Assert.assertTrue(event instanceof XtfStartTransferEvent);
+                    XtfStartTransferEvent startEvent=(XtfStartTransferEvent)event;
+                    ArrayList<String> models=getModels(startEvent);
+                    Assert.assertEquals(1,models.size());
+                    Assert.assertEquals("BaseModel", models.get(0));
+                }else if(event instanceof StartBasketEvent){
+                }else if(event instanceof ObjectEvent){
+                    IomObject iomObj=((ObjectEvent)event).getIomObject();
+                    if(iomObj.getobjectoid()!=null){
+                        objs.put(iomObj.getobjectoid(), iomObj);
+                    }
+                }else if(event instanceof EndBasketEvent){
+                }else if(event instanceof EndTransferEvent){
+                }
+             }while(!(event instanceof EndTransferEvent));
+             {
+                 IomObject obj0 = objs.get("32");
+                 Assert.assertNotNull(obj0);
+                 Assert.assertEquals("BaseModel.TestA.ClassA2", obj0.getobjecttag());
+                 Assert.assertEquals("urs", obj0.getattrvalue("name"));
+                 Assert.assertEquals("rot", obj0.getattrvalue("farbe"));
+                 Assert.assertEquals("33", obj0.getattrobj("a3",0).getobjectrefoid());
+                 Assert.assertEquals(null, obj0.getattrvalue("wert"));
+                 Assert.assertEquals(null, obj0.getattrobj("ap1",0));
+             }
+        }catch(Exception e) {
+            throw new IoxException(e);
+        }finally{
+            if(jdbcConnection!=null){
+                jdbcConnection.close();
+            }
+        }
+    }
     private static ArrayList<String> getModels(XtfStartTransferEvent xtfStart) {
         ArrayList<String> ret=new ArrayList<String>();
         java.util.HashMap<String, IomObject> objs=xtfStart.getHeaderObjects();
