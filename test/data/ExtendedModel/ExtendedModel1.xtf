@@ -3,7 +3,7 @@
 <DATASECTION>
 <BaseModel.TestA BID="b1">
 <BaseModel.TestA.ClassA1 TID="1"></BaseModel.TestA.ClassA1>
-<BaseModel.TestA.ClassA2 TID="2"><name>felix</name><farbe>rot</farbe><a3 REF="3"/></BaseModel.TestA.ClassA2>
+<BaseModel.TestA.ClassA2 TID="2"><attr>a1</attr><name>felix</name><farbe>rot</farbe><a3 REF="3"/></BaseModel.TestA.ClassA2>
 <BaseModel.TestA.ClassA3 TID="3"></BaseModel.TestA.ClassA3>
 </BaseModel.TestA>
 <BaseModel.TestB BID="b2">
@@ -11,7 +11,7 @@
 </BaseModel.TestB>
 <ExtendedModel.TestAp BID="b3">
 <BaseModel.TestA.ClassA1 TID="31"></BaseModel.TestA.ClassA1>
-<ExtendedModel.TestAp.ClassA2 TID="32"><name>urs</name><farbe>rot.dunkel</farbe><a3 REF="33"/><wert>1.1</wert><ap1 REF="34"/></ExtendedModel.TestAp.ClassA2>
+<ExtendedModel.TestAp.ClassA2 TID="32"><attr>a2</attr><name>urs</name><farbe>rot.dunkel</farbe><a3 REF="33"/><wert>1.1</wert><ap1 REF="34"/></ExtendedModel.TestAp.ClassA2>
 <BaseModel.TestA.ClassA3 TID="33"></BaseModel.TestA.ClassA3>
 <ExtendedModel.TestAp.ClassAp1 TID="34"></ExtendedModel.TestAp.ClassAp1>
 </ExtendedModel.TestAp>

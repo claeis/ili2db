@@ -8,8 +8,8 @@ INSERT INTO extendedmodel23.classa1 VALUES (16, 15, '31');
 INSERT INTO extendedmodel23.classa3 VALUES (6, 3, '3');
 INSERT INTO extendedmodel23.classa3 VALUES (18, 15, '33');
 INSERT INTO extendedmodel23.classap1 VALUES (19, 15, '34');
-INSERT INTO extendedmodel23.classa2 VALUES (5, 3, 'classa2', '2', 'felix','rot', 6, NULL, NULL);
-INSERT INTO extendedmodel23.classa2 VALUES (17, 15, 'extendedmodeltestap_classa2', '32', 'urs','rot.dunkel', 18, 1.1, 19);
+INSERT INTO extendedmodel23.classa2 VALUES (5, 3, 'classa2', '2', 'a1','felix','rot', 6, NULL, NULL);
+INSERT INTO extendedmodel23.classa2 VALUES (17, 15, 'extendedmodeltestap_classa2', '32', 'a2','urs','rot.dunkel', 18, 1.1, 19);
 INSERT INTO extendedmodel23.classb1 VALUES (12, 11, '20');
 INSERT INTO extendedmodel23.extendedmodeltestbp_classb1 VALUES (26, 25, '40');
 INSERT INTO extendedmodel23.t_ili2db_attrname VALUES ('ExtendedModel.TestAp.ClassA2.wert', 'wert', 'classa2', NULL);
@@ -63,6 +63,7 @@ MODEL BaseModel
     END ClassA1;
 
     CLASS ClassA2 =
+      attr : TEXT*20;
       name : TEXT*20;
       farbe : Farbe;
     END ClassA2;

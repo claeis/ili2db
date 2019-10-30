@@ -13,6 +13,7 @@ ideas/open issues/questions
 
 LATEST
 ---------------------------
+- fix extended geometry attributes in model generates duplicated geometry fields in DB (#296)
 
 ili2db 4.3.1 (2019-10-25)
 ------------------------------

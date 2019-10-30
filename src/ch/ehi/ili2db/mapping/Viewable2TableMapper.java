@@ -298,13 +298,13 @@ public class Viewable2TableMapper {
         }
         return td;
     }
-	private void addProps(ViewableWrapper viewable,List<ColumnWrapper> attrv,
-		Iterator<ViewableTransferElement> iter) throws Ili2dbException {
+	private void addProps(ViewableWrapper viewable,List<ColumnWrapper> existingAttrs,
+		Iterator<ViewableTransferElement> additionalAttrs) throws Ili2dbException {
         Viewable iliclass=viewable.getViewable();
 		boolean hasGeometry=false;
 		// only one geometry column per table?
 		if(singleGeom){
-			for(ColumnWrapper propE:attrv){
+			for(ColumnWrapper propE:existingAttrs){
 			    ViewableTransferElement attrE=propE.getViewableTransferElement();
 				if(attrE.obj instanceof AttributeDef){
 					AttributeDef attr=(AttributeDef) attrE.obj;
@@ -323,8 +323,8 @@ public class Viewable2TableMapper {
 				}
 			}
 		}
-		while (iter.hasNext()) {
-			ViewableTransferElement viewableTransferElement = iter.next();
+		while (additionalAttrs.hasNext()) {
+			ViewableTransferElement viewableTransferElement = additionalAttrs.next();
 			if (viewableTransferElement.obj instanceof AttributeDef) {
 				AttributeDef attr=(AttributeDef) viewableTransferElement.obj;
 				attr=getBaseAttr(iliclass,attr); // get the most general attribute definition, but only up to the class of the current table
@@ -336,14 +336,15 @@ public class Viewable2TableMapper {
 	                    sqlname=trafoConfig.getAttrConfig(iliclass,attr, TrafoConfigNames.SECONDARY_TABLE);
 	                }
 	                // attribute configured to be in a secondary table?
-	                if(sqlname!=null){
+                    if(sqlname!=null){
 	                    // add attribute to given secondary table
 	                    ViewableWrapper attrWrapper=viewable.getSecondaryTable(sqlname);
 	                    if(attrWrapper==null){
 	                        attrWrapper=viewable.createSecondaryTable(sqlname);
 	                    }
 	                    List<ColumnWrapper> attrProps=new java.util.ArrayList<ColumnWrapper>();
-	                    addColumn(viewable,attrProps,new ColumnWrapper(viewableTransferElement,epsgCode));
+	                    final ColumnWrapper newProp = new ColumnWrapper(viewableTransferElement,epsgCode);
+	                    addColumn(viewable,attrProps,newProp);
 	                    attrWrapper.setAttrv(attrProps);
 	                }else{
                         ch.interlis.ili2c.metamodel.Type type=attr.getDomainResolvingAliases();
@@ -358,32 +359,36 @@ public class Viewable2TableMapper {
                             if(epsgCode==null) {
                                 throw new Ili2dbException("no CRS for attribute "+attr.getScopedName());
                             }
+                            final ColumnWrapper newProp = new ColumnWrapper(viewableTransferElement,epsgCode);
                             if(createItfLineTables && type instanceof ch.interlis.ili2c.metamodel.SurfaceType){
                                 // no attribute in maintable required
                             }else{
                                 // table already has a geometry column?
                                 if(singleGeom && hasGeometry){
-                                    // create a new secondary table
-                                    sqlname=nameMapping.mapAttributeAsTable(iliclass,attr,epsgCode);
-                                    ViewableWrapper attrWrapper=viewable.getSecondaryTable(sqlname);
-                                    if(attrWrapper==null){
-                                        attrWrapper=viewable.createSecondaryTable(sqlname);
+                                    // attribute not yet mapped?
+                                    if(!columnAlreadyAdded(viewable,existingAttrs,newProp)){
+                                        // create a new secondary table
+                                        sqlname=nameMapping.mapAttributeAsTable(iliclass,attr,epsgCode);
+                                        ViewableWrapper attrWrapper=viewable.getSecondaryTable(sqlname);
+                                        if(attrWrapper==null){
+                                            attrWrapper=viewable.createSecondaryTable(sqlname);
+                                        }
+                                        // add attribute to new secondary table
+                                        List<ColumnWrapper> attrProps=new java.util.ArrayList<ColumnWrapper>();
+                                        addColumn(viewable,attrProps,newProp);
+                                        attrWrapper.setAttrv(attrProps);
+                                        trafoConfig.setAttrConfig(iliclass,attr, epsgCode,TrafoConfigNames.SECONDARY_TABLE, sqlname);
                                     }
-                                    // add attribute to new secondary table
-                                    List<ColumnWrapper> attrProps=new java.util.ArrayList<ColumnWrapper>();
-                                    addColumn(viewable,attrProps,new ColumnWrapper(viewableTransferElement,epsgCode));
-                                    attrWrapper.setAttrv(attrProps);
-                                    trafoConfig.setAttrConfig(iliclass,attr, epsgCode,TrafoConfigNames.SECONDARY_TABLE, sqlname);
                                 }else{
                                     // table has not yet a geometry column
                                     // add it
                                     hasGeometry=true;
-                                    addColumn(viewable,attrv,new ColumnWrapper(viewableTransferElement,epsgCode));
+                                    addColumn(viewable,existingAttrs,newProp);
                                 }
                             }
                         }else{
                             // not a Geom type
-                            addColumn(viewable,attrv,new ColumnWrapper(viewableTransferElement));
+                            addColumn(viewable,existingAttrs,new ColumnWrapper(viewableTransferElement));
                         }
 	                }
 				    
@@ -397,53 +402,71 @@ public class Viewable2TableMapper {
 				        ; // skip it; is added when visiting AssociationDef
 				    }else {
 	                    if(roleOwner.getDerivedFrom()==null){
-	                        addColumn(viewable,attrv,new ColumnWrapper(viewableTransferElement));
+	                        addColumn(viewable,existingAttrs,new ColumnWrapper(viewableTransferElement));
 	                    }
 				    }
 				}else {
-                    addColumn(viewable,attrv,new ColumnWrapper(viewableTransferElement));
+                    addColumn(viewable,existingAttrs,new ColumnWrapper(viewableTransferElement));
 				}
 			}
 		}
 		
 	}
 
-	private void addColumn(ViewableWrapper current,List<ColumnWrapper> attrProps, ColumnWrapper columnWrapper) {
-        for(ColumnWrapper exst:attrProps) {
-            if(getRootProp(exst.getViewableTransferElement().obj)==getRootProp(columnWrapper.getViewableTransferElement().obj) && exst.getEpsgCode()==columnWrapper.getEpsgCode()) {
+	private void addColumn(ViewableWrapper current,List<ColumnWrapper> existingProps, ColumnWrapper additionalProp) {
+	    if(columnAlreadyAdded(current,existingProps,additionalProp)) {
+	        return;
+	    }
+        existingProps.add(additionalProp);
+    }
+    private boolean columnAlreadyAdded(ViewableWrapper current,List<ColumnWrapper> existingProps, ColumnWrapper additionalProp) {
+        for(ColumnWrapper exst:existingProps) {
+            final Object prop1 = getRootProp(exst.getViewableTransferElement().obj);
+            final Object prop2=getRootProp(additionalProp.getViewableTransferElement().obj);
+            if(prop1==prop2 && epsgCodeEqual(exst.getEpsgCode(),additionalProp.getEpsgCode())) {
                 // already added
-                return;
+                return true;
             }
         }
         // check also secondaries
         for(ViewableWrapper secondary:current.getSecondaryTables()){
             for(ColumnWrapper exst:secondary.getAttrv()) {
-                if(getRootProp(exst.getViewableTransferElement().obj)==getRootProp(columnWrapper.getViewableTransferElement().obj) && exst.getEpsgCode()==columnWrapper.getEpsgCode()) {
+                if(getRootProp(exst.getViewableTransferElement().obj)==getRootProp(additionalProp.getViewableTransferElement().obj) && epsgCodeEqual(exst.getEpsgCode(),additionalProp.getEpsgCode())) {
                     // already added
-                    return;
+                    return true;
                 }
             }
         }
         ViewableWrapper base=current.getExtending();
         while(base!=null) {
             for(ColumnWrapper exst:base.getAttrv()) {
-                if(getRootProp(exst.getViewableTransferElement().obj)==getRootProp(columnWrapper.getViewableTransferElement().obj) && exst.getEpsgCode()==columnWrapper.getEpsgCode()) {
+                if(getRootProp(exst.getViewableTransferElement().obj)==getRootProp(additionalProp.getViewableTransferElement().obj) && epsgCodeEqual(exst.getEpsgCode(),additionalProp.getEpsgCode())) {
                     // already added
-                    return;
+                    return true;
                 }
             }
             // check also secondaries
             for(ViewableWrapper secondary:base.getSecondaryTables()){
                 for(ColumnWrapper exst:secondary.getAttrv()) {
-                    if(getRootProp(exst.getViewableTransferElement().obj)==getRootProp(columnWrapper.getViewableTransferElement().obj) && exst.getEpsgCode()==columnWrapper.getEpsgCode()) {
+                    if(getRootProp(exst.getViewableTransferElement().obj)==getRootProp(additionalProp.getViewableTransferElement().obj) && epsgCodeEqual(exst.getEpsgCode(),additionalProp.getEpsgCode())) {
                         // already added
-                        return;
+                        return true;
                     }
                 }
             }
             base=base.getExtending();
         }
-        attrProps.add(columnWrapper);
+        return false;
+    }
+
+    private boolean epsgCodeEqual(Integer epsgCode1, Integer epsgCode2) {
+        if(epsgCode1==null && epsgCode2==null) {
+            return true;
+        }
+        if(epsgCode1!=null && epsgCode2!=null && epsgCode1.equals(epsgCode2)) {
+            return true;
+        }
+        return false;
     }
 
     private Object getRootProp(Object obj) {

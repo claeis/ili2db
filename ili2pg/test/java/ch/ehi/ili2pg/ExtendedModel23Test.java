@@ -14,6 +14,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import ch.ehi.basics.logging.EhiLogger;
+import ch.ehi.ili2db.Ili2dbAssert;
 import ch.ehi.ili2db.base.DbNames;
 import ch.ehi.ili2db.base.DbUrlConverter;
 import ch.ehi.ili2db.base.Ili2db;
@@ -93,6 +94,34 @@ public class ExtendedModel23Test {
 		    		Ili2db.run(config,null);
 				}
 			}
+            {
+                // t_ili2db_attrname
+                String [][] expectedValues=new String[][] {
+                    {"BaseModel.TestA.AssocA1.a3",  "a3",  "classa2", "classa3"},
+                    {"BaseModel.TestA.ClassA2.attr",    "attr",    "classa2", null},
+                    {"BaseModel.TestA.ClassA2.farbe",   "farbe",   "classa2", null},
+                    {"BaseModel.TestA.ClassA2.name",    "aname",   "classa2", null},
+                    {"ExtendedModel.TestAp.ClassA2.wert",   "wert",    "classa2", null},
+                    {"ExtendedModel.TestAp.AssocAp1.ap1",   "ap1", "classa2", "classap1"},
+                    
+                };
+                Ili2dbAssert.assertAttrNameTable(jdbcConnection, expectedValues,DBSCHEMA);
+            }
+            {
+                // t_ili2db_trafo
+                String [][] expectedValues=new String[][] {
+                    {"BaseModel.TestA.AssocA1", "ch.ehi.ili2db.inheritance",   "embedded"},
+                    {"ExtendedModel.TestAp.AssocAp1",   "ch.ehi.ili2db.inheritance",   "embedded"},
+                    {"ExtendedModel.TestBp.ClassB1",    "ch.ehi.ili2db.inheritance",   "newClass"},
+                    {"ExtendedModel.TestAp.ClassAp1",   "ch.ehi.ili2db.inheritance",   "newClass"},
+                    {"ExtendedModel.TestAp.ClassA2",    "ch.ehi.ili2db.inheritance",   "superClass"},
+                    {"BaseModel.TestB.ClassB1", "ch.ehi.ili2db.inheritance",   "newClass"},
+                    {"BaseModel.TestA.ClassA3", "ch.ehi.ili2db.inheritance",   "newClass"},
+                    {"BaseModel.TestA.ClassA2", "ch.ehi.ili2db.inheritance",   "newClass"},
+                    {"BaseModel.TestA.ClassA1", "ch.ehi.ili2db.inheritance",   "newClass"}
+                };
+                Ili2dbAssert.assertTrafoTable(jdbcConnection, expectedValues,DBSCHEMA);
+            }
 		}finally{
 			if(jdbcConnection!=null){
 				jdbcConnection.close();
@@ -143,6 +172,7 @@ public class ExtendedModel23Test {
 				 IomObject obj0 = objs.get("32");
 				 Assert.assertNotNull(obj0);
 				 Assert.assertEquals("ExtendedModel.TestAp.ClassA2", obj0.getobjecttag());
+                 Assert.assertEquals("a2", obj0.getattrvalue("attr"));
                  Assert.assertEquals("urs", obj0.getattrvalue("name"));
 				 Assert.assertEquals("rot.dunkel", obj0.getattrvalue("farbe"));
 				 Assert.assertEquals("33", obj0.getattrobj("a3",0).getobjectrefoid());
@@ -204,6 +234,7 @@ public class ExtendedModel23Test {
 				 IomObject obj0 = objs.get("32");
 				 Assert.assertNotNull(obj0);
 				 Assert.assertEquals("BaseModel.TestA.ClassA2", obj0.getobjecttag());
+                 Assert.assertEquals("a2", obj0.getattrvalue("attr"));
                  Assert.assertEquals("urs", obj0.getattrvalue("name"));
 				 Assert.assertEquals("rot", obj0.getattrvalue("farbe"));
 				 Assert.assertEquals("33", obj0.getattrobj("a3",0).getobjectrefoid());
@@ -247,6 +278,38 @@ public class ExtendedModel23Test {
                     Ili2db.readSettingsFromDb(config);
                     Ili2db.run(config,null);
                 }
+            }
+            {
+                // t_ili2db_attrname
+                String [][] expectedValues=new String[][] {
+                    {"ExtendedModel.TestAp.ClassA2.farbe",  "farbe",   "extendedmodeltestap_classa2", null},
+                    {"BaseModel.TestA.AssocA1.a3",  "a3",  "classa2", "classa3"},
+                    {"BaseModel.TestA.ClassA2.attr", "attr",    "extendedmodeltestap_classa2", null},
+                    {"BaseModel.TestA.ClassA2.attr",    "attr",    "classa2", null},
+                    {"BaseModel.TestA.ClassA2.farbe",   "farbe",   "classa2", null},
+                    {"BaseModel.TestA.AssocA1.a3",  "a3",  "extendedmodeltestap_classa2", "classa3"},
+                    {"ExtendedModel.TestAp.ClassA2.name",   "aname",   "extendedmodeltestap_classa2", null},
+                    {"ExtendedModel.TestAp.ClassA2.wert",   "wert",    "extendedmodeltestap_classa2", null},
+                    {"ExtendedModel.TestAp.AssocAp1.ap1",   "ap1", "extendedmodeltestap_classa2", "classap1"},
+                    {"BaseModel.TestA.ClassA2.name",    "aname",   "classa2", null}
+                    
+                };
+                Ili2dbAssert.assertAttrNameTable(jdbcConnection, expectedValues,DBSCHEMA);
+            }
+            {
+                // t_ili2db_trafo
+                String [][] expectedValues=new String[][] {
+                    {"BaseModel.TestA.AssocA1", "ch.ehi.ili2db.inheritance",   "embedded"},
+                    {"ExtendedModel.TestAp.AssocAp1",   "ch.ehi.ili2db.inheritance",   "embedded"},
+                    {"ExtendedModel.TestBp.ClassB1",    "ch.ehi.ili2db.inheritance",   "newAndSubClass"},
+                    {"ExtendedModel.TestAp.ClassAp1",   "ch.ehi.ili2db.inheritance",   "newAndSubClass"},
+                    {"ExtendedModel.TestAp.ClassA2",    "ch.ehi.ili2db.inheritance",   "newAndSubClass"},
+                    {"BaseModel.TestB.ClassB1", "ch.ehi.ili2db.inheritance",   "newAndSubClass"},
+                    {"BaseModel.TestA.ClassA3", "ch.ehi.ili2db.inheritance",   "newAndSubClass"},
+                    {"BaseModel.TestA.ClassA2", "ch.ehi.ili2db.inheritance",   "newAndSubClass"},
+                    {"BaseModel.TestA.ClassA1", "ch.ehi.ili2db.inheritance",   "newAndSubClass"}
+                };
+                Ili2dbAssert.assertTrafoTable(jdbcConnection, expectedValues,DBSCHEMA);
             }
         }finally{
             if(jdbcConnection!=null){
@@ -299,6 +362,7 @@ public class ExtendedModel23Test {
                  IomObject obj0 = objs.get("32");
                  Assert.assertNotNull(obj0);
                  Assert.assertEquals("ExtendedModel.TestAp.ClassA2", obj0.getobjecttag());
+                 Assert.assertEquals("a2", obj0.getattrvalue("attr"));
                  Assert.assertEquals("urs", obj0.getattrvalue("name"));
                  Assert.assertEquals("rot.dunkel", obj0.getattrvalue("farbe"));
                  Assert.assertEquals("33", obj0.getattrobj("a3",0).getobjectrefoid());
@@ -358,6 +422,7 @@ public class ExtendedModel23Test {
                  IomObject obj0 = objs.get("32");
                  Assert.assertNotNull(obj0);
                  Assert.assertEquals("BaseModel.TestA.ClassA2", obj0.getobjecttag());
+                 Assert.assertEquals("a2", obj0.getattrvalue("attr"));
                  Assert.assertEquals("urs", obj0.getattrvalue("name"));
                  Assert.assertEquals("rot", obj0.getattrvalue("farbe"));
                  Assert.assertEquals("33", obj0.getattrobj("a3",0).getobjectrefoid());

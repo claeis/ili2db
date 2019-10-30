@@ -12,6 +12,7 @@ MODEL BaseModel
     END ClassA1;
 
     CLASS ClassA2 =
+      attr : TEXT*20;
       name : TEXT*20;
       farbe : Farbe;
     END ClassA2;
