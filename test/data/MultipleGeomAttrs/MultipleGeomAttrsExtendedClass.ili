@@ -1,7 +1,7 @@
 INTERLIS 2.3;
 
 MODEL MultipleGeomAttrsExtendedClass
-  AT "mailto:ce@eisenhutinformatik.ch" VERSION "2017-08-25" =
+  AT "mailto:ce@eisenhutinformatik.ch" VERSION "2019-10-28" =
 	TOPIC Topic=
 		DOMAIN
 			!!@CRS=EPSG:2056
@@ -18,6 +18,10 @@ MODEL MultipleGeomAttrsExtendedClass
 	
 		CLASS ClassAp EXTENDS ClassA =
 		END ClassAp;
+		
+		CLASS ClassAx EXTENDS ClassA =
+		   coord (EXTENDED) : Lkoord;
+		END ClassAx;
 		
 	END Topic;
 	

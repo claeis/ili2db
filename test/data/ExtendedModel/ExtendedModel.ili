@@ -12,6 +12,8 @@ MODEL BaseModel
     END ClassA1;
 
     CLASS ClassA2 =
+      attr : TEXT*20;
+      name : TEXT*20;
       farbe : Farbe;
     END ClassA2;
 
@@ -48,9 +50,11 @@ MODEL ExtendedModel
     
     !! ClassA2 erweitert
     !!   zusaetzliches Attribut
+    !!   normales Attribut (Text) spezialisiert
     !!   Aufzaehlung spezialisiert
     !!   zusaetzliche eingebettete Rolle
 	CLASS ClassA2 (EXTENDED) =
+      name (EXTENDED) : TEXT*18;
 	  farbe (EXTENDED) : ExtendedModel.Farbe;
 	  wert : 1.0 .. 100.0;
     END ClassA2;

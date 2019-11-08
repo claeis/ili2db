@@ -14,6 +14,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import ch.ehi.basics.logging.EhiLogger;
+import ch.ehi.ili2db.Ili2dbAssert;
 import ch.ehi.ili2db.base.DbNames;
 import ch.ehi.ili2db.base.DbUrlConverter;
 import ch.ehi.ili2db.base.Ili2db;
@@ -64,7 +65,7 @@ public class ExtendedModel23Test {
 	
 	
 	@Test
-	public void importXtf() throws Exception
+	public void importXtfSmart1() throws Exception
 	{
 		//EhiLogger.getInstance().setTraceFilter(false);
 		Connection jdbcConnection=null;
@@ -80,9 +81,11 @@ public class ExtendedModel23Test {
 		    		config.setFunction(Config.FC_IMPORT);
 		            config.setDoImplicitSchemaImport(true);
 					config.setModels("BaseModel;ExtendedModel");
-		    		config.setCreateFk(config.CREATE_FK_YES);
+		    		config.setCreateFk(Config.CREATE_FK_YES);
+		    		config.setImportTid(true);
+                    config.setImportBid(true);
 		    		config.setTidHandling(Config.TID_HANDLING_PROPERTY);
-		    		config.setBasketHandling(config.BASKET_HANDLING_READWRITE);
+		    		config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
 		    		config.setCatalogueRefTrafo(null);
 		    		config.setMultiSurfaceTrafo(null);
 		    		config.setMultilingualTrafo(null);
@@ -91,6 +94,34 @@ public class ExtendedModel23Test {
 		    		Ili2db.run(config,null);
 				}
 			}
+            {
+                // t_ili2db_attrname
+                String [][] expectedValues=new String[][] {
+                    {"BaseModel.TestA.AssocA1.a3",  "a3",  "classa2", "classa3"},
+                    {"BaseModel.TestA.ClassA2.attr",    "attr",    "classa2", null},
+                    {"BaseModel.TestA.ClassA2.farbe",   "farbe",   "classa2", null},
+                    {"BaseModel.TestA.ClassA2.name",    "aname",   "classa2", null},
+                    {"ExtendedModel.TestAp.ClassA2.wert",   "wert",    "classa2", null},
+                    {"ExtendedModel.TestAp.AssocAp1.ap1",   "ap1", "classa2", "classap1"},
+                    
+                };
+                Ili2dbAssert.assertAttrNameTable(jdbcConnection, expectedValues,DBSCHEMA);
+            }
+            {
+                // t_ili2db_trafo
+                String [][] expectedValues=new String[][] {
+                    {"BaseModel.TestA.AssocA1", "ch.ehi.ili2db.inheritance",   "embedded"},
+                    {"ExtendedModel.TestAp.AssocAp1",   "ch.ehi.ili2db.inheritance",   "embedded"},
+                    {"ExtendedModel.TestBp.ClassB1",    "ch.ehi.ili2db.inheritance",   "newClass"},
+                    {"ExtendedModel.TestAp.ClassAp1",   "ch.ehi.ili2db.inheritance",   "newClass"},
+                    {"ExtendedModel.TestAp.ClassA2",    "ch.ehi.ili2db.inheritance",   "superClass"},
+                    {"BaseModel.TestB.ClassB1", "ch.ehi.ili2db.inheritance",   "newClass"},
+                    {"BaseModel.TestA.ClassA3", "ch.ehi.ili2db.inheritance",   "newClass"},
+                    {"BaseModel.TestA.ClassA2", "ch.ehi.ili2db.inheritance",   "newClass"},
+                    {"BaseModel.TestA.ClassA1", "ch.ehi.ili2db.inheritance",   "newClass"}
+                };
+                Ili2dbAssert.assertTrafoTable(jdbcConnection, expectedValues,DBSCHEMA);
+            }
 		}finally{
 			if(jdbcConnection!=null){
 				jdbcConnection.close();
@@ -99,7 +130,7 @@ public class ExtendedModel23Test {
 	}	
 	
 	@Test
-	public void exportXtfOriginal() throws Exception
+	public void exportXtfSmart1Original() throws Exception
 	{
 		Connection jdbcConnection=null;
 		try{
@@ -141,6 +172,8 @@ public class ExtendedModel23Test {
 				 IomObject obj0 = objs.get("32");
 				 Assert.assertNotNull(obj0);
 				 Assert.assertEquals("ExtendedModel.TestAp.ClassA2", obj0.getobjecttag());
+                 Assert.assertEquals("a2", obj0.getattrvalue("attr"));
+                 Assert.assertEquals("urs", obj0.getattrvalue("name"));
 				 Assert.assertEquals("rot.dunkel", obj0.getattrvalue("farbe"));
 				 Assert.assertEquals("33", obj0.getattrobj("a3",0).getobjectrefoid());
 				 Assert.assertEquals("1.1", obj0.getattrvalue("wert"));
@@ -154,8 +187,11 @@ public class ExtendedModel23Test {
 	}
 	
 	@Test
-	public void exportXtfBase() throws Exception
+	public void exportXtfSmart1Base() throws Exception
 	{
+	    //{
+	    //    importXtf();
+	    //}
 		Connection jdbcConnection=null;
 		try{
 	        Class driverClass = Class.forName("org.postgresql.Driver");
@@ -198,6 +234,8 @@ public class ExtendedModel23Test {
 				 IomObject obj0 = objs.get("32");
 				 Assert.assertNotNull(obj0);
 				 Assert.assertEquals("BaseModel.TestA.ClassA2", obj0.getobjecttag());
+                 Assert.assertEquals("a2", obj0.getattrvalue("attr"));
+                 Assert.assertEquals("urs", obj0.getattrvalue("name"));
 				 Assert.assertEquals("rot", obj0.getattrvalue("farbe"));
 				 Assert.assertEquals("33", obj0.getattrobj("a3",0).getobjectrefoid());
 				 Assert.assertEquals(null, obj0.getattrvalue("wert"));
@@ -211,6 +249,194 @@ public class ExtendedModel23Test {
 			}
 		}
 	}
+    @Test
+    public void importXtfSmart2() throws Exception
+    {
+        //EhiLogger.getInstance().setTraceFilter(false);
+        Connection jdbcConnection=null;
+        try{
+            Class driverClass = Class.forName("org.postgresql.Driver");
+            jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
+            stmt=jdbcConnection.createStatement();
+            stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");
+            {
+                {
+                    File data=new File("test/data/ExtendedModel/ExtendedModel1.xtf");
+                    Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+                    config.setFunction(Config.FC_IMPORT);
+                    config.setDoImplicitSchemaImport(true);
+                    config.setModels("BaseModel;ExtendedModel");
+                    config.setCreateFk(Config.CREATE_FK_YES);
+                    config.setImportTid(true);
+                    config.setImportBid(true);
+                    config.setTidHandling(Config.TID_HANDLING_PROPERTY);
+                    config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
+                    config.setCatalogueRefTrafo(null);
+                    config.setMultiSurfaceTrafo(null);
+                    config.setMultilingualTrafo(null);
+                    config.setInheritanceTrafo(Config.INHERITANCE_TRAFO_SMART2);
+                    Ili2db.readSettingsFromDb(config);
+                    Ili2db.run(config,null);
+                }
+            }
+            {
+                // t_ili2db_attrname
+                String [][] expectedValues=new String[][] {
+                    {"ExtendedModel.TestAp.ClassA2.farbe",  "farbe",   "extendedmodeltestap_classa2", null},
+                    {"BaseModel.TestA.AssocA1.a3",  "a3",  "classa2", "classa3"},
+                    {"BaseModel.TestA.ClassA2.attr", "attr",    "extendedmodeltestap_classa2", null},
+                    {"BaseModel.TestA.ClassA2.attr",    "attr",    "classa2", null},
+                    {"BaseModel.TestA.ClassA2.farbe",   "farbe",   "classa2", null},
+                    {"BaseModel.TestA.AssocA1.a3",  "a3",  "extendedmodeltestap_classa2", "classa3"},
+                    {"ExtendedModel.TestAp.ClassA2.name",   "aname",   "extendedmodeltestap_classa2", null},
+                    {"ExtendedModel.TestAp.ClassA2.wert",   "wert",    "extendedmodeltestap_classa2", null},
+                    {"ExtendedModel.TestAp.AssocAp1.ap1",   "ap1", "extendedmodeltestap_classa2", "classap1"},
+                    {"BaseModel.TestA.ClassA2.name",    "aname",   "classa2", null}
+                    
+                };
+                Ili2dbAssert.assertAttrNameTable(jdbcConnection, expectedValues,DBSCHEMA);
+            }
+            {
+                // t_ili2db_trafo
+                String [][] expectedValues=new String[][] {
+                    {"BaseModel.TestA.AssocA1", "ch.ehi.ili2db.inheritance",   "embedded"},
+                    {"ExtendedModel.TestAp.AssocAp1",   "ch.ehi.ili2db.inheritance",   "embedded"},
+                    {"ExtendedModel.TestBp.ClassB1",    "ch.ehi.ili2db.inheritance",   "newAndSubClass"},
+                    {"ExtendedModel.TestAp.ClassAp1",   "ch.ehi.ili2db.inheritance",   "newAndSubClass"},
+                    {"ExtendedModel.TestAp.ClassA2",    "ch.ehi.ili2db.inheritance",   "newAndSubClass"},
+                    {"BaseModel.TestB.ClassB1", "ch.ehi.ili2db.inheritance",   "newAndSubClass"},
+                    {"BaseModel.TestA.ClassA3", "ch.ehi.ili2db.inheritance",   "newAndSubClass"},
+                    {"BaseModel.TestA.ClassA2", "ch.ehi.ili2db.inheritance",   "newAndSubClass"},
+                    {"BaseModel.TestA.ClassA1", "ch.ehi.ili2db.inheritance",   "newAndSubClass"}
+                };
+                Ili2dbAssert.assertTrafoTable(jdbcConnection, expectedValues,DBSCHEMA);
+            }
+        }finally{
+            if(jdbcConnection!=null){
+                jdbcConnection.close();
+            }
+        }
+    }   
+    
+    @Test
+    public void exportXtfSmart2Original() throws Exception
+    {
+        {
+            importXtfSmart2();
+        }
+        Connection jdbcConnection=null;
+        try{
+            Class driverClass = Class.forName("org.postgresql.Driver");
+            jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
+            File data=new File("test/data/ExtendedModel/ExtendedModel1-out.xtf");
+            Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+            config.setModels("BaseModel;ExtendedModel");
+            config.setFunction(Config.FC_EXPORT);
+            config.setExportTid(true);
+            Ili2db.readSettingsFromDb(config);
+            Ili2db.run(config,null);
+            
+            HashMap<String,IomObject> objs=new HashMap<String,IomObject>();
+            XtfReader reader=new XtfReader(data);
+            IoxEvent event=null;
+             do{
+                event=reader.read();
+                if(event instanceof StartTransferEvent){
+                    Assert.assertTrue(event instanceof XtfStartTransferEvent);
+                    XtfStartTransferEvent startEvent=(XtfStartTransferEvent)event;
+                    ArrayList<String> models=getModels(startEvent);
+                    Assert.assertEquals(2,models.size());
+                    Assert.assertTrue(models.contains("BaseModel"));
+                    Assert.assertTrue(models.contains("ExtendedModel"));
+                }else if(event instanceof StartBasketEvent){
+                }else if(event instanceof ObjectEvent){
+                    IomObject iomObj=((ObjectEvent)event).getIomObject();
+                    if(iomObj.getobjectoid()!=null){
+                        objs.put(iomObj.getobjectoid(), iomObj);
+                    }
+                }else if(event instanceof EndBasketEvent){
+                }else if(event instanceof EndTransferEvent){
+                }
+             }while(!(event instanceof EndTransferEvent));
+             {
+                 IomObject obj0 = objs.get("32");
+                 Assert.assertNotNull(obj0);
+                 Assert.assertEquals("ExtendedModel.TestAp.ClassA2", obj0.getobjecttag());
+                 Assert.assertEquals("a2", obj0.getattrvalue("attr"));
+                 Assert.assertEquals("urs", obj0.getattrvalue("name"));
+                 Assert.assertEquals("rot.dunkel", obj0.getattrvalue("farbe"));
+                 Assert.assertEquals("33", obj0.getattrobj("a3",0).getobjectrefoid());
+                 Assert.assertEquals("1.1", obj0.getattrvalue("wert"));
+                 Assert.assertEquals("34", obj0.getattrobj("ap1",0).getobjectrefoid());
+             }
+        }finally{
+            if(jdbcConnection!=null){
+                jdbcConnection.close();
+            }
+        }
+    }
+    
+    @Test
+    public void exportXtfSmart2Base() throws Exception
+    {
+        {
+            importXtfSmart2();
+        }
+        Connection jdbcConnection=null;
+        try{
+            Class driverClass = Class.forName("org.postgresql.Driver");
+            jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
+            
+            File data=new File("test/data/ExtendedModel/ExtendedModel1-out.xtf");
+            
+            Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+            config.setModels("BaseModel;ExtendedModel");
+            config.setExportModels("BaseModel");
+            config.setFunction(Config.FC_EXPORT);
+            config.setExportTid(true);
+            Ili2db.readSettingsFromDb(config);
+            Ili2db.run(config,null);
+            
+            HashMap<String,IomObject> objs=new HashMap<String,IomObject>();
+            XtfReader reader=new XtfReader(data);
+            IoxEvent event=null;
+             do{
+                event=reader.read();
+                if(event instanceof StartTransferEvent){
+                    Assert.assertTrue(event instanceof XtfStartTransferEvent);
+                    XtfStartTransferEvent startEvent=(XtfStartTransferEvent)event;
+                    ArrayList<String> models=getModels(startEvent);
+                    Assert.assertEquals(1,models.size());
+                    Assert.assertEquals("BaseModel", models.get(0));
+                }else if(event instanceof StartBasketEvent){
+                }else if(event instanceof ObjectEvent){
+                    IomObject iomObj=((ObjectEvent)event).getIomObject();
+                    if(iomObj.getobjectoid()!=null){
+                        objs.put(iomObj.getobjectoid(), iomObj);
+                    }
+                }else if(event instanceof EndBasketEvent){
+                }else if(event instanceof EndTransferEvent){
+                }
+             }while(!(event instanceof EndTransferEvent));
+             {
+                 IomObject obj0 = objs.get("32");
+                 Assert.assertNotNull(obj0);
+                 Assert.assertEquals("BaseModel.TestA.ClassA2", obj0.getobjecttag());
+                 Assert.assertEquals("a2", obj0.getattrvalue("attr"));
+                 Assert.assertEquals("urs", obj0.getattrvalue("name"));
+                 Assert.assertEquals("rot", obj0.getattrvalue("farbe"));
+                 Assert.assertEquals("33", obj0.getattrobj("a3",0).getobjectrefoid());
+                 Assert.assertEquals(null, obj0.getattrvalue("wert"));
+                 Assert.assertEquals(null, obj0.getattrobj("ap1",0));
+             }
+        }catch(Exception e) {
+            throw new IoxException(e);
+        }finally{
+            if(jdbcConnection!=null){
+                jdbcConnection.close();
+            }
+        }
+    }
     private static ArrayList<String> getModels(XtfStartTransferEvent xtfStart) {
         ArrayList<String> ret=new ArrayList<String>();
         java.util.HashMap<String, IomObject> objs=xtfStart.getHeaderObjects();

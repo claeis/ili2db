@@ -95,6 +95,14 @@
 					</SURFACE>
 				</surface>
 			</MultipleGeomAttrsExtendedClass.Topic.ClassAp>
+			<MultipleGeomAttrsExtendedClass.Topic.ClassAx TID="ClassAx.1">
+				<coord>
+					<COORD>
+							<C1>2460002.000</C1>
+							<C2>1045002.000</C2>
+					</COORD>
+				</coord>
+			</MultipleGeomAttrsExtendedClass.Topic.ClassAx>
 		</MultipleGeomAttrsExtendedClass.Topic>
 		<MultipleGeomAttrsExtendedClass.TopicB BID="b2">
 			<MultipleGeomAttrsExtendedClass.TopicB.ClassB TID="ClassB.1">

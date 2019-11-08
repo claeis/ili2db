@@ -77,8 +77,8 @@ public class Ili2dbAssert {
         Assert.assertTrue(stmt.execute(query));
         Set<String[]> foundValues = getValuesFromTableTrafo(stmt.getResultSet());
         if (foundValues.size() != expectedValues.length) {
-            String message = "Werte stimmen nicht ueberein. in Test Klasse: ";
-            throw new org.junit.ComparisonFailure(message, foundValues.toString(), expectedValues.toString());  
+            String message = "Anzahl Eintraege stimmen nicht ueberein: ";
+            throw new org.junit.ComparisonFailure(message, Integer.toString(expectedValues.length),Integer.toString(foundValues.size()) );  
         }
         
         //Sort the array expectedValues

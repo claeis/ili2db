@@ -22,6 +22,8 @@ CREATE TABLE classa2 (
     t_basket bigint NOT NULL,
     t_type character varying(60) NOT NULL,
     t_ili_tid character varying(200),
+    attr character varying(20),
+    aname character varying(20),
     farbe character varying(255),
     a3 bigint,
     wert numeric(4,1),
