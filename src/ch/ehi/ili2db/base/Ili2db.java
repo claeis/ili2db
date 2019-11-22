@@ -1598,6 +1598,10 @@ public class Ili2db {
 				String topicv[]=topics.split(ch.interlis.ili2c.Main.MODELS_SEPARATOR);
 				// map BID to sqlBasketId and modelnames
 				basketSqlIds=getBasketSqlIdsFromTopic(topicv,modelv,conn,config);
+		        if(basketSqlIds==null || basketSqlIds.length==0){
+		            throw new Ili2dbException("no baskets with given topic names in table "+DbNames.BASKETS_TAB);
+		        }
+				
 			}else{
 				if(createBasketCol){
 					String[] modelnames = getModelNames(models);
@@ -1959,7 +1963,7 @@ public class Ili2db {
 		}
 		return null;
 	}
-	private static long[] getBasketSqlIdsFromTopic(String[] topics,
+	public static long[] getBasketSqlIdsFromTopic(String[] topics,
 			Configuration modelv,Connection conn,Config config) throws Ili2dbException {
 		String schema=config.getDbschema();
 		String colT_ID=config.getColT_ID();
@@ -2023,9 +2027,6 @@ public class Ili2db {
 					EhiLogger.logError(ex);
 				}
 			}
-		}
-		if(bids.size()==0){
-			throw new Ili2dbException("no baskets with given topic names in table "+sqlName);
 		}
 		long ret[]=new long[bids.size()];
 		idx=0;

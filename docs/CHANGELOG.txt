@@ -13,6 +13,7 @@ ideas/open issues/questions
 
 LATEST
 ---------------------------
+- fix --update without stable BID (#315)
 
 ili2db 4.3.2 (2019-11-08)
 ------------------------------
