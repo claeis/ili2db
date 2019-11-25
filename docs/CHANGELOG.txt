@@ -15,6 +15,7 @@ LATEST
 ---------------------------
 - fix --update without stable BID (#315)
 - fix --update n:n ASSOCATION (#315, #316)
+- iox-ili-1.20.15-SNAPSHOT
 
 ili2db 4.3.2 (2019-11-08)
 ------------------------------
