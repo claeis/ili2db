@@ -8,6 +8,7 @@ MODEL BaseModel
   	
   TOPIC TestA =
   
+  
     CLASS ClassA1 =
     END ClassA1;
 
@@ -24,6 +25,12 @@ MODEL BaseModel
       a2 -- {0..*} ClassA2;
       a3 -- {0..1} ClassA3;
     END AssocA1;
+
+    CLASS ClassA5_0 (ABSTRACT) =
+    END ClassA5_0;
+
+    CLASS ClassA5 EXTENDS ClassA5_0 =
+    END ClassA5;
     
   END TestA;
   
@@ -68,6 +75,9 @@ MODEL ExtendedModel
       ap2 -- {0..*} ClassA2;
       ap1 -- {0..1} ClassAp1;
     END AssocAp1;
+    
+    CLASS ClassA5_2 EXTENDS BaseModel.TestA.ClassA5_0 =
+    END ClassA5_2;
     
   END TestAp;
   
