@@ -749,7 +749,10 @@ public class TransferFromXtf {
 				if(classo instanceof Viewable){
 					if(classo instanceof Table && ((Table)classo).isIdentifiable()){
 						getStructs_Helper((AbstractClassDef)classo,visitedStructs);
-					}
+					}else if(classo instanceof AssociationDef && !((AssociationDef)classo).isIdentifiable()){
+					    // handle associations without an OID like struct eles
+					    visitedStructs.add((AssociationDef)classo);
+                    }
 				}
 			}
 			def=(Topic)def.getExtending();
@@ -924,6 +927,9 @@ public class TransferFromXtf {
 				Viewable aclass=(Viewable)obj;
 				if(aclass.isAbstract()){
 					throw new IllegalArgumentException("unexpected abstract viewable "+aclass.getScopedName(null));
+				}
+				if(aclass instanceof AssociationDef && !((AssociationDef)aclass).isIdentifiable()) {
+				    continue;
 				}
 				// get sql name
 				DbTableName sqlName=recConv.getSqlType(aclass);

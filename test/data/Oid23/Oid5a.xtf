@@ -13,22 +13,9 @@
 			<Oid5.TestA.ClassB1 TID="81fc3941-01ec-4c51-b1ba-46b6295d9b4e">
 				<attrB>a_b1</attrB>
 			</Oid5.TestA.ClassB1>
-			<!-- Oid5.TestA.a2b>
-				<a REF="c34c86ec-2a75-4a89-a194-f9ebc422f8bc"/>
-				<b REF="81fc3941-01ec-4c51-b1ba-46b6295d9b4e"/>
-				<attrAB>a_ab1</attrAB>
-			</Oid5.TestA.a2b -->
-			
 			<Oid5.TestA.ClassA1 TID="a7284ca2-5c41-4479-ba69-66c05bff8fbd">
 				<attrA>a_a2</attrA>
 			</Oid5.TestA.ClassA1>
-			<!-- Oid5.TestA.a2b>
-				<a REF="a7284ca2-5c41-4479-ba69-66c05bff8fbd"/>
-				<b REF="81fc3941-01ec-4c51-b1ba-46b6295d9b4e"/>
-				<attrAB>a_ab2</attrAB>
-			</Oid5.TestA.a2b -->
-
-			
 		</Oid5.TestA>
 	</DATASECTION>
 </TRANSFER>

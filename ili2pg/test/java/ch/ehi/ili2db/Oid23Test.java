@@ -133,7 +133,7 @@ public class Oid23Test {
 		}
 	}
     @Test
-    public void importIliAssoc() throws Exception
+    public void importIliwithoutBid() throws Exception
     {
         //EhiLogger.getInstance().setTraceFilter(false);
         Connection jdbcConnection=null;
@@ -157,9 +157,6 @@ public class Oid23Test {
                 {
                     // t_ili2db_attrname
                     String [][] expectedValues=new String[][] {
-                        //{"Oid5.TestA.a2b.a", "a", "a2b", "classa1"},
-                        //{"Oid5.TestA.a2b.b", "b", "a2b", "classb1"},
-                        //{"Oid5.TestA.a2b.attrAB", "attrab", "a2b", null},
                         {"Oid5.TestA.ClassA1.attrA", "attra", "classa1", null},
                         {"Oid5.TestA.ClassB1.attrB", "attrb", "classb1", null},
                     };
@@ -171,7 +168,6 @@ public class Oid23Test {
                     String [][] expectedValues=new String[][] {
                         {"Oid5.TestA.ClassA1", "ch.ehi.ili2db.inheritance", "newClass"},
                         {"Oid5.TestA.ClassB1", "ch.ehi.ili2db.inheritance", "newClass"},
-                        //{"Oid5.TestA.a2b",     "ch.ehi.ili2db.inheritance", "newClass"},
                     };
                     Ili2dbAssert.assertTrafoTable(jdbcConnection,expectedValues, DBSCHEMA);
                 }
@@ -183,9 +179,9 @@ public class Oid23Test {
         }
     }
     @Test
-    public void importXtfAssoc() throws Exception
+    public void importXtfwithoutBid() throws Exception
     {
-        importIliAssoc();
+        importIliwithoutBid();
         //EhiLogger.getInstance().setTraceFilter(false);
         Connection jdbcConnection=null;
         try{
@@ -207,9 +203,9 @@ public class Oid23Test {
         }
     }
     @Test
-    public void updateXtfAssoc() throws Exception
+    public void updateXtfwithoutBid() throws Exception
     {
-        importXtfAssoc();
+        importXtfwithoutBid();
         //EhiLogger.getInstance().setTraceFilter(false);
         Connection jdbcConnection=null;
         try{
@@ -231,9 +227,9 @@ public class Oid23Test {
         }
     }
     @Test
-    public void exportXtfAssoc() throws Exception
+    public void exportXtfwithoutBid() throws Exception
     {
-        importXtfAssoc();
+        importXtfwithoutBid();
         //EhiLogger.getInstance().setTraceFilter(false);
         Connection jdbcConnection=null;
         try{

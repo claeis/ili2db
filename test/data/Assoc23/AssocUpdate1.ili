@@ -1,6 +1,6 @@
 INTERLIS 2.3;
 
-MODEL Oid5
+MODEL AssocUpdate1
   AT "mailto:ce@eisenhutinformatik.ch" VERSION "2019-11-22" =
     
   TOPIC TestA =
@@ -14,7 +14,13 @@ MODEL Oid5
     	attrB : TEXT*20;
     END ClassB1;
 
+    ASSOCIATION a2b =
+      a (EXTERNAL) -- {0..*} ClassA1;
+      b (EXTERNAL) -- {0..*} ClassB1;
+      attrAB : TEXT*20;
+    END a2b;
+    
   END TestA;
   
   
-END Oid5.
+END AssocUpdate1.
