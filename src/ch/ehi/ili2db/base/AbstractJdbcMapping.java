@@ -77,4 +77,8 @@ public abstract class AbstractJdbcMapping implements CustomMapping {
     public String shortenConnectUrl4Log(String url) {
         return url;
     }
+    @Override
+    public String getCreateSchemaStmt(String dbschema) {
+        return "CREATE SCHEMA IF NOT EXISTS "+dbschema;
+    }
 }

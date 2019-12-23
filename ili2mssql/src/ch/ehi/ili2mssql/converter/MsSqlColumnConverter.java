@@ -72,15 +72,15 @@ public class MsSqlColumnConverter extends AbstractWKBColumnConverter {
     public String getSelectValueWrapperMultiPolyline(String dbNativeValue) {
         return dbNativeValue+".STAsBinary()";
     }
-	@Override
-	public Integer getSrsid(String crsAuthority, String crsCode,Connection conn) 
-		throws ConverterException{
-		
-		int srsid;
-		srsid=Integer.parseInt(crsCode);
-
-		return srsid;
-	}
+    @Override
+    public Integer getSrsid(String crsAuthority, String crsCode,Connection conn) 
+            throws ConverterException{
+        Integer srsid = null;
+        if(crsCode!=null) {
+            srsid=Integer.parseInt(crsCode);
+        }
+        return srsid;
+    }
 	
 	@Override
 	public IomObject toIomSurface(

@@ -67,4 +67,8 @@ public class CustomMappingNull implements CustomMapping {
         return url;
     }
 
+    @Override
+    public String getCreateSchemaStmt(String dbschema) {
+        return null;
+    }
 }
