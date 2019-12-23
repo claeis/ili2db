@@ -25,7 +25,7 @@ addons:
 install: true
 
 before_script:
-    - docker run --name=mssql-test -e 'ACCEPT_EULA=Y' -e 'SA_PASSWORD=MsInst2019x' -p 1433:1433 -d mcr.microsoft.com/mssql
+    - docker run --name=mssql-test -e 'ACCEPT_EULA=Y' -e 'SA_PASSWORD=MsInst2019x' -p 1433:1433 -d microsoft/mssql
     - mysql -u root --password="" -e 'SHOW VARIABLES LIKE "%version%";'
     - psql -c 'create database ili2db;' -U postgres
     - psql -c 'select version();' -d ili2db -U postgres
