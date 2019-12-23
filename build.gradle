@@ -490,6 +490,9 @@ task ili2mssqlTest(type: Test) {
 	forkEvery = 1
     classpath = sourceSets.ili2mssqlTest.runtimeClasspath
     testClassesDirs = sourceSets.ili2mssqlTest.output.classesDirs
+	systemProperty 'dburl', dburl
+	systemProperty 'dbusr', dbusr
+	systemProperty 'dbpwd', dbpwd
     testLogging.exceptionFormat = 'full'
 }
 task ili2oraJar(dependsOn: jar,type: Jar) {
