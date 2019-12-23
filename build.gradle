@@ -283,7 +283,7 @@ configurations {
     deployerJars
 }
 dependencies {
-    implementation group: 'ch.interlis', name: 'iox-ili', version: '1.20.15+'
+    implementation group: 'ch.interlis', name: 'iox-ili', version: '1.20.15'
     implementation group: 'ch.interlis', name: 'ili2c-tool', version: "5.0.2"
     implementation group: 'ch.interlis', name: 'ili2c-core', version: "5.0.2"
     implementation group: 'ch.ehi', name: 'ehisqlgen', version: "1.13.8"
