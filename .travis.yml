@@ -26,6 +26,7 @@ install: true
 
 before_script:
     - docker run --name=mssql-test -e 'ACCEPT_EULA=Y' -e 'MSSQL_SA_PASSWORD=MsInst2019x' -p 1433:1433 -d microsoft/mssql-server-linux
+    - docker exec -it mssql-test  /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P MsInst2019x -Q 'SELECT @@VERSION'
     - mysql -u root --password="" -e 'SHOW VARIABLES LIKE "%version%";'
     - psql -c 'create database ili2db;' -U postgres
     - psql -c 'select version();' -d ili2db -U postgres
