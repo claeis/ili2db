@@ -1,5 +1,5 @@
 group 'ch.interlis'
-version '4.3.2'+System.getProperty('release','-SNAPSHOT')
+version '4.3.3'+System.getProperty('release','-SNAPSHOT')
 
 apply plugin: "java"
 apply plugin: "maven"
@@ -283,7 +283,7 @@ configurations {
     deployerJars
 }
 dependencies {
-    implementation group: 'ch.interlis', name: 'iox-ili', version: '1.20.14'
+    implementation group: 'ch.interlis', name: 'iox-ili', version: '1.20.15'
     implementation group: 'ch.interlis', name: 'ili2c-tool', version: "5.0.2"
     implementation group: 'ch.interlis', name: 'ili2c-core', version: "5.0.2"
     implementation group: 'ch.ehi', name: 'ehisqlgen', version: "1.13.8"
@@ -490,6 +490,9 @@ task ili2mssqlTest(type: Test) {
 	forkEvery = 1
     classpath = sourceSets.ili2mssqlTest.runtimeClasspath
     testClassesDirs = sourceSets.ili2mssqlTest.output.classesDirs
+	systemProperty 'dburl', dburl
+	systemProperty 'dbusr', dbusr
+	systemProperty 'dbpwd', dbpwd
     testLogging.exceptionFormat = 'full'
 }
 task ili2oraJar(dependsOn: jar,type: Jar) {

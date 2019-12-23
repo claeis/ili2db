@@ -625,6 +625,70 @@ public class Assoc23Test {
             }
         }
     }
+    @Test
+    public void importIliExtFileRef_Smart1() throws Exception
+    {
+        //EhiLogger.getInstance().setTraceFilter(false);
+        Connection jdbcConnection=null;
+        try{
+            Class driverClass = Class.forName("org.postgresql.Driver");
+            jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
+            stmt=jdbcConnection.createStatement();
+            stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");
+            {
+                {
+                    File data=new File(TEST_OUT,"Assoc2.ili");
+                    Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+                    config.setFunction(Config.FC_SCHEMAIMPORT);
+                    config.setCreateFk(Config.CREATE_FK_YES);
+                    config.setTidHandling(Config.TID_HANDLING_PROPERTY);
+                    config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
+                    config.setCatalogueRefTrafo(null);
+                    config.setMultiSurfaceTrafo(null);
+                    config.setMultilingualTrafo(null);
+                    config.setInheritanceTrafo(Config.INHERITANCE_TRAFO_SMART1);
+                    Ili2db.readSettingsFromDb(config);
+                    Ili2db.run(config,null);
+                }
+            }
+        }finally{
+            if(jdbcConnection!=null){
+                jdbcConnection.close();
+            }
+        }
+    }
+    @Test
+    public void importIliExtFileRef_Smart2() throws Exception
+    {
+        //EhiLogger.getInstance().setTraceFilter(false);
+        Connection jdbcConnection=null;
+        try{
+            Class driverClass = Class.forName("org.postgresql.Driver");
+            jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
+            stmt=jdbcConnection.createStatement();
+            stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");
+            {
+                {
+                    File data=new File(TEST_OUT,"Assoc2.ili");
+                    Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+                    config.setFunction(Config.FC_SCHEMAIMPORT);
+                    config.setCreateFk(Config.CREATE_FK_YES);
+                    config.setTidHandling(Config.TID_HANDLING_PROPERTY);
+                    config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
+                    config.setCatalogueRefTrafo(null);
+                    config.setMultiSurfaceTrafo(null);
+                    config.setMultilingualTrafo(null);
+                    config.setInheritanceTrafo(Config.INHERITANCE_TRAFO_SMART2);
+                    Ili2db.readSettingsFromDb(config);
+                    Ili2db.run(config,null);
+                }
+            }
+        }finally{
+            if(jdbcConnection!=null){
+                jdbcConnection.close();
+            }
+        }
+    }
 	@Test
 	public void importXtfExtFileRefBackward() throws Exception
 	{
@@ -1392,4 +1456,128 @@ public class Assoc23Test {
              }
         }
     }
+    
+    @Test
+    public void importIliwithoutBid() throws Exception
+    {
+        //EhiLogger.getInstance().setTraceFilter(false);
+        Connection jdbcConnection=null;
+        try{
+            Class driverClass = Class.forName("org.postgresql.Driver");
+            jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
+            stmt=jdbcConnection.createStatement();
+            stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");
+            {
+                File data=new File(TEST_OUT,"AssocUpdate1.ili");
+                Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+                config.setFunction(Config.FC_SCHEMAIMPORT);
+                config.setCreateFk(Config.CREATE_FK_YES);
+                config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
+                config.setCatalogueRefTrafo(null);
+                config.setMultiSurfaceTrafo(null);
+                config.setMultilingualTrafo(null);
+                config.setInheritanceTrafo(null);
+                Ili2db.readSettingsFromDb(config);
+                Ili2db.run(config,null);
+                {
+                    // t_ili2db_attrname
+                    String [][] expectedValues=new String[][] {
+                        {"AssocUpdate1.TestA.a2b.a", "a", "a2b", "classa1"},
+                        {"AssocUpdate1.TestA.a2b.b", "b", "a2b", "classb1"},
+                        {"AssocUpdate1.TestA.a2b.attrAB", "attrab", "a2b", null},
+                        {"AssocUpdate1.TestA.ClassA1.attrA", "attra", "classa1", null},
+                        {"AssocUpdate1.TestA.ClassB1.attrB", "attrb", "classb1", null},
+                    };
+                    Ili2dbAssert.assertAttrNameTable(jdbcConnection,expectedValues, DBSCHEMA);
+                    
+                }
+                {
+                    // t_ili2db_trafo
+                    String [][] expectedValues=new String[][] {
+                        {"AssocUpdate1.TestA.ClassA1", "ch.ehi.ili2db.inheritance", "newClass"},
+                        {"AssocUpdate1.TestA.ClassB1", "ch.ehi.ili2db.inheritance", "newClass"},
+                        {"AssocUpdate1.TestA.a2b",     "ch.ehi.ili2db.inheritance", "newClass"},
+                    };
+                    Ili2dbAssert.assertTrafoTable(jdbcConnection,expectedValues, DBSCHEMA);
+                }
+            }
+        }finally{
+            if(jdbcConnection!=null){
+                jdbcConnection.close();
+            }
+        }
+    }
+    @Test
+    public void importXtfwithoutBid() throws Exception
+    {
+        importIliwithoutBid();
+        //EhiLogger.getInstance().setTraceFilter(false);
+        Connection jdbcConnection=null;
+        try{
+            Class driverClass = Class.forName("org.postgresql.Driver");
+            jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
+            stmt=jdbcConnection.createStatement();
+            {
+                File data=new File(TEST_OUT,"AssocUpdate1a.xtf");
+                Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+                config.setFunction(Config.FC_IMPORT);
+                config.setDatasetName("AssocUpdate1a");
+                Ili2db.readSettingsFromDb(config);
+                Ili2db.run(config,null);
+            }
+        }finally{
+            if(jdbcConnection!=null){
+                jdbcConnection.close();
+            }
+        }
+    }
+    @Test
+    public void updateXtfwithoutBid() throws Exception
+    {
+        importXtfwithoutBid();
+        EhiLogger.getInstance().setTraceFilter(false);
+        Connection jdbcConnection=null;
+        try{
+            Class driverClass = Class.forName("org.postgresql.Driver");
+            jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
+            stmt=jdbcConnection.createStatement();
+            {
+                File data=new File(TEST_OUT,"AssocUpdate1b.xtf");
+                Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+                config.setFunction(Config.FC_UPDATE);
+                config.setDatasetName("AssocUpdate1a");
+                Ili2db.readSettingsFromDb(config);
+                Ili2db.run(config,null);
+            }
+        }finally{
+            if(jdbcConnection!=null){
+                jdbcConnection.close();
+            }
+        }
+    }
+    @Test
+    public void exportXtfwithoutBid() throws Exception
+    {
+        importXtfwithoutBid();
+        //EhiLogger.getInstance().setTraceFilter(false);
+        Connection jdbcConnection=null;
+        try{
+            Class driverClass = Class.forName("org.postgresql.Driver");
+            jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
+            stmt=jdbcConnection.createStatement();
+            {
+                File data=new File(TEST_OUT,"AssocUpdate1a-out.xtf");
+                Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+                config.setFunction(Config.FC_EXPORT);
+                config.setModels("AssocUpdate1");
+                Ili2db.readSettingsFromDb(config);
+                Ili2db.run(config,null);
+            }
+        }finally{
+            if(jdbcConnection!=null){
+                jdbcConnection.close();
+            }
+        }
+    }
+    
 }

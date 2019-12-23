@@ -143,7 +143,7 @@ public class ReduceToBaseModel implements IoxFilter {
 						}
                         // found destEle in original language?
                         AbstractClassDef destEle=null;
-						if(originDestEle!=null) {
+						if(originDestEle!=null && !originDestEle.isAbstract()) {
 						    destEle=findTranslatedEle(originDestEle,destTopic);
 						    if(destEle==null) {
 						        throw new IllegalStateException("destEle "+originDestEle.getScopedName()+" in "+destTopic.getScopedName()+"not found");

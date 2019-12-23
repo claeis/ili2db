@@ -115,10 +115,13 @@ public class ExtendedModel23Test {
                     {"ExtendedModel.TestBp.ClassB1",    "ch.ehi.ili2db.inheritance",   "newClass"},
                     {"ExtendedModel.TestAp.ClassAp1",   "ch.ehi.ili2db.inheritance",   "newClass"},
                     {"ExtendedModel.TestAp.ClassA2",    "ch.ehi.ili2db.inheritance",   "superClass"},
+                    {"ExtendedModel.TestAp.ClassA5_2",    "ch.ehi.ili2db.inheritance",   "newClass"},
                     {"BaseModel.TestB.ClassB1", "ch.ehi.ili2db.inheritance",   "newClass"},
                     {"BaseModel.TestA.ClassA3", "ch.ehi.ili2db.inheritance",   "newClass"},
                     {"BaseModel.TestA.ClassA2", "ch.ehi.ili2db.inheritance",   "newClass"},
-                    {"BaseModel.TestA.ClassA1", "ch.ehi.ili2db.inheritance",   "newClass"}
+                    {"BaseModel.TestA.ClassA1", "ch.ehi.ili2db.inheritance",   "newClass"},
+                    {"BaseModel.TestA.ClassA5_0", "ch.ehi.ili2db.inheritance",   "subClass"},
+                    {"BaseModel.TestA.ClassA5", "ch.ehi.ili2db.inheritance",   "newClass"},
                 };
                 Ili2dbAssert.assertTrafoTable(jdbcConnection, expectedValues,DBSCHEMA);
             }
@@ -304,10 +307,13 @@ public class ExtendedModel23Test {
                     {"ExtendedModel.TestBp.ClassB1",    "ch.ehi.ili2db.inheritance",   "newAndSubClass"},
                     {"ExtendedModel.TestAp.ClassAp1",   "ch.ehi.ili2db.inheritance",   "newAndSubClass"},
                     {"ExtendedModel.TestAp.ClassA2",    "ch.ehi.ili2db.inheritance",   "newAndSubClass"},
+                    {"ExtendedModel.TestAp.ClassA5_2",    "ch.ehi.ili2db.inheritance",   "newAndSubClass"},
                     {"BaseModel.TestB.ClassB1", "ch.ehi.ili2db.inheritance",   "newAndSubClass"},
                     {"BaseModel.TestA.ClassA3", "ch.ehi.ili2db.inheritance",   "newAndSubClass"},
                     {"BaseModel.TestA.ClassA2", "ch.ehi.ili2db.inheritance",   "newAndSubClass"},
-                    {"BaseModel.TestA.ClassA1", "ch.ehi.ili2db.inheritance",   "newAndSubClass"}
+                    {"BaseModel.TestA.ClassA1", "ch.ehi.ili2db.inheritance",   "newAndSubClass"},
+                    {"BaseModel.TestA.ClassA5_0", "ch.ehi.ili2db.inheritance",   "subClass"},
+                    {"BaseModel.TestA.ClassA5", "ch.ehi.ili2db.inheritance",   "newAndSubClass"},
                 };
                 Ili2dbAssert.assertTrafoTable(jdbcConnection, expectedValues,DBSCHEMA);
             }
@@ -428,6 +434,10 @@ public class ExtendedModel23Test {
                  Assert.assertEquals("33", obj0.getattrobj("a3",0).getobjectrefoid());
                  Assert.assertEquals(null, obj0.getattrvalue("wert"));
                  Assert.assertEquals(null, obj0.getattrobj("ap1",0));
+             }
+             {
+                 IomObject obj0 = objs.get("35");
+                 Assert.assertNull(obj0);
              }
         }catch(Exception e) {
             throw new IoxException(e);

@@ -576,10 +576,6 @@ public class TransferFromIli {
 
 	            // insert entries
 	            String insStmt="INSERT INTO "+sqlName+" ("+DbNames.MODELS_TAB_FILENAME_COL+","+DbNames.MODELS_TAB_ILIVERSION_COL+","+DbNames.MODELS_TAB_MODELNAME_COL+","+DbNames.MODELS_TAB_CONTENT_COL+","+DbNames.MODELS_TAB_IMPORTDATE_COL+") VALUES (?,?,?,?,?)";
-	            if(isMsSqlServer(conn) || isOracle(conn)) {
-	                // 'file' is keyword in sql server and oracle
-	                insStmt="INSERT INTO "+sqlName+" (\""+DbNames.MODELS_TAB_FILENAME_COL+"\","+DbNames.MODELS_TAB_ILIVERSION_COL+","+DbNames.MODELS_TAB_MODELNAME_COL+","+DbNames.MODELS_TAB_CONTENT_COL+","+DbNames.MODELS_TAB_IMPORTDATE_COL+") VALUES (?,?,?,?,?)";
-	            }
 	            EhiLogger.traceBackendCmd(insStmt);
 	            java.sql.PreparedStatement insPrepStmt = conn.prepareStatement(insStmt);
 	            try{

@@ -14,6 +14,13 @@ ideas/open issues/questions
 LATEST
 ---------------------------
 
+ili2db 4.3.3 (2019-12-23)
+------------------------------
+- fix --update without stable BID (#315)
+- fix --update n:n ASSOCATION (#315, #316)
+- fix export to base model if base class abstract (#314)
+- iox-ili-1.20.15
+
 ili2db 4.3.2 (2019-11-08)
 ------------------------------
 - fix extended geometry attributes in model generates duplicated geometry fields in DB (#296)

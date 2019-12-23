@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TRANSFER xmlns="http://www.interlis.ch/INTERLIS2.3">
+	<HEADERSECTION SENDER="ili2pg-2.4.0-20151123" VERSION="2.3">
+		<MODELS>
+			<MODEL NAME="Oid5" VERSION="2015-12-03" URI="mailto:ce@eisenhutinformatik.ch"></MODEL>
+		</MODELS>
+	</HEADERSECTION>
+	<DATASECTION>
+		<Oid5.TestA BID="Oid5.TestA">
+			<Oid5.TestA.ClassA1 TID="c34c86ec-2a75-4a89-a194-f9ebc422f8bc">
+				<attrA>a_a1</attrA>
+			</Oid5.TestA.ClassA1>
+			<Oid5.TestA.ClassB1 TID="81fc3941-01ec-4c51-b1ba-46b6295d9b4e">
+				<attrB>a_b1</attrB>
+			</Oid5.TestA.ClassB1>
+			<Oid5.TestA.ClassA1 TID="a7284ca2-5c41-4479-ba69-66c05bff8fbd">
+				<attrA>a_a2</attrA>
+			</Oid5.TestA.ClassA1>
+		</Oid5.TestA>
+	</DATASECTION>
+</TRANSFER>

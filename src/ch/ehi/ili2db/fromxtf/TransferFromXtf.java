@@ -49,6 +49,7 @@ import ch.ehi.ili2db.toxtf.TransferToXtf;
 import ch.ehi.iox.objpool.ObjectPoolManager;
 import ch.ehi.sqlgen.DbUtility;
 import ch.ehi.sqlgen.repository.DbTableName;
+import ch.interlis.ili2c.config.Configuration;
 import ch.interlis.ili2c.metamodel.AbstractClassDef;
 import ch.interlis.ili2c.metamodel.AbstractPatternDef;
 import ch.interlis.ili2c.metamodel.AssociationDef;
@@ -474,15 +475,34 @@ public class TransferFromXtf {
 								if(functionCode==Config.FC_UPDATE){
 									// read existing oid/sqlid mapping (but might also be a new basket)
 									existingObjectsOfCurrentBasket=new HashMap<String,HashSet<Long>>();
-									existingBasketSqlId=readExistingSqlObjIds(reader instanceof ItfReader,basket.getBid());
-									if(existingBasketSqlId==null){
-										// new basket 
-										basketSqlId=oidPool.getBasketSqlId(basket.getBid());
-									}else{
-										// existing basket
-										basketSqlId=existingBasketSqlId;
-										// drop existing structeles
-										dropExistingStructEles(basket.getType(),basketSqlId);
+                                    Topic topic=(Topic)td.getElement(basket.getType());
+                                    boolean hasBid=topic.getBasketOid()!=null;
+									if(readIliBid || hasBid) {
+	                                    existingBasketSqlId=readExistingSqlObjIds(reader instanceof ItfReader,basket.getBid());
+	                                    if(existingBasketSqlId==null){
+	                                        // new basket 
+	                                        basketSqlId=oidPool.getBasketSqlId(basket.getBid());
+	                                    }else{
+	                                        // existing basket
+	                                        basketSqlId=existingBasketSqlId;
+	                                        // drop existing structeles
+	                                        dropExistingStructEles(basket.getType(),basketSqlId);
+	                                    }
+									}else {
+									    String topicv[]=new String[] {basket.getType()};
+						                Configuration dummy=new Configuration();
+                                        long[] basketSqlIds = Ili2db.getBasketSqlIdsFromTopic(topicv,dummy,conn,config);
+									    for(long oldBasketSqlId:basketSqlIds) {
+	                                        // read existing objects from baskets with same topic
+									        readExistingSqlObjIds(reader instanceof ItfReader,topic,oldBasketSqlId);
+	                                        // drop existing sturct eles
+                                            dropExistingStructEles(basket.getType(),oldBasketSqlId);
+									    }
+									    // remove old baskets from dataset
+									    removeBasketsFromDataset(basketSqlIds);
+									    // new basket
+									    existingBasketSqlId=null;
+                                        basketSqlId=oidPool.getBasketSqlId(basket.getBid());
 									}
 								}else{
 									basketSqlId=oidPool.getBasketSqlId(basket.getBid());
@@ -687,7 +707,7 @@ public class TransferFromXtf {
 		
 	}
 
-	private void dropExistingStructEles(String topic, long basketSqlId) {
+    private void dropExistingStructEles(String topic, long basketSqlId) {
 		// get all structs that are reachable from this topic
 		HashSet<AbstractClassDef> classv=getStructs(topic);
 		// delete all structeles
@@ -729,7 +749,10 @@ public class TransferFromXtf {
 				if(classo instanceof Viewable){
 					if(classo instanceof Table && ((Table)classo).isIdentifiable()){
 						getStructs_Helper((AbstractClassDef)classo,visitedStructs);
-					}
+					}else if(classo instanceof AssociationDef && !((AssociationDef)classo).isIdentifiable()){
+					    // handle associations without an OID like struct eles
+					    visitedStructs.add((AssociationDef)classo);
+                    }
 				}
 			}
 			def=(Topic)def.getExtending();
@@ -868,17 +891,21 @@ public class TransferFromXtf {
 		}
 	}
 
-	private Long readExistingSqlObjIds(boolean isItf,String bid) throws Ili2dbException {
-		StringBuilder topicQName=new StringBuilder();
-		Long basketSqlId=Ili2db.getBasketSqlIdFromBID(bid, conn, schema,colT_ID, topicQName);
-		if(basketSqlId==null){
-			// new basket
-			return null;
-		}
-		Topic topic=TransferToXtf.getTopicDef(td, topicQName.toString());
-		if(topic==null){
-			throw new Ili2dbException("unkown topic "+topicQName.toString());
-		}
+    private Long readExistingSqlObjIds(boolean isItf,String bid) throws Ili2dbException {
+        StringBuilder topicQName=new StringBuilder();
+        Long basketSqlId=Ili2db.getBasketSqlIdFromBID(bid, conn, schema,colT_ID, topicQName);
+        if(basketSqlId==null){
+            // new basket
+            return null;
+        }
+        Topic topic=TransferToXtf.getTopicDef(td, topicQName.toString());
+        if(topic==null){
+            throw new Ili2dbException("unkown topic "+topicQName.toString());
+        }
+        readExistingSqlObjIds(isItf,topic, basketSqlId);
+        return basketSqlId;
+    }
+	private void readExistingSqlObjIds(boolean isItf,Topic topic, long basketSqlId) throws Ili2dbException {
 		Model model=(Model) topic.getContainer();
 		// for all Viewables
 		Iterator iter = null;
@@ -900,6 +927,9 @@ public class TransferFromXtf {
 				Viewable aclass=(Viewable)obj;
 				if(aclass.isAbstract()){
 					throw new IllegalArgumentException("unexpected abstract viewable "+aclass.getScopedName(null));
+				}
+				if(aclass instanceof AssociationDef && !((AssociationDef)aclass).isIdentifiable()) {
+				    continue;
 				}
 				// get sql name
 				DbTableName sqlName=recConv.getSqlType(aclass);
@@ -945,7 +975,6 @@ public class TransferFromXtf {
 		  }
 		  
 		}		
-		return basketSqlId;
 	}
 	static private  ArrayList<Viewable> getXtfTables(TransferDescription td, Topic topic) {
 		ArrayList<Viewable> ret= new ArrayList<Viewable>();
@@ -1820,6 +1849,27 @@ public class TransferFromXtf {
 	    }
 		
 	}
+
+    private void removeBasketsFromDataset(long[] basketSqlIds) throws SQLException {
+        if(basketSqlIds==null || basketSqlIds.length==0) {
+            return;
+        }
+        String sqlname=DbNames.BASKETS_TAB;
+        if(schema!=null){
+            sqlname=schema+"."+sqlname;
+        }
+        StringBuffer crit=new StringBuffer();
+        String sep="";
+        for(long basketSqlId:basketSqlIds) {
+            crit.append(sep);
+            crit.append(Long.toString(basketSqlId));
+            sep=",";
+        }
+        String insert = "UPDATE "+sqlname+" SET "+DbNames.BASKETS_TAB_DATASET_COL+"=NULL"
+            +" WHERE "+colT_ID+" IN ("+crit.toString()+")";
+        EhiLogger.traceBackendCmd(insert);
+        conn.createStatement().execute(insert);
+    }
 
 	private long writeBasket(long datasetSqlId,StartBasketEvent iomBasket,long basketSqlId,String attachmentKey,boolean importBid,Map<String,String> genericDomains)
 	throws java.sql.SQLException,ConverterException

@@ -1,6 +1,8 @@
 package ch.ehi.ili2ora.sqlgen;
 
 import java.io.IOException;
+import java.io.StringWriter;
+import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Iterator;
@@ -26,11 +28,15 @@ import ch.ehi.sqlgen.repository.DbTable;
 
 public class GeneratorOracleSpatial extends GeneratorJdbc {
 
+    private final int MAJOR_VERSION_SUPPORT_SEQ_AS_DEFAULT = 12;
+    private final int MINOR_VERSION_SUPPORT_SEQ_AS_DEFAULT = 1;
+    private boolean useTriggerToSetT_id = true;
+
+    private DbColumn primaryKeyDefaultValue=null;
+
 	@Override
 	public void visitColumn(DbTable dbTab,DbColumn column) throws IOException {
 		String type="";
-		String size="";
-		String notSupported=null;
 		
 		if(column instanceof DbColBoolean){
 			type="NUMBER(1)";
@@ -69,15 +75,46 @@ public class GeneratorOracleSpatial extends GeneratorJdbc {
 				isNull="PRIMARY KEY";
 			}
 		}
+
+        String defaultValue="";
+        if(column.getDefaultValue()!=null){
+            defaultValue=" "+"DEFAULT " + column.getDefaultValue();
+            
+            if(column.isPrimaryKey() && useTriggerToSetT_id) {
+                defaultValue = "";
+                primaryKeyDefaultValue = column;
+            }
+        }
+
 		String name=column.getName();
 		
 		if(name.equals(DbNames.MODELS_TAB_FILENAME_COL_VER3) && dbTab.getName().getName().equals(DbNames.MODELS_TAB)) {
 			name = "\"" + name + "\"";
 		}
 		
-		out.write(getIndent()+colSep+name+" "+type+" "+isNull+newline());
+        out.write(getIndent()+colSep+name+" "+type+defaultValue+" "+isNull+newline());
 		colSep=",";
 	}
+
+    @Override
+    public void visitSchemaBegin(Settings config, DbSchema schema) throws IOException {
+        super.visitSchemaBegin(config, schema);
+        DatabaseMetaData meta;
+        
+        try {
+            meta = conn.getMetaData();
+            useTriggerToSetT_id = true;
+            int majorVersion = meta.getDatabaseMajorVersion();
+            int minorVersion = meta.getDatabaseMinorVersion();
+            useTriggerToSetT_id = 
+                    (majorVersion < MAJOR_VERSION_SUPPORT_SEQ_AS_DEFAULT) ||
+                    (majorVersion == MAJOR_VERSION_SUPPORT_SEQ_AS_DEFAULT && minorVersion < MINOR_VERSION_SUPPORT_SEQ_AS_DEFAULT);
+            
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new IOException("It was not possible to get the Oracle version." + e.getMessage());
+        }
+    }
 
 	@Override
 	public void visitIndex(DbIndex idx) throws IOException {
@@ -165,6 +202,46 @@ public class GeneratorOracleSpatial extends GeneratorJdbc {
         
         boolean tableExists=DbUtility.tableExists(conn,tab.getName());
         super.visit1TableEnd(tab);
+
+        if(primaryKeyDefaultValue != null) {
+            String fieldName = primaryKeyDefaultValue.getName();
+            StringWriter trgQuery = new StringWriter();
+            
+            trgQuery.write(getIndent() + "CREATE OR REPLACE TRIGGER trg_" + tab.getName().getName() +"_"+ fieldName + newline());
+            trgQuery.write(getIndent() + "BEFORE INSERT ON " + sqlTabName + newline()); 
+            trgQuery.write(getIndent() + "FOR EACH ROW" + newline());
+            trgQuery.write(getIndent() + "BEGIN" + newline());
+            inc_ind();
+            trgQuery.write(getIndent() + "IF (:NEW."+ fieldName +" is NULL) THEN" + newline());
+            inc_ind();
+            trgQuery.write(getIndent() + ":NEW." + fieldName +" := " + primaryKeyDefaultValue.getDefaultValue() + ";" + newline());
+            dec_ind();
+            trgQuery.write(getIndent() + "END IF;" + newline());
+            dec_ind();
+            trgQuery.write(getIndent() + "END;");
+            
+            String strTrgQuery = trgQuery.toString();
+            addCreateLine(new Stmt(strTrgQuery));
+            
+            if(conn!=null){
+                Statement dbstmt = null;
+                try{
+                    try{
+                        dbstmt = conn.createStatement();
+                        EhiLogger.traceBackendCmd(strTrgQuery);
+                        dbstmt.execute(strTrgQuery);
+                    }finally{
+                        dbstmt.close();
+                    }
+                }catch(SQLException ex){
+                    IOException iox=new IOException("Failed to add default value to "+tab.getName() + "." + fieldName);
+                    iox.initCause(ex);
+                    throw iox;
+                }
+            }
+            
+            primaryKeyDefaultValue = null;
+        }
 
         String cmt=tab.getComment();
         if(cmt!=null){

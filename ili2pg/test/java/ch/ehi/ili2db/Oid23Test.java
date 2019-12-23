@@ -133,6 +133,124 @@ public class Oid23Test {
 		}
 	}
     @Test
+    public void importIliwithoutBid() throws Exception
+    {
+        //EhiLogger.getInstance().setTraceFilter(false);
+        Connection jdbcConnection=null;
+        try{
+            Class driverClass = Class.forName("org.postgresql.Driver");
+            jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
+            stmt=jdbcConnection.createStatement();
+            stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");
+            {
+                File data=new File("test/data/Oid23/Oid5.ili");
+                Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+                config.setFunction(Config.FC_SCHEMAIMPORT);
+                config.setCreateFk(Config.CREATE_FK_YES);
+                config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
+                config.setCatalogueRefTrafo(null);
+                config.setMultiSurfaceTrafo(null);
+                config.setMultilingualTrafo(null);
+                config.setInheritanceTrafo(null);
+                Ili2db.readSettingsFromDb(config);
+                Ili2db.run(config,null);
+                {
+                    // t_ili2db_attrname
+                    String [][] expectedValues=new String[][] {
+                        {"Oid5.TestA.ClassA1.attrA", "attra", "classa1", null},
+                        {"Oid5.TestA.ClassB1.attrB", "attrb", "classb1", null},
+                    };
+                    Ili2dbAssert.assertAttrNameTable(jdbcConnection,expectedValues, DBSCHEMA);
+                    
+                }
+                {
+                    // t_ili2db_trafo
+                    String [][] expectedValues=new String[][] {
+                        {"Oid5.TestA.ClassA1", "ch.ehi.ili2db.inheritance", "newClass"},
+                        {"Oid5.TestA.ClassB1", "ch.ehi.ili2db.inheritance", "newClass"},
+                    };
+                    Ili2dbAssert.assertTrafoTable(jdbcConnection,expectedValues, DBSCHEMA);
+                }
+            }
+        }finally{
+            if(jdbcConnection!=null){
+                jdbcConnection.close();
+            }
+        }
+    }
+    @Test
+    public void importXtfwithoutBid() throws Exception
+    {
+        importIliwithoutBid();
+        //EhiLogger.getInstance().setTraceFilter(false);
+        Connection jdbcConnection=null;
+        try{
+            Class driverClass = Class.forName("org.postgresql.Driver");
+            jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
+            stmt=jdbcConnection.createStatement();
+            {
+                File data=new File("test/data/Oid23/Oid5a.xtf");
+                Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+                config.setFunction(Config.FC_IMPORT);
+                config.setDatasetName("Oid5");
+                Ili2db.readSettingsFromDb(config);
+                Ili2db.run(config,null);
+            }
+        }finally{
+            if(jdbcConnection!=null){
+                jdbcConnection.close();
+            }
+        }
+    }
+    @Test
+    public void updateXtfwithoutBid() throws Exception
+    {
+        importXtfwithoutBid();
+        //EhiLogger.getInstance().setTraceFilter(false);
+        Connection jdbcConnection=null;
+        try{
+            Class driverClass = Class.forName("org.postgresql.Driver");
+            jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
+            stmt=jdbcConnection.createStatement();
+            {
+                File data=new File("test/data/Oid23/Oid5b.xtf");
+                Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+                config.setFunction(Config.FC_UPDATE);
+                config.setDatasetName("Oid5");
+                Ili2db.readSettingsFromDb(config);
+                Ili2db.run(config,null);
+            }
+        }finally{
+            if(jdbcConnection!=null){
+                jdbcConnection.close();
+            }
+        }
+    }
+    @Test
+    public void exportXtfwithoutBid() throws Exception
+    {
+        importXtfwithoutBid();
+        //EhiLogger.getInstance().setTraceFilter(false);
+        Connection jdbcConnection=null;
+        try{
+            Class driverClass = Class.forName("org.postgresql.Driver");
+            jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
+            stmt=jdbcConnection.createStatement();
+            {
+                File data=new File("test/data/Oid23/Oid5a-out.xtf");
+                Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+                config.setFunction(Config.FC_EXPORT);
+                config.setModels("Oid5");
+                Ili2db.readSettingsFromDb(config);
+                Ili2db.run(config,null);
+            }
+        }finally{
+            if(jdbcConnection!=null){
+                jdbcConnection.close();
+            }
+        }
+    }
+    @Test
     public void importIliMetaAttr() throws Exception
     {
         //EhiLogger.getInstance().setTraceFilter(false);

@@ -57,23 +57,24 @@ public class MsSqlSequenceBasedIdGen implements DbIdGen {
 				"begin\r\n"+ stmt +"\r\nend";
 		
 		stmt = seqExist;
-		
-		EhiLogger.traceBackendCmd(stmt);
-		java.sql.PreparedStatement updstmt = null;
-		try{
-			updstmt = conn.prepareStatement(stmt);
-			updstmt.execute();
-		}catch(java.sql.SQLException ex){
-			EhiLogger.logError("failed to create sequence "+sqlName.getQName(),ex);
-		}finally{
-			if(updstmt!=null){
-				try{
-					updstmt.close();
-				}catch(java.sql.SQLException ex){
-					EhiLogger.logError(ex);
-				}
-			}
-		}
+        if(conn!=null) {
+            EhiLogger.traceBackendCmd(stmt);
+            java.sql.PreparedStatement updstmt = null;
+            try{
+                updstmt = conn.prepareStatement(stmt);
+                updstmt.execute();
+            }catch(java.sql.SQLException ex){
+                EhiLogger.logError("failed to create sequence "+sqlName.getQName(),ex);
+            }finally{
+                if(updstmt!=null){
+                    try{
+                        updstmt.close();
+                    }catch(java.sql.SQLException ex){
+                        EhiLogger.logError(ex);
+                    }
+                }
+            }
+        }
 	}
 	
 	long lastLocalId=0;

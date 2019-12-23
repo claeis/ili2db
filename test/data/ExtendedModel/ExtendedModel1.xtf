@@ -14,6 +14,7 @@
 <ExtendedModel.TestAp.ClassA2 TID="32"><attr>a2</attr><name>urs</name><farbe>rot.dunkel</farbe><a3 REF="33"/><wert>1.1</wert><ap1 REF="34"/></ExtendedModel.TestAp.ClassA2>
 <BaseModel.TestA.ClassA3 TID="33"></BaseModel.TestA.ClassA3>
 <ExtendedModel.TestAp.ClassAp1 TID="34"></ExtendedModel.TestAp.ClassAp1>
+<ExtendedModel.TestAp.ClassA5_2 TID="35"></ExtendedModel.TestAp.ClassA5_2>
 </ExtendedModel.TestAp>
 <ExtendedModel.TestBp BID="b4">
 <ExtendedModel.TestBp.ClassB1 TID="40"></ExtendedModel.TestBp.ClassB1>
