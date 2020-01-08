@@ -504,7 +504,7 @@ public class Ili2db {
                 }
 			  	
 				// read mapping file
-				NameMapping mapping=new NameMapping(config);
+				NameMapping mapping=new NameMapping(td,config);
 				  if(DbUtility.tableExists(conn,new DbTableName(config.getDbschema(),DbNames.CLASSNAME_TAB))){
 					  // read mapping from db
 					  mapping.readTableMappingTable(conn,config.getDbschema());
@@ -1141,7 +1141,7 @@ public class Ili2db {
 		  	idGen.init(config.getDbschema(),config);
 
 			// read mapping file
-			NameMapping mapping=new NameMapping(config);
+			NameMapping mapping=new NameMapping(td,config);
             if(importToDb) {
                 if(DbUtility.tableExists(conn,new DbTableName(config.getDbschema(),DbNames.CLASSNAME_TAB))){
                     // read mapping from db
@@ -1663,7 +1663,7 @@ public class Ili2db {
 			  geomConverter.setup(conn, config);
 			  
 			  // get mapping definition
-			  NameMapping mapping=new NameMapping(config);
+			  NameMapping mapping=new NameMapping(td,config);
 			  if(DbUtility.tableExists(conn,new DbTableName(config.getDbschema(),DbNames.CLASSNAME_TAB))){
 				  // read mapping from db
 				  mapping.readTableMappingTable(conn,config.getDbschema());

@@ -1,6 +1,6 @@
 INTERLIS 2.3;
 
-MODEL Basis (de) AT "http://www.interlis.ch/ili2db/tests/" VERSION "1" =
+MODEL Basis AT "http://www.interlis.ch/ili2db/tests/" VERSION "1" =
 
 	STRUCTURE Struct =
 			attrA : (a1,a3(a31,a32));
@@ -8,7 +8,46 @@ MODEL Basis (de) AT "http://www.interlis.ch/ili2db/tests/" VERSION "1" =
 	
 END Basis.
 
-MODEL EnumOkA (de) AT "http://www.interlis.ch/ili2c/tests/" VERSION "1" =
+MODEL BasisC (it) AT "http://www.interlis.ch/ili2db/tests/" VERSION "1" 
+TRANSLATION OF Basis ["1"]
+=
+
+	STRUCTURE StructC =
+			attrC : (c1,c3(c31,c32));
+	END StructC;
+	
+END BasisC.
+
+MODEL EnumOkX AT "http://www.interlis.ch/ili2c/tests/" VERSION "1" =
+	IMPORTS Basis;
+	
+	TOPIC TopicX =
+
+		CLASS ClassX =
+			attrX : (x1,x2(x21,x22));
+			attrX2 : Basis.Struct;
+		END ClassX;
+
+		CLASS ClassX2 =
+		END ClassX2;
+		
+		ASSOCIATION n_nX =
+			n_nX_X -- {0..*} ClassX;
+			n_nX_X2 -- {0..*} ClassX2;
+		END n_nX;
+
+		ASSOCIATION n_1X =
+			n_1X_X -- {0..*} ClassX;
+			n_1X_X2 -- {0..1} ClassX2;
+		END n_1X;
+		
+	END TopicX;
+
+END EnumOkX.
+
+MODEL EnumOkA (de) AT "http://www.interlis.ch/ili2c/tests/" VERSION "1" 
+TRANSLATION OF EnumOkX [ "1"]
+=
 	IMPORTS Basis;
 	
 	TOPIC TopicA =

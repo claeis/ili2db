@@ -13,6 +13,8 @@ ideas/open issues/questions
 
 LATEST
 ---------------------------
+- create db tables ony in a derived language (#221)
+- iox-ili-1.20.16-SNAPSHOT
 
 ili2db 4.3.3 (2019-12-23)
 ------------------------------

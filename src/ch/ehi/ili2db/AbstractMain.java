@@ -109,6 +109,10 @@ public abstract class AbstractMain {
                 argi++;
                 config.setCrsExportModels(args[argi]);
                 argi++;
+            }else if(arg.equals("--nameLang")){
+                argi++;
+                config.setNameLanguage(args[argi]);
+                argi++;
 			}else if(arg.equals("--dataset")){
 				argi++;
 				config.setDatasetName(args[argi]);
@@ -472,6 +476,9 @@ public abstract class AbstractMain {
 					System.err.println("--structWithGenericRef  generate one generic reference to parent in struct tables.");
 					System.err.println("--disableNameOptimization disable use of unqualified class name as table name.");
 					System.err.println("--nameByTopic          use topic+class name as table name.");
+					
+                    
+                    System.err.println("--nameLang lang        use names of ili model in given language as table/column name.");
 					System.err.println("--maxNameLength length max length of sql names ("+config.getMaxSqlNameLength()+")");
 					System.err.println("--sqlEnableNull        create no NOT NULL constraints in db schema.");
 					System.err.println("--strokeArcs           stroke ARCS on import.");
