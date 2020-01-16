@@ -162,6 +162,67 @@ public class MetaInfo23Test {
 		}
 	}
     @Test
+    public void importIliAssoc() throws Exception
+    {
+        //EhiLogger.getInstance().setTraceFilter(false);
+        Connection jdbcConnection=null;
+        try{
+            Class driverClass = Class.forName("org.postgresql.Driver");
+            jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
+            stmt=jdbcConnection.createStatement();
+            stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");
+            {
+                File data=new File("test/data/MetaInfo/Assoc23.ili");
+                Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+                config.setFunction(Config.FC_SCHEMAIMPORT);
+                config.setCreateFk(Config.CREATE_FK_YES);
+                config.setInheritanceTrafo(Config.INHERITANCE_TRAFO_SMART1);
+                config.setCreateMetaInfo(true);
+                Ili2db.readSettingsFromDb(config);
+                Ili2db.run(config,null);
+                if(false){
+                    String selStmt="SELECT "+DbNames.META_INFO_COLUMN_TAB_SETTING_COL+", "+DbNames.META_INFO_COLUMN_TAB_SUBTYPE_COL+" FROM "+DBSCHEMA+"."+DbNames.META_INFO_COLUMN_TAB+" WHERE "+DbNames.META_INFO_COLUMN_TAB_TABLENAME_COL+"=? AND "+DbNames.META_INFO_COLUMN_TAB_COLUMNNAME_COL+"=? AND "+DbNames.META_INFO_COLUMN_TAB_TAG_COL+"=?";
+                    java.sql.PreparedStatement selPrepStmt = jdbcConnection.prepareStatement(selStmt);
+                    {
+                        selPrepStmt.setString(1, "classa1");
+                        selPrepStmt.setString(2, "numx");
+                        selPrepStmt.setString(3, DbExtMetaInfo.TAG_COL_UNIT);
+                        ResultSet rs = selPrepStmt.executeQuery();
+                        Assert.assertTrue(rs.next());
+                        Assert.assertEquals("m",rs.getString(1));
+                        Assert.assertEquals("classa1b",rs.getString(2));
+                        Assert.assertFalse(rs.next());
+                    }
+                    {
+                        selPrepStmt.setString(1, "classa1");
+                        selPrepStmt.setString(2, "numa");
+                        selPrepStmt.setString(3, DbExtMetaInfo.TAG_COL_UNIT);
+                        ResultSet rs = selPrepStmt.executeQuery();
+                        Assert.assertTrue(rs.next());
+                        Assert.assertEquals("m",rs.getString(1));
+                        Assert.assertEquals(null,rs.getString(2));
+                        Assert.assertFalse(rs.next());
+                    }
+                    {
+                        selPrepStmt.setString(1, "classc");
+                        selPrepStmt.setString(2, "geom");
+                        selPrepStmt.setString(3, DbExtMetaInfo.TAG_COL_C1_MAX);
+                        ResultSet rs = selPrepStmt.executeQuery();
+                        Assert.assertTrue(rs.next());
+                        Assert.assertEquals("2870000.000",rs.getString(1));
+                        Assert.assertEquals(null,rs.getString(2));
+                        Assert.assertFalse(rs.next());
+                    }
+                    
+                }
+            }
+        }finally{
+            if(jdbcConnection!=null){
+                jdbcConnection.close();
+            }
+        }
+    }
+    @Test
     public void importXtfTwice() throws Exception
     {
         //EhiLogger.getInstance().setTraceFilter(false);

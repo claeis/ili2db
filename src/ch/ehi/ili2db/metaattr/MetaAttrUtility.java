@@ -10,9 +10,11 @@ import java.sql.ResultSet;
 
 
 import ch.interlis.ili2c.metamodel.Element;
+import ch.interlis.ili2c.metamodel.RoleDef;
 import ch.interlis.ili2c.metamodel.TransferDescription;
 import ch.interlis.iox_j.inifile.IniFileReader;
 import ch.interlis.iox_j.validator.ValidationConfig;
+import ch.interlis.ili2c.metamodel.Cardinality;
 import ch.interlis.ili2c.metamodel.Container;
 import ch.ehi.basics.logging.EhiLogger;
 import ch.ehi.basics.settings.Settings;
@@ -153,15 +155,17 @@ public class MetaAttrUtility{
 		Settings metaValues = el.getMetaValues();
 		if(metaValues.getValues().size() > 0){
 			for(String attr:metaValues.getValues()){
-			    
-                HashMap<String,String> exstValues=entries.get(el.getScopedName());
-                if(exstValues==null){
-                    exstValues=new HashMap<String,String>(); 
-                    entries.put(el.getScopedName(), exstValues);
-                }
+	            HashMap<String,String> exstValues=getMetaValues(entries,el);
                 exstValues.put(attr, metaValues.getValue(attr));
 			}
 		}
+        if(el instanceof RoleDef){
+            RoleDef role=(RoleDef)el;
+            HashMap<String,String> exstValues=getMetaValues(entries,el);
+            exstValues.put("ili.assocKind", mapRoleKind(role.getKind()));
+            exstValues.put("ili.assocCardinalityMin", mapCardinality(role.getCardinality().getMinimum()));
+            exstValues.put("ili.assocCardinalityMax", mapCardinality(role.getCardinality().getMaximum()));
+        }
 		if(el instanceof Container){
 			Container e = (Container) el;
 			Iterator it = e.iterator();
@@ -172,7 +176,31 @@ public class MetaAttrUtility{
 	}
 
 	
+	  private static String mapCardinality(long val) {
+	      if (val == Cardinality.UNBOUND) {
+	        return "*";
+	      }
+	        return Long.toString(val);
+	    }
 	
+    private static String mapRoleKind(int kind) {
+        if(kind==RoleDef.Kind.eAGGREGATE) {
+            return "AGGREGATE";
+        }else if(kind==RoleDef.Kind.eCOMPOSITE) {
+            return "COMPOSITE";
+        }
+        return "ASSOCIATE";
+    }
+
+    private static HashMap<String, String> getMetaValues(HashMap<String,HashMap<String,String>> entries,Element el) {
+        HashMap<String,String> exstValues=entries.get(el.getScopedName());
+        if(exstValues==null){
+            exstValues=new HashMap<String,String>(); 
+            entries.put(el.getScopedName(), exstValues);
+        }
+        return exstValues;
+    }
+
     private static void saveTableTab(GeneratorJdbc gen, Connection conn,String schemaName,HashMap<String,HashMap<String,String>> tabInfo)
     throws Ili2dbException
     {
