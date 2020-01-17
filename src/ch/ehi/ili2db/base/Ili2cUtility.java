@@ -1,7 +1,7 @@
 package ch.ehi.ili2db.base;
 
 import ch.ehi.basics.logging.EhiLogger;
-import ch.ehi.ili2db.mapping.IliMetaAttrNames;
+import ch.ehi.ili2db.metaattr.IliMetaAttrNames;
 import ch.interlis.ili2c.metamodel.AbstractClassDef;
 import ch.interlis.ili2c.metamodel.AttributeDef;
 import ch.interlis.ili2c.metamodel.CompositionType;
