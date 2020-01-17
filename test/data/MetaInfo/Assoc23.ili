@@ -1,9 +1,9 @@
 INTERLIS 2.3;
 
-MODEL Assoc3
+MODEL Assoc23
   AT "mailto:ce@eisenhutinformatik.ch" VERSION "2015-09-23" =
     
-  TOPIC Test =
+  TOPIC Topic =
   
     CLASS ClassA1=
     END ClassA1;
@@ -55,5 +55,5 @@ MODEL Assoc3
       assoc3_b -- {0..*} ClassB1;
     END assoc3;
 
-  END Test;
-END Assoc3.
+  END Topic;
+END Assoc23.

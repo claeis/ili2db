@@ -30,7 +30,15 @@ import ch.ehi.sqlgen.repository.DbColVarchar;
 
 public class MetaAttrUtility{
 
-	/** Read meta-attributes from a toml file and add them to the ili2c metamodel.
+    
+    public static final String METAATTRVALUE_ASSOC_KIND_ASSOCIATE = "ASSOCIATE";
+    public static final String METAATTRVALUE_ASSOC_KIND_COMPOSITE = "COMPOSITE";
+    public static final String METAATTRVALUE_ASSOC_KIND_AGGREGATE = "AGGREGATE";
+    public static final String ILI2DB_ILI_PREFIX = "ili2db.ili."; // prefix for meta-attributes derived by ili2db from the model
+	public static final String ILI2DB_ILI_ASSOC_CARDINALITY_MAX = ILI2DB_ILI_PREFIX+"assocCardinalityMax";
+    public static final String ILI2DB_ILI_ASSOC_CARDINALITY_MIN = ILI2DB_ILI_PREFIX+"assocCardinalityMin";
+    public static final String ILI2DB_ILI_ASSOC_KIND = ILI2DB_ILI_PREFIX+"assocKind";
+    /** Read meta-attributes from a toml file and add them to the ili2c metamodel.
 	 * @param td ili-model as read by the ili compiler
 	 * @param tomlFile
 	 * @throws Ili2dbException
@@ -88,10 +96,14 @@ public class MetaAttrUtility{
 				Element element = td.getElement(ilielement);
 				// known element?
 				if(element!=null) {
-				    // meta-attr not yet set/defined?
-				    if(element.getMetaValue(attrname)==null){
-				        // set it to the read value
-	                    element.setMetaValue(attrname, attrvalue);
+				    if(attrname.startsWith(ILI2DB_ILI_PREFIX)) {
+				        // ignore meta-attrs derived by ili2db
+				    }else {
+	                    // meta-attr not yet set/defined?
+	                    if(element.getMetaValue(attrname)==null){
+	                        // set it to the read value
+	                        element.setMetaValue(attrname, attrvalue);
+	                    }
 				    }
 				}
 			}
@@ -162,9 +174,9 @@ public class MetaAttrUtility{
         if(el instanceof RoleDef){
             RoleDef role=(RoleDef)el;
             HashMap<String,String> exstValues=getMetaValues(entries,el);
-            exstValues.put("ili.assocKind", mapRoleKind(role.getKind()));
-            exstValues.put("ili.assocCardinalityMin", mapCardinality(role.getCardinality().getMinimum()));
-            exstValues.put("ili.assocCardinalityMax", mapCardinality(role.getCardinality().getMaximum()));
+            exstValues.put(ILI2DB_ILI_ASSOC_KIND, mapRoleKind(role.getKind()));
+            exstValues.put(ILI2DB_ILI_ASSOC_CARDINALITY_MIN, mapCardinality(role.getCardinality().getMinimum()));
+            exstValues.put(ILI2DB_ILI_ASSOC_CARDINALITY_MAX, mapCardinality(role.getCardinality().getMaximum()));
         }
 		if(el instanceof Container){
 			Container e = (Container) el;
@@ -185,11 +197,11 @@ public class MetaAttrUtility{
 	
     private static String mapRoleKind(int kind) {
         if(kind==RoleDef.Kind.eAGGREGATE) {
-            return "AGGREGATE";
+            return METAATTRVALUE_ASSOC_KIND_AGGREGATE;
         }else if(kind==RoleDef.Kind.eCOMPOSITE) {
-            return "COMPOSITE";
+            return METAATTRVALUE_ASSOC_KIND_COMPOSITE;
         }
-        return "ASSOCIATE";
+        return METAATTRVALUE_ASSOC_KIND_ASSOCIATE;
     }
 
     private static HashMap<String, String> getMetaValues(HashMap<String,HashMap<String,String>> entries,Element el) {

@@ -20,6 +20,7 @@ import ch.ehi.ili2db.base.Ili2dbException;
 import ch.ehi.ili2db.dbmetainfo.DbExtMetaInfo;
 import ch.ehi.ili2db.gui.Config;
 import ch.ehi.ili2db.mapping.NameMapping;
+import ch.ehi.ili2db.metaattr.MetaAttrUtility;
 import ch.ehi.sqlgen.DbUtility;
 import ch.ehi.sqlgen.repository.DbTableName;
 import ch.interlis.iom.IomObject;
@@ -180,40 +181,88 @@ public class MetaInfo23Test {
                 config.setCreateMetaInfo(true);
                 Ili2db.readSettingsFromDb(config);
                 Ili2db.run(config,null);
-                if(false){
-                    String selStmt="SELECT "+DbNames.META_INFO_COLUMN_TAB_SETTING_COL+", "+DbNames.META_INFO_COLUMN_TAB_SUBTYPE_COL+" FROM "+DBSCHEMA+"."+DbNames.META_INFO_COLUMN_TAB+" WHERE "+DbNames.META_INFO_COLUMN_TAB_TABLENAME_COL+"=? AND "+DbNames.META_INFO_COLUMN_TAB_COLUMNNAME_COL+"=? AND "+DbNames.META_INFO_COLUMN_TAB_TAG_COL+"=?";
+                {
+                    String selStmt="SELECT "+DbNames.META_ATTRIBUTES_TAB_ATTRVALUE_COL+" FROM "+DBSCHEMA+"."+DbNames.META_ATTRIBUTES_TAB+" WHERE "+DbNames.META_ATTRIBUTES_TAB_ILIELEMENT_COL+"=? AND "+DbNames.META_ATTRIBUTES_TAB_ATTRNAME_COL+"=?";
                     java.sql.PreparedStatement selPrepStmt = jdbcConnection.prepareStatement(selStmt);
                     {
-                        selPrepStmt.setString(1, "classa1");
-                        selPrepStmt.setString(2, "numx");
-                        selPrepStmt.setString(3, DbExtMetaInfo.TAG_COL_UNIT);
-                        ResultSet rs = selPrepStmt.executeQuery();
-                        Assert.assertTrue(rs.next());
-                        Assert.assertEquals("m",rs.getString(1));
-                        Assert.assertEquals("classa1b",rs.getString(2));
-                        Assert.assertFalse(rs.next());
+                        {
+                            selPrepStmt.setString(1, "Assoc23.Topic.comp1.comp1_a");
+                            selPrepStmt.setString(2, MetaAttrUtility.ILI2DB_ILI_ASSOC_KIND);
+                            ResultSet rs = selPrepStmt.executeQuery();
+                            Assert.assertTrue(rs.next());
+                            Assert.assertEquals(MetaAttrUtility.METAATTRVALUE_ASSOC_KIND_COMPOSITE,rs.getString(1));
+                            Assert.assertFalse(rs.next());
+                        }
+                        {
+                            selPrepStmt.setString(1, "Assoc23.Topic.comp1.comp1_a");
+                            selPrepStmt.setString(2, MetaAttrUtility.ILI2DB_ILI_ASSOC_CARDINALITY_MIN);
+                            ResultSet rs = selPrepStmt.executeQuery();
+                            Assert.assertTrue(rs.next());
+                            Assert.assertEquals("0",rs.getString(1));
+                            Assert.assertFalse(rs.next());
+                        }
+                        {
+                            selPrepStmt.setString(1, "Assoc23.Topic.comp1.comp1_a");
+                            selPrepStmt.setString(2, MetaAttrUtility.ILI2DB_ILI_ASSOC_CARDINALITY_MAX);
+                            ResultSet rs = selPrepStmt.executeQuery();
+                            Assert.assertTrue(rs.next());
+                            Assert.assertEquals("1",rs.getString(1));
+                            Assert.assertFalse(rs.next());
+                        }
+                    }
+                    // 
+                    {
+                        {
+                            selPrepStmt.setString(1, "Assoc23.Topic.agg3.agg3_a");
+                            selPrepStmt.setString(2, MetaAttrUtility.ILI2DB_ILI_ASSOC_KIND);
+                            ResultSet rs = selPrepStmt.executeQuery();
+                            Assert.assertTrue(rs.next());
+                            Assert.assertEquals(MetaAttrUtility.METAATTRVALUE_ASSOC_KIND_AGGREGATE,rs.getString(1));
+                            Assert.assertFalse(rs.next());
+                        }
+                        {
+                            selPrepStmt.setString(1, "Assoc23.Topic.agg3.agg3_a");
+                            selPrepStmt.setString(2, MetaAttrUtility.ILI2DB_ILI_ASSOC_CARDINALITY_MIN);
+                            ResultSet rs = selPrepStmt.executeQuery();
+                            Assert.assertTrue(rs.next());
+                            Assert.assertEquals("0",rs.getString(1));
+                            Assert.assertFalse(rs.next());
+                        }
+                        {
+                            selPrepStmt.setString(1, "Assoc23.Topic.agg3.agg3_a");
+                            selPrepStmt.setString(2, MetaAttrUtility.ILI2DB_ILI_ASSOC_CARDINALITY_MAX);
+                            ResultSet rs = selPrepStmt.executeQuery();
+                            Assert.assertTrue(rs.next());
+                            Assert.assertEquals("*",rs.getString(1));
+                            Assert.assertFalse(rs.next());
+                        }
                     }
                     {
-                        selPrepStmt.setString(1, "classa1");
-                        selPrepStmt.setString(2, "numa");
-                        selPrepStmt.setString(3, DbExtMetaInfo.TAG_COL_UNIT);
-                        ResultSet rs = selPrepStmt.executeQuery();
-                        Assert.assertTrue(rs.next());
-                        Assert.assertEquals("m",rs.getString(1));
-                        Assert.assertEquals(null,rs.getString(2));
-                        Assert.assertFalse(rs.next());
+                        {
+                            selPrepStmt.setString(1, "Assoc23.Topic.assoc3.assoc3_a");
+                            selPrepStmt.setString(2, MetaAttrUtility.ILI2DB_ILI_ASSOC_KIND);
+                            ResultSet rs = selPrepStmt.executeQuery();
+                            Assert.assertTrue(rs.next());
+                            Assert.assertEquals(MetaAttrUtility.METAATTRVALUE_ASSOC_KIND_ASSOCIATE,rs.getString(1));
+                            Assert.assertFalse(rs.next());
+                        }
+                        {
+                            selPrepStmt.setString(1, "Assoc23.Topic.assoc3.assoc3_a");
+                            selPrepStmt.setString(2, MetaAttrUtility.ILI2DB_ILI_ASSOC_CARDINALITY_MIN);
+                            ResultSet rs = selPrepStmt.executeQuery();
+                            Assert.assertTrue(rs.next());
+                            Assert.assertEquals("0",rs.getString(1));
+                            Assert.assertFalse(rs.next());
+                        }
+                        {
+                            selPrepStmt.setString(1, "Assoc23.Topic.assoc3.assoc3_a");
+                            selPrepStmt.setString(2, MetaAttrUtility.ILI2DB_ILI_ASSOC_CARDINALITY_MAX);
+                            ResultSet rs = selPrepStmt.executeQuery();
+                            Assert.assertTrue(rs.next());
+                            Assert.assertEquals("*",rs.getString(1));
+                            Assert.assertFalse(rs.next());
+                        }
                     }
-                    {
-                        selPrepStmt.setString(1, "classc");
-                        selPrepStmt.setString(2, "geom");
-                        selPrepStmt.setString(3, DbExtMetaInfo.TAG_COL_C1_MAX);
-                        ResultSet rs = selPrepStmt.executeQuery();
-                        Assert.assertTrue(rs.next());
-                        Assert.assertEquals("2870000.000",rs.getString(1));
-                        Assert.assertEquals(null,rs.getString(2));
-                        Assert.assertFalse(rs.next());
-                    }
-                    
                 }
             }
         }finally{
