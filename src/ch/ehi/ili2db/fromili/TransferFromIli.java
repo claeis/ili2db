@@ -58,8 +58,10 @@ import ch.ehi.sqlgen.repository.DbIndex;
 import ch.ehi.sqlgen.repository.DbSchema;
 import ch.ehi.sqlgen.repository.DbTable;
 import ch.ehi.sqlgen.repository.DbTableName;
+import ch.interlis.ili2c.metamodel.AbstractAttributeRef;
 import ch.interlis.ili2c.metamodel.AssociationDef;
 import ch.interlis.ili2c.metamodel.AttributeDef;
+import ch.interlis.ili2c.metamodel.AttributeRef;
 import ch.interlis.ili2c.metamodel.CompositionType;
 import ch.interlis.ili2c.metamodel.Container;
 import ch.interlis.ili2c.metamodel.CoordType;
@@ -67,9 +69,13 @@ import ch.interlis.ili2c.metamodel.Domain;
 import ch.interlis.ili2c.metamodel.Element;
 import ch.interlis.ili2c.metamodel.Enumeration;
 import ch.interlis.ili2c.metamodel.EnumerationType;
+import ch.interlis.ili2c.metamodel.Evaluable;
 import ch.interlis.ili2c.metamodel.ExtendableContainer;
 import ch.interlis.ili2c.metamodel.LineType;
+import ch.interlis.ili2c.metamodel.LocalAttribute;
 import ch.interlis.ili2c.metamodel.Model;
+import ch.interlis.ili2c.metamodel.ObjectPath;
+import ch.interlis.ili2c.metamodel.PathEl;
 import ch.interlis.ili2c.metamodel.SurfaceOrAreaType;
 import ch.interlis.ili2c.metamodel.SurfaceType;
 import ch.interlis.ili2c.metamodel.Table;
@@ -1775,6 +1781,14 @@ public class TransferFromIli {
         }
         ch.interlis.ili2c.metamodel.Element attrOrDomainDef=attr;
         ch.interlis.ili2c.metamodel.Type attrType=attr.getDomain();
+        if (attrType == null) {
+            while ((attrType == null) && ((attrOrDomainDef instanceof LocalAttribute))) {
+                Evaluable[] ev = ((LocalAttribute) attrOrDomainDef).getBasePaths();
+                attrType = ((ObjectPath) ev[0]).getType();
+                PathEl last = ((ObjectPath) ev[0]).getLastPathEl();
+                attrOrDomainDef=((AttributeRef)last).getAttr();
+            }
+        }
         Domain coordDomain=null;
         if(attrType instanceof ch.interlis.ili2c.metamodel.TypeAlias) {
             attrOrDomainDef=((ch.interlis.ili2c.metamodel.TypeAlias)attrType).getAliasing();

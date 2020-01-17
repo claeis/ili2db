@@ -347,7 +347,7 @@ public class Viewable2TableMapper {
 	                    addColumn(viewable,attrProps,newProp);
 	                    attrWrapper.setAttrv(attrProps);
 	                }else{
-                        ch.interlis.ili2c.metamodel.Type type=attr.getDomainResolvingAliases();
+                        ch.interlis.ili2c.metamodel.Type type=attr.getDomainResolvingAll();
                         if(type instanceof ch.interlis.ili2c.metamodel.CoordType || type instanceof ch.interlis.ili2c.metamodel.LineType
                             || (Ili2cUtility.isMultiSurfaceAttr(getTransferDescription(attr), attr) && (coalesceMultiSurface 
                                 || TrafoConfigNames.MULTISURFACE_TRAFO_COALESCE.equals(trafoConfig.getAttrConfig(attr,TrafoConfigNames.MULTISURFACE_TRAFO))))
