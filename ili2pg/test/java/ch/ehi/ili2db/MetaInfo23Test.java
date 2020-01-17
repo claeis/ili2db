@@ -272,6 +272,90 @@ public class MetaInfo23Test {
         }
     }
     @Test
+    public void importIliBag() throws Exception
+    {
+        //EhiLogger.getInstance().setTraceFilter(false);
+        Connection jdbcConnection=null;
+        try{
+            Class driverClass = Class.forName("org.postgresql.Driver");
+            jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
+            stmt=jdbcConnection.createStatement();
+            stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");
+            {
+                File data=new File("test/data/MetaInfo/Bag23.ili");
+                Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+                config.setFunction(Config.FC_SCHEMAIMPORT);
+                config.setCreateFk(Config.CREATE_FK_YES);
+                config.setInheritanceTrafo(Config.INHERITANCE_TRAFO_SMART1);
+                config.setCreateMetaInfo(true);
+                Ili2db.readSettingsFromDb(config);
+                Ili2db.run(config,null);
+                {
+                    String selStmt="SELECT "+DbNames.META_ATTRIBUTES_TAB_ATTRVALUE_COL+" FROM "+DBSCHEMA+"."+DbNames.META_ATTRIBUTES_TAB+" WHERE "+DbNames.META_ATTRIBUTES_TAB_ILIELEMENT_COL+"=? AND "+DbNames.META_ATTRIBUTES_TAB_ATTRNAME_COL+"=?";
+                    java.sql.PreparedStatement selPrepStmt = jdbcConnection.prepareStatement(selStmt);
+                    {
+                        {
+                            selPrepStmt.setString(1, "Bag23.Topic.ClassA2.attrA21");
+                            selPrepStmt.setString(2, MetaAttrUtility.ILI2DB_ILI_ATTR_CARDINALITY_MIN);
+                            ResultSet rs = selPrepStmt.executeQuery();
+                            Assert.assertTrue(rs.next());
+                            Assert.assertEquals("1",rs.getString(1));
+                            Assert.assertFalse(rs.next());
+                        }
+                        {
+                            selPrepStmt.setString(1, "Bag23.Topic.ClassA2.attrA21");
+                            selPrepStmt.setString(2, MetaAttrUtility.ILI2DB_ILI_ATTR_CARDINALITY_MAX);
+                            ResultSet rs = selPrepStmt.executeQuery();
+                            Assert.assertTrue(rs.next());
+                            Assert.assertEquals("1",rs.getString(1));
+                            Assert.assertFalse(rs.next());
+                        }
+                    }
+                    {
+                        {
+                            selPrepStmt.setString(1, "Bag23.Topic.ClassA2.attrA22");
+                            selPrepStmt.setString(2, MetaAttrUtility.ILI2DB_ILI_ATTR_CARDINALITY_MIN);
+                            ResultSet rs = selPrepStmt.executeQuery();
+                            Assert.assertTrue(rs.next());
+                            Assert.assertEquals("0",rs.getString(1));
+                            Assert.assertFalse(rs.next());
+                        }
+                        {
+                            selPrepStmt.setString(1, "Bag23.Topic.ClassA2.attrA22");
+                            selPrepStmt.setString(2, MetaAttrUtility.ILI2DB_ILI_ATTR_CARDINALITY_MAX);
+                            ResultSet rs = selPrepStmt.executeQuery();
+                            Assert.assertTrue(rs.next());
+                            Assert.assertEquals("1",rs.getString(1));
+                            Assert.assertFalse(rs.next());
+                        }
+                    }
+                    {
+                        {
+                            selPrepStmt.setString(1, "Bag23.Topic.ClassA2.attrA23");
+                            selPrepStmt.setString(2, MetaAttrUtility.ILI2DB_ILI_ATTR_CARDINALITY_MIN);
+                            ResultSet rs = selPrepStmt.executeQuery();
+                            Assert.assertTrue(rs.next());
+                            Assert.assertEquals("0",rs.getString(1));
+                            Assert.assertFalse(rs.next());
+                        }
+                        {
+                            selPrepStmt.setString(1, "Bag23.Topic.ClassA2.attrA23");
+                            selPrepStmt.setString(2, MetaAttrUtility.ILI2DB_ILI_ATTR_CARDINALITY_MAX);
+                            ResultSet rs = selPrepStmt.executeQuery();
+                            Assert.assertTrue(rs.next());
+                            Assert.assertEquals("*",rs.getString(1));
+                            Assert.assertFalse(rs.next());
+                        }
+                    }
+                }
+            }
+        }finally{
+            if(jdbcConnection!=null){
+                jdbcConnection.close();
+            }
+        }
+    }
+    @Test
     public void importXtfTwice() throws Exception
     {
         //EhiLogger.getInstance().setTraceFilter(false);

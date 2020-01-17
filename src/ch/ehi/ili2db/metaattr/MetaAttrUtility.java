@@ -14,6 +14,7 @@ import ch.interlis.ili2c.metamodel.RoleDef;
 import ch.interlis.ili2c.metamodel.TransferDescription;
 import ch.interlis.iox_j.inifile.IniFileReader;
 import ch.interlis.iox_j.validator.ValidationConfig;
+import ch.interlis.ili2c.metamodel.AttributeDef;
 import ch.interlis.ili2c.metamodel.Cardinality;
 import ch.interlis.ili2c.metamodel.Container;
 import ch.ehi.basics.logging.EhiLogger;
@@ -35,6 +36,8 @@ public class MetaAttrUtility{
     public static final String METAATTRVALUE_ASSOC_KIND_COMPOSITE = "COMPOSITE";
     public static final String METAATTRVALUE_ASSOC_KIND_AGGREGATE = "AGGREGATE";
     public static final String ILI2DB_ILI_PREFIX = "ili2db.ili."; // prefix for meta-attributes derived by ili2db from the model
+    public static final String ILI2DB_ILI_ATTR_CARDINALITY_MAX = ILI2DB_ILI_PREFIX+"attrCardinalityMax";
+    public static final String ILI2DB_ILI_ATTR_CARDINALITY_MIN = ILI2DB_ILI_PREFIX+"attrCardinalityMin";
 	public static final String ILI2DB_ILI_ASSOC_CARDINALITY_MAX = ILI2DB_ILI_PREFIX+"assocCardinalityMax";
     public static final String ILI2DB_ILI_ASSOC_CARDINALITY_MIN = ILI2DB_ILI_PREFIX+"assocCardinalityMin";
     public static final String ILI2DB_ILI_ASSOC_KIND = ILI2DB_ILI_PREFIX+"assocKind";
@@ -177,6 +180,12 @@ public class MetaAttrUtility{
             exstValues.put(ILI2DB_ILI_ASSOC_KIND, mapRoleKind(role.getKind()));
             exstValues.put(ILI2DB_ILI_ASSOC_CARDINALITY_MIN, mapCardinality(role.getCardinality().getMinimum()));
             exstValues.put(ILI2DB_ILI_ASSOC_CARDINALITY_MAX, mapCardinality(role.getCardinality().getMaximum()));
+        }
+        if(el instanceof AttributeDef){
+            AttributeDef attr=(AttributeDef)el;
+            HashMap<String,String> exstValues=getMetaValues(entries,el);
+            exstValues.put(ILI2DB_ILI_ATTR_CARDINALITY_MIN, mapCardinality(attr.getDomain().getCardinality().getMinimum()));
+            exstValues.put(ILI2DB_ILI_ATTR_CARDINALITY_MAX, mapCardinality(attr.getDomain().getCardinality().getMaximum()));
         }
 		if(el instanceof Container){
 			Container e = (Container) el;

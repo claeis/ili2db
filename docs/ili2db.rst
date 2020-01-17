@@ -1385,13 +1385,29 @@ eine Tabelle mit Aufzählwerten ist). Wird nur erstellt mit Option --createMetaI
 t\_ili2db\_meta\_attrs
 ......................
 Interlis-Meta-Attribute (auch für Modell-Elemente, denen kein DB-Element 
-entspricht; z.B. die einem FK gegenüberliegende Rolle). Wird nur erstellt 
-mit der Option --createMetaInfo.
+entspricht; z.B. die einem FK gegenüberliegende Rolle). 
+Diese Tabelle wird nur erstellt 
+mit der Option ``--createMetaInfo``.
+Die Tabelle enthält auch von ili2db aufgrund des Modells generierte 
+Meta-Attribute (z.B. Kardinaliät einer Rolle). Die Namen dieser generierten
+Meta-Attribute beginnen 
+mit ``ili2db.ili.``.
 
 - ilielement Qualifizierter Name des betroffenen Interlis-Elements
 - attr_name Name des Meta-Attributs
 - attr_value Wert des Meta-Attributs
- 
+
+Von ili2db werden automatisch aufgrund des Interlis-Modells folgende 
+Meta-Attribute generiert:
+
++------------------------------------+---------------------------------------------------------------+
+| Tag                                | Beschreibung                                                  |
++====================================+===============================================================+
+| ``ili2db.ili.attrCardinalityMin``  | minimum Anzahl Werte eines Attributes                         |
++------------------------------------+---------------------------------------------------------------+
+| ``ili2db.ili.attrCardinalityMax``  | maximum Anzahl Werte eines Attributes                         |
++------------------------------------+---------------------------------------------------------------+
+
 Namenskonvention
 ~~~~~~~~~~~~~~~~
 
