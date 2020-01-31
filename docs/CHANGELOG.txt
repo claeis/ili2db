@@ -14,6 +14,20 @@ ideas/open issues/questions
 LATEST
 ---------------------------
 
+ili2db 4.4.0 (2020-01-31)
+------------------------------
+- create db tables ony in a derived language (#221)
+- add kind of association (Association, Composition, Aggregation) into meta tables (#323)
+- Cardinality of "BAG OF" is missing in the metadata tables (#171)
+- if --sqlEnableNull add NOT NULL meta-attribute for ili MANDATORY attrs (#180)
+- Exception when calling schemaimport with views (#310)
+- JTS parser fails reading a MultiPolygonZ from Geopackage (#325)
+- BASKET OID AS INTERLIS.UUIDOID: Problem bei XTF-Export aus PostGIS (#287)
+- enable export of BID without --createBasketCol (if object/basket assignment possible) (#287)
+- log missing/wrong id for enum values
+- fix missing baskets in statistics
+- iox-ili-1.20.16
+
 ili2db 4.3.3 (2019-12-23)
 ------------------------------
 - fix --update without stable BID (#315)

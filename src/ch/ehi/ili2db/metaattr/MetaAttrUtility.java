@@ -10,9 +10,12 @@ import java.sql.ResultSet;
 
 
 import ch.interlis.ili2c.metamodel.Element;
+import ch.interlis.ili2c.metamodel.RoleDef;
 import ch.interlis.ili2c.metamodel.TransferDescription;
 import ch.interlis.iox_j.inifile.IniFileReader;
 import ch.interlis.iox_j.validator.ValidationConfig;
+import ch.interlis.ili2c.metamodel.AttributeDef;
+import ch.interlis.ili2c.metamodel.Cardinality;
 import ch.interlis.ili2c.metamodel.Container;
 import ch.ehi.basics.logging.EhiLogger;
 import ch.ehi.basics.settings.Settings;
@@ -28,7 +31,17 @@ import ch.ehi.sqlgen.repository.DbColVarchar;
 
 public class MetaAttrUtility{
 
-	/** Read meta-attributes from a toml file and add them to the ili2c metamodel.
+    
+    public static final String METAATTRVALUE_ASSOC_KIND_ASSOCIATE = "ASSOCIATE";
+    public static final String METAATTRVALUE_ASSOC_KIND_COMPOSITE = "COMPOSITE";
+    public static final String METAATTRVALUE_ASSOC_KIND_AGGREGATE = "AGGREGATE";
+    public static final String ILI2DB_ILI_PREFIX = "ili2db.ili."; // prefix for meta-attributes derived by ili2db from the model
+    public static final String ILI2DB_ILI_ATTR_CARDINALITY_MAX = ILI2DB_ILI_PREFIX+"attrCardinalityMax";
+    public static final String ILI2DB_ILI_ATTR_CARDINALITY_MIN = ILI2DB_ILI_PREFIX+"attrCardinalityMin";
+	public static final String ILI2DB_ILI_ASSOC_CARDINALITY_MAX = ILI2DB_ILI_PREFIX+"assocCardinalityMax";
+    public static final String ILI2DB_ILI_ASSOC_CARDINALITY_MIN = ILI2DB_ILI_PREFIX+"assocCardinalityMin";
+    public static final String ILI2DB_ILI_ASSOC_KIND = ILI2DB_ILI_PREFIX+"assocKind";
+    /** Read meta-attributes from a toml file and add them to the ili2c metamodel.
 	 * @param td ili-model as read by the ili compiler
 	 * @param tomlFile
 	 * @throws Ili2dbException
@@ -86,10 +99,14 @@ public class MetaAttrUtility{
 				Element element = td.getElement(ilielement);
 				// known element?
 				if(element!=null) {
-				    // meta-attr not yet set/defined?
-				    if(element.getMetaValue(attrname)==null){
-				        // set it to the read value
-	                    element.setMetaValue(attrname, attrvalue);
+				    if(attrname.startsWith(ILI2DB_ILI_PREFIX)) {
+				        // ignore meta-attrs derived by ili2db
+				    }else {
+	                    // meta-attr not yet set/defined?
+	                    if(element.getMetaValue(attrname)==null){
+	                        // set it to the read value
+	                        element.setMetaValue(attrname, attrvalue);
+	                    }
 				    }
 				}
 			}
@@ -153,15 +170,23 @@ public class MetaAttrUtility{
 		Settings metaValues = el.getMetaValues();
 		if(metaValues.getValues().size() > 0){
 			for(String attr:metaValues.getValues()){
-			    
-                HashMap<String,String> exstValues=entries.get(el.getScopedName());
-                if(exstValues==null){
-                    exstValues=new HashMap<String,String>(); 
-                    entries.put(el.getScopedName(), exstValues);
-                }
+	            HashMap<String,String> exstValues=getMetaValues(entries,el);
                 exstValues.put(attr, metaValues.getValue(attr));
 			}
 		}
+        if(el instanceof RoleDef){
+            RoleDef role=(RoleDef)el;
+            HashMap<String,String> exstValues=getMetaValues(entries,el);
+            exstValues.put(ILI2DB_ILI_ASSOC_KIND, mapRoleKind(role.getKind()));
+            exstValues.put(ILI2DB_ILI_ASSOC_CARDINALITY_MIN, mapCardinality(role.getCardinality().getMinimum()));
+            exstValues.put(ILI2DB_ILI_ASSOC_CARDINALITY_MAX, mapCardinality(role.getCardinality().getMaximum()));
+        }
+        if(el instanceof AttributeDef){
+            AttributeDef attr=(AttributeDef)el;
+            HashMap<String,String> exstValues=getMetaValues(entries,el);
+            exstValues.put(ILI2DB_ILI_ATTR_CARDINALITY_MIN, mapCardinality(attr.getDomain().getCardinality().getMinimum()));
+            exstValues.put(ILI2DB_ILI_ATTR_CARDINALITY_MAX, mapCardinality(attr.getDomain().getCardinality().getMaximum()));
+        }
 		if(el instanceof Container){
 			Container e = (Container) el;
 			Iterator it = e.iterator();
@@ -172,7 +197,31 @@ public class MetaAttrUtility{
 	}
 
 	
+	  private static String mapCardinality(long val) {
+	      if (val == Cardinality.UNBOUND) {
+	        return "*";
+	      }
+	        return Long.toString(val);
+	    }
 	
+    private static String mapRoleKind(int kind) {
+        if(kind==RoleDef.Kind.eAGGREGATE) {
+            return METAATTRVALUE_ASSOC_KIND_AGGREGATE;
+        }else if(kind==RoleDef.Kind.eCOMPOSITE) {
+            return METAATTRVALUE_ASSOC_KIND_COMPOSITE;
+        }
+        return METAATTRVALUE_ASSOC_KIND_ASSOCIATE;
+    }
+
+    private static HashMap<String, String> getMetaValues(HashMap<String,HashMap<String,String>> entries,Element el) {
+        HashMap<String,String> exstValues=entries.get(el.getScopedName());
+        if(exstValues==null){
+            exstValues=new HashMap<String,String>(); 
+            entries.put(el.getScopedName(), exstValues);
+        }
+        return exstValues;
+    }
+
     private static void saveTableTab(GeneratorJdbc gen, Connection conn,String schemaName,HashMap<String,HashMap<String,String>> tabInfo)
     throws Ili2dbException
     {

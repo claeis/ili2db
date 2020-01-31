@@ -909,7 +909,11 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
                                 valuei++;
                                 if(!rs.wasNull()){
                                     String xtfValue=mapEnumValue(classAttr,value);
-                                    iomObj.setattrvalue(attrName,xtfValue);
+                                    if(xtfValue==null) {
+                                        EhiLogger.logError("Object "+sqlid+": failed to map id "+value+" for enum attribute "+classAttr);
+                                    }else {
+                                        iomObj.setattrvalue(attrName,xtfValue);
+                                    }
                                 }                           
                             }
 					    }else {

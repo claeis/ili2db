@@ -1,0 +1,20 @@
+INTERLIS 2.3;
+
+MODEL Bag23
+  AT "mailto:ce@eisenhutinformatik.ch" VERSION "2015-09-23" =
+    
+  TOPIC Topic =
+  
+    STRUCTURE StructA1=
+       attrA1 : TEXT*10;
+    END StructA1;
+
+    CLASS ClassA2 =
+       attrA21 : MANDATORY TEXT*10;
+       attrA22 : TEXT*10;
+       !!@ili2db.mapping=ARRAY
+       attrA23 : BAG {0..*} OF StructA1;
+    END ClassA2;
+
+  END Topic;
+END Bag23.

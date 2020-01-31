@@ -109,6 +109,7 @@ public class Config extends Settings {
 	private String dbschema=null;
 	private String modeldir;
 	private String models=null;
+    private String nameLanguage=null;
 	private String exportModels=null;
     private String exportCrsModels=null;
 	private String datasetName=null;
@@ -221,6 +222,12 @@ public class Config extends Settings {
 	public void setModels(String models) {
 		this.models = models;
 	}
+    public String getNameLanguage() {
+        return nameLanguage;
+    }
+    public void setNameLanguage(String models) {
+        this.nameLanguage = models;
+    }
 	public String getExportModels() {
 		return exportModels;
 	}

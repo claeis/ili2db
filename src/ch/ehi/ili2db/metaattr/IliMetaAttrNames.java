@@ -1,4 +1,4 @@
-package ch.ehi.ili2db.mapping;
+package ch.ehi.ili2db.metaattr;
 
 public class IliMetaAttrNames {
 	public static final String METAATTR_MAPPING="ili2db.mapping"; 

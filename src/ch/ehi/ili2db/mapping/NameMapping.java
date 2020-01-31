@@ -25,8 +25,10 @@ import ch.ehi.basics.logging.EhiLogger;
 import ch.ehi.ili2db.base.DbNames;
 import ch.ehi.ili2db.base.Ili2db;
 import ch.ehi.ili2db.base.Ili2dbException;
-import ch.ehi.ili2db.gui.Config;
 import ch.ehi.sqlgen.generator_impl.jdbc.GeneratorJdbc;
+import ch.interlis.ili2c.metamodel.AttributeDef;
+import ch.interlis.ili2c.metamodel.Domain;
+import ch.interlis.ili2c.metamodel.TransferDescription;
 import ch.interlis.ili2c.metamodel.Viewable;
 
 /** make names unique and conforming to the underlying database
@@ -51,8 +53,10 @@ public class NameMapping {
 	private static final int FULL_QUALIFIED_NAMES=2;
 	private boolean useEpsg=false;
     private boolean isVer3_export=false;
+    private String languagePath[]=null;
+    private TranslationNameMapper translationNameMapper=null;
 	private NameMapping(){};
-	public NameMapping(ch.ehi.ili2db.gui.Config config)
+	public NameMapping(TransferDescription td,ch.ehi.ili2db.gui.Config config)
 	{
 		_maxSqlNameLength=Integer.parseInt(config.getMaxSqlNameLength());
 		if(config.NAME_OPTIMIZATION_DISABLE.equals(config.getNameOptimization())){
@@ -64,6 +68,11 @@ public class NameMapping {
 		}
 		useEpsg=config.useEpsgInNames();
 		isVer3_export=config.isVer3_export();
+		String path=config.getNameLanguage();
+		if(path!=null) {
+		    languagePath=path.split(";");
+		    translationNameMapper=new TranslationNameMapper(td,config);
+		}
 	}
 	private String makeSqlTableName(String modelName,String topicName,String className,String attrName,int maxSqlNameLength)
 	{
@@ -154,6 +163,7 @@ public class NameMapping {
 		String iliname=def.getScopedName(null);
 		String sqlname=(String)classNameIli2sql.get(iliname);
 		if(sqlname==null){
+	        def=(Viewable) getTranslatedElement(def);
 			ch.interlis.ili2c.metamodel.Topic topic=(ch.interlis.ili2c.metamodel.Topic)def.getContainer(ch.interlis.ili2c.metamodel.Topic.class);
 			ch.interlis.ili2c.metamodel.Model model=(ch.interlis.ili2c.metamodel.Model)def.getContainer(ch.interlis.ili2c.metamodel.Model.class);
 			sqlname=makeSqlTableName(model.getName(),topic!=null ? topic.getName():null,def.getName(),null,getMaxSqlNameLength());
@@ -166,6 +176,7 @@ public class NameMapping {
 		String iliname=def.getScopedName(null);
 		String sqlname=(String)classNameIli2sql.get(iliname);
 		if(sqlname==null){
+	        def=(Domain) getTranslatedElement(def);
 			ch.interlis.ili2c.metamodel.Topic topic=(ch.interlis.ili2c.metamodel.Topic)def.getContainer(ch.interlis.ili2c.metamodel.Topic.class);
 			ch.interlis.ili2c.metamodel.Model model=(ch.interlis.ili2c.metamodel.Model)def.getContainer(ch.interlis.ili2c.metamodel.Model.class);
 			sqlname=makeSqlTableName(model.getName(),topic!=null ? topic.getName():null,def.getName(),null,getMaxSqlNameLength());
@@ -177,6 +188,7 @@ public class NameMapping {
 		String iliname=def.getContainer().getScopedName(null)+"."+def.getName();
 		String sqlname=(String)classNameIli2sql.get(iliname);
 		if(sqlname==null){
+	        def=(AttributeDef) getTranslatedElement(def);
 			ch.interlis.ili2c.metamodel.Topic topic=(ch.interlis.ili2c.metamodel.Topic)def.getContainer(ch.interlis.ili2c.metamodel.Topic.class);
 			ch.interlis.ili2c.metamodel.Model model=(ch.interlis.ili2c.metamodel.Model)def.getContainer(ch.interlis.ili2c.metamodel.Model.class);
 			ch.interlis.ili2c.metamodel.Viewable aclass=(ch.interlis.ili2c.metamodel.Viewable)def.getContainer(ch.interlis.ili2c.metamodel.Viewable.class);
@@ -200,6 +212,8 @@ public class NameMapping {
 	        sqlname=(String)classNameIli2sql.get(iliqname);
 		}
 		if(sqlname==null){
+	        aclass=(Viewable) getTranslatedElement(aclass);
+	        def=(AttributeDef) getTranslatedElement(def);
 			ch.interlis.ili2c.metamodel.Topic topic=(ch.interlis.ili2c.metamodel.Topic)aclass.getContainer(ch.interlis.ili2c.metamodel.Topic.class);
 			ch.interlis.ili2c.metamodel.Model model=(ch.interlis.ili2c.metamodel.Model)aclass.getContainer(ch.interlis.ili2c.metamodel.Model.class);
 			if(useEpsg && epsgCode!=null) {
@@ -222,6 +236,8 @@ public class NameMapping {
             sqlname=(String)classNameIli2sql.get(iliqname);
         }
         if(sqlname==null){
+            aclass=(Viewable) getTranslatedElement(aclass);
+            def=(AttributeDef) getTranslatedElement(def);
             ch.interlis.ili2c.metamodel.Topic topic=(ch.interlis.ili2c.metamodel.Topic)aclass.getContainer(ch.interlis.ili2c.metamodel.Topic.class);
             ch.interlis.ili2c.metamodel.Model model=(ch.interlis.ili2c.metamodel.Model)aclass.getContainer(ch.interlis.ili2c.metamodel.Model.class);
             if(useEpsg && epsgCode!=null) {
@@ -237,6 +253,7 @@ public class NameMapping {
 		String iliname=def.getContainer().getScopedName(null)+"."+def.getName();
 		String sqlname=(String)columnMapping.getSqlName(iliname,ownerSqlTablename,targetSqlTablename);
 		if(sqlname==null){
+	        def=(AttributeDef) getTranslatedElement(def);
 			/*
 			ch.interlis.ili2c.metamodel.Topic topic=(ch.interlis.ili2c.metamodel.Topic)targetTable.getContainer(ch.interlis.ili2c.metamodel.Topic.class);
 			ch.interlis.ili2c.metamodel.Model model=(ch.interlis.ili2c.metamodel.Model)targetTable.getContainer(ch.interlis.ili2c.metamodel.Model.class);
@@ -253,6 +270,7 @@ public class NameMapping {
 		String iliqname=def.getContainer().getScopedName(null)+"."+def.getName();
 		String sqlname=(String)columnMapping.getSqlName(iliqname,ownerSqlTablename,targetSqlTablename);
 		if(sqlname==null){
+	        def=(ch.interlis.ili2c.metamodel.RoleDef) getTranslatedElement(def);
 			if(hasMultipleTargets){
 				sqlname=shortcutName(def.getName(),targetSqlTablename,getMaxSqlNameLength()-6);
 			}else{
@@ -268,6 +286,7 @@ public class NameMapping {
 		String iliqname=def.getContainer().getScopedName(null)+"."+def.getName();
 		String sqlname=(String)columnMapping.getSqlName(iliqname,ownerSqlTablename,targetSqlTablename);
 		if(sqlname==null){
+	        def=(ch.interlis.ili2c.metamodel.RoleDef) getTranslatedElement(def);
 			sqlname=shortcutName(def.getName(),getMaxSqlNameLength()-6);
 			sqlname=makeValidSqlName(sqlname);
 			sqlname=makeSqlColNameUnique(ownerSqlTablename,sqlname);
@@ -279,6 +298,7 @@ public class NameMapping {
 		String iliqname=def.getContainer().getScopedName(null)+"."+def.getName();
 		String sqlname=columnMapping.getSqlName(iliqname,ownerSqlTablename,targetSqlTablename);
 		if(sqlname==null){
+	        def=(AttributeDef) getTranslatedElement(def);
 			if(hasMultipleTargets){
 				sqlname=shortcutName(def.getName(),targetSqlTablename,getMaxSqlNameLength()-6);
 			}else{
@@ -305,6 +325,7 @@ public class NameMapping {
 	        sqlname=columnMapping.getSqlName(iliqname,ownerSqlTablename,targetSqlTablename);
 		}
 		if(sqlname==null){
+	        def=(AttributeDef) getTranslatedElement(def);
 		    if(useEpsg && epsgCode!=null) {
 	            sqlname=shortcutName(def.getName()+"_"+epsgCode,getMaxSqlNameLength());
 		    }else {
@@ -321,6 +342,7 @@ public class NameMapping {
 		String iliqname=def.getContainer().getScopedName(null)+"."+def.getName()+"."+suffix;
 		String sqlname=(String)columnMapping.getSqlName(iliqname,ownerSqlTablename,null);
 		if(sqlname==null){
+	        def=(AttributeDef) getTranslatedElement(def);
 			sqlname=shortcutName(suffix,getMaxSqlNameLength());
 			sqlname=makeValidSqlName(sqlname);
 			sqlname=makeSqlColNameUnique(ownerSqlTablename, sqlname);
@@ -328,7 +350,13 @@ public class NameMapping {
 		}
 		return sqlname;
 	}
-	private String makeSqlColNameUnique(String ownerSqlTablename, String sqlname) {
+	private ch.interlis.ili2c.metamodel.Element getTranslatedElement(ch.interlis.ili2c.metamodel.Element def) {
+        if(translationNameMapper!=null) {
+            return translationNameMapper.translateElement(languagePath, def);
+        }
+        return def;
+    }
+    private String makeSqlColNameUnique(String ownerSqlTablename, String sqlname) {
 		sqlname=normalizeSqlName(sqlname);
 		String base=sqlname;
 		int c=1;

@@ -661,6 +661,9 @@ Optionen:
 +-------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | --nameByTopic                 | Für alle Tabellennamen werden teilweise qualifizierte Interlis-Klassennamen (Topic.Class) verwendet (und in einen gültigen Tabellennamen abgebildet). (siehe Kapitel Abbildungsregeln/Namenskonventionen)                                                                                                                                                                                                                                                                                                                                  |
 +-------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| --nameLang lang               | Für alle Tabellen- und Spaltennamen werden Namen aus dem Interlis-Modell der gegebenen Sprache verwendet. Die möglichen Sprachnamen ergeben sich aus den Interlis-Modellen (``MODEL Name (lang) ...``).                                                                                                                                                                                                                                                                                                                                    |
+|                               | Mehrere Sprachen können durch Semikolon getrennt werden, um die Priorität zu regeln. Ist für einen Namen kein Modell in einer der gegebenen Sprache vorhanden, wird der Namen aus dem Modell in der Ursprungssprache verwendet.                                                                                                                                                                                                                                                                                                            |
++-------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | --maxNameLength length        | Definiert die maximale Länge der Namen für Datenbankelemente (Tabellennamen, Spaltennamen , usw.) Default ist 60. Ist der Interlis-Name länger, wird er gekürzt. (siehe Kapitel Abbildungsregeln/Namenskonventionen)                                                                                                                                                                                                                                                                                                                       |
 +-------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | --sqlEnableNull               | Erstellt keine NOT NULL Anweisungen bei Spalten die Interlis-Attribute abbilden. (siehe Kapitel Abbildungsregeln/Attribute)                                                                                                                                                                                                                                                                                                                                                                                                                |
@@ -997,9 +1000,54 @@ TID/OID
 
 TODO
 
-Beziehungen/Referenzattribute
+Beziehungen
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+Beziehungen werden abhängig von der maximalen Kardinalität auf zwei Arten abgebildet:
+
+- direkt als Fremdschlüssel bei einer der Tabellen, die die an der Assoziation beteiligten Klassen abbilden
+- mit Hilfe einer Zwischentabelle, mit je einen Fremschlüssel auf die beteiligten Tabellen
+
+Die Stärke der Beziehung (Assoziation, Aggregation oder Komposition) beeinflusst die Art der Abbildung nicht.
+
++--------------+-----------------------------+--------------------------------------+------------------------------------------------------------------------------------------------------+
+| Nummer       | Beispiel INTERLIS           | Beispiel SQL                         | Kommentare                                                                                           |
++==============+=============================+======================================+======================================================================================================+
+| 1            | ::                          | ::                                   | Wenn die maximale Kardinalität bei einer der beiden Rollen nicht grösser als 1 ist,                  |
+|              |                             |                                      | wird keine Zwischentabelle erstellt.                                                                 |
+|              |  CLASS A =                  |  CREATE TABLE A (                    |                                                                                                      |
+|              |  END A;                     |   T_Id integer PRIMARY KEY,          |                                                                                                      |
+|              |                             |  );                                  |                                                                                                      |
+|              |                             |                                      |                                                                                                      |
+|              |  CLASS B =                  |  CREATE TABLE B (                    |                                                                                                      |
+|              |  END B;                     |   T_Id integer PRIMARY KEY,          |                                                                                                      |
+|              |                             |   role_a integer REFERENCES A(T_id)  |                                                                                                      |
+|              |                             |  );                                  |                                                                                                      |
+|              |                             |                                      |                                                                                                      |
+|              |  ASSOCIATION a2b =          |                                      |                                                                                                      |
+|              |    role_A -- {0..1} ClassA; |                                      |                                                                                                      |
+|              |    role_B -- {0..*} ClassB; |                                      |                                                                                                      |
+|              |  END a2b;                   |                                      |                                                                                                      |
++--------------+-----------------------------+--------------------------------------+------------------------------------------------------------------------------------------------------+
+| 2            | ::                          | ::                                   | Wenn die maximale Kardinalität bei beiden Rollen grösser als 1 ist,                                  |
+|              |                             |                                      | wird eine Zwischentabelle erstellt.                                                                  |
+|              |  CLASS A =                  |  CREATE TABLE A (                    |                                                                                                      |
+|              |  END A;                     |   T_Id integer PRIMARY KEY,          |                                                                                                      |
+|              |                             |  );                                  |                                                                                                      |
+|              |                             |                                      |                                                                                                      |
+|              |  CLASS B =                  |  CREATE TABLE B (                    |                                                                                                      |
+|              |  END B;                     |   T_Id integer PRIMARY KEY,          |                                                                                                      |
+|              |                             |  );                                  |                                                                                                      |
+|              |                             |                                      |                                                                                                      |
+|              |                             |                                      |                                                                                                      |
+|              |  ASSOCIATION a2b =          |  CREATE TABLE a2b (                  |                                                                                                      |
+|              |    role_A -- {0..*} ClassA; |   role_a integer REFERENCES A(T_id)  |                                                                                                      |
+|              |    role_B -- {0..*} ClassB; |   role_b integer REFERENCES B(T_id)  |                                                                                                      |
+|              |  END a2b;                   |  );                                  |                                                                                                      |
++--------------+-----------------------------+--------------------------------------+------------------------------------------------------------------------------------------------------+
+
+Referenzattribute
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 TODO
 
 Geometrieattribute (allgemein)
@@ -1382,13 +1430,44 @@ eine Tabelle mit Aufzählwerten ist). Wird nur erstellt mit Option --createMetaI
 t\_ili2db\_meta\_attrs
 ......................
 Interlis-Meta-Attribute (auch für Modell-Elemente, denen kein DB-Element 
-entspricht; z.B. die einem FK gegenüberliegende Rolle). Wird nur erstellt 
-mit der Option --createMetaInfo.
+entspricht; z.B. die einem FK gegenüberliegende Rolle). 
+Diese Tabelle wird nur erstellt 
+mit der Option ``--createMetaInfo``.
+Die Tabelle enthält auch von ili2db aufgrund des Modells generierte 
+Meta-Attribute (z.B. Kardinaliät einer Rolle). Die Namen dieser generierten
+Meta-Attribute beginnen 
+mit ``ili2db.ili.``.
 
 - ilielement Qualifizierter Name des betroffenen Interlis-Elements
 - attr_name Name des Meta-Attributs
 - attr_value Wert des Meta-Attributs
- 
+
+Von ili2db werden automatisch aufgrund des Interlis-Modells folgende 
+Meta-Attribute generiert:
+
++------------------------------------+---------------------------------------------------------------+
+| Tag                                | Beschreibung                                                  |
++====================================+===============================================================+
+| ``ili2db.ili.attrCardinalityMin``  | minimum Anzahl Werte eines Attributes                         |
++------------------------------------+---------------------------------------------------------------+
+| ``ili2db.ili.attrCardinalityMax``  | maximum Anzahl Werte eines Attributes                         |
++------------------------------------+---------------------------------------------------------------+
+| ``ili2db.ili.assocCardinalityMin`` | minimum Anzahl Objekte zu einer Bezeihungs-Rolle              |
++------------------------------------+---------------------------------------------------------------+
+| ``ili2db.ili.assocCardinalityMax`` | maximum Anzahl Objekte zu einer Beziehungs-Rolle              |
++------------------------------------+---------------------------------------------------------------+
+| ``ili2db.ili.assocKind``           | Stärke der Rolle                                              |
+|                                    |                                                               |
+|                                    | - ``ASSOCIATE`` Assoziation (``--``)  Beziehung zwischen      |
+|                                    |          unabhängigen Objekten                                |
+|                                    | - ``AGGREGATE`` Aggregation (``-<>``)  Beziehung zwischen     |
+|                                    |    Teilobjekten und einem Ganzen. Ein Teilobjekt              |
+|                                    |    kann Teil von mehreren Ganzen sein                         |
+|                                    | - ``COMPOSITE`` Komposition (``-<#>``)  Beziehung zwischen    |
+|                                    |          Teilobjekten und einem Ganzen. Ein Teilobjekt        |
+|                                    |          kann nur Teil von einem Ganzen sein                  |
++------------------------------------+---------------------------------------------------------------+
+
 Namenskonvention
 ~~~~~~~~~~~~~~~~
 
