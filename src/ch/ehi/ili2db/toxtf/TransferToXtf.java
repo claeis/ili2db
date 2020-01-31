@@ -1,4 +1,4 @@
-/* This file is part of the ili2ora project.
+/* This file is part of the ili2db project.
  * For more information, please see <http://www.interlis.ch>.
  *
  * This library is free software; you can redistribute it and/or
@@ -149,7 +149,7 @@ public class TransferToXtf {
 		this.config=config;
 
 	}
-	public void doit(int function,String datasource,IoxWriter iomFile,String sender,String exportParamModelnames[],long basketSqlIds[],Map<Long,BasketStat> stat)
+	public void doit(int function,String datasource,IoxWriter iomFile,String sender,String exportParamModelnames[],long basketSqlIds[],Map<String,BasketStat> stat)
 	throws ch.interlis.iox.IoxException, Ili2dbException
 	{
 		this.basketStat=stat;
@@ -268,12 +268,23 @@ public class TransferToXtf {
 					Object tObj=topici.next();
 					if (tObj instanceof Topic && !(suppressTopic((Topic)tObj))){
 							Topic topic=(Topic)tObj;
-							Map<String,String> genericDomains=new HashMap<String,String>();
+			                String basketXtfId=topic.getScopedName();
+                            Map<String,String> genericDomains=new HashMap<String,String>();
+			                //if TOPIC has a stable BID?
+							if(topic.getBasketOid()!=null) {
+				                // if TOPIC has a stable BID, export only if there 
+							    // is exactly one entry in t_ilid2db_basket table
+							    basketXtfId=getBasketSqlIdsFromTopic(topic.getScopedName(),genericDomains);
+	                            if(basketXtfId==null) {
+	                                // no basket found
+	                                continue;
+	                            }
+							}
 			                if(config.getDomainAssignments()!=null) {
 			                    EhiLogger.logState("domain assignments <"+config.getDomainAssignments()+">");
 			                    genericDomains=Xtf24Reader.parseDomains(config.getDomainAssignments());
 			                }
-							referrs = referrs || doBasket(function,datasource, iomFile, topic,null,topic.getScopedName(null),genericDomains);
+							referrs = referrs || doBasket(function,datasource, iomFile, topic,null,basketXtfId,genericDomains);
 					}
 				}
 			  }
@@ -306,7 +317,76 @@ public class TransferToXtf {
 			exportBaseModelFilter.close();
 		}
 	}
-	private Topic getTopicByBasketId(long basketSqlId, StringBuilder basketXtfId,Map<String,String> genericDomains) throws IoxException {
+	private String getBasketSqlIdsFromTopic(String topicName,Map<String,String> genericDomains) throws IoxException {
+        String sqlName=DbNames.BASKETS_TAB;
+        if(schema!=null){
+            sqlName=schema+"."+sqlName;
+        }
+        String bid=null;
+        String domains=null;
+        java.sql.PreparedStatement getstmt=null;
+        java.sql.ResultSet res=null;
+        try{
+            String stmt="SELECT "+DbNames.T_ILI_TID_COL+","+DbNames.BASKETS_TAB_DOMAINS_COL+" FROM "+sqlName+" WHERE "+DbNames.BASKETS_TAB_TOPIC_COL+"= ?";
+            if(config.isVer3_export()) {
+                stmt="SELECT "+DbNames.T_ILI_TID_COL+" FROM "+sqlName+" WHERE "+DbNames.BASKETS_TAB_TOPIC_COL+"= ?";
+            }
+            EhiLogger.traceBackendCmd(stmt);
+            getstmt=conn.prepareStatement(stmt);
+            getstmt.setString(1,topicName);
+            res=getstmt.executeQuery();
+            if(res.next()){
+                bid=res.getString(1);
+                if(!config.isVer3_export()) {
+                    domains=res.getString(2);
+                }
+            }
+            if(res.next()){
+                throw new IoxException("multiple Baskets of Topic "+topicName+" in table "+sqlName);
+            }
+        }catch(java.sql.SQLException ex){
+            EhiLogger.logError("failed to query "+sqlName,ex);
+        }finally{
+            if(res!=null){
+                try{
+                    res.close();
+                    res=null;
+                }catch(java.sql.SQLException ex){
+                    EhiLogger.logError(ex);
+                }
+            }
+            if(getstmt!=null){
+                try{
+                    getstmt.close();
+                }catch(java.sql.SQLException ex){
+                    EhiLogger.logError(ex);
+                }
+            }
+        }
+        if(bid!=null){
+            Topic topic=getTopicDef(td,topicName);
+            if(topic==null){
+                throw new IoxException("unknown Topic "+topicName+" in table "+sqlName);
+            }
+            if(config.getCrsExportModels()!=null) {
+                // crs translate topic
+                Topic crsTranslatedTopic1=(Topic)crsFilter.get(topic);
+                Topic crsTranslatedTopic2=(Topic)crsFilterToTarget.get(topic);
+                // if translated topic is in export model, use translated one
+                if(crsTranslatedTopic1!=null && crsTranslatedTopic1.getContainer().getName().equals(config.getCrsExportModels())) {
+                    topic=crsTranslatedTopic1;
+                }else if(crsTranslatedTopic2!=null && crsTranslatedTopic2.getContainer().getName().equals(config.getCrsExportModels())) {
+                    topic=crsTranslatedTopic2;
+                }
+            }
+            if(domains!=null) {
+                genericDomains.putAll(Xtf24Reader.parseDomains(domains));
+            }
+            return bid;
+        }
+        return null;
+    }
+    private Topic getTopicByBasketId(long basketSqlId, StringBuilder basketXtfId,Map<String,String> genericDomains) throws IoxException {
 		
 		String sqlName=DbNames.BASKETS_TAB;
 		if(schema!=null){
@@ -1524,7 +1604,7 @@ public class TransferToXtf {
         return ret.toString();
     }
 
-	private Map<Long,BasketStat> basketStat=null;
+	private Map<String,BasketStat> basketStat=null;
 	private HashMap<String, ClassStat> objStat=new HashMap<String, ClassStat>();
 	private void updateObjStat(String tag, long sqlId)
 	{
@@ -1539,7 +1619,7 @@ public class TransferToXtf {
 	private void saveObjStat(String iliBasketId,Long basketSqlId,String datasource,String topic)
 	{
 		// save it for later output to log
-		basketStat.put(basketSqlId,new BasketStat(datasource,topic,iliBasketId,objStat));
+		basketStat.put(iliBasketId,new BasketStat(datasource,topic,iliBasketId,objStat));
 		// setup new collection
 		objStat=new HashMap<String, ClassStat>();
 	}

@@ -630,7 +630,7 @@ public class Ili2db {
 				
 				// process xtf files
 				EhiLogger.logState("process data file...");
-				Map<Long,BasketStat> stat=new HashMap<Long,BasketStat>();
+				Map<String,BasketStat> stat=new HashMap<String,BasketStat>();
 				errs=new ch.ehi.basics.logging.ErrorTracker();
 				EhiLogger.getInstance().addListener(errs);
 				if(zipXtfEntry!=null){
@@ -871,7 +871,7 @@ public class Ili2db {
 	        }
 	    }
 	}
-	private static void logStatistics(boolean isIli1,Map<Long,BasketStat> stat)
+	private static void logStatistics(boolean isIli1,Map<String,BasketStat> stat)
 	{
 		ArrayList<BasketStat> statv=new ArrayList<BasketStat>(stat.values());
 		java.util.Collections.sort(statv,new java.util.Comparator<BasketStat>(){
@@ -1705,7 +1705,7 @@ public class Ili2db {
 			  if(function!=Config.FC_VALIDATE) {
 	              EhiLogger.logState("data <"+xtffile+">");
 			  }
-				Map<Long,BasketStat> stat=new HashMap<Long,BasketStat>();
+				Map<String,BasketStat> stat=new HashMap<String,BasketStat>();
 				ch.ehi.basics.logging.ErrorTracker errs=new ch.ehi.basics.logging.ErrorTracker();
 				EhiLogger.getInstance().addListener(errs);
 				transferToXtf(conn,function,xtffile,customMapping,mapping,td,geomConverter,config.getSender(),config,exportModelnames,basketSqlIds,stat,trafoConfig,class2wrapper);
@@ -2231,7 +2231,7 @@ public class Ili2db {
 			SqlColumnConverter geomConv,
 			DbIdGen idGen,
 			Config config,
-			Map<Long,BasketStat> stat,
+			Map<String,BasketStat> stat,
 			TrafoConfig trafoConfig,Viewable2TableMapping class2wrapper){	
 		try{
 			TransferFromXtf trsfr=new TransferFromXtf(function,ili2sqlName,td,conn,dbusr,geomConv,idGen,config,trafoConfig,class2wrapper);
@@ -2250,7 +2250,7 @@ public class Ili2db {
 			,Config config
 			,String exportParamModelnames[]
 			,long basketSqlIds[]
-			,Map<Long,BasketStat> stat
+			,Map<String,BasketStat> stat
 			,TrafoConfig trafoConfig
 			,Viewable2TableMapping class2wrapper){	
 

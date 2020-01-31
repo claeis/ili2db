@@ -201,7 +201,7 @@ public class TransferFromXtf {
 	    }
 	}
 		
-	public void doit(IoxReader reader,Config config,Map<Long,BasketStat> stat)
+	public void doit(IoxReader reader,Config config,Map<String,BasketStat> stat)
 	throws IoxException, Ili2dbException
 	{
 		if(functionCode==Config.FC_UPDATE || functionCode==Config.FC_REPLACE){
@@ -536,7 +536,7 @@ public class TransferFromXtf {
                                 filename=new java.io.File(xtffilename).getName();
                             }
                             // save it for later output to log
-                            stat.put(basketSqlId,new BasketStat(filename,basket.getType(),basket.getBid(),objStat));
+                            stat.put(Long.toString(basketSqlId),new BasketStat(filename,basket.getType(),basket.getBid(),objStat));
 						}
 					}else if(event instanceof EndBasketEvent){
 						if(reader instanceof ItfReader2){
@@ -578,7 +578,7 @@ public class TransferFromXtf {
 									}
 								}
 								if(!skipObj){
-								    HashMap<String, ClassStat> fixrefObjStat=stat.get(fixref.getBasketSqlId()).getObjStat();
+								    HashMap<String, ClassStat> fixrefObjStat=stat.get(Long.toString(fixref.getBasketSqlId())).getObjStat();
 									doObject(datasetName,fixref.getBasketSqlId(),fixref.getGenericDomains(),objPool.get(fixref.getRootTid()),fixrefObjStat);
 									fixedObjects.add(fixref);
 								}
@@ -664,7 +664,7 @@ public class TransferFromXtf {
 									
 								}
 								if(!skipObj){
-									objStat=stat.get(fixref.getBasketSqlId()).getObjStat();
+									objStat=stat.get(Long.toString(fixref.getBasketSqlId())).getObjStat();
 									doObject(datasetName,fixref.getBasketSqlId(),fixref.getGenericDomains(),objPool.get(fixref.getRootTid()),objStat);
 								}
 							}
