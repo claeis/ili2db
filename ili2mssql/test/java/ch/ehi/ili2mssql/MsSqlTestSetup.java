@@ -1,6 +1,5 @@
 package ch.ehi.ili2mssql;
 
-import java.io.File;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -10,6 +9,7 @@ import java.sql.Statement;
 import ch.ehi.ili2db.AbstractTestSetup;
 import ch.ehi.ili2db.base.Ili2db;
 import ch.ehi.ili2db.gui.Config;
+import ch.ehi.ili2mssql.test_utils.TestUtils;
 
 public class MsSqlTestSetup extends AbstractTestSetup {
     private String dburl;
@@ -17,19 +17,12 @@ public class MsSqlTestSetup extends AbstractTestSetup {
     private String dbpwd;
     private String dbschema;
     
-    private String dropSchema;
-    
     public MsSqlTestSetup(String dburl, String dbuser, String dbpwd,String dbschema) {
         super();
         this.dburl=dburl;
         this.dbuser=dbuser;
         this.dbpwd=dbpwd;
         this.dbschema=dbschema;
-        try {
-            dropSchema = this.getScript();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 
     @Override
@@ -75,9 +68,12 @@ public class MsSqlTestSetup extends AbstractTestSetup {
             try {
                 Statement stmt=jdbcConnection.createStatement();
                 try {
-                    String strStmt = dropSchema.replace("{{{schema}}}", dbschema);
-                    stmt.execute(strStmt);
-                }finally {
+                    String dropScript = TestUtils.getDropScript(dbschema);
+                    stmt.execute(dropScript);
+                } catch(IOException e) {
+                    throw new SQLException("Could not load drop schema script file");
+                }
+                finally {
                     stmt.close();
                     stmt=null;
                 }
@@ -103,20 +99,5 @@ public class MsSqlTestSetup extends AbstractTestSetup {
     @Override
     protected String getSchema() {
         return dbschema;
-    }
-
-    private String getScript() throws java.io.IOException {
-        File file = new File("test/data/MssqlBase/dropSchema.sql");
-        java.io.InputStream is = new java.io.FileInputStream(file.getPath());
-        java.io.BufferedReader buf = new java.io.BufferedReader(new java.io.InputStreamReader(is));
-                
-        String line = buf.readLine();
-        StringBuilder sb = new StringBuilder();
-                
-        while(line != null){
-           sb.append(line).append("\n");
-           line = buf.readLine();
-        }
-        return sb.toString();
     }
 }
