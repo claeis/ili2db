@@ -1644,7 +1644,7 @@ public class TransferFromIli {
                 }else{
                     insStmt.append(","+ Ili2db.quoteSqlStringValue(recConv.beautifyEnumDispName(eleName))); 
                 }
-                insStmt.append(",FALSE");  // inactive
+                insStmt.append(",'0'");  // inactive
                 String description = eleElement.getDocumentation();
                 insStmt.append(","+ Ili2db.quoteSqlStringValue(description));
 
