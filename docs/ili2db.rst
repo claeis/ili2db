@@ -114,6 +114,12 @@ erstellt ili2pg die fehlenden notwendigen Erweiterungen.
 installiert sein. Je nach Java Version (Die Java Version ist massgebend, nicht die Windows Version) muss 
 die 32-bit oder 64-bit Version dieser Laufzeitbibliothek installiert sein. Falls diese Laufzeitbibliothek nicht 
 installiert ist, gibt es einen Fehler beim laden der FileGDB.dll.
+Zur Laufzeit entpackt ili2fgdb zwei DLLs/Shared-Libraries und lädt 
+diese. Der Benutzer benötigt also die Berechtigungen, um diese Bibliotheken zu 
+laden.
+
+**GeoPackage:** Zur Laufzeit entpackt ili2gpkg eine DLL/Shared-Library und lädt 
+diese. Der Benutzer benötigt also die Berechtigungen, um die Bibliothek zu laden.
 
 Lizenz
 ------
