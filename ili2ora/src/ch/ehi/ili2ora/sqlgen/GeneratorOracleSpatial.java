@@ -101,18 +101,20 @@ public class GeneratorOracleSpatial extends GeneratorJdbc {
         super.visitSchemaBegin(config, schema);
         DatabaseMetaData meta;
         
-        try {
-            meta = conn.getMetaData();
-            useTriggerToSetT_id = true;
-            int majorVersion = meta.getDatabaseMajorVersion();
-            int minorVersion = meta.getDatabaseMinorVersion();
-            useTriggerToSetT_id = 
-                    (majorVersion < MAJOR_VERSION_SUPPORT_SEQ_AS_DEFAULT) ||
-                    (majorVersion == MAJOR_VERSION_SUPPORT_SEQ_AS_DEFAULT && minorVersion < MINOR_VERSION_SUPPORT_SEQ_AS_DEFAULT);
-            
-        } catch (SQLException e) {
-            e.printStackTrace();
-            throw new IOException("It was not possible to get the Oracle version." + e.getMessage());
+        if(conn!=null) {
+            try {
+                meta = conn.getMetaData();
+                useTriggerToSetT_id = true;
+                int majorVersion = meta.getDatabaseMajorVersion();
+                int minorVersion = meta.getDatabaseMinorVersion();
+                useTriggerToSetT_id = 
+                        (majorVersion < MAJOR_VERSION_SUPPORT_SEQ_AS_DEFAULT) ||
+                        (majorVersion == MAJOR_VERSION_SUPPORT_SEQ_AS_DEFAULT && minorVersion < MINOR_VERSION_SUPPORT_SEQ_AS_DEFAULT);
+                
+            } catch (SQLException e) {
+                e.printStackTrace();
+                throw new IOException("It was not possible to get the Oracle version." + e.getMessage());
+            }
         }
     }
 
@@ -247,7 +249,7 @@ public class GeneratorOracleSpatial extends GeneratorJdbc {
         if(cmt!=null){
             cmt="COMMENT ON TABLE "+sqlTabName+" IS '"+escapeString(cmt)+"'";
             addCreateLine(new Stmt(cmt));
-            if(!tableExists){
+            if(conn!=null&&!tableExists){
                 Statement dbstmt = null;
                 try{
                     try{
@@ -272,7 +274,7 @@ public class GeneratorOracleSpatial extends GeneratorJdbc {
             if(cmt!=null){
                 cmt="COMMENT ON COLUMN "+sqlTabName+"."+col.getName()+" IS '"+escapeString(cmt)+"'";
                 addCreateLine(new Stmt(cmt));
-                if(!tableExists){
+                if(conn!=null&&!tableExists){
                     Statement dbstmt = null;
                     try{
                         try{
