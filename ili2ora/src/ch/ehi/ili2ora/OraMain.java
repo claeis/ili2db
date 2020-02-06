@@ -19,9 +19,8 @@ package ch.ehi.ili2ora;
 
 import ch.ehi.basics.logging.EhiLogger;
 import ch.ehi.ili2db.base.DbUrlConverter;
-import ch.ehi.ili2db.base.Ili2db;
-import ch.ehi.ili2db.gui.Config;
 import ch.ehi.ili2db.gui.AbstractDbPanelDescriptor;
+import ch.ehi.ili2db.gui.Config;
 
 
 /**
@@ -31,7 +30,9 @@ import ch.ehi.ili2db.gui.AbstractDbPanelDescriptor;
 public class OraMain extends ch.ehi.ili2db.AbstractMain {
 	private final String DB_PORT="1521";
 	private final String DB_HOST="localhost";
-	
+
+    public static final String GENERAL_TABLESPACE = "generalTablespace";
+
 	private String dbservice="";
 	
 	@Override
@@ -151,6 +152,10 @@ public class OraMain extends ch.ehi.ili2db.AbstractMain {
 		}else if(arg.equals("--dbschema")){
             argi++;
             config.setDbschema(args[argi]);
+            argi++;
+        }else if(arg.equals("--generalTablespace")) {
+            argi++;
+            config.setValue(GENERAL_TABLESPACE, args[argi]);
             argi++;
         }
 		

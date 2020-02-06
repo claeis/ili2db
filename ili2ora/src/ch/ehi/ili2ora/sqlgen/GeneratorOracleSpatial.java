@@ -6,11 +6,14 @@ import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Iterator;
+
 import ch.ehi.basics.logging.EhiLogger;
 import ch.ehi.basics.settings.Settings;
 import ch.ehi.ili2db.base.DbNames;
+import ch.ehi.ili2ora.OraMain;
 import ch.ehi.sqlgen.DbUtility;
 import ch.ehi.sqlgen.generator_impl.jdbc.GeneratorJdbc;
+import ch.ehi.sqlgen.generator_impl.jdbc.GeneratorJdbc.Stmt;
 import ch.ehi.sqlgen.repository.DbColBoolean;
 import ch.ehi.sqlgen.repository.DbColDate;
 import ch.ehi.sqlgen.repository.DbColDateTime;
@@ -28,6 +31,7 @@ import ch.ehi.sqlgen.repository.DbTable;
 
 public class GeneratorOracleSpatial extends GeneratorJdbc {
 
+    private String generalTableSpace;
     private final int MAJOR_VERSION_SUPPORT_SEQ_AS_DEFAULT = 12;
     private final int MINOR_VERSION_SUPPORT_SEQ_AS_DEFAULT = 1;
     private boolean useTriggerToSetT_id = true;
@@ -99,6 +103,8 @@ public class GeneratorOracleSpatial extends GeneratorJdbc {
     @Override
     public void visitSchemaBegin(Settings config, DbSchema schema) throws IOException {
         super.visitSchemaBegin(config, schema);
+
+        generalTableSpace = config.getValue(OraMain.GENERAL_TABLESPACE);
         DatabaseMetaData meta;
         
         if(conn!=null) {
@@ -118,11 +124,57 @@ public class GeneratorOracleSpatial extends GeneratorJdbc {
         }
     }
 
-	@Override
-	public void visitIndex(DbIndex idx) throws IOException {
-		if(!idx.isPrimary())
-			super.visitIndex(idx);
-	}
+    @Override
+    public void visitIndex(DbIndex idx) throws IOException {
+        if(!idx.isPrimary()&&idx.isUnique()){
+            java.io.StringWriter out = new java.io.StringWriter();
+            DbTable tab=idx.getTable();
+            String tableName=tab.getName().getQName();
+            String constraintName=idx.getName();
+            if(constraintName==null){
+                String colNames[]=new String[idx.sizeAttr()];
+                int i=0;
+                for(Iterator attri=idx.iteratorAttr();attri.hasNext();){
+                    DbColumn attr=(DbColumn)attri.next();
+                    colNames[i++]=attr.getName();
+                }
+                constraintName=createConstraintName(tab,"key", colNames);
+            }
+            out.write(getIndent()+"ALTER TABLE "+tableName+" ADD CONSTRAINT "+constraintName+" UNIQUE (");
+            String sep="";
+            for(Iterator attri=idx.iteratorAttr();attri.hasNext();){
+                DbColumn attr=(DbColumn)attri.next();
+                out.write(sep+attr.getName());
+                sep=",";
+            }
+            String tableSpace="";
+            if(generalTableSpace!=null) {
+                tableSpace=" USING INDEX TABLESPACE "+generalTableSpace;
+            }
+            out.write(")"+tableSpace);
+            String stmt=out.toString();
+            addCreateLine(new Stmt(stmt));
+            out=null;
+            if(conn!=null) {
+                if(createdTables.contains(tab.getName())){
+                    Statement dbstmt = null;
+                    try{
+                        try{
+                            dbstmt = conn.createStatement();
+                            EhiLogger.traceBackendCmd(stmt);
+                            dbstmt.executeUpdate(stmt);
+                        }finally{
+                            dbstmt.close();
+                        }
+                    }catch(SQLException ex){
+                        IOException iox=new IOException("failed to add UNIQUE to table "+tab.getName());
+                        iox.initCause(ex);
+                        throw iox;
+                    }
+                }
+            }
+        }
+    }
     
     @Override
     public void visitTableBeginConstraint(DbTable dbTab) throws IOException {
@@ -293,7 +345,16 @@ public class GeneratorOracleSpatial extends GeneratorJdbc {
             }
         }
     }
-   
+
+    @Override
+    protected String getTableEndOptions(DbTable dbTab) {
+        String result=null;
+        if(generalTableSpace!=null) {
+            result="TABLESPACE "+generalTableSpace;
+        }
+        return result;
+    }
+
     static public String escapeString(String cmt)
     {
         StringBuilder ret=new StringBuilder((int)cmt.length());
