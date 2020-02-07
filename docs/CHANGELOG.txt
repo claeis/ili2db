@@ -15,6 +15,7 @@ LATEST
 ---------------------------
 - Create SQL script (--createscript) for SQL Server) generates wrong insert commands (#328)
 - Broken ili1 export (#326)
+- ili2ora: Fix npe thrown when executing createscript operation (#332)
 - iox-ili 1.20.17-SNAPSHOT
 
 ili2db 4.4.0 (2020-01-31)
