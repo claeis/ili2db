@@ -51,25 +51,24 @@ public class OraSequenceBasedIdGen implements DbIdGen {
 			((GeneratorJdbc) gen).addCreateLine(((GeneratorJdbc) gen).new Stmt(stmt));
 			((GeneratorJdbc) gen).addDropLine(((GeneratorJdbc) gen).new Stmt("DROP SEQUENCE "+sqlName.getQName()));
 		}
-		
-		// TODO check if sequence exists 
-		
-		EhiLogger.traceBackendCmd(stmt);
-		java.sql.PreparedStatement updstmt = null;
-		try{
-			updstmt = conn.prepareStatement(stmt);
-			updstmt.execute();
-		}catch(java.sql.SQLException ex){
-			EhiLogger.logError("failed to create sequence "+sqlName.getQName(),ex);
-		}finally{
-			if(updstmt!=null){
-				try{
-					updstmt.close();
-				}catch(java.sql.SQLException ex){
-					EhiLogger.logError(ex);
-				}
-			}
-		}
+        if(conn!=null) {
+            EhiLogger.traceBackendCmd(stmt);
+            java.sql.PreparedStatement updstmt = null;
+            try{
+                updstmt = conn.prepareStatement(stmt);
+                updstmt.execute();
+            }catch(java.sql.SQLException ex){
+                EhiLogger.logError("failed to create sequence "+sqlName.getQName(),ex);
+            }finally{
+                if(updstmt!=null){
+                    try{
+                        updstmt.close();
+                    }catch(java.sql.SQLException ex){
+                        EhiLogger.logError(ex);
+                    }
+                }
+            }
+        }
 	}
 	
 	long lastLocalId=0;
