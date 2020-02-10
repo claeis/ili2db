@@ -13,7 +13,6 @@ import ch.ehi.ili2db.base.DbNames;
 import ch.ehi.ili2ora.OraMain;
 import ch.ehi.sqlgen.DbUtility;
 import ch.ehi.sqlgen.generator_impl.jdbc.GeneratorJdbc;
-import ch.ehi.sqlgen.generator_impl.jdbc.GeneratorJdbc.Stmt;
 import ch.ehi.sqlgen.repository.DbColBoolean;
 import ch.ehi.sqlgen.repository.DbColDate;
 import ch.ehi.sqlgen.repository.DbColDateTime;
@@ -37,6 +36,7 @@ public class GeneratorOracleSpatial extends GeneratorJdbc {
     private boolean useTriggerToSetT_id = true;
 
     private DbColumn primaryKeyDefaultValue=null;
+    private DbColumn primaryKeyCol=null;
 
 	@Override
 	public void visitColumn(DbTable dbTab,DbColumn column) throws IOException {
@@ -74,11 +74,11 @@ public class GeneratorOracleSpatial extends GeneratorJdbc {
 			type="VARCHAR2(20)";
 		}
 		String isNull=column.isNotNull()?"NOT NULL":"NULL";
-		if(column instanceof DbColId){
-			if(((DbColId)column).isPrimaryKey()){
-				isNull="PRIMARY KEY";
-			}
-		}
+        if(column instanceof DbColId){
+            if(((DbColId)column).isPrimaryKey()){
+                primaryKeyCol=column;
+            }
+        }
 
         String defaultValue="";
         if(column.getDefaultValue()!=null){
@@ -255,7 +255,8 @@ public class GeneratorOracleSpatial extends GeneratorJdbc {
         String sqlTabName=tab.getName().toString();
         
         boolean tableExists=DbUtility.tableExists(conn,tab.getName());
-        super.visit1TableEnd(tab);
+        executeCreateTable(tab);
+        writePrimaryKey(tab);
 
         if(primaryKeyDefaultValue != null) {
             String fieldName = primaryKeyDefaultValue.getName();
@@ -353,6 +354,91 @@ public class GeneratorOracleSpatial extends GeneratorJdbc {
             result="TABLESPACE "+generalTableSpace;
         }
         return result;
+    }
+
+    private void executeCreateTable(DbTable tab) throws IOException {
+        dec_ind();
+        String cmt=getTableEndOptions(tab);
+        if(cmt!=null) {
+            out.write(getIndent()+") "+cmt+newline());
+        }else {
+            out.write(getIndent()+")"+newline());
+        }
+        // execute stmt
+        String stmt=out.toString();
+        addCreateLine(new Stmt(stmt));
+        addDropLine(new Stmt("DROP TABLE "+tab.getName()));
+        out=null;
+        if(conn!=null) {
+            if(DbUtility.tableExists(conn,tab.getName())){
+                if(tab.isDeleteDataIfTableExists()){
+                    Statement dbstmt = null;
+                    try{
+                        try{
+                            dbstmt = conn.createStatement();
+                            String delStmt="DELETE FROM "+tab.getName();
+                            EhiLogger.traceBackendCmd(delStmt);
+                            dbstmt.executeUpdate(delStmt);
+                        }finally{
+                            dbstmt.close();
+                        }
+                    }catch(SQLException ex){
+                        IOException iox=new IOException("failed to delete data from table "+tab.getName());
+                        iox.initCause(ex);
+                        throw iox;
+                    }
+                }
+            }else{
+                Statement dbstmt = null;
+                try{
+                    try{
+                        dbstmt = conn.createStatement();
+                        EhiLogger.traceBackendCmd(stmt);
+                        dbstmt.executeUpdate(stmt);
+                        createdTables.add(tab.getName());
+                    }finally{
+                        dbstmt.close();
+                    }
+                }catch(SQLException ex){
+                    IOException iox=new IOException("failed to create table "+tab.getName());
+                    iox.initCause(ex);
+                    throw iox;
+                }
+            }
+        }
+    }
+
+    private void writePrimaryKey(DbTable tab) throws IOException {
+        String[] constraintCols=null;
+        
+        // get cols of the primary key when pk is combined
+        for(Iterator idxi=tab.iteratorIndex();idxi.hasNext();){
+            DbIndex idx=(DbIndex)idxi.next();
+            if(idx.isPrimary()){
+                constraintCols=new String[idx.sizeAttr()];
+                int coli=0;
+                for(Iterator attri=idx.iteratorAttr();attri.hasNext();){
+                    DbColumn attr=(DbColumn)attri.next();
+                    constraintCols[coli++]=attr.getName();
+                }
+            }
+        }
+        // get col of the primary key
+        if(primaryKeyCol!=null) {
+            constraintCols=new String[] { primaryKeyCol.getName() };
+            primaryKeyCol = null;
+        }
+        
+        if(constraintCols!=null) {
+            String constraintName=createConstraintName(tab,"pkey",constraintCols);
+            String createstmt="ALTER TABLE "+tab.getName()+" ADD CONSTRAINT "+constraintName+" PRIMARY KEY("+String.join(",", constraintCols)+")";
+            if(generalTableSpace!=null) {
+                createstmt+=" USING INDEX TABLESPACE "+generalTableSpace;
+            }
+            String dropstmt="ALTER TABLE "+tab.getName()+" DROP CONSTRAINT "+constraintName;
+            
+            this.addConstraint(tab, constraintName, createstmt, dropstmt);
+        }
     }
 
     static public String escapeString(String cmt)
