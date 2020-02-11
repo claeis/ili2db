@@ -32,6 +32,7 @@ public class OraMain extends ch.ehi.ili2db.AbstractMain {
 	private final String DB_HOST="localhost";
 
     public static final String GENERAL_TABLESPACE = "generalTablespace";
+    public static final String INDEX_TABLESPACE="indexTablespace";
 
 	private String dbservice="";
 	
@@ -156,6 +157,10 @@ public class OraMain extends ch.ehi.ili2db.AbstractMain {
         }else if(arg.equals("--generalTablespace")) {
             argi++;
             config.setValue(GENERAL_TABLESPACE, args[argi]);
+            argi++;
+        }else if(arg.equals("--indexTablespace")) {
+            argi++;
+            config.setValue(INDEX_TABLESPACE, args[argi]);
             argi++;
         }
 		

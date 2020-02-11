@@ -31,6 +31,7 @@ import ch.ehi.sqlgen.repository.DbTable;
 public class GeneratorOracleSpatial extends GeneratorJdbc {
 
     private String generalTableSpace;
+    private String indexTablespace;
     private final int MAJOR_VERSION_SUPPORT_SEQ_AS_DEFAULT = 12;
     private final int MINOR_VERSION_SUPPORT_SEQ_AS_DEFAULT = 1;
     private boolean useTriggerToSetT_id = true;
@@ -105,6 +106,7 @@ public class GeneratorOracleSpatial extends GeneratorJdbc {
         super.visitSchemaBegin(config, schema);
 
         generalTableSpace = config.getValue(OraMain.GENERAL_TABLESPACE);
+        indexTablespace=config.getValue(OraMain.INDEX_TABLESPACE);
         DatabaseMetaData meta;
         
         if(conn!=null) {
@@ -148,7 +150,9 @@ public class GeneratorOracleSpatial extends GeneratorJdbc {
                 sep=",";
             }
             String tableSpace="";
-            if(generalTableSpace!=null) {
+            if(indexTablespace!=null) {
+                tableSpace=" USING INDEX TABLESPACE "+indexTablespace;
+            } else if(generalTableSpace!=null) {
                 tableSpace=" USING INDEX TABLESPACE "+generalTableSpace;
             }
             out.write(")"+tableSpace);
@@ -432,7 +436,9 @@ public class GeneratorOracleSpatial extends GeneratorJdbc {
         if(constraintCols!=null) {
             String constraintName=createConstraintName(tab,"pkey",constraintCols);
             String createstmt="ALTER TABLE "+tab.getName()+" ADD CONSTRAINT "+constraintName+" PRIMARY KEY("+String.join(",", constraintCols)+")";
-            if(generalTableSpace!=null) {
+            if(indexTablespace!=null) {
+                createstmt+=" USING INDEX TABLESPACE "+indexTablespace;
+            } else if(generalTableSpace!=null) {
                 createstmt+=" USING INDEX TABLESPACE "+generalTableSpace;
             }
             String dropstmt="ALTER TABLE "+tab.getName()+" DROP CONSTRAINT "+constraintName;
