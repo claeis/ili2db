@@ -5,7 +5,9 @@ import java.io.StringWriter;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 import ch.ehi.basics.logging.EhiLogger;
 import ch.ehi.basics.settings.Settings;
@@ -32,12 +34,15 @@ public class GeneratorOracleSpatial extends GeneratorJdbc {
 
     private String generalTableSpace;
     private String indexTablespace;
+    private String lobTablespace;
     private final int MAJOR_VERSION_SUPPORT_SEQ_AS_DEFAULT = 12;
     private final int MINOR_VERSION_SUPPORT_SEQ_AS_DEFAULT = 1;
     private boolean useTriggerToSetT_id = true;
 
     private DbColumn primaryKeyDefaultValue=null;
     private DbColumn primaryKeyCol=null;
+    
+    private List<DbColumn> lobCols;
 
 	@Override
 	public void visitColumn(DbTable dbTab,DbColumn column) throws IOException {
@@ -70,6 +75,7 @@ public class GeneratorOracleSpatial extends GeneratorJdbc {
 				type="VARCHAR2("+Integer.toString(colsize)+")";
 			}else {
 				type="CLOB";
+                lobCols.add(column);
 			}
 		}else{
 			type="VARCHAR2(20)";
@@ -107,6 +113,8 @@ public class GeneratorOracleSpatial extends GeneratorJdbc {
 
         generalTableSpace = config.getValue(OraMain.GENERAL_TABLESPACE);
         indexTablespace=config.getValue(OraMain.INDEX_TABLESPACE);
+        lobTablespace=config.getValue(OraMain.LOB_TABLESPACE);
+        lobCols=new ArrayList<DbColumn>();
         DatabaseMetaData meta;
         
         if(conn!=null) {
@@ -353,21 +361,24 @@ public class GeneratorOracleSpatial extends GeneratorJdbc {
 
     @Override
     protected String getTableEndOptions(DbTable dbTab) {
-        String result=null;
+        String generalTablespacePart="";
+        String lobTablespacePart="";
         if(generalTableSpace!=null) {
-            result="TABLESPACE "+generalTableSpace;
+            generalTablespacePart=newline()+"TABLESPACE "+generalTableSpace;
         }
-        return result;
+        if(lobTablespace!=null&&!lobCols.isEmpty()) {
+            for(DbColumn lobColi:lobCols) {
+                lobTablespacePart+=newline()+"LOB ("+lobColi.getName()+") STORE AS (TABLESPACE "+lobTablespace+")";
+            }
+        }
+        return generalTablespacePart+lobTablespacePart;
     }
 
     private void executeCreateTable(DbTable tab) throws IOException {
         dec_ind();
         String cmt=getTableEndOptions(tab);
-        if(cmt!=null) {
-            out.write(getIndent()+") "+cmt+newline());
-        }else {
-            out.write(getIndent()+")"+newline());
-        }
+        lobCols=new ArrayList<DbColumn>();
+        out.write(getIndent()+")"+cmt);
         // execute stmt
         String stmt=out.toString();
         addCreateLine(new Stmt(stmt));
