@@ -12,7 +12,6 @@ import java.util.List;
 import ch.ehi.basics.logging.EhiLogger;
 import ch.ehi.basics.settings.Settings;
 import ch.ehi.ili2db.base.DbNames;
-import ch.ehi.ili2ora.OraMain;
 import ch.ehi.sqlgen.DbUtility;
 import ch.ehi.sqlgen.generator_impl.jdbc.GeneratorJdbc;
 import ch.ehi.sqlgen.repository.DbColBoolean;
@@ -31,6 +30,9 @@ import ch.ehi.sqlgen.repository.DbSchema;
 import ch.ehi.sqlgen.repository.DbTable;
 
 public class GeneratorOracleSpatial extends GeneratorJdbc {
+    public static final String GENERAL_TABLESPACE = "generalTablespace";
+    public static final String INDEX_TABLESPACE="indexTablespace";
+    public static final String LOB_TABLESPACE="lobTableSpace";
 
     private String generalTableSpace;
     private String indexTablespace;
@@ -111,9 +113,9 @@ public class GeneratorOracleSpatial extends GeneratorJdbc {
     public void visitSchemaBegin(Settings config, DbSchema schema) throws IOException {
         super.visitSchemaBegin(config, schema);
 
-        generalTableSpace = config.getValue(OraMain.GENERAL_TABLESPACE);
-        indexTablespace=config.getValue(OraMain.INDEX_TABLESPACE);
-        lobTablespace=config.getValue(OraMain.LOB_TABLESPACE);
+        generalTableSpace = config.getValue(GENERAL_TABLESPACE);
+        indexTablespace=config.getValue(INDEX_TABLESPACE);
+        lobTablespace=config.getValue(LOB_TABLESPACE);
         lobCols=new ArrayList<DbColumn>();
         DatabaseMetaData meta;
         

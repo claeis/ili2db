@@ -21,6 +21,7 @@ import ch.ehi.basics.logging.EhiLogger;
 import ch.ehi.ili2db.base.DbUrlConverter;
 import ch.ehi.ili2db.gui.AbstractDbPanelDescriptor;
 import ch.ehi.ili2db.gui.Config;
+import ch.ehi.ili2ora.sqlgen.GeneratorOracleSpatial;
 
 
 /**
@@ -30,10 +31,6 @@ import ch.ehi.ili2db.gui.Config;
 public class OraMain extends ch.ehi.ili2db.AbstractMain {
 	private final String DB_PORT="1521";
 	private final String DB_HOST="localhost";
-
-    public static final String GENERAL_TABLESPACE = "generalTablespace";
-    public static final String INDEX_TABLESPACE="indexTablespace";
-    public static final String LOB_TABLESPACE="lobTableSpace";
 
 	private String dbservice="";
 	
@@ -157,15 +154,15 @@ public class OraMain extends ch.ehi.ili2db.AbstractMain {
             argi++;
         }else if(arg.equals("--generalTablespace")) {
             argi++;
-            config.setValue(GENERAL_TABLESPACE, args[argi]);
+            config.setValue(GeneratorOracleSpatial.GENERAL_TABLESPACE, args[argi]);
             argi++;
         }else if(arg.equals("--indexTablespace")) {
             argi++;
-            config.setValue(INDEX_TABLESPACE, args[argi]);
+            config.setValue(GeneratorOracleSpatial.INDEX_TABLESPACE, args[argi]);
             argi++;
         }else if(arg.equals("--lobTablespace")) {
             argi++;
-            config.setValue(LOB_TABLESPACE, args[argi]);
+            config.setValue(GeneratorOracleSpatial.LOB_TABLESPACE, args[argi]);
             argi++;
         }
 		
