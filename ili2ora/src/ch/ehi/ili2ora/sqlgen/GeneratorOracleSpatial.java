@@ -169,23 +169,8 @@ public class GeneratorOracleSpatial extends GeneratorJdbc {
             String stmt=out.toString();
             addCreateLine(new Stmt(stmt));
             out=null;
-            if(conn!=null) {
-                if(createdTables.contains(tab.getName())){
-                    Statement dbstmt = null;
-                    try{
-                        try{
-                            dbstmt = conn.createStatement();
-                            EhiLogger.traceBackendCmd(stmt);
-                            dbstmt.executeUpdate(stmt);
-                        }finally{
-                            dbstmt.close();
-                        }
-                    }catch(SQLException ex){
-                        IOException iox=new IOException("failed to add UNIQUE to table "+tab.getName());
-                        iox.initCause(ex);
-                        throw iox;
-                    }
-                }
+            if(conn!=null&&createdTables.contains(tab.getName())){
+                executeUpdateStatement(stmt,"failed to add UNIQUE to table "+tab.getName());
             }
         }
     }
@@ -292,23 +277,9 @@ public class GeneratorOracleSpatial extends GeneratorJdbc {
             String strTrgQuery = trgQuery.toString();
             addCreateLine(new Stmt(strTrgQuery));
             
-            if(conn!=null){
-                Statement dbstmt = null;
-                try{
-                    try{
-                        dbstmt = conn.createStatement();
-                        EhiLogger.traceBackendCmd(strTrgQuery);
-                        dbstmt.execute(strTrgQuery);
-                    }finally{
-                        dbstmt.close();
-                    }
-                }catch(SQLException ex){
-                    IOException iox=new IOException("Failed to add default value to "+tab.getName() + "." + fieldName);
-                    iox.initCause(ex);
-                    throw iox;
-                }
+            if(conn!=null) {
+                executeStatement(strTrgQuery, "Failed to add default value to "+tab.getName() + "." + fieldName);
             }
-            
             primaryKeyDefaultValue = null;
         }
 
@@ -317,20 +288,7 @@ public class GeneratorOracleSpatial extends GeneratorJdbc {
             cmt="COMMENT ON TABLE "+sqlTabName+" IS '"+escapeString(cmt)+"'";
             addCreateLine(new Stmt(cmt));
             if(conn!=null&&!tableExists){
-                Statement dbstmt = null;
-                try{
-                    try{
-                        dbstmt = conn.createStatement();
-                        EhiLogger.traceBackendCmd(cmt);
-                        dbstmt.execute(cmt);
-                    }finally{
-                        dbstmt.close();
-                    }
-                }catch(SQLException ex){
-                    IOException iox=new IOException("failed to add comment to table "+tab.getName());
-                    iox.initCause(ex);
-                    throw iox;
-                }
+                executeStatement(cmt, "Failed to add comment to table "+tab.getName());
             }
         }
 
@@ -342,20 +300,7 @@ public class GeneratorOracleSpatial extends GeneratorJdbc {
                 cmt="COMMENT ON COLUMN "+sqlTabName+"."+col.getName()+" IS '"+escapeString(cmt)+"'";
                 addCreateLine(new Stmt(cmt));
                 if(conn!=null&&!tableExists){
-                    Statement dbstmt = null;
-                    try{
-                        try{
-                            dbstmt = conn.createStatement();
-                            EhiLogger.traceBackendCmd(cmt);
-                            dbstmt.execute(cmt);
-                        }finally{
-                            dbstmt.close();
-                        }
-                    }catch(SQLException ex){
-                        IOException iox=new IOException("failed to add comment to table "+tab.getName());
-                        iox.initCause(ex);
-                        throw iox;
-                    }
+                    executeStatement(cmt, "Failed to add comment to column "+tab.getName());
                 }
             }
         }
@@ -389,38 +334,12 @@ public class GeneratorOracleSpatial extends GeneratorJdbc {
         if(conn!=null) {
             if(DbUtility.tableExists(conn,tab.getName())){
                 if(tab.isDeleteDataIfTableExists()){
-                    Statement dbstmt = null;
-                    try{
-                        try{
-                            dbstmt = conn.createStatement();
-                            String delStmt="DELETE FROM "+tab.getName();
-                            EhiLogger.traceBackendCmd(delStmt);
-                            dbstmt.executeUpdate(delStmt);
-                        }finally{
-                            dbstmt.close();
-                        }
-                    }catch(SQLException ex){
-                        IOException iox=new IOException("failed to delete data from table "+tab.getName());
-                        iox.initCause(ex);
-                        throw iox;
-                    }
+                    String delStmt="DELETE FROM "+tab.getName();
+                    executeUpdateStatement(delStmt, "Failed to delete data from table "+tab.getName());
                 }
             }else{
-                Statement dbstmt = null;
-                try{
-                    try{
-                        dbstmt = conn.createStatement();
-                        EhiLogger.traceBackendCmd(stmt);
-                        dbstmt.executeUpdate(stmt);
-                        createdTables.add(tab.getName());
-                    }finally{
-                        dbstmt.close();
-                    }
-                }catch(SQLException ex){
-                    IOException iox=new IOException("failed to create table "+tab.getName());
-                    iox.initCause(ex);
-                    throw iox;
-                }
+                executeUpdateStatement(stmt, "Failed to create table "+tab.getName());
+                createdTables.add(tab.getName());
             }
         }
     }
@@ -459,8 +378,42 @@ public class GeneratorOracleSpatial extends GeneratorJdbc {
             this.addConstraint(tab, constraintName, createstmt, dropstmt);
         }
     }
+    
+    private void executeStatement(String cmt, String errorMessage) throws IOException {
+        Statement dbstmt = null;
+        try{
+            try{
+                dbstmt = conn.createStatement();
+                EhiLogger.traceBackendCmd(cmt);
+                dbstmt.execute(cmt);
+            }finally{
+                if(dbstmt!=null) dbstmt.close();
+            }
+        }catch(SQLException ex){
+            IOException iox=new IOException(errorMessage);
+            iox.initCause(ex);
+            throw iox;
+        }
+    }
 
-    static public String escapeString(String cmt)
+    private void executeUpdateStatement(String stmt, String errorMessage) throws IOException  {
+        Statement dbstmt = null;
+        try{
+            try{
+                dbstmt = conn.createStatement();
+                EhiLogger.traceBackendCmd(stmt);
+                dbstmt.executeUpdate(stmt);
+            }finally{
+                if(dbstmt!=null) dbstmt.close();
+            }
+        }catch(SQLException ex){
+            IOException iox=new IOException(errorMessage);
+            iox.initCause(ex);
+            throw iox;
+        }
+    }
+
+    public static String escapeString(String cmt)
     {
         StringBuilder ret=new StringBuilder((int)cmt.length());
         for(int i=0;i<cmt.length();i++){
