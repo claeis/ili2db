@@ -1,7 +1,6 @@
 package ch.ehi.ili2ora.sqlgen;
 
 import java.io.IOException;
-import java.io.StringWriter;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -39,7 +38,7 @@ public class GeneratorOracleSpatial extends GeneratorJdbc {
     private String generalTableSpace;
     private String indexTablespace;
     private String lobTablespace;
-    private boolean useTriggerToSetT_id = true;
+    private boolean useTriggerToSetTId = true;
 
     private DbColumn primaryKeyDefaultValue=null;
     private DbColumn primaryKeyCol=null;
@@ -83,17 +82,15 @@ public class GeneratorOracleSpatial extends GeneratorJdbc {
 			type="VARCHAR2(20)";
 		}
 		String isNull=column.isNotNull()?"NOT NULL":"NULL";
-        if(column instanceof DbColId){
-            if(((DbColId)column).isPrimaryKey()){
-                primaryKeyCol=column;
-            }
+        if(column instanceof DbColId && ((DbColId)column).isPrimaryKey()){
+            primaryKeyCol=column;
         }
 
         String defaultValue="";
         if(column.getDefaultValue()!=null){
             defaultValue=" "+"DEFAULT " + column.getDefaultValue();
             
-            if(column.isPrimaryKey() && useTriggerToSetT_id) {
+            if(column.isPrimaryKey() && useTriggerToSetTId) {
                 defaultValue = "";
                 primaryKeyDefaultValue = column;
             }
@@ -122,16 +119,17 @@ public class GeneratorOracleSpatial extends GeneratorJdbc {
         if(conn!=null) {
             try {
                 meta = conn.getMetaData();
-                useTriggerToSetT_id = true;
+                useTriggerToSetTId = true;
                 int majorVersion = meta.getDatabaseMajorVersion();
                 int minorVersion = meta.getDatabaseMinorVersion();
-                useTriggerToSetT_id = 
+                useTriggerToSetTId = 
                         (majorVersion < MAJOR_VERSION_SUPPORT_SEQ_AS_DEFAULT) ||
                         (majorVersion == MAJOR_VERSION_SUPPORT_SEQ_AS_DEFAULT && minorVersion < MINOR_VERSION_SUPPORT_SEQ_AS_DEFAULT);
                 
             } catch (SQLException e) {
-                e.printStackTrace();
-                throw new IOException("It was not possible to get the Oracle version." + e.getMessage());
+                IOException iox=new IOException("It was not possible to get the Oracle version.");
+                iox.initCause(e);
+                throw iox;
             }
         }
     }
@@ -139,12 +137,12 @@ public class GeneratorOracleSpatial extends GeneratorJdbc {
     @Override
     public void visitIndex(DbIndex idx) throws IOException {
         if(!idx.isPrimary()&&idx.isUnique()){
-            java.io.StringWriter out = new java.io.StringWriter();
+            StringBuilder out = new StringBuilder();
             DbTable tab=idx.getTable();
             String tableName=tab.getName().getQName();
             String constraintName=idx.getName();
             if(constraintName==null){
-                String colNames[]=new String[idx.sizeAttr()];
+                String[] colNames=new String[idx.sizeAttr()];
                 int i=0;
                 for(Iterator attri=idx.iteratorAttr();attri.hasNext();){
                     DbColumn attr=(DbColumn)attri.next();
@@ -152,11 +150,11 @@ public class GeneratorOracleSpatial extends GeneratorJdbc {
                 }
                 constraintName=createConstraintName(tab,"key", colNames);
             }
-            out.write(getIndent()+"ALTER TABLE "+tableName+" ADD CONSTRAINT "+constraintName+" UNIQUE (");
+            out.append(getIndent()+"ALTER TABLE "+tableName+" ADD CONSTRAINT "+constraintName+" UNIQUE (");
             String sep="";
             for(Iterator attri=idx.iteratorAttr();attri.hasNext();){
                 DbColumn attr=(DbColumn)attri.next();
-                out.write(sep+attr.getName());
+                out.append(sep+attr.getName());
                 sep=",";
             }
             String tableSpace="";
@@ -165,10 +163,9 @@ public class GeneratorOracleSpatial extends GeneratorJdbc {
             } else if(generalTableSpace!=null) {
                 tableSpace=" USING INDEX TABLESPACE "+generalTableSpace;
             }
-            out.write(")"+tableSpace);
+            out.append(")"+tableSpace);
             String stmt=out.toString();
             addCreateLine(new Stmt(stmt));
-            out=null;
             if(conn!=null&&createdTables.contains(tab.getName())){
                 executeUpdateStatement(stmt,"failed to add UNIQUE to table "+tab.getName());
             }
@@ -215,20 +212,19 @@ public class GeneratorOracleSpatial extends GeneratorJdbc {
 
         if(primaryKeyDefaultValue != null) {
             String fieldName = primaryKeyDefaultValue.getName();
-            StringWriter trgQuery = new StringWriter();
-            
-            trgQuery.write(getIndent() + "CREATE OR REPLACE TRIGGER trg_" + tab.getName().getName() +"_"+ fieldName + newline());
-            trgQuery.write(getIndent() + "BEFORE INSERT ON " + sqlTabName + newline()); 
-            trgQuery.write(getIndent() + "FOR EACH ROW" + newline());
-            trgQuery.write(getIndent() + "BEGIN" + newline());
+            StringBuilder trgQuery = new StringBuilder();
+            trgQuery.append(getIndent() + "CREATE OR REPLACE TRIGGER trg_" + tab.getName().getName() +"_"+ fieldName + newline());
+            trgQuery.append(getIndent() + "BEFORE INSERT ON " + sqlTabName + newline()); 
+            trgQuery.append(getIndent() + "FOR EACH ROW" + newline());
+            trgQuery.append(getIndent() + "BEGIN" + newline());
             inc_ind();
-            trgQuery.write(getIndent() + "IF (:NEW."+ fieldName +" is NULL) THEN" + newline());
+            trgQuery.append(getIndent() + "IF (:NEW."+ fieldName +" is NULL) THEN" + newline());
             inc_ind();
-            trgQuery.write(getIndent() + ":NEW." + fieldName +" := " + primaryKeyDefaultValue.getDefaultValue() + ";" + newline());
+            trgQuery.append(getIndent() + ":NEW." + fieldName +" := " + primaryKeyDefaultValue.getDefaultValue() + ";" + newline());
             dec_ind();
-            trgQuery.write(getIndent() + "END IF;" + newline());
+            trgQuery.append(getIndent() + "END IF;" + newline());
             dec_ind();
-            trgQuery.write(getIndent() + "END;");
+            trgQuery.append(getIndent() + "END;");
             
             String strTrgQuery = trgQuery.toString();
             addCreateLine(new Stmt(strTrgQuery));
@@ -265,13 +261,13 @@ public class GeneratorOracleSpatial extends GeneratorJdbc {
     @Override
     protected String getTableEndOptions(DbTable dbTab) {
         String generalTablespacePart="";
-        String lobTablespacePart="";
+        StringBuilder lobTablespacePart=new StringBuilder();
         if(generalTableSpace!=null) {
             generalTablespacePart=newline()+"TABLESPACE "+generalTableSpace;
         }
         if(lobTablespace!=null&&!lobCols.isEmpty()) {
             for(DbColumn lobColi:lobCols) {
-                lobTablespacePart+=newline()+"LOB ("+lobColi.getName()+") STORE AS (TABLESPACE "+lobTablespace+")";
+                lobTablespacePart.append(newline()+"LOB ("+lobColi.getName()+") STORE AS (TABLESPACE "+lobTablespace+")");
             }
         }
         return generalTablespacePart+lobTablespacePart;
@@ -348,7 +344,7 @@ public class GeneratorOracleSpatial extends GeneratorJdbc {
         }
         String constraintName=createConstraintName(dbTab,"fkey",dbCol.getName());
 
-        createstmt="ALTER TABLE "+sqlTabName+" ADD CONSTRAINT "+constraintName+" FOREIGN KEY ( "+dbCol.getName()+" ) REFERENCES "+dbCol.getReferencedTable().getQName();
+        createstmt="ALTER TABLE "+sqlTabName+" ADD CONSTRAINT "+constraintName+" FOREIGN KEY ( "+dbCol.getName()+" ) REFERENCES "+dbCol.getReferencedTable().getQName()+action;
 
         String dropstmt=null;
         dropstmt="ALTER TABLE "+sqlTabName+" DROP CONSTRAINT "+constraintName;

@@ -29,8 +29,8 @@ import ch.ehi.ili2ora.sqlgen.GeneratorOracleSpatial;
  * @version $Revision: 1.0 $ $Date: 07.02.2005 $
  */
 public class OraMain extends ch.ehi.ili2db.AbstractMain {
-	private final String DB_PORT="1521";
-	private final String DB_HOST="localhost";
+    private static final String DB_PORT="1521";
+    private static final String DB_HOST="localhost";
 
 	private String dbservice="";
 	
@@ -54,12 +54,13 @@ public class OraMain extends ch.ehi.ili2db.AbstractMain {
 				
 				// no option selected
 				if((sid == null || sid.isEmpty()) && (dbservice == null || dbservice.isEmpty())) {
-					return null;
+                    EhiLogger.logError("SID or Service must be specified");
+                    return null;
 				}
 				// two options selected: service and database
 				if((sid != null && !sid.isEmpty()) && (dbservice != null && !dbservice.isEmpty())) {
-					EhiLogger.logError("TODO Message");
-					return null;
+                    EhiLogger.logError("SID or Service must be specified but not both");
+                    return null;
 				}
 				
 				
@@ -83,7 +84,7 @@ public class OraMain extends ch.ehi.ili2db.AbstractMain {
 		return new OraDbPanelDescriptor();
 	}
 
-	static public void main(String args[]){
+	public static void main(String[] args){
 		new OraMain().domain(args);
 	}
 
@@ -98,11 +99,7 @@ public class OraMain extends ch.ehi.ili2db.AbstractMain {
 	public String getJAR_NAME() {
 		return "ili2ora.jar";
 	}
-	/*
-	    * jdbc:postgresql:database
-	    * jdbc:postgresql://host/database
-	    * jdbc:postgresql://host:port/database
-	    */
+
 	protected void printConnectOptions() {
 		System.err.println("--dbhost  host         The host name of the server. Defaults to "+DB_HOST+".");
 		System.err.println("--dbport  port         The port number the server is listening on. Defaults to "+DB_PORT+".");
@@ -113,7 +110,7 @@ public class OraMain extends ch.ehi.ili2db.AbstractMain {
 		System.err.println("--geomwkb              Geometry as WKB (to be used if no Oracle Spatial).");
 		System.err.println("--geomwkt              Geometry as WKT (to be used if no Oracle Spatial).");
 	}
-	protected int doArgs(String args[],int argi,Config config)
+    protected int doArgs(String[] args,int argi,Config config)
 	{
 		String arg=args[argi];
 		if(arg.equals("--dbhost")){
