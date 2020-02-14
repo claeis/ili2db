@@ -33,12 +33,12 @@ public class GeneratorOracleSpatial extends GeneratorJdbc {
     public static final String GENERAL_TABLESPACE = "generalTablespace";
     public static final String INDEX_TABLESPACE="indexTablespace";
     public static final String LOB_TABLESPACE="lobTableSpace";
+    private static final int MAJOR_VERSION_SUPPORT_SEQ_AS_DEFAULT = 12;
+    private static final int MINOR_VERSION_SUPPORT_SEQ_AS_DEFAULT = 1;
 
     private String generalTableSpace;
     private String indexTablespace;
     private String lobTablespace;
-    private final int MAJOR_VERSION_SUPPORT_SEQ_AS_DEFAULT = 12;
-    private final int MINOR_VERSION_SUPPORT_SEQ_AS_DEFAULT = 1;
     private boolean useTriggerToSetT_id = true;
 
     private DbColumn primaryKeyDefaultValue=null;
@@ -178,73 +178,29 @@ public class GeneratorOracleSpatial extends GeneratorJdbc {
     @Override
     public void visitTableBeginConstraint(DbTable dbTab) throws IOException {
         super.visitTableBeginConstraint(dbTab);
-
-        String sqlTabName=dbTab.getName().getQName();
+        
         for(Iterator dbColi=dbTab.iteratorColumn();dbColi.hasNext();){
             DbColumn dbCol=(DbColumn) dbColi.next();
             if(dbCol.getReferencedTable()!=null){
-                String createstmt=null;
-                String action="";
-                if(dbCol.getOnUpdateAction()!=null){
-                    action=action+" ON UPDATE "+dbCol.getOnUpdateAction();
-                }
-                if(dbCol.getOnDeleteAction()!=null){
-                    action=action+" ON DELETE "+dbCol.getOnDeleteAction();
-                }
-                String constraintName=createConstraintName(dbTab,"fkey",dbCol.getName());
-
-                createstmt="ALTER TABLE "+sqlTabName+" ADD CONSTRAINT "+constraintName+" FOREIGN KEY ( "+dbCol.getName()+" ) REFERENCES "+dbCol.getReferencedTable().getQName();
-
-                String dropstmt=null;
-                dropstmt="ALTER TABLE "+sqlTabName+" DROP CONSTRAINT "+constraintName;
-
-                addConstraint(dbTab, constraintName,createstmt, dropstmt);
+                writeForeignKey(dbTab, dbCol);
             }
             
-            if(dbCol instanceof DbColNumber && (((DbColNumber)dbCol).getMinValue()!=null || ((DbColNumber)dbCol).getMaxValue()!=null)){
-                DbColNumber dbColNum=(DbColNumber)dbCol;
-                String createstmt=null;
-                String action="";
-                if(dbColNum.getMinValue()!=null || dbColNum.getMaxValue()!=null){
-                    if(dbColNum.getMaxValue()==null){
-                        action=">="+dbColNum.getMinValue();
-                    }else if(dbColNum.getMinValue()==null){
-                        action="<="+dbColNum.getMaxValue();
-                    }else{
-                        action="BETWEEN "+dbColNum.getMinValue()+" AND "+dbColNum.getMaxValue();
-                    }
-                }
-                String constraintName=createConstraintName(dbTab,"check",dbCol.getName());
+            String min=null;
+            String max=null;
 
-                createstmt="ALTER TABLE "+sqlTabName+" ADD CONSTRAINT "+constraintName+" CHECK( "+dbCol.getName()+" "+action+")";
-
-                String dropstmt=null;
-                dropstmt="ALTER TABLE "+sqlTabName+" DROP CONSTRAINT "+constraintName;
-
-                addConstraint(dbTab, constraintName,createstmt, dropstmt);
-
-             } else if(dbCol instanceof DbColDecimal && (((DbColDecimal)dbCol).getMinValue()!=null || ((DbColDecimal)dbCol).getMaxValue()!=null)){
-                DbColDecimal dbColNum=(DbColDecimal)dbCol;
-                String createstmt=null;
-                String action="";
-                if(dbColNum.getMinValue()!=null || dbColNum.getMaxValue()!=null){
-                    if(dbColNum.getMaxValue()==null){
-                        action=">="+dbColNum.getMinValue();
-                    }else if(dbColNum.getMinValue()==null){
-                        action="<="+dbColNum.getMaxValue();
-                    }else{
-                        action="BETWEEN "+dbColNum.getMinValue()+" AND "+dbColNum.getMaxValue();
-                    }
-                }
-                String constraintName=createConstraintName(dbTab,"check",dbCol.getName());
-
-                createstmt="ALTER TABLE "+sqlTabName+" ADD CONSTRAINT "+constraintName+" CHECK( "+dbCol.getName()+" "+action+")";
-
-                String dropstmt=null;
-                dropstmt="ALTER TABLE "+sqlTabName+" DROP CONSTRAINT "+constraintName;
-
-                addConstraint(dbTab, constraintName,createstmt, dropstmt);
+            if(dbCol instanceof DbColNumber) {
+                Integer minVal=((DbColNumber)dbCol).getMinValue();
+                Integer maxVal=((DbColNumber)dbCol).getMaxValue();
+                min=minVal!=null?minVal.toString():null;
+                max=maxVal!=null?maxVal.toString():null;
+             } else if(dbCol instanceof DbColDecimal){
+                Double minVal=((DbColDecimal)dbCol).getMinValue();
+                Double maxVal=((DbColDecimal)dbCol).getMaxValue();
+                min=minVal!=null?minVal.toString():null;
+                max=maxVal!=null?maxVal.toString():null;
             }
+            
+            writeValueRangeNumber(dbTab, dbCol, min, max);
         }
     }
 
@@ -376,6 +332,48 @@ public class GeneratorOracleSpatial extends GeneratorJdbc {
             String dropstmt="ALTER TABLE "+tab.getName()+" DROP CONSTRAINT "+constraintName;
             
             this.addConstraint(tab, constraintName, createstmt, dropstmt);
+        }
+    }
+    
+    private void writeForeignKey(DbTable dbTab, DbColumn dbCol) throws IOException {
+        String createstmt=null;
+        String action="";
+        String sqlTabName=dbTab.getName().getQName();
+        
+        if(dbCol.getOnUpdateAction()!=null){
+            action=action+" ON UPDATE "+dbCol.getOnUpdateAction();
+        }
+        if(dbCol.getOnDeleteAction()!=null){
+            action=action+" ON DELETE "+dbCol.getOnDeleteAction();
+        }
+        String constraintName=createConstraintName(dbTab,"fkey",dbCol.getName());
+
+        createstmt="ALTER TABLE "+sqlTabName+" ADD CONSTRAINT "+constraintName+" FOREIGN KEY ( "+dbCol.getName()+" ) REFERENCES "+dbCol.getReferencedTable().getQName();
+
+        String dropstmt=null;
+        dropstmt="ALTER TABLE "+sqlTabName+" DROP CONSTRAINT "+constraintName;
+
+        addConstraint(dbTab, constraintName,createstmt, dropstmt);
+    }
+    
+    private void writeValueRangeNumber(DbTable dbTab, DbColumn dbCol, String min, String max) throws IOException {
+        if(min!=null||max!=null) {
+            String sqlTabName=dbTab.getName().getQName();
+            String action="";
+            
+            if(max==null){
+                action=">="+min;
+            }else if(min==null){
+                action="<="+max;
+            }else{
+                action="BETWEEN "+min+" AND "+max;
+            }
+    
+            String constraintName=createConstraintName(dbTab,"check",dbCol.getName());
+            String createstmt="ALTER TABLE "+sqlTabName+" ADD CONSTRAINT "+constraintName+" CHECK( "+dbCol.getName()+" "+action+")";
+            String dropstmt="ALTER TABLE "+sqlTabName+" DROP CONSTRAINT "+constraintName;
+    
+            addConstraint(dbTab, constraintName,createstmt, dropstmt);
         }
     }
     
