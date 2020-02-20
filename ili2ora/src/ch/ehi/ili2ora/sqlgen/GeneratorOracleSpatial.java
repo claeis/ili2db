@@ -212,8 +212,12 @@ public class GeneratorOracleSpatial extends GeneratorJdbc {
 
         if(primaryKeyDefaultValue != null) {
             String fieldName = primaryKeyDefaultValue.getName();
+            String triggerName="trg_" + tab.getName().getName() +"_"+ fieldName;
+            if(tab.getName().getSchema()!=null){
+                triggerName=tab.getName().getSchema()+"."+triggerName;
+            }
             StringBuilder trgQuery = new StringBuilder();
-            trgQuery.append(getIndent() + "CREATE OR REPLACE TRIGGER trg_" + tab.getName().getName() +"_"+ fieldName + newline());
+            trgQuery.append(getIndent() + "CREATE OR REPLACE TRIGGER "+ triggerName + newline());
             trgQuery.append(getIndent() + "BEFORE INSERT ON " + sqlTabName + newline()); 
             trgQuery.append(getIndent() + "FOR EACH ROW" + newline());
             trgQuery.append(getIndent() + "BEGIN" + newline());
@@ -345,7 +349,7 @@ public class GeneratorOracleSpatial extends GeneratorJdbc {
         String constraintName=createConstraintName(dbTab,"fkey",dbCol.getName());
 
         createstmt="ALTER TABLE "+sqlTabName+" ADD CONSTRAINT "+constraintName+" FOREIGN KEY ( "+dbCol.getName()+" ) REFERENCES "+dbCol.getReferencedTable().getQName()+action;
-
+        createstmt+=" INITIALLY DEFERRED";
         String dropstmt=null;
         dropstmt="ALTER TABLE "+sqlTabName+" DROP CONSTRAINT "+constraintName;
 
