@@ -168,5 +168,8 @@ public class OraMain extends ch.ehi.ili2db.AbstractMain {
 	@Override
 	protected void printSpecificOptions() {
         System.err.println("--dbschema  schema     The name of the schema in the database. Defaults to not set.");
+        System.err.println("--generalTablespace tablespace  Tablespace to be used in general: tables, indexes, and large objects (lobs).");
+        System.err.println("--indexTablespace tablespace    Tablespace for indexes: unique constraints and primary keys. Overrides general tablespace for index.");
+        System.err.println("--lobTablespace tablespace      Tablespace for large objects: blob, clob, nclob, and bfile datatypes. Overrides general tablespace for lobs.");
 	}
 }
