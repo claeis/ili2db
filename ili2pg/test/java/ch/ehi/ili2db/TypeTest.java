@@ -42,6 +42,7 @@ public class TypeTest {
 		return config;
 	}
 
+
     @Test
     public void columnPropType() throws Exception {
         Connection jdbcConnection = null;
@@ -71,48 +72,7 @@ public class TypeTest {
 
             Assert.assertTrue(rs.next());
             String setting = rs.getString(1);
-            Assert.assertTrue(setting.contains("classa1"));
-            Assert.assertTrue(setting.contains("classa1b"));
-            Assert.assertTrue(setting.contains("classa1c"));
-            Assert.assertFalse(setting.contains("classa1d"));
-
-        }finally{
-			if(jdbcConnection != null){
-				jdbcConnection.close();
-			}
-		}
-    }
-
-    @Test
-    public void columnPropTypeJsonSorted() throws Exception {
-        Connection jdbcConnection = null;
-        Statement stmt = null;
-
-		try{
-			Class driverClass = Class.forName("org.postgresql.Driver");
-	        jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
-	        stmt=jdbcConnection.createStatement();
-	        stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");
-
-            File data = new File(TEST_DATA_DIR, "ClassType.ili");
-            Config config = initConfig(data.getPath(), DBSCHEMA,data.getPath()+".log");
-            config.setFunction(Config.FC_SCHEMAIMPORT);
-            config.setCreateMetaInfo(true);
-
-            Ili2db.readSettingsFromDb(config);
-            Ili2db.run(config, null);
-
-            String query = "SELECT setting FROM "+DBSCHEMA+"."+DbNames.META_INFO_COLUMN_TAB+
-                " WHERE "+DbNames.META_INFO_COLUMN_TAB_TAG_COL+" = 'ch.ehi.ili2db.types' and "
-                + DbNames.META_INFO_COLUMN_TAB_COLUMNNAME_COL+" = 'T_Type' and "
-                + DbNames.META_INFO_TABLE_TAB_TABLENAME_COL+" = 'classa1';";
-
-            Assert.assertTrue(stmt.execute(query));
-            ResultSet rs = stmt.getResultSet();
-
-            Assert.assertTrue(rs.next());
-            String setting = rs.getString(1);
-            Assert.assertEquals("[\"classa1\",\"classa1b\",\"classa1c\"]", setting);
+            Assert.assertEquals("[\"classa1\",\"classa1b\",\"classa1c\",\"classa1d\"]", setting);
 
         }finally{
 			if(jdbcConnection != null){
@@ -150,6 +110,7 @@ public class TypeTest {
             Assert.assertTrue(constraint.contains("classa1"));
             Assert.assertTrue(constraint.contains("classa1b"));
             Assert.assertTrue(constraint.contains("classa1c"));
+            Assert.assertTrue(constraint.contains("classa1d"));
 
         }finally{
 			if(jdbcConnection != null){

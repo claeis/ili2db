@@ -14,8 +14,12 @@ MODEL Dataset1
     CLASS ClassA1c EXTENDS ClassA1 =
     END ClassA1c;
 
-    CLASS ClassA1d (ABSTRACT) EXTENDS ClassA1 =
+    CLASS ClassA1abstract (ABSTRACT) EXTENDS ClassA1 =
+    END ClassA1abstract;
+    
+    CLASS ClassA1d EXTENDS ClassA1abstract =
     END ClassA1d;
+
 
   END TestA;
 
