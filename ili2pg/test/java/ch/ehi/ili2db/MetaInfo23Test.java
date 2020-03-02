@@ -526,7 +526,7 @@ public class MetaInfo23Test {
             Ili2db.readSettingsFromDb(config);
             Ili2db.run(config, null);
 
-            String query = "SELECT pg_catalog.pg_get_constraintdef(r.oid, true) as condef FROM pg_catalog.pg_constraint r WHERE r.conrelid = 'classtype.classa1'::regclass AND r.contype = 'c';";
+            String query = "SELECT pg_catalog.pg_get_constraintdef(r.oid, true) as condef FROM pg_catalog.pg_constraint r WHERE r.conrelid = '"+DBSCHEMA.toLowerCase()+".classa1'::regclass AND r.contype = 'c';";
 
             Assert.assertTrue(stmt.execute(query));
             ResultSet rs = stmt.getResultSet();
