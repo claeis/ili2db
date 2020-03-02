@@ -1535,7 +1535,7 @@ public class Assoc23Test {
     public void updateXtfwithoutBid() throws Exception
     {
         importXtfwithoutBid();
-        EhiLogger.getInstance().setTraceFilter(false);
+        //EhiLogger.getInstance().setTraceFilter(false);
         Connection jdbcConnection=null;
         try{
             Class driverClass = Class.forName("org.postgresql.Driver");

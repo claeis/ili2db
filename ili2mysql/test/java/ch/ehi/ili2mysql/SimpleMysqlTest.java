@@ -20,7 +20,7 @@ public class SimpleMysqlTest extends ch.ehi.ili2db.SimpleTest {
     @Test
     public void importXtfCoord() throws Exception
     {
-        ch.ehi.basics.logging.EhiLogger.getInstance().setTraceFilter(false);
+        //ch.ehi.basics.logging.EhiLogger.getInstance().setTraceFilter(false);
         super.importXtfCoord();
     }    
 	

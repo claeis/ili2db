@@ -504,7 +504,7 @@ public abstract class TranslationTest {
             jdbcConnection = setup.createConnection();
 	        Statement stmt=jdbcConnection.createStatement();
 			
-			EhiLogger.getInstance().setTraceFilter(false);
+			//EhiLogger.getInstance().setTraceFilter(false);
 			File data=new File(TEST_OUT,"EnumOka-out.xtf");
 			Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
 			config.setFunction(Config.FC_EXPORT);
@@ -597,7 +597,7 @@ public abstract class TranslationTest {
             jdbcConnection = setup.createConnection();
             Statement stmt=jdbcConnection.createStatement();
             
-            EhiLogger.getInstance().setTraceFilter(false);
+            //EhiLogger.getInstance().setTraceFilter(false);
             File data=new File(TEST_OUT,"EnumOka-out.xtf");
             Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
             config.setFunction(Config.FC_EXPORT);

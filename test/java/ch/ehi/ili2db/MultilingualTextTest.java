@@ -74,7 +74,7 @@ public abstract class MultilingualTextTest {
             importIliSmartChbase();
 	        
 	    }
-	    EhiLogger.getInstance().setTraceFilter(false);
+	    //EhiLogger.getInstance().setTraceFilter(false);
         File data=new File(TEST_OUT,"MultilingualText1a.xtf");
         Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
         config.setFunction(Config.FC_IMPORT);
@@ -196,7 +196,7 @@ public abstract class MultilingualTextTest {
 			config.setModels("MultilingualText1");
 			config.setFunction(Config.FC_EXPORT);
 			config.setExportTid(true);
-			EhiLogger.getInstance().setTraceFilter(false);
+			//EhiLogger.getInstance().setTraceFilter(false);
 			Ili2db.readSettingsFromDb(config);
 			Ili2db.run(config,null);
 			
