@@ -35,6 +35,7 @@ import ch.interlis.iox.StartTransferEvent;
 //-Ddburl=jdbc:postgresql:dbname -Ddbusr=usrname -Ddbpwd=1234
 public class MetaInfo23Test {
 	private static final String DBSCHEMA = "MetaInfo23";
+    private static final String TEST_DATA_DIR = "test/data/MetaInfo";
 	String dburl=System.getProperty("dburl"); 
 	String dbuser=System.getProperty("dbusr");
 	String dbpwd=System.getProperty("dbpwd"); 
@@ -71,7 +72,7 @@ public class MetaInfo23Test {
 	        stmt=jdbcConnection.createStatement();
 			stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");
 			{
-				File data=new File("test/data/MetaInfo/MetaInfo23.ili");
+				File data=new File(TEST_DATA_DIR,"MetaInfo23.ili");
 				Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 				config.setFunction(Config.FC_SCHEMAIMPORT);
 				config.setCreateFk(Config.CREATE_FK_YES);
@@ -173,7 +174,7 @@ public class MetaInfo23Test {
             stmt=jdbcConnection.createStatement();
             stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");
             {
-                File data=new File("test/data/MetaInfo/Assoc23.ili");
+                File data=new File(TEST_DATA_DIR,"Assoc23.ili");
                 Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
                 config.setFunction(Config.FC_SCHEMAIMPORT);
                 config.setCreateFk(Config.CREATE_FK_YES);
@@ -282,7 +283,7 @@ public class MetaInfo23Test {
             stmt=jdbcConnection.createStatement();
             stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");
             {
-                File data=new File("test/data/MetaInfo/Bag23.ili");
+                File data=new File(TEST_DATA_DIR,"Bag23.ili");
                 Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
                 config.setFunction(Config.FC_SCHEMAIMPORT);
                 config.setCreateFk(Config.CREATE_FK_YES);
@@ -367,7 +368,7 @@ public class MetaInfo23Test {
             stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");
             {
                 
-                File data=new File("test/data/MetaInfo/MetaInfo23a.xtf");
+                File data=new File(TEST_DATA_DIR,"MetaInfo23a.xtf");
                 {
                     Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
                     config.setFunction(Config.FC_IMPORT);
@@ -464,6 +465,81 @@ public class MetaInfo23Test {
             }
         }finally{
             if(jdbcConnection!=null){
+                jdbcConnection.close();
+            }
+        }
+    }
+    @Test
+    public void importIliT_TypeColumnProp() throws Exception {
+        Connection jdbcConnection = null;
+        Statement stmt = null;
+
+        try{
+            Class driverClass = Class.forName("org.postgresql.Driver");
+            jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
+            stmt=jdbcConnection.createStatement();
+            stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");
+
+            File data = new File(TEST_DATA_DIR, "T_Type23.ili");
+            Config config = initConfig(data.getPath(), DBSCHEMA,data.getPath()+".log");
+            config.setFunction(Config.FC_SCHEMAIMPORT);
+            config.setCreateMetaInfo(true);
+
+            Ili2db.readSettingsFromDb(config);
+            Ili2db.run(config, null);
+
+            String query = "SELECT setting FROM "+DBSCHEMA+"."+DbNames.META_INFO_COLUMN_TAB+
+                " WHERE "+DbNames.META_INFO_COLUMN_TAB_TAG_COL+" = 'ch.ehi.ili2db.types' and "
+                + DbNames.META_INFO_COLUMN_TAB_COLUMNNAME_COL+" = 'T_Type' and "
+                + DbNames.META_INFO_TABLE_TAB_TABLENAME_COL+" = 'classa1';";
+
+            Assert.assertTrue(stmt.execute(query));
+            ResultSet rs = stmt.getResultSet();
+
+            Assert.assertTrue(rs.next());
+            String setting = rs.getString(1);
+            Assert.assertEquals("[\"classa1\",\"classa1b\",\"classa1c\",\"classa1d\"]", setting);
+
+        }finally{
+            if(jdbcConnection != null){
+                jdbcConnection.close();
+            }
+        }
+    }
+
+    @Test
+    public void importIliT_TypeConstraint() throws Exception {
+        Connection jdbcConnection = null;
+        Statement stmt = null;
+
+        try{
+            Class driverClass = Class.forName("org.postgresql.Driver");
+            jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
+            stmt=jdbcConnection.createStatement();
+            stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");
+
+            File data = new File(TEST_DATA_DIR, "T_Type23.ili");
+            Config config = initConfig(data.getPath(), DBSCHEMA,data.getPath()+".log");
+            config.setFunction(Config.FC_SCHEMAIMPORT);
+            config.setCreateTypeConstraint(true);
+
+            Ili2db.readSettingsFromDb(config);
+            Ili2db.run(config, null);
+
+            String query = "SELECT pg_catalog.pg_get_constraintdef(r.oid, true) as condef FROM pg_catalog.pg_constraint r WHERE r.conrelid = '"+DBSCHEMA.toLowerCase()+".classa1'::regclass AND r.contype = 'c';";
+
+            Assert.assertTrue(stmt.execute(query));
+            ResultSet rs = stmt.getResultSet();
+
+            Assert.assertTrue(rs.next());
+            String constraint = rs.getString(1);
+            Assert.assertTrue(constraint.contains("classa1"));
+            Assert.assertTrue(constraint.contains("classa1b"));
+            Assert.assertTrue(constraint.contains("classa1c"));
+            Assert.assertTrue(constraint.contains("classa1d"));
+
+        }finally{
+            if(jdbcConnection != null){
                 jdbcConnection.close();
             }
         }

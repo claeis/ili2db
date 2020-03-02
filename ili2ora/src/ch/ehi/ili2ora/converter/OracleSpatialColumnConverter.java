@@ -18,36 +18,44 @@ import ch.interlis.iox_j.wkb.Wkb2iox;
 public class OracleSpatialColumnConverter extends AbstractWKBColumnConverter {
     
     private boolean strokeArcs=true;
-    
+    private String geomFromWkbFunction;
+
     @Override
     public void setup(Connection conn, Settings config) {
         super.setup(conn,config);
         strokeArcs=Config.STROKE_ARCS_ENABLE.equals(Config.getStrokeArcs(config));
+        geomFromWkbFunction="ILI2ORA_SDO_GEOMETRY";
+        if(config instanceof Config) {
+            String dbschema=((Config)config).getDbschema();
+            if(dbschema!=null) {
+                geomFromWkbFunction=dbschema+"."+geomFromWkbFunction;
+            }
+        }
     }
 
     @Override
     public String getInsertValueWrapperCoord(String wkfValue,int srid) {
-        return "ILI2ORA_SDO_GEOMETRY(" + wkfValue + ", "+ Integer.toString(srid)  + ")";
+        return geomFromWkbFunction+"(" + wkfValue + ", "+ Integer.toString(srid)  + ")";
     }
     @Override
     public String getInsertValueWrapperPolyline(String wkfValue,int srid) {
-        return "ILI2ORA_SDO_GEOMETRY(" + wkfValue + ", "+ Integer.toString(srid)  + ")";
+        return geomFromWkbFunction+"(" + wkfValue + ", "+ Integer.toString(srid)  + ")";
     }
     @Override
     public String getInsertValueWrapperSurface(String wkfValue,int srid) {
-        return "ILI2ORA_SDO_GEOMETRY(" + wkfValue + ", "+ Integer.toString(srid)  + ")";
+        return geomFromWkbFunction+"(" + wkfValue + ", "+ Integer.toString(srid)  + ")";
     }
     @Override
     public String getInsertValueWrapperMultiSurface(String wkfValue,int srid) {
-        return "ILI2ORA_SDO_GEOMETRY(" + wkfValue + ", "+ Integer.toString(srid)  + ")";
+        return geomFromWkbFunction+"(" + wkfValue + ", "+ Integer.toString(srid)  + ")";
     }
     @Override
     public String getInsertValueWrapperMultiPolyline(String wkfValue,int srid) {
-        return "ILI2ORA_SDO_GEOMETRY(" + wkfValue + ", "+ Integer.toString(srid)  + ")";
+        return geomFromWkbFunction+"(" + wkfValue + ", "+ Integer.toString(srid)  + ")";
     }
     @Override
     public String getInsertValueWrapperMultiCoord(String wkfValue,int srid) {
-        return "ILI2ORA_SDO_GEOMETRY(" + wkfValue + ", "+ Integer.toString(srid)  + ")";
+        return geomFromWkbFunction+"(" + wkfValue + ", "+ Integer.toString(srid)  + ")";
     }
     @Override
     public String getSelectValueWrapperCoord(String dbNativeValue) {
