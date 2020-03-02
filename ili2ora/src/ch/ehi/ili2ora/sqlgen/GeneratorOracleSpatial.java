@@ -323,7 +323,7 @@ public class GeneratorOracleSpatial extends GeneratorJdbc {
         
         if(constraintCols!=null) {
             String constraintName=createConstraintName(tab,"pkey",constraintCols);
-            String createstmt="ALTER TABLE "+tab.getName()+" ADD CONSTRAINT "+constraintName+" PRIMARY KEY("+String.join(",", constraintCols)+")";
+            String createstmt="ALTER TABLE "+tab.getName()+" ADD CONSTRAINT "+constraintName+" PRIMARY KEY("+StringJoin(",", constraintCols)+")";
             if(indexTablespace!=null) {
                 createstmt+=" USING INDEX TABLESPACE "+indexTablespace;
             } else if(generalTableSpace!=null) {
@@ -335,6 +335,16 @@ public class GeneratorOracleSpatial extends GeneratorJdbc {
         }
     }
     
+    private String StringJoin(String sep, String[] eles) {
+        StringBuffer ret=new StringBuffer();
+        ret.append(eles[0]);
+        for(int i=1;i<eles.length;i++) {
+            ret.append(sep);
+            ret.append(eles[i]);
+        }
+        return ret.toString();
+    }
+
     private void writeForeignKey(DbTable dbTab, DbColumn dbCol) throws IOException {
         String createstmt=null;
         String action="";
