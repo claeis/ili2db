@@ -6,7 +6,7 @@ import ch.ehi.ili2db.AbstractTestSetup;
 import ch.ehi.ili2db.SimpleTest;
 
 public class SimpleMsSqlTest extends SimpleTest {
-    private final static String DBSCHEMA="simple";
+    private static final String DBSCHEMA="simple";
     @Override
     protected AbstractTestSetup createTestSetup() {
         String dburl=System.getProperty("dburl"); 

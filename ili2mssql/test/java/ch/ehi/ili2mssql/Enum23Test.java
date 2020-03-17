@@ -2,7 +2,7 @@ package ch.ehi.ili2mssql;
 
 import ch.ehi.ili2db.AbstractTestSetup;
 
-public class EnumTest23 extends ch.ehi.ili2db.Enum23Test {
+public class Enum23Test extends ch.ehi.ili2db.Enum23Test {
     private static final String DBSCHEMA = "Enum23";
 
     @Override
