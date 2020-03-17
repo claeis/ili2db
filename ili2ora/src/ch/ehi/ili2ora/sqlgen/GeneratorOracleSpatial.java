@@ -45,50 +45,17 @@ public class GeneratorOracleSpatial extends GeneratorJdbc {
     
     private List<DbColumn> lobCols;
 
-	@Override
-	public void visitColumn(DbTable dbTab,DbColumn column) throws IOException {
-		String type="";
-		
-		if(column instanceof DbColBoolean){
-			type="NUMBER(1)";
-		}else if(column instanceof DbColDateTime){
-			type="TIMESTAMP";
-		}else if(column instanceof DbColDate){
-			type="DATE";
-		}else if(column instanceof DbColTime){
-			type="TIME";
-		}else if(column instanceof DbColDecimal){
-			DbColDecimal col=(DbColDecimal)column;
-			type="DECIMAL("+Integer.toString(col.getSize())+","+Integer.toString(col.getPrecision())+")";
-		}else if(column instanceof DbColGeometry){
-			type="MDSYS.SDO_GEOMETRY";
-		}else if(column instanceof DbColId){
-			type="NUMBER(9)";
-		}else if(column instanceof DbColUuid){
-			type="VARCHAR2(36)";
-		}else if(column instanceof DbColNumber){
-			DbColNumber col=(DbColNumber)column;
-			type="NUMBER("+Integer.toString(col.getSize())+")";
-		}else if(column instanceof DbColVarchar){
-			int colsize=((DbColVarchar)column).getSize();
-			
-			if(colsize!=DbColVarchar.UNLIMITED) {
-				type="VARCHAR2("+Integer.toString(colsize)+")";
-			}else {
-				type="CLOB";
-                lobCols.add(column);
-			}
-		}else{
-			type="VARCHAR2(20)";
-		}
-		String isNull=column.isNotNull()?"NOT NULL":"NULL";
+    @Override
+    public void visitColumn(DbTable dbTab,DbColumn column) throws IOException {
+        String type=getOraType(column);
+        String isNull=column.isNotNull()?"NOT NULL":"NULL";
+        
         if(column instanceof DbColId && ((DbColId)column).isPrimaryKey()){
             primaryKeyCol=column;
         }
-
         String defaultValue="";
         if(column.getDefaultValue()!=null){
-            defaultValue=" "+"DEFAULT " + column.getDefaultValue();
+            defaultValue=" DEFAULT " + column.getDefaultValue();
             
             if(column.isPrimaryKey() && useTriggerToSetTId) {
                 defaultValue = "";
@@ -96,15 +63,15 @@ public class GeneratorOracleSpatial extends GeneratorJdbc {
             }
         }
 
-		String name=column.getName();
-		
-		if(name.equals(DbNames.MODELS_TAB_FILENAME_COL_VER3) && dbTab.getName().getName().equals(DbNames.MODELS_TAB)) {
-			name = "\"" + name + "\"";
-		}
-		
+        String name=column.getName();
+        
+        if(name.equals(DbNames.MODELS_TAB_FILENAME_COL_VER3) && dbTab.getName().getName().equals(DbNames.MODELS_TAB)) {
+            name = "\"" + name + "\"";
+        }
+        
         out.write(getIndent()+colSep+name+" "+type+defaultValue+" "+isNull+newline());
-		colSep=",";
-	}
+        colSep=",";
+    }
 
     @Override
     public void visitSchemaBegin(Settings config, DbSchema schema) throws IOException {
@@ -181,64 +148,23 @@ public class GeneratorOracleSpatial extends GeneratorJdbc {
             if(dbCol.getReferencedTable()!=null){
                 writeForeignKey(dbTab, dbCol);
             }
-            
-            String min=null;
-            String max=null;
-
-            if(dbCol instanceof DbColNumber) {
-                Integer minVal=((DbColNumber)dbCol).getMinValue();
-                Integer maxVal=((DbColNumber)dbCol).getMaxValue();
-                min=minVal!=null?minVal.toString():null;
-                max=maxVal!=null?maxVal.toString():null;
-             } else if(dbCol instanceof DbColDecimal){
-                Double minVal=((DbColDecimal)dbCol).getMinValue();
-                Double maxVal=((DbColDecimal)dbCol).getMaxValue();
-                min=minVal!=null?minVal.toString():null;
-                max=maxVal!=null?maxVal.toString():null;
-            }
-            
-            writeValueRangeNumber(dbTab, dbCol, min, max);
+            writeValueRangeNumber(dbTab, dbCol);
         }
     }
 
    @Override
     public void visit1TableEnd(DbTable tab) throws IOException {
-
-        String sqlTabName=tab.getName().toString();
         
         boolean tableExists=DbUtility.tableExists(conn,tab.getName());
         executeCreateTable(tab);
         writePrimaryKey(tab);
 
         if(primaryKeyDefaultValue != null) {
-            String fieldName = primaryKeyDefaultValue.getName();
-            String triggerName="trg_" + tab.getName().getName() +"_"+ fieldName;
-            if(tab.getName().getSchema()!=null){
-                triggerName=tab.getName().getSchema()+"."+triggerName;
-            }
-            StringBuilder trgQuery = new StringBuilder();
-            trgQuery.append(getIndent() + "CREATE OR REPLACE TRIGGER "+ triggerName + newline());
-            trgQuery.append(getIndent() + "BEFORE INSERT ON " + sqlTabName + newline()); 
-            trgQuery.append(getIndent() + "FOR EACH ROW" + newline());
-            trgQuery.append(getIndent() + "BEGIN" + newline());
-            inc_ind();
-            trgQuery.append(getIndent() + "IF (:NEW."+ fieldName +" is NULL) THEN" + newline());
-            inc_ind();
-            trgQuery.append(getIndent() + ":NEW." + fieldName +" := " + primaryKeyDefaultValue.getDefaultValue() + ";" + newline());
-            dec_ind();
-            trgQuery.append(getIndent() + "END IF;" + newline());
-            dec_ind();
-            trgQuery.append(getIndent() + "END;");
-            
-            String strTrgQuery = trgQuery.toString();
-            addCreateLine(new Stmt(strTrgQuery));
-            
-            if(conn!=null) {
-                executeStatement(strTrgQuery, "Failed to add default value to "+tab.getName() + "." + fieldName);
-            }
+            writeDefaultValueForPrimaryKey(tab);
             primaryKeyDefaultValue = null;
         }
 
+        String sqlTabName=tab.getName().toString();
         String cmt=tab.getComment();
         if(cmt!=null){
             cmt="COMMENT ON TABLE "+sqlTabName+" IS '"+escapeString(cmt)+"'";
@@ -323,7 +249,7 @@ public class GeneratorOracleSpatial extends GeneratorJdbc {
         
         if(constraintCols!=null) {
             String constraintName=createConstraintName(tab,"pkey",constraintCols);
-            String createstmt="ALTER TABLE "+tab.getName()+" ADD CONSTRAINT "+constraintName+" PRIMARY KEY("+StringJoin(",", constraintCols)+")";
+            String createstmt="ALTER TABLE "+tab.getName()+" ADD CONSTRAINT "+constraintName+" PRIMARY KEY("+stringJoin(",", constraintCols)+")";
             if(indexTablespace!=null) {
                 createstmt+=" USING INDEX TABLESPACE "+indexTablespace;
             } else if(generalTableSpace!=null) {
@@ -335,8 +261,37 @@ public class GeneratorOracleSpatial extends GeneratorJdbc {
         }
     }
     
-    private String StringJoin(String sep, String[] eles) {
-        StringBuffer ret=new StringBuffer();
+    private void writeDefaultValueForPrimaryKey(DbTable tab) throws IOException {
+        String sqlTabName=tab.getName().toString();
+        String fieldName = primaryKeyDefaultValue.getName();
+        String triggerName="trg_" + tab.getName().getName() +"_"+ fieldName;
+        if(tab.getName().getSchema()!=null){
+            triggerName=tab.getName().getSchema()+"."+triggerName;
+        }
+        StringBuilder trgQuery = new StringBuilder();
+        trgQuery.append(getIndent() + "CREATE OR REPLACE TRIGGER "+ triggerName + newline());
+        trgQuery.append(getIndent() + "BEFORE INSERT ON " + sqlTabName + newline()); 
+        trgQuery.append(getIndent() + "FOR EACH ROW" + newline());
+        trgQuery.append(getIndent() + "BEGIN" + newline());
+        inc_ind();
+        trgQuery.append(getIndent() + "IF (:NEW."+ fieldName +" is NULL) THEN" + newline());
+        inc_ind();
+        trgQuery.append(getIndent() + ":NEW." + fieldName +" := " + primaryKeyDefaultValue.getDefaultValue() + ";" + newline());
+        dec_ind();
+        trgQuery.append(getIndent() + "END IF;" + newline());
+        dec_ind();
+        trgQuery.append(getIndent() + "END;");
+        
+        String strTrgQuery = trgQuery.toString();
+        addCreateLine(new Stmt(strTrgQuery));
+        
+        if(conn!=null) {
+            executeStatement(strTrgQuery, "Failed to add default value to "+tab.getName() + "." + fieldName);
+        }
+    }
+    
+    private String stringJoin(String sep, String[] eles) {
+        StringBuilder ret=new StringBuilder();
         ret.append(eles[0]);
         for(int i=1;i<eles.length;i++) {
             ret.append(sep);
@@ -366,7 +321,9 @@ public class GeneratorOracleSpatial extends GeneratorJdbc {
         addConstraint(dbTab, constraintName,createstmt, dropstmt);
     }
     
-    private void writeValueRangeNumber(DbTable dbTab, DbColumn dbCol, String min, String max) throws IOException {
+    private void writeValueRangeNumber(DbTable dbTab, DbColumn dbCol) throws IOException {
+        String min=getMinValue(dbCol);
+        String max=getMaxValue(dbCol);
         if(min!=null||max!=null) {
             String sqlTabName=dbTab.getName().getQName();
             String action="";
@@ -387,6 +344,67 @@ public class GeneratorOracleSpatial extends GeneratorJdbc {
         }
     }
     
+    private String getMinValue(DbColumn dbCol) {
+        String result=null;
+        if(dbCol instanceof DbColNumber) {
+            Integer minVal=((DbColNumber)dbCol).getMinValue();
+            result=minVal!=null?minVal.toString():null;
+         } else if(dbCol instanceof DbColDecimal){
+            Double minVal=((DbColDecimal)dbCol).getMinValue();
+            result=minVal!=null?minVal.toString():null;
+        }
+        return result;
+    }
+
+    private String getMaxValue(DbColumn dbCol) {
+        String result=null;
+        if(dbCol instanceof DbColNumber) {
+            Integer maxVal=((DbColNumber)dbCol).getMaxValue();
+            result=maxVal!=null?maxVal.toString():null;
+         } else if(dbCol instanceof DbColDecimal){
+            Double maxVal=((DbColDecimal)dbCol).getMaxValue();
+            result=maxVal!=null?maxVal.toString():null;
+        }
+        return result;
+    }
+
+    private String getOraType(DbColumn column) {
+        String type;
+        if(column instanceof DbColBoolean){
+            type="NUMBER(1)";
+        }else if(column instanceof DbColDateTime){
+            type="TIMESTAMP";
+        }else if(column instanceof DbColDate){
+            type="DATE";
+        }else if(column instanceof DbColTime){
+            type="TIME";
+        }else if(column instanceof DbColDecimal){
+            DbColDecimal col=(DbColDecimal)column;
+            type="DECIMAL("+Integer.toString(col.getSize())+","+Integer.toString(col.getPrecision())+")";
+        }else if(column instanceof DbColGeometry){
+            type="MDSYS.SDO_GEOMETRY";
+        }else if(column instanceof DbColId){
+            type="NUMBER(9)";
+        }else if(column instanceof DbColUuid){
+            type="VARCHAR2(36)";
+        }else if(column instanceof DbColNumber){
+            DbColNumber col=(DbColNumber)column;
+            type="NUMBER("+Integer.toString(col.getSize())+")";
+        }else if(column instanceof DbColVarchar){
+            int colsize=((DbColVarchar)column).getSize();
+            
+            if(colsize!=DbColVarchar.UNLIMITED) {
+                type="VARCHAR2("+Integer.toString(colsize)+")";
+            }else {
+                type="CLOB";
+                lobCols.add(column);
+            }
+        }else{
+            type="VARCHAR2(20)";
+        }
+        return type;
+    }
+
     private void executeStatement(String cmt, String errorMessage) throws IOException {
         Statement dbstmt = null;
         try{
