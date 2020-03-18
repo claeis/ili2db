@@ -50,32 +50,29 @@ public class OraMain extends ch.ehi.ili2db.AbstractMain {
 				/*
 				 *  jdbc:oracle:thin:@myhost:1521:orcl
 				    */
-				String sid = config.getDbdatabase();
-				
-				// no option selected
-				if((sid == null || sid.isEmpty()) && (dbservice == null || dbservice.isEmpty())) {
+                String sid = config.getDbdatabase();
+                // no option selected
+                if(isNullOrEmpty(sid) && isNullOrEmpty(dbservice)) {
                     EhiLogger.logError("SID or Service must be specified");
                     return null;
-				}
-				// two options selected: service and database
-				if((sid != null && !sid.isEmpty()) && (dbservice != null && !dbservice.isEmpty())) {
+                    }
+                // two options selected: service and database
+                if(!isNullOrEmpty(sid) && !isNullOrEmpty(dbservice)) {
                     EhiLogger.logError("SID or Service must be specified but not both");
                     return null;
-				}
-				
-				
-				String strDbHost = config.getDbhost()!=null&&!config.getDbhost().isEmpty()? config.getDbhost() : DB_HOST;
-				String strPort = config.getDbport()!=null && !config.getDbport().isEmpty()? config.getDbport() : DB_PORT;
-				String strDbdatabase = sid != null && !sid.isEmpty()? ":" + sid : "";
-				String strService = dbservice != null && !dbservice.isEmpty()? "/" + dbservice : "";
-				
-				String subProtocol = "jdbc:oracle:thin:@";
-				
-				if(dbservice != null && !dbservice.isEmpty()) {
-					subProtocol += "//";
-				}
-				
-				return subProtocol + strDbHost + ":" + strPort + strDbdatabase + strService;
+                }
+
+                String strDbHost = !isNullOrEmpty(config.getDbhost())? config.getDbhost() : DB_HOST;
+                String strPort = !isNullOrEmpty(config.getDbport())? config.getDbport() : DB_PORT;
+                String strDbdatabase = !isNullOrEmpty(sid)? ":" + sid : "";
+                String strService = !isNullOrEmpty(dbservice)? "/" + dbservice : "";
+                String subProtocol = "jdbc:oracle:thin:@";
+                
+                if(!strService.isEmpty()) {
+                    subProtocol += "//";
+                }
+                
+                return subProtocol + strDbHost + ":" + strPort + strDbdatabase + strService;
 			}
 		};
 	}
@@ -165,11 +162,15 @@ public class OraMain extends ch.ehi.ili2db.AbstractMain {
 		
 		return argi;
 	}
-	@Override
-	protected void printSpecificOptions() {
+    @Override
+    protected void printSpecificOptions() {
         System.err.println("--dbschema  schema     The name of the schema in the database. Defaults to not set.");
         System.err.println("--generalTablespace tablespace  Tablespace to be used in general: tables, indexes, and large objects (lobs).");
         System.err.println("--indexTablespace tablespace    Tablespace for indexes: unique constraints and primary keys. Overrides general tablespace for index.");
         System.err.println("--lobTablespace tablespace      Tablespace for large objects: blob, clob, nclob, and bfile datatypes. Overrides general tablespace for lobs.");
-	}
+    }
+    
+    private boolean isNullOrEmpty(String str) {
+        return str==null||str.isEmpty();
+    }
 }

@@ -12,7 +12,7 @@ import ch.ehi.sqlgen.repository.DbTableName;
 
 public class OraSequenceBasedIdGen implements DbIdGen {
 
-	public final static String SQL_ILI2DB_SEQ_NAME="t_ili2db_seq";
+	public static final String SQL_ILI2DB_SEQ_NAME="t_ili2db_seq";
 	java.sql.Connection conn=null;
 	String dbusr=null;
 	String schema=null;
@@ -55,18 +55,14 @@ public class OraSequenceBasedIdGen implements DbIdGen {
             EhiLogger.traceBackendCmd(stmt);
             java.sql.PreparedStatement updstmt = null;
             try{
-                updstmt = conn.prepareStatement(stmt);
-                updstmt.execute();
-            }catch(java.sql.SQLException ex){
-                EhiLogger.logError("failed to create sequence "+sqlName.getQName(),ex);
-            }finally{
-                if(updstmt!=null){
-                    try{
-                        updstmt.close();
-                    }catch(java.sql.SQLException ex){
-                        EhiLogger.logError(ex);
-                    }
+                try {
+                    updstmt = conn.prepareStatement(stmt);
+                    updstmt.execute();
+                } finally {
+                    if(updstmt!=null) updstmt.close();
                 }
+            }catch(java.sql.SQLException ex){
+                EhiLogger.logError("Failed to create sequence "+sqlName.getQName(),ex);
             }
         }
 	}
@@ -88,29 +84,29 @@ public class OraSequenceBasedIdGen implements DbIdGen {
 		if(schema!=null){
 			sqlName=schema+"."+sqlName;
 		}
-		java.sql.PreparedStatement getstmt=null;
-		try{
-			String stmt="select "+sqlName+".nextval from dual";
-			EhiLogger.traceBackendCmd(stmt);
-			getstmt=conn.prepareStatement(stmt);
-			java.sql.ResultSet res=getstmt.executeQuery();
-			long ret=0;
-			if(res.next()){
-				ret=res.getLong(1);
-				return ret;
-			}
-		}catch(java.sql.SQLException ex){
-			EhiLogger.logError("failed to query "+sqlName,ex);
-			throw new IllegalStateException(ex);
-		}finally{
-			if(getstmt!=null){
-				try{
-					getstmt.close();
-				}catch(java.sql.SQLException ex){
-					EhiLogger.logError(ex);
-				}
-			}
-		}
+        try{
+            java.sql.PreparedStatement getstmt=null;
+            java.sql.ResultSet res=null;
+            try {
+                String stmt="select "+sqlName+".nextval from dual";
+                EhiLogger.traceBackendCmd(stmt);
+                getstmt=conn.prepareStatement(stmt);
+                res=getstmt.executeQuery();
+                long ret=0;
+                if(res.next()){
+                    ret=res.getLong(1);
+                    return ret;
+                }
+            } finally {
+                if(getstmt!=null) {
+                    if(res!=null) res.close();
+                    getstmt.close();
+                }
+            }
+        }catch(java.sql.SQLException ex){
+            EhiLogger.logError("Failed to query "+sqlName,ex);
+            throw new IllegalStateException(ex);
+        }
 		throw new IllegalStateException("no nextval "+sqlName);
 	}
 	@Override
@@ -124,5 +120,6 @@ public class OraSequenceBasedIdGen implements DbIdGen {
 
 	@Override
 	public void addMappingTable(DbSchema schema) {
+        // not implemented because it's based on Oracle sequences
 	}
 }
