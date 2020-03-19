@@ -486,4 +486,29 @@ public class MultisurfaceTest {
 			}
 		}
 	}
+
+    @Test
+    public void exportEmptyGeom() throws Exception {
+        Class driverClass = Class.forName("org.postgresql.Driver");
+        jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
+        stmt=jdbcConnection.createStatement();
+        stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");
+        File data=new File("test/data/MultiSurface/MultiSurface2.ili");
+        Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+        config.setFunction(Config.FC_SCHEMAIMPORT);
+        Ili2db.readSettingsFromDb(config);
+        Ili2db.run(config,null);
+        
+        DbUtility.executeSqlScript(jdbcConnection, new java.io.FileReader("test/data/MultiSurface/MultisurfaceEmpty.sql"));
+
+        File dataXtf=new File("test/data/MultiSurface/MultisurfaceEmpty.xtf");
+
+        config.setXtffile(dataXtf.getPath());
+        config.setLogfile(dataXtf.getPath()+".log");
+        config.setModels("MultiSurface2");
+        config.setFunction(Config.FC_EXPORT);
+
+        Ili2db.readSettingsFromDb(config);
+        Ili2db.run(config,null);
+    }
 }
