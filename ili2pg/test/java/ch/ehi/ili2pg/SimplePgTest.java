@@ -68,7 +68,6 @@ public class SimplePgTest extends ch.ehi.ili2db.SimpleTest {
             assertTrue(reader.read() instanceof StartTransferEvent);
             assertTrue(reader.read() instanceof StartBasketEvent);
             IoxEvent event=reader.read();
-            event=reader.read();
             assertTrue(event instanceof ObjectEvent);
             IomObject iomObj=((ObjectEvent)event).getIomObject();
             {
