@@ -25,7 +25,7 @@ public class OraTestSetup extends AbstractTestSetup {
         this.dbtablespace=dbtablespace;
     }
     @Override
-    protected void initConfig(Config config) {
+    public void initConfig(Config config) {
         new ch.ehi.ili2ora.OraMain().initConfig(config);
         if(dbschema!=null) {
             config.setDbschema(dbschema);
@@ -33,7 +33,7 @@ public class OraTestSetup extends AbstractTestSetup {
     }
 
     @Override
-    protected Config initConfig(String xtfFilename, String logfile) {
+    public Config initConfig(String xtfFilename, String logfile) {
         Config config=new Config();
         new ch.ehi.ili2ora.OraMain().initConfig(config);
         config.setDburl(dburl);
@@ -53,7 +53,7 @@ public class OraTestSetup extends AbstractTestSetup {
     }
 
     @Override
-    protected void resetDb() throws SQLException {
+    public void resetDb() throws SQLException {
         if(dbschema!=null) {
             Connection jdbcConnection=createConnection();
             try {
@@ -87,7 +87,7 @@ public class OraTestSetup extends AbstractTestSetup {
     }
 
     @Override
-    protected Connection createConnection() throws SQLException {
+    public Connection createConnection() throws SQLException {
         try {
             Class.forName("oracle.jdbc.driver.OracleDriver");
         } catch (ClassNotFoundException e) {
@@ -97,7 +97,7 @@ public class OraTestSetup extends AbstractTestSetup {
     }
 
     @Override
-    protected String prefixName(String name) {
+    public String prefixName(String name) {
         if(dbschema==null) {
             return name;
         }
@@ -105,7 +105,7 @@ public class OraTestSetup extends AbstractTestSetup {
     }
     
     @Override
-    protected String getSchema() {
+    public String getSchema() {
         return dbschema;
     }
 }

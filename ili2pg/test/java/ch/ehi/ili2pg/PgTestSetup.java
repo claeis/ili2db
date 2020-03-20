@@ -23,7 +23,7 @@ public class PgTestSetup extends ch.ehi.ili2db.AbstractTestSetup {
     }
 
     @Override
-    protected Config initConfig(String xtfFilename,String logfile) {
+    public Config initConfig(String xtfFilename,String logfile) {
         Config config=new Config();
         new ch.ehi.ili2pg.PgMain().initConfig(config);
         config.setDburl(dburl);
@@ -50,7 +50,7 @@ public class PgTestSetup extends ch.ehi.ili2db.AbstractTestSetup {
         }
     }
     @Override
-    protected String prefixName(String name) {
+    public String prefixName(String name) {
         if(dbschema==null) {
             return name;
         }
@@ -58,7 +58,7 @@ public class PgTestSetup extends ch.ehi.ili2db.AbstractTestSetup {
     }
 
     @Override
-    protected void resetDb() throws SQLException {
+    public void resetDb() throws SQLException {
         if(dbschema!=null) {
             Connection jdbcConnection=createConnection();
             try {
@@ -78,7 +78,7 @@ public class PgTestSetup extends ch.ehi.ili2db.AbstractTestSetup {
     }
 
     @Override
-    protected Connection createConnection() throws SQLException {
+    public Connection createConnection() throws SQLException {
         try {
             Class driverClass = Class.forName("org.postgresql.Driver");
         } catch (ClassNotFoundException e) {
@@ -89,7 +89,7 @@ public class PgTestSetup extends ch.ehi.ili2db.AbstractTestSetup {
         return jdbcConnection;
     }
     @Override
-    protected String getSchema() {
+    public String getSchema() {
         return dbschema;
     }
 

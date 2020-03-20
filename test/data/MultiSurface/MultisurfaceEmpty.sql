@@ -1,1 +1,0 @@
-INSERT INTO Multisurface.classa1(geom)	VALUES (ST_GeomFromText('MULTISURFACE EMPTY', 21781));

@@ -20,13 +20,13 @@ public class FgdbTestSetup extends ch.ehi.ili2db.AbstractTestSetup {
     }
 
     @Override
-    protected void setXYParams(Config config) {
+    public void setXYParams(Config config) {
         config.setValue(GeneratorFgdb.XY_RESOLUTION, "0.005");
         config.setValue(GeneratorFgdb.XY_TOLERANCE, "0.05");
     }
     
     @Override
-    protected Config initConfig(String xtfFilename,String logfile) {
+    public Config initConfig(String xtfFilename,String logfile) {
         Config config=new Config();
         new ch.ehi.ili2fgdb.FgdbMain().initConfig(config);
         config.setDbfile(fgdbFilename);
@@ -42,18 +42,18 @@ public class FgdbTestSetup extends ch.ehi.ili2db.AbstractTestSetup {
     }
 
     @Override
-    protected void initConfig(Config config) {
+    public void initConfig(Config config) {
         new ch.ehi.ili2fgdb.FgdbMain().initConfig(config);
     }
 
     @Override
-    protected void resetDb() throws SQLException {
+    public void resetDb() throws SQLException {
         File fgdbFile=new File(fgdbFilename);
         Fgdb4j.deleteFileGdb(fgdbFile);
     }
 
     @Override
-    protected Connection createConnection() throws SQLException {
+    public Connection createConnection() throws SQLException {
         Connection conn = DriverManager.getConnection(
                 FgdbDriver.BASE_URL+fgdbFilename, null, null);
         return conn;

@@ -34,7 +34,7 @@ public class GpkgTestSetup extends AbstractTestSetup {
     }
     
     @Override
-    protected void resetDb() {
+    public void resetDb() {
         File gpkgFile=new File(gpkgFilename);
         if(gpkgFile.exists()){ 
             File file = new File(gpkgFile.getAbsolutePath());
@@ -42,7 +42,7 @@ public class GpkgTestSetup extends AbstractTestSetup {
         }
     }
     @Override
-    protected Connection createDbSchema() throws SQLException {
+    public Connection createDbSchema() throws SQLException {
         Config config=new Config();
         config.setDbfile(gpkgFilename);
         config.setDburl(dburl);
@@ -53,11 +53,11 @@ public class GpkgTestSetup extends AbstractTestSetup {
         return jdbcConnection;
     }
     @Override
-    protected Connection createConnection() throws SQLException {
+    public Connection createConnection() throws SQLException {
         return DriverManager.getConnection(dburl, null, null);
     }
     @Override
-    protected void initConfig(Config config) {
+    public void initConfig(Config config) {
         new ch.ehi.ili2gpkg.GpkgMain().initConfig(config);
     }
 

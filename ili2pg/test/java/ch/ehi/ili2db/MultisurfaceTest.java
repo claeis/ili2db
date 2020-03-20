@@ -67,10 +67,10 @@ public class MultisurfaceTest {
 			Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 			config.setFunction(Config.FC_IMPORT);
 	        config.setDoImplicitSchemaImport(true);
-			config.setCreateFk(config.CREATE_FK_YES);
+			config.setCreateFk(Config.CREATE_FK_YES);
 			config.setTidHandling(Config.TID_HANDLING_PROPERTY);
 			config.setImportTid(true);
-			config.setBasketHandling(config.BASKET_HANDLING_READWRITE);
+			config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
 			config.setCatalogueRefTrafo(null);
 			config.setMultiSurfaceTrafo(null);
 			config.setMultilingualTrafo(null);
@@ -160,12 +160,12 @@ public class MultisurfaceTest {
 			Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 			config.setFunction(Config.FC_IMPORT);
 	        config.setDoImplicitSchemaImport(true);
-			config.setCreateFk(config.CREATE_FK_YES);
+			config.setCreateFk(Config.CREATE_FK_YES);
 			config.setTidHandling(Config.TID_HANDLING_PROPERTY);
 			config.setImportTid(true);
-			config.setBasketHandling(config.BASKET_HANDLING_READWRITE);
+			config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
 			config.setCatalogueRefTrafo(null);
-			config.setMultiSurfaceTrafo(config.MULTISURFACE_TRAFO_COALESCE);
+			config.setMultiSurfaceTrafo(Config.MULTISURFACE_TRAFO_COALESCE);
 			config.setMultilingualTrafo(null);
 			config.setInheritanceTrafo(null);
 			Ili2db.readSettingsFromDb(config);
@@ -198,12 +198,12 @@ public class MultisurfaceTest {
             Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
             config.setFunction(Config.FC_IMPORT);
             config.setDoImplicitSchemaImport(true);
-            config.setCreateFk(config.CREATE_FK_YES);
+            config.setCreateFk(Config.CREATE_FK_YES);
             config.setTidHandling(Config.TID_HANDLING_PROPERTY);
             config.setImportTid(true);
-            config.setBasketHandling(config.BASKET_HANDLING_READWRITE);
+            config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
             config.setCatalogueRefTrafo(null);
-            config.setMultiSurfaceTrafo(config.MULTISURFACE_TRAFO_COALESCE);
+            config.setMultiSurfaceTrafo(Config.MULTISURFACE_TRAFO_COALESCE);
             config.setMultilingualTrafo(null);
             config.setInheritanceTrafo(null);
             Ili2db.readSettingsFromDb(config);
@@ -298,12 +298,12 @@ public class MultisurfaceTest {
 			Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 			config.setFunction(Config.FC_IMPORT);
 	        config.setDoImplicitSchemaImport(true);
-			config.setCreateFk(config.CREATE_FK_YES);
+			config.setCreateFk(Config.CREATE_FK_YES);
 			config.setTidHandling(Config.TID_HANDLING_PROPERTY);
 			config.setImportTid(true);
-			config.setBasketHandling(config.BASKET_HANDLING_READWRITE);
+			config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
 			config.setCatalogueRefTrafo(null);
-			config.setMultiSurfaceTrafo(config.MULTISURFACE_TRAFO_COALESCE);
+			config.setMultiSurfaceTrafo(Config.MULTISURFACE_TRAFO_COALESCE);
 			config.setMultilingualTrafo(null);
 			config.setInheritanceTrafo(null);
 			Ili2db.readSettingsFromDb(config);
@@ -398,12 +398,12 @@ public class MultisurfaceTest {
 			Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 			config.setFunction(Config.FC_IMPORT);
 	        config.setDoImplicitSchemaImport(true);
-			config.setCreateFk(config.CREATE_FK_YES);
+			config.setCreateFk(Config.CREATE_FK_YES);
 			config.setTidHandling(Config.TID_HANDLING_PROPERTY);
 			config.setImportTid(true);
-			config.setBasketHandling(config.BASKET_HANDLING_READWRITE);
+			config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
 			config.setCatalogueRefTrafo(null);
-			config.setMultiSurfaceTrafo(config.MULTISURFACE_TRAFO_COALESCE);
+			config.setMultiSurfaceTrafo(Config.MULTISURFACE_TRAFO_COALESCE);
 			config.setOneGeomPerTable(true);
 			config.setMultilingualTrafo(null);
 			config.setInheritanceTrafo(null);
@@ -496,10 +496,11 @@ public class MultisurfaceTest {
         File data=new File("test/data/MultiSurface/MultiSurface2.ili");
         Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
         config.setFunction(Config.FC_SCHEMAIMPORT);
+        config.setDefaultSrsCode("21781");
         Ili2db.readSettingsFromDb(config);
         Ili2db.run(config,null);
         
-        DbUtility.executeSqlScript(jdbcConnection, new java.io.FileReader("test/data/MultiSurface/MultisurfaceEmpty.sql"));
+        stmt.execute("INSERT INTO "+DBSCHEMA+".classa1(geom) VALUES (ST_GeomFromText('MULTISURFACE EMPTY', 21781))");
 
         File dataXtf=new File("test/data/MultiSurface/MultisurfaceEmpty.xtf");
 
