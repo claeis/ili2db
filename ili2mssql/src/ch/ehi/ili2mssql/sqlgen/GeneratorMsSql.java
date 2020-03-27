@@ -26,147 +26,49 @@ public class GeneratorMsSql extends GeneratorJdbc {
 	
 	@Override
 	public void visitColumn(DbTable dbTab,DbColumn column) throws IOException {
-		String type="";
-		
-		if(column instanceof DbColBoolean){
-			type="BIT";
-		}else if(column instanceof DbColDateTime){
-			type="DATETIME";
-		}else if(column instanceof DbColDate){
-			type="DATE";
-		}else if(column instanceof DbColTime){
-			type="TIME";
-		}else if(column instanceof DbColDecimal){
-			DbColDecimal col=(DbColDecimal)column;
-			type="DECIMAL("+Integer.toString(col.getSize())+","+Integer.toString(col.getPrecision())+")";
-		}else if(column instanceof DbColGeometry){
-			type="GEOMETRY";
-		}else if(column instanceof DbColId){
-			type="BIGINT";
-		}else if(column instanceof DbColUuid){
-			type="UNIQUEIDENTIFIER";
-		}else if(column instanceof DbColNumber){
-			DbColNumber col=(DbColNumber)column;
-			type="NUMERIC("+Integer.toString(col.getSize())+")";
-		}else if(column instanceof DbColVarchar){
-			int colsize=((DbColVarchar)column).getSize();
-			if(colsize!=DbColVarchar.UNLIMITED)
-				type="VARCHAR("+Integer.toString(colsize)+")";
-			else
-				type="VARCHAR(MAX)";
-		}else{
-			type="VARCHAR(MAX)";
-		}
+        String type=getMsSqlType(column);
 		String isNull=column.isNotNull()?"NOT NULL":"NULL";
 		if(column.isPrimaryKey()){
 			isNull="PRIMARY KEY";
 		}
-		String sep=" ";
 		String defaultValue="";
 		if(column.getDefaultValue()!=null){
-			defaultValue=sep+"DEFAULT ("+column.getDefaultValue()+")";
-			sep=" ";
+            defaultValue=" DEFAULT ("+column.getDefaultValue()+")";
 		}
 		
 		String name=column.getName();
 		out.write(getIndent()+colSep+"["+name+"] "+type+" "+isNull+defaultValue+newline());
 		colSep=",";
 	}
-
-	
-	@Override
-	public void visit1TableEnd(DbTable tab) throws IOException {
-		super.visit1TableEnd(tab);
-	}
 	
 	@Override
 	public void visitTableEndColumn(DbTable tab) throws IOException {
-		boolean tableExists = DbUtility.tableExists(conn,tab.getName());
+        DbUtility.tableExists(conn,tab.getName());
 	}
 	
 
 	@Override
 	public void visitTableBeginConstraint(DbTable dbTab) throws IOException {
 		super.visitTableBeginConstraint(dbTab);
-		
-		String sqlTabName=dbTab.getName().getQName();
+
 		for(Iterator dbColi=dbTab.iteratorColumn();dbColi.hasNext();){
 			DbColumn dbCol=(DbColumn) dbColi.next();
-			if(dbCol.getReferencedTable()!=null){
-				String createstmt=null;
-				String action="";
-				if(dbCol.getOnUpdateAction()!=null){
-					action=action+" ON UPDATE "+dbCol.getOnUpdateAction();
-				}
-				if(dbCol.getOnDeleteAction()!=null){
-					action=action+" ON DELETE "+dbCol.getOnDeleteAction();
-				}
-				String constraintName=createConstraintName(dbTab,"fkey",dbCol.getName());
-				
-				createstmt="ALTER TABLE "+sqlTabName+" ADD CONSTRAINT "+constraintName+" FOREIGN KEY ( "+dbCol.getName()+" ) REFERENCES "+dbCol.getReferencedTable().getQName();//+action+" DEFERRABLE INITIALLY DEFERRED";
-				
-				String dropstmt=null;
-				dropstmt="ALTER TABLE "+sqlTabName+" DROP CONSTRAINT "+constraintName;
-
-				addConstraint(dbTab, constraintName,createstmt, dropstmt);
-				
-			}
-			if(dbCol instanceof DbColNumber && (((DbColNumber)dbCol).getMinValue()!=null || ((DbColNumber)dbCol).getMaxValue()!=null)){
-				DbColNumber dbColNum=(DbColNumber)dbCol;
-				String createstmt=null;
-				String action="";
-				if(dbColNum.getMinValue()!=null || dbColNum.getMaxValue()!=null){
-					if(dbColNum.getMaxValue()==null){
-						action=">="+dbColNum.getMinValue();
-					}else if(dbColNum.getMinValue()==null){
-						action="<="+dbColNum.getMaxValue();
-					}else{
-						action="BETWEEN "+dbColNum.getMinValue()+" AND "+dbColNum.getMaxValue();
-					}
-				}
-				String constraintName=createConstraintName(dbTab,"check",dbCol.getName());
-
-				createstmt="ALTER TABLE "+sqlTabName+" ADD CONSTRAINT "+constraintName+" CHECK( "+dbCol.getName()+" "+action+")";
-				
-				String dropstmt=null;
-				dropstmt="ALTER TABLE "+sqlTabName+" DROP CONSTRAINT "+constraintName;
-
-				addConstraint(dbTab, constraintName,createstmt, dropstmt);
-				
-			} else if(dbCol instanceof DbColDecimal && (((DbColDecimal)dbCol).getMinValue()!=null || ((DbColDecimal)dbCol).getMaxValue()!=null)){
-				DbColDecimal dbColNum=(DbColDecimal)dbCol;
-				String createstmt=null;
-				String action="";
-				if(dbColNum.getMinValue()!=null || dbColNum.getMaxValue()!=null){
-					if(dbColNum.getMaxValue()==null){
-						action=">="+dbColNum.getMinValue();
-					}else if(dbColNum.getMinValue()==null){
-						action="<="+dbColNum.getMaxValue();
-					}else{
-						action="BETWEEN "+dbColNum.getMinValue()+" AND "+dbColNum.getMaxValue();
-					}
-				}
-				String constraintName=createConstraintName(dbTab,"check",dbCol.getName());
-				
-				createstmt="ALTER TABLE "+sqlTabName+" ADD CONSTRAINT "+constraintName+" CHECK( "+dbCol.getName()+" "+action+")";
-				
-				String dropstmt=null;
-				dropstmt="ALTER TABLE "+sqlTabName+" DROP CONSTRAINT "+constraintName;
-
-				addConstraint(dbTab, constraintName,createstmt, dropstmt);
-			}
+            if(dbCol.getReferencedTable()!=null){
+                writeForeignKey(dbTab, dbCol);
+            }
+            writeValueRangeNumber(dbTab, dbCol);
 		}
 	}
 	
 	@Override
 	public void visitIndex(DbIndex idx) throws IOException {
 		if(idx.isUnique()){
-			java.io.StringWriter out = new java.io.StringWriter();
+            StringBuilder out = new StringBuilder();
 			DbTable tab=idx.getTable();
 			String tableName=tab.getName().getQName();
 			String constraintName=idx.getName();
 			if(constraintName==null){
-				String colNames[]=new String[idx.sizeAttr()];
+                String[] colNames=new String[idx.sizeAttr()];
 				int i=0;
 				for(Iterator attri=idx.iteratorAttr();attri.hasNext();){
 					DbColumn attr=(DbColumn)attri.next();
@@ -174,41 +76,146 @@ public class GeneratorMsSql extends GeneratorJdbc {
 				}
 				constraintName=createConstraintName(tab,"key", colNames);
 			}
-			out.write(getIndent()+"CREATE UNIQUE INDEX "+constraintName+" ON "+tableName+" (");
+            out.append(getIndent()+"CREATE UNIQUE INDEX "+constraintName+" ON "+tableName+" (");
 			String sep="";
 			
-			String condition = " ";
+            StringBuilder condition = new StringBuilder(" ");
 			String sepCondition = " ";
 			
 			for(Iterator attri=idx.iteratorAttr();attri.hasNext();){
 				DbColumn attr=(DbColumn)attri.next();
 				
-					out.write(sep+attr.getName());
-					condition += sepCondition + attr.getName() + " is not null";
+                out.append(sep+attr.getName());
+                condition.append(sepCondition + attr.getName() + " is not null");
 					
 				sep=",";
 				sepCondition = " AND ";
 			}
-			out.write(") WHERE"+condition+newline());
+            out.append(") WHERE"+condition.toString()+newline());
 			String stmt=out.toString();
 			addCreateLine(new Stmt(stmt));
-			out=null;
-			if(createdTables.contains(tab.getName())){
-				Statement dbstmt = null;
-				try{
-					try{
-						dbstmt = conn.createStatement();
-						EhiLogger.traceBackendCmd(stmt);
-						dbstmt.executeUpdate(stmt);
-					}finally{
-						dbstmt.close();
-					}
-				}catch(SQLException ex){
-					IOException iox=new IOException("failed to add UNIQUE to table "+tab.getName());
-					iox.initCause(ex);
-					throw iox;
-				}
+			if(conn!=null&&createdTables.contains(tab.getName())){
+                executeUpdateStatement(stmt,"Failed to add UNIQUE to table "+tab.getName());
 			}
 		}
 	}
+
+    private void writeForeignKey(DbTable dbTab, DbColumn dbCol) throws IOException {
+        String createstmt=null;
+        String action="";
+        String sqlTabName=dbTab.getName().getQName();
+        
+        if(dbCol.getOnUpdateAction()!=null){
+            action=action+" ON UPDATE "+dbCol.getOnUpdateAction();
+        }
+        if(dbCol.getOnDeleteAction()!=null){
+            action=action+" ON DELETE "+dbCol.getOnDeleteAction();
+        }
+        String constraintName=createConstraintName(dbTab,"fkey",dbCol.getName());
+        
+        createstmt="ALTER TABLE "+sqlTabName+" ADD CONSTRAINT "+constraintName+" FOREIGN KEY ( "+dbCol.getName()+" ) REFERENCES "+dbCol.getReferencedTable().getQName()+action;
+        
+        String dropstmt=null;
+        dropstmt="ALTER TABLE "+sqlTabName+" DROP CONSTRAINT "+constraintName;
+
+        addConstraint(dbTab, constraintName,createstmt, dropstmt);
+    }
+    
+    private void writeValueRangeNumber(DbTable dbTab, DbColumn dbCol) throws IOException {
+        String min=getMinValue(dbCol);
+        String max=getMaxValue(dbCol);
+        if(min!=null||max!=null) {
+            String sqlTabName=dbTab.getName().getQName();
+            String action="";
+            
+            if(max==null){
+                action=">="+min;
+            }else if(min==null){
+                action="<="+max;
+            }else{
+                action="BETWEEN "+min+" AND "+max;
+            }
+    
+            String constraintName=createConstraintName(dbTab,"check",dbCol.getName());
+            String createstmt="ALTER TABLE "+sqlTabName+" ADD CONSTRAINT "+constraintName+" CHECK( "+dbCol.getName()+" "+action+")";
+            String dropstmt="ALTER TABLE "+sqlTabName+" DROP CONSTRAINT "+constraintName;
+    
+            addConstraint(dbTab, constraintName,createstmt, dropstmt);
+        }
+    }
+    
+    private String getMinValue(DbColumn dbCol) {
+        String result=null;
+        if(dbCol instanceof DbColNumber) {
+            Integer minVal=((DbColNumber)dbCol).getMinValue();
+            result=minVal!=null?minVal.toString():null;
+         } else if(dbCol instanceof DbColDecimal){
+            Double minVal=((DbColDecimal)dbCol).getMinValue();
+            result=minVal!=null?minVal.toString():null;
+        }
+        return result;
+    }
+
+    private String getMaxValue(DbColumn dbCol) {
+        String result=null;
+        if(dbCol instanceof DbColNumber) {
+            Integer maxVal=((DbColNumber)dbCol).getMaxValue();
+            result=maxVal!=null?maxVal.toString():null;
+         } else if(dbCol instanceof DbColDecimal){
+            Double maxVal=((DbColDecimal)dbCol).getMaxValue();
+            result=maxVal!=null?maxVal.toString():null;
+        }
+        return result;
+    }
+    
+    private String getMsSqlType(DbColumn column) {
+        String type;
+        if(column instanceof DbColBoolean){
+            type="BIT";
+        }else if(column instanceof DbColDateTime){
+            type="DATETIME";
+        }else if(column instanceof DbColDate){
+            type="DATE";
+        }else if(column instanceof DbColTime){
+            type="TIME";
+        }else if(column instanceof DbColDecimal){
+            DbColDecimal col=(DbColDecimal)column;
+            type="DECIMAL("+Integer.toString(col.getSize())+","+Integer.toString(col.getPrecision())+")";
+        }else if(column instanceof DbColGeometry){
+            type="GEOMETRY";
+        }else if(column instanceof DbColId){
+            type="BIGINT";
+        }else if(column instanceof DbColUuid){
+            type="UNIQUEIDENTIFIER";
+        }else if(column instanceof DbColNumber){
+            DbColNumber col=(DbColNumber)column;
+            type="NUMERIC("+Integer.toString(col.getSize())+")";
+        }else if(column instanceof DbColVarchar){
+            int colsize=((DbColVarchar)column).getSize();
+            if(colsize!=DbColVarchar.UNLIMITED)
+                type="VARCHAR("+Integer.toString(colsize)+")";
+            else
+                type="VARCHAR(MAX)";
+        }else{
+            type="VARCHAR(MAX)";
+        }
+        return type;
+    }
+
+    private void executeUpdateStatement(String stmt, String errorMessage) throws IOException  {
+        Statement dbstmt = null;
+        try{
+            try{
+                dbstmt = conn.createStatement();
+                EhiLogger.traceBackendCmd(stmt);
+                dbstmt.executeUpdate(stmt);
+            }finally{
+                if(dbstmt!=null) dbstmt.close();
+            }
+        }catch(SQLException ex){
+            IOException iox=new IOException(errorMessage);
+            iox.initCause(ex);
+            throw iox;
+        }
+    }
 }
