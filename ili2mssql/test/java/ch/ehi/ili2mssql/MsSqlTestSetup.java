@@ -87,13 +87,11 @@ public class MsSqlTestSetup extends AbstractTestSetup {
     @Override
     public Connection createConnection() throws SQLException {
         try {
-            Class driverClass = Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
+            Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
         } catch (ClassNotFoundException e) {
             throw new IllegalStateException(e);
         }
-        Connection jdbcConnection = DriverManager.getConnection(
-                dburl, dbuser, dbpwd);
-        return jdbcConnection;
+        return DriverManager.getConnection(dburl, dbuser, dbpwd);
     }
 
     @Override
