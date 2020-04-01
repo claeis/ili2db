@@ -627,16 +627,20 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 	                         if(!rs.wasNull()){
 	                             try{
 	                                 IomObject iomMultiSurface=geomConv.toIomMultiSurface(geomobj,sqlAttrName,is3D);
-	                                 IomObject iomChbaseMultiSurface=new Iom_jObject(multiSurfaceQname,null); 
-	                                 int surfacec=iomMultiSurface.getattrvaluecount("surface");
-	                                 for(int surfacei=0;surfacei<surfacec;surfacei++){
-	                                     IomObject iomSurface=iomMultiSurface.getattrobj("surface",surfacei);
-	                                     IomObject iomChbaseSurfaceStructure=iomChbaseMultiSurface.addattrobj(attrMapping.getBagOfSurfacesAttrName(), surfaceStructureQname);
-	                                     IomObject iomSurfaceClone=new ch.interlis.iom_j.Iom_jObject("MULTISURFACE",null);
-	                                     iomSurfaceClone.addattrobj("surface",iomSurface);
-	                                     iomChbaseSurfaceStructure.addattrobj(attrMapping.getSurfaceAttrName(), iomSurfaceClone);
+	                                 if(iomMultiSurface==null) {
+	                                     // EMPTY
+	                                 }else {
+	                                     IomObject iomChbaseMultiSurface=new Iom_jObject(multiSurfaceQname,null); 
+	                                     int surfacec=iomMultiSurface.getattrvaluecount("surface");
+	                                     for(int surfacei=0;surfacei<surfacec;surfacei++){
+	                                         IomObject iomSurface=iomMultiSurface.getattrobj("surface",surfacei);
+	                                         IomObject iomChbaseSurfaceStructure=iomChbaseMultiSurface.addattrobj(attrMapping.getBagOfSurfacesAttrName(), surfaceStructureQname);
+	                                         IomObject iomSurfaceClone=new ch.interlis.iom_j.Iom_jObject("MULTISURFACE",null);
+	                                         iomSurfaceClone.addattrobj("surface",iomSurface);
+	                                         iomChbaseSurfaceStructure.addattrobj(attrMapping.getSurfaceAttrName(), iomSurfaceClone);
+	                                     }
+	                                     iomObj.addattrobj(attrName,iomChbaseMultiSurface);
 	                                 }
-	                                 iomObj.addattrobj(attrName,iomChbaseMultiSurface);
 	                             }catch(ConverterException ex){
 	                                 EhiLogger.logError("Object "+sqlid+": failed to convert surface/area",ex);
 	                             }   
@@ -659,14 +663,18 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 	                         if(!rs.wasNull()){
 	                             try{
 	                                 IomObject iomMultiPolygon=geomConv.toIomMultiPolyline(geomobj,sqlAttrName,is3D);
-	                                 IomObject iomChbaseMultiLine=new Iom_jObject(multiLineQname,null); 
-	                                 int linec=iomMultiPolygon.getattrvaluecount(Wkb2iox.ATTR_POLYLINE);
-	                                 for(int linei=0;linei<linec;linei++){
-	                                     IomObject iomPolygon=iomMultiPolygon.getattrobj(Wkb2iox.ATTR_POLYLINE,linei);
-	                                     IomObject iomChbaseSurfaceStructure=iomChbaseMultiLine.addattrobj(attrMapping.getBagOfLinesAttrName(), lineStructureQname);
-	                                     iomChbaseSurfaceStructure.addattrobj(attrMapping.getLineAttrName(), iomPolygon);
+	                                 if(iomMultiPolygon==null) {
+	                                     // EMPTY
+	                                 }else {
+	                                     IomObject iomChbaseMultiLine=new Iom_jObject(multiLineQname,null); 
+	                                     int linec=iomMultiPolygon.getattrvaluecount(Wkb2iox.ATTR_POLYLINE);
+	                                     for(int linei=0;linei<linec;linei++){
+	                                         IomObject iomPolygon=iomMultiPolygon.getattrobj(Wkb2iox.ATTR_POLYLINE,linei);
+	                                         IomObject iomChbaseSurfaceStructure=iomChbaseMultiLine.addattrobj(attrMapping.getBagOfLinesAttrName(), lineStructureQname);
+	                                         iomChbaseSurfaceStructure.addattrobj(attrMapping.getLineAttrName(), iomPolygon);
+	                                     }
+	                                     iomObj.addattrobj(attrName,iomChbaseMultiLine);
 	                                 }
-	                                 iomObj.addattrobj(attrName,iomChbaseMultiLine);
 	                             }catch(ConverterException ex){
 	                                 EhiLogger.logError("Object "+sqlid+": failed to convert polyline",ex);
 	                             }   
@@ -688,14 +696,18 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 	                         if(!rs.wasNull()){
 	                             try{
 	                                 IomObject iomMultiPoint=geomConv.toIomMultiCoord(geomobj,sqlAttrName,is3D);
-	                                 IomObject iomChbaseMultiPoint=new Iom_jObject(multiPointQname,null); 
-	                                 int pointc=iomMultiPoint.getattrvaluecount(Wkb2iox.ATTR_COORD);
-	                                 for(int pointi=0;pointi<pointc;pointi++){
-	                                     IomObject iomPoint=iomMultiPoint.getattrobj(Wkb2iox.ATTR_COORD,pointi);
-	                                     IomObject iomChbasePointStructure=iomChbaseMultiPoint.addattrobj(attrMapping.getBagOfPointsAttrName(), pointStructureQname);
-	                                     iomChbasePointStructure.addattrobj(attrMapping.getPointAttrName(), iomPoint);
+	                                 if(iomMultiPoint==null) {
+	                                     // EMPTY
+	                                 }else {
+	                                     IomObject iomChbaseMultiPoint=new Iom_jObject(multiPointQname,null); 
+	                                     int pointc=iomMultiPoint.getattrvaluecount(Wkb2iox.ATTR_COORD);
+	                                     for(int pointi=0;pointi<pointc;pointi++){
+	                                         IomObject iomPoint=iomMultiPoint.getattrobj(Wkb2iox.ATTR_COORD,pointi);
+	                                         IomObject iomChbasePointStructure=iomChbaseMultiPoint.addattrobj(attrMapping.getBagOfPointsAttrName(), pointStructureQname);
+	                                         iomChbasePointStructure.addattrobj(attrMapping.getPointAttrName(), iomPoint);
+	                                     }
+	                                     iomObj.addattrobj(attrName,iomChbaseMultiPoint);
 	                                 }
-	                                 iomObj.addattrobj(attrName,iomChbaseMultiPoint);
 	                             }catch(ConverterException ex){
 	                                 EhiLogger.logError("Object "+sqlid+": failed to convert coord",ex);
 	                             }   
@@ -713,30 +725,33 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 	                                 Table valueStructType = ((CompositionType) type).getComponentType();
 	                                 String valueStructQname=valueStructType.getScopedName(null);
 	                                 String iomArray[]=geomConv.toIomArray(attrMapping.getValueAttr(),dbValue,createEnumColAsItfCode || Config.CREATE_ENUM_DEFS_MULTI_WITH_ID.equals(createEnumTable));
-	                                 Type arrayElementType=attrMapping.getValueAttr().getDomainResolvingAliases();
-	                                 if((arrayElementType instanceof EnumerationType) && !attrMapping.getValueAttr().isDomainBoolean()) {
-	                                     if(createEnumColAsItfCode) {
-	                                         String xtfCode[]=new String[iomArray.length];
-	                                         for(int i=0;i<iomArray.length;i++) {
-	                                             xtfCode[i]=enumTypes.mapItfCode2XtfCode((EnumerationType)arrayElementType,iomArray[i]);
+	                                 if(iomArray!=null) {
+	                                     Type arrayElementType=attrMapping.getValueAttr().getDomainResolvingAliases();
+	                                     if((arrayElementType instanceof EnumerationType) && !attrMapping.getValueAttr().isDomainBoolean()) {
+	                                         if(createEnumColAsItfCode) {
+	                                             String xtfCode[]=new String[iomArray.length];
+	                                             for(int i=0;i<iomArray.length;i++) {
+	                                                 xtfCode[i]=enumTypes.mapItfCode2XtfCode((EnumerationType)arrayElementType,iomArray[i]);
+	                                             }
+	                                             iomArray=xtfCode;
+	                                         }else if(Config.CREATE_ENUM_DEFS_MULTI_WITH_ID.equals(createEnumTable)){
+	                                             String xtfCode[]=new String[iomArray.length];
+	                                             for(int i=0;i<iomArray.length;i++) {
+	                                                 xtfCode[i]=mapEnumValue(attrMapping.getValueAttr(),Long.parseLong(iomArray[i]));
+	                                             }
+	                                             iomArray=xtfCode;
 	                                         }
-	                                         iomArray=xtfCode;
-	                                     }else if(Config.CREATE_ENUM_DEFS_MULTI_WITH_ID.equals(createEnumTable)){
-                                             String xtfCode[]=new String[iomArray.length];
-                                             for(int i=0;i<iomArray.length;i++) {
-                                                 xtfCode[i]=mapEnumValue(attrMapping.getValueAttr(),Long.parseLong(iomArray[i]));
-                                             }
-                                             iomArray=xtfCode;
+	                                     }else {
+	                                         
 	                                     }
-	                                 }else {
-	                                     
 	                                 }
-	                                 
-	                                 for(int elei=0;elei<iomArray.length;elei++){
-	                                     IomObject iomValueStruct=new Iom_jObject(valueStructQname,null); 
-	                                     iomValueStruct.setattrvalue(attrMapping.getValueAttr().getName(), iomArray[elei]);
-	                                     iomObj.addattrobj(attrName, iomValueStruct);
-	                                 }
+                                     if(iomArray!=null) {
+                                         for(int elei=0;elei<iomArray.length;elei++){
+                                             IomObject iomValueStruct=new Iom_jObject(valueStructQname,null); 
+                                             iomValueStruct.setattrvalue(attrMapping.getValueAttr().getName(), iomArray[elei]);
+                                             iomObj.addattrobj(attrName, iomValueStruct);
+                                         }
+                                     }
 	                             }catch(ConverterException ex){
 	                                 EhiLogger.logError("Object "+sqlid+": failed to convert array",ex);
 	                             }   
@@ -751,8 +766,10 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
                              if(!rs.wasNull()){
                                  try{
                                      IomObject iomArray[]=geomConv.toIomStructureFromJson(tableAttr, dbValue);
-                                     for(int elei=0;elei<iomArray.length;elei++){
-                                         iomObj.addattrobj(attrName, iomArray[elei]);
+                                     if(iomArray!=null) {
+                                         for(int elei=0;elei<iomArray.length;elei++){
+                                             iomObj.addattrobj(attrName, iomArray[elei]);
+                                         }
                                      }
                                  }catch(ConverterException ex){
                                      EhiLogger.logError("Object "+sqlid+": failed to convert JSON",ex);
@@ -828,7 +845,11 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 	                        try{
 	                        boolean is3D=((CoordType)((PolylineType)type).getControlPointDomain().getType()).getDimensions().length==3;
 	                        IomObject polyline=geomConv.toIomPolyline(geomobj,sqlAttrName,is3D);
-	                        iomObj.addattrobj(attrName,polyline);
+	                        if(polyline==null) {
+	                            // EMPTY
+	                        }else {
+	                            iomObj.addattrobj(attrName,polyline);
+	                        }
 	                        }catch(ConverterException ex){
 	                            EhiLogger.logError("Object "+sqlid+": failed to convert polyline",ex);
 	                        }   
@@ -846,7 +867,11 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 	                                try{
 	                                    boolean is3D=((CoordType)((SurfaceOrAreaType)type).getControlPointDomain().getType()).getDimensions().length==3;
 	                                    IomObject surface=geomConv.toIomSurface(geomobj,sqlAttrName,is3D);
-	                                    iomObj.addattrobj(attrName,surface);
+	                                    if(surface==null) {
+	                                        // EMPTY
+	                                    }else {
+	                                        iomObj.addattrobj(attrName,surface);
+	                                    }
 	                                }catch(ConverterException ex){
 	                                    EhiLogger.logError("Object "+sqlid+": failed to convert surface/area",ex);
 	                                }   
@@ -864,7 +889,11 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 	                                    try{
 	                                        boolean is3D=false;
 	                                        IomObject coord=geomConv.toIomCoord(geomobj,sqlAttrName,is3D);
-	                                        iomObj.addattrobj(attrName,coord);
+	                                        if(coord==null) {
+	                                            // EMPTY
+	                                        }else {
+	                                            iomObj.addattrobj(attrName,coord);
+	                                        }
 	                                    }catch(ConverterException ex){
 	                                        EhiLogger.logError("Object "+sqlid+": failed to convert coord",ex);
 	                                    }
@@ -883,7 +912,11 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 		                        try{
 		                            boolean is3D=((CoordType)type).getDimensions().length==3;
 		                            IomObject coord=geomConv.toIomCoord(geomobj,sqlAttrName,is3D);
-		                            iomObj.addattrobj(attrName,coord);
+		                            if(coord==null) {
+		                                // EMPTY
+		                            }else {
+	                                    iomObj.addattrobj(attrName,coord);
+		                            }
 		                        }catch(ConverterException ex){
 		                            EhiLogger.logError("Object "+sqlid+": failed to convert coord",ex);
 		                        }
@@ -961,7 +994,10 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 	                        valuei++;
 	                        if(!rs.wasNull()){
 	                            try {
-	                                iomObj.setattrvalue(attrName,geomConv.toIomXml(obj));
+	                                String xml=geomConv.toIomXml(obj);
+	                                if(xml!=null) {
+	                                    iomObj.setattrvalue(attrName,xml);
+	                                }
 	                            } catch (ConverterException ex) {
 	                                EhiLogger.logError("Object "+sqlid+": failed to convert blackbox xml",ex);
 	                            }
@@ -975,7 +1011,10 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 	                        valuei++;
 	                        if(!rs.wasNull()){
 	                            try {
-	                                iomObj.setattrvalue(attrName,geomConv.toIomBlob(obj));
+	                                String blob=geomConv.toIomBlob(obj);
+	                                if(blob!=null) {
+	                                    iomObj.setattrvalue(attrName,blob);
+	                                }
 	                            } catch (ConverterException ex) {
 	                                EhiLogger.logError("Object "+sqlid+": failed to convert blackbox binary",ex);
 	                            }

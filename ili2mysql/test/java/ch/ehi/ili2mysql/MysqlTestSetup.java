@@ -20,7 +20,7 @@ public class MysqlTestSetup extends ch.ehi.ili2db.AbstractTestSetup {
     }
     
     @Override
-    protected Config initConfig(String xtfFilename,String logfile) {
+    public Config initConfig(String xtfFilename,String logfile) {
         Config config=new Config();
         new ch.ehi.ili2mysql.MysqlMain().initConfig(config);
         config.setDburl(dburl);
@@ -36,11 +36,11 @@ public class MysqlTestSetup extends ch.ehi.ili2db.AbstractTestSetup {
         return config;
     }
     @Override
-    protected void initConfig(Config config) {
+    public void initConfig(Config config) {
         new ch.ehi.ili2mysql.MysqlMain().initConfig(config);
     }
     @Override
-    protected void resetDb() throws SQLException {
+    public void resetDb() throws SQLException {
         Connection jdbcConnection = DriverManager.getConnection("jdbc:mysql:///", dbuser, dbpwd);
         Statement stmt=jdbcConnection.createStatement();
         stmt.execute("DROP DATABASE IF EXISTS ili2db");
@@ -50,7 +50,7 @@ public class MysqlTestSetup extends ch.ehi.ili2db.AbstractTestSetup {
         jdbcConnection=null;
     }
     @Override
-    protected Connection createConnection() throws SQLException {
+    public Connection createConnection() throws SQLException {
         Connection jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
         return jdbcConnection;
     }

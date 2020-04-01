@@ -1,5 +1,9 @@
 package ch.ehi.ili2db;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+
 import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -67,10 +71,10 @@ public class MultisurfaceTest {
 			Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 			config.setFunction(Config.FC_IMPORT);
 	        config.setDoImplicitSchemaImport(true);
-			config.setCreateFk(config.CREATE_FK_YES);
+			config.setCreateFk(Config.CREATE_FK_YES);
 			config.setTidHandling(Config.TID_HANDLING_PROPERTY);
 			config.setImportTid(true);
-			config.setBasketHandling(config.BASKET_HANDLING_READWRITE);
+			config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
 			config.setCatalogueRefTrafo(null);
 			config.setMultiSurfaceTrafo(null);
 			config.setMultilingualTrafo(null);
@@ -160,12 +164,12 @@ public class MultisurfaceTest {
 			Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 			config.setFunction(Config.FC_IMPORT);
 	        config.setDoImplicitSchemaImport(true);
-			config.setCreateFk(config.CREATE_FK_YES);
+			config.setCreateFk(Config.CREATE_FK_YES);
 			config.setTidHandling(Config.TID_HANDLING_PROPERTY);
 			config.setImportTid(true);
-			config.setBasketHandling(config.BASKET_HANDLING_READWRITE);
+			config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
 			config.setCatalogueRefTrafo(null);
-			config.setMultiSurfaceTrafo(config.MULTISURFACE_TRAFO_COALESCE);
+			config.setMultiSurfaceTrafo(Config.MULTISURFACE_TRAFO_COALESCE);
 			config.setMultilingualTrafo(null);
 			config.setInheritanceTrafo(null);
 			Ili2db.readSettingsFromDb(config);
@@ -198,12 +202,12 @@ public class MultisurfaceTest {
             Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
             config.setFunction(Config.FC_IMPORT);
             config.setDoImplicitSchemaImport(true);
-            config.setCreateFk(config.CREATE_FK_YES);
+            config.setCreateFk(Config.CREATE_FK_YES);
             config.setTidHandling(Config.TID_HANDLING_PROPERTY);
             config.setImportTid(true);
-            config.setBasketHandling(config.BASKET_HANDLING_READWRITE);
+            config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
             config.setCatalogueRefTrafo(null);
-            config.setMultiSurfaceTrafo(config.MULTISURFACE_TRAFO_COALESCE);
+            config.setMultiSurfaceTrafo(Config.MULTISURFACE_TRAFO_COALESCE);
             config.setMultilingualTrafo(null);
             config.setInheritanceTrafo(null);
             Ili2db.readSettingsFromDb(config);
@@ -298,12 +302,12 @@ public class MultisurfaceTest {
 			Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 			config.setFunction(Config.FC_IMPORT);
 	        config.setDoImplicitSchemaImport(true);
-			config.setCreateFk(config.CREATE_FK_YES);
+			config.setCreateFk(Config.CREATE_FK_YES);
 			config.setTidHandling(Config.TID_HANDLING_PROPERTY);
 			config.setImportTid(true);
-			config.setBasketHandling(config.BASKET_HANDLING_READWRITE);
+			config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
 			config.setCatalogueRefTrafo(null);
-			config.setMultiSurfaceTrafo(config.MULTISURFACE_TRAFO_COALESCE);
+			config.setMultiSurfaceTrafo(Config.MULTISURFACE_TRAFO_COALESCE);
 			config.setMultilingualTrafo(null);
 			config.setInheritanceTrafo(null);
 			Ili2db.readSettingsFromDb(config);
@@ -398,12 +402,12 @@ public class MultisurfaceTest {
 			Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 			config.setFunction(Config.FC_IMPORT);
 	        config.setDoImplicitSchemaImport(true);
-			config.setCreateFk(config.CREATE_FK_YES);
+			config.setCreateFk(Config.CREATE_FK_YES);
 			config.setTidHandling(Config.TID_HANDLING_PROPERTY);
 			config.setImportTid(true);
-			config.setBasketHandling(config.BASKET_HANDLING_READWRITE);
+			config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
 			config.setCatalogueRefTrafo(null);
-			config.setMultiSurfaceTrafo(config.MULTISURFACE_TRAFO_COALESCE);
+			config.setMultiSurfaceTrafo(Config.MULTISURFACE_TRAFO_COALESCE);
 			config.setOneGeomPerTable(true);
 			config.setMultilingualTrafo(null);
 			config.setInheritanceTrafo(null);
@@ -486,4 +490,52 @@ public class MultisurfaceTest {
 			}
 		}
 	}
+
+    @Test
+    public void exportXtfEmptyGeom() throws Exception {
+        Class driverClass = Class.forName("org.postgresql.Driver");
+        jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
+        stmt=jdbcConnection.createStatement();
+        stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");
+        File data=new File("test/data/MultiSurface/MultiSurface2.ili");
+        Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+        config.setFunction(Config.FC_SCHEMAIMPORT);
+        config.setDefaultSrsCode("21781");
+        Ili2db.readSettingsFromDb(config);
+        Ili2db.run(config,null);
+        
+        stmt.execute("INSERT INTO "+DBSCHEMA+".classa1(geom) VALUES (ST_GeomFromText('MULTISURFACE EMPTY', 21781))");
+
+        File dataXtf=new File("test/data/MultiSurface/MultiSurface2Empty-out.xtf");
+
+        config.setXtffile(dataXtf.getPath());
+        config.setLogfile(dataXtf.getPath()+".log");
+        config.setModels("MultiSurface2");
+        config.setFunction(Config.FC_EXPORT);
+        config.setValidation(false); // ClassA1.geom is in model MANDATORY (can not be empty)
+
+        Ili2db.readSettingsFromDb(config);
+        Ili2db.run(config,null);
+        {
+            XtfReader reader=new XtfReader(dataXtf);
+            assertTrue(reader.read() instanceof StartTransferEvent);
+            assertTrue(reader.read() instanceof StartBasketEvent);
+            IoxEvent event=reader.read();
+            assertTrue(event instanceof ObjectEvent);
+            IomObject iomObj=((ObjectEvent)event).getIomObject();
+            {
+                String attrtag=iomObj.getobjecttag();
+                assertEquals("MultiSurface2.TestA.ClassA1", attrtag);
+                {
+                    {
+                        IomObject geom=iomObj.getattrobj("geom", 0);
+                        assertNull(geom);
+                    }
+                }
+            }
+            assertTrue(reader.read() instanceof EndBasketEvent);
+            assertTrue(reader.read() instanceof EndTransferEvent);
+        }
+        
+    }
 }

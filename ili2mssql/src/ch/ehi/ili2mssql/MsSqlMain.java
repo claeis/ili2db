@@ -28,9 +28,9 @@ public class MsSqlMain  extends ch.ehi.ili2db.AbstractMain {
 			public String makeUrl(Config config) {
 				if(config.getDbdatabase()!=null){
 					
-					String strDbHost = config.getDbhost()!=null&&!config.getDbhost().isEmpty()? config.getDbhost():"localhost";
-					String strInstance = dbinstance.isEmpty()?"":"\\"+dbinstance;
-					String strPort = config.getDbport()!=null && !config.getDbport().isEmpty()?":"+config.getDbport():"";
+                    String strDbHost = !isNullOrEmpty(config.getDbhost())? config.getDbhost():"localhost";
+                    String strInstance = !isNullOrEmpty(dbinstance)?"":"\\"+dbinstance;
+                    String strPort = !isNullOrEmpty(config.getDbport())?":"+config.getDbport():"";
 					String strDbdatabase = ";databaseName="+config.getDbdatabase();
 					String strWindowsAuth =  dbWindowsAuth?";integratedSecurity=true":"";
 					
@@ -46,8 +46,8 @@ public class MsSqlMain  extends ch.ehi.ili2db.AbstractMain {
 		return null;
 	}
 	
-	static public void main(String args[]){
-		new MsSqlMain().domain(args);
+    public static void main(String[] args){
+        new MsSqlMain().domain(args);
 	}
 	
 	@Override
@@ -82,7 +82,7 @@ public class MsSqlMain  extends ch.ehi.ili2db.AbstractMain {
 	}
 
 	@Override
-	protected int doArgs(String args[],int argi,Config config)
+	protected int doArgs(String[] args,int argi,Config config)
 	{
 		String arg=args[argi];
 		if(arg.equals("--dbhost")){
@@ -119,4 +119,8 @@ public class MsSqlMain  extends ch.ehi.ili2db.AbstractMain {
 		}
 		return argi;
 	}
+    
+    private boolean isNullOrEmpty(String str) {
+        return str==null||str.isEmpty();
+    }
 }

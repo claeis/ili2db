@@ -11,22 +11,22 @@ public abstract class AbstractTestSetup {
     abstract protected void initConfig(Config config);
     /** init config including setting of db connection params
      */
-    abstract protected Config initConfig(String xtfFilename,String logfile);
+    public abstract Config initConfig(String xtfFilename,String logfile);
     /** clear/remove the dbschema or dbfile
      */
-    abstract protected void resetDb() throws SQLException;
+    public abstract void resetDb() throws SQLException;
     /** get an open connection
      */
-    abstract protected Connection createConnection() throws SQLException;
-    protected void setXYParams(Config config) {
+    public abstract Connection createConnection() throws SQLException;
+    public void setXYParams(Config config) {
     }
-    protected Connection createDbSchema() throws SQLException {
+    public Connection createDbSchema() throws SQLException {
         return createConnection();
     }
-    protected String prefixName(String name) {
+    public String prefixName(String name) {
         return name;
     }
-    protected String getSchema() {
+    public String getSchema() {
         return null;
     }
 

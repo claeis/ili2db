@@ -26,7 +26,7 @@ public class MsSqlTestSetup extends AbstractTestSetup {
     }
 
     @Override
-    protected Config initConfig(String xtfFilename, String logfile) {
+    public Config initConfig(String xtfFilename, String logfile) {
         Config config=new Config();
         new ch.ehi.ili2mssql.MsSqlMain().initConfig(config);
         config.setDburl(dburl);
@@ -46,7 +46,7 @@ public class MsSqlTestSetup extends AbstractTestSetup {
     }
 
     @Override
-    protected void initConfig(Config config) {
+    public void initConfig(Config config) {
         new ch.ehi.ili2mssql.MsSqlMain().initConfig(config);
         if(dbschema!=null) {
             config.setDbschema(dbschema);
@@ -54,7 +54,7 @@ public class MsSqlTestSetup extends AbstractTestSetup {
     }
 
     @Override
-    protected String prefixName(String name) {
+    public String prefixName(String name) {
         if(dbschema==null) {
             return name;
         }
@@ -62,7 +62,7 @@ public class MsSqlTestSetup extends AbstractTestSetup {
     }
 
     @Override
-    protected void resetDb() throws SQLException {
+    public void resetDb() throws SQLException {
         if(dbschema!=null) {
             Connection jdbcConnection=createConnection();
             try {
@@ -85,19 +85,17 @@ public class MsSqlTestSetup extends AbstractTestSetup {
     }
 
     @Override
-    protected Connection createConnection() throws SQLException {
+    public Connection createConnection() throws SQLException {
         try {
-            Class driverClass = Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
+            Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
         } catch (ClassNotFoundException e) {
             throw new IllegalStateException(e);
         }
-        Connection jdbcConnection = DriverManager.getConnection(
-                dburl, dbuser, dbpwd);
-        return jdbcConnection;
+        return DriverManager.getConnection(dburl, dbuser, dbpwd);
     }
 
     @Override
-    protected String getSchema() {
+    public String getSchema() {
         return dbschema;
     }
 }
