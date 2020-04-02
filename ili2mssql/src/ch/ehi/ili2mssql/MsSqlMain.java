@@ -29,7 +29,7 @@ public class MsSqlMain  extends ch.ehi.ili2db.AbstractMain {
 				if(config.getDbdatabase()!=null){
 					
                     String strDbHost = !isNullOrEmpty(config.getDbhost())? config.getDbhost():"localhost";
-                    String strInstance = !isNullOrEmpty(dbinstance)?"":"\\"+dbinstance;
+                    String strInstance = !isNullOrEmpty(dbinstance)?"\\"+dbinstance:"";
                     String strPort = !isNullOrEmpty(config.getDbport())?":"+config.getDbport():"";
 					String strDbdatabase = ";databaseName="+config.getDbdatabase();
 					String strWindowsAuth =  dbWindowsAuth?";integratedSecurity=true":"";
