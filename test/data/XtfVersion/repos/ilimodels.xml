@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TRANSFER xmlns="http://www.interlis.ch/INTERLIS2.3">
+	<HEADERSECTION SENDER="mkilimodelsxml-5.0.9-20200406" VERSION="2.3">
+		<MODELS>
+			<MODEL NAME="IliRepository20" VERSION="2020-01-15" URI="http://models.interlis.ch/core"></MODEL>
+		</MODELS>
+	</HEADERSECTION>
+	<DATASECTION>
+		<IliRepository20.RepositoryIndex BID="b1">
+			<IliRepository20.RepositoryIndex.ModelMetadata TID="0">
+				<Name>Simple</Name>
+				<SchemaLanguage>ili2_3</SchemaLanguage>
+				<File>Simple23-20200323.ili</File>
+				<Version>2020-03-23</Version>
+				<publishingDate>2020-03-23</publishingDate>
+				<dependsOnModel>
+					<IliRepository20.ModelName_>
+						<value>Basis</value>
+					</IliRepository20.ModelName_>
+				</dependsOnModel>
+				<Issuer>mailto:ce@eisenhutinformatik.ch</Issuer>
+				<browseOnly>false</browseOnly>
+				<md5>a6262ffd66c7499a4b2848dfd3bf4be0</md5>
+			</IliRepository20.RepositoryIndex.ModelMetadata>
+			<IliRepository20.RepositoryIndex.ModelMetadata TID="1">
+				<Name>Simple</Name>
+				<SchemaLanguage>ili2_4</SchemaLanguage>
+				<File>Simple24-20200324.ili</File>
+				<Version>2020-03-24</Version>
+				<publishingDate>2020-03-24</publishingDate>
+				<dependsOnModel>
+					<IliRepository20.ModelName_>
+						<value>Basis</value>
+					</IliRepository20.ModelName_>
+				</dependsOnModel>
+				<Issuer>mailto:ce@eisenhutinformatik.ch</Issuer>
+				<browseOnly>false</browseOnly>
+				<md5>a8ba0fc538c12fdf91241d20ea7c046f</md5>
+			</IliRepository20.RepositoryIndex.ModelMetadata>
+			<IliRepository20.RepositoryIndex.ModelMetadata TID="2">
+				<Name>Simple</Name>
+				<SchemaLanguage>ili1</SchemaLanguage>
+				<File>Simple10-20200310.ili</File>
+				<Version>2020-03-10</Version>
+				<publishingDate>2020-03-10</publishingDate>
+				<browseOnly>false</browseOnly>
+				<md5>a10b7690819967e752526353a980e0bb</md5>
+			</IliRepository20.RepositoryIndex.ModelMetadata>
+			<IliRepository20.RepositoryIndex.ModelMetadata TID="3">
+				<Name>Simple</Name>
+				<SchemaLanguage>ili2_2</SchemaLanguage>
+				<File>Simple22-20200322.ili</File>
+				<Version>2020-03-22</Version>
+				<publishingDate>2020-03-22</publishingDate>
+				<dependsOnModel>
+					<IliRepository20.ModelName_>
+						<value>Basis</value>
+					</IliRepository20.ModelName_>
+				</dependsOnModel>
+				<browseOnly>false</browseOnly>
+				<md5>ced2ebadc2c2a591daca83b3041d587a</md5>
+			</IliRepository20.RepositoryIndex.ModelMetadata>
+			<IliRepository20.RepositoryIndex.ModelMetadata TID="4">
+				<Name>Basis</Name>
+				<SchemaLanguage>ili2_4</SchemaLanguage>
+				<File>Basis24-20200324.ili</File>
+				<Version>2020-03-24</Version>
+				<publishingDate>2020-03-24</publishingDate>
+				<Issuer>mailto:ce@eisenhutinformatik.ch</Issuer>
+				<browseOnly>false</browseOnly>
+				<md5>c04539d77482320c0428dd2392db6d23</md5>
+			</IliRepository20.RepositoryIndex.ModelMetadata>
+			<IliRepository20.RepositoryIndex.ModelMetadata TID="5">
+				<Name>Basis</Name>
+				<SchemaLanguage>ili2_2</SchemaLanguage>
+				<File>Basis22-20200322.ili</File>
+				<Version>2020-03-22</Version>
+				<publishingDate>2020-03-22</publishingDate>
+				<browseOnly>false</browseOnly>
+				<md5>ccbd09e430df1e165b8c3dea1d539321</md5>
+			</IliRepository20.RepositoryIndex.ModelMetadata>
+			<IliRepository20.RepositoryIndex.ModelMetadata TID="6">
+				<Name>Basis</Name>
+				<SchemaLanguage>ili2_3</SchemaLanguage>
+				<File>Basis23-20200323.ili</File>
+				<Version>2020-03-23</Version>
+				<publishingDate>2020-03-23</publishingDate>
+				<Issuer>mailto:ce@eisenhutinformatik.ch</Issuer>
+				<browseOnly>false</browseOnly>
+				<md5>e295eb73bccd20293e9567c8714be796</md5>
+			</IliRepository20.RepositoryIndex.ModelMetadata>
+		</IliRepository20.RepositoryIndex>
+	</DATASECTION>
+</TRANSFER>

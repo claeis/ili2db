@@ -1,0 +1,15 @@
+INTERLIS 2.2;
+
+MODEL Simple =
+  IMPORTS Basis;
+  
+  TOPIC TestA =
+    
+    CLASS ClassA1 =
+    	attr22 : Basis.Domain22;
+    END ClassA1;
+    
+  END TestA;
+  
+  
+END Simple.

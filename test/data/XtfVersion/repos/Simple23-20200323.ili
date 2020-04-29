@@ -1,0 +1,16 @@
+INTERLIS 2.3;
+
+MODEL Simple
+  AT "mailto:ce@eisenhutinformatik.ch" VERSION "2020-03-23" =
+  IMPORTS Basis;
+  
+  TOPIC TestA =
+    
+    CLASS ClassA1 =
+    	attr23 : Basis.Domain23;
+    END ClassA1;
+    
+  END TestA;
+  
+  
+END Simple.

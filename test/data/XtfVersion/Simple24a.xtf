@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ili:transfer xmlns="http://www.interlis.ch/xtf/2.4/Simple" xmlns:ili="http://www.interlis.ch/xtf/2.4/INTERLIS">
+	<ili:headersection SENDER="ili2c-4.5.22-20160520" VERSION="2.3">
+		<ili:models>
+			<ili:model>Simple</ili:model>
+		</ili:models>
+	</ili:headersection>
+	<ili:datasection>
+		<TestA ili:bid="b1">
+			<ClassA1 ili:tid="o1">
+				<attr24>a24</attr24>
+			</ClassA1>
+		</TestA>
+	</ili:datasection>
+</ili:transfer>
