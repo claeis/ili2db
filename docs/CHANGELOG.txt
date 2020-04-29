@@ -13,6 +13,8 @@ ideas/open issues/questions
 
 LATEST
 ---------------------------
+- iox-ili-1.21.0-SNAPSHOT
+- ili2c-5.1.0-SNAPSHOT
 
 ili2db 4.4.2 (2020-04-01)
 ------------------------------
