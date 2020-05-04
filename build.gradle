@@ -33,6 +33,10 @@ if(propFile.exists()){
 def git = System.getProperty('git',properties.get('git','git'))
 def repos_pwd = System.getProperty('repos_pwd',properties.get('repos_pwd','repos_pwd'))
 def repos_usr = System.getProperty('repos_usr',properties.get('repos_usr','repos_usr'))
+ext {
+	downloads_pwd = System.getProperty('downloads_pwd',properties.get('downloads_pwd','downloads_pwd'))
+	downloads_usr = System.getProperty('downloads_usr',properties.get('downloads_usr','downloads_usr'))
+}
 def dburl = System.getProperty('dburl',properties.get('dburl'))
 def dbusr = System.getProperty('dbusr',properties.get('dbusr'))
 def dbpwd = System.getProperty('dbpwd',properties.get('dbpwd'))
@@ -281,6 +285,7 @@ configurations {
 		extendsFrom ili2oraRuntimeOnly
 	}
     deployerJars
+    ftpAntTask
 }
 dependencies {
     implementation group: 'ch.interlis', name: 'iox-ili', version: '1.21.0+'
@@ -305,6 +310,7 @@ dependencies {
 	ili2db group: project.group, name: project.name, version: project.version
     deployerJars "org.apache.maven.wagon:wagon-ftp:3.3.3"
     deployerJars "org.apache.maven.wagon:wagon-ssh:3.3.3"
+    ftpAntTask "org.apache.ant:ant-commons-net:1.10.7"
 }
 
 
@@ -340,7 +346,6 @@ task ili2pgJar(dependsOn: jar,type: Jar) {
 }
 task ili2pgBindist(dependsOn:[usrdoc,ili2pgJar], type: Zip){
 	baseName = 'ili2pg'
-    classifier 'bindist'
 	destinationDir = file('dist')
 	from ili2pgJar
 	into('docs'){
@@ -382,7 +387,6 @@ task ili2gpkgJar(dependsOn: jar,type: Jar) {
 }
 task ili2gpkgBindist(dependsOn:[usrdoc,ili2gpkgJar], type: Zip){
 	baseName = 'ili2gpkg'
-    classifier 'bindist'
 	destinationDir = file('dist')
 	from ili2gpkgJar
 	into('docs'){
@@ -412,7 +416,6 @@ task ili2mysqlJar(dependsOn: jar,type: Jar) {
 }
 task ili2mysqlBindist(dependsOn:[usrdoc,ili2mysqlJar], type: Zip){
 	baseName = 'ili2mysql'
-    classifier 'bindist'
 	destinationDir = file('dist')
 	from ili2mysqlJar
 	into('docs'){
@@ -445,7 +448,6 @@ task ili2fgdbJar(dependsOn: jar,type: Jar) {
 }
 task ili2fgdbBindist(dependsOn:[usrdoc,ili2fgdbJar], type: Zip){
 	baseName = 'ili2fgdb'
-    classifier 'bindist'
 	destinationDir = file('dist')
 	from ili2fgdbJar
 	into('docs'){
@@ -474,7 +476,6 @@ task ili2mssqlJar(dependsOn: jar,type: Jar) {
 }
 task ili2mssqlBindist(dependsOn:[usrdoc,ili2mssqlJar], type: Zip){
 	baseName = 'ili2mssql'
-    classifier 'bindist'
 	destinationDir = file('dist')
 	from ili2mssqlJar
 	into('docs'){
@@ -506,7 +507,6 @@ task ili2oraJar(dependsOn: jar,type: Jar) {
 }
 task ili2oraBindist(dependsOn:[usrdoc,ili2oraJar], type: Zip){
 	baseName = 'ili2ora'
-    classifier 'bindist'
 	destinationDir = file('dist')
 	from ili2oraJar
 	into('docs'){
@@ -773,4 +773,35 @@ uploadArchives {
             }
         }
     }
+}
+
+void uploadFile(String programName, File archiveFile) {
+		def archiveDir= archiveFile.parent
+		def archiveName=archiveFile.name
+		def json = groovy.json.JsonOutput.toJson([filename: 'https://downloads.interlis.ch/'+programName+'/'+archiveName, version: project.version ,date: new Date().format( 'yyyy-MM-dd' )])
+		def releaseFile = new File(archiveDir,programName+"-release.json")
+		releaseFile.write(json)
+		ant.ftp(server: "jql.ftp.infomaniak.com", userid: project.ext.downloads_usr, password: project.ext.downloads_pwd, 
+			action: "put",
+			remoteDir: '/'+programName, passive:"yes") {
+				fileset(dir: archiveDir ) {
+					include(name: archiveName)
+					include(name: releaseFile.name)
+				}
+		}
+
+}
+
+task uploadBin(dependsOn: [ili2pgBindist,ili2gpkgBindist,ili2mysqlBindist,ili2fgdbBindist,ili2mssqlBindist,ili2oraBindist]) {
+	doLast {
+		ant.taskdef(name: 'ftp',
+					classname: 'org.apache.tools.ant.taskdefs.optional.net.FTP',
+					classpath: configurations.ftpAntTask.asPath)
+		uploadFile('ili2pg',ili2pgBindist.archiveFile.get().asFile)
+		uploadFile('ili2gpkg',ili2gpkgBindist.archiveFile.get().asFile)
+		uploadFile('ili2mysql',ili2mysqlBindist.archiveFile.get().asFile)
+		uploadFile('ili2fgdb',ili2fgdbBindist.archiveFile.get().asFile)
+		uploadFile('ili2mssql',ili2mssqlBindist.archiveFile.get().asFile)
+		uploadFile('ili2ora',ili2oraBindist.archiveFile.get().asFile)
+	}
 }

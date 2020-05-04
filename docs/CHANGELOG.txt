@@ -13,10 +13,13 @@ ideas/open issues/questions
 
 LATEST
 ---------------------------
+
+ili2db 4.4.3 (2020-05-04)
+------------------------------
 - improved ili 2.4/2.3 model lookup
 - ili2gpkg: added CRS 'MAGNA-SIRGAS / CTM12', 38820, 'STC' to init script
-- iox-ili-1.21.0-SNAPSHOT
-- ili2c-5.1.0-SNAPSHOT
+- iox-ili-1.21.0
+- ili2c-5.1.1
 
 ili2db 4.4.2 (2020-04-01)
 ------------------------------
