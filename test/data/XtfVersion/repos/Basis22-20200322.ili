@@ -1,0 +1,7 @@
+INTERLIS 2.2;
+
+MODEL Basis =
+  DOMAIN
+  	Domain22 = (a22);
+    
+END Basis.

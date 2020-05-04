@@ -1,0 +1,25 @@
+TRANSFER INTERLIS1;
+
+MODEL Simple
+	
+  DOMAIN
+  	Domain10 = (a10,a20);
+  
+  TOPIC TestA =
+    
+    TABLE ClassA1 =
+    	attr10 : Domain10;
+    	NO IDENT
+    END ClassA1;
+    
+  END TestA.
+  
+  
+END Simple.
+
+FORMAT FREE;
+
+CODE
+  BLANK = DEFAULT, UNDEFINED = DEFAULT, CONTINUE = DEFAULT;
+  TID = ANY;
+END.

@@ -69,6 +69,7 @@ import ch.ehi.sqlgen.repository.DbSchema;
 import ch.ehi.sqlgen.repository.DbTable;
 import ch.ehi.sqlgen.repository.DbTableName;
 import ch.interlis.ili2c.config.Configuration;
+import ch.interlis.ili2c.gui.UserSettings;
 import ch.interlis.ili2c.metamodel.Element;
 import ch.interlis.ili2c.metamodel.Ili2cMetaAttrs;
 import ch.interlis.ili2c.metamodel.Model;
@@ -89,8 +90,9 @@ import ch.interlis.iom_j.xtf.XtfWriter;
 import ch.interlis.iox.IoxException;
 import ch.interlis.iox.IoxReader;
 import ch.interlis.iox.IoxWriter;
-import ch.interlis.iox_j.IoxUtility;
+import ch.interlis.iox_j.utility.IoxUtility;
 import ch.interlis.iox_j.logging.FileLogger;
+import ch.interlis.iox_j.logging.LogEventFactory;
 import ch.interlis.iox_j.logging.StdLogger;
 
 /**
@@ -292,6 +294,7 @@ public class Ili2db {
 				}
 				EhiLogger.traceState("modeldir <"+modeldir+">");
 				
+			String iliVersion=null;
 			ch.interlis.ili2c.config.Configuration modelv=new ch.interlis.ili2c.config.Configuration();
 			if(function!=Config.FC_DELETE){
 				String models=config.getModels();
@@ -318,6 +321,9 @@ public class Ili2db {
 							List<String> modelsFromXtf=null;
                             try {
                                 modelsFromXtf = IoxUtility.getModels(new java.io.File(inputFilename));
+                                if(iliVersion==null) {
+                                    iliVersion=IoxUtility.getModelVersion(new String[] {inputFilename},new LogEventFactory());
+                                }
                             } catch (IoxException e) {
                                 throw new Ili2dbException(e);
                             }
@@ -475,6 +481,9 @@ public class Ili2db {
 				EhiLogger.logState("compile models...");
 				ili2cConfig.setAutoCompleteModelList(true);
 				ili2cConfig.setGenerateWarnings(false);
+				if(iliVersion!=null) {
+	                config.setValue(UserSettings.ILI_LANGUAGE_VERSION, iliVersion);
+				}
 				TransferDescription td = ch.interlis.ili2c.Main.runCompiler(ili2cConfig,
 						config,ili2cMetaAttrs);
 				if (td == null) {
@@ -1402,7 +1411,7 @@ public class Ili2db {
     private static void logGeneralInfo(Config config) {
 		EhiLogger.logState(config.getSender());
 		EhiLogger.logState("ili2c-"+ch.interlis.ili2c.Main.getVersion());
-		EhiLogger.logState("iox-ili-"+ch.interlis.iox_j.IoxUtility.getVersion());
+		EhiLogger.logState("iox-ili-"+ch.interlis.iox_j.utility.IoxUtility.getVersion());
 		EhiLogger.logState("java.version "+System.getProperty("java.version"));
 		EhiLogger.logState("user.name <"+System.getProperty("user.name")+">");
 		EhiLogger.logState("maxMemory "+java.lang.Runtime.getRuntime().maxMemory()/1024L+" KB");

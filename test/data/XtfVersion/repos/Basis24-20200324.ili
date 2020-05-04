@@ -1,0 +1,8 @@
+INTERLIS 2.4;
+
+MODEL Basis
+  AT "mailto:ce@eisenhutinformatik.ch" VERSION "2020-03-24" =
+  DOMAIN
+  	Domain24 = (a24);
+  	
+END Basis.
