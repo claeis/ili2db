@@ -324,6 +324,8 @@ task printcp {
 	}
 }
 task usrdoc(type:Exec) {
+	group = JavaBasePlugin.DOCUMENTATION_GROUP
+    description = 'Builds the user documentation (html)'
 	def infile=new File(project.projectDir,'docs/ili2db.rst')
 	def outfile=new File('docs/ili2db.html')
 	inputs.file infile

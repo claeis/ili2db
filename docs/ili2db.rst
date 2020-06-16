@@ -751,6 +751,21 @@ Optionen:
 Abbildungsregeln
 ----------------
 
+Umfang der Abbildung
+~~~~~~~~~~~~~~~~~~~~~
+
+Alle explizit genannten Modelle (mit ``--models``) werden vollständig importiert. 
+Direkt oder indirekt importierte Modelle (via ``IMPORTS``) werden nicht importiert, 
+ausser denjenigen Klassen die direkt oder indirekt via Assoziationen oder 
+Referenzattribute referenziert werden.
+
+Wird via ``--models`` kein Modell explizit bezeichnet, wird das letzte Modell der 
+ili-Datei importiert.
+
+Wird das Schema als Teil des Daten-Imports (``--doSchemaImport`` ) 
+angelegt (ohne ``--models``), werden die Modelle gemäss dem Element ``MODELS`` aus der Transferdatei angelegt.
+
+
 Klassen/Strukturen
 ~~~~~~~~~~~~~~~~~~
 
