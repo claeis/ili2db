@@ -63,7 +63,7 @@ sourceSets {
     //it is now a part of the 'main' classpath and will be a part of the jar
     output.dir(generatedResources, builtBy: 'generateMyResources')
     java {
-    	srcDirs=['src']
+    	srcDirs=['src','gui/src'] // 'gui-noop/src'
     }
     resources {
     	srcDirs=['resources']
