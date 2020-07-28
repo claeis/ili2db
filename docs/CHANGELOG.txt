@@ -14,6 +14,7 @@ ideas/open issues/questions
 LATEST
 ---------------------------
 - fixed MultiSurface export / Unexpected WKB type 3 (#358)
+- remove use of ObjectOutputStream.writeObject() (#354)
 - iox-ili-1.21.1-SNAPSHOT
 
 ili2db 4.4.3 (2020-05-04)
