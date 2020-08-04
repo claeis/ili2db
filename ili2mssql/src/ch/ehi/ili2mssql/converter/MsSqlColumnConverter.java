@@ -1,5 +1,6 @@
 package ch.ehi.ili2mssql.converter;
 
+import java.nio.ByteOrder;
 import java.sql.Connection;
 import java.sql.SQLException;
 
@@ -18,7 +19,7 @@ public class MsSqlColumnConverter extends AbstractWKBColumnConverter {
 	
 	private boolean strokeArcs=true;
     private static final String GEOM_FROM_WKB_FUNCTION="geometry::STGeomFromWKB";
-    private static final String GEOM_TO_WKB_FUNCTION=".STAsBinary()";
+    private static final String GEOM_TO_WKB_FUNCTION=".AsBinaryZM()";
 	
 	@Override
 	public void setup(Connection conn, Settings config) {
@@ -145,7 +146,7 @@ public class MsSqlColumnConverter extends AbstractWKBColumnConverter {
 		throws SQLException, ConverterException {
 	
 			if(value!=null){
-				Iox2wkb conv=new Iox2wkb(is3D?3:2);
+				Iox2wkb conv=new Iox2wkb(is3D?3:2, ByteOrder.BIG_ENDIAN, false);
 				
 				try {
 					return conv.multisurface2wkb(value,!strokeArcs,p);
@@ -164,7 +165,7 @@ public class MsSqlColumnConverter extends AbstractWKBColumnConverter {
         boolean is3D,double p)
     throws SQLException, ConverterException {
         if (value!=null) {
-            Iox2wkb conv=new Iox2wkb(is3D?3:2);
+            Iox2wkb conv=new Iox2wkb(is3D?3:2, ByteOrder.BIG_ENDIAN, false);
 
             try {
                 return conv.surface2wkb(value,!strokeArcs,p);
@@ -179,7 +180,7 @@ public class MsSqlColumnConverter extends AbstractWKBColumnConverter {
     public java.lang.Object fromIomCoord(IomObject value, int srid,boolean is3D)
     throws SQLException, ConverterException {
         if (value!=null) {
-            Iox2wkb conv=new Iox2wkb(is3D?3:2);
+            Iox2wkb conv=new Iox2wkb(is3D?3:2, ByteOrder.BIG_ENDIAN, false);
             try {
                 return conv.coord2wkb(value);
             } catch (Iox2wkbException ex) {
@@ -192,7 +193,7 @@ public class MsSqlColumnConverter extends AbstractWKBColumnConverter {
     public java.lang.Object fromIomMultiCoord(IomObject value, int srid,boolean is3D)
     throws SQLException, ConverterException {
         if (value!=null) {
-            Iox2wkb conv=new Iox2wkb(is3D?3:2);
+            Iox2wkb conv=new Iox2wkb(is3D?3:2, ByteOrder.BIG_ENDIAN, false);
             try {
                 return conv.multicoord2wkb(value);
             } catch (Iox2wkbException ex) {
@@ -205,7 +206,7 @@ public class MsSqlColumnConverter extends AbstractWKBColumnConverter {
     public java.lang.Object fromIomPolyline(IomObject value, int srid,boolean is3D,double p)
     throws SQLException, ConverterException {
         if (value!=null) {
-            Iox2wkb conv=new Iox2wkb(is3D?3:2);
+            Iox2wkb conv=new Iox2wkb(is3D?3:2, ByteOrder.BIG_ENDIAN, false);
             try {
                 return conv.polyline2wkb(value,false,!strokeArcs,p);
             } catch (Iox2wkbException ex) {
@@ -218,7 +219,7 @@ public class MsSqlColumnConverter extends AbstractWKBColumnConverter {
     public java.lang.Object fromIomMultiPolyline(IomObject value, int srid,boolean is3D,double p)
     throws SQLException, ConverterException {
         if (value!=null) {
-            Iox2wkb conv=new Iox2wkb(is3D?3:2);
+            Iox2wkb conv=new Iox2wkb(is3D?3:2, ByteOrder.BIG_ENDIAN, false);
             try {
                 return conv.multiline2wkb(value,!strokeArcs,p);
             } catch (Iox2wkbException ex) {
