@@ -1052,7 +1052,7 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 		if(sqlid2xtfid.containsSqlid(targetSqlTable,sqlid)){
 			refobj.setobjectrefoid(sqlid2xtfid.getXtfid(targetSqlTable,sqlid));
 		}else{
-			fixref.addFix(refobj,sqlid,targetClass,targetSqlTable);
+			fixref.addFix(refobj,sqlid,targetClass.getScopedName(),targetSqlTable);
 		}
 		return null;
 	}
