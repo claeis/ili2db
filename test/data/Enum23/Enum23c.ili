@@ -1,0 +1,48 @@
+INTERLIS 2.3;
+
+MODEL Enum23c
+  AT "mailto:ce@eisenhutinformatik.ch" VERSION "2020-08-31" =
+
+  DOMAIN
+    Enum1 = (Test1, Test2, Test3 (Test3a, Test3aa));
+    Enum1b EXTENDS Enum1 = (Test2 (Test2bA, Test2bB));
+    Enum1c EXTENDS Enum1 = (Test2 (Test2cA, Test2cB));
+    Enum1ccc EXTENDS Enum1c = (Test2 (Test2cA (Test2cAA, Test2cAB)));
+    
+  TOPIC TestA =
+    
+    CLASS ClassA1 (ABSTRACT) =
+    	attr1 : Enum1;
+    END ClassA1;
+
+    CLASS ClassA1a EXTENDS ClassA1 =
+    END ClassA1a;
+    
+    CLASS ClassA1b EXTENDS ClassA1 =
+    	attr1 (EXTENDED): Enum1b;
+    END ClassA1b;
+
+    CLASS ClassA1c EXTENDS ClassA1 =
+    	attr1 (EXTENDED): Enum1c;
+    END ClassA1c;
+    
+    CLASS ClassA1cc EXTENDS ClassA1c =
+    END ClassA1cc;
+
+    CLASS ClassA1ccc EXTENDS ClassA1cc =
+    	attr1 (EXTENDED): Enum1ccc;
+    END ClassA1ccc;
+    
+
+    CLASS ClassB1 =
+    END ClassB1;
+   
+    ASSOCIATION a2b =
+    	a -- {0..1} ClassA1;
+    	b -- {0..*} ClassB1;
+    END a2b;
+    
+  END TestA;
+  
+  
+END Enum23c.
