@@ -13,6 +13,7 @@ import org.junit.Test;
 import ch.ehi.ili2db.AbstractTestSetup;
 import ch.ehi.ili2db.base.DbNames;
 import ch.ehi.ili2db.base.Ili2db;
+import ch.ehi.ili2db.dbmetainfo.DbExtMetaInfo;
 import ch.ehi.ili2db.gui.Config;
 import ch.ehi.sqlgen.DbUtility;
 import ch.ehi.sqlgen.repository.DbTableName;
@@ -400,6 +401,25 @@ public class Enum23Test extends ch.ehi.ili2db.Enum23Test{
                     Assert.assertFalse(rs.next());
                     Assert.assertFalse(stmt.getMoreResults());
                 }
+                {
+                    HashMap<String,String> enums=new HashMap<String,String>();
+                    String stmtTxt="SELECT "+DbNames.META_INFO_COLUMN_TAB_SUBTYPE_COL+","+DbNames.META_INFO_COLUMN_TAB_SETTING_COL
+                            + " FROM "+DBSCHEMA+"."+DbNames.META_INFO_COLUMN_TAB+" WHERE "+DbNames.META_INFO_COLUMN_TAB_TAG_COL+"='"+DbExtMetaInfo.TAG_COL_ENUMDOMAIN+"'";
+                    ResultSet rs=stmt.executeQuery(stmtTxt);
+                    int rc=0;
+                    while(rs.next()) {
+                        rc++;
+                        String aclass=rs.getString(1);
+                        String domain=rs.getString(2);
+                        enums.put(aclass,domain);
+                    }
+                    Assert.assertEquals(5,rc);
+                    Assert.assertEquals("Enum23c.Enum1ccc",enums.get("classa1ccc"));
+                    Assert.assertEquals("Enum23c.Enum1c",enums.get("classa1cc"));
+                    Assert.assertEquals("Enum23c.Enum1c",enums.get("classa1c"));
+                    Assert.assertEquals("Enum23c.Enum1b",enums.get("classa1b"));
+                    Assert.assertEquals("Enum23c.Enum1",enums.get("classa1a"));
+                }
             }
         }finally{
             if(jdbcConnection!=null){
@@ -447,6 +467,25 @@ public class Enum23Test extends ch.ehi.ili2db.Enum23Test{
                     Assert.assertFalse(rs.next());
                     Assert.assertFalse(stmt.getMoreResults());
                 }
+                {
+                    HashMap<String,String> enums=new HashMap<String,String>();
+                    String stmtTxt="SELECT "+DbNames.META_INFO_COLUMN_TAB_SUBTYPE_COL+","+DbNames.META_INFO_COLUMN_TAB_SETTING_COL
+                            + " FROM "+DBSCHEMA+"."+DbNames.META_INFO_COLUMN_TAB+" WHERE "+DbNames.META_INFO_COLUMN_TAB_TAG_COL+"='"+DbExtMetaInfo.TAG_COL_ENUMDOMAIN+"'";
+                    ResultSet rs=stmt.executeQuery(stmtTxt);
+                    int rc=0;
+                    while(rs.next()) {
+                        rc++;
+                        String aclass=rs.getString(1);
+                        String domain=rs.getString(2);
+                        enums.put(aclass,domain);
+                    }
+                    Assert.assertEquals(5,rc);
+                    Assert.assertEquals("Enum23c.Enum1ccc",enums.get("classa1ccc"));
+                    Assert.assertEquals("Enum23c.Enum1c",enums.get("classa1cc"));
+                    Assert.assertEquals("Enum23c.Enum1c",enums.get("classa1c"));
+                    Assert.assertEquals("Enum23c.Enum1b",enums.get("classa1b"));
+                    Assert.assertEquals("Enum23c.Enum1",enums.get("classa1a"));
+                }
             }
         }finally{
             if(jdbcConnection!=null){
@@ -493,6 +532,25 @@ public class Enum23Test extends ch.ehi.ili2db.Enum23Test{
                     Assert.assertTrue(rs.next());
                     Assert.assertFalse(rs.next());
                     Assert.assertFalse(stmt.getMoreResults());
+                }
+                {
+                    HashMap<String,String> enums=new HashMap<String,String>();
+                    String stmtTxt="SELECT "+DbNames.META_INFO_COLUMN_TAB_SUBTYPE_COL+","+DbNames.META_INFO_COLUMN_TAB_SETTING_COL
+                            + " FROM "+DBSCHEMA+"."+DbNames.META_INFO_COLUMN_TAB+" WHERE "+DbNames.META_INFO_COLUMN_TAB_TAG_COL+"='"+DbExtMetaInfo.TAG_COL_ENUMDOMAIN+"'";
+                    ResultSet rs=stmt.executeQuery(stmtTxt);
+                    int rc=0;
+                    while(rs.next()) {
+                        rc++;
+                        String aclass=rs.getString(1);
+                        String domain=rs.getString(2);
+                        enums.put(aclass,domain);
+                    }
+                    Assert.assertEquals(5,rc);
+                    Assert.assertEquals("Enum23c.Enum1ccc",enums.get("classa1ccc"));
+                    Assert.assertEquals("Enum23c.Enum1c",enums.get("classa1cc"));
+                    Assert.assertEquals("Enum23c.Enum1c",enums.get("classa1c"));
+                    Assert.assertEquals("Enum23c.Enum1b",enums.get("classa1b"));
+                    Assert.assertEquals("Enum23c.Enum1",enums.get("classa1a"));
                 }
             }
         }finally{

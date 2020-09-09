@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import java.util.Collections;
 
 import java.io.IOException;
@@ -54,8 +55,10 @@ import ch.interlis.ili2c.metamodel.BasketType;
 import ch.interlis.ili2c.metamodel.BlackboxType;
 import ch.interlis.ili2c.metamodel.CompositionType;
 import ch.interlis.ili2c.metamodel.CoordType;
+import ch.interlis.ili2c.metamodel.Domain;
 import ch.interlis.ili2c.metamodel.EnumerationType;
 import ch.interlis.ili2c.metamodel.Evaluable;
+import ch.interlis.ili2c.metamodel.ExtendableContainer;
 import ch.interlis.ili2c.metamodel.LineType;
 import ch.interlis.ili2c.metamodel.LocalAttribute;
 import ch.interlis.ili2c.metamodel.NumericType;
@@ -73,6 +76,7 @@ import ch.interlis.ili2c.metamodel.Table;
 import ch.interlis.ili2c.metamodel.TextType;
 import ch.interlis.ili2c.metamodel.TransferDescription;
 import ch.interlis.ili2c.metamodel.Type;
+import ch.interlis.ili2c.metamodel.TypeAlias;
 import ch.interlis.ili2c.metamodel.UniqueEl;
 import ch.interlis.ili2c.metamodel.UniquenessConstraint;
 import ch.interlis.ili2c.metamodel.Unit;
@@ -204,7 +208,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
                   }
 
                   Collections.sort(extensions);
-
+                  
                   String jsonExtensions = "";
 
                   JsonFactory factory = new JsonFactory();
@@ -450,6 +454,34 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 		  }
 	  	
 	}
+
+    private List<Viewable> getPotentialClassTypes(Viewable def) {
+        ArrayList<Viewable> extensions = new ArrayList<Viewable>();
+        getExtensions_recursiveHelper(def, extensions);
+        /*for (Object o : extensions) {
+            Viewable v = (Viewable) o;
+            if (!v.isAbstract()) {
+                extensions.add(v);
+            }
+        }*/
+        return extensions;
+    }
+
+    private final void getExtensions_recursiveHelper(Viewable def, List<Viewable> s) {
+        if (!def.isAbstract()) {
+            s.add(def);
+        }
+        Iterator<Viewable> iter = (Iterator<Viewable>) def.getDirectExtensions().iterator();
+        while (iter.hasNext()) {
+            Viewable ext = iter.next();
+            if (!ext.isAbstract()) {
+                String trafo = trafoConfig.getViewableConfig(ext, TrafoConfigNames.INHERITANCE_TRAFO);
+                if(trafo==null || !trafo.equals(TrafoConfigNames.INHERITANCE_TRAFO_NEWANDSUBCLASS)) {
+                        getExtensions_recursiveHelper(ext, s);
+                }
+            }
+        }
+    }
 
 	private Integer[] getEpsgCodes(List<ColumnWrapper> attrv) {
 	    HashSet<Integer> epsgCodes=new HashSet<Integer>();
@@ -721,6 +753,24 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 				setNullable(aclass,attr, ret);
 				dbColExts.add(ret);
 			}
+
+            String sqlColName=getSqlAttrName(attr,epsgCode,dbTable.getName().getName(),null);
+            
+            String attrName=attr.getName();
+            List<Viewable> exts=getPotentialClassTypes(aclass);
+            for(Viewable extV:exts) {
+                AttributeDef extAttr=null;
+                extAttr=(AttributeDef) extV.getElement(AttributeDef.class,attrName);
+                if(extAttr!=null) {
+                    Type extType=extAttr.getDomain();
+                    if(extType instanceof TypeAlias) {
+                        Domain domain=((TypeAlias)extType).getAliasing();
+                        String domainSqlName=domain.getScopedName();
+                        metaInfo.setColumnInfo(dbTable.getName().getName(), getSqlType(extV).getName(), sqlColName, DbExtMetaInfo.TAG_COL_ENUMDOMAIN, domainSqlName);                        
+                    }
+                }
+            }
+			// add enum type to metaattr
 		}
 		if (dbCol.value != null) {
 			String sqlColName=getSqlAttrName(attr,epsgCode,dbTable.getName().getName(),null);
@@ -769,7 +819,18 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 		}
 	}
 	
-	static public String getIli2DbGeomType(int type)
+	private AttributeDef getDefinedAttribute(Viewable aclass, String attrName) {
+	    Iterator attri=aclass.getDefinedAttributes();
+        for(;attri.hasNext();) {
+            AttributeDef attr=(AttributeDef) attri.next();
+            if(attr.getName().equals(attrName)) {
+                return attr;
+            }
+        }
+        return null;
+    }
+
+    static public String getIli2DbGeomType(int type)
 	{
 		 switch(type){
 			case DbColGeometry.POINT:

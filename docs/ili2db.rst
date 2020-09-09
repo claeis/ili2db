@@ -1428,6 +1428,10 @@ sie beliebige (auch zukünftige) Werte/Zusatzangaben aufnehmen kann.
 | ``ch.ehi.ili2db.foreignKey``       | Bei Fremdschlüsseln der Name der Zieltabelle. Damit auch      |
 |                                    | ohne ``--createFk`` die Beziehungen ermittelt werden können   |
 +------------------------------------+---------------------------------------------------------------+
+| ``ch.ehi.ili2db.enumDomain``       | Bei Aufzählungsattributen der Name der konkreten Aufzählung.  |
+|                                    | Damit auch bei erweiterten Attributen/Aufzählungen die für die|
+|                                    | Subklasse relevante Aufzählung ermittelt werden kann          |
++------------------------------------+---------------------------------------------------------------+
 
 t\_ili2db\_table_prop
 ......................
