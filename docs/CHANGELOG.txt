@@ -18,6 +18,7 @@ LATEST
 - Separate GUI (Swing) classes from Main class (#357)
 - export: switch delayedObjects from heap to file (#363)
 - ili import: Unexpected behavior with EXTENDED enumerations (#362)
+- ili import: create metainfo about OID domain (#365)
 - iox-ili-1.21.2-SNAPSHOT
 
 ili2db 4.4.3 (2020-05-04)
