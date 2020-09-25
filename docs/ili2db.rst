@@ -1432,6 +1432,9 @@ sie beliebige (auch zukünftige) Werte/Zusatzangaben aufnehmen kann.
 |                                    | Damit auch bei erweiterten Attributen/Aufzählungen die für die|
 |                                    | Subklasse relevante Aufzählung ermittelt werden kann          |
 +------------------------------------+---------------------------------------------------------------+
+| ``ch.ehi.ili2db.oidDomain``        | Bei Klassen mit OID der qualifizierte Name des                |
+|                                    | OID-Wertebereichs (z.B. INTERLIS.UUIDOID)                     |
++------------------------------------+---------------------------------------------------------------+
 
 t\_ili2db\_table_prop
 ......................
