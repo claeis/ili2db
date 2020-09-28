@@ -176,7 +176,6 @@ public class Rounder implements IoxFilter {
         PrecisionDecimal minimum=((NumericType) type).getMinimum();
         int precision= minimum.getAccuracy();
         BigDecimal value=Validator.roundNumeric(precision, attrValue);
-        value.setScale(precision, BigDecimal.ROUND_HALF_UP);
         return value;
     }
     @Override
