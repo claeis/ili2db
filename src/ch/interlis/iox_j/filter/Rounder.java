@@ -104,8 +104,12 @@ public class Rounder implements IoxFilter {
 		for(int attri=0;attri<attrc;attri++){
             if(type instanceof NumericType){
                 String attrValue=iomObj.getattrprim(srcAttrName,attri);
-                BigDecimal value=roundNumber(attrValue,(NumericType)type);
-                iomObj.setattrvalue(srcAttrName, value.toString());
+                try {
+                    BigDecimal value=roundNumber(attrValue,(NumericType)type);
+                    iomObj.setattrvalue(srcAttrName, value.toString());
+                }catch(NumberFormatException ex) {
+                    // ignore; keep value as it is
+                }
             }else if(type instanceof CoordType) {
                 IomObject attrValue=iomObj.getattrobj(srcAttrName,attri);
                 roundSegment(attrValue,(CoordType)type);
@@ -158,8 +162,12 @@ public class Rounder implements IoxFilter {
 	            String propName=prop+Integer.toString(i+1);
 	            String attrValue=iomObj.getattrprim(propName,0);
 	            if(attrValue!=null) {
-	                BigDecimal value=roundNumber(attrValue,dimType);
-	                iomObj.setattrvalue(propName, value.toString());
+	                try {
+	                    BigDecimal value=roundNumber(attrValue,dimType);
+	                    iomObj.setattrvalue(propName, value.toString());
+	                }catch(NumberFormatException ex) {
+	                    // ignore; keep value as it is
+	                }
 	            }
 	        }
 	    }
