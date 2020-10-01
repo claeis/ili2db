@@ -54,6 +54,8 @@ public class FgdbTestSetup extends ch.ehi.ili2db.AbstractTestSetup {
 
     @Override
     public Connection createConnection() throws SQLException {
+        DriverManager.registerDriver(new FgdbDriver());
+        
         Connection conn = DriverManager.getConnection(
                 FgdbDriver.BASE_URL+fgdbFilename, null, null);
         return conn;
