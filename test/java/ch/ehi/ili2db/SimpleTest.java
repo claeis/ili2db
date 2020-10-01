@@ -203,10 +203,9 @@ public abstract class SimpleTest {
             }
             // verify
             {
-                Assert.assertTrue(stmt.execute("SELECT attra FROM "+setup.prefixName("structa1")));
                 {
                     HashSet<String> attraValues=new HashSet<String>();
-                    ResultSet rs=stmt.getResultSet();
+                    ResultSet rs=stmt.executeQuery("SELECT attra FROM "+setup.prefixName("structa1"));
                     while(rs.next()) {
                         attraValues.add(rs.getString(1));
                     }
@@ -214,10 +213,9 @@ public abstract class SimpleTest {
                     Assert.assertTrue(attraValues.contains("me"));
                     Assert.assertTrue(attraValues.contains("do"));
                 }
-                Assert.assertTrue(stmt.execute("SELECT attrb1 FROM "+setup.prefixName("classb1")));
                 {
                     HashSet<String> attraValues=new HashSet<String>();
-                    ResultSet rs=stmt.getResultSet();
+                    ResultSet rs=stmt.executeQuery("SELECT attrb1 FROM "+setup.prefixName("classb1"));
                     while(rs.next()) {
                         attraValues.add(rs.getString(1));
                     }
@@ -261,10 +259,9 @@ public abstract class SimpleTest {
             }
             // verify
             {
-                Assert.assertTrue(stmt.execute("SELECT attra FROM "+setup.prefixName("structa1")));
                 {
                     HashSet<String> attraValues=new HashSet<String>();
-                    ResultSet rs=stmt.getResultSet();
+                    ResultSet rs=stmt.executeQuery("SELECT attra FROM "+setup.prefixName("structa1"));
                     while(rs.next()) {
                         attraValues.add(rs.getString(1));
                     }
@@ -272,25 +269,22 @@ public abstract class SimpleTest {
                     Assert.assertTrue(attraValues.contains("me2"));
                     Assert.assertTrue(attraValues.contains("do2"));
                 }
-                Assert.assertTrue(stmt.execute("SELECT attrb1 FROM "+setup.prefixName("classb1")));
                 {
                     HashSet<String> attraValues=new HashSet<String>();
-                    ResultSet rs=stmt.getResultSet();
+                    ResultSet rs=stmt.executeQuery("SELECT attrb1 FROM "+setup.prefixName("classb1"));
                     while(rs.next()) {
                         attraValues.add(rs.getString(1));
                     }
                     Assert.assertEquals(1, attraValues.size());
                     Assert.assertTrue(attraValues.contains("gugus2"));
                 }
-                Assert.assertTrue(stmt.execute("SELECT count(*) FROM "+setup.prefixName(DbNames.BASKETS_TAB)));
                 {
-                    ResultSet rs=stmt.getResultSet();
+                    ResultSet rs=stmt.executeQuery("SELECT count(*) FROM "+setup.prefixName(DbNames.BASKETS_TAB));
                     Assert.assertTrue(rs.next());
                     Assert.assertEquals(1, rs.getLong(1));
                 }
-                Assert.assertTrue(stmt.execute("SELECT count(*) FROM "+setup.prefixName(DbNames.DATASETS_TAB)));
                 {
-                    ResultSet rs=stmt.getResultSet();
+                    ResultSet rs=stmt.executeQuery("SELECT count(*) FROM "+setup.prefixName(DbNames.DATASETS_TAB));
                     Assert.assertTrue(rs.next());
                     Assert.assertEquals(1, rs.getLong(1));
                 }

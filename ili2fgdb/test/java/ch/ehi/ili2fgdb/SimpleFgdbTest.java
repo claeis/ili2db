@@ -20,6 +20,13 @@ public class SimpleFgdbTest extends ch.ehi.ili2db.SimpleTest {
     {
         
     }
+    @Test
+    @Override
+    @Ignore("requires support of DELETE FROM see #153")
+    public void importXtfStructWithDelete() throws Exception
+    {
+        super.importXtfStructWithDelete();
+    }
 
 	
 }
