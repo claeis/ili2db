@@ -20,6 +20,7 @@ import ch.ehi.ili2db.base.DbNames;
 import ch.ehi.ili2db.base.DbUrlConverter;
 import ch.ehi.ili2db.base.Ili2db;
 import ch.ehi.ili2db.base.Ili2dbException;
+import ch.ehi.ili2db.dbmetainfo.DbExtMetaInfo;
 import ch.ehi.ili2db.gui.Config;
 import ch.ehi.ili2db.mapping.NameMapping;
 import ch.ehi.sqlgen.DbUtility;
@@ -125,6 +126,20 @@ public class Oid23Test {
                     };
                     Ili2dbAssert.assertTrafoTable(jdbcConnection,expectedValues, DBSCHEMA);
                 }
+                {
+                    String stmtTxt="SELECT "+DbNames.META_INFO_COLUMN_TAB_TABLENAME_COL+","+DbNames.META_INFO_COLUMN_TAB_SETTING_COL+" FROM "+DBSCHEMA+"."+DbNames.META_INFO_COLUMN_TAB+" WHERE "+DbNames.META_INFO_COLUMN_TAB_TAG_COL+" = '"+DbExtMetaInfo.TAG_COL_OIDDOMAIN+"' AND "+DbNames.META_INFO_COLUMN_TAB_COLUMNNAME_COL+" = '"+DbNames.T_ILI_TID_COL+"'";
+                    HashMap<String,String> res=new HashMap<String,String>();
+                    ResultSet rs=stmt.executeQuery(stmtTxt);
+                    while(rs.next()) {
+                        String tableName=rs.getString(1);
+                        String oidDomain=rs.getString(2);
+                        res.put(tableName,oidDomain);
+                    }
+                    Assert.assertEquals(2, res.size());
+                    Assert.assertEquals("INTERLIS.UUIDOID",res.get("classa1"));
+                    Assert.assertEquals("INTERLIS.UUIDOID",res.get("classb1"));
+                    
+                }
 			}
 		}finally{
 			if(jdbcConnection!=null){
@@ -170,6 +185,19 @@ public class Oid23Test {
                         {"Oid5.TestA.ClassB1", "ch.ehi.ili2db.inheritance", "newClass"},
                     };
                     Ili2dbAssert.assertTrafoTable(jdbcConnection,expectedValues, DBSCHEMA);
+                }
+                {
+                    String stmtTxt="SELECT "+DbNames.META_INFO_COLUMN_TAB_TABLENAME_COL+","+DbNames.META_INFO_COLUMN_TAB_SETTING_COL+" FROM "+DBSCHEMA+"."+DbNames.META_INFO_COLUMN_TAB+" WHERE "+DbNames.META_INFO_COLUMN_TAB_TAG_COL+" = '"+DbExtMetaInfo.TAG_COL_OIDDOMAIN+"' AND "+DbNames.META_INFO_COLUMN_TAB_COLUMNNAME_COL+" = '"+DbNames.T_ILI_TID_COL+"'";
+                    HashMap<String,String> res=new HashMap<String,String>();
+                    ResultSet rs=stmt.executeQuery(stmtTxt);
+                    while(rs.next()) {
+                        String tableName=rs.getString(1);
+                        String oidDomain=rs.getString(2);
+                        res.put(tableName,oidDomain);
+                    }
+                    Assert.assertEquals(2, res.size());
+                    Assert.assertEquals("INTERLIS.UUIDOID",res.get("classa1"));
+                    Assert.assertEquals("INTERLIS.UUIDOID",res.get("classb1"));
                 }
             }
         }finally{
@@ -315,6 +343,19 @@ public class Oid23Test {
                         {"Oid3.TestA.ClassA1", "ch.ehi.ili2db.inheritance", "newClass"},
                     };
                     Ili2dbAssert.assertTrafoTable(jdbcConnection,expectedValues, DBSCHEMA);
+                }
+                {
+                    String stmtTxt="SELECT "+DbNames.META_INFO_COLUMN_TAB_TABLENAME_COL+","+DbNames.META_INFO_COLUMN_TAB_SETTING_COL+" FROM "+DBSCHEMA+"."+DbNames.META_INFO_COLUMN_TAB+" WHERE "+DbNames.META_INFO_COLUMN_TAB_TAG_COL+" = '"+DbExtMetaInfo.TAG_COL_OIDDOMAIN+"' AND "+DbNames.META_INFO_COLUMN_TAB_COLUMNNAME_COL+" = '"+DbNames.T_ILI_TID_COL+"'";
+                    HashMap<String,String> res=new HashMap<String,String>();
+                    ResultSet rs=stmt.executeQuery(stmtTxt);
+                    while(rs.next()) {
+                        String tableName=rs.getString(1);
+                        String oidDomain=rs.getString(2);
+                        res.put(tableName,oidDomain);
+                    }
+                    Assert.assertEquals(2, res.size());
+                    Assert.assertEquals("INTERLIS.UUIDOID",res.get("classa1"));
+                    Assert.assertEquals("INTERLIS.UUIDOID",res.get("classb1"));
                 }
             }
         }finally{
@@ -608,6 +649,20 @@ public class Oid23Test {
                 };
                 Ili2dbAssert.assertTrafoTable(jdbcConnection,expectedValues, DBSCHEMA);
             }
+            {
+                String stmtTxt="SELECT "+DbNames.META_INFO_COLUMN_TAB_TABLENAME_COL+","+DbNames.META_INFO_COLUMN_TAB_SETTING_COL+" FROM "+DBSCHEMA+"."+DbNames.META_INFO_COLUMN_TAB+" WHERE "+DbNames.META_INFO_COLUMN_TAB_TAG_COL+" = '"+DbExtMetaInfo.TAG_COL_OIDDOMAIN+"' AND "+DbNames.META_INFO_COLUMN_TAB_COLUMNNAME_COL+" = '"+DbNames.T_ILI_TID_COL+"'";
+                HashMap<String,String> res=new HashMap<String,String>();
+                ResultSet rs=stmt.executeQuery(stmtTxt);
+                while(rs.next()) {
+                    String tableName=rs.getString(1);
+                    String oidDomain=rs.getString(2);
+                    res.put(tableName,oidDomain);
+                }
+                Assert.assertEquals(2, res.size());
+                Assert.assertEquals("INTERLIS.UUIDOID",res.get("classda"));
+                Assert.assertEquals("INTERLIS.UUIDOID",res.get("classdb"));
+                
+            }
         }finally{
             if(jdbcConnection!=null){
                 jdbcConnection.close();
@@ -656,6 +711,20 @@ public class Oid23Test {
                     {"Oid2.TestE.ClassDb","ch.ehi.ili2db.inheritance","superClass"}                  
                 };
                 Ili2dbAssert.assertTrafoTable(jdbcConnection,expectedValues, DBSCHEMA);
+            }
+            {
+                String stmtTxt="SELECT "+DbNames.META_INFO_COLUMN_TAB_TABLENAME_COL+","+DbNames.META_INFO_COLUMN_TAB_SETTING_COL+" FROM "+DBSCHEMA+"."+DbNames.META_INFO_COLUMN_TAB+" WHERE "+DbNames.META_INFO_COLUMN_TAB_TAG_COL+" = '"+DbExtMetaInfo.TAG_COL_OIDDOMAIN+"' AND "+DbNames.META_INFO_COLUMN_TAB_COLUMNNAME_COL+" = '"+DbNames.T_ILI_TID_COL+"'";
+                HashMap<String,String> res=new HashMap<String,String>();
+                ResultSet rs=stmt.executeQuery(stmtTxt);
+                while(rs.next()) {
+                    String tableName=rs.getString(1);
+                    String oidDomain=rs.getString(2);
+                    res.put(tableName,oidDomain);
+                }
+                Assert.assertEquals(2, res.size());
+                Assert.assertEquals("INTERLIS.UUIDOID",res.get("classda"));
+                Assert.assertEquals("INTERLIS.UUIDOID",res.get("classdb"));
+                
             }
         }finally{
             if(jdbcConnection!=null){

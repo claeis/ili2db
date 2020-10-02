@@ -538,4 +538,51 @@ public class MultisurfaceTest {
         }
         
     }
+    @Test
+    public void exportXtfMultiSurfaceWithPolygon() throws Exception {
+        Class driverClass = Class.forName("org.postgresql.Driver");
+        jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
+        stmt=jdbcConnection.createStatement();
+        stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");
+        File data=new File("test/data/MultiSurface/MultiSurface2.ili");
+        Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+        config.setFunction(Config.FC_SCHEMAIMPORT);
+        config.setDefaultSrsCode("21781");
+        Ili2db.readSettingsFromDb(config);
+        Ili2db.run(config,null);
+        // 600030.000 200020.000, 600045.000 200040.000, 600010.000 200040.000, 600030.000 200020.000
+        stmt.execute("INSERT INTO "+DBSCHEMA+".classa1(geom) VALUES (ST_GeomFromText('MULTISURFACE (POLYGON((600030.000 200020.000, 600045.000 200040.000, 600010.000 200040.000, 600030.000 200020.000 )))', 21781))");
+
+        File dataXtf=new File("test/data/MultiSurface/MultiSurface2WithPolygon-out.xtf");
+
+        config.setXtffile(dataXtf.getPath());
+        config.setLogfile(dataXtf.getPath()+".log");
+        config.setModels("MultiSurface2");
+        config.setFunction(Config.FC_EXPORT);
+        config.setValidation(false); // ClassA1.geom is in model MANDATORY (can not be empty)
+
+        Ili2db.readSettingsFromDb(config);
+        Ili2db.run(config,null);
+        {
+            XtfReader reader=new XtfReader(dataXtf);
+            assertTrue(reader.read() instanceof StartTransferEvent);
+            assertTrue(reader.read() instanceof StartBasketEvent);
+            IoxEvent event=reader.read();
+            assertTrue(event instanceof ObjectEvent);
+            IomObject iomObj=((ObjectEvent)event).getIomObject();
+            {
+                String attrtag=iomObj.getobjecttag();
+                assertEquals("MultiSurface2.TestA.ClassA1", attrtag);
+                {
+                    {
+                        IomObject geom=iomObj.getattrobj("geom", 0);
+                        assertEquals("MultiSurface2.MultiFlaeche2D {Flaechen MultiSurface2.FlaecheStruktur2D {Flaeche MULTISURFACE {surface SURFACE {boundary BOUNDARY {polyline POLYLINE {sequence SEGMENTS {segment [COORD {C1 600030.000, C2 200020.000}, COORD {C1 600045.000, C2 200040.000}, COORD {C1 600010.000, C2 200040.000}, COORD {C1 600030.000, C2 200020.000}]}}}}}}}",geom.toString());
+                    }
+                }
+            }
+            assertTrue(reader.read() instanceof EndBasketEvent);
+            assertTrue(reader.read() instanceof EndTransferEvent);
+        }
+        
+    }
 }

@@ -751,6 +751,21 @@ Optionen:
 Abbildungsregeln
 ----------------
 
+Umfang der Abbildung
+~~~~~~~~~~~~~~~~~~~~~
+
+Alle explizit genannten Modelle (mit ``--models``) werden vollständig importiert. 
+Direkt oder indirekt importierte Modelle (via ``IMPORTS``) werden nicht importiert, 
+ausser denjenigen Klassen die direkt oder indirekt via Assoziationen oder 
+Referenzattribute referenziert werden.
+
+Wird via ``--models`` kein Modell explizit bezeichnet, wird das letzte Modell der 
+ili-Datei importiert.
+
+Wird das Schema als Teil des Daten-Imports (``--doSchemaImport`` ) 
+angelegt (ohne ``--models``), werden die Modelle gemäss dem Element ``MODELS`` aus der Transferdatei angelegt.
+
+
 Klassen/Strukturen
 ~~~~~~~~~~~~~~~~~~
 
@@ -1412,6 +1427,13 @@ sie beliebige (auch zukünftige) Werte/Zusatzangaben aufnehmen kann.
 +------------------------------------+---------------------------------------------------------------+
 | ``ch.ehi.ili2db.foreignKey``       | Bei Fremdschlüsseln der Name der Zieltabelle. Damit auch      |
 |                                    | ohne ``--createFk`` die Beziehungen ermittelt werden können   |
++------------------------------------+---------------------------------------------------------------+
+| ``ch.ehi.ili2db.enumDomain``       | Bei Aufzählungsattributen der Name der konkreten Aufzählung.  |
+|                                    | Damit auch bei erweiterten Attributen/Aufzählungen die für die|
+|                                    | Subklasse relevante Aufzählung ermittelt werden kann          |
++------------------------------------+---------------------------------------------------------------+
+| ``ch.ehi.ili2db.oidDomain``        | Bei Klassen mit OID der qualifizierte Name des                |
+|                                    | OID-Wertebereichs (z.B. INTERLIS.UUIDOID)                     |
 +------------------------------------+---------------------------------------------------------------+
 
 t\_ili2db\_table_prop

@@ -24,7 +24,6 @@ import ch.ehi.ili2db.base.Ili2db;
 import ch.ehi.ili2db.gui.AbstractDbPanelDescriptor;
 import ch.ehi.ili2db.gui.Config;
 import ch.ehi.ili2db.mapping.NameMapping;
-import ch.ehi.sqlgen.generator.SqlConfiguration;
 import ch.interlis.ili2c.gui.UserSettings;
 
 /**

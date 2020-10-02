@@ -47,6 +47,7 @@ import ch.ehi.ili2db.mapping.Viewable2TableMapping;
 import ch.ehi.ili2db.mapping.ViewableWrapper;
 import ch.ehi.ili2db.toxtf.TransferToXtf;
 import ch.ehi.iox.objpool.ObjectPoolManager;
+import ch.ehi.iox.objpool.impl.IomObjectSerializer;
 import ch.ehi.sqlgen.DbUtility;
 import ch.ehi.sqlgen.repository.DbTableName;
 import ch.interlis.ili2c.config.Configuration;
@@ -257,7 +258,7 @@ public class TransferFromXtf {
 		
 		recman=new ObjectPoolManager();
 		try{
-			objPool=recman.newObjectPool();
+			objPool=recman.newObjectPool(new IomObjectSerializer());
 			long importSqlId=0;
 			long basketSqlId=0;
 			long startTid=0;

@@ -1,5 +1,5 @@
 group 'ch.interlis'
-version '4.4.3'+System.getProperty('release','-SNAPSHOT')
+version '4.4.4'+System.getProperty('release','-SNAPSHOT')
 
 apply plugin: "java"
 apply plugin: "maven"
@@ -63,7 +63,7 @@ sourceSets {
     //it is now a part of the 'main' classpath and will be a part of the jar
     output.dir(generatedResources, builtBy: 'generateMyResources')
     java {
-    	srcDirs=['src']
+    	srcDirs=['src','gui/src'] // 'gui-noop/src'
     }
     resources {
     	srcDirs=['resources']
@@ -288,9 +288,9 @@ configurations {
     ftpAntTask
 }
 dependencies {
-    implementation group: 'ch.interlis', name: 'iox-ili', version: '1.21.0+'
-    implementation group: 'ch.interlis', name: 'ili2c-tool', version: "5.1.0+"
-    implementation group: 'ch.interlis', name: 'ili2c-core', version: "5.1.0+"
+    implementation group: 'ch.interlis', name: 'iox-ili', version: '1.21.3'
+    implementation group: 'ch.interlis', name: 'ili2c-tool', version: "5.1.4"
+    implementation group: 'ch.interlis', name: 'ili2c-core', version: "5.1.4"
     implementation group: 'ch.ehi', name: 'ehisqlgen', version: "1.13.8"
     implementation group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: '2.9.7'
 	implementation group: 'net.iharder', name: 'base64', version: '2.3.9'
@@ -304,6 +304,7 @@ dependencies {
 	ili2mysqlImplementation group: 'mysql', name: 'mysql-connector-java', version: '5.1.47'
 	compileOnly group: 'mysql', name: 'mysql-connector-java', version: '5.1.47' // add as compileOnly, so that eclipse sees it
 	ili2fgdbImplementation group: 'ch.ehi', name: 'fgdb4j', version: "1.1.1"
+	ili2fgdbImplementation "antlr:antlr:2.7.7" 	
 	compileOnly group: 'ch.ehi', name: 'fgdb4j', version: "1.1.1" // add as compileOnly, so that eclipse sees it
 	ili2mssqlImplementation group: 'com.microsoft.sqlserver', name: 'mssql-jdbc', version: '6.4.0.jre7'
 	ili2oraImplementation files('lib/ojdbc14.jar')
@@ -324,6 +325,8 @@ task printcp {
 	}
 }
 task usrdoc(type:Exec) {
+	group = JavaBasePlugin.DOCUMENTATION_GROUP
+    description = 'Builds the user documentation (html)'
 	def infile=new File(project.projectDir,'docs/ili2db.rst')
 	def outfile=new File('docs/ili2db.html')
 	inputs.file infile

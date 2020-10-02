@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?><TRANSFER xmlns="http://www.interlis.ch/INTERLIS2.3">
+<HEADERSECTION SENDER="ili2pg-developer-workspace" VERSION="2.3"><MODELS><MODEL NAME="Enum23c" VERSION="2017-03-29" URI="mailto:ce@eisenhutinformatik.ch"></MODEL></MODELS></HEADERSECTION>
+<DATASECTION>
+<Enum23c.TestA BID="b1">
+	<Enum23c.TestA.ClassA1a TID="1a">
+		<attr1>Test2</attr1>
+	</Enum23c.TestA.ClassA1a>
+	<Enum23c.TestA.ClassA1b TID="1b">
+		<attr1>Test2.Test2bA</attr1>
+	</Enum23c.TestA.ClassA1b>
+	<Enum23c.TestA.ClassA1c TID="1c">
+		<attr1>Test2.Test2cA</attr1>
+	</Enum23c.TestA.ClassA1c>
+	<Enum23c.TestA.ClassA1cc TID="1cc">
+		<attr1>Test2.Test2cA</attr1>
+	</Enum23c.TestA.ClassA1cc>
+	<Enum23c.TestA.ClassA1ccc TID="1ccc">
+		<attr1>Test2.Test2cA.Test2cAA</attr1>
+	</Enum23c.TestA.ClassA1ccc>
+	<Enum23c.TestA.ClassB1 TID="b1a">
+		<a REF="1a"/>
+	</Enum23c.TestA.ClassB1>
+	<Enum23c.TestA.ClassB1 TID="b1b">
+		<a REF="1b"/>
+	</Enum23c.TestA.ClassB1>
+	<Enum23c.TestA.ClassB1 TID="b1c">
+		<a REF="1c"/>
+	</Enum23c.TestA.ClassB1>
+	<Enum23c.TestA.ClassB1 TID="b1cc">
+		<a REF="1cc"/>
+	</Enum23c.TestA.ClassB1>
+	<Enum23c.TestA.ClassB1 TID="b1ccc">
+		<a REF="1ccc"/>
+	</Enum23c.TestA.ClassB1>
+	
+</Enum23c.TestA>
+</DATASECTION>
+</TRANSFER>

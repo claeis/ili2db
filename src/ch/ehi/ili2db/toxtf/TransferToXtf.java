@@ -43,6 +43,11 @@ import ch.ehi.ili2db.mapping.NameMapping;
 import ch.ehi.ili2db.mapping.TrafoConfig;
 import ch.ehi.ili2db.mapping.Viewable2TableMapping;
 import ch.ehi.ili2db.mapping.ViewableWrapper;
+import ch.ehi.iox.objpool.ObjectPoolManager;
+import ch.ehi.iox.objpool.impl.ArrayPoolImpl;
+import ch.ehi.iox.objpool.impl.IomObjectSerializer;
+import ch.ehi.iox.objpool.impl.JavaSerializer;
+import ch.ehi.iox.objpool.impl.StringSerializer;
 import ch.ehi.sqlgen.DbUtility;
 import ch.ehi.sqlgen.repository.DbTableName;
 import ch.interlis.ili2c.metamodel.AbstractClassDef;
@@ -117,7 +122,8 @@ public class TransferToXtf {
 	 */
 	private HashMap tag2class=null; // map<String tag, Viewable classDef>
 	private SqlidPool sqlidPool=new SqlidPool();
-	private ArrayList<FixIomObjectRefs> delayedObjects=null;
+    private ObjectPoolManager recman = null;
+	private ArrayPoolImpl<FixIomObjectRefs> delayedObjects=null;
 	private ch.interlis.ili2c.generator.IndentPrintWriter expgen=null;
 	private TranslateToTranslation languageFilter=null;
 	private Rounder rounder=null;
@@ -147,7 +153,7 @@ public class TransferToXtf {
 		this.geomConv=geomConv;
 		recConv=new ToXtfRecordConverter(td,ili2sqlName,config,null,geomConv,conn,sqlidPool,trafoConfig,class2wrapper,schema);
 		this.config=config;
-
+		recman=new ObjectPoolManager();
 	}
 	public void doit(int function,String datasource,IoxWriter iomFile,String sender,String exportParamModelnames[],long basketSqlIds[],Map<String,BasketStat> stat)
 	throws ch.interlis.iox.IoxException, Ili2dbException
@@ -316,6 +322,7 @@ public class TransferToXtf {
 		if(exportBaseModelFilter!=null){
 			exportBaseModelFilter.close();
 		}
+		recman.close();
 	}
 	private String getBasketSqlIdsFromTopic(String topicName,Map<String,String> genericDomains) throws IoxException {
         String sqlName=DbNames.BASKETS_TAB;
@@ -496,7 +503,10 @@ public class TransferToXtf {
 		Model model=(Model) topic.getContainer();
 		boolean referrs=false;
 		StartBasketEvent iomBasket=null;
-		delayedObjects=new ArrayList<FixIomObjectRefs>();
+		if(delayedObjects!=null) {
+		    delayedObjects.close();
+		}
+		delayedObjects=new ArrayPoolImpl<FixIomObjectRefs>(recman, new FixIomObjectRefsSerializer());
 		// for all Viewables
 		Iterator iter = null;
 		if(iomFile instanceof ItfWriter){
@@ -597,7 +607,7 @@ public class TransferToXtf {
 		}
 		if(iomBasket!=null){
 			// fix forward references
-			for(FixIomObjectRefs fixref : delayedObjects){
+			for(FixIomObjectRefs fixref : delayedObjects ){
 				boolean skipObj=false;
 				for(IomObject ref:fixref.getRefs()){
 					long sqlid=fixref.getTargetSqlid(ref);
@@ -607,7 +617,7 @@ public class TransferToXtf {
 						ref.setobjectrefoid(sqlidPool.getXtfid(sqlTargetTable,sqlid));
 					}else{
 						// object in another basket
-						Viewable aclass=fixref.getTargetClass(ref);
+						Viewable aclass=(Viewable) tag2class.get(fixref.getTargetClass(ref));
 						// read object
 						String tid=readObjectTid(aclass,sqlid);
 						if(tid==null){
