@@ -14,7 +14,7 @@ ideas/open issues/questions
 LATEST
 ---------------------------
 
-ili2db 4.4.4 (2020-10-01)
+ili2db 4.4.4 (2020-10-02)
 ------------------------------
 - fixed MultiSurface export / Unexpected WKB type 3 (#358)
 - remove use of ObjectOutputStream.writeObject() (#354)
@@ -24,8 +24,8 @@ ili2db 4.4.4 (2020-10-01)
 - ili import: create metainfo about OID domain (#365)
 - Rounder: do not try to round illegal values/NaN (#367)
 - fix NaN in arc segmentation (#367) 
-- iox-ili-1.21.3-SNAPSHOT
-- ili2c-5.1.4-SNAPSHOT
+- iox-ili-1.21.3
+- ili2c-5.1.4
 
 ili2db 4.4.3 (2020-05-04)
 ------------------------------
