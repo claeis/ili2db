@@ -182,6 +182,10 @@ public abstract class AbstractMain {
 				argi++;
 				config.setLogfile(args[argi]);
 				argi++;
+            }else if(arg.equals("--xtflog")){
+                argi++;
+                config.setXtfLogfile(args[argi]);
+                argi++;
 			}else if(arg.equals("--defaultSrsAuth")){
 				argi++;
 				String auth=args[argi];
@@ -510,7 +514,8 @@ public abstract class AbstractMain {
 					printSpecificOptions();
 					System.err.println("--proxy host           proxy server to access model repositories.");
 					System.err.println("--proxyPort port       proxy port to access model repositories.");
-					System.err.println("--log filename         log message to given file.");
+					System.err.println("--log filename         log messages to given file.");
+                    System.err.println("--xtflog filename      log messages to given XTF file.");
 					System.err.println("--gui                  start GUI.");
 					System.err.println("--trace                enable trace messages.");
 					System.err.println("--help                 Display this help text.");

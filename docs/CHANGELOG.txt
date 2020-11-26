@@ -13,6 +13,7 @@ ideas/open issues/questions
 
 LATEST
 ---------------------------
+- add --xtflog (#368)
 
 ili2db 4.4.4 (2020-10-02)
 ------------------------------

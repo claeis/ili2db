@@ -17,6 +17,7 @@
  */
 package ch.ehi.ili2db.base;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -34,6 +35,8 @@ import java.util.List;
 import java.util.Map;
 
 import javax.swing.JOptionPane;
+
+import org.interlis2.validator.Main;
 
 import ch.ehi.basics.logging.EhiLogger;
 import ch.ehi.basics.logging.LogEvent;
@@ -94,6 +97,7 @@ import ch.interlis.iox_j.utility.IoxUtility;
 import ch.interlis.iox_j.logging.FileLogger;
 import ch.interlis.iox_j.logging.LogEventFactory;
 import ch.interlis.iox_j.logging.StdLogger;
+import ch.interlis.iox_j.logging.XtfErrorsLogger;
 
 /**
  * @author ce
@@ -240,10 +244,25 @@ public class Ili2db {
 	throws Ili2dbException
 		{
 		ch.ehi.basics.logging.FileListener logfile=null;
+        ch.interlis.iox_j.logging.XtfErrorsLogger xtflog=null;
 		if(config.getLogfile()!=null){
 			logfile=new FileLogger(new java.io.File(config.getLogfile()));
 			EhiLogger.getInstance().addListener(logfile);
 		}
+		String xtflogFilename=config.getXtfLogfile();
+        if(xtflogFilename!=null){
+            File f=new java.io.File(xtflogFilename);
+            try {
+                if(isWriteable(f)) {
+                    xtflog=new ch.interlis.iox_j.logging.XtfErrorsLogger(f, config.getSender());
+                    EhiLogger.getInstance().addListener(xtflog);
+                }else {
+                    throw new Ili2dbException("failed to write to logfile <"+f.getPath()+">");
+                }
+            } catch (IOException e) {
+                throw new Ili2dbException("failed to write to logfile <"+f.getPath()+">",e);
+            }
+        }
 		StdLogger logStderr=new StdLogger(config.getLogfile());
 		EhiLogger.getInstance().addListener(logStderr);
 		EhiLogger.getInstance().removeListener(StdListener.getInstance());
@@ -809,13 +828,24 @@ public class Ili2db {
 			if(logfile!=null){
 				logfile.logEvent(new StdLogEvent(LogEvent.ERROR,null,ex,null));
 			}
+            if(xtflog!=null){
+                xtflog.logEvent(new StdLogEvent(LogEvent.ERROR,null,ex,null));
+            }
 			throw ex;
 		}catch(java.lang.RuntimeException ex){
 			if(logfile!=null){
 				logfile.logEvent(new StdLogEvent(LogEvent.ERROR,null,ex,null));
 			}
+            if(xtflog!=null){
+                xtflog.logEvent(new StdLogEvent(LogEvent.ERROR,null,ex,null));
+            }
 			throw ex;
 		}finally{
+            if(xtflog!=null){
+                EhiLogger.getInstance().removeListener(xtflog);
+                xtflog.close();
+                xtflog=null;
+            }
 			if(logfile!=null){
 				EhiLogger.getInstance().removeListener(logfile);
 				logfile.close();
@@ -953,10 +983,25 @@ public class Ili2db {
 	throws Ili2dbException
 	{
 		ch.ehi.basics.logging.FileListener logfile=null;
+        ch.interlis.iox_j.logging.XtfErrorsLogger xtflog=null;
 		if(config.getLogfile()!=null){
 			logfile=new FileLogger(new java.io.File(config.getLogfile()));
 			EhiLogger.getInstance().addListener(logfile);
 		}
+        String xtflogFilename=config.getXtfLogfile();
+        if(xtflogFilename!=null){
+            File f=new java.io.File(xtflogFilename);
+            try {
+                if(isWriteable(f)) {
+                    xtflog=new ch.interlis.iox_j.logging.XtfErrorsLogger(f, config.getSender());
+                    EhiLogger.getInstance().addListener(xtflog);
+                }else {
+                    throw new Ili2dbException("failed to write to logfile <"+f.getPath()+">");
+                }
+            } catch (IOException e) {
+                throw new Ili2dbException("failed to write to logfile <"+f.getPath()+">",e);
+            }
+        }
 		StdLogger logStderr=new StdLogger(config.getLogfile());
 		EhiLogger.getInstance().addListener(logStderr);
 		EhiLogger.getInstance().removeListener(StdListener.getInstance());
@@ -1365,13 +1410,24 @@ public class Ili2db {
 			if(logfile!=null){
 				logfile.logEvent(new StdLogEvent(LogEvent.ERROR,null,ex,null));
 			}
+            if(xtflog!=null){
+                xtflog.logEvent(new StdLogEvent(LogEvent.ERROR,null,ex,null));
+            }
 			throw ex;
 		}catch(java.lang.RuntimeException ex){
 			if(logfile!=null){
 				logfile.logEvent(new StdLogEvent(LogEvent.ERROR,null,ex,null));
 			}
+            if(xtflog!=null){
+                xtflog.logEvent(new StdLogEvent(LogEvent.ERROR,null,ex,null));
+            }
 			throw ex;
 		}finally{
+            if(xtflog!=null){
+                EhiLogger.getInstance().removeListener(xtflog);
+                xtflog.close();
+                xtflog=null;
+            }
 			if(logfile!=null){
 				EhiLogger.getInstance().removeListener(logfile);
 				logfile.close();
@@ -1465,10 +1521,25 @@ public class Ili2db {
             functionName="validate";
         }
 		ch.ehi.basics.logging.FileListener logfile=null;
+		ch.interlis.iox_j.logging.XtfErrorsLogger xtflog=null;
 		if(config.getLogfile()!=null){
 			logfile=new FileLogger(new java.io.File(config.getLogfile()));
 			EhiLogger.getInstance().addListener(logfile);
 		}
+        String xtflogFilename=config.getXtfLogfile();
+        if(xtflogFilename!=null){
+            File f=new java.io.File(xtflogFilename);
+            try {
+                if(isWriteable(f)) {
+                    xtflog=new ch.interlis.iox_j.logging.XtfErrorsLogger(f, config.getSender());
+                    EhiLogger.getInstance().addListener(xtflog);
+                }else {
+                    throw new Ili2dbException("failed to write to logfile <"+f.getPath()+">");
+                }
+            } catch (IOException e) {
+                throw new Ili2dbException("failed to write to logfile <"+f.getPath()+">",e);
+            }
+        }
 		StdLogger logStderr=new StdLogger(config.getLogfile());
 		EhiLogger.getInstance().addListener(logStderr);
 		EhiLogger.getInstance().removeListener(StdListener.getInstance());
@@ -1757,13 +1828,24 @@ public class Ili2db {
 			if(logfile!=null){
 				logfile.logEvent(new StdLogEvent(LogEvent.ERROR,null,ex,null));
 			}
+            if(xtflog!=null){
+                xtflog.logEvent(new StdLogEvent(LogEvent.ERROR,null,ex,null));
+            }
 			throw ex;
 		}catch(java.lang.RuntimeException ex){
 			if(logfile!=null){
 				logfile.logEvent(new StdLogEvent(LogEvent.ERROR,null,ex,null));
 			}
+            if(xtflog!=null){
+                xtflog.logEvent(new StdLogEvent(LogEvent.ERROR,null,ex,null));
+            }
 			throw ex;
 		}finally{
+            if(xtflog!=null){
+                EhiLogger.getInstance().removeListener(xtflog);
+                xtflog.close();
+                xtflog=null;
+            }
 			if(logfile!=null){
 				EhiLogger.getInstance().removeListener(logfile);
 				logfile.close();
@@ -2454,6 +2536,10 @@ public class Ili2db {
             return "NULL";
         }
         return "'"+value.replace("'", "''")+"'";
+    }
+    private static boolean isWriteable(File f) throws IOException {
+        f.createNewFile();
+        return f.canWrite();
     }
 
 }
