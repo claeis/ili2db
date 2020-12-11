@@ -71,4 +71,9 @@ public class CustomMappingNull implements CustomMapping {
     public String getCreateSchemaStmt(String dbschema) {
         return null;
     }
+
+    @Override
+    public boolean tableExists(Connection conn, DbTableName tableName) {
+        return false;
+    }
 }

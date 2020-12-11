@@ -145,6 +145,23 @@ sourceSets {
     runtimeClasspath += sourceSets.test.output
     runtimeClasspath += sourceSets.ili2mysql.output
   }
+  ili2h2gis {
+    java {
+    	srcDirs=['ili2h2gis/src']
+    }
+    compileClasspath += sourceSets.main.output
+  }
+  ili2h2gisTest {
+    java {
+    	srcDirs=['ili2h2gis/test/java']
+    }
+    compileClasspath += sourceSets.main.output
+    compileClasspath += sourceSets.test.output
+    compileClasspath += sourceSets.ili2h2gis.output
+    runtimeClasspath += sourceSets.main.output
+    runtimeClasspath += sourceSets.test.output
+    runtimeClasspath += sourceSets.ili2h2gis.output
+  }
   ili2fgdb {
     java {
     	srcDirs=['ili2fgdb/src']
@@ -245,6 +262,20 @@ configurations {
 		extendsFrom ili2mysqlImplementation
 	}
 	
+	ili2h2gisImplementation {
+		extendsFrom implementation
+	}
+	ili2h2gisRuntimeOnly {
+		extendsFrom runtimeOnly
+	}
+	ili2h2gisTestRuntimeOnly {
+		extendsFrom ili2h2gisRuntimeOnly
+	}
+	ili2h2gisTestImplementation {
+		extendsFrom testImplementation
+		extendsFrom ili2h2gisImplementation
+	}
+	
 	ili2fgdbImplementation {
 		extendsFrom implementation
 	}
@@ -303,6 +334,14 @@ dependencies {
 	compileOnly group: 'org.xerial', name: 'sqlite-jdbc', version: '3.8.11.2' // add as compileOnly, so that eclipse sees it
 	ili2mysqlImplementation group: 'mysql', name: 'mysql-connector-java', version: '5.1.47'
 	compileOnly group: 'mysql', name: 'mysql-connector-java', version: '5.1.47' // add as compileOnly, so that eclipse sees it
+	ili2h2gisImplementation group: 'org.orbisgis', name:'h2gis',version: '1.5.0'
+	compileOnly group: 'org.orbisgis', name:'h2gis',version: '1.5.0' // add as compileOnly, so that eclipse sees it
+	
+	//ili2h2gisImplementation group: 'com.h2database', name: 'h2', version: '1.4.200'
+	//compileOnly group: 'com.h2database', name: 'h2', version: '1.4.200'
+	//ili2h2gisImplementation group: 'org.locationtech.jts', name: 'jts-core', version: '1.17.0'
+	//compileOnly group: 'org.locationtech.jts', name: 'jts-core', version: '1.17.0'
+	
 	ili2fgdbImplementation group: 'ch.ehi', name: 'fgdb4j', version: "1.1.1"
 	ili2fgdbImplementation "antlr:antlr:2.7.7" 	
 	compileOnly group: 'ch.ehi', name: 'fgdb4j', version: "1.1.1" // add as compileOnly, so that eclipse sees it
@@ -434,6 +473,38 @@ task ili2mysqlTest(type: Test) {
 	forkEvery = 1
     classpath = sourceSets.ili2mysqlTest.runtimeClasspath
     testClassesDirs = sourceSets.ili2mysqlTest.output.classesDirs
+    testLogging.exceptionFormat = 'full'
+	systemProperty 'dburl', myurl
+	systemProperty 'dbusr', myusr
+	systemProperty 'dbpwd', mypwd
+}
+
+task ili2h2gisJar(dependsOn: jar,type: Jar) {
+	baseName = 'ili2h2gis'
+    from sourceSets.ili2h2gis.output
+  manifest {
+    attributes(
+      "Main-Class": "ch.ehi.ili2h2gis.H2gisMain",
+      "Class-Path": 'libs/'+jar.archiveName+' '+configurations.ili2h2gisRuntimeClasspath.collect { 'libs/'+it.getName() }.join(' '))
+  }   
+}
+task ili2h2gisBindist(dependsOn:[usrdoc,ili2h2gisJar], type: Zip){
+	baseName = 'ili2h2gis'
+	destinationDir = file('dist')
+	from ili2h2gisJar
+	into('docs'){
+		from files(fileTree("docs").include("LICENSE.*"),"docs/README.txt","docs/CHANGELOG.txt","build/docs/ili2db.html")
+	}
+	into('libs'){
+		from configurations.ili2h2gisRuntimeClasspath
+		from jar
+	}
+}
+task ili2h2gisTest(type: Test) {
+	maxParallelForks = 1
+	forkEvery = 1
+    classpath = sourceSets.ili2h2gisTest.runtimeClasspath
+    testClassesDirs = sourceSets.ili2h2gisTest.output.classesDirs
     testLogging.exceptionFormat = 'full'
 	systemProperty 'dburl', myurl
 	systemProperty 'dbusr', myusr
@@ -602,6 +673,14 @@ artifacts {
     archives(ili2mysqlJar.archivePath){
     	builtBy ili2mysqlJar
     }
+	archives(ili2h2gisBindist.archivePath) {
+        type 'zip'
+        classifier 'bindist'
+        builtBy ili2h2gisBindist
+    }
+    archives(ili2h2gisJar.archivePath){
+    	builtBy ili2h2gisJar
+    }
 	archives(ili2gpkgBindist.archivePath) {
         type 'zip'
         classifier 'bindist'
@@ -648,6 +727,9 @@ install {
             addFilter('ili2mysql') {artifact, file ->
                 artifact.name == 'ili2mysql'
             }            
+            addFilter('ili2h2gis') {artifact, file ->
+                artifact.name == 'ili2h2gis'
+            }            
             addFilter('ili2gpkg') {artifact, file ->
                 artifact.name == 'ili2gpkg'
             }            
@@ -675,6 +757,12 @@ install {
             pom('ili2mysql').scopeMappings.with {
                 mappings.clear()
                 addMapping(300, configurations.ili2mysqlCompileClasspath, 'runtime')
+                addMapping(300, configurations.ili2db, 'compile')
+            }
+            pom('ili2h2gis').artifactId = 'ili2h2gis'
+            pom('ili2h2gis').scopeMappings.with {
+                mappings.clear()
+                addMapping(300, configurations.ili2h2gisCompileClasspath, 'runtime')
                 addMapping(300, configurations.ili2db, 'compile')
             }
             pom('ili2gpkg').artifactId = 'ili2gpkg'
@@ -721,6 +809,9 @@ uploadArchives {
             addFilter('ili2mysql') {artifact, file ->
                 artifact.name == 'ili2mysql'
             }            
+            addFilter('ili2h2gis') {artifact, file ->
+                artifact.name == 'ili2h2gis'
+            }            
             addFilter('ili2gpkg') {artifact, file ->
                 artifact.name == 'ili2gpkg'
             }            
@@ -748,6 +839,12 @@ uploadArchives {
             pom('ili2mysql').scopeMappings.with {
                 mappings.clear()
                 addMapping(300, configurations.ili2mysqlCompileClasspath, 'runtime')
+                addMapping(300, configurations.ili2db, 'compile')
+            }
+            pom('ili2h2gis').artifactId = 'ili2h2gis'
+            pom('ili2h2gis').scopeMappings.with {
+                mappings.clear()
+                addMapping(300, configurations.ili2h2gisCompileClasspath, 'runtime')
                 addMapping(300, configurations.ili2db, 'compile')
             }
             pom('ili2gpkg').artifactId = 'ili2gpkg'
@@ -795,7 +892,7 @@ void uploadFile(String programName, File archiveFile) {
 
 }
 
-task uploadBin(dependsOn: [ili2pgBindist,ili2gpkgBindist,ili2mysqlBindist,ili2fgdbBindist,ili2mssqlBindist,ili2oraBindist]) {
+task uploadBin(dependsOn: [ili2pgBindist,ili2gpkgBindist,ili2mysqlBindist,ili2h2gisBindist,ili2fgdbBindist,ili2mssqlBindist,ili2oraBindist]) {
 	doLast {
 		ant.taskdef(name: 'ftp',
 					classname: 'org.apache.tools.ant.taskdefs.optional.net.FTP',
@@ -803,6 +900,7 @@ task uploadBin(dependsOn: [ili2pgBindist,ili2gpkgBindist,ili2mysqlBindist,ili2fg
 		uploadFile('ili2pg',ili2pgBindist.archiveFile.get().asFile)
 		uploadFile('ili2gpkg',ili2gpkgBindist.archiveFile.get().asFile)
 		uploadFile('ili2mysql',ili2mysqlBindist.archiveFile.get().asFile)
+		uploadFile('ili2h2gis',ili2h2gisBindist.archiveFile.get().asFile)
 		uploadFile('ili2fgdb',ili2fgdbBindist.archiveFile.get().asFile)
 		uploadFile('ili2mssql',ili2mssqlBindist.archiveFile.get().asFile)
 		uploadFile('ili2ora',ili2oraBindist.archiveFile.get().asFile)

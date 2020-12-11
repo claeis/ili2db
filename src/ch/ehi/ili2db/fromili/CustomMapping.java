@@ -26,4 +26,5 @@ public interface CustomMapping {
     public String shortenConnectUrl4IliCache(String url);
     public String shortenConnectUrl4Log(String url);
     public String getCreateSchemaStmt(String dbschema);
+    public boolean tableExists(Connection conn,DbTableName tableName);
 }

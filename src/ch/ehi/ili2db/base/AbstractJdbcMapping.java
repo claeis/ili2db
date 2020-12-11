@@ -6,6 +6,7 @@ import java.sql.Connection;
 
 import ch.ehi.ili2db.fromili.CustomMapping;
 import ch.ehi.ili2db.gui.Config;
+import ch.ehi.sqlgen.DbUtility;
 import ch.ehi.sqlgen.repository.DbColumn;
 import ch.ehi.sqlgen.repository.DbTable;
 import ch.ehi.sqlgen.repository.DbTableName;
@@ -81,4 +82,10 @@ public abstract class AbstractJdbcMapping implements CustomMapping {
     public String getCreateSchemaStmt(String dbschema) {
         return "CREATE SCHEMA IF NOT EXISTS "+dbschema;
     }
+    @Override
+    public boolean tableExists(Connection conn,DbTableName tableName)
+    {
+        return DbUtility.tableExists(conn, tableName);
+    }
+
 }

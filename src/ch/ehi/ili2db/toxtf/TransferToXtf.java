@@ -35,6 +35,7 @@ import ch.ehi.ili2db.base.Ili2db;
 import ch.ehi.ili2db.base.Ili2dbException;
 import ch.ehi.ili2db.converter.ConverterException;
 import ch.ehi.ili2db.converter.SqlColumnConverter;
+import ch.ehi.ili2db.fromili.CustomMapping;
 import ch.ehi.ili2db.fromili.TransferFromIli;
 import ch.ehi.ili2db.fromxtf.BasketStat;
 import ch.ehi.ili2db.fromxtf.ClassStat;
@@ -115,6 +116,7 @@ public class TransferToXtf {
 	private ToXtfRecordConverter recConv=null;
 	private Viewable2TableMapping class2wrapper=null;
 	private Config config=null;
+	private CustomMapping customMapping=null;
 	private ch.interlis.iox_j.validator.Validator validator=null;
 	
 	/** map of xml-elementnames to interlis classdefs.
@@ -155,10 +157,11 @@ public class TransferToXtf {
 		this.config=config;
 		recman=new ObjectPoolManager();
 	}
-	public void doit(int function,String datasource,IoxWriter iomFile,String sender,String exportParamModelnames[],long basketSqlIds[],Map<String,BasketStat> stat)
+	public void doit(int function,String datasource,IoxWriter iomFile,String sender,String exportParamModelnames[],long basketSqlIds[],Map<String,BasketStat> stat,CustomMapping customMapping1)
 	throws ch.interlis.iox.IoxException, Ili2dbException
 	{
 		this.basketStat=stat;
+		this.customMapping=customMapping1;
 		boolean referrs=false;
 		
 		if(!hasIliTidCol && writeIliTid) {
@@ -539,7 +542,7 @@ public class TransferToXtf {
 				// get sql name
 				DbTableName sqlName=recConv.getSqlType(wrapper.getViewable());
 				// if table exists?
-				if(DbUtility.tableExists(conn,sqlName)){
+				if(customMapping.tableExists(conn,sqlName)){
 					// dump it
 					if(iomBasket==null){
 	                    EhiLogger.logState(topic.getScopedName(null)+" BID <"+basketXtfId+">...");
@@ -575,7 +578,7 @@ public class TransferToXtf {
 					// get sql name
 					DbTableName sqlName=getSqlTableNameItfLineTable(attr,epsgCode);
 					// if table exists?
-					if(DbUtility.tableExists(conn,sqlName)){
+					if(customMapping.tableExists(conn,sqlName)){
 						// dump it
 						EhiLogger.logState(attr.getContainer().getScopedName(null)+"_"+attr.getName()+"...");
 						if(iomBasket==null){

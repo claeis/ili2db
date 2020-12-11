@@ -183,7 +183,7 @@ public class Ili2db {
 				conn = connect(url, dbusr, dbpwd, config, customMapping);
 			}
 			customMapping.postConnect(conn, config);
-			TransferFromIli.readSettings(conn,config,config.getDbschema());
+			TransferFromIli.readSettings(conn,config,config.getDbschema(),customMapping);
 		} catch (SQLException e) {
 			EhiLogger.logError(e);
 		} catch (IOException e) {
@@ -458,7 +458,7 @@ public class Ili2db {
 				}else if(function==Config.FC_IMPORT){
 					String datasetName=config.getDatasetName();
 					if(datasetName!=null){
-						if(DbUtility.tableExists(conn,new DbTableName(config.getDbschema(),DbNames.DATASETS_TAB))){
+						if(customMapping.tableExists(conn,new DbTableName(config.getDbschema(),DbNames.DATASETS_TAB))){
 							Long datasetId=getDatasetId(datasetName, conn, config);
 							if(datasetId!=null){
 								throw new Ili2dbException("dataset <"+datasetName+"> already exists");
@@ -500,7 +500,7 @@ public class Ili2db {
 				}
 				
 				// if meta attribute table already exists, read it
-                if(config.getCreateMetaInfo() && DbUtility.tableExists(conn,new DbTableName(config.getDbschema(),DbNames.META_ATTRIBUTES_TAB))){
+                if(config.getCreateMetaInfo() && customMapping.tableExists(conn,new DbTableName(config.getDbschema(),DbNames.META_ATTRIBUTES_TAB))){
                     // set elements' meta-attributes
                     MetaAttrUtility.addMetaAttrsFromDb(td, conn, config.getDbschema());
                 }
@@ -523,16 +523,16 @@ public class Ili2db {
 			  	
 				// read mapping file
 				NameMapping mapping=new NameMapping(td,config);
-				  if(DbUtility.tableExists(conn,new DbTableName(config.getDbschema(),DbNames.CLASSNAME_TAB))){
+				  if(customMapping.tableExists(conn,new DbTableName(config.getDbschema(),DbNames.CLASSNAME_TAB))){
 					  // read mapping from db
 					  mapping.readTableMappingTable(conn,config.getDbschema());
 				  }
-				  if(DbUtility.tableExists(conn,new DbTableName(config.getDbschema(),DbNames.ATTRNAME_TAB))){
+				  if(customMapping.tableExists(conn,new DbTableName(config.getDbschema(),DbNames.ATTRNAME_TAB))){
 					  // read mapping from db
 					  mapping.readAttrMappingTable(conn,config.getDbschema());
 				  }
 				  TrafoConfig trafoConfig=new TrafoConfig();
-				  trafoConfig.readTrafoConfig(conn, config.getDbschema());
+				  trafoConfig.readTrafoConfig(conn, config.getDbschema(),customMapping);
 
 				ModelElementSelector ms=new ModelElementSelector();
 				ArrayList<String> modelNames=new ArrayList<String>();
@@ -614,7 +614,7 @@ public class Ili2db {
                             // update mapping table
                             mapping.updateTableMappingTable(insertCollector,conn,config.getDbschema());
                             mapping.updateAttrMappingTable(insertCollector,conn,config.getDbschema());
-                            trafoConfig.updateTrafoConfig(insertCollector,conn, config.getDbschema());
+                            trafoConfig.updateTrafoConfig(insertCollector,conn, config.getDbschema(),customMapping);
                             // update inheritance table
                             trsfFromIli.updateInheritanceTable(insertCollector,conn,config.getDbschema());
                             // update enumerations table
@@ -668,7 +668,7 @@ public class Ili2db {
 						}else{
 							ioxReader=new XtfReader(in);
 						}
-						transferFromXtf(conn,ioxReader,function,mapping,td,dbusr,geomConverter,idGen,config,stat,trafoConfig,class2wrapper);
+						transferFromXtf(conn,ioxReader,function,mapping,td,dbusr,geomConverter,idGen,config,stat,trafoConfig,class2wrapper,customMapping);
 					} catch (IOException ex) {
 						throw new Ili2dbException(ex);
 					} catch (IoxException ex) {
@@ -740,7 +740,7 @@ public class Ili2db {
                                     }
 								}
 						}
-						transferFromXtf(conn,ioxReader,function,mapping,td,dbusr,geomConverter,idGen,config,stat,trafoConfig,class2wrapper);
+						transferFromXtf(conn,ioxReader,function,mapping,td,dbusr,geomConverter,idGen,config,stat,trafoConfig,class2wrapper,customMapping);
 					} catch (IoxException e) {
 						throw new Ili2dbException(e);
 					}finally{
@@ -1187,18 +1187,18 @@ public class Ili2db {
 			// read mapping file
 			NameMapping mapping=new NameMapping(td,config);
             if(importToDb) {
-                if(DbUtility.tableExists(conn,new DbTableName(config.getDbschema(),DbNames.CLASSNAME_TAB))){
+                if(customMapping.tableExists(conn,new DbTableName(config.getDbschema(),DbNames.CLASSNAME_TAB))){
                     // read mapping from db
                     mapping.readTableMappingTable(conn,config.getDbschema());
                 }
-                if(DbUtility.tableExists(conn,new DbTableName(config.getDbschema(),DbNames.ATTRNAME_TAB))){
+                if(customMapping.tableExists(conn,new DbTableName(config.getDbschema(),DbNames.ATTRNAME_TAB))){
                     // read mapping from db
                     mapping.readAttrMappingTable(conn,config.getDbschema());
                 }
             }
             
 			  TrafoConfig trafoConfig=new TrafoConfig();
-			  trafoConfig.readTrafoConfig(conn, config.getDbschema());
+			  trafoConfig.readTrafoConfig(conn, config.getDbschema(),customMapping);
 
 			ModelElementSelector ms=new ModelElementSelector();
 			ArrayList<String> modelNames=new ArrayList<String>();
@@ -1310,7 +1310,7 @@ public class Ili2db {
                     // update mapping table
                     mapping.updateTableMappingTable(insertCollector,conn,config.getDbschema());
                     mapping.updateAttrMappingTable(insertCollector,conn,config.getDbschema());
-                    trafoConfig.updateTrafoConfig(insertCollector,conn, config.getDbschema());
+                    trafoConfig.updateTrafoConfig(insertCollector,conn, config.getDbschema(),customMapping);
                     
                     // update inheritance table
                     trsfFromIli.updateInheritanceTable(insertCollector,conn,config.getDbschema());
@@ -1722,7 +1722,7 @@ public class Ili2db {
 			  
 				if(config.getCreateMetaInfo()){
 					// set elements' meta-attributes
-					if(DbUtility.tableExists(conn,new DbTableName(config.getDbschema(),DbNames.META_ATTRIBUTES_TAB))){
+					if(customMapping.tableExists(conn,new DbTableName(config.getDbschema(),DbNames.META_ATTRIBUTES_TAB))){
 						MetaAttrUtility.addMetaAttrsFromDb(td, conn, config.getDbschema());
 					}
 				}
@@ -1734,16 +1734,16 @@ public class Ili2db {
 			  
 			  // get mapping definition
 			  NameMapping mapping=new NameMapping(td,config);
-			  if(DbUtility.tableExists(conn,new DbTableName(config.getDbschema(),DbNames.CLASSNAME_TAB))){
+			  if(customMapping.tableExists(conn,new DbTableName(config.getDbschema(),DbNames.CLASSNAME_TAB))){
 				  // read mapping from db
 				  mapping.readTableMappingTable(conn,config.getDbschema());
 			  }
-			  if(DbUtility.tableExists(conn,new DbTableName(config.getDbschema(),DbNames.ATTRNAME_TAB))){
+			  if(customMapping.tableExists(conn,new DbTableName(config.getDbschema(),DbNames.ATTRNAME_TAB))){
 				  // read mapping from db
 				  mapping.readAttrMappingTable(conn,config.getDbschema());
 			  }
 			  TrafoConfig trafoConfig=new TrafoConfig();
-			  trafoConfig.readTrafoConfig(conn, config.getDbschema());
+			  trafoConfig.readTrafoConfig(conn, config.getDbschema(),customMapping);
 
 				ModelElementSelector ms=new ModelElementSelector();
 				ArrayList<String> modelNames=new ArrayList<String>();
@@ -2313,10 +2313,10 @@ public class Ili2db {
 			DbIdGen idGen,
 			Config config,
 			Map<String,BasketStat> stat,
-			TrafoConfig trafoConfig,Viewable2TableMapping class2wrapper){	
+			TrafoConfig trafoConfig,Viewable2TableMapping class2wrapper,CustomMapping customMapping){	
 		try{
 			TransferFromXtf trsfr=new TransferFromXtf(function,ili2sqlName,td,conn,dbusr,geomConv,idGen,config,trafoConfig,class2wrapper);
-			trsfr.doit(reader,config,stat);
+			trsfr.doit(reader,config,stat,customMapping);
 		}catch(ch.interlis.iox.IoxException ex){
 			EhiLogger.logError("failed to transfer data from file to db",ex);
 		} catch (Ili2dbException ex) {
@@ -2338,7 +2338,7 @@ public class Ili2db {
 	    if(function==Config.FC_VALIDATE) {
 	        try{
 	            TransferToXtf trsfr=new TransferToXtf(ili2sqlName,td,conn,geomConv,config,trafoConfig,class2wrapper);
-	            trsfr.doit(function,customMapping.shortenConnectUrl4Log(config.getDburl()),null,sender,exportParamModelnames,basketSqlIds,stat);
+	            trsfr.doit(function,customMapping.shortenConnectUrl4Log(config.getDburl()),null,sender,exportParamModelnames,basketSqlIds,stat,customMapping);
 	        }catch(ch.interlis.iox.IoxException ex){
 	            EhiLogger.logError("failed to validate data from db",ex);
 	        } catch (Ili2dbException ex) {
@@ -2369,7 +2369,7 @@ public class Ili2db {
 	                }
 	            }
 	            TransferToXtf trsfr=new TransferToXtf(ili2sqlName,td,conn,geomConv,config,trafoConfig,class2wrapper);
-	            trsfr.doit(function,outfile.getName(),ioxWriter,sender,exportParamModelnames,basketSqlIds,stat);
+	            trsfr.doit(function,outfile.getName(),ioxWriter,sender,exportParamModelnames,basketSqlIds,stat,customMapping);
 	            //trsfr.doitJava();
 	            ioxWriter.flush();
 	        }catch(ch.interlis.iox.IoxException ex){

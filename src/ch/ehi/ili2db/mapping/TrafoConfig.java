@@ -6,6 +6,7 @@ import ch.ehi.basics.logging.EhiLogger;
 import ch.ehi.ili2db.base.DbNames;
 import ch.ehi.ili2db.base.Ili2db;
 import ch.ehi.ili2db.base.Ili2dbException;
+import ch.ehi.ili2db.fromili.CustomMapping;
 import ch.ehi.sqlgen.DbUtility;
 import ch.ehi.sqlgen.generator_impl.jdbc.GeneratorJdbc;
 import ch.ehi.sqlgen.repository.DbTableName;
@@ -16,12 +17,12 @@ public class TrafoConfig {
 
 	
 	HashMap<String,HashMap<String,String>> config=null;
-	public void readTrafoConfig(java.sql.Connection conn,String schema)
+	public void readTrafoConfig(java.sql.Connection conn,String schema,CustomMapping customMapping)
 	throws Ili2dbException
 	{
-		config=read(conn,schema);
+		config=read(conn,schema,customMapping);
 	}
-	private static HashMap<String,HashMap<String,String>> read(java.sql.Connection conn,String schema)
+	private static HashMap<String,HashMap<String,String>> read(java.sql.Connection conn,String schema,CustomMapping customMapping)
 	throws Ili2dbException
 	{
 		HashMap<String,HashMap<String,String>> settings=new HashMap<String,HashMap<String,String>>();
@@ -29,7 +30,7 @@ public class TrafoConfig {
 		if(schema!=null){
 			sqlName=schema+"."+sqlName;
 		}
-		if(conn!=null && DbUtility.tableExists(conn,new DbTableName(schema,DbNames.TRAFO_TAB))){
+		if(conn!=null && customMapping.tableExists(conn,new DbTableName(schema,DbNames.TRAFO_TAB))){
 			try{
 				// select entries
 				String insStmt="SELECT "+DbNames.TRAFO_TAB_ILINAME_COL+","+DbNames.TRAFO_TAB_TAG_COL+","+DbNames.TRAFO_TAB_SETTING_COL+" FROM "+sqlName;
@@ -61,7 +62,7 @@ public class TrafoConfig {
 		}
 		return settings;
 	}
-	public void updateTrafoConfig(GeneratorJdbc gen, java.sql.Connection conn,String schema)
+	public void updateTrafoConfig(GeneratorJdbc gen, java.sql.Connection conn,String schema,CustomMapping customMapping)
 	throws Ili2dbException
 	{
 
@@ -70,7 +71,7 @@ public class TrafoConfig {
 			sqlName=schema+"."+sqlName;
 		}
 		if(conn!=null) {
-	        HashMap<String, HashMap<String, String>> existingEntries = read(conn,schema);
+	        HashMap<String, HashMap<String, String>> existingEntries = read(conn,schema,customMapping);
 	        try{
 
 	            // update entries
