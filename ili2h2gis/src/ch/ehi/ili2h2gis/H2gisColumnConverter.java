@@ -104,17 +104,17 @@ public class H2gisColumnConverter extends AbstractWKBColumnConverter {
 	}
 	@Override
 	public String getSelectValueWrapperDate(String sqlColName) {
-		 return "strftime('%Y-%m-%d %H:%M:%fZ',"+sqlColName+")";
+		 return sqlColName;
 	}
 
 	@Override
 	public String getSelectValueWrapperTime(String sqlColName) {
-		 return "strftime('%Y-%m-%d %H:%M:%fZ',"+sqlColName+")";
+		 return sqlColName;
 	}
 
 	@Override
 	public String getSelectValueWrapperDateTime(String sqlColName) {
-		 return "strftime('%Y-%m-%d %H:%M:%fZ',"+sqlColName+")";
+		 return sqlColName;
 	}
 	@Override
 	public String getSelectValueWrapperCoord(String dbNativeValue) {

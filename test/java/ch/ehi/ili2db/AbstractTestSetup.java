@@ -29,5 +29,9 @@ public abstract class AbstractTestSetup {
     public String getSchema() {
         return null;
     }
+    
+    public boolean supportsCompoundGeometry(){
+        return true;
+    }
 
 }

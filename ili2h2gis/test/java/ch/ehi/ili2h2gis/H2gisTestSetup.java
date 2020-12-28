@@ -63,11 +63,16 @@ public class H2gisTestSetup extends AbstractTestSetup {
     }
     @Override
     public Connection createConnection() throws SQLException {
+        DriverManager.registerDriver(new org.h2.Driver());
         return DriverManager.getConnection(dburl, null, null);
     }
     @Override
     public void initConfig(Config config) {
         new ch.ehi.ili2h2gis.H2gisMain().initConfig(config);
+    }
+    @Override
+    public boolean supportsCompoundGeometry(){
+        return false;
     }
 
 }
