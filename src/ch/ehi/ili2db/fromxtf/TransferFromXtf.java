@@ -39,6 +39,7 @@ import ch.ehi.ili2db.base.Ili2dbException;
 import ch.ehi.ili2db.converter.AbstractRecordConverter;
 import ch.ehi.ili2db.converter.ConverterException;
 import ch.ehi.ili2db.converter.SqlColumnConverter;
+import ch.ehi.ili2db.fromili.CustomMapping;
 import ch.ehi.ili2db.fromili.TransferFromIli;
 import ch.ehi.ili2db.gui.Config;
 import ch.ehi.ili2db.mapping.NameMapping;
@@ -110,6 +111,7 @@ public class TransferFromXtf {
 	private HashSet unknownTypev=null;
 	private TransferDescription td=null;
 	private Connection conn=null;
+	private CustomMapping customMapping=null;
 	private String schema=null; // name of dbschema or null
 	private java.sql.Timestamp today=null;
 	private String dbusr=null;
@@ -202,7 +204,7 @@ public class TransferFromXtf {
 	    }
 	}
 		
-	public void doit(IoxReader reader,Config config,Map<String,BasketStat> stat)
+	public void doit(IoxReader reader,Config config,Map<String,BasketStat> stat,CustomMapping customMapping1)
 	throws IoxException, Ili2dbException
 	{
 		if(functionCode==Config.FC_UPDATE || functionCode==Config.FC_REPLACE){
@@ -215,6 +217,7 @@ public class TransferFromXtf {
                 throw new Ili2dbException("TID import requires a "+DbNames.T_ILI_TID_COL+" column");
             }
         }
+        this.customMapping=customMapping1;
         
 		// limit import to given BIDs
 		HashSet<String> limitedToBids=null;
@@ -373,7 +376,7 @@ public class TransferFromXtf {
 			                DbTableName sqltableName = wrapper.getSqlTable();
 			                if(!tables.contains(sqltableName)) {
 			                    tables.add(sqltableName);
-			                    if(DbUtility.tableExists(conn,sqltableName)) {
+			                    if(customMapping.tableExists(conn,sqltableName)) {
 			                        // drop data
 			                        deleteExistingObjectsHelper(sqltableName, null);
 			                    }
@@ -381,11 +384,11 @@ public class TransferFromXtf {
 			            }
 			            // drop datasets+baskets
 			            DbTableName sqltableName=new DbTableName(schema,DbNames.DATASETS_TAB);
-                        if(DbUtility.tableExists(conn,sqltableName)) {
+                        if(customMapping.tableExists(conn,sqltableName)) {
                             deleteExistingObjectsHelper(sqltableName, null);
                         }
                         sqltableName=new DbTableName(schema,DbNames.BASKETS_TAB);
-                        if(DbUtility.tableExists(conn,sqltableName)) {
+                        if(customMapping.tableExists(conn,sqltableName)) {
                             deleteExistingObjectsHelper(sqltableName, null);
                         }
 			        }
@@ -724,7 +727,7 @@ public class TransferFromXtf {
 							// if table exists?
 							// get sql name
 							DbTableName sqlName = wrapper.getSqlTable();
-							if (DbUtility.tableExists(conn, sqlName)) {
+							if (customMapping.tableExists(conn, sqlName)) {
 								// delete it
 								dropRecords(sqlName, basketSqlId);
 							} else {
@@ -944,7 +947,7 @@ public class TransferFromXtf {
 				if(!visitedTables.contains(sqlName.getQName())){
 					visitedTables.add(sqlName.getQName());
 					// if table exists?
-					if(DbUtility.tableExists(conn,sqlName)){
+					if(customMapping.tableExists(conn,sqlName)){
 						// dump it
 						EhiLogger.logState(aclass.getScopedName(null)+" read ids...");
 						readObjectSqlIds(!wrapper.includesMultipleTypes(),sqlName,basketSqlId);
@@ -963,7 +966,7 @@ public class TransferFromXtf {
 	                    // get sql name
 	                    DbTableName sqlName=getSqlTableNameItfLineTable(attr,epsgCode);
 	                    // if table exists?
-	                    if(DbUtility.tableExists(conn,sqlName)){
+	                    if(customMapping.tableExists(conn,sqlName)){
 	                        // dump it
 	                        EhiLogger.logState(attr.getContainer().getScopedName(null)+"_"+attr.getName()+" read ids...");
 	                        readObjectSqlIds(isItf,sqlName,basketSqlId);
@@ -1086,7 +1089,7 @@ public class TransferFromXtf {
 									// if table exists?
 									// get sql name
 									DbTableName sqlName = wrapper.getSqlTable();
-									if (DbUtility.tableExists(conn, sqlName)) {
+									if (customMapping.tableExists(conn, sqlName)) {
 										// delete it
 										dropRecords(sqlName, basketSqlId);
 									} else {
@@ -1100,7 +1103,7 @@ public class TransferFromXtf {
 								// if table exists?
 								// get sql name
 								DbTableName sqlName = secondary.getSqlTable();
-								if (DbUtility.tableExists(conn, sqlName)) {
+								if (customMapping.tableExists(conn, sqlName)) {
 									// delete it
 									dropRecords(sqlName, basketSqlId);
 								} else {
@@ -1120,7 +1123,7 @@ public class TransferFromXtf {
 	                    // get sql name
 	                    DbTableName sqlName=getSqlTableNameItfLineTable(attr,epsgCode);
 	                    // if table exists?
-	                    if(DbUtility.tableExists(conn,sqlName)){
+	                    if(customMapping.tableExists(conn,sqlName)){
 	                        dropRecords(sqlName, basketSqlId);
 	                    }else{
 	                        // skip it; no table

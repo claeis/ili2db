@@ -17,23 +17,19 @@
  */
 package ch.ehi.ili2db.base;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-
-import javax.swing.JOptionPane;
 
 import ch.ehi.basics.logging.EhiLogger;
 import ch.ehi.basics.logging.LogEvent;
@@ -63,7 +59,6 @@ import ch.ehi.sqlgen.generator.Generator;
 import ch.ehi.sqlgen.generator.GeneratorDriver;
 //import ch.ehi.sqlgen.generator_impl.oracle.GeneratorOracle;
 import ch.ehi.sqlgen.generator_impl.jdbc.GeneratorJdbc;
-import ch.ehi.sqlgen.generator_impl.jdbc.GeneratorJdbc.Stmt;
 import ch.ehi.sqlgen.repository.DbColumn;
 import ch.ehi.sqlgen.repository.DbSchema;
 import ch.ehi.sqlgen.repository.DbTable;
@@ -73,7 +68,6 @@ import ch.interlis.ili2c.gui.UserSettings;
 import ch.interlis.ili2c.metamodel.Element;
 import ch.interlis.ili2c.metamodel.Ili2cMetaAttrs;
 import ch.interlis.ili2c.metamodel.Model;
-import ch.interlis.ili2c.metamodel.PredefinedModel;
 import ch.interlis.ili2c.metamodel.TransferDescription;
 import ch.interlis.ilirepository.IliFiles;
 import ch.interlis.iom_j.iligml.Iligml10Writer;
@@ -189,7 +183,7 @@ public class Ili2db {
 				conn = connect(url, dbusr, dbpwd, config, customMapping);
 			}
 			customMapping.postConnect(conn, config);
-			TransferFromIli.readSettings(conn,config,config.getDbschema());
+			TransferFromIli.readSettings(conn,config,config.getDbschema(),customMapping);
 		} catch (SQLException e) {
 			EhiLogger.logError(e);
 		} catch (IOException e) {
@@ -240,10 +234,25 @@ public class Ili2db {
 	throws Ili2dbException
 		{
 		ch.ehi.basics.logging.FileListener logfile=null;
+        ch.interlis.iox_j.logging.XtfErrorsLogger xtflog=null;
 		if(config.getLogfile()!=null){
 			logfile=new FileLogger(new java.io.File(config.getLogfile()));
 			EhiLogger.getInstance().addListener(logfile);
 		}
+		String xtflogFilename=config.getXtfLogfile();
+        if(xtflogFilename!=null){
+            File f=new java.io.File(xtflogFilename);
+            try {
+                if(isWriteable(f)) {
+                    xtflog=new ch.interlis.iox_j.logging.XtfErrorsLogger(f, config.getSender());
+                    EhiLogger.getInstance().addListener(xtflog);
+                }else {
+                    throw new Ili2dbException("failed to write to logfile <"+f.getPath()+">");
+                }
+            } catch (IOException e) {
+                throw new Ili2dbException("failed to write to logfile <"+f.getPath()+">",e);
+            }
+        }
 		StdLogger logStderr=new StdLogger(config.getLogfile());
 		EhiLogger.getInstance().addListener(logStderr);
 		EhiLogger.getInstance().removeListener(StdListener.getInstance());
@@ -449,7 +458,7 @@ public class Ili2db {
 				}else if(function==Config.FC_IMPORT){
 					String datasetName=config.getDatasetName();
 					if(datasetName!=null){
-						if(DbUtility.tableExists(conn,new DbTableName(config.getDbschema(),DbNames.DATASETS_TAB))){
+						if(customMapping.tableExists(conn,new DbTableName(config.getDbschema(),DbNames.DATASETS_TAB))){
 							Long datasetId=getDatasetId(datasetName, conn, config);
 							if(datasetId!=null){
 								throw new Ili2dbException("dataset <"+datasetName+"> already exists");
@@ -491,7 +500,7 @@ public class Ili2db {
 				}
 				
 				// if meta attribute table already exists, read it
-                if(config.getCreateMetaInfo() && DbUtility.tableExists(conn,new DbTableName(config.getDbschema(),DbNames.META_ATTRIBUTES_TAB))){
+                if(config.getCreateMetaInfo() && customMapping.tableExists(conn,new DbTableName(config.getDbschema(),DbNames.META_ATTRIBUTES_TAB))){
                     // set elements' meta-attributes
                     MetaAttrUtility.addMetaAttrsFromDb(td, conn, config.getDbschema());
                 }
@@ -514,16 +523,16 @@ public class Ili2db {
 			  	
 				// read mapping file
 				NameMapping mapping=new NameMapping(td,config);
-				  if(DbUtility.tableExists(conn,new DbTableName(config.getDbschema(),DbNames.CLASSNAME_TAB))){
+				  if(customMapping.tableExists(conn,new DbTableName(config.getDbschema(),DbNames.CLASSNAME_TAB))){
 					  // read mapping from db
 					  mapping.readTableMappingTable(conn,config.getDbschema());
 				  }
-				  if(DbUtility.tableExists(conn,new DbTableName(config.getDbschema(),DbNames.ATTRNAME_TAB))){
+				  if(customMapping.tableExists(conn,new DbTableName(config.getDbschema(),DbNames.ATTRNAME_TAB))){
 					  // read mapping from db
 					  mapping.readAttrMappingTable(conn,config.getDbschema());
 				  }
 				  TrafoConfig trafoConfig=new TrafoConfig();
-				  trafoConfig.readTrafoConfig(conn, config.getDbschema());
+				  trafoConfig.readTrafoConfig(conn, config.getDbschema(),customMapping);
 
 				ModelElementSelector ms=new ModelElementSelector();
 				ArrayList<String> modelNames=new ArrayList<String>();
@@ -605,7 +614,7 @@ public class Ili2db {
                             // update mapping table
                             mapping.updateTableMappingTable(insertCollector,conn,config.getDbschema());
                             mapping.updateAttrMappingTable(insertCollector,conn,config.getDbschema());
-                            trafoConfig.updateTrafoConfig(insertCollector,conn, config.getDbschema());
+                            trafoConfig.updateTrafoConfig(insertCollector,conn, config.getDbschema(),customMapping);
                             // update inheritance table
                             trsfFromIli.updateInheritanceTable(insertCollector,conn,config.getDbschema());
                             // update enumerations table
@@ -659,7 +668,7 @@ public class Ili2db {
 						}else{
 							ioxReader=new XtfReader(in);
 						}
-						transferFromXtf(conn,ioxReader,function,mapping,td,dbusr,geomConverter,idGen,config,stat,trafoConfig,class2wrapper);
+						transferFromXtf(conn,ioxReader,function,mapping,td,dbusr,geomConverter,idGen,config,stat,trafoConfig,class2wrapper,customMapping);
 					} catch (IOException ex) {
 						throw new Ili2dbException(ex);
 					} catch (IoxException ex) {
@@ -731,7 +740,7 @@ public class Ili2db {
                                     }
 								}
 						}
-						transferFromXtf(conn,ioxReader,function,mapping,td,dbusr,geomConverter,idGen,config,stat,trafoConfig,class2wrapper);
+						transferFromXtf(conn,ioxReader,function,mapping,td,dbusr,geomConverter,idGen,config,stat,trafoConfig,class2wrapper,customMapping);
 					} catch (IoxException e) {
 						throw new Ili2dbException(e);
 					}finally{
@@ -809,13 +818,24 @@ public class Ili2db {
 			if(logfile!=null){
 				logfile.logEvent(new StdLogEvent(LogEvent.ERROR,null,ex,null));
 			}
+            if(xtflog!=null){
+                xtflog.logEvent(new StdLogEvent(LogEvent.ERROR,null,ex,null));
+            }
 			throw ex;
 		}catch(java.lang.RuntimeException ex){
 			if(logfile!=null){
 				logfile.logEvent(new StdLogEvent(LogEvent.ERROR,null,ex,null));
 			}
+            if(xtflog!=null){
+                xtflog.logEvent(new StdLogEvent(LogEvent.ERROR,null,ex,null));
+            }
 			throw ex;
 		}finally{
+            if(xtflog!=null){
+                EhiLogger.getInstance().removeListener(xtflog);
+                xtflog.close();
+                xtflog=null;
+            }
 			if(logfile!=null){
 				EhiLogger.getInstance().removeListener(logfile);
 				logfile.close();
@@ -953,10 +973,25 @@ public class Ili2db {
 	throws Ili2dbException
 	{
 		ch.ehi.basics.logging.FileListener logfile=null;
+        ch.interlis.iox_j.logging.XtfErrorsLogger xtflog=null;
 		if(config.getLogfile()!=null){
 			logfile=new FileLogger(new java.io.File(config.getLogfile()));
 			EhiLogger.getInstance().addListener(logfile);
 		}
+        String xtflogFilename=config.getXtfLogfile();
+        if(xtflogFilename!=null){
+            File f=new java.io.File(xtflogFilename);
+            try {
+                if(isWriteable(f)) {
+                    xtflog=new ch.interlis.iox_j.logging.XtfErrorsLogger(f, config.getSender());
+                    EhiLogger.getInstance().addListener(xtflog);
+                }else {
+                    throw new Ili2dbException("failed to write to logfile <"+f.getPath()+">");
+                }
+            } catch (IOException e) {
+                throw new Ili2dbException("failed to write to logfile <"+f.getPath()+">",e);
+            }
+        }
 		StdLogger logStderr=new StdLogger(config.getLogfile());
 		EhiLogger.getInstance().addListener(logStderr);
 		EhiLogger.getInstance().removeListener(StdListener.getInstance());
@@ -1152,18 +1187,18 @@ public class Ili2db {
 			// read mapping file
 			NameMapping mapping=new NameMapping(td,config);
             if(importToDb) {
-                if(DbUtility.tableExists(conn,new DbTableName(config.getDbschema(),DbNames.CLASSNAME_TAB))){
+                if(customMapping.tableExists(conn,new DbTableName(config.getDbschema(),DbNames.CLASSNAME_TAB))){
                     // read mapping from db
                     mapping.readTableMappingTable(conn,config.getDbschema());
                 }
-                if(DbUtility.tableExists(conn,new DbTableName(config.getDbschema(),DbNames.ATTRNAME_TAB))){
+                if(customMapping.tableExists(conn,new DbTableName(config.getDbschema(),DbNames.ATTRNAME_TAB))){
                     // read mapping from db
                     mapping.readAttrMappingTable(conn,config.getDbschema());
                 }
             }
             
 			  TrafoConfig trafoConfig=new TrafoConfig();
-			  trafoConfig.readTrafoConfig(conn, config.getDbschema());
+			  trafoConfig.readTrafoConfig(conn, config.getDbschema(),customMapping);
 
 			ModelElementSelector ms=new ModelElementSelector();
 			ArrayList<String> modelNames=new ArrayList<String>();
@@ -1275,7 +1310,7 @@ public class Ili2db {
                     // update mapping table
                     mapping.updateTableMappingTable(insertCollector,conn,config.getDbschema());
                     mapping.updateAttrMappingTable(insertCollector,conn,config.getDbschema());
-                    trafoConfig.updateTrafoConfig(insertCollector,conn, config.getDbschema());
+                    trafoConfig.updateTrafoConfig(insertCollector,conn, config.getDbschema(),customMapping);
                     
                     // update inheritance table
                     trsfFromIli.updateInheritanceTable(insertCollector,conn,config.getDbschema());
@@ -1365,13 +1400,24 @@ public class Ili2db {
 			if(logfile!=null){
 				logfile.logEvent(new StdLogEvent(LogEvent.ERROR,null,ex,null));
 			}
+            if(xtflog!=null){
+                xtflog.logEvent(new StdLogEvent(LogEvent.ERROR,null,ex,null));
+            }
 			throw ex;
 		}catch(java.lang.RuntimeException ex){
 			if(logfile!=null){
 				logfile.logEvent(new StdLogEvent(LogEvent.ERROR,null,ex,null));
 			}
+            if(xtflog!=null){
+                xtflog.logEvent(new StdLogEvent(LogEvent.ERROR,null,ex,null));
+            }
 			throw ex;
 		}finally{
+            if(xtflog!=null){
+                EhiLogger.getInstance().removeListener(xtflog);
+                xtflog.close();
+                xtflog=null;
+            }
 			if(logfile!=null){
 				EhiLogger.getInstance().removeListener(logfile);
 				logfile.close();
@@ -1465,10 +1511,25 @@ public class Ili2db {
             functionName="validate";
         }
 		ch.ehi.basics.logging.FileListener logfile=null;
+		ch.interlis.iox_j.logging.XtfErrorsLogger xtflog=null;
 		if(config.getLogfile()!=null){
 			logfile=new FileLogger(new java.io.File(config.getLogfile()));
 			EhiLogger.getInstance().addListener(logfile);
 		}
+        String xtflogFilename=config.getXtfLogfile();
+        if(xtflogFilename!=null){
+            File f=new java.io.File(xtflogFilename);
+            try {
+                if(isWriteable(f)) {
+                    xtflog=new ch.interlis.iox_j.logging.XtfErrorsLogger(f, config.getSender());
+                    EhiLogger.getInstance().addListener(xtflog);
+                }else {
+                    throw new Ili2dbException("failed to write to logfile <"+f.getPath()+">");
+                }
+            } catch (IOException e) {
+                throw new Ili2dbException("failed to write to logfile <"+f.getPath()+">",e);
+            }
+        }
 		StdLogger logStderr=new StdLogger(config.getLogfile());
 		EhiLogger.getInstance().addListener(logStderr);
 		EhiLogger.getInstance().removeListener(StdListener.getInstance());
@@ -1661,7 +1722,7 @@ public class Ili2db {
 			  
 				if(config.getCreateMetaInfo()){
 					// set elements' meta-attributes
-					if(DbUtility.tableExists(conn,new DbTableName(config.getDbschema(),DbNames.META_ATTRIBUTES_TAB))){
+					if(customMapping.tableExists(conn,new DbTableName(config.getDbschema(),DbNames.META_ATTRIBUTES_TAB))){
 						MetaAttrUtility.addMetaAttrsFromDb(td, conn, config.getDbschema());
 					}
 				}
@@ -1673,16 +1734,16 @@ public class Ili2db {
 			  
 			  // get mapping definition
 			  NameMapping mapping=new NameMapping(td,config);
-			  if(DbUtility.tableExists(conn,new DbTableName(config.getDbschema(),DbNames.CLASSNAME_TAB))){
+			  if(customMapping.tableExists(conn,new DbTableName(config.getDbschema(),DbNames.CLASSNAME_TAB))){
 				  // read mapping from db
 				  mapping.readTableMappingTable(conn,config.getDbschema());
 			  }
-			  if(DbUtility.tableExists(conn,new DbTableName(config.getDbschema(),DbNames.ATTRNAME_TAB))){
+			  if(customMapping.tableExists(conn,new DbTableName(config.getDbschema(),DbNames.ATTRNAME_TAB))){
 				  // read mapping from db
 				  mapping.readAttrMappingTable(conn,config.getDbschema());
 			  }
 			  TrafoConfig trafoConfig=new TrafoConfig();
-			  trafoConfig.readTrafoConfig(conn, config.getDbschema());
+			  trafoConfig.readTrafoConfig(conn, config.getDbschema(),customMapping);
 
 				ModelElementSelector ms=new ModelElementSelector();
 				ArrayList<String> modelNames=new ArrayList<String>();
@@ -1757,13 +1818,24 @@ public class Ili2db {
 			if(logfile!=null){
 				logfile.logEvent(new StdLogEvent(LogEvent.ERROR,null,ex,null));
 			}
+            if(xtflog!=null){
+                xtflog.logEvent(new StdLogEvent(LogEvent.ERROR,null,ex,null));
+            }
 			throw ex;
 		}catch(java.lang.RuntimeException ex){
 			if(logfile!=null){
 				logfile.logEvent(new StdLogEvent(LogEvent.ERROR,null,ex,null));
 			}
+            if(xtflog!=null){
+                xtflog.logEvent(new StdLogEvent(LogEvent.ERROR,null,ex,null));
+            }
 			throw ex;
 		}finally{
+            if(xtflog!=null){
+                EhiLogger.getInstance().removeListener(xtflog);
+                xtflog.close();
+                xtflog=null;
+            }
 			if(logfile!=null){
 				EhiLogger.getInstance().removeListener(logfile);
 				logfile.close();
@@ -2241,10 +2313,10 @@ public class Ili2db {
 			DbIdGen idGen,
 			Config config,
 			Map<String,BasketStat> stat,
-			TrafoConfig trafoConfig,Viewable2TableMapping class2wrapper){	
+			TrafoConfig trafoConfig,Viewable2TableMapping class2wrapper,CustomMapping customMapping){	
 		try{
 			TransferFromXtf trsfr=new TransferFromXtf(function,ili2sqlName,td,conn,dbusr,geomConv,idGen,config,trafoConfig,class2wrapper);
-			trsfr.doit(reader,config,stat);
+			trsfr.doit(reader,config,stat,customMapping);
 		}catch(ch.interlis.iox.IoxException ex){
 			EhiLogger.logError("failed to transfer data from file to db",ex);
 		} catch (Ili2dbException ex) {
@@ -2266,7 +2338,7 @@ public class Ili2db {
 	    if(function==Config.FC_VALIDATE) {
 	        try{
 	            TransferToXtf trsfr=new TransferToXtf(ili2sqlName,td,conn,geomConv,config,trafoConfig,class2wrapper);
-	            trsfr.doit(function,customMapping.shortenConnectUrl4Log(config.getDburl()),null,sender,exportParamModelnames,basketSqlIds,stat);
+	            trsfr.doit(function,customMapping.shortenConnectUrl4Log(config.getDburl()),null,sender,exportParamModelnames,basketSqlIds,stat,customMapping);
 	        }catch(ch.interlis.iox.IoxException ex){
 	            EhiLogger.logError("failed to validate data from db",ex);
 	        } catch (Ili2dbException ex) {
@@ -2297,7 +2369,7 @@ public class Ili2db {
 	                }
 	            }
 	            TransferToXtf trsfr=new TransferToXtf(ili2sqlName,td,conn,geomConv,config,trafoConfig,class2wrapper);
-	            trsfr.doit(function,outfile.getName(),ioxWriter,sender,exportParamModelnames,basketSqlIds,stat);
+	            trsfr.doit(function,outfile.getName(),ioxWriter,sender,exportParamModelnames,basketSqlIds,stat,customMapping);
 	            //trsfr.doitJava();
 	            ioxWriter.flush();
 	        }catch(ch.interlis.iox.IoxException ex){
@@ -2454,6 +2526,10 @@ public class Ili2db {
             return "NULL";
         }
         return "'"+value.replace("'", "''")+"'";
+    }
+    private static boolean isWriteable(File f) throws IOException {
+        f.createNewFile();
+        return f.canWrite();
     }
 
 }

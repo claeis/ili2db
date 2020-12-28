@@ -128,6 +128,7 @@ public class Config extends Settings {
 	private String ddlGenerator=null;
 	private String deleteMode=null;
 	private String logfile=null;
+    private String xtfLogfile=null;
 	private boolean configReadFromDb=false;
 	private boolean itfTransferFile=false;
 	private String validConfigFileName=null;
@@ -600,6 +601,12 @@ public class Config extends Settings {
 	public void setLogfile(String logfile) {
 		this.logfile = logfile;
 	}
+    public String getXtfLogfile() {
+        return xtfLogfile;
+    }
+    public void setXtfLogfile(String logfile) {
+        this.xtfLogfile = logfile;
+    }
 	public boolean isConfigReadFromDb() {
 		return configReadFromDb;
 	}

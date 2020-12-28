@@ -434,7 +434,7 @@ public class TransferFromIli {
 	throws Ili2dbException
 	{
 		String sqlName=DbNames.MODELS_TAB;
-		if(!DbUtility.tableExists(conn,new DbTableName(schema,sqlName))){
+		if(!mapping.tableExists(conn,new DbTableName(schema,sqlName))){
 			return null;
 		}
 		ch.interlis.ilirepository.IliFiles ret=new ch.interlis.ilirepository.IliFiles();
@@ -679,14 +679,14 @@ public class TransferFromIli {
 		tab.addColumn(settingCol);
 		schema.addTable(tab);
 	}
-	public static void readSettings(java.sql.Connection conn,Config settings,String schema)
+	public static void readSettings(java.sql.Connection conn,Config settings,String schema,CustomMapping customMapping)
 	throws Ili2dbException
 	{
 		String sqlName=DbNames.SETTINGS_TAB;
 		if(schema!=null){
 			sqlName=schema+"."+sqlName;
 		}
-		if(DbUtility.tableExists(conn,new DbTableName(schema,DbNames.SETTINGS_TAB))){
+		if(customMapping.tableExists(conn,new DbTableName(schema,DbNames.SETTINGS_TAB))){
 			try{
 				// select entries
 				String insStmt="SELECT "+DbNames.SETTINGS_TAB_TAG_COL+","+DbNames.SETTINGS_TAB_SETTING_COL+" FROM "+sqlName;
