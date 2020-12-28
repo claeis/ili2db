@@ -13,10 +13,13 @@ ideas/open issues/questions
 
 LATEST
 ---------------------------
+
+ili2db 4.4.5 (2020-12-28)
+------------------------------
 - add support for h2gis db (#343)
 - add --xtflog (#368)
-- iox-ili-1.21.4-SNAPSHOT
-- ili2c-5.1.5-SNAPSHOT
+- iox-ili-1.21.4
+- ili2c-5.1.5
 
 ili2db 4.4.4 (2020-10-02)
 ------------------------------
