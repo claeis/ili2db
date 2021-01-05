@@ -97,6 +97,35 @@ Fehler wird aber in der Regel schon früher ausgegeben.::
   ...
   Error: ...import failed
 
+Fehlerhafte Daten
+-----------------
+Um fehlerhaften Daten zu importieren (um sie zu flicken), muss mindestens die 
+Validierung ausgeschaltet werden (``--disableValidation``). Das DB Schema muss 
+aber auch so angelegt werden, dass fehlerhafte Werte durch ``NULL`` ersetzt werden 
+können (``--sqlEnableNull``). Und die Programmlogik für den Datenimport muss die Fehler 
+tolerieren (``--skipReferenceErrors`` und ``--skipGeometryErrors``), so dass 
+z.B. eine Referenz auf ein nicht vorhandenes Objekt ignoriert wird.
+
+Um solche Daten zu importieren (um sie zu flicken)::
+	
+  java -jar ili2gpkg.jar --schemaimport --sqlEnableNull --dbfile mogis.gpkg path/to/mo.ili
+  java -jar ili2gpkg.jar --import --skipReferenceErrors --skipGeometryErrors --disableValidation --dbfile mogis.gpkg path/to/data.xtf
+
+Bei ITF (Interlis 1): Fehlerhafte AREA Attribute können für 
+den ganzen Datensatz nicht als Polygone 
+gelesen werden, weil ein Programm nicht erkennen kann, welche Linien und 
+Punkte falsch sind (Punkt und/oder Linie zu viel oder zu wenig; Linie zu kurz oder zu lang); 
+und somit nicht erkennen kann, bei welchem Polygon der Fehler ist. 
+Dass diese Daten nicht gelesen werden können, hat also nicht in erster Linie 
+mit der Validierung zu tun, sondern damit, dass aus den Linien+Punkten 
+keine Polygone gebildet werden können. Die Polygonbildung muss also 
+ausgeschaltet werden (``--skipPolygonBuilding``).
+
+Um solche Daten zu importieren (um sie zu flicken)::
+	
+  java -jar ili2gpkg.jar --schemaimport --sqlEnableNull --skipPolygonBuilding --dbfile mogis.gpkg path/to/mo.ili
+  java -jar ili2gpkg.jar --import --skipReferenceErrors --skipPolygonBuilding --skipGeometryErrors --disableValidation --dbfile mogis.gpkg path/to/data.itf
+
 
 Laufzeitanforderungen
 ---------------------
