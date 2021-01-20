@@ -1360,6 +1360,44 @@ Für die Abbildung von Aufzählungen gibt es zwei Varianten und verschiedene Opt
 |              |                                                               |                                      | er gelöscht werden muss. Wird beim Import mit FALSE befüllt.                      |
 +--------------+---------------------------------------------------------------+--------------------------------------+-----------------------------------------------------------------------------------+
 
+INTERLIS-Metaattribute
+~~~~~~~~~~~~~~~~~~~~~~
+Einzelne Abbildungen können direkt im Modell über Metaaatribute konfiguriert werden. 
+Metaattribute stehen unmittelbar vor dem Modellelement das sie betreffen und beginnen mit ``!!@``.
+Falls der Wert (rechts von ```=```) aus mehreren durch Leerstellen getrennten Wörtern besteht, muss er mit Gänsefüsschen eingerahmt werden (```"..."```).
+
++------------------+--------------------------+-----------------------------------------------------------------------------------+
+| Modelelement     | Metaattribut             | Beschreibung                                                                      |
++==================+==========================+===================================================================================+
+| AttributeDef     | ::                       | Strukturattribute mit diesem Meta-Attribut                                        |
+|                  |                          | werden als Spalte mit dem Datentyp Array oder JSON abgebildet.                    |
+|                  |  ili2db.mapping          | D.h. es gibt keine weiteren Records in einer Hilfstabelle.                        |
+|                  |                          | Siehe auch Programm-Optionen --coalesceArray und --coalesceJson.                  |
+|                  |                          | Mögliche Werte: ARRAY, JSON                                                       |
+|                  |                          |                                                                                   |
++------------------+--------------------------+-----------------------------------------------------------------------------------+
+| ClassDef         | ::                       | Strukturen mit diesem Meta-Attribut                                               |
+|                  |                          | werden als Spalte mit dem enstprechenden Multi-Geometrie Datentyp abgebildet.     |
+|                  |  ili2db.mapping          | D.h. es gibt keine weiteren Records in einer Hilfstabelle.                        |
+|                  |                          | Mögliche Werte: MultiSurface, MultiLine, MultiPoint                               |
+|                  |                          |                                                                                   |
++------------------+--------------------------+-----------------------------------------------------------------------------------+
+| ClassDef,        | ::                       | Definiert den Anzeigetext für das entsprechende Modell-Element.                   |
+| AttributeDef,    |                          | Für Aufzählelemente ist es der Wert der Saplte dispName in der jeweiligen Tabelle |
+| EnumElement      |  ili2db.dispName         | mit den Aufzählwerten.                                                            |
+|                  |                          | Für Klassen ist es in der Tabelle t\_ili2db\_table_prop der Wert mit              |
+|                  |                          | dem Tag ch.ehi.ili2db.dispName.                                                   |
+|                  |                          | Für Attribute ist es in der Tabelle t\_ili2db\_column_prop der Wert mit           |
+|                  |                          | dem Tag ch.ehi.ili2db.dispName.                                                   |
+|                  |                          |                                                                                   |
++------------------+--------------------------+-----------------------------------------------------------------------------------+
+| ClassDef         | ::                       | Mit dem Metaattribut ili2db.oid erhält die Tabelle (die eine Klasse               |
+|                  |                          | repräsentiert, die keine Basisklasse hat) eine zusätzliche Spalte                 |
+|                  |  ili2db.oid              | T\_Ili\_Tid, wie wenn die Klasse eine OID hätte.                                  |
+|                  |                          | Siehe auch `Klassen/Strukturen`_.                                                 |
+|                  |                          |                                                                                   |
++------------------+--------------------------+-----------------------------------------------------------------------------------+
+
 
 Metadaten
 ~~~~~~~~~
