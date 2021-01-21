@@ -1398,6 +1398,10 @@ Falls der Wert (rechts von ```=```) aus mehreren durch Leerstellen getrennten W�
 |                  |                          |                                                                                   |
 +------------------+--------------------------+-----------------------------------------------------------------------------------+
 
+Ein Modell kann beliebige weitere Metaattribute enthalten; diese werden 
+durch ili2db beim Schemaimpot in t\_ili2db\_meta\_attrs abgelegt.
+Mit Hilfe der Option ``--iliMetaAttrs`` können beliebige weitere Metaattribute
+definiert werden, ohne das Modell (die ili-Datei) zu ändern.
 
 Metadaten
 ~~~~~~~~~
