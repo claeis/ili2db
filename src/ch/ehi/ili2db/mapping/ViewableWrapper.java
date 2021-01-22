@@ -134,6 +134,15 @@ public class ViewableWrapper {
 	public ViewableWrapper getExtending() {
 		return base;
 	}
+    public ViewableWrapper getRoot() {
+        ViewableWrapper root0=this;
+        ViewableWrapper root1=root0.getExtending();
+        while(root1!=null) {
+            root0=root1;
+            root1=root0.getExtending();
+        }
+        return root0;
+    }
 	public void setExtending(ViewableWrapper base1) {
 		base=base1;
 	}

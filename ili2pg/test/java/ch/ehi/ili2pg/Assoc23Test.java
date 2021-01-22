@@ -594,7 +594,7 @@ public class Assoc23Test {
 	}
 	
     @Test
-    public void importIliExtFileRef() throws Exception
+    public void importIliExtRef_Smart0() throws Exception
     {
         //EhiLogger.getInstance().setTraceFilter(false);
         Connection jdbcConnection=null;
@@ -626,7 +626,7 @@ public class Assoc23Test {
         }
     }
     @Test
-    public void importIliExtFileRef_Smart1() throws Exception
+    public void importIliExtRef_Smart1() throws Exception
     {
         //EhiLogger.getInstance().setTraceFilter(false);
         Connection jdbcConnection=null;
@@ -658,7 +658,7 @@ public class Assoc23Test {
         }
     }
     @Test
-    public void importIliExtFileRef_Smart2() throws Exception
+    public void importIliExtRef_Smart2() throws Exception
     {
         //EhiLogger.getInstance().setTraceFilter(false);
         Connection jdbcConnection=null;
@@ -690,11 +690,11 @@ public class Assoc23Test {
         }
     }
 	@Test
-	public void importXtfExtFileRefBackward() throws Exception
+	public void importXtfExtFileRefBackward_Smart0() throws Exception
 	{
 		//EhiLogger.getInstance().setTraceFilter(false);
 	    {
-	        importIliExtFileRef();
+	        importIliExtRef_Smart0();
 	    }
 		Connection jdbcConnection=null;
 		try{
@@ -727,7 +727,7 @@ public class Assoc23Test {
 	}
 	
 	@Test
-	public void importXtfExtRefForward() throws Exception
+	public void importXtfExtRefForward_Smart0() throws Exception
 	{
 		//EhiLogger.getInstance().setTraceFilter(false);
 		Connection jdbcConnection=null;
@@ -776,10 +776,10 @@ public class Assoc23Test {
 		}
 	}
     @Test
-    public void replaceXtfExtRefForward() throws Exception
+    public void replaceXtfExtRefForward_Smart0() throws Exception
     {
         {
-            importXtfExtRefForward();
+            importXtfExtRefForward_Smart0();
         }
         //EhiLogger.getInstance().setTraceFilter(false);
         Connection jdbcConnection=null;
@@ -1062,7 +1062,7 @@ public class Assoc23Test {
 	public void exportXtfExtFileRef() throws Exception
 	{
 		{
-			importXtfExtFileRefBackward();
+			importXtfExtFileRefBackward_Smart0();
 		}
 		File data=null;
 		//EhiLogger.getInstance().setTraceFilter(false);
@@ -1129,10 +1129,10 @@ public class Assoc23Test {
 	}
 	
 	@Test
-	public void exportXtfExtRef() throws Exception
+	public void exportXtfExtRef_Smart0() throws Exception
 	{
 		{
-			importXtfExtRefForward();
+			importXtfExtRefForward_Smart0();
 		}
 		File data=null;
 		//EhiLogger.getInstance().setTraceFilter(false);
