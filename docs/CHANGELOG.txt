@@ -16,6 +16,7 @@ LATEST
 - import fails with --noSmartMapping (#381) 
 - ili2gpkg: failed to import MultiPoint
 - ili2pg-4.4.1 failed to build polygons (#376)
+- NPE with schema import and --createMetaInfo and a VIEW with implicit typed attributes (#385)
 - iox-ili-1.21.5-SNAPSHOT
 
 ili2db 4.4.5 (2020-12-28)

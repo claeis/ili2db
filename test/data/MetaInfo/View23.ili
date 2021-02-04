@@ -1,0 +1,21 @@
+INTERLIS 2.3;
+
+MODEL View23
+  AT "mailto:ce@eisenhutinformatik.ch" VERSION "2015-09-23" =
+    
+  TOPIC Topic =
+  
+    CLASS ClassA =
+       attrA1 : MANDATORY TEXT*10;
+       attrA2 : TEXT*10;
+    END ClassA;
+
+	VIEW ViewA
+	  PROJECTION OF base~ClassA;
+	  =  
+	  ATTRIBUTE
+		a :=base-> attrA1;
+	END ViewA;
+
+  END Topic;
+END View23.

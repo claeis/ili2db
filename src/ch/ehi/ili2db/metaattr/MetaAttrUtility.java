@@ -10,8 +10,12 @@ import java.sql.ResultSet;
 
 
 import ch.interlis.ili2c.metamodel.Element;
+import ch.interlis.ili2c.metamodel.Evaluable;
+import ch.interlis.ili2c.metamodel.LocalAttribute;
+import ch.interlis.ili2c.metamodel.ObjectPath;
 import ch.interlis.ili2c.metamodel.RoleDef;
 import ch.interlis.ili2c.metamodel.TransferDescription;
+import ch.interlis.ili2c.metamodel.Type;
 import ch.interlis.iox_j.inifile.IniFileReader;
 import ch.interlis.iox_j.validator.ValidationConfig;
 import ch.interlis.ili2c.metamodel.AttributeDef;
@@ -168,25 +172,30 @@ public class MetaAttrUtility{
 	throws Ili2dbException
 	{
 		Settings metaValues = el.getMetaValues();
-		if(metaValues.getValues().size() > 0){
-			for(String attr:metaValues.getValues()){
+		try {
+	        if(metaValues.getValues().size() > 0){
+	            for(String attr:metaValues.getValues()){
+	                HashMap<String,String> exstValues=getMetaValues(entries,el);
+	                exstValues.put(attr, metaValues.getValue(attr));
+	            }
+	        }
+	        if(el instanceof RoleDef){
+	            RoleDef role=(RoleDef)el;
 	            HashMap<String,String> exstValues=getMetaValues(entries,el);
-                exstValues.put(attr, metaValues.getValue(attr));
-			}
+	            exstValues.put(ILI2DB_ILI_ASSOC_KIND, mapRoleKind(role.getKind()));
+	            exstValues.put(ILI2DB_ILI_ASSOC_CARDINALITY_MIN, mapCardinality(role.getCardinality().getMinimum()));
+	            exstValues.put(ILI2DB_ILI_ASSOC_CARDINALITY_MAX, mapCardinality(role.getCardinality().getMaximum()));
+	        }
+	        if(el instanceof AttributeDef){
+	            AttributeDef attr=(AttributeDef)el;
+	            HashMap<String,String> exstValues=getMetaValues(entries,el);
+	            exstValues.put(ILI2DB_ILI_ATTR_CARDINALITY_MIN, mapCardinality(getDomain(attr).getCardinality().getMinimum()));
+	            exstValues.put(ILI2DB_ILI_ATTR_CARDINALITY_MAX, mapCardinality(getDomain(attr).getCardinality().getMaximum()));
+	        }
+		}catch(RuntimeException e) {
+		    EhiLogger.traceUnusualState(el.getScopedName()+": "+e.getMessage());
+		    throw e;
 		}
-        if(el instanceof RoleDef){
-            RoleDef role=(RoleDef)el;
-            HashMap<String,String> exstValues=getMetaValues(entries,el);
-            exstValues.put(ILI2DB_ILI_ASSOC_KIND, mapRoleKind(role.getKind()));
-            exstValues.put(ILI2DB_ILI_ASSOC_CARDINALITY_MIN, mapCardinality(role.getCardinality().getMinimum()));
-            exstValues.put(ILI2DB_ILI_ASSOC_CARDINALITY_MAX, mapCardinality(role.getCardinality().getMaximum()));
-        }
-        if(el instanceof AttributeDef){
-            AttributeDef attr=(AttributeDef)el;
-            HashMap<String,String> exstValues=getMetaValues(entries,el);
-            exstValues.put(ILI2DB_ILI_ATTR_CARDINALITY_MIN, mapCardinality(attr.getDomain().getCardinality().getMinimum()));
-            exstValues.put(ILI2DB_ILI_ATTR_CARDINALITY_MAX, mapCardinality(attr.getDomain().getCardinality().getMaximum()));
-        }
 		if(el instanceof Container){
 			Container e = (Container) el;
 			Iterator it = e.iterator();
@@ -196,7 +205,14 @@ public class MetaAttrUtility{
 		}
 	}
 
-	
+	private static Type getDomain(AttributeDef attr) {
+        Type type = attr.getDomain();
+        if ((type == null) && ((attr instanceof LocalAttribute))) {
+            Evaluable[] ev = ((LocalAttribute) attr).getBasePaths();
+            type = ((ObjectPath) ev[0]).getType();
+        }
+        return type;
+	}
 	  private static String mapCardinality(long val) {
 	      if (val == Cardinality.UNBOUND) {
 	        return "*";
