@@ -241,18 +241,18 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
                   }
                   dbTable.addColumn(dbCol);
 			}
+			
 			// if CLASS
-			  if(!def.isStructure() && !(def.getViewable() instanceof AssociationDef && ((AssociationDef)def.getViewable()).isLightweight())){
-				  if(createIliTidCol || def.getOid()!=null){
-						addIliTidCol(dbTable,def.getOid());
-						if(def.getOid()!=null) {
-			                  metaInfo.setColumnInfo(dbTable.getName().getName(),
-                                      DbNames.T_ILI_TID_COL,
-                                      DbExtMetaInfo.TAG_COL_OIDDOMAIN,
-                                      def.getOid().getScopedName());
-						}
-				  }
+			  if(!(def.getViewable() instanceof AssociationDef && ((AssociationDef)def.getViewable()).isLightweight())){
+                if (createIliTidCol || def.hasOid()) {
+                    addIliTidCol(dbTable, def.getOid());
+                    if (def.getOid() != null) {
+                        metaInfo.setColumnInfo(dbTable.getName().getName(), DbNames.T_ILI_TID_COL,
+                                DbExtMetaInfo.TAG_COL_OIDDOMAIN, def.getOid().getScopedName());
+                    }
+                }
 			  }
+			  
 		  // if STRUCTURE, add ref to parent
 		  if(def.isStructure()){
 			  if(createGenericStructRef){

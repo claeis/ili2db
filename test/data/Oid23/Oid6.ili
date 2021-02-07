@@ -1,0 +1,34 @@
+INTERLIS 2.3;
+
+MODEL Oid6
+  AT "mailto:ce@eisenhutinformatik.ch" VERSION "2021-02-07" =
+    
+  TOPIC TestA =
+
+    STRUCTURE StructA0 =
+    END StructA0;
+    CLASS ClassA1 EXTENDS StructA0 =
+    	OID AS INTERLIS.UUIDOID;
+    END ClassA1;
+    CLASS ClassA1b EXTENDS ClassA1 =
+    END ClassA1b;
+    
+    STRUCTURE StructB0 =
+    END StructB0;
+    CLASS ClassB1 EXTENDS StructB0 =
+    END ClassB1;
+    CLASS ClassB1b EXTENDS ClassB1=
+    	OID AS INTERLIS.UUIDOID;
+    END ClassB1b;
+
+    STRUCTURE StructC0 =
+    END StructC0;
+    CLASS ClassC1 (ABSTRACT) EXTENDS StructC0 =
+    END ClassC1;
+    CLASS ClassC1b EXTENDS ClassC1=
+    	OID AS INTERLIS.UUIDOID;
+    END ClassC1b;
+    
+  END TestA;
+  
+END Oid6.
