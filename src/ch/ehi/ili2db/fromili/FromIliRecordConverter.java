@@ -244,7 +244,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 			
 			// if CLASS
 			  if(!(def.getViewable() instanceof AssociationDef && ((AssociationDef)def.getViewable()).isLightweight())){
-                if (createIliTidCol || def.hasOid()) {
+                if ((createIliTidCol && !(def.getViewable() instanceof AssociationDef)) || def.hasOid()) {
                     addIliTidCol(dbTable, def.getOid());
                     if (def.getOid() != null) {
                         metaInfo.setColumnInfo(dbTable.getName().getName(), DbNames.T_ILI_TID_COL,

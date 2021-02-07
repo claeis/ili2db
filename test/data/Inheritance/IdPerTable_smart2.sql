@@ -10,6 +10,6 @@ INSERT INTO Inheritance.classb VALUES (1, 3, '3', 'attrb-30', 1, NULL);
 INSERT INTO Inheritance.classb VALUES (2, 3, '4', 'attrb-40', NULL, 1);
 INSERT INTO Inheritance.classb VALUES (3, 3, '5', 'attrb-50', 1, NULL);
 
-INSERT INTO Inheritance.aa2bb VALUES (1, 3, NULL, 1, NULL, 2);
-INSERT INTO Inheritance.aa2bb VALUES (2, 3, NULL, NULL, 1, 2);
-INSERT INTO Inheritance.aa2bb VALUES (3, 3, NULL, 1, NULL, 3);
+INSERT INTO Inheritance.aa2bb VALUES (1, 3, 1, NULL, 2);
+INSERT INTO Inheritance.aa2bb VALUES (2, 3,  NULL, 1, 2);
+INSERT INTO Inheritance.aa2bb VALUES (3, 3,  1, NULL, 3);

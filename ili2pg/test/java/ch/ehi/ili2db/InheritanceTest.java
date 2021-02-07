@@ -185,6 +185,8 @@ public class InheritanceTest {
         {
             importIli_smart0();
         }
+        //EhiLogger.getInstance().setTraceFilter(false);
+
         Connection jdbcConnection=null;
         try{
             Class driverClass = Class.forName("org.postgresql.Driver");

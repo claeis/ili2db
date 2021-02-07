@@ -137,9 +137,8 @@ public class Oid23Test {
                         String oidDomain=rs.getString(2);
                         res.put(tableName,oidDomain);
                     }
-                    Assert.assertEquals(2, res.size());
+                    Assert.assertEquals(1, res.size());
                     Assert.assertEquals("INTERLIS.UUIDOID",res.get("classa1"));
-                    Assert.assertEquals("INTERLIS.UUIDOID",res.get("classb1"));
                     
                 }
 			}
@@ -746,9 +745,8 @@ public class Oid23Test {
                         String oidDomain=rs.getString(2);
                         res.put(tableName,oidDomain);
                     }
-                    Assert.assertEquals(2, res.size());
+                    Assert.assertEquals(1, res.size());
                     Assert.assertEquals("INTERLIS.UUIDOID",res.get("classa1"));
-                    Assert.assertEquals("INTERLIS.UUIDOID",res.get("classb1"));
                 }
             }
         }finally{
@@ -1051,9 +1049,7 @@ public class Oid23Test {
                     String oidDomain=rs.getString(2);
                     res.put(tableName,oidDomain);
                 }
-                Assert.assertEquals(2, res.size());
-                Assert.assertEquals("INTERLIS.UUIDOID",res.get("classda"));
-                Assert.assertEquals("INTERLIS.UUIDOID",res.get("classdb"));
+                Assert.assertEquals(0, res.size());
                 
             }
         }finally{
@@ -1114,9 +1110,7 @@ public class Oid23Test {
                     String oidDomain=rs.getString(2);
                     res.put(tableName,oidDomain);
                 }
-                Assert.assertEquals(2, res.size());
-                Assert.assertEquals("INTERLIS.UUIDOID",res.get("classda"));
-                Assert.assertEquals("INTERLIS.UUIDOID",res.get("classdb"));
+                Assert.assertEquals(0, res.size());
                 
             }
         }finally{

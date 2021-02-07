@@ -6,4 +6,4 @@ INSERT INTO inheritance.t_ili2db_basket VALUES (53, 1, 'Inheritance1.TestD', 'In
 INSERT INTO inheritance.classd1 VALUES (1, 53, 'classd1b', '20', '20_d1');
 INSERT INTO inheritance.classd1b VALUES (1, 53, '20_d1b');
 INSERT INTO inheritance.classd1x VALUES (1, 53, '21', '21_d1x', 1);
-INSERT INTO inheritance.d2x VALUES (57, 53, NULL, 1, 1);
+INSERT INTO inheritance.d2x VALUES (57, 53,  1, 1);
