@@ -780,6 +780,78 @@ public class Assoc23Test {
 			}
 		}
 	}
+    @Test
+    public void importXtfExtFileRefBackward_Smart1() throws Exception
+    {
+        //EhiLogger.getInstance().setTraceFilter(false);
+        {
+            importIliExtRef_Smart1();
+        }
+        Connection jdbcConnection=null;
+        try{
+            Class driverClass = Class.forName("org.postgresql.Driver");
+            jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
+            stmt=jdbcConnection.createStatement();
+            {
+                {
+                    File data=new File(TEST_DATA_DIR,"Assoc2b1.xtf");
+                    Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+                    config.setFunction(Config.FC_IMPORT);
+                    config.setImportTid(true);
+                    Ili2db.readSettingsFromDb(config);
+                    Ili2db.run(config,null);
+                }
+                {
+                    File data=new File(TEST_DATA_DIR,"Assoc2b2.xtf");
+                    Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+                    config.setFunction(Config.FC_IMPORT);
+                    config.setImportTid(true);
+                    Ili2db.readSettingsFromDb(config);
+                    Ili2db.run(config,null);
+                }
+            }
+        }finally{
+            if(jdbcConnection!=null){
+                jdbcConnection.close();
+            }
+        }
+    }
+    @Test
+    public void importXtfExtFileRefBackward_Smart2() throws Exception
+    {
+        //EhiLogger.getInstance().setTraceFilter(false);
+        {
+            importIliExtRef_Smart2();
+        }
+        Connection jdbcConnection=null;
+        try{
+            Class driverClass = Class.forName("org.postgresql.Driver");
+            jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
+            stmt=jdbcConnection.createStatement();
+            {
+                {
+                    File data=new File(TEST_DATA_DIR,"Assoc2b1.xtf");
+                    Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+                    config.setFunction(Config.FC_IMPORT);
+                    config.setImportTid(true);
+                    Ili2db.readSettingsFromDb(config);
+                    Ili2db.run(config,null);
+                }
+                {
+                    File data=new File(TEST_DATA_DIR,"Assoc2b2.xtf");
+                    Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+                    config.setFunction(Config.FC_IMPORT);
+                    config.setImportTid(true);
+                    Ili2db.readSettingsFromDb(config);
+                    Ili2db.run(config,null);
+                }
+            }
+        }finally{
+            if(jdbcConnection!=null){
+                jdbcConnection.close();
+            }
+        }
+    }
 	
 	@Test
 	public void importXtfExtRefForward_Smart0() throws Exception
@@ -1182,6 +1254,144 @@ public class Assoc23Test {
 			 }
 		}
 	}
+    @Test
+    public void exportXtfExtFileRef_Smart1() throws Exception
+    {
+        {
+            importXtfExtFileRefBackward_Smart1();
+        }
+        File data=null;
+        //EhiLogger.getInstance().setTraceFilter(false);
+        Connection jdbcConnection=null;
+        try{
+            Class driverClass = Class.forName("org.postgresql.Driver");
+            jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
+            stmt=jdbcConnection.createStatement();
+            {
+                {
+                    data=new File(TEST_DATA_DIR,"Assoc2b2-out.xtf");
+                    Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+                    config.setFunction(Config.FC_EXPORT);
+                    config.setExportTid(true);
+                    config.setModels("Assoc2");
+                    Ili2db.readSettingsFromDb(config);
+                    Ili2db.run(config,null);
+                }
+            }
+        }finally{
+            if(jdbcConnection!=null){
+                jdbcConnection.close();
+            }
+        }
+        {
+            HashMap<String,IomObject> objs=new HashMap<String,IomObject>();
+            XtfReader reader=new XtfReader(data);
+            IoxEvent event=null;
+             do{
+                event=reader.read();
+                if(event instanceof StartTransferEvent){
+                }else if(event instanceof StartBasketEvent){
+                }else if(event instanceof ObjectEvent){
+                    IomObject iomObj=((ObjectEvent)event).getIomObject();
+                    if(iomObj.getobjectoid()!=null){
+                        objs.put(iomObj.getobjectoid(), iomObj);
+                    }
+                }else if(event instanceof EndBasketEvent){
+                }else if(event instanceof EndTransferEvent){
+                }
+             }while(!(event instanceof EndTransferEvent));
+             {
+                 {
+                     IomObject obj0 = objs.get("a3");
+                     Assert.assertNotNull(obj0);
+                     Assert.assertEquals("Assoc2.TestB.ClassA3", obj0.getobjecttag());
+                     IomObject obj1=obj0.getattrobj("b3",0);
+                     assertEquals("b3",obj1.getobjectrefoid());
+                 }
+                 // assoc2b2
+                 {
+                     IomObject obj0 = objs.get("b2");
+                     Assert.assertNotNull(obj0);
+                     Assert.assertEquals("Assoc2.TestB.ClassB2", obj0.getobjecttag());
+                     IomObject obj1=obj0.getattrobj("a2",0);
+                     assertEquals("a2",obj1.getobjectrefoid());
+                     
+                     IomObject obj2=obj0.getattrobj("strA2",0);
+                     IomObject obj3=obj2.getattrobj("refa2",0);
+                     assertEquals("a2",obj3.getobjectrefoid());
+                 }
+             }
+        }
+    }
+    @Test
+    public void exportXtfExtFileRef_Smart2() throws Exception
+    {
+        {
+            importXtfExtFileRefBackward_Smart2();
+        }
+        File data=null;
+        //EhiLogger.getInstance().setTraceFilter(false);
+        Connection jdbcConnection=null;
+        try{
+            Class driverClass = Class.forName("org.postgresql.Driver");
+            jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
+            stmt=jdbcConnection.createStatement();
+            {
+                {
+                    data=new File(TEST_DATA_DIR,"Assoc2b2-out.xtf");
+                    Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+                    config.setFunction(Config.FC_EXPORT);
+                    config.setExportTid(true);
+                    config.setModels("Assoc2");
+                    Ili2db.readSettingsFromDb(config);
+                    Ili2db.run(config,null);
+                }
+            }
+        }finally{
+            if(jdbcConnection!=null){
+                jdbcConnection.close();
+            }
+        }
+        {
+            HashMap<String,IomObject> objs=new HashMap<String,IomObject>();
+            XtfReader reader=new XtfReader(data);
+            IoxEvent event=null;
+             do{
+                event=reader.read();
+                if(event instanceof StartTransferEvent){
+                }else if(event instanceof StartBasketEvent){
+                }else if(event instanceof ObjectEvent){
+                    IomObject iomObj=((ObjectEvent)event).getIomObject();
+                    if(iomObj.getobjectoid()!=null){
+                        objs.put(iomObj.getobjectoid(), iomObj);
+                    }
+                }else if(event instanceof EndBasketEvent){
+                }else if(event instanceof EndTransferEvent){
+                }
+             }while(!(event instanceof EndTransferEvent));
+             {
+                 {
+                     IomObject obj0 = objs.get("a3");
+                     Assert.assertNotNull(obj0);
+                     Assert.assertEquals("Assoc2.TestB.ClassA3", obj0.getobjecttag());
+                     IomObject obj1=obj0.getattrobj("b3",0);
+                     assertEquals("b3",obj1.getobjectrefoid());
+                 }
+                 // assoc2b2
+                 {
+                     IomObject obj0 = objs.get("b2");
+                     Assert.assertNotNull(obj0);
+                     Assert.assertEquals("Assoc2.TestB.ClassB2", obj0.getobjecttag());
+                     IomObject obj1=obj0.getattrobj("a2",0);
+                     assertEquals("a2",obj1.getobjectrefoid());
+                     
+                     IomObject obj2=obj0.getattrobj("strA2",0);
+                     IomObject obj3=obj2.getattrobj("refa2",0);
+                     assertEquals("a2",obj3.getobjectrefoid());
+                 }
+             }
+        }
+    }
 	
 	@Test
 	public void exportXtfExtRef_Smart0() throws Exception
