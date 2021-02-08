@@ -35,8 +35,6 @@ public class Assoc23Test {
 	private static final String DBSCHEMA = "Assoc23";
 	private static final String TEST_DATA_DIR="test/data/Assoc23/";
     private static final String EXTREFFORWARD = "ExtRefForward";
-	Connection jdbcConnection=null;
-	Statement stmt=null;
 	
 	String dburl=System.getProperty("dburl"); 
 	String dbuser=System.getProperty("dbusr");
@@ -69,7 +67,7 @@ public class Assoc23Test {
         try{
             Class driverClass = Class.forName("org.postgresql.Driver");
             jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
-            stmt=jdbcConnection.createStatement();
+            Statement stmt=jdbcConnection.createStatement();
             stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");
             {
                 File data=new File(TEST_DATA_DIR,"Assoc4.ili");
@@ -126,7 +124,7 @@ public class Assoc23Test {
         try{
             Class driverClass = Class.forName("org.postgresql.Driver");
             jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
-            stmt=jdbcConnection.createStatement();
+            Statement stmt=jdbcConnection.createStatement();
             stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");
             {
                 File data=new File(TEST_DATA_DIR,"Assoc4.ili");
@@ -183,7 +181,7 @@ public class Assoc23Test {
         try{
             Class driverClass = Class.forName("org.postgresql.Driver");
             jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
-            stmt=jdbcConnection.createStatement();
+            Statement stmt=jdbcConnection.createStatement();
             stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");
             {
                 File data=new File(TEST_DATA_DIR,"Assoc4.ili");
@@ -252,7 +250,7 @@ public class Assoc23Test {
         try{
             Class driverClass = Class.forName("org.postgresql.Driver");
             jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
-            stmt=jdbcConnection.createStatement();
+            Statement stmt=jdbcConnection.createStatement();
             stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");
             {
                 File data=new File(TEST_DATA_DIR,"Assoc4a.xtf");
@@ -327,7 +325,7 @@ public class Assoc23Test {
         try{
             Class driverClass = Class.forName("org.postgresql.Driver");
             jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
-            stmt=jdbcConnection.createStatement();
+            Statement stmt=jdbcConnection.createStatement();
             stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");
             {
                 File data=new File(TEST_DATA_DIR,"Assoc4a.xtf");
@@ -399,7 +397,7 @@ public class Assoc23Test {
         try{
             Class driverClass = Class.forName("org.postgresql.Driver");
             jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
-            stmt=jdbcConnection.createStatement();
+            Statement stmt=jdbcConnection.createStatement();
             stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");
             {
                 File data=new File(TEST_DATA_DIR,"Assoc4a.xtf");
@@ -468,7 +466,7 @@ public class Assoc23Test {
 		try{
 		    Class driverClass = Class.forName("org.postgresql.Driver");
 	        jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
-	        stmt=jdbcConnection.createStatement();
+	        Statement stmt = jdbcConnection.createStatement();
 			stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");
 			{
 				File data=new File(TEST_DATA_DIR,"Assoc1a.xtf");
@@ -501,7 +499,7 @@ public class Assoc23Test {
 		try{
 		    Class driverClass = Class.forName("org.postgresql.Driver");
 	        jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
-	        stmt=jdbcConnection.createStatement();
+	        Statement stmt = jdbcConnection.createStatement();
 			stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");
 			{
 				File data=new File(TEST_DATA_DIR,"Assoc1b.xtf");
@@ -534,7 +532,7 @@ public class Assoc23Test {
 		try{
 		    Class driverClass = Class.forName("org.postgresql.Driver");
 	        jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
-	        stmt=jdbcConnection.createStatement();
+	        Statement stmt=jdbcConnection.createStatement();
 			stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");
 			{
 	            LogCollector logCollector = new LogCollector();
@@ -585,7 +583,7 @@ public class Assoc23Test {
         try{
             Class driverClass = Class.forName("org.postgresql.Driver");
             jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
-            stmt=jdbcConnection.createStatement();
+            Statement stmt=jdbcConnection.createStatement();
             stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");
             {
                 LogCollector logCollector = new LogCollector();
@@ -623,7 +621,7 @@ public class Assoc23Test {
 		try{
 		    Class driverClass = Class.forName("org.postgresql.Driver");
 	        jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
-	        stmt=jdbcConnection.createStatement();
+	        Statement stmt=jdbcConnection.createStatement();
 			stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");
 			{
 				File data=new File(TEST_DATA_DIR,"Assoc2a.xtf");
@@ -656,7 +654,7 @@ public class Assoc23Test {
         try{
             Class driverClass = Class.forName("org.postgresql.Driver");
             jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
-            stmt=jdbcConnection.createStatement();
+            Statement stmt=jdbcConnection.createStatement();
             stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");
             {
                 {
@@ -688,7 +686,7 @@ public class Assoc23Test {
         try{
             Class driverClass = Class.forName("org.postgresql.Driver");
             jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
-            stmt=jdbcConnection.createStatement();
+            Statement stmt=jdbcConnection.createStatement();
             stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");
             {
                 {
@@ -720,7 +718,7 @@ public class Assoc23Test {
         try{
             Class driverClass = Class.forName("org.postgresql.Driver");
             jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
-            stmt=jdbcConnection.createStatement();
+            Statement stmt=jdbcConnection.createStatement();
             stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");
             {
                 {
@@ -755,7 +753,7 @@ public class Assoc23Test {
 		try{
 		    Class driverClass = Class.forName("org.postgresql.Driver");
 	        jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
-	        stmt=jdbcConnection.createStatement();
+	        Statement stmt=jdbcConnection.createStatement();
 			{
 				{
 					File data=new File(TEST_DATA_DIR,"Assoc2b1.xtf");
@@ -791,7 +789,7 @@ public class Assoc23Test {
         try{
             Class driverClass = Class.forName("org.postgresql.Driver");
             jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
-            stmt=jdbcConnection.createStatement();
+            Statement stmt=jdbcConnection.createStatement();
             {
                 {
                     File data=new File(TEST_DATA_DIR,"Assoc2b1.xtf");
@@ -827,7 +825,7 @@ public class Assoc23Test {
         try{
             Class driverClass = Class.forName("org.postgresql.Driver");
             jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
-            stmt=jdbcConnection.createStatement();
+            Statement stmt=jdbcConnection.createStatement();
             {
                 {
                     File data=new File(TEST_DATA_DIR,"Assoc2b1.xtf");
@@ -861,7 +859,7 @@ public class Assoc23Test {
 		try{
 		    Class driverClass = Class.forName("org.postgresql.Driver");
 	        jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
-	        stmt=jdbcConnection.createStatement();
+	        Statement stmt=jdbcConnection.createStatement();
 			stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");
 			{
 				File data=new File(TEST_DATA_DIR,"Assoc2c.xtf");
@@ -913,7 +911,7 @@ public class Assoc23Test {
         try{
             Class driverClass = Class.forName("org.postgresql.Driver");
             jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
-            stmt=jdbcConnection.createStatement();
+            Statement stmt=jdbcConnection.createStatement();
             {
                 File data=new File(TEST_DATA_DIR,"Assoc2c.xtf");
                 Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
@@ -958,7 +956,7 @@ public class Assoc23Test {
 		try{
 		    Class driverClass = Class.forName("org.postgresql.Driver");
 	        jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
-	        stmt=jdbcConnection.createStatement();
+	        Statement stmt=jdbcConnection.createStatement();
 			{
 				data=new File(TEST_DATA_DIR,"Assoc1a-out.xtf");
 	    		Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
@@ -1050,7 +1048,7 @@ public class Assoc23Test {
 		try{
 		    Class driverClass = Class.forName("org.postgresql.Driver");
 	        jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
-	        stmt=jdbcConnection.createStatement();
+	        Statement stmt=jdbcConnection.createStatement();
 			{
 				data=new File(TEST_DATA_DIR,"Assoc1b-out.xtf");
 	    		Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
@@ -1142,7 +1140,7 @@ public class Assoc23Test {
 		try{
 		    Class driverClass = Class.forName("org.postgresql.Driver");
 	        jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
-	        stmt=jdbcConnection.createStatement();
+	        Statement stmt=jdbcConnection.createStatement();
 			{
 				data=new File(TEST_DATA_DIR,"Assoc1z-out.xtf");
 	    		Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
@@ -1197,7 +1195,7 @@ public class Assoc23Test {
 		try{
 		    Class driverClass = Class.forName("org.postgresql.Driver");
 	        jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
-	        stmt=jdbcConnection.createStatement();
+	        Statement stmt=jdbcConnection.createStatement();
 			{
 				{
 					data=new File(TEST_DATA_DIR,"Assoc2b2-out.xtf");
@@ -1266,7 +1264,7 @@ public class Assoc23Test {
         try{
             Class driverClass = Class.forName("org.postgresql.Driver");
             jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
-            stmt=jdbcConnection.createStatement();
+            Statement stmt=jdbcConnection.createStatement();
             {
                 {
                     data=new File(TEST_DATA_DIR,"Assoc2b2-out.xtf");
@@ -1335,7 +1333,7 @@ public class Assoc23Test {
         try{
             Class driverClass = Class.forName("org.postgresql.Driver");
             jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
-            stmt=jdbcConnection.createStatement();
+            Statement stmt=jdbcConnection.createStatement();
             {
                 {
                     data=new File(TEST_DATA_DIR,"Assoc2b2-out.xtf");
@@ -1405,7 +1403,7 @@ public class Assoc23Test {
 		try{
 		    Class driverClass = Class.forName("org.postgresql.Driver");
 	        jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
-	        stmt=jdbcConnection.createStatement();
+	        Statement stmt=jdbcConnection.createStatement();
 			{
 				data=new File(TEST_DATA_DIR,"Assoc2c-out.xtf");
 	    		Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
@@ -1478,7 +1476,7 @@ public class Assoc23Test {
         try{
             Class driverClass = Class.forName("org.postgresql.Driver");
             jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
-            stmt=jdbcConnection.createStatement();
+            Statement stmt=jdbcConnection.createStatement();
             {
                 data=new File(TEST_DATA_DIR,"Assoc4a-out.xtf");
                 Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
@@ -1563,7 +1561,7 @@ public class Assoc23Test {
         try{
             Class driverClass = Class.forName("org.postgresql.Driver");
             jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
-            stmt=jdbcConnection.createStatement();
+            Statement stmt=jdbcConnection.createStatement();
             {
                 data=new File(TEST_DATA_DIR,"Assoc4a-out.xtf");
                 Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
@@ -1648,7 +1646,7 @@ public class Assoc23Test {
         try{
             Class driverClass = Class.forName("org.postgresql.Driver");
             jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
-            stmt=jdbcConnection.createStatement();
+            Statement stmt=jdbcConnection.createStatement();
             {
                 data=new File(TEST_DATA_DIR,"Assoc4a-out.xtf");
                 Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
@@ -1730,7 +1728,7 @@ public class Assoc23Test {
         try{
             Class driverClass = Class.forName("org.postgresql.Driver");
             jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
-            stmt=jdbcConnection.createStatement();
+            Statement stmt=jdbcConnection.createStatement();
             stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");
             {
                 File data=new File(TEST_DATA_DIR,"AssocUpdate1.ili");
@@ -1781,7 +1779,7 @@ public class Assoc23Test {
         try{
             Class driverClass = Class.forName("org.postgresql.Driver");
             jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
-            stmt=jdbcConnection.createStatement();
+            Statement stmt=jdbcConnection.createStatement();
             {
                 File data=new File(TEST_DATA_DIR,"AssocUpdate1a.xtf");
                 Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
@@ -1805,7 +1803,7 @@ public class Assoc23Test {
         try{
             Class driverClass = Class.forName("org.postgresql.Driver");
             jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
-            stmt=jdbcConnection.createStatement();
+            Statement stmt=jdbcConnection.createStatement();
             {
                 File data=new File(TEST_DATA_DIR,"AssocUpdate1b.xtf");
                 Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
@@ -1829,7 +1827,7 @@ public class Assoc23Test {
         try{
             Class driverClass = Class.forName("org.postgresql.Driver");
             jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
-            stmt=jdbcConnection.createStatement();
+            Statement stmt=jdbcConnection.createStatement();
             {
                 File data=new File(TEST_DATA_DIR,"AssocUpdate1a-out.xtf");
                 Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");

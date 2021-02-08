@@ -2,7 +2,6 @@ INTERLIS 2.3;
 
 !!
 !! assoc with stable ID based on referenced objects
-!!
 MODEL AssocUpdate1
   AT "mailto:ce@eisenhutinformatik.ch" VERSION "2019-11-22" =
     
