@@ -1,0 +1,49 @@
+INTERLIS 2.3;
+
+/** Docu of model
+ */
+MODEL Docu23
+  AT "mailto:ce@eisenhutinformatik.ch" VERSION "2021-02-08" =
+  
+  /** Docu of TopicA
+   */
+  TOPIC TopicA =
+    
+    /** Docu of ClassA
+     */
+    CLASS ClassA =
+		/** Docu of a1
+		 */
+    	a1 : TEXT*60;
+    END ClassA;
+
+    CLASS ClassB =
+    	b1 : TEXT*60;
+    END ClassB;
+    
+    /** Docu of n2n
+     */
+    ASSOCIATION n2n =
+      /** Docu of n2n_a
+       */
+      n2n_a -- {0..*} ClassA;
+      /** Docu of n2n_b
+       */
+      n2n_b -- {0..*} ClassB;
+    END n2n;
+
+    /** Docu of n21
+     */
+    ASSOCIATION n21 =
+      /** Docu of n21_a
+       */
+      n21_a -- {0..*} ClassA;
+      /** Docu of n21_b
+       */
+      n21_b -- {0..1} ClassB;
+    END n21;
+    
+  END TopicA;
+  
+  
+END Docu23.

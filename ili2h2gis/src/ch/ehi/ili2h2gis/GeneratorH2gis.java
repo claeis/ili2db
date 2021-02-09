@@ -209,10 +209,6 @@ public class GeneratorH2gis extends GeneratorJdbc {
 
     @Override
     protected String getTableEndOptions(DbTable tab) {
-        String cmt = tab.getComment();
-        if (cmt != null) {
-            return("COMMENT '" + escapeString(cmt) + "'");
-        }
         return "";
     }
 	@Override
@@ -224,6 +220,32 @@ public class GeneratorH2gis extends GeneratorJdbc {
 		boolean tableExists=tableExists(conn,tab.getName());
 		super.visit1TableEnd(tab);
 
+		{
+	        String cmt = tab.getComment();
+	        if (cmt != null) {
+	            String cmtstmt="COMMENT ON TABLE " +sqlTabName+" IS '" + escapeString(cmt) + "';";
+	            addCreateLine(new Stmt(cmtstmt));
+	            
+	            if(conn!=null) {
+	                if(!tableExists){
+	                    Statement dbstmt = null;
+	                    try{
+	                        try{
+	                            dbstmt = conn.createStatement();
+	                            EhiLogger.traceBackendCmd(cmtstmt);
+	                            dbstmt.execute(cmtstmt);
+	                        }finally{
+	                            dbstmt.close();
+	                        }
+	                    }catch(SQLException ex){
+	                        IOException iox=new IOException("failed to add comment on table "+tab.getName());
+	                        iox.initCause(ex);
+	                        throw iox;
+	                    }
+	                }
+	            }
+	        }
+		}
 		for(DbColumn idxcol:indexColumns){
 			
 			String idxstmt=null;

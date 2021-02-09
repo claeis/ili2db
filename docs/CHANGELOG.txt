@@ -20,6 +20,7 @@ LATEST
 - failed to import with --importTid class that extends a structure (#336)
 - failed to export bags in multiple subclasses (#352)
 - fix export Unknown WKB type 8 (iox-ili#92)
+- ili2h2gis: schemaimport fails if class has a comment (#379)
 - iox-ili-1.21.5-SNAPSHOT
 
 ili2db 4.4.5 (2020-12-28)
