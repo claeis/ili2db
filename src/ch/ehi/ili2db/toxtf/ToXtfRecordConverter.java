@@ -512,7 +512,6 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 	public int addAttrValue(java.sql.ResultSet rs, int valuei, long sqlid,
 			Iom_jObject iomObj, AttributeDef tableAttr,AttributeDef classAttr,Integer epsgCode,ArrayList<AbstractStructWrapper> structQueue,ViewableWrapper table,FixIomObjectRefs fixref,Map<String,String> genericDomains,Viewable iliClassForXtf) throws SQLException {
 		if(true) { // attr.getExtending()==null){
-		    EhiLogger.logState(valuei+": "+tableAttr.getScopedName()+"; "+(classAttr!=null?classAttr.getScopedName():"null"));
 			String attrName=tableAttr.getName();
 			String sqlAttrName=ili2sqlName.mapIliAttributeDef(tableAttr,epsgCode,table.getSqlTablename(),null);
 			if( tableAttr.isDomainBoolean()) {
@@ -828,7 +827,7 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
                         }
 					}else{
 		                if(classAttr==null) {
-		                    valuei++;
+
 		                }else {
 	                        // enque iomObj as parent
 	                        structQueue.add(new StructWrapper(sqlid,tableAttr,iomObj,table));

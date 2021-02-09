@@ -477,7 +477,7 @@ public class Oid23Test {
         {
             importIliStructBaseNoTidCol_Smart0();
         }
-        EhiLogger.getInstance().setTraceFilter(false);
+        //EhiLogger.getInstance().setTraceFilter(false);
         Connection jdbcConnection=null;
         try{
             Class driverClass = Class.forName("org.postgresql.Driver");
@@ -692,7 +692,7 @@ public class Oid23Test {
         {
             importIliStructBaseNoTidCol_Smart1();
         }
-        EhiLogger.getInstance().setTraceFilter(false);
+        //EhiLogger.getInstance().setTraceFilter(false);
         Connection jdbcConnection=null;
         try{
             Class driverClass = Class.forName("org.postgresql.Driver");

@@ -742,16 +742,21 @@ public class InheritanceTest {
                 {
                     // t_ili2db_attrname
                     String [][] expectedValues=new String[][] {
+                        {"StructAttr1.TopicA.StructA.name",   "aname", "topica_structa", null},
+                        {"StructAttr1.TopicA.StructAb.ab1",   "ab1", "topica_structab", null},
+                        {"StructAttr1.TopicA.ClassA.attr1",   "topica_classa_attr1",   "topica_structa",   "topica_classa"},
+                        {"StructAttr1.TopicA.ClassA.attr2",   "attr2",   "topica_classa",   null},
+                        {"StructAttr1.TopicA.ClassB.attr3",   "attr3", "topica_classb", null},
+                        {"StructAttr1.TopicA.ClassC.attr4",   "attr4", "topica_classc", null},
+                        {"StructAttr1.TopicA.ClassD.d1",   "topica_classd_d1",   "topica_structa",   "topica_classd"},
+                        {"StructAttr1.TopicA.ClassD.d2",   "d2", "topica_classd", null},
                         {"StructAttr1.TopicB.StructA.name",   "aname", "topicb_structa", null},
-                        {"StructAttr1.TopicB.ClassB.attr3",   "attr3", "topicb_classb", null},
                         {"StructAttr1.TopicB.ClassA.attr1",   "topicb_classa_attr1",   "topicb_structa",    "topicb_classa"},
                         {"StructAttr1.TopicB.ClassA.attr2",   "attr2", "topicb_classa", null},
-                        {"StructAttr1.TopicA.ClassA.attr1",   "topica_classa_attr1",   "topica_structa",   "topica_classa"},
-                        {"StructAttr1.TopicA.ClassC.attr4",   "attr4", "topica_classc", null},
-                        {"StructAttr1.TopicA.ClassB.attr3",   "attr3", "topica_classb", null},
-                        {"StructAttr1.TopicA.StructA.name",   "aname", "topica_structa", null},
-                        {"StructAttr1.TopicA.ClassA.attr2",   "attr2", "topica_classa", null},
+                        {"StructAttr1.TopicB.ClassB.attr3",   "attr3", "topicb_classb", null},
+                        {"StructAttr1.TopicB.ClassB.b1",   "topicb_classb_b1", "topicb_structa", "topicb_classb"},
                         {"StructAttr1.TopicB.ClassC.attr4",   "attr4", "topicb_classc", null}, 
+                        {"StructAttr1.TopicB.ClassC.c1",   "topicb_classc_c1", "topicb_structa", "topicb_classc"},
                     };
                     Ili2dbAssert.assertAttrNameTable(jdbcConnection,expectedValues, DBSCHEMA);
                     
@@ -759,13 +764,15 @@ public class InheritanceTest {
                 {
                     // t_ili2db_trafo
                     String [][] expectedValues=new String[][] {
-                        {"StructAttr1.TopicB.StructA", "ch.ehi.ili2db.inheritance", "newClass"},
-                        {"StructAttr1.TopicA.ClassB", "ch.ehi.ili2db.inheritance", "newClass"},
+                        {"StructAttr1.TopicA.StructA", "ch.ehi.ili2db.inheritance", "newClass"},
+                        {"StructAttr1.TopicA.StructAb", "ch.ehi.ili2db.inheritance", "newClass"},
                         {"StructAttr1.TopicA.ClassA", "ch.ehi.ili2db.inheritance", "newClass"},
+                        {"StructAttr1.TopicA.ClassB", "ch.ehi.ili2db.inheritance", "newClass"},
+                        {"StructAttr1.TopicA.ClassC", "ch.ehi.ili2db.inheritance", "newClass"},
+                        {"StructAttr1.TopicA.ClassD", "ch.ehi.ili2db.inheritance", "newClass"},
+                        {"StructAttr1.TopicB.StructA", "ch.ehi.ili2db.inheritance", "newClass"},
                         {"StructAttr1.TopicB.ClassA", "ch.ehi.ili2db.inheritance", "newClass"},
                         {"StructAttr1.TopicB.ClassB", "ch.ehi.ili2db.inheritance", "newClass"},
-                        {"StructAttr1.TopicA.StructA", "ch.ehi.ili2db.inheritance", "newClass"},
-                        {"StructAttr1.TopicA.ClassC", "ch.ehi.ili2db.inheritance", "newClass"},
                         {"StructAttr1.TopicB.ClassC", "ch.ehi.ili2db.inheritance", "newClass"},
                     };
                     Ili2dbAssert.assertTrafoTable(jdbcConnection,expectedValues, DBSCHEMA);
@@ -816,15 +823,20 @@ public class InheritanceTest {
                 {
                     // t_ili2db_attrname
                     String [][] expectedValues=new String[][] {
+                        {"StructAttr1.TopicA.StructA.name",   "aname", "topica_structa", null},
+                        {"StructAttr1.TopicA.StructAb.ab1",   "ab1", "topica_structa", null},
+                        {"StructAttr1.TopicA.ClassA.attr1",   "topica_structa_attr1",   "topica_structa", "topica_structa"},
+                        {"StructAttr1.TopicA.ClassA.attr2",   "attr2", "topica_structa", null},
+                        {"StructAttr1.TopicA.ClassB.attr3",   "attr3", "topica_structa", null},
+                        {"StructAttr1.TopicA.ClassC.attr4",   "attr4", "topica_structa", null},
+                        {"StructAttr1.TopicA.ClassD.d1",   "topica_structa_d1",   "topica_structa", "topica_structa"},
+                        {"StructAttr1.TopicA.ClassD.d2",   "d2",   "topica_structa", null},
                         {"StructAttr1.TopicB.StructA.name",  "aname", "topicb_structa", null},    
-                        {"StructAttr1.TopicA.ClassB.attr3",   "attr3", "topica_classa", null},
                         {"StructAttr1.TopicB.ClassB.attr3",   "attr3", "topicb_classb", null},
                         {"StructAttr1.TopicB.ClassA.attr1",   "topicb_classb_attr1",   "topicb_structa", "topicb_classb"},
-                        {"StructAttr1.TopicA.ClassA.attr1",   "topica_classa_attr1",   "topica_structa", "topica_classa"},
-                        {"StructAttr1.TopicA.ClassC.attr4",   "attr4", "topica_classa", null},
+                        {"StructAttr1.TopicB.ClassB.b1",   "topicb_classb_b1",   "topicb_structa", "topicb_classb"},
+                        {"StructAttr1.TopicB.ClassC.c1",   "topicb_classb_c1",   "topicb_structa", "topicb_classb"},
                         {"StructAttr1.TopicB.ClassA.attr2",   "attr2", "topicb_classb", null},
-                        {"StructAttr1.TopicA.StructA.name",   "aname", "topica_structa", null},
-                        {"StructAttr1.TopicA.ClassA.attr2",   "attr2", "topica_classa", null},
                         {"StructAttr1.TopicB.ClassC.attr4",   "attr4", "topicb_classb", null},
                     };
                     Ili2dbAssert.assertAttrNameTable(jdbcConnection,expectedValues, DBSCHEMA);
@@ -833,13 +845,15 @@ public class InheritanceTest {
                 {
                     // t_ili2db_trafo
                     String [][] expectedValues=new String[][] {
-                        {"StructAttr1.TopicB.StructA", "ch.ehi.ili2db.inheritance", "newClass"},
+                        {"StructAttr1.TopicA.StructA",  "ch.ehi.ili2db.inheritance", "newClass"},
+                        {"StructAttr1.TopicA.StructAb",  "ch.ehi.ili2db.inheritance", "superClass"},
+                        {"StructAttr1.TopicA.ClassA", "ch.ehi.ili2db.inheritance", "superClass"},
                         {"StructAttr1.TopicA.ClassB", "ch.ehi.ili2db.inheritance", "superClass"},
-                        {"StructAttr1.TopicA.ClassA", "ch.ehi.ili2db.inheritance", "newClass"},
+                        {"StructAttr1.TopicA.ClassC", "ch.ehi.ili2db.inheritance", "superClass"},
+                        {"StructAttr1.TopicA.ClassD", "ch.ehi.ili2db.inheritance", "superClass"},
+                        {"StructAttr1.TopicB.StructA", "ch.ehi.ili2db.inheritance", "newClass"},
                         {"StructAttr1.TopicB.ClassA", "ch.ehi.ili2db.inheritance", "subClass"},
                         {"StructAttr1.TopicB.ClassB", "ch.ehi.ili2db.inheritance", "newClass"},
-                        {"StructAttr1.TopicA.StructA",  "ch.ehi.ili2db.inheritance", "newClass"},
-                        {"StructAttr1.TopicA.ClassC", "ch.ehi.ili2db.inheritance", "superClass"},
                         {"StructAttr1.TopicB.ClassC", "ch.ehi.ili2db.inheritance", "superClass"},
                     };
                     Ili2dbAssert.assertTrafoTable(jdbcConnection,expectedValues, DBSCHEMA);
@@ -877,24 +891,44 @@ public class InheritanceTest {
                 {
                     // t_ili2db_attrname
                     String [][] expectedValues=new String[][] {
-                        {"StructAttr1.TopicB.ClassB.attr3",   "attr3", "topicb_classc", null},
-                        {"StructAttr1.TopicB.ClassB.attr3",   "attr3", "topicb_classb", null},
-                        {"StructAttr1.TopicA.ClassC.attr4",   "attr4", "topica_classc", null},
-                        {"StructAttr1.TopicB.ClassA.attr2",   "attr2", "topicb_classc", null},
-                        {"StructAttr1.TopicB.ClassA.attr2",   "attr2", "topicb_classb", null},
-                        {"StructAttr1.TopicB.StructA.name",   "aname", "topicb_structa", null},
-                        {"StructAttr1.TopicA.ClassA.attr1",   "topica_classb_attr1",   "topica_structa",    "topica_classb"},
-                        {"StructAttr1.TopicB.ClassA.attr1",   "topicb_classb_attr1",   "topicb_structa",    "topicb_classb"},
-                        {"StructAttr1.TopicA.ClassA.attr1",   "topica_classa_attr1",   "topica_structa",    "topica_classa"},
-                        {"StructAttr1.TopicB.ClassA.attr1",   "topicb_classc_attr1",   "topicb_structa",    "topicb_classc"},
-                        {"StructAttr1.TopicA.ClassB.attr3",   "attr3", "topica_classc", null},
-                        {"StructAttr1.TopicA.ClassB.attr3",   "attr3", "topica_classb", null}, 
-                        {"StructAttr1.TopicA.ClassA.attr2",   "attr2", "topica_classc", null},
-                        {"StructAttr1.TopicA.StructA.name",   "aname", "topica_structa", null},
-                        {"StructAttr1.TopicA.ClassA.attr2",   "attr2", "topica_classb", null}, 
-                        {"StructAttr1.TopicA.ClassA.attr2",   "attr2", "topica_classa", null}, 
-                        {"StructAttr1.TopicA.ClassA.attr1",   "topica_classc_attr1",   "topica_structa",    "topica_classc"},
-                        {"StructAttr1.TopicB.ClassC.attr4",   "attr4", "topicb_classc", null}, 
+                        {"StructAttr1.TopicA.StructA.name", "aname",   "topica_structab", null},
+                        {"StructAttr1.TopicB.ClassB.attr3", "attr3",   "topicb_classc",   null},
+                        {"StructAttr1.TopicA.ClassC.attr4", "attr4",   "topica_classc",   null},
+                        {"StructAttr1.TopicA.ClassA.attr1", "topica_classc_attr1", "topica_classd",   "topica_classc"},
+                        {"StructAttr1.TopicA.ClassA.attr1", "topica_classb_attr1", "topica_classd",   "topica_classb"},
+                        {"StructAttr1.TopicB.ClassA.attr2", "attr2",   "topicb_classc",   null},
+                        {"StructAttr1.TopicA.ClassA.attr1", "topica_classa_attr1", "topica_classd",   "topica_classa"},
+                        {"StructAttr1.TopicA.StructA.name", "aname",   "topica_classa",   null},
+                        {"StructAttr1.TopicA.StructA.name", "aname",   "topica_classc",   null},
+                        {"StructAttr1.TopicA.ClassA.attr1", "topica_classb_attr1", "topica_structa",  "topica_classb"},
+                        {"StructAttr1.TopicA.ClassA.attr1", "topica_classa_attr1", "topica_structa",  "topica_classa"},
+                        {"StructAttr1.TopicA.ClassB.attr3", "attr3",   "topica_classb",   null},
+                        {"StructAttr1.TopicA.StructA.name", "aname",   "topica_structa",  null},
+                        {"StructAttr1.TopicA.ClassA.attr2", "attr2",   "topica_classb",   null},
+                        {"StructAttr1.TopicA.ClassA.attr1", "topica_classc_attr1", "topica_structa",  "topica_classc"},
+                        {"StructAttr1.TopicB.ClassB.attr3", "attr3",   "topicb_classb",   null},
+                        {"StructAttr1.TopicA.StructAb.ab1", "ab1", "topica_structab", null},
+                        {"StructAttr1.TopicA.ClassA.attr1", "topica_classa_attr1", "topica_classa",   "topica_classa"},
+                        {"StructAttr1.TopicB.ClassA.attr2", "attr2",   "topicb_classb",   null},
+                        {"StructAttr1.TopicA.StructA.name", "aname",   "topica_classb",   null},
+                        {"StructAttr1.TopicA.ClassA.attr1", "topica_classc_attr1", "topica_classa",   "topica_classc"},
+                        {"StructAttr1.TopicB.ClassB.b1",    "topicb_classc_b1",    "topicb_structa",  "topicb_classc"},
+                        {"StructAttr1.TopicA.ClassA.attr1", "topica_classb_attr1", "topica_classa",   "topica_classb"},
+                        {"StructAttr1.TopicA.ClassD.d1",    "topica_classd_d1",    "topica_structab", "topica_classd"},
+                        {"StructAttr1.TopicA.StructA.name", "aname",   "topica_classd",   null},
+                        {"StructAttr1.TopicB.ClassB.b1",    "topicb_classb_b1",    "topicb_structa",  "topicb_classb"},
+                        {"StructAttr1.TopicB.StructA.name", "aname",   "topicb_structa",  null},
+                        {"StructAttr1.TopicA.ClassA.attr1", "topica_classc_attr1", "topica_structab", "topica_classc"},
+                        {"StructAttr1.TopicA.ClassD.d2",    "d2",  "topica_classd",   null},
+                        {"StructAttr1.TopicB.ClassA.attr1", "topicb_classb_attr1", "topicb_structa",  "topicb_classb"},
+                        {"StructAttr1.TopicB.ClassA.attr1", "topicb_classc_attr1", "topicb_structa",  "topicb_classc"},
+                        {"StructAttr1.TopicA.ClassB.attr3", "attr3",   "topica_classc",   null},
+                        {"StructAttr1.TopicB.ClassC.c1",    "topicb_classc_c1",    "topicb_structa",  "topicb_classc"},
+                        {"StructAttr1.TopicA.ClassA.attr1", "topica_classb_attr1", "topica_structab", "topica_classb"},
+                        {"StructAttr1.TopicA.ClassA.attr2", "attr2",   "topica_classc",   null},
+                        {"StructAttr1.TopicA.ClassA.attr1", "topica_classa_attr1", "topica_structab", "topica_classa"},
+                        {"StructAttr1.TopicA.ClassA.attr2", "attr2",   "topica_classa",   null},
+                        {"StructAttr1.TopicB.ClassC.attr4", "attr4",   "topicb_classc",   null}
                     };
                     Ili2dbAssert.assertAttrNameTable(jdbcConnection,expectedValues, DBSCHEMA);
                     
@@ -902,13 +936,15 @@ public class InheritanceTest {
                 {
                     // t_ili2db_trafo
                     String[][] expectedValues=new String[][] {
-                        {"StructAttr1.TopicB.StructA", "ch.ehi.ili2db.inheritance", "newAndSubClass"},
-                        {"StructAttr1.TopicA.ClassB", "ch.ehi.ili2db.inheritance", "newAndSubClass"},
+                        {"StructAttr1.TopicA.StructA",    "ch.ehi.ili2db.inheritance", "newAndSubClass"},
+                        {"StructAttr1.TopicA.StructAb",    "ch.ehi.ili2db.inheritance", "newAndSubClass"},
                         {"StructAttr1.TopicA.ClassA", "ch.ehi.ili2db.inheritance", "newAndSubClass"},
+                        {"StructAttr1.TopicA.ClassB", "ch.ehi.ili2db.inheritance", "newAndSubClass"},
+                        {"StructAttr1.TopicA.ClassC", "ch.ehi.ili2db.inheritance", "newAndSubClass"},
+                        {"StructAttr1.TopicA.ClassD", "ch.ehi.ili2db.inheritance", "newAndSubClass"},
+                        {"StructAttr1.TopicB.StructA", "ch.ehi.ili2db.inheritance", "newAndSubClass"},
                         {"StructAttr1.TopicB.ClassA", "ch.ehi.ili2db.inheritance", "subClass"},
                         {"StructAttr1.TopicB.ClassB", "ch.ehi.ili2db.inheritance", "newAndSubClass"},
-                        {"StructAttr1.TopicA.StructA",    "ch.ehi.ili2db.inheritance", "newAndSubClass"},
-                        {"StructAttr1.TopicA.ClassC", "ch.ehi.ili2db.inheritance", "newAndSubClass"},
                         {"StructAttr1.TopicB.ClassC", "ch.ehi.ili2db.inheritance", "newAndSubClass"},
                     };
                     Ili2dbAssert.assertTrafoTable(jdbcConnection,expectedValues, DBSCHEMA);
@@ -941,13 +977,6 @@ public class InheritanceTest {
 				config.setImportTid(true);
 				Ili2db.readSettingsFromDb(config);
 				Ili2db.run(config,null);
-				// column-name
-				Assert.assertTrue(stmt.execute("SELECT topica_structa.aname FROM "+DBSCHEMA+".topica_structa"));
-				{
-					ResultSet rs=stmt.getResultSet();
-					Assert.assertTrue(rs.next());
-					Assert.assertEquals("Anna",rs.getString(1));
-				}
 	        }
 		}finally{
 			if(jdbcConnection!=null){
@@ -1064,7 +1093,7 @@ public class InheritanceTest {
 		        }else if(event instanceof EndTransferEvent){
 		        }
 			 }while(!(event instanceof EndTransferEvent));
-             Assert.assertEquals(5, objs.size());
+             Assert.assertEquals(6, objs.size());
 			 {
 				 IomObject obj1 = objs.get("a1");
                  Assert.assertEquals("StructAttr1.TopicA.ClassA oid a1 {attr1 StructAttr1.TopicA.StructA {name Anna}, attr2 text2}", obj1.toString());
@@ -1077,6 +1106,10 @@ public class InheritanceTest {
 				 IomObject obj1 = objs.get("a3");
                  Assert.assertEquals("StructAttr1.TopicA.ClassC oid a3 {attr1 StructAttr1.TopicA.StructA {name Claudia}, attr2 text2, attr3 text3, attr4 text4}", obj1.toString());
 			 }
+             {
+                 IomObject obj1 = objs.get("a4");
+                 Assert.assertEquals("StructAttr1.TopicA.ClassD oid a4 {d1 StructAttr1.TopicA.StructAb {ab1 ab1, name Rolf}, d2 d2}", obj1.toString());
+             }
 			 {
 				 IomObject obj1 = objs.get("b2");
                  Assert.assertEquals("StructAttr1.TopicB.ClassB oid b2 {attr1 StructAttr1.TopicB.StructA {name Berta}, attr2 text2, attr3 text3}", obj1.toString());
@@ -1097,6 +1130,7 @@ public class InheritanceTest {
         {
             importXtfStructAttrFK_smart1();
         }
+        //EhiLogger.getInstance().setTraceFilter(false);
         Connection jdbcConnection=null;
         try{
             Class driverClass = Class.forName("org.postgresql.Driver");
@@ -1126,7 +1160,7 @@ public class InheritanceTest {
                 }else if(event instanceof EndTransferEvent){
                 }
              }while(!(event instanceof EndTransferEvent));
-             Assert.assertEquals(5, objs.size());
+             Assert.assertEquals(6, objs.size());
              {
                  IomObject obj1 = objs.get("a1");
                  Assert.assertEquals("StructAttr1.TopicA.ClassA oid a1 {attr1 StructAttr1.TopicA.StructA {name Anna}, attr2 text2}", obj1.toString());
@@ -1138,6 +1172,10 @@ public class InheritanceTest {
              {
                  IomObject obj1 = objs.get("a3");
                  Assert.assertEquals("StructAttr1.TopicA.ClassC oid a3 {attr1 StructAttr1.TopicA.StructA {name Claudia}, attr2 text2, attr3 text3, attr4 text4}", obj1.toString());
+             }
+             {
+                 IomObject obj1 = objs.get("a4");
+                 Assert.assertEquals("StructAttr1.TopicA.ClassD oid a4 {d1 StructAttr1.TopicA.StructAb {ab1 ab1, name Rolf}, d2 d2}", obj1.toString());
              }
              {
                  IomObject obj1 = objs.get("b2");
@@ -1159,6 +1197,7 @@ public class InheritanceTest {
         {
             importXtfStructAttrFK_smart2();
         }
+        //EhiLogger.getInstance().setTraceFilter(false);
         Connection jdbcConnection=null;
         try{
             Class driverClass = Class.forName("org.postgresql.Driver");
@@ -1188,7 +1227,7 @@ public class InheritanceTest {
                 }else if(event instanceof EndTransferEvent){
                 }
              }while(!(event instanceof EndTransferEvent));
-             Assert.assertEquals(5, objs.size());
+             Assert.assertEquals(6, objs.size());
              {
                  IomObject obj1 = objs.get("a1");
                  Assert.assertEquals("StructAttr1.TopicA.ClassA oid a1 {attr1 StructAttr1.TopicA.StructA {name Anna}, attr2 text2}", obj1.toString());
@@ -1200,6 +1239,10 @@ public class InheritanceTest {
              {
                  IomObject obj1 = objs.get("a3");
                  Assert.assertEquals("StructAttr1.TopicA.ClassC oid a3 {attr1 StructAttr1.TopicA.StructA {name Claudia}, attr2 text2, attr3 text3, attr4 text4}", obj1.toString());
+             }
+             {
+                 IomObject obj1 = objs.get("a4");
+                 Assert.assertEquals("StructAttr1.TopicA.ClassD oid a4 {d1 StructAttr1.TopicA.StructAb {ab1 ab1, name Rolf}, d2 d2}", obj1.toString());
              }
              {
                  IomObject obj1 = objs.get("b2");
