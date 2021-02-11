@@ -1487,24 +1487,29 @@ public class TransferToXtf {
 		
 		ret.append("SELECT "+colT_ID+","+DbNames.T_ILI_TID_COL+","+DbNames.T_TYPE_COL+" FROM (");
 		String sep="";
+        HashSet<ViewableWrapper> visitedWrappers=new HashSet<ViewableWrapper>();
 		for(ViewableWrapper wrapper:wrappers){
-			ret.append(sep);
-			ret.append("SELECT r"+i+"."+colT_ID);
-			if(hasIliTidCol || wrapper.getOid()!=null){
-				ret.append(", r"+i+"."+DbNames.T_ILI_TID_COL);
-			}else{
-				ret.append(", NULL "+DbNames.T_ILI_TID_COL);
-			}
-			if(recConv.createTypeDiscriminator() ||wrapper.includesMultipleTypes()){
-				ret.append(", r"+i+"."+DbNames.T_TYPE_COL);
-			}else{
-				ret.append(", '"+wrapper.getSqlTable().getName()+"' "+DbNames.T_TYPE_COL);
-			}
-		ret.append(" FROM ");
-			ret.append(wrapper.getSqlTable().getQName());
-			ret.append(" r"+i+"");
-			i++;
-			sep=" UNION ";
+            wrapper=wrapper.getRoot();
+            if(!visitedWrappers.contains(wrapper)) {
+                visitedWrappers.add(wrapper);
+                ret.append(sep);
+                ret.append("SELECT r"+i+"."+colT_ID);
+                if(hasIliTidCol || wrapper.hasOid()){
+                    ret.append(", r"+i+"."+DbNames.T_ILI_TID_COL);
+                }else{
+                    ret.append(", NULL "+DbNames.T_ILI_TID_COL);
+                }
+                if(recConv.createTypeDiscriminator() ||wrapper.includesMultipleTypes()){
+                    ret.append(", r"+i+"."+DbNames.T_TYPE_COL);
+                }else{
+                    ret.append(", '"+wrapper.getSqlTable().getName()+"' "+DbNames.T_TYPE_COL);
+                }
+                ret.append(" FROM ");
+                ret.append(wrapper.getSqlTable().getQName());
+                ret.append(" r"+i+"");
+                i++;
+                sep=" UNION ";
+            }
 		}
 		ret.append(") r0");
 		ret.append(" WHERE r0."+colT_ID+"=?");

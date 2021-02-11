@@ -1399,6 +1399,7 @@ public class TransferFromXtf {
 		for(ViewableWrapper wrapper:wrappers){
 		    wrapper=wrapper.getRoot();
 		    if(!visitedWrappers.contains(wrapper)) {
+		        visitedWrappers.add(wrapper);
 	            ret.append(sep);
 	            ret.append("SELECT r"+i+"."+colT_ID);
 	            if(isPg) {
