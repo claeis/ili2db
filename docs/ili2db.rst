@@ -97,6 +97,35 @@ Fehler wird aber in der Regel schon früher ausgegeben.::
   ...
   Error: ...import failed
 
+Fehlerhafte Daten
+-----------------
+Um fehlerhaften Daten zu importieren (um sie zu flicken), muss mindestens die 
+Validierung ausgeschaltet werden (``--disableValidation``). Das DB Schema muss 
+aber auch so angelegt werden, dass fehlerhafte Werte durch ``NULL`` ersetzt werden 
+können (``--sqlEnableNull``). Und die Programmlogik für den Datenimport muss die Fehler 
+tolerieren (``--skipReferenceErrors`` und ``--skipGeometryErrors``), so dass 
+z.B. eine Referenz auf ein nicht vorhandenes Objekt ignoriert wird.
+
+Um solche Daten zu importieren (um sie zu flicken)::
+	
+  java -jar ili2gpkg.jar --schemaimport --sqlEnableNull --dbfile mogis.gpkg path/to/mo.ili
+  java -jar ili2gpkg.jar --import --skipReferenceErrors --skipGeometryErrors --disableValidation --dbfile mogis.gpkg path/to/data.xtf
+
+Bei ITF (Interlis 1): Fehlerhafte AREA Attribute können für 
+den ganzen Datensatz nicht als Polygone 
+gelesen werden, weil ein Programm nicht erkennen kann, welche Linien und 
+Punkte falsch sind (Punkt und/oder Linie zu viel oder zu wenig; Linie zu kurz oder zu lang); 
+und somit nicht erkennen kann, bei welchem Polygon der Fehler ist. 
+Dass diese Daten nicht gelesen werden können, hat also nicht in erster Linie 
+mit der Validierung zu tun, sondern damit, dass aus den Linien+Punkten 
+keine Polygone gebildet werden können. Die Polygonbildung muss also 
+ausgeschaltet werden (``--skipPolygonBuilding``).
+
+Um solche Daten zu importieren (um sie zu flicken)::
+	
+  java -jar ili2gpkg.jar --schemaimport --sqlEnableNull --skipPolygonBuilding --dbfile mogis.gpkg path/to/mo.ili
+  java -jar ili2gpkg.jar --import --skipReferenceErrors --skipPolygonBuilding --skipGeometryErrors --disableValidation --dbfile mogis.gpkg path/to/data.itf
+
 
 Laufzeitanforderungen
 ---------------------
@@ -1331,6 +1360,48 @@ Für die Abbildung von Aufzählungen gibt es zwei Varianten und verschiedene Opt
 |              |                                                               |                                      | er gelöscht werden muss. Wird beim Import mit FALSE befüllt.                      |
 +--------------+---------------------------------------------------------------+--------------------------------------+-----------------------------------------------------------------------------------+
 
+INTERLIS-Metaattribute
+~~~~~~~~~~~~~~~~~~~~~~
+Einzelne Abbildungen können direkt im Modell über Metaaatribute konfiguriert werden. 
+Metaattribute stehen unmittelbar vor dem Modellelement das sie betreffen und beginnen mit ``!!@``.
+Falls der Wert (rechts von ```=```) aus mehreren durch Leerstellen getrennten Wörtern besteht, muss er mit Gänsefüsschen eingerahmt werden (```"..."```).
+
++------------------+--------------------------+-----------------------------------------------------------------------------------+
+| Modelelement     | Metaattribut             | Beschreibung                                                                      |
++==================+==========================+===================================================================================+
+| AttributeDef     | ::                       | Strukturattribute mit diesem Meta-Attribut                                        |
+|                  |                          | werden als Spalte mit dem Datentyp Array oder JSON abgebildet.                    |
+|                  |  ili2db.mapping          | D.h. es gibt keine weiteren Records in einer Hilfstabelle.                        |
+|                  |                          | Siehe auch Programm-Optionen --coalesceArray und --coalesceJson.                  |
+|                  |                          | Mögliche Werte: ARRAY, JSON                                                       |
+|                  |                          |                                                                                   |
++------------------+--------------------------+-----------------------------------------------------------------------------------+
+| ClassDef         | ::                       | Strukturen mit diesem Meta-Attribut                                               |
+|                  |                          | werden als Spalte mit dem enstprechenden Multi-Geometrie Datentyp abgebildet.     |
+|                  |  ili2db.mapping          | D.h. es gibt keine weiteren Records in einer Hilfstabelle.                        |
+|                  |                          | Mögliche Werte: MultiSurface, MultiLine, MultiPoint                               |
+|                  |                          |                                                                                   |
++------------------+--------------------------+-----------------------------------------------------------------------------------+
+| ClassDef,        | ::                       | Definiert den Anzeigetext für das entsprechende Modell-Element.                   |
+| AttributeDef,    |                          | Für Aufzählelemente ist es der Wert der Saplte dispName in der jeweiligen Tabelle |
+| EnumElement      |  ili2db.dispName         | mit den Aufzählwerten.                                                            |
+|                  |                          | Für Klassen ist es in der Tabelle t\_ili2db\_table_prop der Wert mit              |
+|                  |                          | dem Tag ch.ehi.ili2db.dispName.                                                   |
+|                  |                          | Für Attribute ist es in der Tabelle t\_ili2db\_column_prop der Wert mit           |
+|                  |                          | dem Tag ch.ehi.ili2db.dispName.                                                   |
+|                  |                          |                                                                                   |
++------------------+--------------------------+-----------------------------------------------------------------------------------+
+| ClassDef         | ::                       | Mit dem Metaattribut ili2db.oid erhält die Tabelle (die eine Klasse               |
+|                  |                          | repräsentiert, die keine Basisklasse hat) eine zusätzliche Spalte                 |
+|                  |  ili2db.oid              | T\_Ili\_Tid, wie wenn die Klasse eine OID hätte.                                  |
+|                  |                          | Siehe auch `Klassen/Strukturen`_.                                                 |
+|                  |                          |                                                                                   |
++------------------+--------------------------+-----------------------------------------------------------------------------------+
+
+Ein Modell kann beliebige weitere Metaattribute enthalten; diese werden 
+durch ili2db beim Schemaimpot in t\_ili2db\_meta\_attrs abgelegt.
+Mit Hilfe der Option ``--iliMetaAttrs`` können beliebige weitere Metaattribute
+definiert werden, ohne das Modell (die ili-Datei) zu ändern.
 
 Metadaten
 ~~~~~~~~~

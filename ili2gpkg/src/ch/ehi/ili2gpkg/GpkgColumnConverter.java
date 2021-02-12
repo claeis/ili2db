@@ -75,6 +75,10 @@ public class GpkgColumnConverter extends AbstractWKBColumnConverter {
 	public String getInsertValueWrapperCoord(String wkfValue,int srid) {
 		return wkfValue;
 	}
+    @Override
+    public String getInsertValueWrapperMultiCoord(String wkfValue,int srid) {
+        return wkfValue;
+    }
 	@Override
 	public String getInsertValueWrapperPolyline(String wkfValue,int srid) {
 		return wkfValue;

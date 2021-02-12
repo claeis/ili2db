@@ -99,7 +99,7 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 			ret.append(", r0."+DbNames.T_TYPE_COL);
 		}
 		if(structWrapper0==null){
-			if(exportTid || classWrapper.getOid()!=null){
+			if((exportTid && !(classWrapper.getViewable() instanceof AssociationDef)) || classWrapper.hasOid()){
 				ret.append(", r0."+DbNames.T_ILI_TID_COL);
 			}
 		}
@@ -384,27 +384,25 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 		}
 		String sqlIliTid=null;
 		if(structWrapper==null){
-			if(!aclass.isStructure()){
-				if(exportTid || aclass.getOid()!=null){
-				    if(iliClassForSelect instanceof AssociationDef && !((AssociationDef)iliClassForXtf).isIdentifiable()) {
-				        ; // no TID; standalone association without TID
-				    }else {
-	                    sqlIliTid=rs.getString(valuei);
-	                    sqlid2xtfid.putSqlid2Xtfid(aclass.getSqlTablename(),sqlid, sqlIliTid);
-				    }
-					valuei++;
-				}else{
-	                if(iliClassForSelect instanceof AssociationDef && !((AssociationDef)iliClassForXtf).isIdentifiable()) {
-	                    ; // no TID; standalone association without TID
-	                }else {
-	                    sqlIliTid=Long.toString(sqlid);
-	                    sqlid2xtfid.putSqlid2Xtfid(aclass.getSqlTablename(),sqlid, sqlIliTid);
-	                }
-				}
-			}
+            if((exportTid && !(aclass.getViewable() instanceof AssociationDef)) || aclass.hasOid()){
+                if(iliClassForSelect instanceof AssociationDef && !((AssociationDef)iliClassForXtf).isIdentifiable()) {
+                    ; // no TID; standalone association without TID
+                }else {
+                    sqlIliTid=rs.getString(valuei);
+                    sqlid2xtfid.putSqlid2Xtfid(aclass.getSqlTablename(),sqlid, sqlIliTid);
+                }
+                valuei++;
+            }else{
+                if(iliClassForSelect instanceof AssociationDef && !((AssociationDef)iliClassForXtf).isIdentifiable()) {
+                    ; // no TID; standalone association without TID
+                }else {
+                    sqlIliTid=Long.toString(sqlid);
+                    sqlid2xtfid.putSqlid2Xtfid(aclass.getSqlTablename(),sqlid, sqlIliTid);
+                }
+            }
 		}
 		if(structWrapper==null){
-			if(!aclass.isStructure()){
+            if(!(iliClassForSelect instanceof AssociationDef && !((AssociationDef)iliClassForXtf).isIdentifiable())) {
 				iomObj=new Iom_jObject(iliClassForXtf.getScopedName(null),sqlIliTid);
 			}else{
 				iomObj=new Iom_jObject(iliClassForXtf.getScopedName(null),null);
@@ -829,7 +827,7 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
                         }
 					}else{
 		                if(classAttr==null) {
-		                    valuei++;
+
 		                }else {
 	                        // enque iomObj as parent
 	                        structQueue.add(new StructWrapper(sqlid,tableAttr,iomObj,table));

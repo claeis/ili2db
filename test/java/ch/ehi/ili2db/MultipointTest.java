@@ -7,6 +7,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.HashMap;
 
@@ -30,33 +31,11 @@ import ch.interlis.iox.ObjectEvent;
 import ch.interlis.iox.StartBasketEvent;
 import ch.interlis.iox.StartTransferEvent;
 
-//-Ddburl=jdbc:postgresql:dbname -Ddbusr=usrname -Ddbpwd=1234
-public class MultipointTest {
-	private static final String DBSCHEMA = "MultiPoint";
-	String dburl=System.getProperty("dburl"); 
-	String dbuser=System.getProperty("dbusr");
-	String dbpwd=System.getProperty("dbpwd"); 
-	Connection jdbcConnection=null;
-	Statement stmt=null;
-
-	public Config initConfig(String xtfFilename,String dbschema,String logfile) {
-		Config config=new Config();
-		new ch.ehi.ili2pg.PgMain().initConfig(config);
-		config.setDburl(dburl);
-		config.setDbusr(dbuser);
-		config.setDbpwd(dbpwd);
-		if(dbschema!=null){
-			config.setDbschema(dbschema);
-		}
-		if(logfile!=null){
-			config.setLogfile(logfile);
-		}
-		config.setXtffile(xtfFilename);
-		if(xtfFilename!=null && Ili2db.isItfFilename(xtfFilename)){
-			config.setItfTransferfile(true);
-		}
-		return config;
-	}
+public abstract class MultipointTest {
+    protected static final String TEST_OUT="test/data/MultiPoint/";
+    
+    protected AbstractTestSetup setup=createTestSetup();
+    protected abstract AbstractTestSetup createTestSetup() ;
 	
 	@Test
 	public void importXtfSmartCustom() throws Exception
@@ -64,33 +43,28 @@ public class MultipointTest {
 		//EhiLogger.getInstance().setTraceFilter(false);
 		Connection jdbcConnection=null;
 		try{
-		    Class driverClass = Class.forName("org.postgresql.Driver");
-	        jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
-	        stmt=jdbcConnection.createStatement();
-			stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");        
+            setup.resetDb();
 
-			File data=new File("test/data/MultiPoint/MultiPoint2a.xtf");
-			Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+			File data=new File(TEST_OUT,"MultiPoint2a.xtf");
+			Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
 			config.setFunction(Config.FC_IMPORT);
 	        config.setDoImplicitSchemaImport(true);
-			config.setCreateFk(config.CREATE_FK_YES);
+			config.setCreateFk(Config.CREATE_FK_YES);
+            config.setImportTid(true);
 			config.setTidHandling(Config.TID_HANDLING_PROPERTY);
-			config.setBasketHandling(config.BASKET_HANDLING_READWRITE);
+			config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
 			config.setCatalogueRefTrafo(null);
 			config.setMultiSurfaceTrafo(null);
 			config.setMultiLineTrafo(null);
-			config.setMultiPointTrafo(config.MULTIPOINT_TRAFO_COALESCE);
+			config.setMultiPointTrafo(Config.MULTIPOINT_TRAFO_COALESCE);
 			config.setMultilingualTrafo(null);
 			config.setInheritanceTrafo(null);
 			Ili2db.readSettingsFromDb(config);
 			Ili2db.run(config,null);
 			// assertions
-			ResultSet rs = stmt.executeQuery("SELECT st_asewkt(geom) FROM multipoint.classa1;");
-			ResultSetMetaData rsmd=rs.getMetaData();
-			assertEquals(1, rsmd.getColumnCount());
-			while(rs.next()){
-			  	assertEquals("SRID=21781;MULTIPOINT(600030 200020,600015 200005)", rs.getObject(1));
-			}
+            jdbcConnection = setup.createConnection();
+            Statement stmt=jdbcConnection.createStatement();
+			importXtfSmartCustom_assert_classa1(stmt);
 		}catch(Exception e) {
 			throw new IoxException(e);
 		}finally{
@@ -99,22 +73,23 @@ public class MultipointTest {
 			}
 		}
 	}
+
+    protected void importXtfSmartCustom_assert_classa1(Statement stmt) throws Exception {
+        ResultSet rs = stmt.executeQuery("SELECT st_asewkt(geom) FROM "+setup.prefixName("classa1")+";");
+        while(rs.next()){
+          	assertEquals("SRID=21781;MULTIPOINT(600030 200020,600015 200005)", rs.getObject(1));
+        }
+    }
 	
 	@Test
 	public void exportXtfSmartCustom() throws Exception
 	{
-		Connection jdbcConnection=null;
+	    {
+	        importXtfSmartCustom();
+	    }
 		try{
-		    Class driverClass = Class.forName("org.postgresql.Driver");
-	        jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
-	        stmt=jdbcConnection.createStatement();
-	        
-	        stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");        
-	        DbUtility.executeSqlScript(jdbcConnection, new java.io.FileReader("test/data/MultiPoint/CreateTableMultiPoint2a.sql"));
-	        DbUtility.executeSqlScript(jdbcConnection, new java.io.FileReader("test/data/MultiPoint/InsertIntoTableMultiPoint2a.sql"));
-			
-	        File data=new File("test/data/MultiPoint/MultiPoint2a-out.xtf");
-			Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+	        File data=new File(TEST_OUT,"MultiPoint2a-out.xtf");
+			Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
 			config.setModels("MultiPoint2");
 			config.setFunction(Config.FC_EXPORT);
 			config.setExportTid(true);
@@ -157,9 +132,6 @@ public class MultipointTest {
 		}catch(Exception e) {
 			throw new IoxException(e);
 		}finally{
-			if(jdbcConnection!=null){
-				jdbcConnection.close();
-			}
 		}
 	}
 }

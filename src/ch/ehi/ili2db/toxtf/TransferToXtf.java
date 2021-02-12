@@ -1487,24 +1487,29 @@ public class TransferToXtf {
 		
 		ret.append("SELECT "+colT_ID+","+DbNames.T_ILI_TID_COL+","+DbNames.T_TYPE_COL+" FROM (");
 		String sep="";
+        HashSet<ViewableWrapper> visitedWrappers=new HashSet<ViewableWrapper>();
 		for(ViewableWrapper wrapper:wrappers){
-			ret.append(sep);
-			ret.append("SELECT r"+i+"."+colT_ID);
-			if(hasIliTidCol || wrapper.getOid()!=null){
-				ret.append(", r"+i+"."+DbNames.T_ILI_TID_COL);
-			}else{
-				ret.append(", NULL "+DbNames.T_ILI_TID_COL);
-			}
-			if(recConv.createTypeDiscriminator() ||wrapper.includesMultipleTypes()){
-				ret.append(", r"+i+"."+DbNames.T_TYPE_COL);
-			}else{
-				ret.append(", '"+wrapper.getSqlTable().getName()+"' "+DbNames.T_TYPE_COL);
-			}
-		ret.append(" FROM ");
-			ret.append(wrapper.getSqlTable().getQName());
-			ret.append(" r"+i+"");
-			i++;
-			sep=" UNION ";
+            wrapper=wrapper.getRoot();
+            if(!visitedWrappers.contains(wrapper)) {
+                visitedWrappers.add(wrapper);
+                ret.append(sep);
+                ret.append("SELECT r"+i+"."+colT_ID);
+                if(hasIliTidCol || wrapper.hasOid()){
+                    ret.append(", r"+i+"."+DbNames.T_ILI_TID_COL);
+                }else{
+                    ret.append(", NULL "+DbNames.T_ILI_TID_COL);
+                }
+                if(recConv.createTypeDiscriminator() ||wrapper.includesMultipleTypes()){
+                    ret.append(", r"+i+"."+DbNames.T_TYPE_COL);
+                }else{
+                    ret.append(", '"+wrapper.getSqlTable().getName()+"' "+DbNames.T_TYPE_COL);
+                }
+                ret.append(" FROM ");
+                ret.append(wrapper.getSqlTable().getQName());
+                ret.append(" r"+i+"");
+                i++;
+                sep=" UNION ";
+            }
 		}
 		ret.append(") r0");
 		ret.append(" WHERE r0."+colT_ID+"=?");
@@ -1552,30 +1557,33 @@ public class TransferToXtf {
 		int tabidx=0;
 		String subSelectSep="";
 		for(ViewableWrapper root : recConv.getStructWrappers((Table)aclass)){
-			tabidx++;
-			String tabalias="r"+tabidx;
-			ret.append(subSelectSep);
-			ret.append("SELECT ");
-			ret.append(tabalias+"."+colT_ID);
-			if(createTypeDiscriminator || root.includesMultipleTypes()){
-				ret.append(", "+tabalias+"."+DbNames.T_TYPE_COL);
-			}else{
-				ret.append(",'"+root.getSqlTablename()+"' AS "+DbNames.T_TYPE_COL);
-				
-			}
-			ret.append(","+tabalias+"."+DbNames.T_SEQ_COL);
-			ret.append(" FROM ");
-			ret.append(recConv.getSqlType(root.getViewable()));
-			ret.append(" "+tabalias);
-			if(wrapper!=null){
-				if(createGenericStructRef){
-					ret.append(" WHERE "+tabalias+"."+DbNames.T_PARENT_ID_COL+"="+wrapper.getParentSqlId()+" AND "+tabalias+"."+DbNames.T_PARENT_ATTR_COL+"='"
-							+ili2sqlName.mapIliAttributeDef(wrapper.getParentAttr(),null,recConv.getSqlType(wrapper.getParentTable().getViewable()).getName(),null));
-				}else{
-					ret.append(" WHERE "+tabalias+"."+ili2sqlName.mapIliAttributeDefReverse(wrapper.getParentAttr(),recConv.getSqlType(root.getViewable()).getName(),recConv.getSqlType(wrapper.getParentTable().getViewable()).getName())+"="+wrapper.getParentSqlId());
-				}
-			}
-			subSelectSep=" UNION ";
+		    // root might be a wrapper of a class if this is a inheritance hierarchy where a struct is extended to a class
+		    if(root.isStructure()) {
+	            tabidx++;
+	            String tabalias="r"+tabidx;
+	            ret.append(subSelectSep);
+	            ret.append("SELECT ");
+	            ret.append(tabalias+"."+colT_ID);
+	            if(createTypeDiscriminator || root.includesMultipleTypes()){
+	                ret.append(", "+tabalias+"."+DbNames.T_TYPE_COL);
+	            }else{
+	                ret.append(",'"+root.getSqlTablename()+"' AS "+DbNames.T_TYPE_COL);
+	                
+	            }
+	            ret.append(","+tabalias+"."+DbNames.T_SEQ_COL);
+	            ret.append(" FROM ");
+	            ret.append(recConv.getSqlType(root.getViewable()));
+	            ret.append(" "+tabalias);
+	            if(wrapper!=null){
+	                if(createGenericStructRef){
+	                    ret.append(" WHERE "+tabalias+"."+DbNames.T_PARENT_ID_COL+"="+wrapper.getParentSqlId()+" AND "+tabalias+"."+DbNames.T_PARENT_ATTR_COL+"='"
+	                            +ili2sqlName.mapIliAttributeDef(wrapper.getParentAttr(),null,recConv.getSqlType(wrapper.getParentTable().getViewable()).getName(),null));
+	                }else{
+	                    ret.append(" WHERE "+tabalias+"."+ili2sqlName.mapIliAttributeDefReverse(wrapper.getParentAttr(),recConv.getSqlType(root.getViewable()).getName(),recConv.getSqlType(wrapper.getParentTable().getViewable()).getName())+"="+wrapper.getParentSqlId());
+	                }
+	            }
+	            subSelectSep=" UNION ";
+		    }
 		}
 		ret.append(" ) r0 ORDER BY "+DbNames.T_SEQ_COL+" ASC");
 

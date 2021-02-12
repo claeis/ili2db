@@ -143,10 +143,10 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 				// if class
 				if(structEle0==null){
 					if(!updateObj){
-						if(!aclass.isStructure()){
-							if(importTid || aclass.getOid()!=null){
+						if(iomClass instanceof Table && ((Table) iomClass).isIdentifiable()){ // concrete object has a tid
+							if((importTid && !(aclass.getViewable() instanceof AssociationDef)) || aclass.hasOid()){
 								// import TID from transfer file
-								if(AbstractRecordConverter.isUuidOid(td, aclass.getOid())){
+								if(isUuidOid(td,aclass.getOid())){
 									 Object toInsertUUID = geomConv.fromIomUuid(iomObj.getobjectoid());
 									 ps.setObject(valuei, toInsertUUID);
 								}else{
@@ -391,7 +391,7 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 				// if Class
 				if(structEle0==null){
 					if(!isUpdate){
-						if(importTid || aclass.getOid()!=null){
+						if((importTid && !(aclass.getViewable() instanceof AssociationDef))|| aclass.hasOid()){
 							ret.append(sep);
 							ret.append(DbNames.T_ILI_TID_COL);
 							values.append(",?");

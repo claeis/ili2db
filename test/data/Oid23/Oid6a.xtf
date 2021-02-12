@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?><TRANSFER xmlns="http://www.interlis.ch/INTERLIS2.3">
+<HEADERSECTION SENDER="ili2pg-2.4.0-20151123" VERSION="2.3"><MODELS><MODEL NAME="Oid6" VERSION="2015-12-03" URI="mailto:ce@eisenhutinformatik.ch"></MODEL></MODELS></HEADERSECTION>
+<DATASECTION>
+<Oid6.TestA BID="Oid6.TestA">
+<Oid6.TestA.ClassA1 TID="c34c86ec-2a75-4a89-a194-f9ebc422f8bc">
+	<a1>a1</a1>
+</Oid6.TestA.ClassA1>
+<Oid6.TestA.ClassA1b TID="81887a1c-257e-45c2-8c8c-c05ddc6c3c38">
+	<a1b>a1b</a1b>
+</Oid6.TestA.ClassA1b>
+<Oid6.TestA.ClassB1 TID="o1">
+	<b1>b1</b1>
+</Oid6.TestA.ClassB1>
+<Oid6.TestA.ClassB1b TID="81fc3941-01ec-4c51-b1ba-46b6295d9b4e">
+	<b1b>b1b</b1b>
+</Oid6.TestA.ClassB1b>
+<Oid6.TestA.ClassC1b TID="9088acab-eaea-4b1e-80a6-80b7cb98005d">
+	<c1b>c1b</c1b>
+</Oid6.TestA.ClassC1b>
+<Oid6.TestA.ClassD1 TID="d1">
+	<d1>d1</d1>
+</Oid6.TestA.ClassD1>
+<Oid6.TestA.ClassD1b TID="d1b">
+	<d1b>d1b</d1b>
+</Oid6.TestA.ClassD1b>
+<Oid6.TestA.ClassE1b TID="e1b">
+	<e1b>e1</e1b>
+</Oid6.TestA.ClassE1b>
+</Oid6.TestA>
+</DATASECTION>
+</TRANSFER>

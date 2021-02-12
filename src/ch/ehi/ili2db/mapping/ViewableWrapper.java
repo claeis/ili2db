@@ -96,15 +96,42 @@ public class ViewableWrapper {
 	public boolean isStructure() {
 		return (viewable instanceof Table) && !((Table)viewable).isIdentifiable();
 	}
+    public boolean hasOid() {
+        if(isSecondaryTable()){
+            return false;
+        }
+        Viewable def=getViewable();
+        if(!(def instanceof AbstractClassDef)){
+            return false;
+        }
+        AbstractClassDef aclass=(AbstractClassDef) def;
+        if(aclass.getOid()!=null){
+            return true;
+        }
+        if(Ili2cUtility.getOidDomainFromMetaAttr(aclass)!=null) {
+           return  true;
+        }
+        HashSet<Domain> ret=new HashSet<Domain>();
+        for(Object exto : aclass.getExtensions()){
+            AbstractClassDef ext=(AbstractClassDef) exto;
+            if(ext.getOid()!=null){
+                ret.add(ext.getOid());
+            }
+            if(Ili2cUtility.getOidDomainFromMetaAttr(ext)!=null) {
+                ret.add(Ili2cUtility.getOidDomainFromMetaAttr(ext));
+            }
+        }
+        if(ret.size()==0) {
+            return false;
+        }
+        return true;
+    }
 	public Domain getOid() {
 		if(isSecondaryTable()){
 			return null;
 		}
 		Viewable def=getViewable();
 		if(!(def instanceof AbstractClassDef)){
-			return null;
-		}
-		if((def instanceof Table) && !((Table)def).isIdentifiable()){
 			return null;
 		}
 		AbstractClassDef aclass=(AbstractClassDef) def;
@@ -114,16 +141,23 @@ public class ViewableWrapper {
 		if(Ili2cUtility.getOidDomainFromMetaAttr(aclass)!=null) {
 		   return  Ili2cUtility.getOidDomainFromMetaAttr(aclass);
 		}
+        HashSet<Domain> ret=new HashSet<Domain>();
 		for(Object exto : aclass.getExtensions()){
 			AbstractClassDef ext=(AbstractClassDef) exto;
 			if(ext.getOid()!=null){
-				return ext.getOid();
-			}
-	        if(Ili2cUtility.getOidDomainFromMetaAttr(ext)!=null) {
-	            return  Ili2cUtility.getOidDomainFromMetaAttr(ext);
+				ret.add(ext.getOid());
+			}else if(Ili2cUtility.getOidDomainFromMetaAttr(ext)!=null) {
+	            ret.add(Ili2cUtility.getOidDomainFromMetaAttr(ext));
+			}else if(ext.isAbstract()) {
+			    // skip (no objects for abstract classes)
+	        }else if(ext instanceof Table && ((Table) ext).isIdentifiable()) {
+	            ret.add(null);
 	        }
 		}
-		return null;
+		if(ret.size()!=1) {
+		    return null;
+		}
+		return ret.iterator().next();
 	}
 	public boolean includesMultipleTypes() {
 		return incMultipleTypes;
@@ -134,6 +168,15 @@ public class ViewableWrapper {
 	public ViewableWrapper getExtending() {
 		return base;
 	}
+    public ViewableWrapper getRoot() {
+        ViewableWrapper root0=this;
+        ViewableWrapper root1=root0.getExtending();
+        while(root1!=null) {
+            root0=root1;
+            root1=root0.getExtending();
+        }
+        return root0;
+    }
 	public void setExtending(ViewableWrapper base1) {
 		base=base1;
 	}

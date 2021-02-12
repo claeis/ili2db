@@ -1,0 +1,63 @@
+INTERLIS 2.3;
+
+MODEL Oid6
+  AT "mailto:ce@eisenhutinformatik.ch" VERSION "2021-02-07" =
+  
+  TOPIC TestA =
+
+    STRUCTURE StructA0 =
+    	a0 : TEXT*20;
+    END StructA0;
+    CLASS ClassA1 EXTENDS StructA0 =
+    	OID AS INTERLIS.UUIDOID;
+    	a1 : TEXT*20;
+    END ClassA1;
+    CLASS ClassA1b EXTENDS ClassA1 =
+    	a1b : TEXT*20;
+    END ClassA1b;
+    
+    STRUCTURE StructB0 =
+    	b0 : TEXT*20;
+    END StructB0;
+    CLASS ClassB1 EXTENDS StructB0 =
+    	b1 : TEXT*20;
+    END ClassB1;
+    CLASS ClassB1b EXTENDS ClassB1=
+    	OID AS INTERLIS.UUIDOID;
+    	b1b : TEXT*20;
+    END ClassB1b;
+
+    STRUCTURE StructC0 =
+    	c0 : TEXT*20;
+    END StructC0;
+    CLASS ClassC1 (ABSTRACT) EXTENDS StructC0 =
+    	c1 : TEXT*20;
+    END ClassC1;
+    CLASS ClassC1b EXTENDS ClassC1=
+    	OID AS INTERLIS.UUIDOID;
+    	c1b : TEXT*20;
+    END ClassC1b;
+
+    STRUCTURE StructD0 =
+    	d0 : TEXT*20;
+    END StructD0;
+    CLASS ClassD1 EXTENDS StructD0 =
+    	d1 : TEXT*20;
+    END ClassD1;
+    CLASS ClassD1b EXTENDS ClassD1 =
+    	d1b : TEXT*20;
+    END ClassD1b;
+
+    STRUCTURE StructE0 =
+    	e0 : TEXT*20;
+    END StructE0;
+    CLASS ClassE1 (ABSTRACT) EXTENDS StructE0 =
+    	e1 : TEXT*20;
+    END ClassE1;
+    CLASS ClassE1b EXTENDS ClassE1 =
+    	e1b : TEXT*20;
+    END ClassE1b;
+    
+  END TestA;
+  
+END Oid6.

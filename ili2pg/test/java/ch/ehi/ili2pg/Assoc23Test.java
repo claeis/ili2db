@@ -7,12 +7,15 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.HashMap;
 import org.junit.Assert;
 import org.junit.Test;
 
 import ch.ehi.basics.logging.EhiLogger;
+import ch.ehi.basics.logging.LogEvent;
 import ch.ehi.ili2db.Ili2dbAssert;
+import ch.ehi.ili2db.LogCollector;
 import ch.ehi.ili2db.base.DbNames;
 import ch.ehi.ili2db.base.Ili2db;
 import ch.ehi.ili2db.base.Ili2dbException;
@@ -30,10 +33,8 @@ import ch.interlis.iox.StartTransferEvent;
 public class Assoc23Test {
 	
 	private static final String DBSCHEMA = "Assoc23";
-	private static final String TEST_OUT="test/data/Assoc23/";
+	private static final String TEST_DATA_DIR="test/data/Assoc23/";
     private static final String EXTREFFORWARD = "ExtRefForward";
-	Connection jdbcConnection=null;
-	Statement stmt=null;
 	
 	String dburl=System.getProperty("dburl"); 
 	String dbuser=System.getProperty("dbusr");
@@ -59,17 +60,17 @@ public class Assoc23Test {
 	}
 	
     @Test
-    public void importIli_1toN_WithAttr_NewClass() throws Exception
+    public void importIli_1toN_WithAttr_Smart0() throws Exception
     {
         //EhiLogger.getInstance().setTraceFilter(false);
         Connection jdbcConnection=null;
         try{
             Class driverClass = Class.forName("org.postgresql.Driver");
             jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
-            stmt=jdbcConnection.createStatement();
+            Statement stmt=jdbcConnection.createStatement();
             stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");
             {
-                File data=new File(TEST_OUT,"Assoc4.ili");
+                File data=new File(TEST_DATA_DIR,"Assoc4.ili");
                 Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
                 config.setFunction(Config.FC_SCHEMAIMPORT);
                 config.setCreateFk(Config.CREATE_FK_YES);
@@ -123,10 +124,10 @@ public class Assoc23Test {
         try{
             Class driverClass = Class.forName("org.postgresql.Driver");
             jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
-            stmt=jdbcConnection.createStatement();
+            Statement stmt=jdbcConnection.createStatement();
             stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");
             {
-                File data=new File(TEST_OUT,"Assoc4.ili");
+                File data=new File(TEST_DATA_DIR,"Assoc4.ili");
                 Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
                 config.setFunction(Config.FC_SCHEMAIMPORT);
                 config.setCreateFk(Config.CREATE_FK_YES);
@@ -180,10 +181,10 @@ public class Assoc23Test {
         try{
             Class driverClass = Class.forName("org.postgresql.Driver");
             jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
-            stmt=jdbcConnection.createStatement();
+            Statement stmt=jdbcConnection.createStatement();
             stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");
             {
-                File data=new File(TEST_OUT,"Assoc4.ili");
+                File data=new File(TEST_DATA_DIR,"Assoc4.ili");
                 Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
                 config.setFunction(Config.FC_SCHEMAIMPORT);
                 config.setCreateFk(Config.CREATE_FK_YES);
@@ -242,17 +243,17 @@ public class Assoc23Test {
     }
     
     @Test
-    public void importXtf_1toN_WithAttr_NewClass() throws Exception
+    public void importXtf_1toN_WithAttr_Smart0() throws Exception
     {
         //EhiLogger.getInstance().setTraceFilter(false);
         Connection jdbcConnection=null;
         try{
             Class driverClass = Class.forName("org.postgresql.Driver");
             jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
-            stmt=jdbcConnection.createStatement();
+            Statement stmt=jdbcConnection.createStatement();
             stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");
             {
-                File data=new File(TEST_OUT,"Assoc4a.xtf");
+                File data=new File(TEST_DATA_DIR,"Assoc4a.xtf");
                 Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
                 config.setFunction(Config.FC_IMPORT);
                 config.setDoImplicitSchemaImport(true);
@@ -324,10 +325,10 @@ public class Assoc23Test {
         try{
             Class driverClass = Class.forName("org.postgresql.Driver");
             jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
-            stmt=jdbcConnection.createStatement();
+            Statement stmt=jdbcConnection.createStatement();
             stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");
             {
-                File data=new File(TEST_OUT,"Assoc4a.xtf");
+                File data=new File(TEST_DATA_DIR,"Assoc4a.xtf");
                 Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
                 config.setFunction(Config.FC_IMPORT);
                 config.setDoImplicitSchemaImport(true);
@@ -396,10 +397,10 @@ public class Assoc23Test {
         try{
             Class driverClass = Class.forName("org.postgresql.Driver");
             jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
-            stmt=jdbcConnection.createStatement();
+            Statement stmt=jdbcConnection.createStatement();
             stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");
             {
-                File data=new File(TEST_OUT,"Assoc4a.xtf");
+                File data=new File(TEST_DATA_DIR,"Assoc4a.xtf");
                 Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
                 config.setFunction(Config.FC_IMPORT);
                 config.setDoImplicitSchemaImport(true);
@@ -458,17 +459,17 @@ public class Assoc23Test {
         }
     }
 	@Test
-	public void importXtfRefBackward() throws Exception
+	public void importXtfRefBackward_Smart0() throws Exception
 	{
 		//EhiLogger.getInstance().setTraceFilter(false);
 		Connection jdbcConnection=null;
 		try{
 		    Class driverClass = Class.forName("org.postgresql.Driver");
 	        jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
-	        stmt=jdbcConnection.createStatement();
+	        Statement stmt = jdbcConnection.createStatement();
 			stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");
 			{
-				File data=new File(TEST_OUT,"Assoc1a.xtf");
+				File data=new File(TEST_DATA_DIR,"Assoc1a.xtf");
 	    		Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 	    		config.setFunction(Config.FC_IMPORT);
 	            config.setDoImplicitSchemaImport(true);
@@ -491,17 +492,17 @@ public class Assoc23Test {
 	}
 	
 	@Test
-	public void importXtfRefForward() throws Exception
+	public void importXtfRefForward_Smart0() throws Exception
 	{
 		//EhiLogger.getInstance().setTraceFilter(false);
 		Connection jdbcConnection=null;
 		try{
 		    Class driverClass = Class.forName("org.postgresql.Driver");
 	        jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
-	        stmt=jdbcConnection.createStatement();
+	        Statement stmt = jdbcConnection.createStatement();
 			stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");
 			{
-				File data=new File(TEST_OUT,"Assoc1b.xtf");
+				File data=new File(TEST_DATA_DIR,"Assoc1b.xtf");
 	    		Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 	    		config.setFunction(Config.FC_IMPORT);
 	            config.setDoImplicitSchemaImport(true);
@@ -524,17 +525,20 @@ public class Assoc23Test {
 	}
 	
 	@Test
-	public void importXtfRefUnkownFail() throws Exception
+	public void importXtfRefUnkownFail_Smart0() throws Exception
 	{
 		//EhiLogger.getInstance().setTraceFilter(false);
 		Connection jdbcConnection=null;
 		try{
 		    Class driverClass = Class.forName("org.postgresql.Driver");
 	        jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
-	        stmt=jdbcConnection.createStatement();
+	        Statement stmt=jdbcConnection.createStatement();
 			stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");
 			{
-				File data=new File(TEST_OUT,"Assoc1z.xtf");
+	            LogCollector logCollector = new LogCollector();
+	            EhiLogger.getInstance().addListener(logCollector);
+
+				File data=new File(TEST_DATA_DIR,"Assoc1z.xtf");
 	    		Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 	    		config.setFunction(Config.FC_IMPORT);
 	            config.setDoImplicitSchemaImport(true);
@@ -545,12 +549,24 @@ public class Assoc23Test {
 	    		config.setMultiSurfaceTrafo(null);
 	    		config.setMultilingualTrafo(null);
 	    		config.setInheritanceTrafo(null);
+	    		config.setValidation(false);
 	    		Ili2db.readSettingsFromDb(config);
 	    		try{
 		    		Ili2db.run(config,null);
 		    		Assert.fail();
 	    		}catch(Ili2dbException ex){
-	    			
+                    ArrayList<String> errorTxt = new ArrayList<String>();
+                    errorTxt.add("unknown referenced object Assoc1.Test.ClassA1 TID a1x referenced from Assoc1.Test.a2b1 TID a1x:b1");
+                    errorTxt.add("unknown referenced object Assoc1.Test.ClassA2 TID a2x referenced from Assoc1.Test.ClassB2 TID b2");
+                    errorTxt.add("unknown referenced object Assoc1.Test.ClassB3 TID b3x referenced from Assoc1.Test.ClassA3 TID a3");
+                    errorTxt.add("failed to transfer data from file to db");
+                    int counter = 0;
+                    for (LogEvent event : logCollector.getErrs()) {
+                        if (errorTxt.contains(event.getEventMsg()) ){
+                            counter++;
+                        }
+                    }
+                    Assert.assertEquals(4, counter);
 	    		}
 			}
 		}finally{
@@ -559,19 +575,56 @@ public class Assoc23Test {
 			}
 		}
 	}
+    @Test
+    public void importXtfRefUnkownSkipErrors_Smart0() throws Exception
+    {
+        //EhiLogger.getInstance().setTraceFilter(false);
+        Connection jdbcConnection=null;
+        try{
+            Class driverClass = Class.forName("org.postgresql.Driver");
+            jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
+            Statement stmt=jdbcConnection.createStatement();
+            stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");
+            {
+                LogCollector logCollector = new LogCollector();
+                EhiLogger.getInstance().addListener(logCollector);
+
+                File data=new File(TEST_DATA_DIR,"Assoc1z.xtf");
+                Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+                config.setFunction(Config.FC_IMPORT);
+                config.setDoImplicitSchemaImport(true);
+                config.setCreateFk(Config.CREATE_FK_YES);
+                config.setTidHandling(Config.TID_HANDLING_PROPERTY);
+                config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
+                config.setCatalogueRefTrafo(null);
+                config.setMultiSurfaceTrafo(null);
+                config.setMultilingualTrafo(null);
+                config.setInheritanceTrafo(null);
+                config.setValidation(false);
+                config.setSkipReferenceErrors(true);
+                config.setSqlNull(Config.SQL_NULL_ENABLE);
+                Ili2db.readSettingsFromDb(config);
+                Ili2db.run(config,null);
+            }
+        }finally{
+            if(jdbcConnection!=null){
+                jdbcConnection.close();
+            }
+        }
+    }
 	
 	@Test
-	public void importXtfExtRefBackward() throws Exception
+	public void importXtfExtRefBackward_Smart0() throws Exception
 	{
 		//EhiLogger.getInstance().setTraceFilter(false);
 		Connection jdbcConnection=null;
 		try{
 		    Class driverClass = Class.forName("org.postgresql.Driver");
 	        jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
-	        stmt=jdbcConnection.createStatement();
+	        Statement stmt=jdbcConnection.createStatement();
 			stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");
 			{
-				File data=new File(TEST_OUT,"Assoc2a.xtf");
+				File data=new File(TEST_DATA_DIR,"Assoc2a.xtf");
 	    		Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 	    		config.setFunction(Config.FC_IMPORT);
 	            config.setDoImplicitSchemaImport(true);
@@ -594,18 +647,18 @@ public class Assoc23Test {
 	}
 	
     @Test
-    public void importIliExtFileRef() throws Exception
+    public void importIliExtRef_Smart0() throws Exception
     {
         //EhiLogger.getInstance().setTraceFilter(false);
         Connection jdbcConnection=null;
         try{
             Class driverClass = Class.forName("org.postgresql.Driver");
             jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
-            stmt=jdbcConnection.createStatement();
+            Statement stmt=jdbcConnection.createStatement();
             stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");
             {
                 {
-                    File data=new File(TEST_OUT,"Assoc2.ili");
+                    File data=new File(TEST_DATA_DIR,"Assoc2.ili");
                     Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
                     config.setFunction(Config.FC_SCHEMAIMPORT);
                     config.setCreateFk(Config.CREATE_FK_YES);
@@ -626,18 +679,18 @@ public class Assoc23Test {
         }
     }
     @Test
-    public void importIliExtFileRef_Smart1() throws Exception
+    public void importIliExtRef_Smart1() throws Exception
     {
         //EhiLogger.getInstance().setTraceFilter(false);
         Connection jdbcConnection=null;
         try{
             Class driverClass = Class.forName("org.postgresql.Driver");
             jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
-            stmt=jdbcConnection.createStatement();
+            Statement stmt=jdbcConnection.createStatement();
             stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");
             {
                 {
-                    File data=new File(TEST_OUT,"Assoc2.ili");
+                    File data=new File(TEST_DATA_DIR,"Assoc2.ili");
                     Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
                     config.setFunction(Config.FC_SCHEMAIMPORT);
                     config.setCreateFk(Config.CREATE_FK_YES);
@@ -658,18 +711,18 @@ public class Assoc23Test {
         }
     }
     @Test
-    public void importIliExtFileRef_Smart2() throws Exception
+    public void importIliExtRef_Smart2() throws Exception
     {
         //EhiLogger.getInstance().setTraceFilter(false);
         Connection jdbcConnection=null;
         try{
             Class driverClass = Class.forName("org.postgresql.Driver");
             jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
-            stmt=jdbcConnection.createStatement();
+            Statement stmt=jdbcConnection.createStatement();
             stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");
             {
                 {
-                    File data=new File(TEST_OUT,"Assoc2.ili");
+                    File data=new File(TEST_DATA_DIR,"Assoc2.ili");
                     Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
                     config.setFunction(Config.FC_SCHEMAIMPORT);
                     config.setCreateFk(Config.CREATE_FK_YES);
@@ -690,20 +743,20 @@ public class Assoc23Test {
         }
     }
 	@Test
-	public void importXtfExtFileRefBackward() throws Exception
+	public void importXtfExtFileRefBackward_Smart0() throws Exception
 	{
 		//EhiLogger.getInstance().setTraceFilter(false);
 	    {
-	        importIliExtFileRef();
+	        importIliExtRef_Smart0();
 	    }
 		Connection jdbcConnection=null;
 		try{
 		    Class driverClass = Class.forName("org.postgresql.Driver");
 	        jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
-	        stmt=jdbcConnection.createStatement();
+	        Statement stmt=jdbcConnection.createStatement();
 			{
 				{
-					File data=new File(TEST_OUT,"Assoc2b1.xtf");
+					File data=new File(TEST_DATA_DIR,"Assoc2b1.xtf");
 		    		Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 		    		config.setFunction(Config.FC_IMPORT);
 		    		config.setImportTid(true);
@@ -711,7 +764,7 @@ public class Assoc23Test {
 		    		Ili2db.run(config,null);
 				}
 				{
-					File data=new File(TEST_OUT,"Assoc2b2.xtf");
+					File data=new File(TEST_DATA_DIR,"Assoc2b2.xtf");
 		    		Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 		    		config.setFunction(Config.FC_IMPORT);
 		    		config.setImportTid(true);
@@ -725,19 +778,91 @@ public class Assoc23Test {
 			}
 		}
 	}
+    @Test
+    public void importXtfExtFileRefBackward_Smart1() throws Exception
+    {
+        //EhiLogger.getInstance().setTraceFilter(false);
+        {
+            importIliExtRef_Smart1();
+        }
+        Connection jdbcConnection=null;
+        try{
+            Class driverClass = Class.forName("org.postgresql.Driver");
+            jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
+            Statement stmt=jdbcConnection.createStatement();
+            {
+                {
+                    File data=new File(TEST_DATA_DIR,"Assoc2b1.xtf");
+                    Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+                    config.setFunction(Config.FC_IMPORT);
+                    config.setImportTid(true);
+                    Ili2db.readSettingsFromDb(config);
+                    Ili2db.run(config,null);
+                }
+                {
+                    File data=new File(TEST_DATA_DIR,"Assoc2b2.xtf");
+                    Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+                    config.setFunction(Config.FC_IMPORT);
+                    config.setImportTid(true);
+                    Ili2db.readSettingsFromDb(config);
+                    Ili2db.run(config,null);
+                }
+            }
+        }finally{
+            if(jdbcConnection!=null){
+                jdbcConnection.close();
+            }
+        }
+    }
+    @Test
+    public void importXtfExtFileRefBackward_Smart2() throws Exception
+    {
+        //EhiLogger.getInstance().setTraceFilter(false);
+        {
+            importIliExtRef_Smart2();
+        }
+        Connection jdbcConnection=null;
+        try{
+            Class driverClass = Class.forName("org.postgresql.Driver");
+            jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
+            Statement stmt=jdbcConnection.createStatement();
+            {
+                {
+                    File data=new File(TEST_DATA_DIR,"Assoc2b1.xtf");
+                    Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+                    config.setFunction(Config.FC_IMPORT);
+                    config.setImportTid(true);
+                    Ili2db.readSettingsFromDb(config);
+                    Ili2db.run(config,null);
+                }
+                {
+                    File data=new File(TEST_DATA_DIR,"Assoc2b2.xtf");
+                    Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+                    config.setFunction(Config.FC_IMPORT);
+                    config.setImportTid(true);
+                    Ili2db.readSettingsFromDb(config);
+                    Ili2db.run(config,null);
+                }
+            }
+        }finally{
+            if(jdbcConnection!=null){
+                jdbcConnection.close();
+            }
+        }
+    }
 	
 	@Test
-	public void importXtfExtRefForward() throws Exception
+	public void importXtfExtRefForward_Smart0() throws Exception
 	{
 		//EhiLogger.getInstance().setTraceFilter(false);
 		Connection jdbcConnection=null;
 		try{
 		    Class driverClass = Class.forName("org.postgresql.Driver");
 	        jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
-	        stmt=jdbcConnection.createStatement();
+	        Statement stmt=jdbcConnection.createStatement();
 			stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");
 			{
-				File data=new File(TEST_OUT,"Assoc2c.xtf");
+				File data=new File(TEST_DATA_DIR,"Assoc2c.xtf");
 	    		Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 	    		config.setFunction(Config.FC_IMPORT);
 	            config.setDoImplicitSchemaImport(true);
@@ -776,19 +901,19 @@ public class Assoc23Test {
 		}
 	}
     @Test
-    public void replaceXtfExtRefForward() throws Exception
+    public void replaceXtfExtRefForward_Smart0() throws Exception
     {
         {
-            importXtfExtRefForward();
+            importXtfExtRefForward_Smart0();
         }
         //EhiLogger.getInstance().setTraceFilter(false);
         Connection jdbcConnection=null;
         try{
             Class driverClass = Class.forName("org.postgresql.Driver");
             jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
-            stmt=jdbcConnection.createStatement();
+            Statement stmt=jdbcConnection.createStatement();
             {
-                File data=new File(TEST_OUT,"Assoc2c.xtf");
+                File data=new File(TEST_DATA_DIR,"Assoc2c.xtf");
                 Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
                 config.setFunction(Config.FC_REPLACE);
                 config.setImportTid(true);
@@ -820,10 +945,10 @@ public class Assoc23Test {
     }
 	
 	@Test
-	public void exportXtfRefBackward() throws Exception
+	public void exportXtfRefBackward_Smart0() throws Exception
 	{
 		{
-			importXtfRefBackward();
+			importXtfRefBackward_Smart0();
 		}
 		//EhiLogger.getInstance().setTraceFilter(false);
 		File data=null;
@@ -831,9 +956,9 @@ public class Assoc23Test {
 		try{
 		    Class driverClass = Class.forName("org.postgresql.Driver");
 	        jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
-	        stmt=jdbcConnection.createStatement();
+	        Statement stmt=jdbcConnection.createStatement();
 			{
-				data=new File(TEST_OUT,"Assoc1a-out.xtf");
+				data=new File(TEST_DATA_DIR,"Assoc1a-out.xtf");
 	    		Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 	    		config.setFunction(Config.FC_EXPORT);
 	    		config.setExportTid(true);
@@ -912,10 +1037,10 @@ public class Assoc23Test {
 	}
 	
 	@Test
-	public void exportXtfRefForward() throws Exception
+	public void exportXtfRefForward_Smart0() throws Exception
 	{
 		{
-			importXtfRefForward();
+			importXtfRefForward_Smart0();
 		}
 		File data=null;
 		//EhiLogger.getInstance().setTraceFilter(false);
@@ -923,9 +1048,9 @@ public class Assoc23Test {
 		try{
 		    Class driverClass = Class.forName("org.postgresql.Driver");
 	        jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
-	        stmt=jdbcConnection.createStatement();
+	        Statement stmt=jdbcConnection.createStatement();
 			{
-				data=new File(TEST_OUT,"Assoc1b-out.xtf");
+				data=new File(TEST_DATA_DIR,"Assoc1b-out.xtf");
 	    		Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 	    		config.setFunction(Config.FC_EXPORT);
 	    		config.setExportTid(true);
@@ -1004,10 +1129,10 @@ public class Assoc23Test {
 	}
 	
 	@Test
-	public void exportXtfRefUnkownFail() throws Exception
+	public void exportXtfRefUnkownFail_Smart0() throws Exception
 	{
 		{
-			importXtfRefUnkownFail();
+			importXtfRefUnkownFail_Smart0();
 		}
 		File data=null;
 		//EhiLogger.getInstance().setTraceFilter(false);
@@ -1015,9 +1140,9 @@ public class Assoc23Test {
 		try{
 		    Class driverClass = Class.forName("org.postgresql.Driver");
 	        jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
-	        stmt=jdbcConnection.createStatement();
+	        Statement stmt=jdbcConnection.createStatement();
 			{
-				data=new File(TEST_OUT,"Assoc1z-out.xtf");
+				data=new File(TEST_DATA_DIR,"Assoc1z-out.xtf");
 	    		Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 	    		config.setFunction(Config.FC_EXPORT);
 	    		config.setModels("Assoc1");
@@ -1059,10 +1184,10 @@ public class Assoc23Test {
 	
 	
 	@Test
-	public void exportXtfExtFileRef() throws Exception
+	public void exportXtfExtFileRef_Smart0() throws Exception
 	{
 		{
-			importXtfExtFileRefBackward();
+			importXtfExtFileRefBackward_Smart0();
 		}
 		File data=null;
 		//EhiLogger.getInstance().setTraceFilter(false);
@@ -1070,10 +1195,10 @@ public class Assoc23Test {
 		try{
 		    Class driverClass = Class.forName("org.postgresql.Driver");
 	        jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
-	        stmt=jdbcConnection.createStatement();
+	        Statement stmt=jdbcConnection.createStatement();
 			{
 				{
-					data=new File(TEST_OUT,"Assoc2b2-out.xtf");
+					data=new File(TEST_DATA_DIR,"Assoc2b2-out.xtf");
 		    		Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 		    		config.setFunction(Config.FC_EXPORT);
                     config.setExportTid(true);
@@ -1127,12 +1252,150 @@ public class Assoc23Test {
 			 }
 		}
 	}
+    @Test
+    public void exportXtfExtFileRef_Smart1() throws Exception
+    {
+        {
+            importXtfExtFileRefBackward_Smart1();
+        }
+        File data=null;
+        //EhiLogger.getInstance().setTraceFilter(false);
+        Connection jdbcConnection=null;
+        try{
+            Class driverClass = Class.forName("org.postgresql.Driver");
+            jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
+            Statement stmt=jdbcConnection.createStatement();
+            {
+                {
+                    data=new File(TEST_DATA_DIR,"Assoc2b2-out.xtf");
+                    Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+                    config.setFunction(Config.FC_EXPORT);
+                    config.setExportTid(true);
+                    config.setModels("Assoc2");
+                    Ili2db.readSettingsFromDb(config);
+                    Ili2db.run(config,null);
+                }
+            }
+        }finally{
+            if(jdbcConnection!=null){
+                jdbcConnection.close();
+            }
+        }
+        {
+            HashMap<String,IomObject> objs=new HashMap<String,IomObject>();
+            XtfReader reader=new XtfReader(data);
+            IoxEvent event=null;
+             do{
+                event=reader.read();
+                if(event instanceof StartTransferEvent){
+                }else if(event instanceof StartBasketEvent){
+                }else if(event instanceof ObjectEvent){
+                    IomObject iomObj=((ObjectEvent)event).getIomObject();
+                    if(iomObj.getobjectoid()!=null){
+                        objs.put(iomObj.getobjectoid(), iomObj);
+                    }
+                }else if(event instanceof EndBasketEvent){
+                }else if(event instanceof EndTransferEvent){
+                }
+             }while(!(event instanceof EndTransferEvent));
+             {
+                 {
+                     IomObject obj0 = objs.get("a3");
+                     Assert.assertNotNull(obj0);
+                     Assert.assertEquals("Assoc2.TestB.ClassA3", obj0.getobjecttag());
+                     IomObject obj1=obj0.getattrobj("b3",0);
+                     assertEquals("b3",obj1.getobjectrefoid());
+                 }
+                 // assoc2b2
+                 {
+                     IomObject obj0 = objs.get("b2");
+                     Assert.assertNotNull(obj0);
+                     Assert.assertEquals("Assoc2.TestB.ClassB2", obj0.getobjecttag());
+                     IomObject obj1=obj0.getattrobj("a2",0);
+                     assertEquals("a2",obj1.getobjectrefoid());
+                     
+                     IomObject obj2=obj0.getattrobj("strA2",0);
+                     IomObject obj3=obj2.getattrobj("refa2",0);
+                     assertEquals("a2",obj3.getobjectrefoid());
+                 }
+             }
+        }
+    }
+    @Test
+    public void exportXtfExtFileRef_Smart2() throws Exception
+    {
+        {
+            importXtfExtFileRefBackward_Smart2();
+        }
+        File data=null;
+        //EhiLogger.getInstance().setTraceFilter(false);
+        Connection jdbcConnection=null;
+        try{
+            Class driverClass = Class.forName("org.postgresql.Driver");
+            jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
+            Statement stmt=jdbcConnection.createStatement();
+            {
+                {
+                    data=new File(TEST_DATA_DIR,"Assoc2b2-out.xtf");
+                    Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+                    config.setFunction(Config.FC_EXPORT);
+                    config.setExportTid(true);
+                    config.setModels("Assoc2");
+                    Ili2db.readSettingsFromDb(config);
+                    Ili2db.run(config,null);
+                }
+            }
+        }finally{
+            if(jdbcConnection!=null){
+                jdbcConnection.close();
+            }
+        }
+        {
+            HashMap<String,IomObject> objs=new HashMap<String,IomObject>();
+            XtfReader reader=new XtfReader(data);
+            IoxEvent event=null;
+             do{
+                event=reader.read();
+                if(event instanceof StartTransferEvent){
+                }else if(event instanceof StartBasketEvent){
+                }else if(event instanceof ObjectEvent){
+                    IomObject iomObj=((ObjectEvent)event).getIomObject();
+                    if(iomObj.getobjectoid()!=null){
+                        objs.put(iomObj.getobjectoid(), iomObj);
+                    }
+                }else if(event instanceof EndBasketEvent){
+                }else if(event instanceof EndTransferEvent){
+                }
+             }while(!(event instanceof EndTransferEvent));
+             {
+                 {
+                     IomObject obj0 = objs.get("a3");
+                     Assert.assertNotNull(obj0);
+                     Assert.assertEquals("Assoc2.TestB.ClassA3", obj0.getobjecttag());
+                     IomObject obj1=obj0.getattrobj("b3",0);
+                     assertEquals("b3",obj1.getobjectrefoid());
+                 }
+                 // assoc2b2
+                 {
+                     IomObject obj0 = objs.get("b2");
+                     Assert.assertNotNull(obj0);
+                     Assert.assertEquals("Assoc2.TestB.ClassB2", obj0.getobjecttag());
+                     IomObject obj1=obj0.getattrobj("a2",0);
+                     assertEquals("a2",obj1.getobjectrefoid());
+                     
+                     IomObject obj2=obj0.getattrobj("strA2",0);
+                     IomObject obj3=obj2.getattrobj("refa2",0);
+                     assertEquals("a2",obj3.getobjectrefoid());
+                 }
+             }
+        }
+    }
 	
 	@Test
-	public void exportXtfExtRef() throws Exception
+	public void exportXtfExtRef_Smart0() throws Exception
 	{
 		{
-			importXtfExtRefForward();
+			importXtfExtRefForward_Smart0();
 		}
 		File data=null;
 		//EhiLogger.getInstance().setTraceFilter(false);
@@ -1140,9 +1403,9 @@ public class Assoc23Test {
 		try{
 		    Class driverClass = Class.forName("org.postgresql.Driver");
 	        jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
-	        stmt=jdbcConnection.createStatement();
+	        Statement stmt=jdbcConnection.createStatement();
 			{
-				data=new File(TEST_OUT,"Assoc2c-out.xtf");
+				data=new File(TEST_DATA_DIR,"Assoc2c-out.xtf");
 	    		Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 	    		config.setFunction(Config.FC_EXPORT);
 	    		config.setExportTid(true);
@@ -1202,10 +1465,10 @@ public class Assoc23Test {
 		}
 	}
     @Test
-    public void exportXtf_1toN_WithAttr_NewClass() throws Exception
+    public void exportXtf_1toN_WithAttr_Smart0() throws Exception
     {
         {
-            importXtf_1toN_WithAttr_NewClass();
+            importXtf_1toN_WithAttr_Smart0();
         }
         File data=null;
         //EhiLogger.getInstance().setTraceFilter(false);
@@ -1213,9 +1476,9 @@ public class Assoc23Test {
         try{
             Class driverClass = Class.forName("org.postgresql.Driver");
             jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
-            stmt=jdbcConnection.createStatement();
+            Statement stmt=jdbcConnection.createStatement();
             {
-                data=new File(TEST_OUT,"Assoc4a-out.xtf");
+                data=new File(TEST_DATA_DIR,"Assoc4a-out.xtf");
                 Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
                 config.setFunction(Config.FC_EXPORT);
                 config.setExportTid(true);
@@ -1298,9 +1561,9 @@ public class Assoc23Test {
         try{
             Class driverClass = Class.forName("org.postgresql.Driver");
             jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
-            stmt=jdbcConnection.createStatement();
+            Statement stmt=jdbcConnection.createStatement();
             {
-                data=new File(TEST_OUT,"Assoc4a-out.xtf");
+                data=new File(TEST_DATA_DIR,"Assoc4a-out.xtf");
                 Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
                 config.setFunction(Config.FC_EXPORT);
                 config.setExportTid(true);
@@ -1383,9 +1646,9 @@ public class Assoc23Test {
         try{
             Class driverClass = Class.forName("org.postgresql.Driver");
             jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
-            stmt=jdbcConnection.createStatement();
+            Statement stmt=jdbcConnection.createStatement();
             {
-                data=new File(TEST_OUT,"Assoc4a-out.xtf");
+                data=new File(TEST_DATA_DIR,"Assoc4a-out.xtf");
                 Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
                 config.setFunction(Config.FC_EXPORT);
                 config.setExportTid(true);
@@ -1458,17 +1721,17 @@ public class Assoc23Test {
     }
     
     @Test
-    public void importIliwithoutBid() throws Exception
+    public void importIliwithoutOid_Smart0() throws Exception
     {
         //EhiLogger.getInstance().setTraceFilter(false);
         Connection jdbcConnection=null;
         try{
             Class driverClass = Class.forName("org.postgresql.Driver");
             jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
-            stmt=jdbcConnection.createStatement();
+            Statement stmt=jdbcConnection.createStatement();
             stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");
             {
-                File data=new File(TEST_OUT,"AssocUpdate1.ili");
+                File data=new File(TEST_DATA_DIR,"AssocUpdate1.ili");
                 Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
                 config.setFunction(Config.FC_SCHEMAIMPORT);
                 config.setCreateFk(Config.CREATE_FK_YES);
@@ -1508,17 +1771,17 @@ public class Assoc23Test {
         }
     }
     @Test
-    public void importXtfwithoutBid() throws Exception
+    public void importXtfwithoutOid_Smart0() throws Exception
     {
-        importIliwithoutBid();
+        importIliwithoutOid_Smart0();
         //EhiLogger.getInstance().setTraceFilter(false);
         Connection jdbcConnection=null;
         try{
             Class driverClass = Class.forName("org.postgresql.Driver");
             jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
-            stmt=jdbcConnection.createStatement();
+            Statement stmt=jdbcConnection.createStatement();
             {
-                File data=new File(TEST_OUT,"AssocUpdate1a.xtf");
+                File data=new File(TEST_DATA_DIR,"AssocUpdate1a.xtf");
                 Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
                 config.setFunction(Config.FC_IMPORT);
                 config.setDatasetName("AssocUpdate1a");
@@ -1532,17 +1795,17 @@ public class Assoc23Test {
         }
     }
     @Test
-    public void updateXtfwithoutBid() throws Exception
+    public void updateXtfwithoutOid_Smart0() throws Exception
     {
-        importXtfwithoutBid();
+        importXtfwithoutOid_Smart0();
         //EhiLogger.getInstance().setTraceFilter(false);
         Connection jdbcConnection=null;
         try{
             Class driverClass = Class.forName("org.postgresql.Driver");
             jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
-            stmt=jdbcConnection.createStatement();
+            Statement stmt=jdbcConnection.createStatement();
             {
-                File data=new File(TEST_OUT,"AssocUpdate1b.xtf");
+                File data=new File(TEST_DATA_DIR,"AssocUpdate1b.xtf");
                 Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
                 config.setFunction(Config.FC_UPDATE);
                 config.setDatasetName("AssocUpdate1a");
@@ -1556,17 +1819,17 @@ public class Assoc23Test {
         }
     }
     @Test
-    public void exportXtfwithoutBid() throws Exception
+    public void exportXtfwithoutOid_Smart0() throws Exception
     {
-        importXtfwithoutBid();
+        importXtfwithoutOid_Smart0();
         //EhiLogger.getInstance().setTraceFilter(false);
         Connection jdbcConnection=null;
         try{
             Class driverClass = Class.forName("org.postgresql.Driver");
             jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
-            stmt=jdbcConnection.createStatement();
+            Statement stmt=jdbcConnection.createStatement();
             {
-                File data=new File(TEST_OUT,"AssocUpdate1a-out.xtf");
+                File data=new File(TEST_DATA_DIR,"AssocUpdate1a-out.xtf");
                 Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
                 config.setFunction(Config.FC_EXPORT);
                 config.setModels("AssocUpdate1");

@@ -14,6 +14,18 @@ ideas/open issues/questions
 LATEST
 ---------------------------
 
+ili2db 4.4.6 (2021-02-12)
+------------------------------
+- import fails with --noSmartMapping (#381) 
+- ili2gpkg: failed to import MultiPoint
+- ili2pg-4.4.1 failed to build polygons (#376)
+- NPE with schema import and --createMetaInfo and a VIEW with implicit typed attributes (#385)
+- failed to import with --importTid class that extends a structure (#336)
+- failed to export bags in multiple subclasses (#352)
+- fix export Unknown WKB type 8 (iox-ili#92)
+- ili2h2gis: schemaimport fails if class has a comment (#379)
+- iox-ili-1.21.5
+
 ili2db 4.4.5 (2020-12-28)
 ------------------------------
 - add support for h2gis db (#343)

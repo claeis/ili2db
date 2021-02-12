@@ -1,5 +1,7 @@
 INTERLIS 2.3;
 
+!!
+!! Assoc with extref
 MODEL Assoc2_0
   AT "mailto:ce@eisenhutinformatik.ch" VERSION "2015-11-28" =
   
