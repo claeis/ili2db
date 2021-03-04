@@ -162,7 +162,7 @@ public abstract class Datatypes23Test {
 				 Assert.assertEquals("22", rs.getString("aI32id"));
 				 Assert.assertEquals(true, rs.getBoolean("aBoolean"));
 				 Assert.assertEquals("15b6bcce-8772-4595-bf82-f727a665fbf3", rs.getString("aUuid"));
-				 Assert.assertEquals("abc100", rs.getString("textLimited"));
+				 Assert.assertEquals("abc100\"\"''", rs.getString("textLimited"));
 				 Assert.assertEquals("Left", rs.getString("horizAlignment"));
 				 Assert.assertEquals("mailto:ceis@localhost", rs.getString("uritext"));
 				 Assert.assertEquals("5", rs.getString("numericInt"));
@@ -477,7 +477,7 @@ public abstract class Datatypes23Test {
 				 Assert.assertEquals("22", obj1.getattrvalue("aI32id"));
 				 Assert.assertEquals("true", obj1.getattrvalue("aBoolean"));
 				 Assert.assertEquals("15b6bcce-8772-4595-bf82-f727a665fbf3", obj1.getattrvalue("aUuid"));
-				 Assert.assertEquals("abc100", obj1.getattrvalue("textLimited"));
+				 Assert.assertEquals("abc100\"\"''", obj1.getattrvalue("textLimited"));
 				 Assert.assertEquals("Left", obj1.getattrvalue("horizAlignment"));
 				 Assert.assertEquals("mailto:ceis@localhost", obj1.getattrvalue("uritext"));
 				 Assert.assertEquals("5", obj1.getattrvalue("numericInt"));
