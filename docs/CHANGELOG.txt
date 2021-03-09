@@ -14,6 +14,7 @@ ideas/open issues/questions
 LATEST
 ---------------------------
 - ili2h2gis: add schema support (#383)
+- ili2h2gis: Primary Key ohne auto_increment (#380)
 
 ili2db 4.4.6 (2021-02-12)
 ------------------------------
