@@ -102,7 +102,7 @@ public class GeneratorH2gis extends GeneratorJdbc {
 		}else if(column instanceof DbColXml){
 			type="varchar";
         }else if(column instanceof DbColJson){
-            type="json";
+            type="varchar";
 		}else{
 			type="varchar";
 		}
