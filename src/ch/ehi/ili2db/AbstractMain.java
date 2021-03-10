@@ -525,10 +525,10 @@ public abstract class AbstractMain {
 				
 			}else if(arg.startsWith("-")){
 				EhiLogger.logError(arg+": unknown option");
-				return;
+                System.exit(1);
 			}else if(argi+1<args.length){
 				EhiLogger.logError(arg+": invalid placed argument");
-				return;
+                System.exit(1);
 			}else{
 				break;
 			}
