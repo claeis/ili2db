@@ -18,6 +18,7 @@ LATEST
 - ili2h2gis: JSON mapping not working (#387)
 - uniform return value (#375)
 - ili2pg: create bigint attributes (#348)
+- ili2pg: new option --createDateTimeChecks (#330)
 - ili2c-5.2.0
 - ehisqlgen-1.13.9-SNAPSHOT
 

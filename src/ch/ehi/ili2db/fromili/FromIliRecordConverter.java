@@ -9,6 +9,9 @@ import java.util.Collections;
 
 import java.io.IOException;
 import java.io.StringWriter;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerator;
@@ -59,6 +62,7 @@ import ch.interlis.ili2c.metamodel.Domain;
 import ch.interlis.ili2c.metamodel.EnumerationType;
 import ch.interlis.ili2c.metamodel.Evaluable;
 import ch.interlis.ili2c.metamodel.ExtendableContainer;
+import ch.interlis.ili2c.metamodel.FormattedType;
 import ch.interlis.ili2c.metamodel.LineType;
 import ch.interlis.ili2c.metamodel.LocalAttribute;
 import ch.interlis.ili2c.metamodel.NumericType;
@@ -97,6 +101,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
     private boolean expandLocalised=true;
 	private boolean createUnique=true;
 	private boolean createNumCheck=false;
+    private boolean createDateTimeCheck=false;
 	private DbExtMetaInfo metaInfo=null;
     private boolean createTypeConstraint=false;
     private boolean createIliTidCol=false;
@@ -120,6 +125,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
         expandLocalised=Config.LOCALISED_TRAFO_EXPAND.equals(config.getLocalisedTrafo());
 		createUnique=config.isCreateUniqueConstraints();
 		createNumCheck=config.isCreateCreateNumChecks();
+        createDateTimeCheck=config.isCreateCreateDateTimeChecks();
 		this.metaInfo=metaInfo;
         createTypeConstraint=config.getCreateTypeConstraint();
         createIliTidCol=Config.TID_HANDLING_PROPERTY.equals(config.getTidHandling());
@@ -883,11 +889,44 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 		}else if (attr.isDomainIliUuid()) {
 			dbCol.value= new DbColUuid();
 		}else if (attr.isDomainIli2Date()) {
-			dbCol.value= new DbColDate();
+		    DbColDate ret=new DbColDate();
+			dbCol.value= ret;
+			if(createDateTimeCheck) {
+	            DateFormat dateTimeFormatter = new SimpleDateFormat("yyyy-MM-dd");
+	            FormattedType fmtType = (FormattedType)type;
+	            try {
+	                ret.setMinValue(new java.sql.Date(dateTimeFormatter.parse(fmtType.getMinimum()).getTime()));
+	                ret.setMaxValue(new java.sql.Date(dateTimeFormatter.parse(fmtType.getMaximum()).getTime()));
+	            } catch (ParseException e) {
+	                throw new IllegalArgumentException(e);
+	            }
+			}
 		}else if (attr.isDomainIli2DateTime()) {
-			dbCol.value= new DbColDateTime();
+            DbColDateTime ret=new DbColDateTime();
+			dbCol.value= ret;
+            if(createDateTimeCheck) {
+                DateFormat dateTimeFormatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
+                FormattedType fmtType = (FormattedType)type;
+                try {
+                    ret.setMinValue(new java.sql.Timestamp(dateTimeFormatter.parse(fmtType.getMinimum()).getTime()));
+                    ret.setMaxValue(new java.sql.Timestamp(dateTimeFormatter.parse(fmtType.getMaximum()).getTime()));
+                } catch (ParseException e) {
+                    throw new IllegalArgumentException(e);
+                }
+            }
 		}else if (attr.isDomainIli2Time()) {
-			dbCol.value= new DbColTime();
+		    DbColTime ret=new DbColTime();
+			dbCol.value= ret;
+            if(createDateTimeCheck) {
+                DateFormat dateTimeFormatter = new SimpleDateFormat("HH:mm:ss.SSS");
+                FormattedType fmtType = (FormattedType)type;
+                try {
+                    ret.setMinValue(new java.sql.Time(dateTimeFormatter.parse(fmtType.getMinimum()).getTime()));
+                    ret.setMaxValue(new java.sql.Time(dateTimeFormatter.parse(fmtType.getMaximum()).getTime()));
+                } catch (ParseException e) {
+                    throw new IllegalArgumentException(e);
+                }
+            }
 		}else if (type instanceof BasketType){
 			// skip it; type no longer exists in ili 2.3
 			dbCol.value=null;

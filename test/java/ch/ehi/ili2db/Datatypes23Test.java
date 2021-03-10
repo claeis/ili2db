@@ -55,6 +55,7 @@ public abstract class Datatypes23Test {
 			config.setFunction(Config.FC_SCHEMAIMPORT);
 			config.setCreateFk(Config.CREATE_FK_YES);
 			config.setCreateNumChecks(true);
+            config.setCreateDateTimeChecks(true);
 			config.setTidHandling(Config.TID_HANDLING_PROPERTY);
 			config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
 			config.setCatalogueRefTrafo(null);
