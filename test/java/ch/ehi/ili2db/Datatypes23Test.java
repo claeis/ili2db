@@ -46,6 +46,7 @@ public abstract class Datatypes23Test {
 	    Connection jdbcConnection=null;
 	    Statement stmt=null;
 		try {
+		    EhiLogger.getInstance().setTraceFilter(false);
 	        setup.resetDb();
             jdbcConnection = setup.createConnection();
 	        stmt=jdbcConnection.createStatement();
@@ -90,6 +91,7 @@ public abstract class Datatypes23Test {
                     {"Datatypes23.Topic.ClassKoord3.hcoord", "hcoord", "classkoord3", null},
                     {"Datatypes23.Topic.ClassKoord2.lcoord", "lcoord", "classkoord2", null},
                     {"Datatypes23.Topic.ClassAttr.numericInt", "numericint", "classattr", null},
+                    {"Datatypes23.Topic.ClassAttr.numericBigInt", "numericbigint", "classattr", null},
                     {"Datatypes23.Topic.ClassAttr.numericDec", "numericdec", "classattr", null},
                     {"Datatypes23.Topic.SimpleLine2.straights2d", "straights2d", "simpleline2", null},
                     {"Datatypes23.Topic.Line2.straightsarcs2d", "straightsarcs2d", "line2", null},

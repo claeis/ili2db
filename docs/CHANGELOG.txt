@@ -17,7 +17,9 @@ LATEST
 - ili2h2gis: Primary Key ohne auto_increment (#380)
 - ili2h2gis: JSON mapping not working (#387)
 - uniform return value (#375)
+- ili2pg: create bigint attributes (#348)
 - ili2c-5.2.0
+- ehisqlgen-1.13.9-SNAPSHOT
 
 ili2db 4.4.6 (2021-02-12)
 ------------------------------

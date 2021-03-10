@@ -44,6 +44,7 @@ MODEL Datatypes23
 		   
 		   !! NumericType
 		   numericInt : 0 .. 10;
+		   numericBigInt : 0 .. 9223372036854775807;
 		   numericDec : 0.0 .. 10.0;
 		   
 		   !! FormattedType

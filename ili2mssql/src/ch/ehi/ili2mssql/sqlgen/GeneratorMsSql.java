@@ -147,7 +147,7 @@ public class GeneratorMsSql extends GeneratorJdbc {
     private String getMinValue(DbColumn dbCol) {
         String result=null;
         if(dbCol instanceof DbColNumber) {
-            Integer minVal=((DbColNumber)dbCol).getMinValue();
+            Long minVal=((DbColNumber)dbCol).getMinValue();
             result=minVal!=null?minVal.toString():null;
          } else if(dbCol instanceof DbColDecimal){
             Double minVal=((DbColDecimal)dbCol).getMinValue();
@@ -159,7 +159,7 @@ public class GeneratorMsSql extends GeneratorJdbc {
     private String getMaxValue(DbColumn dbCol) {
         String result=null;
         if(dbCol instanceof DbColNumber) {
-            Integer maxVal=((DbColNumber)dbCol).getMaxValue();
+            Long maxVal=((DbColNumber)dbCol).getMaxValue();
             result=maxVal!=null?maxVal.toString():null;
          } else if(dbCol instanceof DbColDecimal){
             Double maxVal=((DbColDecimal)dbCol).getMaxValue();

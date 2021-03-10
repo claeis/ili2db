@@ -943,8 +943,8 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 					int size=Math.max(minLen,maxLen);
 					ret.setSize(size);
 					if(createNumCheck){
-						ret.setMinValue((int)min.doubleValue());
-						ret.setMaxValue((int)max.doubleValue());
+						ret.setMinValue(min.getUnscaledValue().longValue());
+						ret.setMaxValue(max.getUnscaledValue().longValue());
 					}
 					dbCol.value=ret;
 				}
