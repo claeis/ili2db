@@ -21,6 +21,7 @@ LATEST
 - ili2pg: new option --createDateTimeChecks (#330)
 - ili2pg: new option --createTextChecks (#331, #340)
 - size of setting columns in metatables increased to 10240 (#374)
+- support expanding of custom MultilingualText structures (#288)
 - ili2c-5.2.0
 - ehisqlgen-1.14.0
 

@@ -701,7 +701,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
                     DbColJson ret=new DbColJson();
                     dbCol.value=ret;
                     trafoConfig.setAttrConfig(attr, TrafoConfigNames.JSON_TRAFO,TrafoConfigNames.JSON_TRAFO_COALESCE);
-				}else if(isChbaseMultilingual(td, attr) && (expandMultilingual 
+				}else if(isMultilingualTextAttr(td, attr) && (expandMultilingual 
 							|| TrafoConfigNames.MULTILINGUAL_TRAFO_EXPAND.equals(trafoConfig.getAttrConfig(attr,TrafoConfigNames.MULTILINGUAL_TRAFO)))){
 					for(String sfx:DbNames.MULTILINGUAL_TXT_COL_SUFFIXS){
 						DbColVarchar ret=new DbColVarchar();
@@ -715,7 +715,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 						dbColExts.add(ret);
 					}
 					trafoConfig.setAttrConfig(attr, TrafoConfigNames.MULTILINGUAL_TRAFO,TrafoConfigNames.MULTILINGUAL_TRAFO_EXPAND);
-                }else if(isChbaseLocalised(td, attr) && (expandLocalised 
+                }else if(isLocalisedTextAttr(td, attr) && (expandLocalised 
                         || TrafoConfigNames.LOCALISED_TRAFO_EXPAND.equals(trafoConfig.getAttrConfig(attr,TrafoConfigNames.LOCALISED_TRAFO)))){
                     
                     DbColVarchar ret=new DbColVarchar();
@@ -1026,9 +1026,9 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 		return true;
 	}
 
-    private boolean isChbaseMultilingual(TransferDescription td,
+    private boolean isMultilingualTextAttr(TransferDescription td,
 			AttributeDef attr) {
-		if(Ili2cUtility.isPureChbaseMultilingualText(td, attr) || Ili2cUtility.isPureChbaseMultilingualMText(td, attr)){
+		if(Ili2cUtility.isMultilingualTextAttr(td, attr) || Ili2cUtility.isMultilingualMTextAttr(td, attr)){
 			CompositionType type=(CompositionType)attr.getDomain();
 			if(type.getCardinality().getMaximum()==1){
 				return true;
@@ -1036,9 +1036,9 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 		}
 		return false;
 	}
-    private boolean isChbaseLocalised(TransferDescription td,
+    private boolean isLocalisedTextAttr(TransferDescription td,
             AttributeDef attr) {
-        if(Ili2cUtility.isPureChbaseLocalisedText(td, attr) || Ili2cUtility.isPureChbaseLocalisedMText(td, attr)){
+        if(Ili2cUtility.isLocalisedTextAttr(td, attr) || Ili2cUtility.isLocalisedMTextAttr(td, attr)){
             CompositionType type=(CompositionType)attr.getDomain();
             if(type.getCardinality().getMaximum()==1){
                 return true;
