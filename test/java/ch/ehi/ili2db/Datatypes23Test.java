@@ -46,7 +46,7 @@ public abstract class Datatypes23Test {
 	    Connection jdbcConnection=null;
 	    Statement stmt=null;
 		try {
-		    EhiLogger.getInstance().setTraceFilter(false);
+		    //EhiLogger.getInstance().setTraceFilter(false);
 	        setup.resetDb();
             jdbcConnection = setup.createConnection();
 	        stmt=jdbcConnection.createStatement();
@@ -54,6 +54,7 @@ public abstract class Datatypes23Test {
 			Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
 			config.setFunction(Config.FC_SCHEMAIMPORT);
 			config.setCreateFk(Config.CREATE_FK_YES);
+            config.setCreateTextChecks(true);
 			config.setCreateNumChecks(true);
             config.setCreateDateTimeChecks(true);
 			config.setTidHandling(Config.TID_HANDLING_PROPERTY);

@@ -39,11 +39,13 @@ public abstract class MultilingualTextTest {
     public void importIliSmartChbase() throws Exception
     {
         setup.resetDb();
+        //EhiLogger.getInstance().setTraceFilter(false);
 
         File data=new File(TEST_OUT,"MultilingualText1.ili");
         Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
         config.setFunction(Config.FC_SCHEMAIMPORT);
         config.setCreateFk(Config.CREATE_FK_YES);
+        config.setCreateTextChecks(true);
         config.setTidHandling(Config.TID_HANDLING_PROPERTY);
         config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
         config.setCatalogueRefTrafo(null);

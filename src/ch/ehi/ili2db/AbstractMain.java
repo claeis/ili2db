@@ -296,6 +296,9 @@ public abstract class AbstractMain {
 			}else if(arg.equals("--createNumChecks")){
 				argi++;
 				config.setCreateNumChecks(true);
+            }else if(arg.equals("--createTextChecks")){
+                argi++;
+                config.setCreateTextChecks(true);
             }else if(arg.equals("--createDateTimeChecks")){
                 argi++;
                 config.setCreateDateTimeChecks(true);
@@ -503,6 +506,7 @@ public abstract class AbstractMain {
 					System.err.println("--createFkIdx          create an index on foreign key columns.");
 					System.err.println("--createUnique         create UNIQUE db constraints.");
 					System.err.println("--createNumChecks      create CHECK db constraints for numeric data types.");
+                    System.err.println("--createTextChecks     create CHECK db constraints for text data types.");
                     System.err.println("--createDateTimeChecks create CHECK db constraints for date/time data types.");
 					System.err.println("--ILIGML20             use eCH-0118-2.0 as transferformat");
 					System.err.println("--exportModels modelname  export data according to the given base ili-models");

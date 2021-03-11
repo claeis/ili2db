@@ -101,6 +101,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
     private boolean expandLocalised=true;
 	private boolean createUnique=true;
 	private boolean createNumCheck=false;
+    private boolean createTextCheck=false;
     private boolean createDateTimeCheck=false;
 	private DbExtMetaInfo metaInfo=null;
     private boolean createTypeConstraint=false;
@@ -125,6 +126,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
         expandLocalised=Config.LOCALISED_TRAFO_EXPAND.equals(config.getLocalisedTrafo());
 		createUnique=config.isCreateUniqueConstraints();
 		createNumCheck=config.isCreateCreateNumChecks();
+        createTextCheck=config.isCreateCreateTextChecks();
         createDateTimeCheck=config.isCreateCreateDateTimeChecks();
 		this.metaInfo=metaInfo;
         createTypeConstraint=config.getCreateTypeConstraint();
@@ -705,6 +707,9 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 						DbColVarchar ret=new DbColVarchar();
 						ret.setName(getSqlAttrName(attr,null,dbTable.getName().getName(),null)+sfx);
 						ret.setSize(DbColVarchar.UNLIMITED);
+						if(createTextCheck) {
+						    ret.setMinLength(1);
+						}
 						ret.setNotNull(false);
 						ret.setPrimaryKey(false);
 						dbColExts.add(ret);
@@ -996,8 +1001,15 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 			}else{
 				ret.setSize(DbColVarchar.UNLIMITED);
 			}
+            if(createTextCheck) {
+                if(((TextType)type).isNormalized()){
+                    ret.setKind(DbColVarchar.KIND_NORMALIZED);
+                }
+                ret.setMinLength(1);
+            }
 			if(!((TextType)type).isNormalized()){
 			    mText.value=true;
+			}else {
 			}
 			dbCol.value=ret;
 		}else if(type instanceof BlackboxType){

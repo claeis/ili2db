@@ -61,6 +61,8 @@ public class Config extends Settings {
 	public static final String UNIQUE_CONSTRAINTS_CREATE="create";
 	public static final String NUMERIC_CHECK_CONSTRAINTS=PREFIX+".numericCheckConstraints";
 	public static final String NUMERIC_CHECK_CONSTRAINTS_CREATE="create";
+    public static final String TEXT_CHECK_CONSTRAINTS=PREFIX+".textCheckConstraints";
+    public static final String TEXT_CHECK_CONSTRAINTS_CREATE="create";
     public static final String DATETIME_CHECK_CONSTRAINTS=PREFIX+".datetimeCheckConstraints";
     public static final String DATETIME_CHECK_CONSTRAINTS_CREATE="create";
     public static final String IMPORT_TABS=PREFIX+".importTabs";
@@ -517,6 +519,12 @@ public class Config extends Settings {
 	public boolean isCreateCreateNumChecks() {
 		return NUMERIC_CHECK_CONSTRAINTS_CREATE.equals(getValue(NUMERIC_CHECK_CONSTRAINTS));
 	}
+    public void setCreateTextChecks(boolean ignore) {
+        setValue(TEXT_CHECK_CONSTRAINTS,ignore?TEXT_CHECK_CONSTRAINTS_CREATE:null);
+    }
+    public boolean isCreateCreateTextChecks() {
+        return TEXT_CHECK_CONSTRAINTS_CREATE.equals(getValue(TEXT_CHECK_CONSTRAINTS));
+    }
     public void setCreateDateTimeChecks(boolean ignore) {
         setValue(DATETIME_CHECK_CONSTRAINTS,ignore?DATETIME_CHECK_CONSTRAINTS_CREATE:null);
     }

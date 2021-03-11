@@ -19,8 +19,9 @@ LATEST
 - uniform return value (#375)
 - ili2pg: create bigint attributes (#348)
 - ili2pg: new option --createDateTimeChecks (#330)
+- ili2pg: new option --createTextChecks (#331, #340)
 - ili2c-5.2.0
-- ehisqlgen-1.13.9-SNAPSHOT
+- ehisqlgen-1.14.0
 
 ili2db 4.4.6 (2021-02-12)
 ------------------------------
