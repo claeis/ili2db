@@ -13,6 +13,9 @@ ideas/open issues/questions
 
 LATEST
 ---------------------------
+
+ili2db 4.5.0 (2021-03-12)
+------------------------------
 - ili2h2gis: add schema support (#383)
 - ili2h2gis: Primary Key ohne auto_increment (#380)
 - ili2h2gis: JSON mapping not working (#387)
