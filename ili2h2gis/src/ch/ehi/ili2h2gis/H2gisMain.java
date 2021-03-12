@@ -95,6 +95,7 @@ public class H2gisMain extends ch.ehi.ili2db.AbstractMain {
 	}
 	@Override
 	protected void printSpecificOptions() {
+        System.err.println("--dbschema  schema     The name of the schema in the database. Defaults to not set.");
 		System.err.println("--oneGeomPerTable      If more than one geometry per table, create secondary table.");
 	}
 	@Override
@@ -125,6 +126,10 @@ public class H2gisMain extends ch.ehi.ili2db.AbstractMain {
 			argi++;
 			config.setDbpwd(args[argi]);
 			argi++;
+        }else if(arg.equals("--dbschema")){
+            argi++;
+            config.setDbschema(args[argi]);
+            argi++;
 		}else if(arg.equals("--oneGeomPerTable")){
 			config.setOneGeomPerTable(true);
 			argi++;

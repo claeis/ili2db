@@ -1,0 +1,65 @@
+INTERLIS 2.3;
+
+MODEL MultilingualTextCustom0
+  AT "mailto:ce@eisenhutinformatik.ch" VERSION "2019-06-23" =
+
+  DOMAIN
+    LanguageCode_ISO639_1 = TEXT*2;
+  
+   !!@ili2db.mapping=Localised
+  STRUCTURE LocalisedText =
+    Language: LanguageCode_ISO639_1;
+    Text: MANDATORY TEXT;
+  END LocalisedText;
+
+   !!@ili2db.mapping=Localised
+  STRUCTURE LocalisedMText =
+    Language: LanguageCode_ISO639_1;
+    Text: MANDATORY MTEXT;
+  END LocalisedMText;
+
+   !!@ili2db.mapping=Multilingual
+  STRUCTURE MultilingualText =
+    LocalisedText : BAG {1..*} OF LocalisedText;
+    UNIQUE (LOCAL) LocalisedText:Language;
+  END MultilingualText;
+
+   !!@ili2db.mapping=Multilingual
+  STRUCTURE MultilingualMText =
+    LocalisedText : BAG {1..*} OF LocalisedMText;
+    UNIQUE (LOCAL) LocalisedText:Language;
+  END MultilingualMText;
+  
+  TOPIC TestA =
+  
+    CLASS ClassA1 =
+      attr : TEXT*20;
+	  atext : MultilingualText;
+	  btext : LocalisedText;
+	  ctext : MultilingualMText;
+	  dtext : LocalisedMText;
+    END ClassA1;
+    
+    CLASS ClassB1 =
+      attr : TEXT*20;
+	  atext : MANDATORY MultilingualText;
+	  btext : MANDATORY LocalisedText;
+	  ctext : MANDATORY MultilingualMText;
+	  dtext : MANDATORY LocalisedMText;
+    END ClassB1;
+    
+  END TestA;
+  
+  
+END MultilingualTextCustom0.
+
+MODEL MultilingualTextCustom1
+  AT "mailto:ce@eisenhutinformatik.ch" VERSION "2019-06-23" =
+  IMPORTS MultilingualTextCustom0;
+  
+  TOPIC TestA EXTENDS MultilingualTextCustom0.TestA =
+      
+  END TestA;
+  
+  
+END MultilingualTextCustom1.

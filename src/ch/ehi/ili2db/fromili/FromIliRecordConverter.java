@@ -9,6 +9,9 @@ import java.util.Collections;
 
 import java.io.IOException;
 import java.io.StringWriter;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerator;
@@ -59,6 +62,7 @@ import ch.interlis.ili2c.metamodel.Domain;
 import ch.interlis.ili2c.metamodel.EnumerationType;
 import ch.interlis.ili2c.metamodel.Evaluable;
 import ch.interlis.ili2c.metamodel.ExtendableContainer;
+import ch.interlis.ili2c.metamodel.FormattedType;
 import ch.interlis.ili2c.metamodel.LineType;
 import ch.interlis.ili2c.metamodel.LocalAttribute;
 import ch.interlis.ili2c.metamodel.NumericType;
@@ -97,6 +101,8 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
     private boolean expandLocalised=true;
 	private boolean createUnique=true;
 	private boolean createNumCheck=false;
+    private boolean createTextCheck=false;
+    private boolean createDateTimeCheck=false;
 	private DbExtMetaInfo metaInfo=null;
     private boolean createTypeConstraint=false;
     private boolean createIliTidCol=false;
@@ -120,6 +126,8 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
         expandLocalised=Config.LOCALISED_TRAFO_EXPAND.equals(config.getLocalisedTrafo());
 		createUnique=config.isCreateUniqueConstraints();
 		createNumCheck=config.isCreateCreateNumChecks();
+        createTextCheck=config.isCreateCreateTextChecks();
+        createDateTimeCheck=config.isCreateCreateDateTimeChecks();
 		this.metaInfo=metaInfo;
         createTypeConstraint=config.getCreateTypeConstraint();
         createIliTidCol=Config.TID_HANDLING_PROPERTY.equals(config.getTidHandling());
@@ -693,18 +701,21 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
                     DbColJson ret=new DbColJson();
                     dbCol.value=ret;
                     trafoConfig.setAttrConfig(attr, TrafoConfigNames.JSON_TRAFO,TrafoConfigNames.JSON_TRAFO_COALESCE);
-				}else if(isChbaseMultilingual(td, attr) && (expandMultilingual 
+				}else if(isMultilingualTextAttr(td, attr) && (expandMultilingual 
 							|| TrafoConfigNames.MULTILINGUAL_TRAFO_EXPAND.equals(trafoConfig.getAttrConfig(attr,TrafoConfigNames.MULTILINGUAL_TRAFO)))){
 					for(String sfx:DbNames.MULTILINGUAL_TXT_COL_SUFFIXS){
 						DbColVarchar ret=new DbColVarchar();
 						ret.setName(getSqlAttrName(attr,null,dbTable.getName().getName(),null)+sfx);
 						ret.setSize(DbColVarchar.UNLIMITED);
+						if(createTextCheck) {
+						    ret.setMinLength(1);
+						}
 						ret.setNotNull(false);
 						ret.setPrimaryKey(false);
 						dbColExts.add(ret);
 					}
 					trafoConfig.setAttrConfig(attr, TrafoConfigNames.MULTILINGUAL_TRAFO,TrafoConfigNames.MULTILINGUAL_TRAFO_EXPAND);
-                }else if(isChbaseLocalised(td, attr) && (expandLocalised 
+                }else if(isLocalisedTextAttr(td, attr) && (expandLocalised 
                         || TrafoConfigNames.LOCALISED_TRAFO_EXPAND.equals(trafoConfig.getAttrConfig(attr,TrafoConfigNames.LOCALISED_TRAFO)))){
                     
                     DbColVarchar ret=new DbColVarchar();
@@ -883,11 +894,44 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 		}else if (attr.isDomainIliUuid()) {
 			dbCol.value= new DbColUuid();
 		}else if (attr.isDomainIli2Date()) {
-			dbCol.value= new DbColDate();
+		    DbColDate ret=new DbColDate();
+			dbCol.value= ret;
+			if(createDateTimeCheck) {
+	            DateFormat dateTimeFormatter = new SimpleDateFormat("yyyy-MM-dd");
+	            FormattedType fmtType = (FormattedType)type;
+	            try {
+	                ret.setMinValue(new java.sql.Date(dateTimeFormatter.parse(fmtType.getMinimum()).getTime()));
+	                ret.setMaxValue(new java.sql.Date(dateTimeFormatter.parse(fmtType.getMaximum()).getTime()));
+	            } catch (ParseException e) {
+	                throw new IllegalArgumentException(e);
+	            }
+			}
 		}else if (attr.isDomainIli2DateTime()) {
-			dbCol.value= new DbColDateTime();
+            DbColDateTime ret=new DbColDateTime();
+			dbCol.value= ret;
+            if(createDateTimeCheck) {
+                DateFormat dateTimeFormatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
+                FormattedType fmtType = (FormattedType)type;
+                try {
+                    ret.setMinValue(new java.sql.Timestamp(dateTimeFormatter.parse(fmtType.getMinimum()).getTime()));
+                    ret.setMaxValue(new java.sql.Timestamp(dateTimeFormatter.parse(fmtType.getMaximum()).getTime()));
+                } catch (ParseException e) {
+                    throw new IllegalArgumentException(e);
+                }
+            }
 		}else if (attr.isDomainIli2Time()) {
-			dbCol.value= new DbColTime();
+		    DbColTime ret=new DbColTime();
+			dbCol.value= ret;
+            if(createDateTimeCheck) {
+                DateFormat dateTimeFormatter = new SimpleDateFormat("HH:mm:ss.SSS");
+                FormattedType fmtType = (FormattedType)type;
+                try {
+                    ret.setMinValue(new java.sql.Time(dateTimeFormatter.parse(fmtType.getMinimum()).getTime()));
+                    ret.setMaxValue(new java.sql.Time(dateTimeFormatter.parse(fmtType.getMaximum()).getTime()));
+                } catch (ParseException e) {
+                    throw new IllegalArgumentException(e);
+                }
+            }
 		}else if (type instanceof BasketType){
 			// skip it; type no longer exists in ili 2.3
 			dbCol.value=null;
@@ -943,8 +987,8 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 					int size=Math.max(minLen,maxLen);
 					ret.setSize(size);
 					if(createNumCheck){
-						ret.setMinValue((int)min.doubleValue());
-						ret.setMaxValue((int)max.doubleValue());
+						ret.setMinValue(min.getUnscaledValue().longValue());
+						ret.setMaxValue(max.getUnscaledValue().longValue());
 					}
 					dbCol.value=ret;
 				}
@@ -957,8 +1001,15 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 			}else{
 				ret.setSize(DbColVarchar.UNLIMITED);
 			}
+            if(createTextCheck) {
+                if(((TextType)type).isNormalized()){
+                    ret.setKind(DbColVarchar.KIND_NORMALIZED);
+                }
+                ret.setMinLength(1);
+            }
 			if(!((TextType)type).isNormalized()){
 			    mText.value=true;
+			}else {
 			}
 			dbCol.value=ret;
 		}else if(type instanceof BlackboxType){
@@ -975,9 +1026,9 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 		return true;
 	}
 
-    private boolean isChbaseMultilingual(TransferDescription td,
+    private boolean isMultilingualTextAttr(TransferDescription td,
 			AttributeDef attr) {
-		if(Ili2cUtility.isPureChbaseMultilingualText(td, attr) || Ili2cUtility.isPureChbaseMultilingualMText(td, attr)){
+		if(Ili2cUtility.isMultilingualTextAttr(td, attr) || Ili2cUtility.isMultilingualMTextAttr(td, attr)){
 			CompositionType type=(CompositionType)attr.getDomain();
 			if(type.getCardinality().getMaximum()==1){
 				return true;
@@ -985,9 +1036,9 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 		}
 		return false;
 	}
-    private boolean isChbaseLocalised(TransferDescription td,
+    private boolean isLocalisedTextAttr(TransferDescription td,
             AttributeDef attr) {
-        if(Ili2cUtility.isPureChbaseLocalisedText(td, attr) || Ili2cUtility.isPureChbaseLocalisedMText(td, attr)){
+        if(Ili2cUtility.isLocalisedTextAttr(td, attr) || Ili2cUtility.isLocalisedMTextAttr(td, attr)){
             CompositionType type=(CompositionType)attr.getDomain();
             if(type.getCardinality().getMaximum()==1){
                 return true;

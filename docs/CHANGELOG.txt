@@ -14,6 +14,20 @@ ideas/open issues/questions
 LATEST
 ---------------------------
 
+ili2db 4.5.0 (2021-03-12)
+------------------------------
+- ili2h2gis: add schema support (#383)
+- ili2h2gis: Primary Key ohne auto_increment (#380)
+- ili2h2gis: JSON mapping not working (#387)
+- uniform return value (#375)
+- ili2pg: create bigint attributes (#348)
+- ili2pg: new option --createDateTimeChecks (#330)
+- ili2pg: new option --createTextChecks (#331, #340)
+- size of setting columns in metatables increased to 10240 (#374)
+- support expanding of custom MultilingualText structures (#288)
+- ili2c-5.2.0
+- ehisqlgen-1.14.0
+
 ili2db 4.4.6 (2021-02-12)
 ------------------------------
 - import fails with --noSmartMapping (#381) 

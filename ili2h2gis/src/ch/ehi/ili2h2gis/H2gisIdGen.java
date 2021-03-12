@@ -14,10 +14,12 @@ public class H2gisIdGen implements DbIdGen {
     public final static String SQL_ILI2DB_SEQ_NAME="t_ili2db_seq";
     java.sql.Connection conn=null;
     String dbusr=null;
+    String schema=null;
     Long minValue=null;
     Long maxValue=null;
     @Override
     public void init(String schema,Config config) {
+        this.schema=schema;
         minValue=config.getMinIdSeqValue();
         maxValue=config.getMaxIdSeqValue();
     }
@@ -33,7 +35,7 @@ public class H2gisIdGen implements DbIdGen {
 
     @Override
     public void initDbDefs(ch.ehi.sqlgen.generator.Generator gen) {
-        DbTableName sqlName=new DbTableName(SQL_ILI2DB_SEQ_NAME);
+        DbTableName sqlName=new DbTableName(schema,SQL_ILI2DB_SEQ_NAME);
         String stmt="CREATE SEQUENCE "+sqlName.getQName();
         if(minValue!=null){
             stmt=stmt+" MINVALUE "+minValue;
@@ -84,6 +86,9 @@ public class H2gisIdGen implements DbIdGen {
     private long getSeqCount()
     {
         String sqlName=SQL_ILI2DB_SEQ_NAME;
+        if(schema!=null){
+            sqlName=schema+"."+sqlName;
+        }
         java.sql.PreparedStatement getstmt=null;
         try{
             String stmt="SELECT next value for "+sqlName;
@@ -112,6 +117,9 @@ public class H2gisIdGen implements DbIdGen {
     @Override
     public String getDefaultValueSql() {
         String sqlName=SQL_ILI2DB_SEQ_NAME;
+        if(schema!=null){
+            sqlName=schema+"."+sqlName;
+        }
         return "next value for "+sqlName;
     }
 }

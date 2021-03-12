@@ -10,12 +10,10 @@ import java.sql.Connection;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Test;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.MultiPolygon;
-import ch.ehi.basics.logging.EhiLogger;
 import ch.ehi.fgdb4j.Fgdb4j;
 import ch.ehi.ili2db.base.Ili2db;
 import ch.ehi.ili2db.gui.Config;
@@ -66,10 +64,10 @@ public class Datatypes23Test {
 		File data=new File(TEST_OUT,"Datatypes23.ili");
 		Config config=initConfig(data.getPath(),data.getPath()+".log");
 		config.setFunction(Config.FC_SCHEMAIMPORT);
-		config.setCreateFk(config.CREATE_FK_YES);
+		config.setCreateFk(Config.CREATE_FK_YES);
 		config.setCreateNumChecks(true);
 		config.setTidHandling(Config.TID_HANDLING_PROPERTY);
-		config.setBasketHandling(config.BASKET_HANDLING_READWRITE);
+		config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
 		config.setCatalogueRefTrafo(null);
 		config.setMultiSurfaceTrafo(null);
 		config.setMultilingualTrafo(null);
@@ -89,10 +87,10 @@ public class Datatypes23Test {
 		Config config=initConfig(data.getPath(),data.getPath()+".log");
 		config.setFunction(Config.FC_IMPORT);
         config.setDoImplicitSchemaImport(true);
-		config.setCreateFk(config.CREATE_FK_YES);
+		config.setCreateFk(Config.CREATE_FK_YES);
 		config.setCreateNumChecks(true);
 		config.setTidHandling(Config.TID_HANDLING_PROPERTY);
-		config.setBasketHandling(config.BASKET_HANDLING_READWRITE);
+		config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
 		config.setCatalogueRefTrafo(null);
 		config.setMultiSurfaceTrafo(null);
 		config.setMultilingualTrafo(null);
@@ -112,10 +110,10 @@ public class Datatypes23Test {
 		Config config=initConfig(data.getPath(),data.getPath()+".log");
 		config.setFunction(Config.FC_IMPORT);
         config.setDoImplicitSchemaImport(true);
-		config.setCreateFk(config.CREATE_FK_YES);
+		config.setCreateFk(Config.CREATE_FK_YES);
 		config.setCreateNumChecks(true);
 		config.setTidHandling(Config.TID_HANDLING_PROPERTY);
-		config.setBasketHandling(config.BASKET_HANDLING_READWRITE);
+		config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
 		config.setCatalogueRefTrafo(null);
 		config.setMultiSurfaceTrafo(null);
 		config.setMultilingualTrafo(null);
@@ -135,11 +133,11 @@ public class Datatypes23Test {
 		Config config=initConfig(data.getPath(),data.getPath()+".log");
 		config.setFunction(Config.FC_IMPORT);
         config.setDoImplicitSchemaImport(true);
-		config.setCreateFk(config.CREATE_FK_YES);
+		config.setCreateFk(Config.CREATE_FK_YES);
 		config.setCreateNumChecks(true);
 		config.setTidHandling(Config.TID_HANDLING_PROPERTY);
 		config.setImportTid(true);
-		config.setBasketHandling(config.BASKET_HANDLING_READWRITE);
+		config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
 		config.setCatalogueRefTrafo(null);
 		config.setMultiSurfaceTrafo(null);
 		config.setMultilingualTrafo(null);
@@ -493,7 +491,7 @@ public class Datatypes23Test {
 			}
 			{
 				String attr=iomObj.getattrvalue("textLimited");
-				assertEquals("abc100",attr);
+				assertEquals("abc100\"\"''",attr);
 			}
 			{
 				String attr=iomObj.getattrvalue("textUnlimited");

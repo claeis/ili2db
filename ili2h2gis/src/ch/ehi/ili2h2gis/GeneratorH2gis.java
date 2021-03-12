@@ -102,7 +102,7 @@ public class GeneratorH2gis extends GeneratorJdbc {
 		}else if(column instanceof DbColXml){
 			type="varchar";
         }else if(column instanceof DbColJson){
-            type="json";
+            type="varchar";
 		}else{
 			type="varchar";
 		}
@@ -119,15 +119,14 @@ public class GeneratorH2gis extends GeneratorJdbc {
             out.write(getIndent()+colSep+name+" "+type+" "+isNull+cmt+newline());
             colSep=",";
         }else {
-            String isNull=column.isNotNull()?"NOT NULL":"NULL";
-            if(column.isPrimaryKey()){
-                isNull="PRIMARY KEY";
-            }
             String sep=" ";
             String defaultValue="";
-            if(false && column.getDefaultValue()!=null){
+            if(column.getDefaultValue()!=null){
                 defaultValue=sep+"DEFAULT "+column.getDefaultValue();
-                sep=" ";
+            }
+            String isNull=sep+(column.isNotNull()?"NOT NULL":"NULL");
+            if(column.isPrimaryKey()){
+                isNull=sep+"PRIMARY KEY";
             }
             if(column.isIndex() || (createGeomIdx && column instanceof DbColGeometry)){
                 // just collect it; process it later
@@ -135,7 +134,7 @@ public class GeneratorH2gis extends GeneratorJdbc {
             }
             if(createColNow){
                 String name=column.getName();
-                out.write(getIndent()+colSep+name+" "+type+" "+isNull+defaultValue+cmt+newline());
+                out.write(getIndent()+colSep+name+" "+type+defaultValue+isNull+cmt+newline());
                 colSep=",";
             }
         }

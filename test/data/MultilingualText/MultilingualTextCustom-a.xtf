@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TRANSFER xmlns="http://www.interlis.ch/INTERLIS2.3">
+	<HEADERSECTION SENDER="ili2pg-developer-workspace" VERSION="2.3">
+		<MODELS>
+			<MODEL NAME="InternationalCodes_V1" VERSION="2011-08-30" URI="http://www.geo.admin.ch"></MODEL>
+			<MODEL NAME="Localisation_V1" VERSION="2011-08-30" URI="http://www.geo.admin.ch"></MODEL>
+			<MODEL NAME="MultilingualTextCustom0" VERSION="2011-08-30" URI="http://www.geo.admin.ch"></MODEL>
+			<MODEL NAME="Dictionaries_V1" VERSION="2011-08-30" URI="http://www.geo.admin.ch"></MODEL>
+			<MODEL NAME="DictionariesCH_V1" VERSION="2011-08-30" URI="http://www.geo.admin.ch"></MODEL>
+			<MODEL NAME="MultilingualTextCustom1" VERSION="2019-06-23" URI="mailto:ce@eisenhutinformatik.ch"></MODEL>
+		</MODELS>
+	</HEADERSECTION>
+	<DATASECTION>
+		<MultilingualTextCustom1.TestA BID="2">
+			<MultilingualTextCustom0.TestA.ClassA1 TID="a1.2"></MultilingualTextCustom0.TestA.ClassA1>
+			<MultilingualTextCustom0.TestA.ClassA1 TID="a1.1">
+				<atext>
+					<MultilingualTextCustom0.MultilingualText>
+						<LocalisedText>
+							<MultilingualTextCustom0.LocalisedText>
+								<Text>a1.1-null</Text>
+							</MultilingualTextCustom0.LocalisedText>
+							<MultilingualTextCustom0.LocalisedText>
+								<Language>de</Language>
+								<Text>a1.1-de</Text>
+							</MultilingualTextCustom0.LocalisedText>
+							<MultilingualTextCustom0.LocalisedText>
+								<Language>fr</Language>
+								<Text>a1.1-fr</Text>
+							</MultilingualTextCustom0.LocalisedText>
+							<MultilingualTextCustom0.LocalisedText>
+								<Language>rm</Language>
+								<Text>a1.1-rm</Text>
+							</MultilingualTextCustom0.LocalisedText>
+							<MultilingualTextCustom0.LocalisedText>
+								<Language>it</Language>
+								<Text>a1.1-it</Text>
+							</MultilingualTextCustom0.LocalisedText>
+							<MultilingualTextCustom0.LocalisedText>
+								<Language>en</Language>
+								<Text>a1.1-en</Text>
+							</MultilingualTextCustom0.LocalisedText>
+						</LocalisedText>
+					</MultilingualTextCustom0.MultilingualText>
+				</atext>
+				<btext>
+					<MultilingualTextCustom0.LocalisedText>
+						<Language>de</Language>
+						<Text>a1.1-de</Text>
+					</MultilingualTextCustom0.LocalisedText>
+				</btext>
+				<ctext>
+					<MultilingualTextCustom0.MultilingualMText>
+						<LocalisedText>
+							<MultilingualTextCustom0.LocalisedMText>
+								<Text>a1.1-null</Text>
+							</MultilingualTextCustom0.LocalisedMText>
+							<MultilingualTextCustom0.LocalisedMText>
+								<Language>de</Language>
+								<Text>a1.1-de</Text>
+							</MultilingualTextCustom0.LocalisedMText>
+							<MultilingualTextCustom0.LocalisedMText>
+								<Language>fr</Language>
+								<Text>a1.1-fr</Text>
+							</MultilingualTextCustom0.LocalisedMText>
+							<MultilingualTextCustom0.LocalisedMText>
+								<Language>rm</Language>
+								<Text>a1.1-rm</Text>
+							</MultilingualTextCustom0.LocalisedMText>
+							<MultilingualTextCustom0.LocalisedMText>
+								<Language>it</Language>
+								<Text>a1.1-it</Text>
+							</MultilingualTextCustom0.LocalisedMText>
+							<MultilingualTextCustom0.LocalisedMText>
+								<Language>en</Language>
+								<Text>a1.1-en</Text>
+							</MultilingualTextCustom0.LocalisedMText>
+						</LocalisedText>
+					</MultilingualTextCustom0.MultilingualMText>
+				</ctext>
+				<dtext>
+					<MultilingualTextCustom0.LocalisedMText>
+						<Language>de</Language>
+						<Text>a1.1-de</Text>
+					</MultilingualTextCustom0.LocalisedMText>
+				</dtext>
+			</MultilingualTextCustom0.TestA.ClassA1>
+			<MultilingualTextCustom0.TestA.ClassB1 TID="b1.1">
+				<atext>
+					<MultilingualTextCustom0.MultilingualText>
+						<LocalisedText>
+							<MultilingualTextCustom0.LocalisedText>
+								<Language>de</Language>
+								<Text>b1.1-de</Text>
+							</MultilingualTextCustom0.LocalisedText>
+						</LocalisedText>
+					</MultilingualTextCustom0.MultilingualText>
+				</atext>
+				<btext>
+					<MultilingualTextCustom0.LocalisedText>
+						<Language>fr</Language>
+						<Text>b1.1-fr</Text>
+					</MultilingualTextCustom0.LocalisedText>
+				</btext>
+				<ctext>
+					<MultilingualTextCustom0.MultilingualMText>
+						<LocalisedText>
+							<MultilingualTextCustom0.LocalisedMText>
+								<Language>de</Language>
+								<Text>b1.1-de</Text>
+							</MultilingualTextCustom0.LocalisedMText>
+						</LocalisedText>
+					</MultilingualTextCustom0.MultilingualMText>
+				</ctext>
+				<dtext>
+					<MultilingualTextCustom0.LocalisedMText>
+						<Language>fr</Language>
+						<Text>b1.1-fr</Text>
+					</MultilingualTextCustom0.LocalisedMText>
+				</dtext>
+			</MultilingualTextCustom0.TestA.ClassB1>
+		</MultilingualTextCustom1.TestA>
+	</DATASECTION>
+</TRANSFER>
