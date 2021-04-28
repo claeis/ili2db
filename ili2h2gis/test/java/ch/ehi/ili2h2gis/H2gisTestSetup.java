@@ -71,7 +71,8 @@ public class H2gisTestSetup extends AbstractTestSetup {
                 jdbcConnection.close();
                 jdbcConnection=null;
             }
-        }else {
+        }
+        {
             // test.mv.db
             // test.newFile
             // test.tempFile
