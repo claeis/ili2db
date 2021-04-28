@@ -128,6 +128,7 @@ public abstract class Datatypes23Test {
 	        }
 			if(jdbcConnection!=null){
 				jdbcConnection.close();
+                jdbcConnection=null;
 			}
 		}
 	}
@@ -219,6 +220,7 @@ public abstract class Datatypes23Test {
             }
             if(jdbcConnection!=null){
                 jdbcConnection.close();
+                jdbcConnection=null;
             }
 		}
 	}
@@ -298,6 +300,7 @@ public abstract class Datatypes23Test {
             }
             if(jdbcConnection!=null){
                 jdbcConnection.close();
+                jdbcConnection=null;
             }
 		}
 	}
@@ -436,6 +439,7 @@ public abstract class Datatypes23Test {
             }
             if(jdbcConnection!=null){
                 jdbcConnection.close();
+                jdbcConnection=null;
             }
 		}
 	}
@@ -452,6 +456,8 @@ public abstract class Datatypes23Test {
                 Statement stmt=jdbcConnection.createStatement();
                 String stmtTxt="UPDATE "+setup.prefixName("classattr")+" SET textLimited = '' WHERE textUnlimited='textNull';";
                 stmt.execute(stmtTxt);
+                jdbcConnection.close();
+                jdbcConnection=null;
             }
 			
 			File data=new File(TEST_OUT+"Datatypes23Attr-out.xtf");
