@@ -45,47 +45,55 @@ public abstract class Json23Test {
     {
         Class driverClass = Class.forName("org.postgresql.Driver");
         Connection jdbcConnection=null;
-        setup.resetDb();
-        jdbcConnection=setup.createConnection();
-        
-        File data=new File(TEST_OUT,"Json23.ili");
-        Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
-        config.setFunction(Config.FC_SCHEMAIMPORT);
-        config.setCreateFk(Config.CREATE_FK_YES);
-        config.setCreateNumChecks(true);
-        config.setTidHandling(Config.TID_HANDLING_PROPERTY);
-        config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
-        config.setCatalogueRefTrafo(null);
-        config.setMultiSurfaceTrafo(null);
-        config.setMultilingualTrafo(null);
-        config.setInheritanceTrafo(null);
-        config.setJsonTrafo(Config.JSON_TRAFO_COALESCE);
-        Ili2db.run(config,null);
-        
-        // asserts
-        {
+        try {
+            setup.resetDb();
+            jdbcConnection=setup.createConnection();
+            
+            File data=new File(TEST_OUT,"Json23.ili");
+            Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+            config.setFunction(Config.FC_SCHEMAIMPORT);
+            config.setCreateFk(Config.CREATE_FK_YES);
+            config.setCreateNumChecks(true);
+            config.setTidHandling(Config.TID_HANDLING_PROPERTY);
+            config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
+            config.setCatalogueRefTrafo(null);
+            config.setMultiSurfaceTrafo(null);
+            config.setMultilingualTrafo(null);
+            config.setInheritanceTrafo(null);
+            config.setJsonTrafo(Config.JSON_TRAFO_COALESCE);
+            Ili2db.run(config,null);
+            
+            // asserts
             {
-                // t_ili2db_attrname
-                String [][] expectedValues=new String[][] {
-                    {"Json23.TestA.Farbe.r",  "r", "farbe" ,null },
-                    {"Json23.TestA.Auto.Farben",  "farben",    "auto",null },  
-                    {"Json23.TestA.Farbe.active", "aactive",    "farbe" ,null },
-                    {"Json23.TestA.Farbe.g",  "g", "farbe" ,null },
-                    {"Json23.TestA.Farbe.name",   "aname", "farbe" ,null },
-                    {"Json23.TestA.Farbe.b",  "b", "farbe"                 ,null },        
-                };
-                Ili2dbAssert.assertAttrNameTable(jdbcConnection, expectedValues,setup.getSchema());
-            }
-            {
-                // t_ili2db_trafo
-                String [][] expectedValues=new String[][] {
-                    {"Json23.TestA.Farbe",    "ch.ehi.ili2db.inheritance", "newClass"},
-                    {"Json23.TestA.Auto.Farben",  "ch.ehi.ili2db.jsonTrafo",   "coalesce"},
-                    {"Json23.TestA.Auto", "ch.ehi.ili2db.inheritance", "newClass"}
-                };
-                Ili2dbAssert.assertTrafoTable(jdbcConnection, expectedValues,setup.getSchema());
+                {
+                    // t_ili2db_attrname
+                    String [][] expectedValues=new String[][] {
+                        {"Json23.TestA.Farbe.r",  "r", "farbe" ,null },
+                        {"Json23.TestA.Auto.Farben",  "farben",    "auto",null },  
+                        {"Json23.TestA.Farbe.active", "aactive",    "farbe" ,null },
+                        {"Json23.TestA.Farbe.g",  "g", "farbe" ,null },
+                        {"Json23.TestA.Farbe.name",   "aname", "farbe" ,null },
+                        {"Json23.TestA.Farbe.b",  "b", "farbe"                 ,null },        
+                    };
+                    Ili2dbAssert.assertAttrNameTable(jdbcConnection, expectedValues,setup.getSchema());
+                }
+                {
+                    // t_ili2db_trafo
+                    String [][] expectedValues=new String[][] {
+                        {"Json23.TestA.Farbe",    "ch.ehi.ili2db.inheritance", "newClass"},
+                        {"Json23.TestA.Auto.Farben",  "ch.ehi.ili2db.jsonTrafo",   "coalesce"},
+                        {"Json23.TestA.Auto", "ch.ehi.ili2db.inheritance", "newClass"}
+                    };
+                    Ili2dbAssert.assertTrafoTable(jdbcConnection, expectedValues,setup.getSchema());
+                }
+                
             }
             
+        }finally {
+            if(jdbcConnection!=null) {
+                jdbcConnection.close();
+                jdbcConnection=null;
+            }
         }
     }
     
