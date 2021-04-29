@@ -33,6 +33,7 @@ import com.vividsolutions.jts.io.ParseException;
 
 import ch.interlis.iom.IomObject;
 import ch.interlis.iox.IoxException;
+import ch.interlis.iox_j.jts.Iox2jtsException;
 import ch.interlis.iox_j.wkb.Iox2wkbException;
 import net.iharder.Base64;
 
@@ -143,7 +144,9 @@ public class FgdbColumnConverter extends AbstractWKBColumnConverter {
 						return conv.surface2wkb(value,!strokeArcs,p,srsid);
 					} catch (IoxException ex) {
 						throw new ConverterException(ex);
-					}
+					} catch (Iox2jtsException ex) {
+                        throw new ConverterException(ex);
+                    }
 				}
 				return null;
 		}
@@ -161,7 +164,9 @@ public class FgdbColumnConverter extends AbstractWKBColumnConverter {
 						return conv.multisurface2wkb(value,!strokeArcs,p,srsid);
 					} catch (IoxException ex) {
 						throw new ConverterException(ex);
-					}
+					} catch (Iox2jtsException ex) {
+                        throw new ConverterException(ex);
+                    }
 				}
 				return null;
 		}
@@ -187,7 +192,9 @@ public class FgdbColumnConverter extends AbstractWKBColumnConverter {
 					return conv.polyline2wkb(value,false,!strokeArcs,p,srsid);
 				} catch (IoxException ex) {
 					throw new ConverterException(ex);
-				}
+				} catch (Iox2jtsException ex) {
+                    throw new ConverterException(ex);
+                }
 			}
 			return null;
 		}
@@ -200,7 +207,9 @@ public class FgdbColumnConverter extends AbstractWKBColumnConverter {
 					return conv.multiline2wkb(value,!strokeArcs,p,srsid);
 				} catch (IoxException ex) {
 					throw new ConverterException(ex);
-				}
+				} catch (Iox2jtsException ex) {
+                    throw new ConverterException(ex);
+                }
 			}
 			return null;
 		}
