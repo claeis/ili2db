@@ -11,9 +11,14 @@ MODEL View23
 
   TOPIC TopicA =
   
+    STRUCTURE StructA0 =
+       attrA01 : TEXT*10;
+    END StructA0;
+    
     CLASS ClassA1 =
        attrA11 : MANDATORY TEXT*10;
        attrA12 : MANDATORY Coord2;
+       attrA13 : LIST OF StructA0;
     END ClassA1;
 
   END TopicA;
@@ -27,6 +32,7 @@ VIEW TOPIC TopicB =
      ATTRIBUTE
        attrB11 := base->attrA11;
        attrB12 := base->attrA12;
+       attrB13 := base->attrA13;
    END ViewB;
 
 END TopicB;  

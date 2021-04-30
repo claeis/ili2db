@@ -236,7 +236,7 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 	}
 	public String addAttrToQueryStmt(StringBuffer ret, String sep, String tableAlias,AttributeDef attr,Integer epsgCode,String sqlTableName) {
 		if(true) { // attr.getExtending()==null){
-			Type type = attr.getDomainResolvingAliases();
+			Type type = attr.getDomainResolvingAll();
 			 String attrSqlName=ili2sqlName.mapIliAttributeDef(attr,epsgCode,sqlTableName,null);
 			if( attr.isDomainIli1Date()) {
 				 ret.append(sep);

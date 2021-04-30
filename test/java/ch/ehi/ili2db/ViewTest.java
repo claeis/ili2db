@@ -50,4 +50,17 @@ public abstract class ViewTest {
 		config.setDefaultSrsCode("2056");
         Ili2db.run(config,null);
 	}
+    @Test
+    public void exportXtf() throws Exception
+    {
+        {
+            importIli();
+        }
+        File data=new File(TEST_OUT,"View23-out.xtf");
+        Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+        config.setFunction(Config.FC_EXPORT);
+        config.setModels("View23");
+        config.setDefaultSrsCode("2056");
+        Ili2db.run(config,null);
+    }
 }

@@ -16,6 +16,7 @@ LATEST
 - replaced the legacy GUI with a message box
 - fix "illegal value null for attrname" (#401)
 - ili2fgdb: fix NullPointerException with --strokeArcs (#399)
+- fix export of struct attr in VIEW (#397) 
 - iox-ili-1.21.6
 - ili2c-5.2.2
 
