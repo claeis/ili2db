@@ -16,8 +16,8 @@ LATEST
 - replaced the legacy GUI with a message box
 - fix "illegal value null for attrname" (#401)
 - ili2fgdb: fix NullPointerException with --strokeArcs (#399)
-- iox-ili-1.21.6-SNAPSHOT
-- ili2c-5.2.2-SNAPSHOT
+- iox-ili-1.21.6
+- ili2c-5.2.2
 
 ili2db 4.5.0 (2021-03-12)
 ------------------------------
