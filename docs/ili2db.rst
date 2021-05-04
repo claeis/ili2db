@@ -1,15 +1,18 @@
-================
-ili2db-Anleitung
-================
+====================================
+Anleitung zur Programmfamilie ili2db
+====================================
 
 Überblick
 =========
 
-Ili2pg, ili2fgdb bzw. ili2gpkg ist ein in Java erstelltes Programm, das eine
+ilid2db ist eine in Java erstellte Programmfamilie, die zurzeit ili2pg, 
+ili2fgdb, ili2gpkg, ili2ora, ili2mssql, ili2mysql und ili2h2gis umfasst.
+
+Damit kann eine
 Interlis-Transferdatei (itf oder xtf) einem Interlis-Modell entsprechend
 (ili) mittels 1:1-Transfer in eine Datenbank (PostgreSQL/Postgis bzw.
-GeoPackage) schreibt oder aus der Datenbank mittels einem 1:1-Transfer
-eine solche Transferdatei erstellt. Folgende Funktionen sind möglich:
+GeoPackage) gelesen werden oder aus der Datenbank mittels einem 1:1-Transfer
+eine solche Transferdatei erstellt werden. Folgende Funktionen sind möglich:
 
 - erstellt das Datenbankschema aus einem Interlis Modell
 
