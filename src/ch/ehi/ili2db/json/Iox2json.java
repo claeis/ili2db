@@ -1,19 +1,15 @@
 package ch.ehi.ili2db.json;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Iterator;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonToken;
-
 import ch.interlis.ili2c.metamodel.AbstractSurfaceOrAreaType;
 import ch.interlis.ili2c.metamodel.AssociationDef;
 import ch.interlis.ili2c.metamodel.AttributeDef;
 import ch.interlis.ili2c.metamodel.CompositionType;
 import ch.interlis.ili2c.metamodel.CoordType;
-import ch.interlis.ili2c.metamodel.EnumerationType;
 import ch.interlis.ili2c.metamodel.LineType;
 import ch.interlis.ili2c.metamodel.MultiPolylineType;
 import ch.interlis.ili2c.metamodel.NumericType;
@@ -26,9 +22,8 @@ import ch.interlis.ili2c.metamodel.Viewable;
 import ch.interlis.ili2c.metamodel.ViewableTransferElement;
 import ch.interlis.iom.IomConstants;
 import ch.interlis.iom.IomObject;
-import ch.interlis.iom_j.Iom_jObject;
 
-class Iox2json {
+public class Iox2json {
     protected JsonGenerator jg=null;
     protected TransferDescription td=null;
     @Deprecated
