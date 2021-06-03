@@ -22,7 +22,7 @@ import ch.ehi.basics.settings.Settings;
 import ch.ehi.ili2db.converter.AbstractWKBColumnConverter;
 import ch.ehi.ili2db.converter.ConverterException;
 import ch.ehi.ili2db.gui.Config;
-import ch.ehi.ili2db.json.Iox2json;
+import ch.ehi.ili2db.json.Iox2jsonUtility;
 
 import java.io.IOException;
 import java.sql.Date;

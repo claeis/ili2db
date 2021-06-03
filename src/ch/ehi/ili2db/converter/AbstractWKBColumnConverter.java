@@ -33,7 +33,7 @@ import com.vividsolutions.jts.io.ParseException;
 
 import ch.ehi.basics.settings.Settings;
 import ch.ehi.ili2db.gui.Config;
-import ch.ehi.ili2db.json.Iox2json;
+import ch.ehi.ili2db.json.Iox2jsonUtility;
 import ch.interlis.ili2c.metamodel.AttributeDef;
 import ch.interlis.ili2c.metamodel.TransferDescription;
 import ch.interlis.iom.IomObject;
@@ -396,7 +396,7 @@ public abstract class AbstractWKBColumnConverter implements SqlColumnConverter {
         
         try {
             jg = jsonF.createJsonGenerator(out);
-            Iox2json.writeArray(jg, iomValues,iliEleAttr,isEnumInt);
+            Iox2jsonUtility.writeArray(jg, iomValues,iliEleAttr,isEnumInt);
             jg.flush();
             jg.close();
             jg=null;
@@ -414,7 +414,7 @@ public abstract class AbstractWKBColumnConverter implements SqlColumnConverter {
         try {
             JsonParser jg = jsonF.createJsonParser(in);
             
-            values=Iox2json.readArray(jg);
+            values=Iox2jsonUtility.readArray(jg);
         }catch(IOException ex) {
             throw new ConverterException(ex);
         }
@@ -445,7 +445,7 @@ public abstract class AbstractWKBColumnConverter implements SqlColumnConverter {
                 td=(TransferDescription) iliEleAttr.getContainer(TransferDescription.class);
             }
             jg = jsonF.createJsonGenerator(out);
-            Iox2json.write(jg, iomObjects,td);
+            Iox2jsonUtility.write(jg, iomObjects,td);
             jg.flush();
             jg.close();
             jg=null;
@@ -463,7 +463,7 @@ public abstract class AbstractWKBColumnConverter implements SqlColumnConverter {
         try {
             JsonParser jg = jsonF.createJsonParser(in);
             
-            iomObj=Iox2json.read(jg);
+            iomObj=Iox2jsonUtility.read(jg);
         }catch(IOException ex) {
             throw new ConverterException(ex);
         }
