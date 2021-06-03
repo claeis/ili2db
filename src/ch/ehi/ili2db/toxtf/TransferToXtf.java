@@ -133,7 +133,8 @@ public class TransferToXtf {
     private Integer defaultCrsCode=null;
     private Map<Element,Element> crsFilter=null;
     private Map<Element,Element> crsFilterToTarget=null;
-	
+    boolean ignoreUnresolvedReferences=false;
+    
 	public TransferToXtf(NameMapping ili2sqlName1,TransferDescription td1,Connection conn1,SqlColumnConverter geomConv,Config config,TrafoConfig trafoConfig,Viewable2TableMapping class2wrapper1){
 		ili2sqlName=ili2sqlName1;
 		td=td1;
@@ -163,6 +164,7 @@ public class TransferToXtf {
 		this.basketStat=stat;
 		this.customMapping=customMapping1;
 		boolean referrs=false;
+        ignoreUnresolvedReferences=config.isSkipReferenceErrors();
 		
 		if(!hasIliTidCol && writeIliTid) {
             throw new Ili2dbException("TID export requires a "+DbNames.T_ILI_TID_COL+" column");
@@ -624,9 +626,11 @@ public class TransferToXtf {
 						// read object
 						String tid=readObjectTid(aclass,sqlid);
 						if(tid==null){
-							EhiLogger.logError("unknown referenced object "+aclass.getScopedName(null)+" (sqltable "+sqlTargetTable+", sqlid "+sqlid+") referenced from "+fixref.getRoot().getobjecttag()+" TID "+fixref.getRoot().getobjectoid());
-							referrs=true;
-							skipObj=true;
+                            if(!ignoreUnresolvedReferences){
+                                EhiLogger.logError("unknown referenced object "+aclass.getScopedName(null)+" (sqltable "+sqlTargetTable+", sqlid "+sqlid+") referenced from "+fixref.getRoot().getobjecttag()+" TID "+fixref.getRoot().getobjectoid());
+                                referrs=true;
+                                skipObj=true;
+                            }
 						}else{
 							// fix reference
 							ref.setobjectrefoid(tid);
