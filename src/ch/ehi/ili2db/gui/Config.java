@@ -143,6 +143,8 @@ public class Config extends Settings {
     private boolean ver3_export=false;
     private boolean importTid=false;
     private boolean importBid=false;
+    private Integer fetchSize = null;
+    private Integer batchSize = null;
     private boolean disableRounding=false;
     private Long minIdSeqValue=null;
 	private Long maxIdSeqValue=null;
@@ -752,7 +754,18 @@ public class Config extends Settings {
     public boolean isImportBid() {
         return importBid;
     }
-
+    public void setFetchSize(Integer fetchSize) {
+        this.fetchSize = fetchSize;
+    }
+    public Integer getFetchSize() {
+        return fetchSize;
+    }
+    public void setBatchSize(Integer batchSize) {
+        this.batchSize = batchSize;
+    }
+    public Integer getBatchSize() {
+        return batchSize;
+    }
     public void setUseEpsgInNames(boolean value) {
         setValue(USE_EPGS_IN_NAMES,value?TRUE:FALSE);
     }

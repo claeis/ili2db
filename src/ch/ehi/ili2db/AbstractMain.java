@@ -373,15 +373,23 @@ public abstract class AbstractMain {
             }else if(arg.equals("--importBid")){
                 argi++;
                 config.setImportBid(true);
-			}else if(arg.equals("--createBasketCol")){
-				argi++;
-				config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
-			}else if(arg.equals("--createDatasetCol")){
-				argi++;
-				config.setCreateDatasetCols(Config.CREATE_DATASET_COL);
-			}else if(arg.equals("--ILIGML20")){
-				argi++;
-				config.setTransferFileFormat(Config.ILIGML20);
+            }else if(arg.equals("-importFetchSize")){
+                argi++;
+                config.setFetchSize(Integer.parseInt(args[argi]));
+                argi++;
+            }else if(arg.equals("--exportBatchSize")){
+                argi++;
+                config.setBatchSize(Integer.parseInt(args[argi]));
+                argi++;
+            }else if(arg.equals("--createBasketCol")){
+                argi++;
+                config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
+            }else if(arg.equals("--createDatasetCol")){
+                argi++;
+                config.setCreateDatasetCols(Config.CREATE_DATASET_COL);
+            }else if(arg.equals("--ILIGML20")){
+                argi++;
+                config.setTransferFileFormat(Config.ILIGML20);
             }else if(arg.equals("--ver4-noSchemaImport")){
                 argi++;
                 config.setDoImplicitSchemaImport(false);
@@ -499,6 +507,8 @@ public abstract class AbstractMain {
                     System.err.println("--importTid            read transient TIDs into column "+DbNames.T_ILI_TID_COL);
 					System.err.println("--exportTid            write transient TIDs from column "+DbNames.T_ILI_TID_COL);
                     System.err.println("--importBid            read transient BIDs into "+DbNames.BASKETS_TAB+"."+DbNames.T_ILI_TID_COL);
+                    System.err.println("--importFetchSize      set the fetch size for the import statements");
+                    System.err.println("--exportBatchSize      set the batch size for the export statements");
                     System.err.println("--createImportTabs     create tables with import statistics. ("+DbNames.IMPORTS_TAB+")");
 					System.err.println("--createBasketCol      generate "+DbNames.T_BASKET_COL+" column.");
 					System.err.println("--createDatasetCol     generate "+DbNames.T_DATASET_COL+" column (Requires --dataset)");
