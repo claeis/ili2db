@@ -161,7 +161,6 @@ public class Datatypes23Test {
 		Config config=initConfig(data.getPath(),data.getPath()+".log");
 		config.setFunction(Config.FC_EXPORT);
 		config.setModels("Datatypes23");
-		config.setBatchSize(10);
 		Ili2db.readSettingsFromDb(config);
         Ili2db.run(config,null);
 		{

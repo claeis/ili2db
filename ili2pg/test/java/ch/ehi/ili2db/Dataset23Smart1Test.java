@@ -88,6 +88,7 @@ public class Dataset23Smart1Test {
 					config.setMultilingualTrafo(null);
 					config.setInheritanceTrafo(config.INHERITANCE_TRAFO_SMART1);
 					config.setCreateImportTabs(true);
+					config.setBatchSize(10);
 					Ili2db.readSettingsFromDb(config);
 					Ili2db.run(config,null);
 				}
