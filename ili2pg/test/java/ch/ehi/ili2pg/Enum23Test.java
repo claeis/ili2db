@@ -190,6 +190,7 @@ public class Enum23Test extends ch.ehi.ili2db.Enum23Test{
                 config.setTidHandling(Config.TID_HANDLING_PROPERTY);
                 config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
                 config.setCreateEnumCols(Config.CREATE_ENUM_TXT_COL);
+                config.setCreateEnumDefs(Config.CREATE_ENUM_DEFS_MULTI);
                 config.setBeautifyEnumDispName(Config.BEAUTIFY_ENUM_DISPNAME_UNDERSCORE);
                 config.setCatalogueRefTrafo(null);
                 config.setMultiSurfaceTrafo(null);
@@ -198,28 +199,28 @@ public class Enum23Test extends ch.ehi.ili2db.Enum23Test{
                 Ili2db.readSettingsFromDb(config);
                 Ili2db.run(config,null);
         
-                if(false){
+                if(true){
                     String stmtTxt="SELECT dispName FROM "+DBSCHEMA+".enum1 WHERE ilicode ='Test2_ele'";
                     Assert.assertTrue(stmt.execute(stmtTxt));
                     ResultSet rs=stmt.getResultSet();
                     Assert.assertTrue(rs.next());
                     Assert.assertEquals("Test2 ele",rs.getString(1));
                 }
-                if(false){
+                if(true){
                     String stmtTxt="SELECT dispName FROM "+DBSCHEMA+".enum1 WHERE ilicode ='Test3.ele_2'";
                     Assert.assertTrue(stmt.execute(stmtTxt));
                     ResultSet rs=stmt.getResultSet();
                     Assert.assertTrue(rs.next());
                     Assert.assertEquals("Test3.ele 2",rs.getString(1));
                 }
-                if(false){
+                if(true){
                     String stmtTxt="SELECT dispName FROM "+DBSCHEMA+".classa1_attr3 WHERE ilicode ='Test2_ele'";
                     Assert.assertTrue(stmt.execute(stmtTxt));
                     ResultSet rs=stmt.getResultSet();
                     Assert.assertTrue(rs.next());
                     Assert.assertEquals("Test2 ele",rs.getString(1));
                 }
-                if(false){
+                if(true){
                     String stmtTxt="SELECT dispName FROM "+DBSCHEMA+".classa1_attr3 WHERE ilicode ='Test3.ele_2'";
                     Assert.assertTrue(stmt.execute(stmtTxt));
                     ResultSet rs=stmt.getResultSet();
