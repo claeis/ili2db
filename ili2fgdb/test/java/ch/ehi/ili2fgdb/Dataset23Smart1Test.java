@@ -92,7 +92,6 @@ public class Dataset23Smart1Test {
 					config.setMultiSurfaceTrafo(null);
 					config.setMultilingualTrafo(null);
 					config.setInheritanceTrafo(config.INHERITANCE_TRAFO_SMART1);
-					config.setFetchSize(50);
 					Ili2db.readSettingsFromDb(config);
 					Ili2db.run(config,null);
 				}
