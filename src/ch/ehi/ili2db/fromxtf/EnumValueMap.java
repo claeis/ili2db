@@ -1,21 +1,19 @@
 package ch.ehi.ili2db.fromxtf;
 
-import java.sql.Connection;
+import ch.ehi.basics.logging.EhiLogger;
+import ch.ehi.ili2db.base.DbNames;
+import ch.ehi.ili2db.base.Ili2dbException;
+import ch.ehi.sqlgen.repository.DbTableName;
+
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.HashSet;
 
-import ch.ehi.basics.logging.EhiLogger;
-import ch.ehi.ili2db.base.DbNames;
-import ch.ehi.ili2db.base.Ili2dbException;
-import ch.ehi.sqlgen.repository.DbTableName;
-
 public class EnumValueMap {
     private HashMap<Long,String> id2xtf=new HashMap<Long,String>();
     private HashMap<String,Long> xtf2id=new HashMap<String,Long>();
-    
     public long mapXtfValue(String xtfvalue) {
         return xtf2id.get(xtfvalue);
     }
@@ -67,6 +65,30 @@ public class EnumValueMap {
     			exstPrepStmt.close();
     		}
     	return ret;
+    }
+
+    public static HashMap<String, String> createDisplayNameMap(java.sql.Connection conn, DbTableName sqlDbName) throws SQLException {
+        String sqlName = sqlDbName.getName();
+        if (sqlDbName.getSchema() != null) {
+            sqlName = sqlDbName.getSchema() + "." + sqlName;
+        }
+
+        String statement = "SELECT "+DbNames.ENUM_TAB_ILICODE_COL+","+DbNames.ENUM_TAB_DISPNAME_COL+"  FROM " + sqlName;
+        EhiLogger.traceBackendCmd(statement);
+
+        HashMap<String, String> iliCodeDispNameMap = new HashMap<String, String>();
+        PreparedStatement preparedStatement = conn.prepareStatement(statement);
+
+        try {
+            ResultSet rs = preparedStatement.executeQuery();
+            while (rs.next()) {
+                iliCodeDispNameMap.put(rs.getString(1), rs.getString(2));
+            }
+        } finally {
+            preparedStatement.close();
+        }
+
+        return iliCodeDispNameMap;
     }
 
     private void addValue(long id, String xtfCode) {

@@ -74,6 +74,7 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 	private HashMap tag2class=null;
 	private Integer defaultEpsgCode=null;
     private Map<AttributeDef,EnumValueMap> enumCache=new HashMap<AttributeDef,EnumValueMap>();
+    private Map<String, String> displayNameCache = new HashMap<String, String>();
     private String dbSchema;
     private boolean importTid=false;
 	
@@ -1191,7 +1192,7 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 					valuei++;
 					if(createEnumTxtCol){
 						if(value!=null){
-							ps.setString(valuei, beautifyEnumDispName(value));
+							ps.setString(valuei, mapDisplayName(classAttr, value));
 						}else{
 							ps.setNull(valuei,Types.VARCHAR);
 						}
@@ -1250,6 +1251,28 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 	    }
         return map.mapXtfValue(xtfvalue);
     }
+
+    private String mapDisplayName(AttributeDef attr, String value) throws SQLException {
+        String mappedDisplayName = null;
+
+        if (displayNameCache.containsKey(value)) {
+            mappedDisplayName = displayNameCache.get(value);
+        } else {
+            OutParam<String> qualifiedIliName = new OutParam<String>();
+            DbTableName sqlDbName = getEnumTargetTableName(attr, qualifiedIliName, dbSchema);
+            HashMap<String, String> iliCodeDispNameMap = EnumValueMap.createDisplayNameMap(conn,  sqlDbName);
+            displayNameCache.putAll(iliCodeDispNameMap);
+            mappedDisplayName = displayNameCache.get(value);
+        }
+
+        // displayName not set, fallback to beautify the value
+        if (mappedDisplayName == null) {
+            mappedDisplayName = beautifyEnumDispName(value);
+        }
+
+        return mappedDisplayName;
+    }
+
     protected AttributeDef getMultiPointAttrDef(Type type, MultiPointMapping attrMapping) {
 		Table multiPointType = ((CompositionType) type).getComponentType();
 		Table pointStructureType=((CompositionType) ((AttributeDef) multiPointType.getElement(AttributeDef.class, attrMapping.getBagOfPointsAttrName())).getDomain()).getComponentType();

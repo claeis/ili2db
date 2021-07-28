@@ -183,7 +183,7 @@ public class Enum23Test extends ch.ehi.ili2db.Enum23Test{
             stmt=jdbcConnection.createStatement();          
             stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");
             {
-                File data=new File("test/data/Enum23/Enum23.ili");
+                File data=new File("test/data/Enum23/Enum23a.ili");
                 Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
                 config.setFunction(Config.FC_SCHEMAIMPORT);
                 config.setCreateFk(Config.CREATE_FK_YES);
@@ -204,7 +204,7 @@ public class Enum23Test extends ch.ehi.ili2db.Enum23Test{
                     Assert.assertTrue(stmt.execute(stmtTxt));
                     ResultSet rs=stmt.getResultSet();
                     Assert.assertTrue(rs.next());
-                    Assert.assertEquals("Test2 ele",rs.getString(1));
+                    Assert.assertEquals("testelezwei",rs.getString(1));
                 }
                 if(true){
                     String stmtTxt="SELECT dispName FROM "+DBSCHEMA+".enum1 WHERE ilicode ='Test3.ele_2'";
@@ -258,7 +258,7 @@ public class Enum23Test extends ch.ehi.ili2db.Enum23Test{
                     Assert.assertTrue(stmt.execute(stmtTxt));
                     ResultSet rs=stmt.getResultSet();
                     Assert.assertTrue(rs.next());
-                    Assert.assertEquals("Test2 ele",rs.getString(1));
+                    Assert.assertEquals("testelezwei",rs.getString(1));
                 }
                 {
                     String stmtTxt="SELECT attr2_txt FROM "+DBSCHEMA+".classa1 WHERE attr2 ='Test3.ele_2'";
@@ -272,7 +272,7 @@ public class Enum23Test extends ch.ehi.ili2db.Enum23Test{
                     Assert.assertTrue(stmt.execute(stmtTxt));
                     ResultSet rs=stmt.getResultSet();
                     Assert.assertTrue(rs.next());
-                    Assert.assertEquals("Test2 ele",rs.getString(1));
+                    Assert.assertEquals("testelezwei",rs.getString(1));
                 }
                 {
                     String stmtTxt="SELECT attr3_txt FROM "+DBSCHEMA+".classa1 WHERE attr3 ='Test3.ele_2'";
