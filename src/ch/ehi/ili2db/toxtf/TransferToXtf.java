@@ -350,9 +350,6 @@ public class TransferToXtf {
             EhiLogger.traceBackendCmd(stmt);
             getstmt=conn.prepareStatement(stmt);
             getstmt.setString(1,topicName);
-            if(fetchSize != null){
-                getstmt.setFetchSize(fetchSize);
-            }
             res=getstmt.executeQuery();
             if(res.next()){
                 bid=res.getString(1);
@@ -424,9 +421,6 @@ public class TransferToXtf {
 			EhiLogger.traceBackendCmd(stmt);
 			getstmt=conn.prepareStatement(stmt);
 			getstmt.setLong(1,basketSqlId);
-			if(fetchSize != null){
-				getstmt.setFetchSize(fetchSize);
-			}
 			res=getstmt.executeQuery();
 			if(res.next()){
 				topicName=res.getString(1);
