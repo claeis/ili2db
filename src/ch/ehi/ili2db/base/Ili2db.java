@@ -531,7 +531,7 @@ public class Ili2db {
 					  // read mapping from db
 					  mapping.readAttrMappingTable(conn,config.getDbschema());
 				  }
-				  TrafoConfig trafoConfig=new TrafoConfig();
+				  TrafoConfig trafoConfig=new TrafoConfig(config.getBatchSize());
 				  trafoConfig.readTrafoConfig(conn, config.getDbschema(),customMapping);
 
 				ModelElementSelector ms=new ModelElementSelector();
@@ -618,11 +618,11 @@ public class Ili2db {
                             // update inheritance table
                             trsfFromIli.updateInheritanceTable(insertCollector,conn,config.getDbschema());
                             // update enumerations table
-                            trsfFromIli.updateEnumTable(insertCollector,conn);
-                            trsfFromIli.updateMetaInfoTables(insertCollector,conn);
-                            TransferFromIli.addModels(insertCollector,conn,td,config.getDbschema(),customMapping,false);
+                            trsfFromIli.updateEnumTable(insertCollector,conn); // need massive refactoring for batchsize
+                            trsfFromIli.updateMetaInfoTables(insertCollector,conn); // need massive refactoring for batchsize
+                            TransferFromIli.addModels(insertCollector,conn,td,config.getDbschema(),customMapping,false); // not possible static model
                             if(!config.isConfigReadFromDb()){
-                                TransferFromIli.updateSettings(insertCollector,conn,config,config.getDbschema());
+                                TransferFromIli.updateSettings(insertCollector,conn,config,config.getDbschema()); // not possible static model
                             }
                             if(config.getCreateMetaInfo()){
                                 // update meta-attributes table

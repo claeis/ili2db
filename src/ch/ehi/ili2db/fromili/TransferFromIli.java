@@ -33,6 +33,7 @@ import ch.ehi.ili2db.base.DbNames;
 import ch.ehi.ili2db.base.Ili2cUtility;
 import ch.ehi.ili2db.base.Ili2db;
 import ch.ehi.ili2db.base.Ili2dbException;
+import ch.ehi.ili2db.base.StatementExecutionHelper;
 import ch.ehi.ili2db.converter.AbstractRecordConverter;
 import ch.ehi.ili2db.dbmetainfo.DbExtMetaInfo;
 import ch.ehi.ili2db.fromxtf.EnumValueMap;
@@ -119,6 +120,7 @@ public class TransferFromIli {
 	private DbExtMetaInfo metaInfo=new DbExtMetaInfo();
 	private Integer defaultCrsCode=null;
 	private String srsModelAssignment=null;
+	private Integer batchSize = null;
 	public DbSchema doit(TransferDescription td1,java.util.List<Element> modelEles,ch.ehi.ili2db.mapping.NameMapping ili2sqlName,ch.ehi.ili2db.gui.Config config,DbIdGen idGen,TrafoConfig trafoConfig,Viewable2TableMapping class2wrapper1,CustomMapping customMapping1)
 	throws Ili2dbException
 	{
@@ -153,6 +155,8 @@ public class TransferFromIli {
 		visitedEnums=new HashSet();
 		td=td1;
 		recConv=new FromIliRecordConverter(td,ili2sqlName,config,schema,customMapping,idGen,visitedEnums,trafoConfig,class2wrapper,metaInfo);
+
+		batchSize = config.getBatchSize();
 
 		visitedWrapper=new HashSet<ViewableWrapper>();
 		generatModelEles(modelEles,1);
@@ -1231,6 +1235,7 @@ public class TransferFromIli {
 	            EhiLogger.traceBackendCmd(stmt);
 	            java.sql.PreparedStatement ps = conn.prepareStatement(stmt);
 	            String thisClass=null;
+				StatementExecutionHelper seHelper = new StatementExecutionHelper(batchSize);
 	            try{
 	                for(Object aclass:visitedElements){
 	                    if(aclass instanceof Viewable){
@@ -1243,9 +1248,11 @@ public class TransferFromIli {
 	                            }else{
 	                                ps.setNull(2,java.sql.Types.VARCHAR);
 	                            }
-	                            ps.executeUpdate();
+								seHelper.executeSingleOrAddTobatch(ps);
 	                        }
+							seHelper.executeBatch(ps, false);
 	                    }
+						seHelper.executeBatch(ps, true);
 	                }
 	            }catch(java.sql.SQLException ex){
 	                throw new Ili2dbException("failed to insert inheritance-relation for class "+thisClass,ex);
