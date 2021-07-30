@@ -5,6 +5,9 @@ MODEL Basis AT "http://www.interlis.ch/ili2db/tests/" VERSION "1" =
 	STRUCTURE Struct =
 			attrA : (a1,a3(a31,a32));
 	END Struct;
+
+	STRUCTURE Struct2 EXTENDS Struct =
+	END Struct2;
 	
 END Basis.
 
@@ -16,16 +19,44 @@ TRANSLATION OF Basis ["1"]
 			attrC : (c1,c3(c31,c32));
 	END StructC;
 	
+	STRUCTURE StructC2 EXTENDS StructC =
+	END StructC2;
+	
 END BasisC.
 
+MODEL TranslatedBasisA (de) AT "http://www.interlis.ch/ili2db/tests/" VERSION "1" =
+
+	STRUCTURE TrStructA =
+			trAttrA : (a1,a3(a31,a32));
+	END TrStructA;
+	
+	STRUCTURE TrStructA2 EXTENDS TrStructA =
+	END TrStructA2;
+	
+END TranslatedBasisA.
+
+MODEL TranslatedBasisB (fr) AT "http://www.interlis.ch/ili2db/tests/" VERSION "1" 
+TRANSLATION OF TranslatedBasisA ["1"]
+=
+
+	STRUCTURE TrStructB =
+			trAttrB : (b1,b3(b31,b32));
+	END TrStructB;
+	
+	STRUCTURE TrStructB2 EXTENDS TrStructB =
+	END TrStructB2;
+	
+END TranslatedBasisB.
+
 MODEL EnumOkX AT "http://www.interlis.ch/ili2c/tests/" VERSION "1" =
-	IMPORTS Basis;
+	IMPORTS Basis,TranslatedBasisA;
 	
 	TOPIC TopicX =
 
 		CLASS ClassX =
 			attrX : (x1,x2(x21,x22));
 			attrX2 : Basis.Struct;
+			attrX3 : TranslatedBasisA.TrStructA;
 		END ClassX;
 
 		CLASS ClassX2 =
@@ -48,13 +79,14 @@ END EnumOkX.
 MODEL EnumOkA (de) AT "http://www.interlis.ch/ili2c/tests/" VERSION "1" 
 TRANSLATION OF EnumOkX [ "1"]
 =
-	IMPORTS Basis;
+	IMPORTS Basis,TranslatedBasisA;
 	
 	TOPIC TopicA =
 
 		CLASS ClassA =
 			attrA : (a1,a2(a21,a22));
 			attrA2 : Basis.Struct;
+			attrA3 : TranslatedBasisA.TrStructA;
 		END ClassA;
 
 		CLASS ClassA2 =
@@ -77,13 +109,14 @@ END EnumOkA.
 MODEL EnumOkB (fr) AT "http://www.interlis.ch/ili2c/tests/" VERSION "1" 
 TRANSLATION OF EnumOkA [ "1"]
 =
-	IMPORTS Basis;
+	IMPORTS Basis,TranslatedBasisB;
 
 	TOPIC TopicB =
 
 		CLASS ClassB =
 			attrB : (b1,b2(b21,b22));
 			attrB2 : Basis.Struct;
+			attrB3 : TranslatedBasisB.TrStructB;
 		END ClassB;
 
 		CLASS ClassB2 =

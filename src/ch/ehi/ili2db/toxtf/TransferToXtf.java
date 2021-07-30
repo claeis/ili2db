@@ -127,8 +127,10 @@ public class TransferToXtf {
     private ObjectPoolManager recman = null;
 	private ArrayPoolImpl<FixIomObjectRefs> delayedObjects=null;
 	private ch.interlis.ili2c.generator.IndentPrintWriter expgen=null;
+	/** translates IomObjects as stored in the DB (root/origin language) back to as they appeared in the transfer file (translated language) */
 	private TranslateToTranslation languageFilter=null;
 	private Rounder rounder=null;
+    /** translates and/or reduces IomObjects to the export transfer file (different language and/or base model) */
 	private ReduceToBaseModel exportBaseModelFilter=null;
     private Integer defaultCrsCode=null;
     private Map<Element,Element> crsFilter=null;

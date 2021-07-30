@@ -20,7 +20,8 @@ LATEST
 - added Iox2jsonUtility
 - support --skipReferenceErrors on export
 - fix missing model if --exportModels uses a translated model in  another ili-file (#405)
-- iox-ili-1.21.6
+- fix mapping of struct at model level if --exportModels used (#405)
+- iox-ili-1.21.7-SNAPSHOT
 - ili2c-5.2.2
 
 ili2db 4.5.0 (2021-03-12)
