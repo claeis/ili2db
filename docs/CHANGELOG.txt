@@ -21,6 +21,7 @@ LATEST
 - support --skipReferenceErrors on export
 - fix missing model if --exportModels uses a translated model in  another ili-file (#405)
 - fix mapping of struct at model level if --exportModels used (#405)
+- remove duplicate ReduceToBaseModel (duplicate in iox-ili) (#405)
 - iox-ili-1.21.7-SNAPSHOT
 - ili2c-5.2.2
 
