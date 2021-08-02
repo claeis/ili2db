@@ -20,36 +20,41 @@ public class StatementExecutionHelper {
         shouldBatch = this.batchSize != null && batchSize > 1; // batchsize 1 or less is pointless
     }
 
-    public void executeSingleOrAddTobatch(PreparedStatement ps) throws SQLException {
+    public void executeSingleOrBatch(PreparedStatement ps, boolean isLastStatement) throws SQLException {
         if (shouldBatch) {
-            ps.addBatch();
-            queuedBatch++;
-        } else {
-            ps.executeUpdate();
-            singleUpdatesCount++;
-        }
-    }
 
-    public void executeBatch(PreparedStatement ps, boolean isLastStatement) throws SQLException {
-        if (shouldBatch && (queuedBatch >= batchSize || isLastStatement)) {
-            int[] updates = ps.executeBatch();
-            totalBatchUpdatesCount += updates.length;
-            ps.clearBatch();
-            queuedBatch = 0;
-            EhiLogger.logState("batch executed, update counts: " + updates.length);
-            EhiLogger.logState("batch executed, total batch updates counts: " + totalBatchUpdatesCount);
-        } else if (!shouldBatch && isLastStatement) {
-            EhiLogger.logState("single updates executed: " + singleUpdatesCount);
+            if (!isLastStatement) {
+                ps.addBatch();
+                queuedBatch++;
+            }
+
+            if (queuedBatch >= batchSize || isLastStatement) {
+                int[] updates = ps.executeBatch();
+                totalBatchUpdatesCount += updates.length;
+                ps.clearBatch();
+                queuedBatch = 0;
+                EhiLogger.logState("batch executed, update counts: " + updates.length);
+
+                if (isLastStatement) {
+                    EhiLogger.logState("total batch updates executed: " + totalBatchUpdatesCount);
+                }
+            }
+        } else {
+            if (!isLastStatement) {
+                ps.executeUpdate();
+                singleUpdatesCount++;
+            } else {
+                EhiLogger.logState("single updates executed: " + singleUpdatesCount);
+            }
         }
     }
 
     // TODO remove this method exist only for performances testing purpose
     public void writeToFile(String methodName, int processedStatements, Integer batchSize, long duration) {
-        String fileName = methodName + "_processedStatements_"+processedStatements+".csv";
-        System.err.println("WR FILE");
+        String fileName = methodName + "_processedStatements_" + processedStatements + ".csv";
         try {
             FileWriter fw = new FileWriter(fileName, true);
-            fw.write(batchSize + ";" + duration + ";"+"\n");
+            fw.write(batchSize + ";" + duration + ";" + "\n");
             fw.flush();
         } catch (IOException e) {
             throw new RuntimeException("Unable to write report" + fileName, e);

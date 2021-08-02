@@ -38,16 +38,13 @@ import ch.ehi.ili2db.converter.AbstractRecordConverter;
 import ch.ehi.ili2db.dbmetainfo.DbExtMetaInfo;
 import ch.ehi.ili2db.fromxtf.EnumValueMap;
 import ch.ehi.ili2db.gui.Config;
-import ch.ehi.ili2db.mapping.ColumnWrapper;
 import ch.ehi.ili2db.mapping.MultiLineMappings;
 import ch.ehi.ili2db.mapping.MultiPointMappings;
-import ch.ehi.ili2db.mapping.MultiSurfaceMapping;
 import ch.ehi.ili2db.mapping.MultiSurfaceMappings;
 import ch.ehi.ili2db.mapping.TrafoConfig;
 import ch.ehi.ili2db.mapping.Viewable2TableMapping;
 import ch.ehi.ili2db.mapping.ViewableWrapper;
 import ch.ehi.ili2db.metaattr.IliMetaAttrNames;
-import ch.ehi.sqlgen.DbUtility;
 import ch.ehi.sqlgen.generator_impl.jdbc.GeneratorJdbc;
 import ch.ehi.sqlgen.repository.DbColBoolean;
 import ch.ehi.sqlgen.repository.DbColDateTime;
@@ -59,11 +56,9 @@ import ch.ehi.sqlgen.repository.DbIndex;
 import ch.ehi.sqlgen.repository.DbSchema;
 import ch.ehi.sqlgen.repository.DbTable;
 import ch.ehi.sqlgen.repository.DbTableName;
-import ch.interlis.ili2c.metamodel.AbstractAttributeRef;
 import ch.interlis.ili2c.metamodel.AssociationDef;
 import ch.interlis.ili2c.metamodel.AttributeDef;
 import ch.interlis.ili2c.metamodel.AttributeRef;
-import ch.interlis.ili2c.metamodel.CompositionType;
 import ch.interlis.ili2c.metamodel.Container;
 import ch.interlis.ili2c.metamodel.CoordType;
 import ch.interlis.ili2c.metamodel.Domain;
@@ -83,7 +78,6 @@ import ch.interlis.ili2c.metamodel.Table;
 import ch.interlis.ili2c.metamodel.Topic;
 import ch.interlis.ili2c.metamodel.TransferDescription;
 import ch.interlis.ili2c.metamodel.Type;
-import ch.interlis.ili2c.metamodel.TypeAlias;
 import ch.interlis.ili2c.metamodel.View;
 import ch.interlis.ili2c.metamodel.Viewable;
 import ch.interlis.ili2c.metamodel.ViewableTransferElement;
@@ -1248,13 +1242,14 @@ public class TransferFromIli {
 	                            }else{
 	                                ps.setNull(2,java.sql.Types.VARCHAR);
 	                            }
-								seHelper.executeSingleOrAddTobatch(ps);
+								seHelper.executeSingleOrBatch(ps, false);
 	                        }
-							seHelper.executeBatch(ps, false);
 	                    }
-						seHelper.executeBatch(ps, true);
 	                }
-	            }catch(java.sql.SQLException ex){
+
+					seHelper.executeSingleOrBatch(ps, true);
+
+				}catch(java.sql.SQLException ex){
 	                throw new Ili2dbException("failed to insert inheritance-relation for class "+thisClass,ex);
 	            }finally{
 	                ps.close();

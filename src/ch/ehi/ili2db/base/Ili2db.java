@@ -626,9 +626,9 @@ public class Ili2db {
                             }
                             if(config.getCreateMetaInfo()){
                                 // update meta-attributes table
-                                MetaAttrUtility.updateMetaAttributesTable(insertCollector,conn, config.getDbschema(), td);
+                                MetaAttrUtility.updateMetaAttributesTable(insertCollector,conn, config.getDbschema(), td); // not possible static model
                                 // set elements' meta-attributes
-                                MetaAttrUtility.addMetaAttrsFromDb(td, conn, config.getDbschema());
+                                MetaAttrUtility.addMetaAttrsFromDb(td, conn, config.getDbschema()); // not possible static model
                             }
 						}
 	                        // create script requested by user?

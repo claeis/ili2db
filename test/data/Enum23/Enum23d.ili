@@ -1,0 +1,1549 @@
+INTERLIS 2.3;
+
+MODEL Enum23d
+  AT "mailto:ce@eisenhutinformatik.ch" VERSION "2020-08-31" =
+
+  DOMAIN
+    Enum1 = (Test1, Test2, Test3 (Test3a, Test3aa));
+    Enum1b EXTENDS Enum1 = (Test2 (Test2bA, Test2bB));
+    Enum1c EXTENDS Enum1 = (Test2 (Test2cA, Test2cB));
+    Enum1ccc EXTENDS Enum1c = (Test2 (Test2cA (Test2cAA, Test2cAB)));
+    
+  TOPIC TestA =
+    
+    CLASS ClassA1 (ABSTRACT) =
+    	attr1 : Enum1;
+    	attr2 : Enum1;
+    	attr3 : Enum1;
+    	attr4 : Enum1;
+    	attr5 : Enum1;
+    END ClassA1;
+
+    CLASS ClassA1a EXTENDS ClassA1 =
+    END ClassA1a;
+    
+    CLASS ClassA1b EXTENDS ClassA1 =
+    	attr1 (EXTENDED): Enum1b;
+    END ClassA1b;
+
+    CLASS ClassA1c EXTENDS ClassA1 =
+    	attr1 (EXTENDED): Enum1c;
+    END ClassA1c;
+    
+    CLASS ClassA1cc EXTENDS ClassA1c =
+    END ClassA1cc;
+
+    CLASS ClassA1ccc EXTENDS ClassA1cc =
+    	attr1 (EXTENDED): Enum1ccc;
+    END ClassA1ccc;
+
+   CLASS ClassA1aa EXTENDS ClassA1 =
+   END ClassA1aa;
+
+    CLASS ClassA2 EXTENDS ClassA1 =
+    END ClassA2;
+
+    CLASS ClassA3 EXTENDS ClassA1 =
+    END ClassA3;
+
+    CLASS ClassA4 EXTENDS ClassA1 =
+    END ClassA4;
+
+    CLASS ClassA5 EXTENDS ClassA1 =
+    END ClassA5;
+
+    CLASS ClassA6 EXTENDS ClassA1 =
+    END ClassA6;
+
+    CLASS ClassA7 EXTENDS ClassA1 =
+    END ClassA7;
+
+    CLASS ClassA8 EXTENDS ClassA1 =
+    END ClassA8;
+
+    CLASS ClassA9 EXTENDS ClassA1 =
+    END ClassA9;
+
+    CLASS ClassA10 EXTENDS ClassA1 =
+    END ClassA10;
+
+    CLASS ClassA11 EXTENDS ClassA1 =
+    END ClassA11;
+
+    CLASS ClassA12 EXTENDS ClassA1 =
+    END ClassA12;
+
+    CLASS ClassA13 EXTENDS ClassA1 =
+    END ClassA13;
+
+    CLASS ClassA14 EXTENDS ClassA1 =
+    END ClassA14;
+
+    CLASS ClassA15 EXTENDS ClassA1 =
+    END ClassA15;
+
+    CLASS ClassA16 EXTENDS ClassA1 =
+    END ClassA16;
+
+    CLASS ClassA17 EXTENDS ClassA1 =
+    END ClassA17;
+
+    CLASS ClassA18 EXTENDS ClassA1 =
+    END ClassA18;
+
+    CLASS ClassA19 EXTENDS ClassA1 =
+    END ClassA19;
+
+    CLASS ClassA20 EXTENDS ClassA1 =
+    END ClassA20;
+
+    CLASS ClassA21 EXTENDS ClassA1 =
+    END ClassA21;
+
+    CLASS ClassA22 EXTENDS ClassA1 =
+    END ClassA22;
+
+    CLASS ClassA23 EXTENDS ClassA1 =
+    END ClassA23;
+
+    CLASS ClassA24 EXTENDS ClassA1 =
+    END ClassA24;
+
+    CLASS ClassA25 EXTENDS ClassA1 =
+    END ClassA25;
+
+    CLASS ClassA26 EXTENDS ClassA1 =
+    END ClassA26;
+
+    CLASS ClassA27 EXTENDS ClassA1 =
+    END ClassA27;
+
+    CLASS ClassA28 EXTENDS ClassA1 =
+    END ClassA28;
+
+    CLASS ClassA29 EXTENDS ClassA1 =
+    END ClassA29;
+
+    CLASS ClassA30 EXTENDS ClassA1 =
+    END ClassA30;
+
+    CLASS ClassA31 EXTENDS ClassA1 =
+    END ClassA31;
+
+    CLASS ClassA32 EXTENDS ClassA1 =
+    END ClassA32;
+
+    CLASS ClassA33 EXTENDS ClassA1 =
+    END ClassA33;
+
+    CLASS ClassA34 EXTENDS ClassA1 =
+    END ClassA34;
+
+    CLASS ClassA35 EXTENDS ClassA1 =
+    END ClassA35;
+
+    CLASS ClassA36 EXTENDS ClassA1 =
+    END ClassA36;
+
+    CLASS ClassA37 EXTENDS ClassA1 =
+    END ClassA37;
+
+    CLASS ClassA38 EXTENDS ClassA1 =
+    END ClassA38;
+
+    CLASS ClassA39 EXTENDS ClassA1 =
+    END ClassA39;
+
+    CLASS ClassA40 EXTENDS ClassA1 =
+    END ClassA40;
+
+    CLASS ClassA41 EXTENDS ClassA1 =
+    END ClassA41;
+
+    CLASS ClassA42 EXTENDS ClassA1 =
+    END ClassA42;
+
+    CLASS ClassA43 EXTENDS ClassA1 =
+    END ClassA43;
+
+    CLASS ClassA44 EXTENDS ClassA1 =
+    END ClassA44;
+
+    CLASS ClassA45 EXTENDS ClassA1 =
+    END ClassA45;
+
+    CLASS ClassA46 EXTENDS ClassA1 =
+    END ClassA46;
+
+    CLASS ClassA47 EXTENDS ClassA1 =
+    END ClassA47;
+
+    CLASS ClassA48 EXTENDS ClassA1 =
+    END ClassA48;
+
+    CLASS ClassA49 EXTENDS ClassA1 =
+    END ClassA49;
+
+    CLASS ClassA50 EXTENDS ClassA1 =
+    END ClassA50;
+
+    CLASS ClassA51 EXTENDS ClassA1 =
+    END ClassA51;
+
+    CLASS ClassA52 EXTENDS ClassA1 =
+    END ClassA52;
+
+    CLASS ClassA53 EXTENDS ClassA1 =
+    END ClassA53;
+
+    CLASS ClassA54 EXTENDS ClassA1 =
+    END ClassA54;
+
+    CLASS ClassA55 EXTENDS ClassA1 =
+    END ClassA55;
+
+    CLASS ClassA56 EXTENDS ClassA1 =
+    END ClassA56;
+
+    CLASS ClassA57 EXTENDS ClassA1 =
+    END ClassA57;
+
+    CLASS ClassA58 EXTENDS ClassA1 =
+    END ClassA58;
+
+    CLASS ClassA59 EXTENDS ClassA1 =
+    END ClassA59;
+
+    CLASS ClassA60 EXTENDS ClassA1 =
+    END ClassA60;
+
+    CLASS ClassA61 EXTENDS ClassA1 =
+    END ClassA61;
+
+    CLASS ClassA62 EXTENDS ClassA1 =
+    END ClassA62;
+
+    CLASS ClassA63 EXTENDS ClassA1 =
+    END ClassA63;
+
+    CLASS ClassA64 EXTENDS ClassA1 =
+    END ClassA64;
+
+    CLASS ClassA65 EXTENDS ClassA1 =
+    END ClassA65;
+
+    CLASS ClassA66 EXTENDS ClassA1 =
+    END ClassA66;
+
+    CLASS ClassA67 EXTENDS ClassA1 =
+    END ClassA67;
+
+    CLASS ClassA68 EXTENDS ClassA1 =
+    END ClassA68;
+
+    CLASS ClassA69 EXTENDS ClassA1 =
+    END ClassA69;
+
+    CLASS ClassA70 EXTENDS ClassA1 =
+    END ClassA70;
+
+    CLASS ClassA71 EXTENDS ClassA1 =
+    END ClassA71;
+
+    CLASS ClassA72 EXTENDS ClassA1 =
+    END ClassA72;
+
+    CLASS ClassA73 EXTENDS ClassA1 =
+    END ClassA73;
+
+    CLASS ClassA74 EXTENDS ClassA1 =
+    END ClassA74;
+
+    CLASS ClassA75 EXTENDS ClassA1 =
+    END ClassA75;
+
+    CLASS ClassA76 EXTENDS ClassA1 =
+    END ClassA76;
+
+    CLASS ClassA77 EXTENDS ClassA1 =
+    END ClassA77;
+
+    CLASS ClassA78 EXTENDS ClassA1 =
+    END ClassA78;
+
+    CLASS ClassA79 EXTENDS ClassA1 =
+    END ClassA79;
+
+    CLASS ClassA80 EXTENDS ClassA1 =
+    END ClassA80;
+
+    CLASS ClassA81 EXTENDS ClassA1 =
+    END ClassA81;
+
+    CLASS ClassA82 EXTENDS ClassA1 =
+    END ClassA82;
+
+    CLASS ClassA83 EXTENDS ClassA1 =
+    END ClassA83;
+
+    CLASS ClassA84 EXTENDS ClassA1 =
+    END ClassA84;
+
+    CLASS ClassA85 EXTENDS ClassA1 =
+    END ClassA85;
+
+    CLASS ClassA86 EXTENDS ClassA1 =
+    END ClassA86;
+
+    CLASS ClassA87 EXTENDS ClassA1 =
+    END ClassA87;
+
+    CLASS ClassA88 EXTENDS ClassA1 =
+    END ClassA88;
+
+    CLASS ClassA89 EXTENDS ClassA1 =
+    END ClassA89;
+
+    CLASS ClassA90 EXTENDS ClassA1 =
+    END ClassA90;
+
+    CLASS ClassA91 EXTENDS ClassA1 =
+    END ClassA91;
+
+    CLASS ClassA92 EXTENDS ClassA1 =
+    END ClassA92;
+
+    CLASS ClassA93 EXTENDS ClassA1 =
+    END ClassA93;
+
+    CLASS ClassA94 EXTENDS ClassA1 =
+    END ClassA94;
+
+    CLASS ClassA95 EXTENDS ClassA1 =
+    END ClassA95;
+
+    CLASS ClassA96 EXTENDS ClassA1 =
+    END ClassA96;
+
+    CLASS ClassA97 EXTENDS ClassA1 =
+    END ClassA97;
+
+    CLASS ClassA98 EXTENDS ClassA1 =
+    END ClassA98;
+
+    CLASS ClassA99 EXTENDS ClassA1 =
+    END ClassA99;
+
+    CLASS ClassA100 EXTENDS ClassA1 =
+    END ClassA100;
+
+    CLASS ClassA101 EXTENDS ClassA1 =
+    END ClassA101;
+
+    CLASS ClassA102 EXTENDS ClassA1 =
+    END ClassA102;
+
+    CLASS ClassA103 EXTENDS ClassA1 =
+    END ClassA103;
+
+    CLASS ClassA104 EXTENDS ClassA1 =
+    END ClassA104;
+
+    CLASS ClassA105 EXTENDS ClassA1 =
+    END ClassA105;
+
+    CLASS ClassA106 EXTENDS ClassA1 =
+    END ClassA106;
+
+    CLASS ClassA107 EXTENDS ClassA1 =
+    END ClassA107;
+
+    CLASS ClassA108 EXTENDS ClassA1 =
+    END ClassA108;
+
+    CLASS ClassA109 EXTENDS ClassA1 =
+    END ClassA109;
+
+    CLASS ClassA110 EXTENDS ClassA1 =
+    END ClassA110;
+
+    CLASS ClassA111 EXTENDS ClassA1 =
+    END ClassA111;
+
+    CLASS ClassA112 EXTENDS ClassA1 =
+    END ClassA112;
+
+    CLASS ClassA113 EXTENDS ClassA1 =
+    END ClassA113;
+
+    CLASS ClassA114 EXTENDS ClassA1 =
+    END ClassA114;
+
+    CLASS ClassA115 EXTENDS ClassA1 =
+    END ClassA115;
+
+    CLASS ClassA116 EXTENDS ClassA1 =
+    END ClassA116;
+
+    CLASS ClassA117 EXTENDS ClassA1 =
+    END ClassA117;
+
+    CLASS ClassA118 EXTENDS ClassA1 =
+    END ClassA118;
+
+    CLASS ClassA119 EXTENDS ClassA1 =
+    END ClassA119;
+
+    CLASS ClassA120 EXTENDS ClassA1 =
+    END ClassA120;
+
+    CLASS ClassA121 EXTENDS ClassA1 =
+    END ClassA121;
+
+    CLASS ClassA122 EXTENDS ClassA1 =
+    END ClassA122;
+
+    CLASS ClassA123 EXTENDS ClassA1 =
+    END ClassA123;
+
+    CLASS ClassA124 EXTENDS ClassA1 =
+    END ClassA124;
+
+    CLASS ClassA125 EXTENDS ClassA1 =
+    END ClassA125;
+
+    CLASS ClassA126 EXTENDS ClassA1 =
+    END ClassA126;
+
+    CLASS ClassA127 EXTENDS ClassA1 =
+    END ClassA127;
+
+    CLASS ClassA128 EXTENDS ClassA1 =
+    END ClassA128;
+
+    CLASS ClassA129 EXTENDS ClassA1 =
+    END ClassA129;
+
+    CLASS ClassA130 EXTENDS ClassA1 =
+    END ClassA130;
+
+    CLASS ClassA131 EXTENDS ClassA1 =
+    END ClassA131;
+
+    CLASS ClassA132 EXTENDS ClassA1 =
+    END ClassA132;
+
+    CLASS ClassA133 EXTENDS ClassA1 =
+    END ClassA133;
+
+    CLASS ClassA134 EXTENDS ClassA1 =
+    END ClassA134;
+
+    CLASS ClassA135 EXTENDS ClassA1 =
+    END ClassA135;
+
+    CLASS ClassA136 EXTENDS ClassA1 =
+    END ClassA136;
+
+    CLASS ClassA137 EXTENDS ClassA1 =
+    END ClassA137;
+
+    CLASS ClassA138 EXTENDS ClassA1 =
+    END ClassA138;
+
+    CLASS ClassA139 EXTENDS ClassA1 =
+    END ClassA139;
+
+    CLASS ClassA140 EXTENDS ClassA1 =
+    END ClassA140;
+
+    CLASS ClassA141 EXTENDS ClassA1 =
+    END ClassA141;
+
+    CLASS ClassA142 EXTENDS ClassA1 =
+    END ClassA142;
+
+    CLASS ClassA143 EXTENDS ClassA1 =
+    END ClassA143;
+
+    CLASS ClassA144 EXTENDS ClassA1 =
+    END ClassA144;
+
+    CLASS ClassA145 EXTENDS ClassA1 =
+    END ClassA145;
+
+    CLASS ClassA146 EXTENDS ClassA1 =
+    END ClassA146;
+
+    CLASS ClassA147 EXTENDS ClassA1 =
+    END ClassA147;
+
+    CLASS ClassA148 EXTENDS ClassA1 =
+    END ClassA148;
+
+    CLASS ClassA149 EXTENDS ClassA1 =
+    END ClassA149;
+
+    CLASS ClassA150 EXTENDS ClassA1 =
+    END ClassA150;
+
+    CLASS ClassA151 EXTENDS ClassA1 =
+    END ClassA151;
+
+    CLASS ClassA152 EXTENDS ClassA1 =
+    END ClassA152;
+
+    CLASS ClassA153 EXTENDS ClassA1 =
+    END ClassA153;
+
+    CLASS ClassA154 EXTENDS ClassA1 =
+    END ClassA154;
+
+    CLASS ClassA155 EXTENDS ClassA1 =
+    END ClassA155;
+
+    CLASS ClassA156 EXTENDS ClassA1 =
+    END ClassA156;
+
+    CLASS ClassA157 EXTENDS ClassA1 =
+    END ClassA157;
+
+    CLASS ClassA158 EXTENDS ClassA1 =
+    END ClassA158;
+
+    CLASS ClassA159 EXTENDS ClassA1 =
+    END ClassA159;
+
+    CLASS ClassA160 EXTENDS ClassA1 =
+    END ClassA160;
+
+    CLASS ClassA161 EXTENDS ClassA1 =
+    END ClassA161;
+
+    CLASS ClassA162 EXTENDS ClassA1 =
+    END ClassA162;
+
+    CLASS ClassA163 EXTENDS ClassA1 =
+    END ClassA163;
+
+    CLASS ClassA164 EXTENDS ClassA1 =
+    END ClassA164;
+
+    CLASS ClassA165 EXTENDS ClassA1 =
+    END ClassA165;
+
+    CLASS ClassA166 EXTENDS ClassA1 =
+    END ClassA166;
+
+    CLASS ClassA167 EXTENDS ClassA1 =
+    END ClassA167;
+
+    CLASS ClassA168 EXTENDS ClassA1 =
+    END ClassA168;
+
+    CLASS ClassA169 EXTENDS ClassA1 =
+    END ClassA169;
+
+    CLASS ClassA170 EXTENDS ClassA1 =
+    END ClassA170;
+
+    CLASS ClassA171 EXTENDS ClassA1 =
+    END ClassA171;
+
+    CLASS ClassA172 EXTENDS ClassA1 =
+    END ClassA172;
+
+    CLASS ClassA173 EXTENDS ClassA1 =
+    END ClassA173;
+
+    CLASS ClassA174 EXTENDS ClassA1 =
+    END ClassA174;
+
+    CLASS ClassA175 EXTENDS ClassA1 =
+    END ClassA175;
+
+    CLASS ClassA176 EXTENDS ClassA1 =
+    END ClassA176;
+
+    CLASS ClassA177 EXTENDS ClassA1 =
+    END ClassA177;
+
+    CLASS ClassA178 EXTENDS ClassA1 =
+    END ClassA178;
+
+    CLASS ClassA179 EXTENDS ClassA1 =
+    END ClassA179;
+
+    CLASS ClassA180 EXTENDS ClassA1 =
+    END ClassA180;
+
+    CLASS ClassA181 EXTENDS ClassA1 =
+    END ClassA181;
+
+    CLASS ClassA182 EXTENDS ClassA1 =
+    END ClassA182;
+
+    CLASS ClassA183 EXTENDS ClassA1 =
+    END ClassA183;
+
+    CLASS ClassA184 EXTENDS ClassA1 =
+    END ClassA184;
+
+    CLASS ClassA185 EXTENDS ClassA1 =
+    END ClassA185;
+
+    CLASS ClassA186 EXTENDS ClassA1 =
+    END ClassA186;
+
+    CLASS ClassA187 EXTENDS ClassA1 =
+    END ClassA187;
+
+    CLASS ClassA188 EXTENDS ClassA1 =
+    END ClassA188;
+
+    CLASS ClassA189 EXTENDS ClassA1 =
+    END ClassA189;
+
+    CLASS ClassA190 EXTENDS ClassA1 =
+    END ClassA190;
+
+    CLASS ClassA191 EXTENDS ClassA1 =
+    END ClassA191;
+
+    CLASS ClassA192 EXTENDS ClassA1 =
+    END ClassA192;
+
+    CLASS ClassA193 EXTENDS ClassA1 =
+    END ClassA193;
+
+    CLASS ClassA194 EXTENDS ClassA1 =
+    END ClassA194;
+
+    CLASS ClassA195 EXTENDS ClassA1 =
+    END ClassA195;
+
+    CLASS ClassA196 EXTENDS ClassA1 =
+    END ClassA196;
+
+    CLASS ClassA197 EXTENDS ClassA1 =
+    END ClassA197;
+
+    CLASS ClassA198 EXTENDS ClassA1 =
+    END ClassA198;
+
+    CLASS ClassA199 EXTENDS ClassA1 =
+    END ClassA199;
+
+    CLASS ClassA200 EXTENDS ClassA1 =
+    END ClassA200;
+
+    CLASS ClassA201 EXTENDS ClassA1 =
+    END ClassA201;
+
+    CLASS ClassA202 EXTENDS ClassA1 =
+    END ClassA202;
+
+    CLASS ClassA203 EXTENDS ClassA1 =
+    END ClassA203;
+
+    CLASS ClassA204 EXTENDS ClassA1 =
+    END ClassA204;
+
+    CLASS ClassA205 EXTENDS ClassA1 =
+    END ClassA205;
+
+    CLASS ClassA206 EXTENDS ClassA1 =
+    END ClassA206;
+
+    CLASS ClassA207 EXTENDS ClassA1 =
+    END ClassA207;
+
+    CLASS ClassA208 EXTENDS ClassA1 =
+    END ClassA208;
+
+    CLASS ClassA209 EXTENDS ClassA1 =
+    END ClassA209;
+
+    CLASS ClassA210 EXTENDS ClassA1 =
+    END ClassA210;
+
+    CLASS ClassA211 EXTENDS ClassA1 =
+    END ClassA211;
+
+    CLASS ClassA212 EXTENDS ClassA1 =
+    END ClassA212;
+
+    CLASS ClassA213 EXTENDS ClassA1 =
+    END ClassA213;
+
+    CLASS ClassA214 EXTENDS ClassA1 =
+    END ClassA214;
+
+    CLASS ClassA215 EXTENDS ClassA1 =
+    END ClassA215;
+
+    CLASS ClassA216 EXTENDS ClassA1 =
+    END ClassA216;
+
+    CLASS ClassA217 EXTENDS ClassA1 =
+    END ClassA217;
+
+    CLASS ClassA218 EXTENDS ClassA1 =
+    END ClassA218;
+
+    CLASS ClassA219 EXTENDS ClassA1 =
+    END ClassA219;
+
+    CLASS ClassA220 EXTENDS ClassA1 =
+    END ClassA220;
+
+    CLASS ClassA221 EXTENDS ClassA1 =
+    END ClassA221;
+
+    CLASS ClassA222 EXTENDS ClassA1 =
+    END ClassA222;
+
+    CLASS ClassA223 EXTENDS ClassA1 =
+    END ClassA223;
+
+    CLASS ClassA224 EXTENDS ClassA1 =
+    END ClassA224;
+
+    CLASS ClassA225 EXTENDS ClassA1 =
+    END ClassA225;
+
+    CLASS ClassA226 EXTENDS ClassA1 =
+    END ClassA226;
+
+    CLASS ClassA227 EXTENDS ClassA1 =
+    END ClassA227;
+
+    CLASS ClassA228 EXTENDS ClassA1 =
+    END ClassA228;
+
+    CLASS ClassA229 EXTENDS ClassA1 =
+    END ClassA229;
+
+    CLASS ClassA230 EXTENDS ClassA1 =
+    END ClassA230;
+
+    CLASS ClassA231 EXTENDS ClassA1 =
+    END ClassA231;
+
+    CLASS ClassA232 EXTENDS ClassA1 =
+    END ClassA232;
+
+    CLASS ClassA233 EXTENDS ClassA1 =
+    END ClassA233;
+
+    CLASS ClassA234 EXTENDS ClassA1 =
+    END ClassA234;
+
+    CLASS ClassA235 EXTENDS ClassA1 =
+    END ClassA235;
+
+    CLASS ClassA236 EXTENDS ClassA1 =
+    END ClassA236;
+
+    CLASS ClassA237 EXTENDS ClassA1 =
+    END ClassA237;
+
+    CLASS ClassA238 EXTENDS ClassA1 =
+    END ClassA238;
+
+    CLASS ClassA239 EXTENDS ClassA1 =
+    END ClassA239;
+
+    CLASS ClassA240 EXTENDS ClassA1 =
+    END ClassA240;
+
+    CLASS ClassA241 EXTENDS ClassA1 =
+    END ClassA241;
+
+    CLASS ClassA242 EXTENDS ClassA1 =
+    END ClassA242;
+
+    CLASS ClassA243 EXTENDS ClassA1 =
+    END ClassA243;
+
+    CLASS ClassA244 EXTENDS ClassA1 =
+    END ClassA244;
+
+    CLASS ClassA245 EXTENDS ClassA1 =
+    END ClassA245;
+
+    CLASS ClassA246 EXTENDS ClassA1 =
+    END ClassA246;
+
+    CLASS ClassA247 EXTENDS ClassA1 =
+    END ClassA247;
+
+    CLASS ClassA248 EXTENDS ClassA1 =
+    END ClassA248;
+
+    CLASS ClassA249 EXTENDS ClassA1 =
+    END ClassA249;
+
+    CLASS ClassA250 EXTENDS ClassA1 =
+    END ClassA250;
+
+    CLASS ClassA251 EXTENDS ClassA1 =
+    END ClassA251;
+
+    CLASS ClassA252 EXTENDS ClassA1 =
+    END ClassA252;
+
+    CLASS ClassA253 EXTENDS ClassA1 =
+    END ClassA253;
+
+    CLASS ClassA254 EXTENDS ClassA1 =
+    END ClassA254;
+
+    CLASS ClassA255 EXTENDS ClassA1 =
+    END ClassA255;
+
+    CLASS ClassA256 EXTENDS ClassA1 =
+    END ClassA256;
+
+    CLASS ClassA257 EXTENDS ClassA1 =
+    END ClassA257;
+
+    CLASS ClassA258 EXTENDS ClassA1 =
+    END ClassA258;
+
+    CLASS ClassA259 EXTENDS ClassA1 =
+    END ClassA259;
+
+    CLASS ClassA260 EXTENDS ClassA1 =
+    END ClassA260;
+
+    CLASS ClassA261 EXTENDS ClassA1 =
+    END ClassA261;
+
+    CLASS ClassA262 EXTENDS ClassA1 =
+    END ClassA262;
+
+    CLASS ClassA263 EXTENDS ClassA1 =
+    END ClassA263;
+
+    CLASS ClassA264 EXTENDS ClassA1 =
+    END ClassA264;
+
+    CLASS ClassA265 EXTENDS ClassA1 =
+    END ClassA265;
+
+    CLASS ClassA266 EXTENDS ClassA1 =
+    END ClassA266;
+
+    CLASS ClassA267 EXTENDS ClassA1 =
+    END ClassA267;
+
+    CLASS ClassA268 EXTENDS ClassA1 =
+    END ClassA268;
+
+    CLASS ClassA269 EXTENDS ClassA1 =
+    END ClassA269;
+
+    CLASS ClassA270 EXTENDS ClassA1 =
+    END ClassA270;
+
+    CLASS ClassA271 EXTENDS ClassA1 =
+    END ClassA271;
+
+    CLASS ClassA272 EXTENDS ClassA1 =
+    END ClassA272;
+
+    CLASS ClassA273 EXTENDS ClassA1 =
+    END ClassA273;
+
+    CLASS ClassA274 EXTENDS ClassA1 =
+    END ClassA274;
+
+    CLASS ClassA275 EXTENDS ClassA1 =
+    END ClassA275;
+
+    CLASS ClassA276 EXTENDS ClassA1 =
+    END ClassA276;
+
+    CLASS ClassA277 EXTENDS ClassA1 =
+    END ClassA277;
+
+    CLASS ClassA278 EXTENDS ClassA1 =
+    END ClassA278;
+
+    CLASS ClassA279 EXTENDS ClassA1 =
+    END ClassA279;
+
+    CLASS ClassA280 EXTENDS ClassA1 =
+    END ClassA280;
+
+    CLASS ClassA281 EXTENDS ClassA1 =
+    END ClassA281;
+
+    CLASS ClassA282 EXTENDS ClassA1 =
+    END ClassA282;
+
+    CLASS ClassA283 EXTENDS ClassA1 =
+    END ClassA283;
+
+    CLASS ClassA284 EXTENDS ClassA1 =
+    END ClassA284;
+
+    CLASS ClassA285 EXTENDS ClassA1 =
+    END ClassA285;
+
+    CLASS ClassA286 EXTENDS ClassA1 =
+    END ClassA286;
+
+    CLASS ClassA287 EXTENDS ClassA1 =
+    END ClassA287;
+
+    CLASS ClassA288 EXTENDS ClassA1 =
+    END ClassA288;
+
+    CLASS ClassA289 EXTENDS ClassA1 =
+    END ClassA289;
+
+    CLASS ClassA290 EXTENDS ClassA1 =
+    END ClassA290;
+
+    CLASS ClassA291 EXTENDS ClassA1 =
+    END ClassA291;
+
+    CLASS ClassA292 EXTENDS ClassA1 =
+    END ClassA292;
+
+    CLASS ClassA293 EXTENDS ClassA1 =
+    END ClassA293;
+
+    CLASS ClassA294 EXTENDS ClassA1 =
+    END ClassA294;
+
+    CLASS ClassA295 EXTENDS ClassA1 =
+    END ClassA295;
+
+    CLASS ClassA296 EXTENDS ClassA1 =
+    END ClassA296;
+
+    CLASS ClassA297 EXTENDS ClassA1 =
+    END ClassA297;
+
+    CLASS ClassA298 EXTENDS ClassA1 =
+    END ClassA298;
+
+    CLASS ClassA299 EXTENDS ClassA1 =
+    END ClassA299;
+
+    CLASS ClassA300 EXTENDS ClassA1 =
+    END ClassA300;
+
+    CLASS ClassA301 EXTENDS ClassA1 =
+    END ClassA301;
+
+    CLASS ClassA302 EXTENDS ClassA1 =
+    END ClassA302;
+
+    CLASS ClassA303 EXTENDS ClassA1 =
+    END ClassA303;
+
+    CLASS ClassA304 EXTENDS ClassA1 =
+    END ClassA304;
+
+    CLASS ClassA305 EXTENDS ClassA1 =
+    END ClassA305;
+
+    CLASS ClassA306 EXTENDS ClassA1 =
+    END ClassA306;
+
+    CLASS ClassA307 EXTENDS ClassA1 =
+    END ClassA307;
+
+    CLASS ClassA308 EXTENDS ClassA1 =
+    END ClassA308;
+
+    CLASS ClassA309 EXTENDS ClassA1 =
+    END ClassA309;
+
+    CLASS ClassA310 EXTENDS ClassA1 =
+    END ClassA310;
+
+    CLASS ClassA311 EXTENDS ClassA1 =
+    END ClassA311;
+
+    CLASS ClassA312 EXTENDS ClassA1 =
+    END ClassA312;
+
+    CLASS ClassA313 EXTENDS ClassA1 =
+    END ClassA313;
+
+    CLASS ClassA314 EXTENDS ClassA1 =
+    END ClassA314;
+
+    CLASS ClassA315 EXTENDS ClassA1 =
+    END ClassA315;
+
+    CLASS ClassA316 EXTENDS ClassA1 =
+    END ClassA316;
+
+    CLASS ClassA317 EXTENDS ClassA1 =
+    END ClassA317;
+
+    CLASS ClassA318 EXTENDS ClassA1 =
+    END ClassA318;
+
+    CLASS ClassA319 EXTENDS ClassA1 =
+    END ClassA319;
+
+    CLASS ClassA320 EXTENDS ClassA1 =
+    END ClassA320;
+
+    CLASS ClassA321 EXTENDS ClassA1 =
+    END ClassA321;
+
+    CLASS ClassA322 EXTENDS ClassA1 =
+    END ClassA322;
+
+    CLASS ClassA323 EXTENDS ClassA1 =
+    END ClassA323;
+
+    CLASS ClassA324 EXTENDS ClassA1 =
+    END ClassA324;
+
+    CLASS ClassA325 EXTENDS ClassA1 =
+    END ClassA325;
+
+    CLASS ClassA326 EXTENDS ClassA1 =
+    END ClassA326;
+
+    CLASS ClassA327 EXTENDS ClassA1 =
+    END ClassA327;
+
+    CLASS ClassA328 EXTENDS ClassA1 =
+    END ClassA328;
+
+    CLASS ClassA329 EXTENDS ClassA1 =
+    END ClassA329;
+
+    CLASS ClassA330 EXTENDS ClassA1 =
+    END ClassA330;
+
+    CLASS ClassA331 EXTENDS ClassA1 =
+    END ClassA331;
+
+    CLASS ClassA332 EXTENDS ClassA1 =
+    END ClassA332;
+
+    CLASS ClassA333 EXTENDS ClassA1 =
+    END ClassA333;
+
+    CLASS ClassA334 EXTENDS ClassA1 =
+    END ClassA334;
+
+    CLASS ClassA335 EXTENDS ClassA1 =
+    END ClassA335;
+
+    CLASS ClassA336 EXTENDS ClassA1 =
+    END ClassA336;
+
+    CLASS ClassA337 EXTENDS ClassA1 =
+    END ClassA337;
+
+    CLASS ClassA338 EXTENDS ClassA1 =
+    END ClassA338;
+
+    CLASS ClassA339 EXTENDS ClassA1 =
+    END ClassA339;
+
+    CLASS ClassA340 EXTENDS ClassA1 =
+    END ClassA340;
+
+    CLASS ClassA341 EXTENDS ClassA1 =
+    END ClassA341;
+
+    CLASS ClassA342 EXTENDS ClassA1 =
+    END ClassA342;
+
+    CLASS ClassA343 EXTENDS ClassA1 =
+    END ClassA343;
+
+    CLASS ClassA344 EXTENDS ClassA1 =
+    END ClassA344;
+
+    CLASS ClassA345 EXTENDS ClassA1 =
+    END ClassA345;
+
+    CLASS ClassA346 EXTENDS ClassA1 =
+    END ClassA346;
+
+    CLASS ClassA347 EXTENDS ClassA1 =
+    END ClassA347;
+
+    CLASS ClassA348 EXTENDS ClassA1 =
+    END ClassA348;
+
+    CLASS ClassA349 EXTENDS ClassA1 =
+    END ClassA349;
+
+    CLASS ClassA350 EXTENDS ClassA1 =
+    END ClassA350;
+
+    CLASS ClassA351 EXTENDS ClassA1 =
+    END ClassA351;
+
+    CLASS ClassA352 EXTENDS ClassA1 =
+    END ClassA352;
+
+    CLASS ClassA353 EXTENDS ClassA1 =
+    END ClassA353;
+
+    CLASS ClassA354 EXTENDS ClassA1 =
+    END ClassA354;
+
+    CLASS ClassA355 EXTENDS ClassA1 =
+    END ClassA355;
+
+    CLASS ClassA356 EXTENDS ClassA1 =
+    END ClassA356;
+
+    CLASS ClassA357 EXTENDS ClassA1 =
+    END ClassA357;
+
+    CLASS ClassA358 EXTENDS ClassA1 =
+    END ClassA358;
+
+    CLASS ClassA359 EXTENDS ClassA1 =
+    END ClassA359;
+
+    CLASS ClassA360 EXTENDS ClassA1 =
+    END ClassA360;
+
+    CLASS ClassA361 EXTENDS ClassA1 =
+    END ClassA361;
+
+    CLASS ClassA362 EXTENDS ClassA1 =
+    END ClassA362;
+
+    CLASS ClassA363 EXTENDS ClassA1 =
+    END ClassA363;
+
+    CLASS ClassA364 EXTENDS ClassA1 =
+    END ClassA364;
+
+    CLASS ClassA365 EXTENDS ClassA1 =
+    END ClassA365;
+
+    CLASS ClassA366 EXTENDS ClassA1 =
+    END ClassA366;
+
+    CLASS ClassA367 EXTENDS ClassA1 =
+    END ClassA367;
+
+    CLASS ClassA368 EXTENDS ClassA1 =
+    END ClassA368;
+
+    CLASS ClassA369 EXTENDS ClassA1 =
+    END ClassA369;
+
+    CLASS ClassA370 EXTENDS ClassA1 =
+    END ClassA370;
+
+    CLASS ClassA371 EXTENDS ClassA1 =
+    END ClassA371;
+
+    CLASS ClassA372 EXTENDS ClassA1 =
+    END ClassA372;
+
+    CLASS ClassA373 EXTENDS ClassA1 =
+    END ClassA373;
+
+    CLASS ClassA374 EXTENDS ClassA1 =
+    END ClassA374;
+
+    CLASS ClassA375 EXTENDS ClassA1 =
+    END ClassA375;
+
+    CLASS ClassA376 EXTENDS ClassA1 =
+    END ClassA376;
+
+    CLASS ClassA377 EXTENDS ClassA1 =
+    END ClassA377;
+
+    CLASS ClassA378 EXTENDS ClassA1 =
+    END ClassA378;
+
+    CLASS ClassA379 EXTENDS ClassA1 =
+    END ClassA379;
+
+    CLASS ClassA380 EXTENDS ClassA1 =
+    END ClassA380;
+
+    CLASS ClassA381 EXTENDS ClassA1 =
+    END ClassA381;
+
+    CLASS ClassA382 EXTENDS ClassA1 =
+    END ClassA382;
+
+    CLASS ClassA383 EXTENDS ClassA1 =
+    END ClassA383;
+
+    CLASS ClassA384 EXTENDS ClassA1 =
+    END ClassA384;
+
+    CLASS ClassA385 EXTENDS ClassA1 =
+    END ClassA385;
+
+    CLASS ClassA386 EXTENDS ClassA1 =
+    END ClassA386;
+
+    CLASS ClassA387 EXTENDS ClassA1 =
+    END ClassA387;
+
+    CLASS ClassA388 EXTENDS ClassA1 =
+    END ClassA388;
+
+    CLASS ClassA389 EXTENDS ClassA1 =
+    END ClassA389;
+
+    CLASS ClassA390 EXTENDS ClassA1 =
+    END ClassA390;
+
+    CLASS ClassA391 EXTENDS ClassA1 =
+    END ClassA391;
+
+    CLASS ClassA392 EXTENDS ClassA1 =
+    END ClassA392;
+
+    CLASS ClassA393 EXTENDS ClassA1 =
+    END ClassA393;
+
+    CLASS ClassA394 EXTENDS ClassA1 =
+    END ClassA394;
+
+    CLASS ClassA395 EXTENDS ClassA1 =
+    END ClassA395;
+
+    CLASS ClassA396 EXTENDS ClassA1 =
+    END ClassA396;
+
+    CLASS ClassA397 EXTENDS ClassA1 =
+    END ClassA397;
+
+    CLASS ClassA398 EXTENDS ClassA1 =
+    END ClassA398;
+
+    CLASS ClassA399 EXTENDS ClassA1 =
+    END ClassA399;
+
+    CLASS ClassA400 EXTENDS ClassA1 =
+    END ClassA400;
+
+    CLASS ClassA401 EXTENDS ClassA1 =
+    END ClassA401;
+
+    CLASS ClassA402 EXTENDS ClassA1 =
+    END ClassA402;
+
+    CLASS ClassA403 EXTENDS ClassA1 =
+    END ClassA403;
+
+    CLASS ClassA404 EXTENDS ClassA1 =
+    END ClassA404;
+
+    CLASS ClassA405 EXTENDS ClassA1 =
+    END ClassA405;
+
+    CLASS ClassA406 EXTENDS ClassA1 =
+    END ClassA406;
+
+    CLASS ClassA407 EXTENDS ClassA1 =
+    END ClassA407;
+
+    CLASS ClassA408 EXTENDS ClassA1 =
+    END ClassA408;
+
+    CLASS ClassA409 EXTENDS ClassA1 =
+    END ClassA409;
+
+    CLASS ClassA410 EXTENDS ClassA1 =
+    END ClassA410;
+
+    CLASS ClassA411 EXTENDS ClassA1 =
+    END ClassA411;
+
+    CLASS ClassA412 EXTENDS ClassA1 =
+    END ClassA412;
+
+    CLASS ClassA413 EXTENDS ClassA1 =
+    END ClassA413;
+
+    CLASS ClassA414 EXTENDS ClassA1 =
+    END ClassA414;
+
+    CLASS ClassA415 EXTENDS ClassA1 =
+    END ClassA415;
+
+    CLASS ClassA416 EXTENDS ClassA1 =
+    END ClassA416;
+
+    CLASS ClassA417 EXTENDS ClassA1 =
+    END ClassA417;
+
+    CLASS ClassA418 EXTENDS ClassA1 =
+    END ClassA418;
+
+    CLASS ClassA419 EXTENDS ClassA1 =
+    END ClassA419;
+
+    CLASS ClassA420 EXTENDS ClassA1 =
+    END ClassA420;
+
+    CLASS ClassA421 EXTENDS ClassA1 =
+    END ClassA421;
+
+    CLASS ClassA422 EXTENDS ClassA1 =
+    END ClassA422;
+
+    CLASS ClassA423 EXTENDS ClassA1 =
+    END ClassA423;
+
+    CLASS ClassA424 EXTENDS ClassA1 =
+    END ClassA424;
+
+    CLASS ClassA425 EXTENDS ClassA1 =
+    END ClassA425;
+
+    CLASS ClassA426 EXTENDS ClassA1 =
+    END ClassA426;
+
+    CLASS ClassA427 EXTENDS ClassA1 =
+    END ClassA427;
+
+    CLASS ClassA428 EXTENDS ClassA1 =
+    END ClassA428;
+
+    CLASS ClassA429 EXTENDS ClassA1 =
+    END ClassA429;
+
+    CLASS ClassA430 EXTENDS ClassA1 =
+    END ClassA430;
+
+    CLASS ClassA431 EXTENDS ClassA1 =
+    END ClassA431;
+
+    CLASS ClassA432 EXTENDS ClassA1 =
+    END ClassA432;
+
+    CLASS ClassA433 EXTENDS ClassA1 =
+    END ClassA433;
+
+    CLASS ClassA434 EXTENDS ClassA1 =
+    END ClassA434;
+
+    CLASS ClassA435 EXTENDS ClassA1 =
+    END ClassA435;
+
+    CLASS ClassA436 EXTENDS ClassA1 =
+    END ClassA436;
+
+    CLASS ClassA437 EXTENDS ClassA1 =
+    END ClassA437;
+
+    CLASS ClassA438 EXTENDS ClassA1 =
+    END ClassA438;
+
+    CLASS ClassA439 EXTENDS ClassA1 =
+    END ClassA439;
+
+    CLASS ClassA440 EXTENDS ClassA1 =
+    END ClassA440;
+
+    CLASS ClassA441 EXTENDS ClassA1 =
+    END ClassA441;
+
+    CLASS ClassA442 EXTENDS ClassA1 =
+    END ClassA442;
+
+    CLASS ClassA443 EXTENDS ClassA1 =
+    END ClassA443;
+
+    CLASS ClassA444 EXTENDS ClassA1 =
+    END ClassA444;
+
+    CLASS ClassA445 EXTENDS ClassA1 =
+    END ClassA445;
+
+    CLASS ClassA446 EXTENDS ClassA1 =
+    END ClassA446;
+
+    CLASS ClassA447 EXTENDS ClassA1 =
+    END ClassA447;
+
+    CLASS ClassA448 EXTENDS ClassA1 =
+    END ClassA448;
+
+    CLASS ClassA449 EXTENDS ClassA1 =
+    END ClassA449;
+
+    CLASS ClassA450 EXTENDS ClassA1 =
+    END ClassA450;
+
+    CLASS ClassA451 EXTENDS ClassA1 =
+    END ClassA451;
+
+    CLASS ClassA452 EXTENDS ClassA1 =
+    END ClassA452;
+
+    CLASS ClassA453 EXTENDS ClassA1 =
+    END ClassA453;
+
+    CLASS ClassA454 EXTENDS ClassA1 =
+    END ClassA454;
+
+    CLASS ClassA455 EXTENDS ClassA1 =
+    END ClassA455;
+
+    CLASS ClassA456 EXTENDS ClassA1 =
+    END ClassA456;
+
+    CLASS ClassA457 EXTENDS ClassA1 =
+    END ClassA457;
+
+    CLASS ClassA458 EXTENDS ClassA1 =
+    END ClassA458;
+
+    CLASS ClassA459 EXTENDS ClassA1 =
+    END ClassA459;
+
+    CLASS ClassA460 EXTENDS ClassA1 =
+    END ClassA460;
+
+    CLASS ClassA461 EXTENDS ClassA1 =
+    END ClassA461;
+
+    CLASS ClassA462 EXTENDS ClassA1 =
+    END ClassA462;
+
+    CLASS ClassA463 EXTENDS ClassA1 =
+    END ClassA463;
+
+    CLASS ClassA464 EXTENDS ClassA1 =
+    END ClassA464;
+
+    CLASS ClassA465 EXTENDS ClassA1 =
+    END ClassA465;
+
+    CLASS ClassA466 EXTENDS ClassA1 =
+    END ClassA466;
+
+    CLASS ClassA467 EXTENDS ClassA1 =
+    END ClassA467;
+
+    CLASS ClassA468 EXTENDS ClassA1 =
+    END ClassA468;
+
+    CLASS ClassA469 EXTENDS ClassA1 =
+    END ClassA469;
+
+    CLASS ClassA470 EXTENDS ClassA1 =
+    END ClassA470;
+
+    CLASS ClassA471 EXTENDS ClassA1 =
+    END ClassA471;
+
+    CLASS ClassA472 EXTENDS ClassA1 =
+    END ClassA472;
+
+    CLASS ClassA473 EXTENDS ClassA1 =
+    END ClassA473;
+
+    CLASS ClassA474 EXTENDS ClassA1 =
+    END ClassA474;
+
+    CLASS ClassA475 EXTENDS ClassA1 =
+    END ClassA475;
+
+    CLASS ClassA476 EXTENDS ClassA1 =
+    END ClassA476;
+
+    CLASS ClassA477 EXTENDS ClassA1 =
+    END ClassA477;
+
+    CLASS ClassA478 EXTENDS ClassA1 =
+    END ClassA478;
+
+    CLASS ClassA479 EXTENDS ClassA1 =
+    END ClassA479;
+
+    CLASS ClassA480 EXTENDS ClassA1 =
+    END ClassA480;
+
+    CLASS ClassA481 EXTENDS ClassA1 =
+    END ClassA481;
+
+    CLASS ClassA482 EXTENDS ClassA1 =
+    END ClassA482;
+
+    CLASS ClassA483 EXTENDS ClassA1 =
+    END ClassA483;
+
+    CLASS ClassA484 EXTENDS ClassA1 =
+    END ClassA484;
+
+    CLASS ClassA485 EXTENDS ClassA1 =
+    END ClassA485;
+
+    CLASS ClassA486 EXTENDS ClassA1 =
+    END ClassA486;
+
+    CLASS ClassA487 EXTENDS ClassA1 =
+    END ClassA487;
+
+    CLASS ClassA488 EXTENDS ClassA1 =
+    END ClassA488;
+
+    CLASS ClassA489 EXTENDS ClassA1 =
+    END ClassA489;
+
+    CLASS ClassA490 EXTENDS ClassA1 =
+    END ClassA490;
+
+    CLASS ClassA491 EXTENDS ClassA1 =
+    END ClassA491;
+
+    CLASS ClassA492 EXTENDS ClassA1 =
+    END ClassA492;
+
+    CLASS ClassA493 EXTENDS ClassA1 =
+    END ClassA493;
+
+    CLASS ClassA494 EXTENDS ClassA1 =
+    END ClassA494;
+
+    CLASS ClassA495 EXTENDS ClassA1 =
+    END ClassA495;
+
+    CLASS ClassA496 EXTENDS ClassA1 =
+    END ClassA496;
+
+    CLASS ClassA497 EXTENDS ClassA1 =
+    END ClassA497;
+
+    CLASS ClassA498 EXTENDS ClassA1 =
+    END ClassA498;
+
+    CLASS ClassA499 EXTENDS ClassA1 =
+    END ClassA499;
+
+
+    CLASS ClassB1 =
+    END ClassB1;
+
+    ASSOCIATION a2b =
+    	a -- {0..1} ClassA1;
+    	b -- {0..*} ClassB1;
+    END a2b;
+    
+  END TestA;
+  
+  
+END Enum23d.

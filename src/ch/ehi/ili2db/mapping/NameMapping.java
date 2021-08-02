@@ -493,7 +493,6 @@ public class NameMapping {
 				StatementExecutionHelper seHelper = new StatementExecutionHelper(batchSize);
 
 	            try{
-					int processedStatements = 0;
 	                java.util.Iterator<String> entri=classNameIli2sql.keySet().iterator();
 					long start = System.currentTimeMillis();
 	                while(entri.hasNext()){
@@ -502,16 +501,12 @@ public class NameMapping {
 	                        sqlname=classNameIli2sql.get(iliname);
 	                        ps.setString(1, iliname);
 	                        ps.setString(2, sqlname);
-							seHelper.executeSingleOrAddTobatch(ps);
-							processedStatements++;
+	                        seHelper.executeSingleOrBatch(ps, false);
 	                    }
 
-						seHelper.executeBatch(ps, !entri.hasNext());
 	                }
-					long end = System.currentTimeMillis();
-					long duration = end - start;
-					EhiLogger.logState("updateTableMappingTable executed in  " + duration +" ms, with batchSize: " + batchSize);
-					seHelper.writeToFile("updateTableMappingTable", processedStatements, batchSize, duration);
+
+					seHelper.executeSingleOrBatch(ps, true);
 
 	            }catch(java.sql.SQLException ex){
 	                throw new Ili2dbException("failed to insert classname-mapping "+iliname,ex);

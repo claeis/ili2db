@@ -104,17 +104,13 @@ public class TrafoConfig {
 	                                updPrepStmt.setString(1, value);
 	                                updPrepStmt.setString(2, iliname);
 	                                updPrepStmt.setString(3, tag);
-									seHelper.executeSingleOrAddTobatch(updPrepStmt);
+									seHelper.executeSingleOrBatch(updPrepStmt, false);
 	                            }
 
-								seHelper.executeBatch(updPrepStmt, false);
 	                        }
 
-							seHelper.executeBatch(updPrepStmt, true);
+							seHelper.executeSingleOrBatch(updPrepStmt, true);
 	                    }
-						long end = System.currentTimeMillis();
-						long duration = end - start;
-						EhiLogger.logState("updateTrafoConfig executed in  " + duration +" ms, with batchSize: " + batchSize);
 	                }catch(java.sql.SQLException ex){
 	                    throw new Ili2dbException("failed to update trafo",ex);
 	                }finally{

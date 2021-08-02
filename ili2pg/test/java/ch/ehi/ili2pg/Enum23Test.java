@@ -8,6 +8,7 @@ import java.sql.Statement;
 import java.util.HashMap;
 
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import ch.ehi.ili2db.AbstractTestSetup;
@@ -1030,4 +1031,104 @@ public class Enum23Test extends ch.ehi.ili2db.Enum23Test{
 			}
 		}
 	}
+
+    @Ignore
+    @Test
+    public void batchSizePerformanceTest() throws Exception {
+        int zero = 0;
+        int fivehundred = 500;
+
+        int nbTests = 5;
+        System.out.println("WITHOUT BATCHSIZE");
+        for (int i = 0; i < nbTests; i++) {
+            importXtfBatchsizeTest(zero);
+        }
+        System.out.println("WITH BATCHSIZE " + fivehundred);
+        for (int i = 0; i < nbTests; i++) {
+            importXtfBatchsizeTest(fivehundred);
+        }
+
+    }
+
+    @Ignore
+    @Test
+    public void generateIliData() {
+        for (int index = 2; index < 500; index++) {
+            System.out.println("    CLASS ClassA" + index + " EXTENDS ClassA1 =");
+            System.out.println("    END ClassA" + index + ";");
+            System.out.println();
+        }
+    }
+
+    private void importXtfBatchsizeTest(Integer batchSize) throws Exception {
+        //EhiLogger.getInstance().setTraceFilter(false);
+        Connection jdbcConnection = null;
+        try {
+            Class driverClass = Class.forName("org.postgresql.Driver");
+            jdbcConnection = DriverManager.getConnection(
+                    dburl, dbuser, dbpwd);
+            stmt = jdbcConnection.createStatement();
+            stmt.execute("DROP SCHEMA IF EXISTS " + DBSCHEMA + " CASCADE");
+            {
+                File data = new File("test/data/Enum23/Enum23d.xtf");
+                Config config = initConfig(data.getPath(), DBSCHEMA, data.getPath() + ".log");
+                config.setFunction(Config.FC_IMPORT);
+                config.setDoImplicitSchemaImport(true);
+                config.setCreateFk(Config.CREATE_FK_YES);
+                config.setTidHandling(Config.TID_HANDLING_PROPERTY);
+                config.setImportTid(true);
+                config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
+                config.setCreateEnumDefs(Config.CREATE_ENUM_DEFS_MULTI_WITH_ID);
+                config.setCatalogueRefTrafo(null);
+                config.setMultiSurfaceTrafo(null);
+                config.setMultilingualTrafo(null);
+                config.setInheritanceTrafo(null);
+                if (batchSize != null) {
+                    config.setBatchSize(batchSize);
+                }
+                Ili2db.readSettingsFromDb(config);
+                Ili2db.run(config, null);
+                {
+                    String stmtTxt = "select iliCode from " + DBSCHEMA + ".classa1 left join " + DBSCHEMA + ".enum1 on classa1.attr1=enum1.t_id where t_ili_tid='1a'";
+                    ResultSet rs = stmt.executeQuery(stmtTxt);
+                    Assert.assertTrue(rs.next());
+                    Assert.assertEquals("Test2", rs.getString(1));
+                    rs.close();
+                }
+                {
+                    String stmtTxt = "select iliCode from " + DBSCHEMA + ".classa1 left join " + DBSCHEMA + ".enum1 on classa1.attr1=enum1.t_id where t_ili_tid='1b'";
+                    ResultSet rs = stmt.executeQuery(stmtTxt);
+                    Assert.assertTrue(rs.next());
+                    Assert.assertEquals("Test2.Test2bA", rs.getString(1));
+                    rs.close();
+                }
+                {
+                    String stmtTxt = "select iliCode from " + DBSCHEMA + ".classa1 left join " + DBSCHEMA + ".enum1 on classa1.attr1=enum1.t_id where t_ili_tid='1c'";
+                    ResultSet rs = stmt.executeQuery(stmtTxt);
+                    Assert.assertTrue(rs.next());
+                    Assert.assertEquals("Test2.Test2cA", rs.getString(1));
+                    rs.close();
+                }
+                {
+                    String stmtTxt = "select iliCode from " + DBSCHEMA + ".classa1 left join " + DBSCHEMA + ".enum1 on classa1.attr1=enum1.t_id where t_ili_tid='1cc'";
+                    ResultSet rs = stmt.executeQuery(stmtTxt);
+                    Assert.assertTrue(rs.next());
+                    Assert.assertEquals("Test2.Test2cA", rs.getString(1));
+                    rs.close();
+                }
+                {
+                    String stmtTxt = "select iliCode from " + DBSCHEMA + ".classa1 left join " + DBSCHEMA + ".enum1 on classa1.attr1=enum1.t_id where t_ili_tid='1ccc'";
+                    ResultSet rs = stmt.executeQuery(stmtTxt);
+                    Assert.assertTrue(rs.next());
+                    Assert.assertEquals("Test2.Test2cA.Test2cAA", rs.getString(1));
+                    rs.close();
+                }
+            }
+        } finally {
+            if (jdbcConnection != null) {
+                jdbcConnection.close();
+            }
+        }
+    }
+
 }
