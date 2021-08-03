@@ -421,6 +421,9 @@ public abstract class AbstractMain {
             }else if(arg.equals("--createTypeConstraint")){
                 argi++;
                 config.setCreateTypeConstraint(true);
+			}else if(arg.equals("--xtfAttrsAsText ")){
+                argi++;
+                config.setXtfAttrText(true);
 			}else if(arg.equals("--help")){
 					printVersion ();
 					System.err.println();
@@ -519,6 +522,8 @@ public abstract class AbstractMain {
 					System.err.println("--createMetaInfo       Create aditional ili-model information.");
 					System.err.println("--iliMetaAttrs file    Import meta-attributes from a .toml file (Requires --createMetaInfo)");
                     System.err.println("--createTypeConstraints   Create CHECK constraint on t_type columns.");
+                    System.err.println("--createTypeConstraints   Create CHECK constraint on t_type columns.");
+					System.err.println("--xtfAttrsAsText       Every xtf attribute will be saved in a text column, this allow to import an xtf with for example a value too long");
 					printSpecificOptions();
 					System.err.println("--proxy host           proxy server to access model repositories.");
 					System.err.println("--proxyPort port       proxy port to access model repositories.");

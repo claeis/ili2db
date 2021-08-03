@@ -226,6 +226,99 @@ public abstract class Datatypes23Test {
 	}
 
 	@Test
+	public void importXtfAttr_asText() throws Exception{
+		Connection jdbcConnection=null;
+		Statement stmt=null;
+		try {
+			setup.resetDb();
+			jdbcConnection = setup.createConnection();
+			stmt=jdbcConnection.createStatement();
+			File data=new File(TEST_OUT+"Datatypes23Attr_textLimitedTooLong.xtf");
+			Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+			config.setFunction(Config.FC_IMPORT);
+			config.setDoImplicitSchemaImport(true);
+			config.setCreateFk(Config.CREATE_FK_YES);
+			config.setCreateNumChecks(true);
+			config.setTidHandling(Config.TID_HANDLING_PROPERTY);
+			config.setImportTid(true);
+			config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
+			config.setCatalogueRefTrafo(null);
+			config.setMultiSurfaceTrafo(null);
+			config.setMultilingualTrafo(null);
+			config.setInheritanceTrafo(null);
+			config.setXtfAttrText(true);
+			//Ili2db.readSettingsFromDb(config);
+			Ili2db.run(config,null);
+			String stmtTxt="SELECT * FROM "+setup.prefixName("classattr")+" ORDER BY t_id ASC";
+			{
+				Assert.assertTrue(stmt.execute(stmtTxt));
+				ResultSet rs=stmt.getResultSet();
+				{
+					Assert.assertTrue(rs.next());
+					Assert.assertEquals("22", rs.getString("aI32id"));
+					Assert.assertEquals(true, rs.getBoolean("aBoolean"));
+					Assert.assertEquals("15b6bcce-8772-4595-bf82-f727a665fbf3", rs.getString("aUuid"));
+					Assert.assertEquals("1111111111111111111111111111111111111111", rs.getString("textLimited"));
+					Assert.assertEquals("Left", rs.getString("horizAlignment"));
+					Assert.assertEquals("mailto:ceis@localhost", rs.getString("uritext"));
+					Assert.assertEquals("5", rs.getString("numericInt"));
+					String xmlbox = rs.getString("xmlbox");
+					String expectedXmlbox = "<x>\n" +
+							"                           <a></a>\n" +
+							"                       </x>";
+					Diff xmlboxDiff = DiffBuilder.compare(Input.fromString(expectedXmlbox)).withTest(Input.fromString(xmlbox))
+							.checkForSimilar().normalizeWhitespace().build();
+
+					Assert.assertFalse(xmlboxDiff.toString(), xmlboxDiff.hasDifferences());
+					Assert.assertEquals("mehr.vier", rs.getString("aufzaehlung"));
+					Assert.assertEquals("09:00:00.0", rs.getString("aTime"));
+					Assert.assertEquals("abc200\n" +
+							"end200", rs.getString("mtextLimited"));
+					Assert.assertEquals("chgAAAAAAAAA0azD", rs.getString("aStandardid"));
+					Assert.assertEquals("Grunddatensatz.Fixpunkte.LFP.Nummer", rs.getString("aAttribute"));
+					Assert.assertEquals("2002-09-24", rs.getString("aDate"));
+					Assert.assertEquals("Top", rs.getString("vertAlignment"));
+					Assert.assertEquals("ClassA", rs.getString("nametext"));
+					Assert.assertEquals("abc101", rs.getString("textUnlimited"));
+					Assert.assertEquals("6.0", rs.getString("numericDec"));
+					Assert.assertEquals("abc201\n" +
+							"end201", rs.getString("mtextUnlimited"));
+					Assert.assertEquals("1900-01-01T12:30:05", rs.getString("aDateTime"));
+				}
+				{
+					Assert.assertTrue(rs.next());
+					Assert.assertEquals(null, rs.getString("textLimited"));
+					Assert.assertTrue(rs.wasNull());
+					Assert.assertEquals("textNull", rs.getString("textUnlimited"));
+
+				}
+			}
+			{
+				// byte array
+				String stmtT="SELECT binbox FROM "+setup.prefixName("classattr")+" ORDER BY t_id ASC";
+				Assert.assertTrue(stmt.execute(stmtT));
+				ResultSet rs=stmt.getResultSet();
+				Assert.assertTrue(rs.next());
+				byte[] bytes=(byte[])rs.getObject("binbox");
+				Assert.assertFalse(rs.wasNull());
+				String wkbText=Base64.encodeBytes(bytes);
+				Assert.assertEquals("AAAA", wkbText);
+			}
+		}catch(SQLException e) {
+			throw new IoxException(e);
+		}finally{
+			if(stmt!=null) {
+				stmt.close();
+				stmt=null;
+			}
+			if(jdbcConnection!=null){
+				jdbcConnection.close();
+				jdbcConnection=null;
+			}
+		}
+	}
+
+	@Test
 	public void importXtfLine() throws Exception{
         Connection jdbcConnection=null;
         Statement stmt=null;
@@ -554,7 +647,118 @@ public abstract class Datatypes23Test {
 		}finally{
 		}
 	}
-	
+
+	@Test
+	public void exportXtfAttr_invalidTextLimited() throws Exception
+	{
+		{
+			importXtfAttr_asText();
+		}
+		try{
+			{
+				Connection jdbcConnection = setup.createConnection();
+				Statement stmt=jdbcConnection.createStatement();
+				String stmtTxt="UPDATE "+setup.prefixName("classattr")+" SET textLimited = '' WHERE textUnlimited='textNull';";
+				stmt.execute(stmtTxt);
+				jdbcConnection.close();
+				jdbcConnection=null;
+			}
+
+			File data=new File(TEST_OUT+"Datatypes23Attr_textLimitedTooLong-out.xtf");
+			Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+			config.setFunction(Config.FC_EXPORT);
+			config.setModels("Datatypes23");
+			config.setExportTid(true);
+			config.setBasketHandling(null);
+			Ili2db.readSettingsFromDb(config);
+			try{
+				Ili2db.run(config,null);
+			}catch(Exception ex){
+				EhiLogger.logError(ex);
+				Assert.fail();
+			}
+			// tests
+			// read objects of db and write objectValue to HashMap
+			HashMap<String,IomObject> objs=new HashMap<String,IomObject>();
+			XtfReader reader=new XtfReader(data);
+			IoxEvent event=null;
+			do{
+				event=reader.read();
+				if(event instanceof StartTransferEvent){
+				}else if(event instanceof StartBasketEvent){
+				}else if(event instanceof ObjectEvent){
+					IomObject iomObj=((ObjectEvent)event).getIomObject();
+					if(iomObj.getobjectoid()!=null){
+						objs.put(iomObj.getobjectoid(), iomObj);
+					}
+				}else if(event instanceof EndBasketEvent){
+				}else if(event instanceof EndTransferEvent){
+				}
+			}while(!(event instanceof EndTransferEvent));
+			{
+				{
+					IomObject obj1 = objs.get("ClassAttr.1");
+					Assert.assertNotNull(obj1);
+					Assert.assertEquals("Datatypes23.Topic.ClassAttr", obj1.getobjecttag());
+					// datatypes23
+					Assert.assertEquals("22", obj1.getattrvalue("aI32id"));
+					Assert.assertEquals("true", obj1.getattrvalue("aBoolean"));
+					Assert.assertEquals("15b6bcce-8772-4595-bf82-f727a665fbf3", obj1.getattrvalue("aUuid"));
+					Assert.assertEquals("abc100\"\"''", obj1.getattrvalue("textLimited"));
+					Assert.assertEquals("Left", obj1.getattrvalue("horizAlignment"));
+					Assert.assertEquals("mailto:ceis@localhost", obj1.getattrvalue("uritext"));
+					Assert.assertEquals("5", obj1.getattrvalue("numericInt"));
+
+					// do xml comparison
+					String expectedXmlValue="<?xml version=\"1.0\" encoding=\"UTF-8\"?><x>\n" +
+							"                           <a></a>\n" +
+							"                       </x>";
+					String actualXmlValue=obj1.getattrvalue("xmlbox");
+					{
+						DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+						DocumentBuilder builder = dbf.newDocumentBuilder();
+						Document actualDoc = builder.parse(new org.xml.sax.InputSource(new java.io.StringReader(actualXmlValue)));
+						Document expectedDoc = builder.parse(new org.xml.sax.InputSource(new java.io.StringReader(expectedXmlValue)));
+						Diff diff = DiffBuilder
+								.compare(expectedDoc)
+								.withTest(actualDoc)
+								.ignoreComments()
+								.ignoreWhitespace()
+								.checkForSimilar()
+								.build();
+						//System.out.println(diff.toString());
+						Assert.assertFalse(diff.hasDifferences());
+					}
+
+					Assert.assertEquals("mehr.vier", obj1.getattrvalue("aufzaehlung"));
+					Assert.assertEquals("09:00:00.000", obj1.getattrvalue("aTime"));
+					Assert.assertEquals("abc200\n" +
+							"end200", obj1.getattrvalue("mtextLimited"));
+					Assert.assertEquals("AAAA", obj1.getattrvalue("binbox"));
+					Assert.assertEquals("chgAAAAAAAAA0azD", obj1.getattrvalue("aStandardid"));
+					Assert.assertEquals("Grunddatensatz.Fixpunkte.LFP.Nummer", obj1.getattrvalue("aAttribute"));
+					Assert.assertEquals("2002-09-24", obj1.getattrvalue("aDate"));
+					Assert.assertEquals("Top", obj1.getattrvalue("vertAlignment"));
+					Assert.assertEquals("ClassA", obj1.getattrvalue("nametext"));
+					Assert.assertEquals("abc101", obj1.getattrvalue("textUnlimited"));
+					Assert.assertEquals("6.0", obj1.getattrvalue("numericDec"));
+					Assert.assertEquals("abc201\n" +
+							"end201", obj1.getattrvalue("mtextUnlimited"));
+					Assert.assertEquals("1900-01-01T12:30:05.000", obj1.getattrvalue("aDateTime"));
+					Assert.assertEquals("DM01AVCH24D.FixpunkteKategorie1.LFP1", obj1.getattrvalue("aClass"));
+
+				}
+				{
+					IomObject obj1 = objs.get("ClassAttr.2");
+					Assert.assertNotNull(obj1);
+					Assert.assertEquals("Datatypes23.Topic.ClassAttr", obj1.getobjecttag());
+					Assert.assertEquals(0, obj1.getattrvaluecount("textLimited"));
+				}
+			}
+		}finally{
+		}
+	}
+
 	@Test
 	public void exportXtfLine() throws Exception {		
 	    {

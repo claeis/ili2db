@@ -150,6 +150,7 @@ public class Config extends Settings {
 	private String transferFileFormat=null;
 	private String iliMetaAttrsFile=null;
     private String domainAssignments=null;
+    private boolean xtfAttrText=false;
 	final static public String ILIGML20="ILIGML20"; 
 	
     static public final int FC_UNDEFINED=0;
@@ -789,4 +790,12 @@ public class Config extends Settings {
     public void setDisableRounding(boolean disableRounding) {
         this.disableRounding = disableRounding;
     }
+
+	public boolean isXtfAttrText() {
+		return xtfAttrText;
+	}
+
+	public void setXtfAttrText(boolean enable) {
+		this.xtfAttrText = enable;
+	}
 }
