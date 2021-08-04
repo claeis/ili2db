@@ -272,7 +272,7 @@ public class Enum23Test extends ch.ehi.ili2db.Enum23Test{
                     Assert.assertTrue(stmt.execute(stmtTxt));
                     ResultSet rs=stmt.getResultSet();
                     Assert.assertTrue(rs.next());
-                    Assert.assertEquals("testelezwei",rs.getString(1));
+                    Assert.assertEquals("Test2 ele",rs.getString(1));
                 }
                 {
                     String stmtTxt="SELECT attr3_txt FROM "+DBSCHEMA+".classa1 WHERE attr3 ='Test3.ele_2'";

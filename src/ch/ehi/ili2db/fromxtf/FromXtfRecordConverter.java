@@ -1252,26 +1252,26 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
         return map.mapXtfValue(xtfvalue);
     }
 
-    private String mapDisplayName(AttributeDef attr, String value) throws SQLException {
-        String mappedDisplayName = null;
+	private String mapDisplayName(AttributeDef attr, String value) throws SQLException {
+		EnumValueMap map = null;
+		if(enumCache.containsKey(attr)) {
+			map=enumCache.get(attr);
+		}else {
+			OutParam<String> qualifiedIliName=new OutParam<String>();
+			DbTableName sqlDbName=getEnumTargetTableName(attr, qualifiedIliName, dbSchema);
+			map=EnumValueMap.createEnumValueMap(conn, null, false, qualifiedIliName.value, sqlDbName);
+			enumCache.put(attr,map);
+		}
 
-        if (displayNameCache.containsKey(value)) {
-            mappedDisplayName = displayNameCache.get(value);
-        } else {
-            OutParam<String> qualifiedIliName = new OutParam<String>();
-            DbTableName sqlDbName = getEnumTargetTableName(attr, qualifiedIliName, dbSchema);
-            HashMap<String, String> iliCodeDispNameMap = EnumValueMap.createDisplayNameMap(conn,  sqlDbName);
-            displayNameCache.putAll(iliCodeDispNameMap);
-            mappedDisplayName = displayNameCache.get(value);
-        }
+		String mappedDisplayName = null;
+		mappedDisplayName = map.mapXtfValueToDisplayName(value);
+		if(mappedDisplayName == null || mappedDisplayName.isEmpty()){
+			// displayName not set, fallback to beautify the value
+			mappedDisplayName = beautifyEnumDispName(value);
+		}
 
-        // displayName not set, fallback to beautify the value
-        if (mappedDisplayName == null) {
-            mappedDisplayName = beautifyEnumDispName(value);
-        }
-
-        return mappedDisplayName;
-    }
+		return mappedDisplayName;
+	}
 
     protected AttributeDef getMultiPointAttrDef(Type type, MultiPointMapping attrMapping) {
 		Table multiPointType = ((CompositionType) type).getComponentType();
