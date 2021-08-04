@@ -572,6 +572,21 @@ public abstract class AbstractMain {
 		}
 		
 	}
+
+	protected boolean parseBooleanArgument(String arg) {
+		int indexEquals = arg.indexOf('=');
+		if (indexEquals >= 0){
+			String value = arg.substring(indexEquals + 1);
+
+			if (value.equalsIgnoreCase("true")) return true;
+			if (value.equalsIgnoreCase("false")) return false;
+
+			EhiLogger.logAdaption(String.format("Could not parse boolean value <%s> for option <%s>.", value, arg.substring(0,indexEquals)));
+		}
+
+		return true;
+	}
+
 	private void printVersion ()
 	{
 	  System.err.println("INTERLIS 2-loader for "+getDB_PRODUCT_NAME()+", Version "+getVersion());
