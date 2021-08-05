@@ -123,8 +123,8 @@ public class MysqlMain extends ch.ehi.ili2db.AbstractMain {
 			argi++;
 			config.setDbpwd(args[argi]);
 			argi++;
-		}else if(arg.equals("--oneGeomPerTable")){
-			config.setOneGeomPerTable(true);
+		}else if(arg.startsWith("--oneGeomPerTable")){
+			config.setOneGeomPerTable(parseBooleanArgument(arg));
 			argi++;
 		}
 		return argi;

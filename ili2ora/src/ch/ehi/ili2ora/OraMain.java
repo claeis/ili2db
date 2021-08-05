@@ -130,14 +130,18 @@ public class OraMain extends ch.ehi.ili2db.AbstractMain {
 			argi++;
 			config.setDbpwd(args[argi]);
 			argi++;
-		}else if(arg.equals("--geomwkb")){
+		}else if(arg.startsWith("--geomwkb")){
 			argi++;
-			config.setGeometryConverter(ch.ehi.ili2ora.converter.OracleWKBColumnConverter.class.getName());
-			config.setDdlGenerator(ch.ehi.sqlgen.generator_impl.jdbc.GeneratorOracleWKB.class.getName());
-		}else if(arg.equals("--geomwkt")){
+			if (parseBooleanArgument(arg)){
+				config.setGeometryConverter(ch.ehi.ili2ora.converter.OracleWKBColumnConverter.class.getName());
+				config.setDdlGenerator(ch.ehi.sqlgen.generator_impl.jdbc.GeneratorOracleWKB.class.getName());
+			}
+		}else if(arg.startsWith("--geomwkt")){
 			argi++;
-			config.setGeometryConverter(ch.ehi.ili2ora.converter.OracleWKTColumnConverter.class.getName());
-			config.setDdlGenerator(ch.ehi.sqlgen.generator_impl.jdbc.GeneratorOracleWKT.class.getName());
+			if (parseBooleanArgument(arg)) {
+				config.setGeometryConverter(ch.ehi.ili2ora.converter.OracleWKTColumnConverter.class.getName());
+				config.setDdlGenerator(ch.ehi.sqlgen.generator_impl.jdbc.GeneratorOracleWKT.class.getName());
+			}
 		}else if(arg.equals("--dbservice")) {
 			argi++;
 			dbservice = args[argi];

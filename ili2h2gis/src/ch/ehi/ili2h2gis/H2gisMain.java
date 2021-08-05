@@ -130,8 +130,8 @@ public class H2gisMain extends ch.ehi.ili2db.AbstractMain {
             argi++;
             config.setDbschema(args[argi]);
             argi++;
-		}else if(arg.equals("--oneGeomPerTable")){
-			config.setOneGeomPerTable(true);
+		}else if(arg.startsWith("--oneGeomPerTable")){
+			config.setOneGeomPerTable(parseBooleanArgument(arg));
 			argi++;
 		}
 		return argi;

@@ -31,9 +31,9 @@ import ch.interlis.ili2c.gui.UserSettings;
  * @version $Revision: 1.0 $ $Date: 07.02.2005 $
  */
 public abstract class AbstractMain {
-	public abstract String getAPP_NAME(); 
-	public abstract String getDB_PRODUCT_NAME(); 
-	public abstract String getJAR_NAME(); 
+	public abstract String getAPP_NAME();
+	public abstract String getDB_PRODUCT_NAME();
+	public abstract String getJAR_NAME();
 	public abstract AbstractDbPanelDescriptor getDbPanelDescriptor();
 	protected abstract void printConnectOptions();
 	protected abstract void printSpecificOptions();
@@ -124,47 +124,57 @@ public abstract class AbstractMain {
 				argi++;
 				config.setTopics(args[argi]);
 				argi++;
-			}else if(arg.equals("--gui")){
-				doGui=true;
+			}else if(arg.startsWith("--gui")){
+				doGui=parseBooleanArgument(arg);
 				argi++;
-            }else if(arg.equals("--validate")){
-                config.setFunction(Config.FC_VALIDATE);
+            }else if(arg.startsWith("--validate")){
+                if(parseBooleanArgument(arg))
+                	config.setFunction(Config.FC_VALIDATE);
                 argi++;
-			}else if(arg.equals("--import")){
-				config.setFunction(Config.FC_IMPORT);
+			}else if(arg.startsWith("--import")){
+				if(parseBooleanArgument(arg))
+					config.setFunction(Config.FC_IMPORT);
 				argi++;
-			}else if(arg.equals("--update")){
-				config.setFunction(Config.FC_UPDATE);
+			}else if(arg.startsWith("--update")){
+				if(parseBooleanArgument(arg))
+					config.setFunction(Config.FC_UPDATE);
 				argi++;
-			}else if(arg.equals("--delete")){
-				config.setFunction(Config.FC_DELETE);
+			}else if(arg.startsWith("--delete")){
+				if(parseBooleanArgument(arg))
+					config.setFunction(Config.FC_DELETE);
 				argi++;
-			}else if(arg.equals("--replace")){
-				config.setFunction(Config.FC_REPLACE);
+			}else if(arg.startsWith("--replace")){
+				if(parseBooleanArgument(arg))
+					config.setFunction(Config.FC_REPLACE);
 				argi++;
-			}else if(arg.equals("--export")){
-				config.setFunction(Config.FC_EXPORT);
+			}else if(arg.startsWith("--export")){
+				if(parseBooleanArgument(arg))
+					config.setFunction(Config.FC_EXPORT);
 				argi++;
-            }else if(arg.equals("--export3")){
-                config.setFunction(Config.FC_EXPORT);
-                config.setVer3_export(true);
+			}else if(arg.equals("--export3")){
+				if(parseBooleanArgument(arg)){
+                	config.setFunction(Config.FC_EXPORT);
+                	config.setVer3_export(true);
+				}
                 argi++;
-			}else if(arg.equals("--schemaimport")){
-				config.setFunction(Config.FC_SCHEMAIMPORT);
+			}else if(arg.startsWith("--schemaimport")){
+				if(parseBooleanArgument(arg))
+					config.setFunction(Config.FC_SCHEMAIMPORT);
 				argi++;
 			}else if(arg.equals("--preScript")){
-				argi++;	
+				argi++;
 				config.setPreScript(args[argi]);
-				argi++;	
+				argi++;
 			}else if(arg.equals("--postScript")){
-				argi++;	
+				argi++;
 				config.setPostScript(args[argi]);
 				argi++;
-			}else if(arg.equals("--deleteData")){
+			}else if(arg.startsWith("--deleteData")){
+				if(parseBooleanArgument(arg))
+					config.setDeleteMode(Config.DELETE_DATA);
 				argi++;
-				config.setDeleteMode(Config.DELETE_DATA);
-			}else if(arg.equals("--trace")){
-				EhiLogger.getInstance().setTraceFilter(false); 
+			}else if(arg.startsWith("--trace")){
+				EhiLogger.getInstance().setTraceFilter(parseBooleanArgument(arg));
 				argi++;
             }else if(arg.equals("--dbparams")){
                 argi++;
@@ -202,9 +212,9 @@ public abstract class AbstractMain {
                 argi++;
                 config.setModelSrsCode(args[argi]);
                 argi++;
-            }else if(arg.equals("--multiSrs")){
+            }else if(arg.startsWith("--multiSrs")){
+                config.setUseEpsgInNames(parseBooleanArgument(arg));
                 argi++;
-                config.setUseEpsgInNames(true);
             }else if(arg.equals("--domains")){
                 argi++;
                 config.setDomainAssignments(args[argi]);
@@ -221,93 +231,113 @@ public abstract class AbstractMain {
 				argi++;
 				config.setValidConfigFile(args[argi]);
 				argi++;
-			}else if(arg.equals("--disableValidation")){
+			}else if(arg.startsWith("--disableValidation")){
 				argi++;
-				config.setValidation(false);
-			}else if(arg.equals("--disableAreaValidation")){
+				config.setValidation(parseBooleanArgument(arg));
+			}else if(arg.startsWith("--disableAreaValidation")){
 				argi++;
-				config.setDisableAreaValidation(true);
-            }else if(arg.equals("--disableRounding")){
+				config.setDisableAreaValidation(parseBooleanArgument(arg));
+            }else if(arg.startsWith("--disableRounding")){
                 argi++;
-                config.setDisableRounding(true);
-			}else if(arg.equals("--forceTypeValidation")){
+                config.setDisableRounding(parseBooleanArgument(arg));
+			}else if(arg.startsWith("--forceTypeValidation")){
 				argi++;
-				config.setOnlyMultiplicityReduction(true);
-			}else if(arg.equals("--createSingleEnumTab")){
+				config.setOnlyMultiplicityReduction(parseBooleanArgument(arg));
+			}else if(arg.startsWith("--createSingleEnumTab")){
 				argi++;
-				config.setCreateEnumDefs(Config.CREATE_ENUM_DEFS_SINGLE);
-			}else if(arg.equals("--createEnumTabs")){
+				if(parseBooleanArgument(arg))
+					config.setCreateEnumDefs(Config.CREATE_ENUM_DEFS_SINGLE);
+			}else if(arg.startsWith("--createEnumTabs")){
 				argi++;
-				config.setCreateEnumDefs(Config.CREATE_ENUM_DEFS_MULTI);
-            }else if(arg.equals("--createEnumTabsWithId")){
+				if(parseBooleanArgument(arg))
+					config.setCreateEnumDefs(Config.CREATE_ENUM_DEFS_MULTI);
+            }else if(arg.startsWith("--createEnumTabsWithId")){
                 argi++;
-                config.setCreateEnumDefs(Config.CREATE_ENUM_DEFS_MULTI_WITH_ID);
-			}else if(arg.equals("--createEnumTxtCol")){
+				if(parseBooleanArgument(arg))
+                	config.setCreateEnumDefs(Config.CREATE_ENUM_DEFS_MULTI_WITH_ID);
+			}else if(arg.startsWith("--createEnumTxtCol")){
 				argi++;
-				config.setCreateEnumCols(Config.CREATE_ENUM_TXT_COL);
-			}else if(arg.equals("--createEnumColAsItfCode")){
+				if(parseBooleanArgument(arg))
+					config.setCreateEnumCols(Config.CREATE_ENUM_TXT_COL);
+			}else if(arg.startsWith("--createEnumColAsItfCode")){
 				argi++;
-				config.setValue(Config.CREATE_ENUMCOL_AS_ITFCODE,Config.CREATE_ENUMCOL_AS_ITFCODE_YES);
-			}else if(arg.equals("--beautifyEnumDispName")){
+				if(parseBooleanArgument(arg))
+					config.setValue(Config.CREATE_ENUMCOL_AS_ITFCODE,Config.CREATE_ENUMCOL_AS_ITFCODE_YES);
+			}else if(arg.startsWith("--beautifyEnumDispName")){
 				argi++;
-				config.setBeautifyEnumDispName(Config.BEAUTIFY_ENUM_DISPNAME_UNDERSCORE);
-			}else if(arg.equals("--noSmartMapping")){
+				if(parseBooleanArgument(arg))
+					config.setBeautifyEnumDispName(Config.BEAUTIFY_ENUM_DISPNAME_UNDERSCORE);
+			}else if(arg.startsWith("--noSmartMapping")){
 				argi++;
-				Ili2db.setNoSmartMapping(config);
-			}else if(arg.equals("--smart1Inheritance")){
+				if(parseBooleanArgument(arg))
+					Ili2db.setNoSmartMapping(config);
+			}else if(arg.startsWith("--smart1Inheritance")){
 				argi++;
-				config.setInheritanceTrafo(Config.INHERITANCE_TRAFO_SMART1);
-			}else if(arg.equals("--smart2Inheritance")){
+				if(parseBooleanArgument(arg))
+					config.setInheritanceTrafo(Config.INHERITANCE_TRAFO_SMART1);
+			}else if(arg.startsWith("--smart2Inheritance")){
 				argi++;
-				config.setInheritanceTrafo(Config.INHERITANCE_TRAFO_SMART2);
-			}else if(arg.equals("--coalesceCatalogueRef")){
+				if(parseBooleanArgument(arg))
+					config.setInheritanceTrafo(Config.INHERITANCE_TRAFO_SMART2);
+			}else if(arg.startsWith("--coalesceCatalogueRef")){
 				argi++;
-				config.setCatalogueRefTrafo(Config.CATALOGUE_REF_TRAFO_COALESCE);
-			}else if(arg.equals("--coalesceMultiSurface")){
+				if(parseBooleanArgument(arg))
+					config.setCatalogueRefTrafo(Config.CATALOGUE_REF_TRAFO_COALESCE);
+			}else if(arg.startsWith("--coalesceMultiSurface")){
 				argi++;
-				config.setMultiSurfaceTrafo(Config.MULTISURFACE_TRAFO_COALESCE);
-			}else if(arg.equals("--coalesceMultiLine")){
+				if(parseBooleanArgument(arg))
+					config.setMultiSurfaceTrafo(Config.MULTISURFACE_TRAFO_COALESCE);
+			}else if(arg.startsWith("--coalesceMultiLine")){
 				argi++;
-				config.setMultiLineTrafo(Config.MULTILINE_TRAFO_COALESCE);
-			}else if(arg.equals("--coalesceMultiPoint")){
+				if(parseBooleanArgument(arg))
+					config.setMultiLineTrafo(Config.MULTILINE_TRAFO_COALESCE);
+			}else if(arg.startsWith("--coalesceMultiPoint")){
 				argi++;
-				config.setMultiPointTrafo(Config.MULTIPOINT_TRAFO_COALESCE);
-			}else if(arg.equals("--coalesceArray")){
+				if(parseBooleanArgument(arg))
+					config.setMultiPointTrafo(Config.MULTIPOINT_TRAFO_COALESCE);
+			}else if(arg.startsWith("--coalesceArray")){
 				argi++;
-				config.setArrayTrafo(Config.ARRAY_TRAFO_COALESCE);
-            }else if(arg.equals("--coalesceJson")){
+				if(parseBooleanArgument(arg))
+					config.setArrayTrafo(Config.ARRAY_TRAFO_COALESCE);
+            }else if(arg.startsWith("--coalesceJson")){
                 argi++;
-                config.setJsonTrafo(Config.JSON_TRAFO_COALESCE);
-			}else if(arg.equals("--expandMultilingual")){
+				if(parseBooleanArgument(arg))
+                	config.setJsonTrafo(Config.JSON_TRAFO_COALESCE);
+			}else if(arg.startsWith("--expandMultilingual")){
 				argi++;
-				config.setMultilingualTrafo(Config.MULTILINGUAL_TRAFO_EXPAND);
-            }else if(arg.equals("--expandLocalised")){
+				if(parseBooleanArgument(arg))
+					config.setMultilingualTrafo(Config.MULTILINGUAL_TRAFO_EXPAND);
+            }else if(arg.startsWith("--expandLocalised")){
                 argi++;
-                config.setLocalisedTrafo(Config.LOCALISED_TRAFO_EXPAND);
-			}else if(arg.equals("--createFk")){
+				if(parseBooleanArgument(arg))
+                	config.setLocalisedTrafo(Config.LOCALISED_TRAFO_EXPAND);
+			}else if(arg.startsWith("--createFk")){
 				argi++;
-				config.setCreateFk(Config.CREATE_FK_YES);
-			}else if(arg.equals("--createFkIdx")){
+				if(parseBooleanArgument(arg))
+					config.setCreateFk(Config.CREATE_FK_YES);
+			}else if(arg.startsWith("--createFkIdx")){
 				argi++;
-				config.setCreateFkIdx(Config.CREATE_FKIDX_YES);
-			}else if(arg.equals("--createUnique")){
+				if(parseBooleanArgument(arg))
+					config.setCreateFkIdx(Config.CREATE_FKIDX_YES);
+			}else if(arg.startsWith("--createUnique")){
 				argi++;
-				config.setCreateUniqueConstraints(true);
-			}else if(arg.equals("--createNumChecks")){
+				config.setCreateUniqueConstraints(parseBooleanArgument(arg));
+			}else if(arg.startsWith("--createNumChecks")){
 				argi++;
-				config.setCreateNumChecks(true);
-            }else if(arg.equals("--createTextChecks")){
+				config.setCreateNumChecks(parseBooleanArgument(arg));
+            }else if(arg.startsWith("--createTextChecks")){
                 argi++;
-                config.setCreateTextChecks(true);
-            }else if(arg.equals("--createDateTimeChecks")){
+                config.setCreateTextChecks(parseBooleanArgument(arg));
+            }else if(arg.startsWith("--createDateTimeChecks")){
                 argi++;
-                config.setCreateDateTimeChecks(true);
-            }else if(arg.equals("--createImportTabs")){
+                config.setCreateDateTimeChecks(parseBooleanArgument(arg));
+            }else if(arg.startsWith("--createImportTabs")){
                 argi++;
-                config.setCreateImportTabs(true);
-			}else if(arg.equals("--createStdCols")){
+                config.setCreateImportTabs(parseBooleanArgument(arg));
+			}else if(arg.startsWith("--createStdCols")){
 				argi++;
-				config.setCreateStdCols(Config.CREATE_STD_COLS_ALL);
+				if(parseBooleanArgument(arg))
+					config.setCreateStdCols(Config.CREATE_STD_COLS_ALL);
 			}else if(arg.equals("--t_id_Name")){
 				argi++;
 				config.setColT_ID(args[argi]);
@@ -320,82 +350,99 @@ public abstract class AbstractMain {
 				argi++;
 				config.setMaxIdSeqValue(Long.parseLong(args[argi]));
 				argi++;
-			}else if(arg.equals("--createTypeDiscriminator")){
+			}else if(arg.startsWith("--createTypeDiscriminator")){
 				argi++;
-				config.setCreateTypeDiscriminator(Config.CREATE_TYPE_DISCRIMINATOR_ALWAYS);
-			}else if(arg.equals("--createGeomIdx")){
+				if(parseBooleanArgument(arg))
+					config.setCreateTypeDiscriminator(Config.CREATE_TYPE_DISCRIMINATOR_ALWAYS);
+			}else if(arg.startsWith("--createGeomIdx")){
 				argi++;
-				config.setValue(Config.CREATE_GEOM_INDEX,Config.TRUE);
-			}else if(arg.equals("--disableNameOptimization")){
+				if(parseBooleanArgument(arg))
+					config.setValue(Config.CREATE_GEOM_INDEX,Config.TRUE);
+			}else if(arg.startsWith("--disableNameOptimization")){
 				argi++;
-				config.setNameOptimization(Config.NAME_OPTIMIZATION_DISABLE);
-			}else if(arg.equals("--nameByTopic")){
+				if(parseBooleanArgument(arg))
+					config.setNameOptimization(Config.NAME_OPTIMIZATION_DISABLE);
+			}else if(arg.startsWith("--nameByTopic")){
 				argi++;
-				config.setNameOptimization(Config.NAME_OPTIMIZATION_TOPIC);
+				if(parseBooleanArgument(arg))
+					config.setNameOptimization(Config.NAME_OPTIMIZATION_TOPIC);
 			}else if(arg.equals("--maxNameLength")){
 				argi++;
 				config.setMaxSqlNameLength(args[argi]);
 				argi++;
-			}else if(arg.equals("--structWithGenericRef")){
+			}else if(arg.startsWith("--structWithGenericRef")){
 				argi++;
-				config.setStructMapping(Config.STRUCT_MAPPING_GENERICREF);
-			}else if(arg.equals("--sqlEnableNull")){
+				if(parseBooleanArgument(arg))
+					config.setStructMapping(Config.STRUCT_MAPPING_GENERICREF);
+			}else if(arg.startsWith("--sqlEnableNull")){
 				argi++;
-				config.setSqlNull(Config.SQL_NULL_ENABLE);
-			}else if(arg.equals("--strokeArcs")){
+				if(parseBooleanArgument(arg))
+					config.setSqlNull(Config.SQL_NULL_ENABLE);
+			}else if(arg.startsWith("--strokeArcs")){
 				argi++;
-				Config.setStrokeArcs(config,Config.STROKE_ARCS_ENABLE);
-			}else if(arg.equals("--skipPolygonBuilding")){
+				if(parseBooleanArgument(arg))
+					Config.setStrokeArcs(config,Config.STROKE_ARCS_ENABLE);
+			}else if(arg.startsWith("--skipPolygonBuilding")){
 				argi++;
-				Ili2db.setSkipPolygonBuilding(config);
-			}else if(arg.equals("--skipPolygonBuildingErrors")){
+				if(parseBooleanArgument(arg))
+					Ili2db.setSkipPolygonBuilding(config);
+			}else if(arg.startsWith("--skipPolygonBuildingErrors")){
 				// DEPRECATED remove option
 				argi++;
-				config.setSkipGeometryErrors(true);
-			}else if (arg.equals("--skipReferenceErrors")) { 
+				config.setSkipGeometryErrors(parseBooleanArgument(arg));
+			}else if (arg.startsWith("--skipReferenceErrors")) {
                 argi++;
-                config.setSkipReferenceErrors(true);
-			}else if(arg.equals("--skipGeometryErrors")){
+                config.setSkipReferenceErrors(parseBooleanArgument(arg));
+			}else if(arg.startsWith("--skipGeometryErrors")){
 				argi++;
-				config.setSkipGeometryErrors(true);
-			}else if(arg.equals("--keepAreaRef")){
+				config.setSkipGeometryErrors(parseBooleanArgument(arg));
+			}else if(arg.startsWith("--keepAreaRef")){
 				argi++;
-				config.setAreaRef(Config.AREA_REF_KEEP);
-            }else if(arg.equals("--createTidCol")){
+				if(parseBooleanArgument(arg))
+					config.setAreaRef(Config.AREA_REF_KEEP);
+            }else if(arg.startsWith("--createTidCol")){
                 argi++;
-                config.setTidHandling(Config.TID_HANDLING_PROPERTY);
-			}else if(arg.equals("--importTid")){
+				if(parseBooleanArgument(arg))
+                	config.setTidHandling(Config.TID_HANDLING_PROPERTY);
+			}else if(arg.startsWith("--importTid")){
 				argi++;
-                config.setImportTid(true);
-            }else if(arg.equals("--exportTid")){
+                config.setImportTid(parseBooleanArgument(arg));
+            }else if(arg.startsWith("--exportTid")){
                 argi++;
-                config.setExportTid(true);
-            }else if(arg.equals("--importBid")){
+                config.setExportTid(parseBooleanArgument(arg));
+            }else if(arg.startsWith("--importBid")){
                 argi++;
-                config.setImportBid(true);
-			}else if(arg.equals("--createBasketCol")){
+                config.setImportBid(parseBooleanArgument(arg));
+			}else if(arg.startsWith("--createBasketCol")){
 				argi++;
-				config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
-			}else if(arg.equals("--createDatasetCol")){
+				if(parseBooleanArgument(arg))
+					config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
+			}else if(arg.startsWith("--createDatasetCol")){
 				argi++;
-				config.setCreateDatasetCols(Config.CREATE_DATASET_COL);
-			}else if(arg.equals("--ILIGML20")){
+				if(parseBooleanArgument(arg))
+					config.setCreateDatasetCols(Config.CREATE_DATASET_COL);
+			}else if(arg.startsWith("--ILIGML20")){
 				argi++;
-				config.setTransferFileFormat(Config.ILIGML20);
-            }else if(arg.equals("--ver4-noSchemaImport")){
+				if(parseBooleanArgument(arg))
+					config.setTransferFileFormat(Config.ILIGML20);
+            }else if(arg.startsWith("--ver4-noSchemaImport")){
                 argi++;
-                config.setDoImplicitSchemaImport(false);
-                EhiLogger.logAdaption("--ver4-noSchemaImport is a deprecated option");
-            }else if(arg.equals("--doSchemaImport")){
+                if (parseBooleanArgument(arg)){
+					config.setDoImplicitSchemaImport(false);
+					EhiLogger.logAdaption("--ver4-noSchemaImport is a deprecated option");
+				}
+            }else if(arg.startsWith("--doSchemaImport")){
                 argi++;
-                config.setDoImplicitSchemaImport(true);
-			}else if(arg.equals("--ver4-translation")){
+                config.setDoImplicitSchemaImport(parseBooleanArgument(arg));
+			}else if(arg.startsWith("--ver4-translation")){
 				argi++;
-				config.setVer3_translation(false);
-                EhiLogger.logAdaption("--ver4-translation is a deprecated option");
-            }else if(arg.equals("--ver3-translation")){
+				if (parseBooleanArgument(arg)){
+					config.setVer3_translation(false);
+					EhiLogger.logAdaption("--ver4-translation is a deprecated option");
+				}
+            }else if(arg.startsWith("--ver3-translation")){
                 argi++;
-                config.setVer3_translation(true);
+                config.setVer3_translation(parseBooleanArgument(arg));
 			}else if(arg.equals("--translation")){
 				argi++;
 				config.setIli1Translation(args[argi]);
@@ -408,19 +455,19 @@ public abstract class AbstractMain {
 				argi++;
 				config.setValue(UserSettings.HTTP_PROXY_PORT,args[argi]);
 				argi++;
-			}else if(arg.equals("--createMetaInfo")){
+			}else if(arg.startsWith("--createMetaInfo")){
 				argi++;
-				config.setCreateMetaInfo(true);
+				config.setCreateMetaInfo(parseBooleanArgument(arg));
 			}else if(arg.equals("--version")){
 				printVersion();
 				return;
 			}else if(arg.equals("--iliMetaAttrs")){
-				argi++;	
+				argi++;
 				config.setIliMetaAttrsFile(args[argi]);
 				argi++;
-            }else if(arg.equals("--createTypeConstraint")){
+            }else if(arg.startsWith("--createTypeConstraint")){
                 argi++;
-                config.setCreateTypeConstraint(true);
+                config.setCreateTypeConstraint(parseBooleanArgument(arg));
 			}else if(arg.equals("--help")){
 					printVersion ();
 					System.err.println();
@@ -485,7 +532,7 @@ public abstract class AbstractMain {
 					System.err.println("--structWithGenericRef  generate one generic reference to parent in struct tables.");
 					System.err.println("--disableNameOptimization disable use of unqualified class name as table name.");
 					System.err.println("--nameByTopic          use topic+class name as table name.");
-					
+
                     
                     System.err.println("--nameLang lang        use names of ili model in given language as table/column name.");
 					System.err.println("--maxNameLength length max length of sql names ("+config.getMaxSqlNameLength()+")");
@@ -530,7 +577,7 @@ public abstract class AbstractMain {
 					System.err.println("--version              Display the version of "+getAPP_NAME());
 					System.err.println();
 					return;
-				
+
 			}else if(arg.startsWith("-")){
 				EhiLogger.logError(arg+": unknown option");
                 System.exit(1);
@@ -570,7 +617,7 @@ public abstract class AbstractMain {
 				System.exit(1);
 			}
 		}
-		
+
 	}
 
 	protected boolean parseBooleanArgument(String arg) {
