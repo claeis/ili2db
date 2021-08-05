@@ -629,6 +629,7 @@ public abstract class AbstractMain {
 			if (value.equalsIgnoreCase("false")) return false;
 
 			EhiLogger.logAdaption(String.format("Could not parse boolean value <%s> for option <%s>.", value, arg.substring(0,indexEquals)));
+			return false;
 		}
 
 		return true;
