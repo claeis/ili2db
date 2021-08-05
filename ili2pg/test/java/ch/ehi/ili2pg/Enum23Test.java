@@ -183,7 +183,7 @@ public class Enum23Test extends ch.ehi.ili2db.Enum23Test{
             stmt=jdbcConnection.createStatement();          
             stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");
             {
-                File data=new File("test/data/Enum23/Enum23a.ili");
+                File data=new File("test/data/Enum23/Enum23.ili");
                 Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
                 config.setFunction(Config.FC_SCHEMAIMPORT);
                 config.setCreateFk(Config.CREATE_FK_YES);
@@ -204,7 +204,7 @@ public class Enum23Test extends ch.ehi.ili2db.Enum23Test{
                     Assert.assertTrue(stmt.execute(stmtTxt));
                     ResultSet rs=stmt.getResultSet();
                     Assert.assertTrue(rs.next());
-                    Assert.assertEquals("testelezwei",rs.getString(1));
+                    Assert.assertEquals("Test2 ele",rs.getString(1));
                 }
                 if(true){
                     String stmtTxt="SELECT dispName FROM "+DBSCHEMA+".enum1 WHERE ilicode ='Test3.ele_2'";
@@ -212,6 +212,13 @@ public class Enum23Test extends ch.ehi.ili2db.Enum23Test{
                     ResultSet rs=stmt.getResultSet();
                     Assert.assertTrue(rs.next());
                     Assert.assertEquals("Test3.ele 2",rs.getString(1));
+                }
+                if(true){
+                    String stmtTxt="SELECT dispName FROM "+DBSCHEMA+".enum1 WHERE ilicode ='Test4_ele'";
+                    Assert.assertTrue(stmt.execute(stmtTxt));
+                    ResultSet rs=stmt.getResultSet();
+                    Assert.assertTrue(rs.next());
+                    Assert.assertEquals("testelevier",rs.getString(1));
                 }
                 if(true){
                     String stmtTxt="SELECT dispName FROM "+DBSCHEMA+".classa1_attr3 WHERE ilicode ='Test2_ele'";
@@ -226,6 +233,13 @@ public class Enum23Test extends ch.ehi.ili2db.Enum23Test{
                     ResultSet rs=stmt.getResultSet();
                     Assert.assertTrue(rs.next());
                     Assert.assertEquals("Test3.ele 2",rs.getString(1));
+                }
+                if(true){
+                    String stmtTxt="SELECT dispName FROM "+DBSCHEMA+".classa1_attr3 WHERE ilicode ='Test4_ele'";
+                    Assert.assertTrue(stmt.execute(stmtTxt));
+                    ResultSet rs=stmt.getResultSet();
+                    Assert.assertTrue(rs.next());
+                    Assert.assertEquals("Attr3_elevier",rs.getString(1));
                 }
             }
         }finally{
@@ -258,7 +272,7 @@ public class Enum23Test extends ch.ehi.ili2db.Enum23Test{
                     Assert.assertTrue(stmt.execute(stmtTxt));
                     ResultSet rs=stmt.getResultSet();
                     Assert.assertTrue(rs.next());
-                    Assert.assertEquals("testelezwei",rs.getString(1));
+                    Assert.assertEquals("Test2 ele",rs.getString(1));
                 }
                 {
                     String stmtTxt="SELECT attr2_txt FROM "+DBSCHEMA+".classa1 WHERE attr2 ='Test3.ele_2'";
@@ -266,6 +280,13 @@ public class Enum23Test extends ch.ehi.ili2db.Enum23Test{
                     ResultSet rs=stmt.getResultSet();
                     Assert.assertTrue(rs.next());
                     Assert.assertEquals("Test3.ele 2",rs.getString(1));
+                }
+                {
+                    String stmtTxt="SELECT attr2_txt FROM "+DBSCHEMA+".classa1 WHERE attr2 ='Test4_ele'";
+                    Assert.assertTrue(stmt.execute(stmtTxt));
+                    ResultSet rs=stmt.getResultSet();
+                    Assert.assertTrue(rs.next());
+                    Assert.assertEquals("testelevier",rs.getString(1));
                 }
                 {
                     String stmtTxt="SELECT attr3_txt FROM "+DBSCHEMA+".classa1 WHERE attr3 ='Test2_ele'";
@@ -280,6 +301,13 @@ public class Enum23Test extends ch.ehi.ili2db.Enum23Test{
                     ResultSet rs=stmt.getResultSet();
                     Assert.assertTrue(rs.next());
                     Assert.assertEquals("Test3.ele 2",rs.getString(1));
+                }
+                {
+                    String stmtTxt="SELECT attr3_txt FROM "+DBSCHEMA+".classa1 WHERE attr3 ='Test4_ele'";
+                    Assert.assertTrue(stmt.execute(stmtTxt));
+                    ResultSet rs=stmt.getResultSet();
+                    Assert.assertTrue(rs.next());
+                    Assert.assertEquals("Attr3_elevier",rs.getString(1));
                 }
                 {
                     String stmtTxt="SELECT attr4_txt FROM "+DBSCHEMA+".classa1 WHERE attr4 is null";

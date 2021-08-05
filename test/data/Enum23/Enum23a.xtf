@@ -18,6 +18,10 @@
 				<attr3>Test3.ele_2</attr3>
 				<attr4>true</attr4>
 			</Enum23.TestA.ClassA1>
+			<Enum23.TestA.ClassA1 TID="3">
+				<attr2>Test4_ele</attr2>
+				<attr3>Test4_ele</attr3>
+			</Enum23.TestA.ClassA1>
 		</Enum23.TestA>
 	</DATASECTION>
 </TRANSFER>
