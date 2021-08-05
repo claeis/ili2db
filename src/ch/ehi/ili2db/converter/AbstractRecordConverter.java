@@ -369,9 +369,7 @@ public class AbstractRecordConverter {
     }
 
 	protected boolean shouldBeSkipped(AttributeDef attributeDef) {
-		if(attributeDef.isDomainIliUuid()){
-			return true;
-		}else if(attributeDef.getDomainResolvingAliases() instanceof BlackboxType){
+		if(attributeDef.getDomainResolvingAliases() instanceof BlackboxType){
 			return true;
 		}
 		return false;

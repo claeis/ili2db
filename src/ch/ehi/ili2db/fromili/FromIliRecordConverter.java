@@ -569,7 +569,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 		ArrayList<DbColumn> dbColExts=new ArrayList<DbColumn>();
 		Type type = attr.getDomainResolvingAll();
 
-		boolean result = xtfAttributesAsText ? createSimpleDbColTXT(dbTable, aclass, attr, type, dbCol, unitDef, mText, dbColExts)
+		boolean result = xtfAttributesAsText && !shouldBeSkipped(attr) ? createSimpleDbColTXT(dbTable, aclass, attr, type, dbCol, unitDef, mText, dbColExts)
 				: createSimpleDbCol(dbTable, aclass, attr, type, dbCol, unitDef, mText, dbColExts);
 		if(result) {
 
@@ -891,21 +891,9 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 
 	private boolean createSimpleDbColTXT(DbTable dbTable, Viewable aclass, AttributeDef attr, Type type,
 										 OutParam<DbColumn> dbCol, OutParam<Unit> unitDef, OutParam<Boolean> mText, ArrayList<DbColumn> dbColExts) {
-
-		if (type instanceof BlackboxType) {
-			if (((BlackboxType) type).getKind() == BlackboxType.eXML) {
-				DbColXml ret = new DbColXml();
-				dbCol.value = ret;
-			} else {
-				DbColBlob ret = new DbColBlob();
-				dbCol.value = ret;
-			}
-
-		} else {
-			DbColVarchar ret = new DbColVarchar();
-			ret.setSize(DbColVarchar.UNLIMITED);
-			dbCol.value = ret;
-		}
+		DbColVarchar ret = new DbColVarchar();
+		ret.setSize(DbColVarchar.UNLIMITED);
+		dbCol.value = ret;
 		return true;
 	}
 
