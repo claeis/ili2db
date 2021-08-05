@@ -695,7 +695,7 @@ public class TransferToXtf {
 				dbstmt = conn.prepareStatement(stmt);
 				dbstmt.clearParameters();
 				dbstmt.setLong(1, sqlid);
-				if(fetchSize != null){
+				if(fetchSize != null && fetchSize > 0){
 					dbstmt.setFetchSize(fetchSize);
 				}
 				rs = dbstmt.executeQuery();
@@ -902,7 +902,7 @@ public class TransferToXtf {
 		try{
 			
 			dbstmt = conn.createStatement();
-			if(fetchSize != null){
+			if(fetchSize != null && fetchSize > 0){
 				dbstmt.setFetchSize(fetchSize);
 			}
 			rs=dbstmt.executeQuery(stmt);
@@ -989,7 +989,7 @@ public class TransferToXtf {
 			if(basketSqlId!=null){
 				dbstmt.setLong(paramIdx++,basketSqlId);
 			}
-			if(fetchSize != null){
+			if(fetchSize != null && fetchSize > 0){
 				dbstmt.setFetchSize(fetchSize);
 			}
 			rs=dbstmt.executeQuery();
@@ -1112,7 +1112,7 @@ public class TransferToXtf {
 			
 			dbstmt = conn.prepareStatement(stmt);
 			recConv.setStmtParams(dbstmt, basketSqlId, fixref, structWrapper);
-			if(fetchSize != null){
+			if(fetchSize != null && fetchSize > 0){
 				dbstmt.setFetchSize(fetchSize);
 			}
 			rs=dbstmt.executeQuery();
