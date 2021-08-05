@@ -670,6 +670,7 @@ public abstract class Datatypes23Test {
 			config.setModels("Datatypes23");
 			config.setExportTid(true);
 			config.setBasketHandling(null);
+			config.setXtfAttrText(true);
 			Ili2db.readSettingsFromDb(config);
 			try{
 				Ili2db.run(config,null);
@@ -704,7 +705,7 @@ public abstract class Datatypes23Test {
 					Assert.assertEquals("22", obj1.getattrvalue("aI32id"));
 					Assert.assertEquals("true", obj1.getattrvalue("aBoolean"));
 					Assert.assertEquals("15b6bcce-8772-4595-bf82-f727a665fbf3", obj1.getattrvalue("aUuid"));
-					Assert.assertEquals("abc100\"\"''", obj1.getattrvalue("textLimited"));
+					Assert.assertEquals("1111111111111111111111111111111111111111", obj1.getattrvalue("textLimited"));
 					Assert.assertEquals("Left", obj1.getattrvalue("horizAlignment"));
 					Assert.assertEquals("mailto:ceis@localhost", obj1.getattrvalue("uritext"));
 					Assert.assertEquals("5", obj1.getattrvalue("numericInt"));
@@ -731,7 +732,7 @@ public abstract class Datatypes23Test {
 					}
 
 					Assert.assertEquals("mehr.vier", obj1.getattrvalue("aufzaehlung"));
-					Assert.assertEquals("09:00:00.000", obj1.getattrvalue("aTime"));
+					Assert.assertEquals("09:00:00.0", obj1.getattrvalue("aTime"));
 					Assert.assertEquals("abc200\n" +
 							"end200", obj1.getattrvalue("mtextLimited"));
 					Assert.assertEquals("AAAA", obj1.getattrvalue("binbox"));
@@ -744,7 +745,7 @@ public abstract class Datatypes23Test {
 					Assert.assertEquals("6.0", obj1.getattrvalue("numericDec"));
 					Assert.assertEquals("abc201\n" +
 							"end201", obj1.getattrvalue("mtextUnlimited"));
-					Assert.assertEquals("1900-01-01T12:30:05.000", obj1.getattrvalue("aDateTime"));
+					Assert.assertEquals("1900-01-01T12:30:05", obj1.getattrvalue("aDateTime"));
 					Assert.assertEquals("DM01AVCH24D.FixpunkteKategorie1.LFP1", obj1.getattrvalue("aClass"));
 
 				}

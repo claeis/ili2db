@@ -30,6 +30,7 @@ import ch.interlis.ili2c.metamodel.AbstractClassDef;
 import ch.interlis.ili2c.metamodel.AbstractLeafElement;
 import ch.interlis.ili2c.metamodel.AssociationDef;
 import ch.interlis.ili2c.metamodel.AttributeDef;
+import ch.interlis.ili2c.metamodel.BlackboxType;
 import ch.interlis.ili2c.metamodel.CompositionType;
 import ch.interlis.ili2c.metamodel.CoordType;
 import ch.interlis.ili2c.metamodel.Domain;
@@ -366,5 +367,14 @@ public class AbstractRecordConverter {
     	}
     	return ret;
     }
+
+	protected boolean shouldBeSkipped(AttributeDef attributeDef) {
+		if(attributeDef.isDomainIliUuid()){
+			return true;
+		}else if(attributeDef.getDomainResolvingAliases() instanceof BlackboxType){
+			return true;
+		}
+		return false;
+	}
 	
 }

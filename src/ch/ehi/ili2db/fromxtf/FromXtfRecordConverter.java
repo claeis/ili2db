@@ -295,17 +295,6 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 		}
 	}
 
-	private boolean shouldBeSkipped(AttributeDef attributeDef) {
-		// EhiLogger.logState("Current attr domain  "+attributeDef.getDomain());
-
-		if(attributeDef.isDomainIliUuid()){
-			return true;
-		}else if(attributeDef.getDomainResolvingAliases() instanceof BlackboxType){
-			return true;
-		}
-		return false;
-	}
-
 	private void setReferenceColumn(PreparedStatement ps,
 			AbstractClassDef destination, String refoid, OutParam<Integer> valuei) throws SQLException {
 	  	String targetRootClassName=Ili2cUtility.getRootViewable(destination).getScopedName(null);
