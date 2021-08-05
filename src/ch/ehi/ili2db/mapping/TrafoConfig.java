@@ -93,7 +93,6 @@ public class TrafoConfig {
 	                EhiLogger.traceBackendCmd(updStmt);
 	                java.sql.PreparedStatement updPrepStmt = conn.prepareStatement(updStmt);
 	                try{
-						long start = System.currentTimeMillis();
 	                    for(String iliname:config.keySet()){
 	                        HashMap<String, String> values=config.get(iliname);
 	                        for(String tag:values.keySet()){
