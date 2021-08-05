@@ -49,16 +49,4 @@ public class StatementExecutionHelper {
         }
     }
 
-    // TODO remove this method exist only for performances testing purpose
-    public void writeToFile(String methodName, int processedStatements, Integer batchSize, long duration) {
-        String fileName = methodName + "_processedStatements_" + processedStatements + ".csv";
-        try {
-            FileWriter fw = new FileWriter(fileName, true);
-            fw.write(batchSize + ";" + duration + ";" + "\n");
-            fw.flush();
-        } catch (IOException e) {
-            throw new RuntimeException("Unable to write report" + fileName, e);
-        }
-    }
-
 }
