@@ -174,7 +174,7 @@ public abstract class AbstractMain {
 					config.setDeleteMode(Config.DELETE_DATA);
 				argi++;
 			}else if(arg.startsWith("--trace")){
-				EhiLogger.getInstance().setTraceFilter(parseBooleanArgument(arg));
+				EhiLogger.getInstance().setTraceFilter(!parseBooleanArgument(arg));
 				argi++;
             }else if(arg.equals("--dbparams")){
                 argi++;
@@ -233,7 +233,7 @@ public abstract class AbstractMain {
 				argi++;
 			}else if(arg.startsWith("--disableValidation")){
 				argi++;
-				config.setValidation(parseBooleanArgument(arg));
+				config.setValidation(!parseBooleanArgument(arg));
 			}else if(arg.startsWith("--disableAreaValidation")){
 				argi++;
 				config.setDisableAreaValidation(parseBooleanArgument(arg));
