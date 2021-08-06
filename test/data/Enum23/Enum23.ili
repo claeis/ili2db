@@ -4,14 +4,18 @@ MODEL Enum23
   AT "mailto:ce@eisenhutinformatik.ch" VERSION "2016-12-21" =
 
   DOMAIN
-    Enum1 = (Test1, Test2_ele, Test3 (ele1, ele_2));
+    Enum1 = (Test1, Test2_ele, Test3 (ele1, ele_2),
+            !!@ili2db.dispName=testelevier
+            Test4_ele);
     
   TOPIC TestA =
     
     CLASS ClassA1 =
     	attr1 : TEXT*60;
     	attr2 : Enum1;
-    	attr3 : (Test1, Test2_ele, Test3 (ele1, ele_2));
+    	attr3 : (Test1, Test2_ele, Test3 (ele1, ele_2),
+    	    !!@ili2db.dispName=Attr3_elevier
+             Test4_ele);
 	attr4 : BOOLEAN;
     END ClassA1;
     
