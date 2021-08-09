@@ -233,7 +233,7 @@ public abstract class Datatypes23Test {
 			setup.resetDb();
 			jdbcConnection = setup.createConnection();
 			stmt=jdbcConnection.createStatement();
-			File data=new File(TEST_OUT+"Datatypes23Attr_textLimitedTooLong.xtf");
+			File data=new File(TEST_OUT+"Datatypes23Attr_invalidSimpleTypes.xtf");
 			Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
 			config.setFunction(Config.FC_IMPORT);
 			config.setDoImplicitSchemaImport(true);
@@ -666,7 +666,7 @@ public abstract class Datatypes23Test {
 				jdbcConnection=null;
 			}
 
-			File data=new File(TEST_OUT+"Datatypes23Attr_textLimitedTooLong-out.xtf");
+			File data=new File(TEST_OUT+"Datatypes23Attr_invalidSimpleTypes-out.xtf");
 			Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
 			config.setFunction(Config.FC_EXPORT);
 			config.setModels("Datatypes23");
