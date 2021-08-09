@@ -246,7 +246,8 @@ public abstract class Datatypes23Test {
 			config.setMultiSurfaceTrafo(null);
 			config.setMultilingualTrafo(null);
 			config.setInheritanceTrafo(null);
-			config.setXtfAttrText(true);
+			config.setSqlColsAsText(Config.SQL_COLS_AS_TEXT_ENABLE);
+			config.setValidation(false);
 			//Ili2db.readSettingsFromDb(config);
 			Ili2db.run(config,null);
 			String stmtTxt="SELECT * FROM "+setup.prefixName("classattr")+" ORDER BY t_id ASC";
@@ -649,7 +650,7 @@ public abstract class Datatypes23Test {
 	}
 
 	@Test
-	public void exportXtfAttr_invalidTextLimited() throws Exception
+	public void exportXtfAttr_invalidValuesAsText() throws Exception
 	{
 		{
 			importXtfAttr_asText();
@@ -670,7 +671,8 @@ public abstract class Datatypes23Test {
 			config.setModels("Datatypes23");
 			config.setExportTid(true);
 			config.setBasketHandling(null);
-			config.setXtfAttrText(true);
+			config.setSqlColsAsText(Config.SQL_COLS_AS_TEXT_ENABLE);
+			config.setValidation(false);
 			Ili2db.readSettingsFromDb(config);
 			try{
 				Ili2db.run(config,null);

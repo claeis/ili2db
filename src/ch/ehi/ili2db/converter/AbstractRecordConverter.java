@@ -80,7 +80,7 @@ public class AbstractRecordConverter {
 	protected MultiLineMappings multiLineAttrs=new MultiLineMappings();
 	protected MultiPointMappings multiPointAttrs=new MultiPointMappings();
 	protected ArrayMappings arrayAttrs=new ArrayMappings();
-	protected boolean xtfAttributesAsText = false;
+	protected boolean sqlColsAsText = false;
 
 	public AbstractRecordConverter(TransferDescription td1,ch.ehi.ili2db.mapping.NameMapping ili2sqlName,ch.ehi.ili2db.gui.Config config,DbIdGen idGen1, TrafoConfig trafoConfig1,Viewable2TableMapping class2wrapper1){
 		td=td1;
@@ -116,7 +116,7 @@ public class AbstractRecordConverter {
 		createItfLineTables=isIli1Model && config.getDoItfLineTables();
 		createItfAreaRef=isIli1Model && Config.AREA_REF_KEEP.equals(config.getAreaRef());
 
-		xtfAttributesAsText = config.isXtfAttrText();
+		sqlColsAsText=Config.SQL_COLS_AS_TEXT_ENABLE.equals(config.getSqlColsAsText());
 
 	}
 	public String beautifyEnumDispName(String value) {
@@ -368,11 +368,11 @@ public class AbstractRecordConverter {
     	return ret;
     }
 
-	protected boolean shouldBeSkipped(AttributeDef attributeDef) {
-		if(attributeDef.getDomainResolvingAliases() instanceof BlackboxType){
-			return true;
+	protected boolean mapAsTextCol(AttributeDef attributeDef) {
+		if(sqlColsAsText && attributeDef.getDomainResolvingAliases() instanceof BlackboxType){
+			return false;
 		}
-		return false;
+		return sqlColsAsText;
 	}
 	
 }

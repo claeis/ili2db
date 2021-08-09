@@ -436,7 +436,7 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
                        if(proxyType!=null && (proxyType instanceof ObjectType)){
                            // skip implicit particles (base-viewables) of views
                        }else{
-                              if (xtfAttributesAsText && !shouldBeSkipped(((AttributeDef) attrs.get(attr)))) {
+                              if (mapAsTextCol(((AttributeDef) attrs.get(attr)))) {
                                  valuei = addAttrValueTXT(rs, valuei, sqlid, iomObj, attr,(AttributeDef)attrs.get(Ili2cUtility.getRootBaseAttr(attr)),columnWrapper.getEpsgCode(),structQueue,table,fixref,genericDomains,iliClassForXtf);
                               } else {
                                  valuei = addAttrValue(rs, valuei, sqlid, iomObj, attr,(AttributeDef)attrs.get(Ili2cUtility.getRootBaseAttr(attr)),columnWrapper.getEpsgCode(),structQueue,table,fixref,genericDomains,iliClassForXtf);

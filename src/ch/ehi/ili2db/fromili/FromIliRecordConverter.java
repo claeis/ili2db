@@ -569,7 +569,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 		ArrayList<DbColumn> dbColExts=new ArrayList<DbColumn>();
 		Type type = attr.getDomainResolvingAll();
 
-		boolean result = xtfAttributesAsText && !shouldBeSkipped(attr) ? createSimpleDbColTXT(dbTable, aclass, attr, type, dbCol, unitDef, mText, dbColExts)
+		boolean result = mapAsTextCol(attr) ? createSimpleDbColTXT(dbTable, aclass, attr, type, dbCol, unitDef, mText, dbColExts)
 				: createSimpleDbCol(dbTable, aclass, attr, type, dbCol, unitDef, mText, dbColExts);
 		if(result) {
 

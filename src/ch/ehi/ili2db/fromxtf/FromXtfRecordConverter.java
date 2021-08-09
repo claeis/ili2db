@@ -192,7 +192,7 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
                     if(proxyType!=null && (proxyType instanceof ObjectType)){
                         // skip implicit particles (base-viewables) of views
 					} else {
-						if (xtfAttributesAsText && !shouldBeSkipped(((AttributeDef) attrs.get(rootAttr)))) {
+						if (mapAsTextCol(((AttributeDef) attrs.get(rootAttr)))) {
 							valuei = addAttrValueTXT(iomObj, sqlType, sqlId, aclass.getSqlTablename(), ps,
 									valuei, attr, (AttributeDef) attrs.get(rootAttr), columnWrapper.getEpsgCode(), structQueue, genericDomains, originalClass);
 

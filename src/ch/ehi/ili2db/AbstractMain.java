@@ -421,9 +421,10 @@ public abstract class AbstractMain {
             }else if(arg.equals("--createTypeConstraint")){
                 argi++;
                 config.setCreateTypeConstraint(true);
-			}else if(arg.equals("--xtfAttrsAsText ")){
+            }else if(arg.equals("--sqlColsAsText ")){
                 argi++;
-                config.setXtfAttrText(true);
+                config.setSqlColsAsText(Config.SQL_COLS_AS_TEXT_ENABLE);
+
 			}else if(arg.equals("--help")){
 					printVersion ();
 					System.err.println();
@@ -523,7 +524,7 @@ public abstract class AbstractMain {
 					System.err.println("--iliMetaAttrs file    Import meta-attributes from a .toml file (Requires --createMetaInfo)");
                     System.err.println("--createTypeConstraints   Create CHECK constraint on t_type columns.");
                     System.err.println("--createTypeConstraints   Create CHECK constraint on t_type columns.");
-					System.err.println("--xtfAttrsAsText       Every xtf attribute will be saved in a text column, this allow to import an xtf with for example a value too long");
+					System.err.println("--sqlColsAsText          Every simple-type attribute will be mapped to a text column, to enable the import of invalid data");
 					printSpecificOptions();
 					System.err.println("--proxy host           proxy server to access model repositories.");
 					System.err.println("--proxyPort port       proxy port to access model repositories.");

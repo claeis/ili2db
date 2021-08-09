@@ -75,6 +75,8 @@ public class Config extends Settings {
 	public static final String MAX_SQLNAME_LENGTH=PREFIX+".maxSqlNameLength";
 	private static final String SQL_NULL=PREFIX+".SqlNull";
 	public static final String SQL_NULL_ENABLE="enable";
+	public static final String SQL_COLS_AS_TEXT=PREFIX+".SqlColsAsText";
+	public static final String SQL_COLS_AS_TEXT_ENABLE="enable";
 	public static final String STROKE_ARCS=PREFIX+".StrokeArcs";
 	public static final String STROKE_ARCS_ENABLE="enable";
 	private static final String AREA_REF=PREFIX+".AreaRef";
@@ -791,11 +793,11 @@ public class Config extends Settings {
         this.disableRounding = disableRounding;
     }
 
-	public boolean isXtfAttrText() {
-		return xtfAttrText;
+	public String getSqlColsAsText() {
+		return getValue(SQL_COLS_AS_TEXT);
 	}
 
-	public void setXtfAttrText(boolean enable) {
-		this.xtfAttrText = enable;
+	public void setSqlColsAsText(String value) {
+		setValue(SQL_COLS_AS_TEXT,value);
 	}
 }
