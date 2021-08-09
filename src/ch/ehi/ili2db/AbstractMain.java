@@ -377,6 +377,10 @@ public abstract class AbstractMain {
 					argi++;
 					if (parseBooleanArgument(arg))
 						config.setStructMapping(Config.STRUCT_MAPPING_GENERICREF);
+        }else if(isOption(arg,"--sqlColsAsText")){
+          argi++;
+					if (parseBooleanArgument(arg))
+            config.setSqlColsAsText(Config.SQL_COLS_AS_TEXT_ENABLE);
 				} else if (isOption(arg, "--sqlEnableNull")) {
 					argi++;
 					if (parseBooleanArgument(arg))
@@ -540,6 +544,7 @@ public abstract class AbstractMain {
 					System.err.println("--nameLang lang        use names of ili model in given language as table/column name.");
 					System.err.println("--maxNameLength length max length of sql names (" + config.getMaxSqlNameLength() + ")");
 					System.err.println("--sqlEnableNull        create no NOT NULL constraints in db schema.");
+					System.err.println("--sqlColsAsText        Every simple-type attribute will be mapped to a text column, to enable the import of invalid data");
 					System.err.println("--strokeArcs           stroke ARCS on import.");
 					System.err.println("--skipPolygonBuilding  keep linetables; don't build polygons on import.");
 					System.err.println("--skipReferenceErrors  ignore/do not report reference errors.");

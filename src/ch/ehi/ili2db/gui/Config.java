@@ -75,6 +75,8 @@ public class Config extends Settings {
 	public static final String MAX_SQLNAME_LENGTH=PREFIX+".maxSqlNameLength";
 	private static final String SQL_NULL=PREFIX+".SqlNull";
 	public static final String SQL_NULL_ENABLE="enable";
+	public static final String SQL_COLS_AS_TEXT=PREFIX+".SqlColsAsText";
+	public static final String SQL_COLS_AS_TEXT_ENABLE="enable";
 	public static final String STROKE_ARCS=PREFIX+".StrokeArcs";
 	public static final String STROKE_ARCS_ENABLE="enable";
 	private static final String AREA_REF=PREFIX+".AreaRef";
@@ -150,6 +152,7 @@ public class Config extends Settings {
 	private String transferFileFormat=null;
 	private String iliMetaAttrsFile=null;
     private String domainAssignments=null;
+    private boolean xtfAttrText=false;
 	final static public String ILIGML20="ILIGML20"; 
 	
     static public final int FC_UNDEFINED=0;
@@ -789,4 +792,12 @@ public class Config extends Settings {
     public void setDisableRounding(boolean disableRounding) {
         this.disableRounding = disableRounding;
     }
+
+	public String getSqlColsAsText() {
+		return getValue(SQL_COLS_AS_TEXT);
+	}
+
+	public void setSqlColsAsText(String value) {
+		setValue(SQL_COLS_AS_TEXT,value);
+	}
 }
