@@ -421,7 +421,7 @@ public abstract class AbstractMain {
             }else if(arg.equals("--createTypeConstraint")){
                 argi++;
                 config.setCreateTypeConstraint(true);
-            }else if(arg.equals("--sqlColsAsText ")){
+            }else if(arg.equals("--sqlColsAsText")){
                 argi++;
                 config.setSqlColsAsText(Config.SQL_COLS_AS_TEXT_ENABLE);
 
