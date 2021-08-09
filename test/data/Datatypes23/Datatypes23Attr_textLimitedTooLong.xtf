@@ -8,10 +8,10 @@
 	<DATASECTION>
 		<Datatypes23.Topic BID="b1">
 			<Datatypes23.Topic.ClassAttr TID="ClassAttr.1">
-				<aufzaehlung>mehr.vier</aufzaehlung>
+				<aufzaehlung>not an enum</aufzaehlung>
 				<aI32id OID="22"></aI32id>
-				<aUuid OID="15B6BCCE-8772-4595-BF82-F727A665FBF3"></aUuid>
-				<aStandardid OID="chgAAAAAAAAA0azD"></aStandardid>
+				<aUuid OID="23A"></aUuid>
+				<aStandardid OID="111"></aStandardid>
 				<textLimited>1111111111111111111111111111111111111111</textLimited>
 				<textUnlimited>abc101</textUnlimited>
 				<mtextLimited>abc200
@@ -20,16 +20,15 @@ end200</mtextLimited>
 end201</mtextUnlimited>
 				<nametext>ClassA</nametext>
 				<uritext>mailto:ceis@localhost</uritext>
-				<horizAlignment>Left</horizAlignment>
-				<vertAlignment>Top</vertAlignment>
-				<aBoolean>true</aBoolean>
-				<numericInt>5</numericInt>
-				<numericDec>6.0</numericDec>
-				<aTime>09:00:00.0</aTime>
-				<aDate>2002-09-24</aDate>
-		   <!-- aDateTime>2002-04-30T09:00:00</aDateTime -->
-				<aDateTime>1900-01-01T12:30:05</aDateTime>
-		   <!-- aDateTime3>2002-06-30T18:00:00</aDateTime3 -->
+				<horizAlignment>42</horizAlignment>
+				<vertAlignment>delete</vertAlignment>
+				<aBoolean>falschhhhhhh</aBoolean>
+				<numericInt>im not an int</numericInt>
+				<numericBigInt>im not a BIG int</numericBigInt>
+				<numericDec>im not a decimal</numericDec>
+				<aTime>is this a time?</aTime>
+				<aDate>one date</aDate>
+				<aDateTime>date and time are nice</aDateTime>
 				<binbox>
 					<BINBLBOX>AAAA</BINBLBOX>
 				</binbox>

@@ -257,12 +257,13 @@ public abstract class Datatypes23Test {
 				{
 					Assert.assertTrue(rs.next());
 					Assert.assertEquals("22", rs.getString("aI32id"));
-					Assert.assertEquals(true, rs.getBoolean("aBoolean"));
-					Assert.assertEquals("15B6BCCE-8772-4595-BF82-F727A665FBF3", rs.getString("aUuid"));
+					Assert.assertEquals("falschhhhhhh", rs.getString("aBoolean"));
+					Assert.assertEquals("23A", rs.getString("aUuid"));
 					Assert.assertEquals("1111111111111111111111111111111111111111", rs.getString("textLimited"));
-					Assert.assertEquals("Left", rs.getString("horizAlignment"));
+					Assert.assertEquals("42", rs.getString("horizAlignment"));
 					Assert.assertEquals("mailto:ceis@localhost", rs.getString("uritext"));
-					Assert.assertEquals("5", rs.getString("numericInt"));
+					Assert.assertEquals("im not an int", rs.getString("numericInt"));
+					Assert.assertEquals("im not a BIG int", rs.getString("numericBigInt"));
 					String xmlbox = rs.getString("xmlbox");
 					String expectedXmlbox = "<x>\n" +
 							"                           <a></a>\n" +
@@ -271,20 +272,20 @@ public abstract class Datatypes23Test {
 							.checkForSimilar().normalizeWhitespace().build();
 
 					Assert.assertFalse(xmlboxDiff.toString(), xmlboxDiff.hasDifferences());
-					Assert.assertEquals("mehr.vier", rs.getString("aufzaehlung"));
-					Assert.assertEquals("09:00:00.0", rs.getString("aTime"));
+					Assert.assertEquals("not an enum", rs.getString("aufzaehlung"));
+					Assert.assertEquals("is this a time?", rs.getString("aTime"));
 					Assert.assertEquals("abc200\n" +
 							"end200", rs.getString("mtextLimited"));
-					Assert.assertEquals("chgAAAAAAAAA0azD", rs.getString("aStandardid"));
+					Assert.assertEquals("111", rs.getString("aStandardid"));
 					Assert.assertEquals("Grunddatensatz.Fixpunkte.LFP.Nummer", rs.getString("aAttribute"));
-					Assert.assertEquals("2002-09-24", rs.getString("aDate"));
-					Assert.assertEquals("Top", rs.getString("vertAlignment"));
+					Assert.assertEquals("one date", rs.getString("aDate"));
+					Assert.assertEquals("delete", rs.getString("vertAlignment"));
 					Assert.assertEquals("ClassA", rs.getString("nametext"));
 					Assert.assertEquals("abc101", rs.getString("textUnlimited"));
-					Assert.assertEquals("6.0", rs.getString("numericDec"));
+					Assert.assertEquals("im not a decimal", rs.getString("numericDec"));
 					Assert.assertEquals("abc201\n" +
 							"end201", rs.getString("mtextUnlimited"));
-					Assert.assertEquals("1900-01-01T12:30:05", rs.getString("aDateTime"));
+					Assert.assertEquals("date and time are nice", rs.getString("aDateTime"));
 				}
 				{
 					Assert.assertTrue(rs.next());
@@ -705,12 +706,13 @@ public abstract class Datatypes23Test {
 					Assert.assertEquals("Datatypes23.Topic.ClassAttr", obj1.getobjecttag());
 					// datatypes23
 					Assert.assertEquals("22", obj1.getattrvalue("aI32id"));
-					Assert.assertEquals("true", obj1.getattrvalue("aBoolean"));
-					Assert.assertEquals("15B6BCCE-8772-4595-BF82-F727A665FBF3", obj1.getattrvalue("aUuid"));
+					Assert.assertEquals("falschhhhhhh", obj1.getattrvalue("aBoolean"));
+					Assert.assertEquals("23A", obj1.getattrvalue("aUuid"));
 					Assert.assertEquals("1111111111111111111111111111111111111111", obj1.getattrvalue("textLimited"));
-					Assert.assertEquals("Left", obj1.getattrvalue("horizAlignment"));
+					Assert.assertEquals("42", obj1.getattrvalue("horizAlignment"));
 					Assert.assertEquals("mailto:ceis@localhost", obj1.getattrvalue("uritext"));
-					Assert.assertEquals("5", obj1.getattrvalue("numericInt"));
+					Assert.assertEquals("im not an int", obj1.getattrvalue("numericInt"));
+					Assert.assertEquals("im not a BIG int", obj1.getattrvalue("numericBigInt"));
 
 					// do xml comparison
 					String expectedXmlValue="<?xml version=\"1.0\" encoding=\"UTF-8\"?><x>\n" +
@@ -733,21 +735,21 @@ public abstract class Datatypes23Test {
 						Assert.assertFalse(diff.hasDifferences());
 					}
 
-					Assert.assertEquals("mehr.vier", obj1.getattrvalue("aufzaehlung"));
-					Assert.assertEquals("09:00:00.0", obj1.getattrvalue("aTime"));
+					Assert.assertEquals("not an enum", obj1.getattrvalue("aufzaehlung"));
+					Assert.assertEquals("is this a time?", obj1.getattrvalue("aTime"));
 					Assert.assertEquals("abc200\n" +
 							"end200", obj1.getattrvalue("mtextLimited"));
 					Assert.assertEquals("AAAA", obj1.getattrvalue("binbox"));
-					Assert.assertEquals("chgAAAAAAAAA0azD", obj1.getattrvalue("aStandardid"));
+					Assert.assertEquals("111", obj1.getattrvalue("aStandardid"));
 					Assert.assertEquals("Grunddatensatz.Fixpunkte.LFP.Nummer", obj1.getattrvalue("aAttribute"));
-					Assert.assertEquals("2002-09-24", obj1.getattrvalue("aDate"));
-					Assert.assertEquals("Top", obj1.getattrvalue("vertAlignment"));
+					Assert.assertEquals("one date", obj1.getattrvalue("aDate"));
+					Assert.assertEquals("delete", obj1.getattrvalue("vertAlignment"));
 					Assert.assertEquals("ClassA", obj1.getattrvalue("nametext"));
 					Assert.assertEquals("abc101", obj1.getattrvalue("textUnlimited"));
-					Assert.assertEquals("6.0", obj1.getattrvalue("numericDec"));
+					Assert.assertEquals("im not a decimal", obj1.getattrvalue("numericDec"));
 					Assert.assertEquals("abc201\n" +
 							"end201", obj1.getattrvalue("mtextUnlimited"));
-					Assert.assertEquals("1900-01-01T12:30:05", obj1.getattrvalue("aDateTime"));
+					Assert.assertEquals("date and time are nice", obj1.getattrvalue("aDateTime"));
 					Assert.assertEquals("DM01AVCH24D.FixpunkteKategorie1.LFP1", obj1.getattrvalue("aClass"));
 
 				}
