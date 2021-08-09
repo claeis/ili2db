@@ -21,6 +21,8 @@ import ch.ehi.ili2db.base.DbUrlConverter;
 import ch.ehi.ili2db.gui.Config;
 import ch.ehi.ili2db.gui.AbstractDbPanelDescriptor;
 
+import java.text.ParseException;
+
 
 /**
  * @author ce
@@ -99,7 +101,7 @@ public class H2gisMain extends ch.ehi.ili2db.AbstractMain {
 		System.err.println("--oneGeomPerTable      If more than one geometry per table, create secondary table.");
 	}
 	@Override
-	protected int doArgs(String args[],int argi,Config config)
+	protected int doArgs(String args[],int argi,Config config) throws ParseException
 	{
 		String arg=args[argi];
 		if(arg.equals("--dbhost")){

@@ -21,6 +21,8 @@ import ch.ehi.ili2db.base.DbUrlConverter;
 import ch.ehi.ili2db.gui.Config;
 import ch.ehi.ili2db.gui.AbstractDbPanelDescriptor;
 
+import java.text.ParseException;
+
 
 /**
  * @author ce
@@ -104,7 +106,7 @@ public class PgMain extends ch.ehi.ili2db.AbstractMain {
 		System.err.println("--setupPgExt           create extensions 'uuid-ossp' and 'postgis'.");
 	}
 	@Override
-	protected int doArgs(String args[],int argi,Config config)
+	protected int doArgs(String args[],int argi,Config config) throws ParseException
 	{
 		String arg=args[argi];
 		if(arg.equals("--dbhost")){

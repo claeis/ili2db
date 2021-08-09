@@ -23,6 +23,8 @@ import ch.ehi.ili2db.gui.AbstractDbPanelDescriptor;
 import ch.ehi.ili2db.gui.Config;
 import ch.ehi.ili2ora.sqlgen.GeneratorOracleSpatial;
 
+import java.text.ParseException;
+
 
 /**
  * @author ce
@@ -107,7 +109,7 @@ public class OraMain extends ch.ehi.ili2db.AbstractMain {
 		System.err.println("--geomwkb              Geometry as WKB (to be used if no Oracle Spatial).");
 		System.err.println("--geomwkt              Geometry as WKT (to be used if no Oracle Spatial).");
 	}
-    protected int doArgs(String[] args,int argi,Config config)
+    protected int doArgs(String[] args,int argi,Config config) throws ParseException
 	{
 		String arg=args[argi];
 		if(arg.equals("--dbhost")){
