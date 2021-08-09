@@ -18,6 +18,7 @@
 package ch.ehi.ili2fgdb;
 
 import java.nio.ByteBuffer;
+import java.text.ParseException;
 
 import ch.ehi.basics.logging.EhiLogger;
 import ch.ehi.ili2db.base.DbUrlConverter;
@@ -95,7 +96,7 @@ public class FgdbMain extends ch.ehi.ili2db.AbstractMain {
 		
 	}
 	@Override
-	protected int doArgs(String args[],int argi,Config config)
+	protected int doArgs(String args[],int argi,Config config) throws ParseException
 	{
 		String arg=args[argi];
 		if(arg.equals("--dbfile")){
