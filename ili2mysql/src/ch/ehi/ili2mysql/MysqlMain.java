@@ -21,6 +21,8 @@ import ch.ehi.ili2db.base.DbUrlConverter;
 import ch.ehi.ili2db.gui.Config;
 import ch.ehi.ili2db.gui.AbstractDbPanelDescriptor;
 
+import java.text.ParseException;
+
 
 /**
  * @author ce
@@ -100,7 +102,7 @@ public class MysqlMain extends ch.ehi.ili2db.AbstractMain {
 		System.err.println("--oneGeomPerTable      If more than one geometry per table, create secondary table.");
 	}
 	@Override
-	protected int doArgs(String args[],int argi,Config config)
+	protected int doArgs(String args[],int argi,Config config) throws ParseException
 	{
 		String arg=args[argi];
 		if(arg.equals("--dbhost")){
@@ -123,8 +125,8 @@ public class MysqlMain extends ch.ehi.ili2db.AbstractMain {
 			argi++;
 			config.setDbpwd(args[argi]);
 			argi++;
-		}else if(arg.equals("--oneGeomPerTable")){
-			config.setOneGeomPerTable(true);
+		}else if(isOption(arg, "--oneGeomPerTable")){
+			config.setOneGeomPerTable(parseBooleanArgument(arg));
 			argi++;
 		}
 		return argi;

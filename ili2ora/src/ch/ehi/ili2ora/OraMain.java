@@ -23,6 +23,8 @@ import ch.ehi.ili2db.gui.AbstractDbPanelDescriptor;
 import ch.ehi.ili2db.gui.Config;
 import ch.ehi.ili2ora.sqlgen.GeneratorOracleSpatial;
 
+import java.text.ParseException;
+
 
 /**
  * @author ce
@@ -107,7 +109,7 @@ public class OraMain extends ch.ehi.ili2db.AbstractMain {
 		System.err.println("--geomwkb              Geometry as WKB (to be used if no Oracle Spatial).");
 		System.err.println("--geomwkt              Geometry as WKT (to be used if no Oracle Spatial).");
 	}
-    protected int doArgs(String[] args,int argi,Config config)
+    protected int doArgs(String[] args,int argi,Config config) throws ParseException
 	{
 		String arg=args[argi];
 		if(arg.equals("--dbhost")){
@@ -130,14 +132,18 @@ public class OraMain extends ch.ehi.ili2db.AbstractMain {
 			argi++;
 			config.setDbpwd(args[argi]);
 			argi++;
-		}else if(arg.equals("--geomwkb")){
+		}else if(isOption(arg, "--geomwkb")){
 			argi++;
-			config.setGeometryConverter(ch.ehi.ili2ora.converter.OracleWKBColumnConverter.class.getName());
-			config.setDdlGenerator(ch.ehi.sqlgen.generator_impl.jdbc.GeneratorOracleWKB.class.getName());
-		}else if(arg.equals("--geomwkt")){
+			if (parseBooleanArgument(arg)){
+				config.setGeometryConverter(ch.ehi.ili2ora.converter.OracleWKBColumnConverter.class.getName());
+				config.setDdlGenerator(ch.ehi.sqlgen.generator_impl.jdbc.GeneratorOracleWKB.class.getName());
+			}
+		}else if(isOption(arg, "--geomwkt")){
 			argi++;
-			config.setGeometryConverter(ch.ehi.ili2ora.converter.OracleWKTColumnConverter.class.getName());
-			config.setDdlGenerator(ch.ehi.sqlgen.generator_impl.jdbc.GeneratorOracleWKT.class.getName());
+			if (parseBooleanArgument(arg)) {
+				config.setGeometryConverter(ch.ehi.ili2ora.converter.OracleWKTColumnConverter.class.getName());
+				config.setDdlGenerator(ch.ehi.sqlgen.generator_impl.jdbc.GeneratorOracleWKT.class.getName());
+			}
 		}else if(arg.equals("--dbservice")) {
 			argi++;
 			dbservice = args[argi];
