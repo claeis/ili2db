@@ -672,7 +672,6 @@ public abstract class Datatypes23Test {
 			config.setModels("Datatypes23");
 			config.setExportTid(true);
 			config.setBasketHandling(null);
-			config.setSqlColsAsText(Config.SQL_COLS_AS_TEXT_ENABLE);
 			config.setValidation(false);
 			Ili2db.readSettingsFromDb(config);
 			try{
