@@ -103,12 +103,12 @@ public class TrafoConfig {
 	                                updPrepStmt.setString(1, value);
 	                                updPrepStmt.setString(2, iliname);
 	                                updPrepStmt.setString(3, tag);
-									seHelper.executeSingleOrBatch(updPrepStmt, false);
+									seHelper.write(updPrepStmt);
 	                            }
 
 	                        }
 
-							seHelper.executeSingleOrBatch(updPrepStmt, true);
+							seHelper.flush(updPrepStmt);
 	                    }
 	                }catch(java.sql.SQLException ex){
 	                    throw new Ili2dbException("failed to update trafo",ex);

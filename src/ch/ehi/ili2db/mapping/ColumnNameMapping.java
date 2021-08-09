@@ -118,12 +118,12 @@ public class ColumnNameMapping {
 	                        ps.setString(2, sqlname);
 	                        ps.setString(3, entry.getOwner());
 	                        ps.setString(4, entry.getTarget());
-	                        seHelper.executeSingleOrBatch(ps, false);
+	                        seHelper.write(ps);
 	                    }
 
 	                }
 
-	                seHelper.executeSingleOrBatch(ps, true);
+	                seHelper.flush(ps);
 	            }catch(java.sql.SQLException ex){
 	                throw new Ili2dbException("failed to insert attrname-mapping "+entry1,ex);
 	            }finally{

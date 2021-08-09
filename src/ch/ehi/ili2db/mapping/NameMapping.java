@@ -501,12 +501,12 @@ public class NameMapping {
 	                        sqlname=classNameIli2sql.get(iliname);
 	                        ps.setString(1, iliname);
 	                        ps.setString(2, sqlname);
-	                        seHelper.executeSingleOrBatch(ps, false);
+	                        seHelper.write(ps);
 	                    }
 
 	                }
 
-					seHelper.executeSingleOrBatch(ps, true);
+					seHelper.flush(ps);
 
 	            }catch(java.sql.SQLException ex){
 	                throw new Ili2dbException("failed to insert classname-mapping "+iliname,ex);

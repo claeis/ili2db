@@ -13,14 +13,14 @@ public class StatementExecutionHelperTest {
         StatementExecutionHelper statementExecutionHelper = new StatementExecutionHelper(null);
         PreparedStatementMock psm = new PreparedStatementMock();
 
-        statementExecutionHelper.executeSingleOrBatch(psm, false);
-        statementExecutionHelper.executeSingleOrBatch(psm, false);
-        statementExecutionHelper.executeSingleOrBatch(psm, false);
-        statementExecutionHelper.executeSingleOrBatch(psm, false);
-        statementExecutionHelper.executeSingleOrBatch(psm, false);
+        statementExecutionHelper.write(psm);
+        statementExecutionHelper.write(psm);
+        statementExecutionHelper.write(psm);
+        statementExecutionHelper.write(psm);
+        statementExecutionHelper.write(psm);
 
         // when
-        statementExecutionHelper.executeSingleOrBatch(psm, true);
+        statementExecutionHelper.flush(psm);
 
         // then
         assertEquals(5, psm.getExecutedUpdates());
@@ -32,14 +32,14 @@ public class StatementExecutionHelperTest {
         StatementExecutionHelper statementExecutionHelper = new StatementExecutionHelper(1);
         PreparedStatementMock psm = new PreparedStatementMock();
 
-        statementExecutionHelper.executeSingleOrBatch(psm, false);
-        statementExecutionHelper.executeSingleOrBatch(psm, false);
-        statementExecutionHelper.executeSingleOrBatch(psm, false);
-        statementExecutionHelper.executeSingleOrBatch(psm, false);
-        statementExecutionHelper.executeSingleOrBatch(psm, false);
+        statementExecutionHelper.write(psm);
+        statementExecutionHelper.write(psm);
+        statementExecutionHelper.write(psm);
+        statementExecutionHelper.write(psm);
+        statementExecutionHelper.write(psm);
 
         // when
-        statementExecutionHelper.executeSingleOrBatch(psm, true);
+        statementExecutionHelper.flush(psm);
 
         // then
         assertEquals(5, psm.getExecutedUpdates());
@@ -53,14 +53,14 @@ public class StatementExecutionHelperTest {
         StatementExecutionHelper statementExecutionHelper = new StatementExecutionHelper(batchSize);
         PreparedStatementMock psm = new PreparedStatementMock();
 
-        statementExecutionHelper.executeSingleOrBatch(psm, false);
-        statementExecutionHelper.executeSingleOrBatch(psm, false);
-        statementExecutionHelper.executeSingleOrBatch(psm, false);
-        statementExecutionHelper.executeSingleOrBatch(psm, false);
-        statementExecutionHelper.executeSingleOrBatch(psm, false);
+        statementExecutionHelper.write(psm);
+        statementExecutionHelper.write(psm);
+        statementExecutionHelper.write(psm);
+        statementExecutionHelper.write(psm);
+        statementExecutionHelper.write(psm);
 
         // when
-        statementExecutionHelper.executeSingleOrBatch(psm, true);
+        statementExecutionHelper.flush(psm);
 
         // then
         assertEquals(0, psm.getExecutedUpdates());
@@ -76,14 +76,14 @@ public class StatementExecutionHelperTest {
         StatementExecutionHelper statementExecutionHelper = new StatementExecutionHelper(batchSize);
         PreparedStatementMock psm = new PreparedStatementMock();
 
-        statementExecutionHelper.executeSingleOrBatch(psm, false);
-        statementExecutionHelper.executeSingleOrBatch(psm, false);
-        statementExecutionHelper.executeSingleOrBatch(psm, false);
-        statementExecutionHelper.executeSingleOrBatch(psm, false);
-        statementExecutionHelper.executeSingleOrBatch(psm, false);
+        statementExecutionHelper.write(psm);
+        statementExecutionHelper.write(psm);
+        statementExecutionHelper.write(psm);
+        statementExecutionHelper.write(psm);
+        statementExecutionHelper.write(psm);
 
         // when
-        statementExecutionHelper.executeSingleOrBatch(psm, true);
+        statementExecutionHelper.flush(psm);
 
         // then
         assertEquals(0, psm.getExecutedUpdates());
@@ -99,22 +99,22 @@ public class StatementExecutionHelperTest {
         StatementExecutionHelper statementExecutionHelper = new StatementExecutionHelper(batchSize);
         PreparedStatementMock psm = new PreparedStatementMock();
 
-        statementExecutionHelper.executeSingleOrBatch(psm, false);
-        statementExecutionHelper.executeSingleOrBatch(psm, false);
-        statementExecutionHelper.executeSingleOrBatch(psm, false);
-        statementExecutionHelper.executeSingleOrBatch(psm, false);
-        statementExecutionHelper.executeSingleOrBatch(psm, false);
-        statementExecutionHelper.executeSingleOrBatch(psm, false);
-        statementExecutionHelper.executeSingleOrBatch(psm, false);
-        statementExecutionHelper.executeSingleOrBatch(psm, false);
-        statementExecutionHelper.executeSingleOrBatch(psm, false);
-        statementExecutionHelper.executeSingleOrBatch(psm, false);
-        statementExecutionHelper.executeSingleOrBatch(psm, false);
-        statementExecutionHelper.executeSingleOrBatch(psm, false);
-        statementExecutionHelper.executeSingleOrBatch(psm, false);
+        statementExecutionHelper.write(psm);
+        statementExecutionHelper.write(psm);
+        statementExecutionHelper.write(psm);
+        statementExecutionHelper.write(psm);
+        statementExecutionHelper.write(psm);
+        statementExecutionHelper.write(psm);
+        statementExecutionHelper.write(psm);
+        statementExecutionHelper.write(psm);
+        statementExecutionHelper.write(psm);
+        statementExecutionHelper.write(psm);
+        statementExecutionHelper.write(psm);
+        statementExecutionHelper.write(psm);
+        statementExecutionHelper.write(psm);
 
         // when
-        statementExecutionHelper.executeSingleOrBatch(psm, true);
+        statementExecutionHelper.flush(psm);
 
         // then
         assertEquals(0, psm.getExecutedUpdates());
