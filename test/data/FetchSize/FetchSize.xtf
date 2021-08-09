@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TRANSFER xmlns="http://www.interlis.ch/INTERLIS2.3">
+	<HEADERSECTION SENDER="ili2pg-developer-workspace" VERSION="2.3">
+		<MODELS>
+			<MODEL NAME="Rounding23" VERSION="2019-05-01" URI="mailto:ce@eisenhutinformatik.ch"></MODEL>
+		</MODELS>
+	</HEADERSECTION>
+	<DATASECTION>
+		<Rounding23.Topic BID="Rounding23.Topic">
+			<Rounding23.Topic.ClassAttr TID="Attr.1">
+				<numericDec>1.01</numericDec>
+			</Rounding23.Topic.ClassAttr>
+			<Rounding23.Topic.ClassKoord2 TID="Coord2.1">
+				<lcoord>
+						<COORD>
+							<C1>2460001.0001</C1>
+							<C2>1045001.0001</C2>
+						</COORD>
+				</lcoord>
+			</Rounding23.Topic.ClassKoord2>
+			<Rounding23.Topic.Line2 TID="Line2.1">
+				<straightsarcs2d>
+					<POLYLINE>
+						<COORD>
+							<C1>2460001.000</C1>
+							<C2>1045001.000</C2>
+						</COORD>
+						<ARC>
+							<C1>2460006.0001</C1>
+							<C2>1045006.0001</C2>
+							<A1>2460005.0001</A1>
+							<A2>1045004.0001</A2>
+						</ARC>
+						<COORD>
+							<C1>2460010.000</C1>
+							<C2>1045010.000</C2>
+						</COORD>
+					</POLYLINE>
+				</straightsarcs2d>
+			</Rounding23.Topic.Line2>
+			<Rounding23.Topic.Surface2 TID="Surface2.1">
+				<surfacearcs2d>
+					<SURFACE>
+						<BOUNDARY>
+							<POLYLINE>
+								<COORD>
+									<C1>2460001.000</C1>
+									<C2>1045001.000</C2>
+								</COORD>
+								<COORD>
+									<C1>2460020.0001</C1>
+									<C2>1045015.0001</C2>
+								</COORD>
+								<ARC>
+									<C1>2460001.000</C1>
+									<C2>1045015.000</C2>
+									<A1>2460010.000</A1>
+									<A2>1045018.000</A2>
+								</ARC>
+								<COORD>
+									<C1>2460001.000</C1>
+									<C2>1045001.000</C2>
+								</COORD>
+							</POLYLINE>
+						</BOUNDARY>
+					</SURFACE>
+				</surfacearcs2d>
+			</Rounding23.Topic.Surface2>
+		</Rounding23.Topic>
+	</DATASECTION>
+</TRANSFER>
