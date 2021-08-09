@@ -115,7 +115,7 @@ public class MsSqlMain  extends ch.ehi.ili2db.AbstractMain {
 			argi++;
 			dbinstance = args[argi];
 			argi++;
-		}else if(arg.startsWith("--dbwindowsauth")){
+		}else if(isOption(arg, "--dbwindowsauth")){
 			argi++;
 			dbWindowsAuth = parseBooleanArgument(arg);
 		}

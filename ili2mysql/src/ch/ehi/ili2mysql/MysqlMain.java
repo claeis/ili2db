@@ -125,7 +125,7 @@ public class MysqlMain extends ch.ehi.ili2db.AbstractMain {
 			argi++;
 			config.setDbpwd(args[argi]);
 			argi++;
-		}else if(arg.startsWith("--oneGeomPerTable")){
+		}else if(isOption(arg, "--oneGeomPerTable")){
 			config.setOneGeomPerTable(parseBooleanArgument(arg));
 			argi++;
 		}

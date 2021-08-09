@@ -133,10 +133,10 @@ public class PgMain extends ch.ehi.ili2db.AbstractMain {
 			argi++;
 			config.setDbschema(args[argi]);
 			argi++;
-		}else if(arg.startsWith("--oneGeomPerTable")){
+		}else if(isOption(arg, "--oneGeomPerTable")){
 			config.setOneGeomPerTable(parseBooleanArgument(arg));
 			argi++;
-		}else if(arg.startsWith("--setupPgExt")){
+		}else if(isOption(arg, "--setupPgExt")){
 			config.setSetupPgExt(parseBooleanArgument(arg));
 			argi++;
 		}

@@ -132,13 +132,13 @@ public class OraMain extends ch.ehi.ili2db.AbstractMain {
 			argi++;
 			config.setDbpwd(args[argi]);
 			argi++;
-		}else if(arg.startsWith("--geomwkb")){
+		}else if(isOption(arg, "--geomwkb")){
 			argi++;
 			if (parseBooleanArgument(arg)){
 				config.setGeometryConverter(ch.ehi.ili2ora.converter.OracleWKBColumnConverter.class.getName());
 				config.setDdlGenerator(ch.ehi.sqlgen.generator_impl.jdbc.GeneratorOracleWKB.class.getName());
 			}
-		}else if(arg.startsWith("--geomwkt")){
+		}else if(isOption(arg, "--geomwkt")){
 			argi++;
 			if (parseBooleanArgument(arg)) {
 				config.setGeometryConverter(ch.ehi.ili2ora.converter.OracleWKTColumnConverter.class.getName());
