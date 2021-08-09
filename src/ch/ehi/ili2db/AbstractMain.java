@@ -373,7 +373,7 @@ public abstract class AbstractMain {
             }else if(arg.equals("--importBid")){
                 argi++;
                 config.setImportBid(true);
-            }else if(arg.equals("-importFetchSize")){
+            }else if(arg.equals("--importFetchSize")){
                 argi++;
                 config.setFetchSize(Integer.parseInt(args[argi]));
                 argi++;
