@@ -65,6 +65,7 @@ import ch.interlis.ili2c.metamodel.ExtendableContainer;
 import ch.interlis.ili2c.metamodel.FormattedType;
 import ch.interlis.ili2c.metamodel.LineType;
 import ch.interlis.ili2c.metamodel.LocalAttribute;
+import ch.interlis.ili2c.metamodel.MultiCoordType;
 import ch.interlis.ili2c.metamodel.NumericType;
 import ch.interlis.ili2c.metamodel.ObjectPath;
 import ch.interlis.ili2c.metamodel.ObjectType;
@@ -618,6 +619,14 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 			ret.setDimension(coord.getDimensions().length);
 			setBB(ret, coord,attr.getContainer().getScopedName(null)+"."+attr.getName());
 			dbCol.value=ret;
+		} else if (type instanceof MultiCoordType) {
+			DbColGeometry ret = new DbColGeometry();
+			ret.setType(DbColGeometry.MULTIPOINT);
+			setCrs(ret,epsgCode);
+			MultiCoordType coord = (MultiCoordType) type;
+			ret.setDimension(coord.getDimensions().length);
+			setBB(ret, coord,attr.getContainer().getScopedName(null) + "." + attr.getName());
+			dbCol.value = ret;
 		}else if (type instanceof CompositionType){
 			// skip it
 			if(!createGenericStructRef){

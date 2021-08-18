@@ -40,6 +40,7 @@ import ch.interlis.ili2c.metamodel.BlackboxType;
 import ch.interlis.ili2c.metamodel.CompositionType;
 import ch.interlis.ili2c.metamodel.CoordType;
 import ch.interlis.ili2c.metamodel.EnumerationType;
+import ch.interlis.ili2c.metamodel.MultiCoordType;
 import ch.interlis.ili2c.metamodel.ObjectType;
 import ch.interlis.ili2c.metamodel.PolylineType;
 import ch.interlis.ili2c.metamodel.ReferenceType;
@@ -940,6 +941,25 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 		                        }
 		                    }
 		                }
+                } else if (type instanceof MultiCoordType) {
+                    if (classAttr == null) {
+                        valuei++;
+                    } else {
+                        Object geomobj = rs.getObject(valuei);
+                        valuei++;
+                        int actualEpsgCode = TransferFromIli.getEpsgCode(iliClassForXtf, tableAttr, genericDomains, defaultEpsgCode);
+                        if(!rs.wasNull() && epsgCode == actualEpsgCode) {
+                            try {
+                                boolean is3D=((MultiCoordType)type).getDimensions().length == 3;
+                                IomObject coord=geomConv.toIomMultiCoord(geomobj, sqlAttrName, is3D);
+                                if(coord != null) {
+                                    iomObj.addattrobj(attrName, coord);
+                                }
+                            }catch(ConverterException ex){
+                                EhiLogger.logError("Object " + sqlid + ": failed to convert multicoord", ex);
+                            }
+                        }
+                    }
 				}else if(type instanceof EnumerationType){
 					if(createEnumColAsItfCode){
 		                if(classAttr==null) {
