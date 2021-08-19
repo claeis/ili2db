@@ -6,8 +6,8 @@ import ch.ehi.basics.logging.EhiLogger;
 import ch.ehi.ili2db.base.DbNames;
 import ch.ehi.ili2db.base.Ili2db;
 import ch.ehi.ili2db.base.Ili2dbException;
+import ch.ehi.ili2db.base.StatementExecutionHelper;
 import ch.ehi.ili2db.fromili.CustomMapping;
-import ch.ehi.sqlgen.DbUtility;
 import ch.ehi.sqlgen.generator_impl.jdbc.GeneratorJdbc;
 import ch.ehi.sqlgen.repository.DbTableName;
 import ch.interlis.ili2c.metamodel.AttributeDef;
@@ -17,6 +17,15 @@ public class TrafoConfig {
 
 	
 	HashMap<String,HashMap<String,String>> config=null;
+	private Integer batchSize = null;
+
+	public TrafoConfig() {
+	}
+
+	public TrafoConfig(Integer batchSize) {
+		this.batchSize = batchSize;
+	}
+
 	public void readTrafoConfig(java.sql.Connection conn,String schema,CustomMapping customMapping)
 	throws Ili2dbException
 	{
@@ -72,6 +81,7 @@ public class TrafoConfig {
 		}
 		if(conn!=null) {
 	        HashMap<String, HashMap<String, String>> existingEntries = read(conn,schema,customMapping);
+			StatementExecutionHelper seHelper = new StatementExecutionHelper(batchSize);
 	        try{
 
 	            // update entries
@@ -83,7 +93,6 @@ public class TrafoConfig {
 	                EhiLogger.traceBackendCmd(updStmt);
 	                java.sql.PreparedStatement updPrepStmt = conn.prepareStatement(updStmt);
 	                try{
-	                    ;
 	                    for(String iliname:config.keySet()){
 	                        HashMap<String, String> values=config.get(iliname);
 	                        for(String tag:values.keySet()){
@@ -94,9 +103,12 @@ public class TrafoConfig {
 	                                updPrepStmt.setString(1, value);
 	                                updPrepStmt.setString(2, iliname);
 	                                updPrepStmt.setString(3, tag);
-	                                updPrepStmt.executeUpdate();
+									seHelper.write(updPrepStmt);
 	                            }
+
 	                        }
+
+							seHelper.flush(updPrepStmt);
 	                    }
 	                }catch(java.sql.SQLException ex){
 	                    throw new Ili2dbException("failed to update trafo",ex);

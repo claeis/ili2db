@@ -33,20 +33,18 @@ import ch.ehi.ili2db.base.DbNames;
 import ch.ehi.ili2db.base.Ili2cUtility;
 import ch.ehi.ili2db.base.Ili2db;
 import ch.ehi.ili2db.base.Ili2dbException;
+import ch.ehi.ili2db.base.StatementExecutionHelper;
 import ch.ehi.ili2db.converter.AbstractRecordConverter;
 import ch.ehi.ili2db.dbmetainfo.DbExtMetaInfo;
 import ch.ehi.ili2db.fromxtf.EnumValueMap;
 import ch.ehi.ili2db.gui.Config;
-import ch.ehi.ili2db.mapping.ColumnWrapper;
 import ch.ehi.ili2db.mapping.MultiLineMappings;
 import ch.ehi.ili2db.mapping.MultiPointMappings;
-import ch.ehi.ili2db.mapping.MultiSurfaceMapping;
 import ch.ehi.ili2db.mapping.MultiSurfaceMappings;
 import ch.ehi.ili2db.mapping.TrafoConfig;
 import ch.ehi.ili2db.mapping.Viewable2TableMapping;
 import ch.ehi.ili2db.mapping.ViewableWrapper;
 import ch.ehi.ili2db.metaattr.IliMetaAttrNames;
-import ch.ehi.sqlgen.DbUtility;
 import ch.ehi.sqlgen.generator_impl.jdbc.GeneratorJdbc;
 import ch.ehi.sqlgen.repository.DbColBoolean;
 import ch.ehi.sqlgen.repository.DbColDateTime;
@@ -58,11 +56,9 @@ import ch.ehi.sqlgen.repository.DbIndex;
 import ch.ehi.sqlgen.repository.DbSchema;
 import ch.ehi.sqlgen.repository.DbTable;
 import ch.ehi.sqlgen.repository.DbTableName;
-import ch.interlis.ili2c.metamodel.AbstractAttributeRef;
 import ch.interlis.ili2c.metamodel.AssociationDef;
 import ch.interlis.ili2c.metamodel.AttributeDef;
 import ch.interlis.ili2c.metamodel.AttributeRef;
-import ch.interlis.ili2c.metamodel.CompositionType;
 import ch.interlis.ili2c.metamodel.Container;
 import ch.interlis.ili2c.metamodel.CoordType;
 import ch.interlis.ili2c.metamodel.Domain;
@@ -82,7 +78,6 @@ import ch.interlis.ili2c.metamodel.Table;
 import ch.interlis.ili2c.metamodel.Topic;
 import ch.interlis.ili2c.metamodel.TransferDescription;
 import ch.interlis.ili2c.metamodel.Type;
-import ch.interlis.ili2c.metamodel.TypeAlias;
 import ch.interlis.ili2c.metamodel.View;
 import ch.interlis.ili2c.metamodel.Viewable;
 import ch.interlis.ili2c.metamodel.ViewableTransferElement;
@@ -119,6 +114,7 @@ public class TransferFromIli {
 	private DbExtMetaInfo metaInfo=new DbExtMetaInfo();
 	private Integer defaultCrsCode=null;
 	private String srsModelAssignment=null;
+	private Integer batchSize = null;
 	public DbSchema doit(TransferDescription td1,java.util.List<Element> modelEles,ch.ehi.ili2db.mapping.NameMapping ili2sqlName,ch.ehi.ili2db.gui.Config config,DbIdGen idGen,TrafoConfig trafoConfig,Viewable2TableMapping class2wrapper1,CustomMapping customMapping1)
 	throws Ili2dbException
 	{
@@ -153,6 +149,8 @@ public class TransferFromIli {
 		visitedEnums=new HashSet();
 		td=td1;
 		recConv=new FromIliRecordConverter(td,ili2sqlName,config,schema,customMapping,idGen,visitedEnums,trafoConfig,class2wrapper,metaInfo);
+
+		batchSize = config.getBatchSize();
 
 		visitedWrapper=new HashSet<ViewableWrapper>();
 		generatModelEles(modelEles,1);
@@ -1231,6 +1229,7 @@ public class TransferFromIli {
 	            EhiLogger.traceBackendCmd(stmt);
 	            java.sql.PreparedStatement ps = conn.prepareStatement(stmt);
 	            String thisClass=null;
+				StatementExecutionHelper seHelper = new StatementExecutionHelper(batchSize);
 	            try{
 	                for(Object aclass:visitedElements){
 	                    if(aclass instanceof Viewable){
@@ -1243,11 +1242,14 @@ public class TransferFromIli {
 	                            }else{
 	                                ps.setNull(2,java.sql.Types.VARCHAR);
 	                            }
-	                            ps.executeUpdate();
+								seHelper.write(ps);
 	                        }
 	                    }
 	                }
-	            }catch(java.sql.SQLException ex){
+
+					seHelper.flush(ps);
+
+				}catch(java.sql.SQLException ex){
 	                throw new Ili2dbException("failed to insert inheritance-relation for class "+thisClass,ex);
 	            }finally{
 	                ps.close();

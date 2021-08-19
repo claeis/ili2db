@@ -531,7 +531,7 @@ public class Ili2db {
 					  // read mapping from db
 					  mapping.readAttrMappingTable(conn,config.getDbschema());
 				  }
-				  TrafoConfig trafoConfig=new TrafoConfig();
+				  TrafoConfig trafoConfig=new TrafoConfig(config.getBatchSize());
 				  trafoConfig.readTrafoConfig(conn, config.getDbschema(),customMapping);
 
 				ModelElementSelector ms=new ModelElementSelector();

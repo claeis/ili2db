@@ -25,6 +25,7 @@ import ch.ehi.basics.logging.EhiLogger;
 import ch.ehi.ili2db.base.DbNames;
 import ch.ehi.ili2db.base.Ili2db;
 import ch.ehi.ili2db.base.Ili2dbException;
+import ch.ehi.ili2db.base.StatementExecutionHelper;
 import ch.ehi.sqlgen.generator_impl.jdbc.GeneratorJdbc;
 import ch.interlis.ili2c.metamodel.AttributeDef;
 import ch.interlis.ili2c.metamodel.Domain;
@@ -53,7 +54,8 @@ public class NameMapping {
 	private static final int FULL_QUALIFIED_NAMES=2;
 	private boolean useEpsg=false;
     private boolean isVer3_export=false;
-    private String languagePath[]=null;
+	private Integer batchSize = null;
+	private String languagePath[]=null;
     private TranslationNameMapper translationNameMapper=null;
 	private NameMapping(){};
 	public NameMapping(TransferDescription td,ch.ehi.ili2db.gui.Config config)
@@ -68,6 +70,7 @@ public class NameMapping {
 		}
 		useEpsg=config.useEpsgInNames();
 		isVer3_export=config.isVer3_export();
+		batchSize = config.getBatchSize();
 		String path=config.getNameLanguage();
 		if(path!=null) {
 		    languagePath=path.split(";");
@@ -487,17 +490,24 @@ public class NameMapping {
 	            java.sql.PreparedStatement ps = conn.prepareStatement(stmt);
 	            String iliname=null;
 	            String sqlname=null;
+				StatementExecutionHelper seHelper = new StatementExecutionHelper(batchSize);
+
 	            try{
 	                java.util.Iterator<String> entri=classNameIli2sql.keySet().iterator();
+					long start = System.currentTimeMillis();
 	                while(entri.hasNext()){
 	                    iliname=entri.next();
 	                    if(!exstEntries.contains(iliname)){
 	                        sqlname=classNameIli2sql.get(iliname);
 	                        ps.setString(1, iliname);
 	                        ps.setString(2, sqlname);
-	                        ps.executeUpdate();
+	                        seHelper.write(ps);
 	                    }
+
 	                }
+
+					seHelper.flush(ps);
+
 	            }catch(java.sql.SQLException ex){
 	                throw new Ili2dbException("failed to insert classname-mapping "+iliname,ex);
 	            }finally{

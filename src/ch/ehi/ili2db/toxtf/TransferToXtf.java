@@ -136,7 +136,8 @@ public class TransferToXtf {
     private Map<Element,Element> crsFilter=null;
     private Map<Element,Element> crsFilterToTarget=null;
     boolean ignoreUnresolvedReferences=false;
-    
+    private Integer fetchSize = null;
+
 	public TransferToXtf(NameMapping ili2sqlName1,TransferDescription td1,Connection conn1,SqlColumnConverter geomConv,Config config,TrafoConfig trafoConfig,Viewable2TableMapping class2wrapper1){
 		ili2sqlName=ili2sqlName1;
 		td=td1;
@@ -151,6 +152,7 @@ public class TransferToXtf {
 		if(config.getDefaultSrsCode()!=null) {
 	        defaultCrsCode=Integer.parseInt(config.getDefaultSrsCode());
 		}
+		fetchSize=config.getFetchSize();
 		createTypeDiscriminator=Config.CREATE_TYPE_DISCRIMINATOR_ALWAYS.equals(config.getCreateTypeDiscriminator());
 		createGenericStructRef=Config.STRUCT_MAPPING_GENERICREF.equals(config.getStructMapping());
 		writeIliTid=config.isExportTid(); 
@@ -693,6 +695,9 @@ public class TransferToXtf {
 				dbstmt = conn.prepareStatement(stmt);
 				dbstmt.clearParameters();
 				dbstmt.setLong(1, sqlid);
+				if(fetchSize != null && fetchSize > 0){
+					dbstmt.setFetchSize(fetchSize);
+				}
 				rs = dbstmt.executeQuery();
 				if(rs.next()) {
 					sqlIliTid = rs.getString(2);
@@ -897,6 +902,9 @@ public class TransferToXtf {
 		try{
 			
 			dbstmt = conn.createStatement();
+			if(fetchSize != null && fetchSize > 0){
+				dbstmt.setFetchSize(fetchSize);
+			}
 			rs=dbstmt.executeQuery(stmt);
 			while(rs.next()){
 				String sqlid=rs.getString(1);
@@ -980,6 +988,9 @@ public class TransferToXtf {
 			int paramIdx=1;
 			if(basketSqlId!=null){
 				dbstmt.setLong(paramIdx++,basketSqlId);
+			}
+			if(fetchSize != null && fetchSize > 0){
+				dbstmt.setFetchSize(fetchSize);
 			}
 			rs=dbstmt.executeQuery();
 			while(rs.next()){
@@ -1101,6 +1112,9 @@ public class TransferToXtf {
 			
 			dbstmt = conn.prepareStatement(stmt);
 			recConv.setStmtParams(dbstmt, basketSqlId, fixref, structWrapper);
+			if(fetchSize != null && fetchSize > 0){
+				dbstmt.setFetchSize(fetchSize);
+			}
 			rs=dbstmt.executeQuery();
 			while(rs.next()){
 				// list of not yet processed struct attrs
