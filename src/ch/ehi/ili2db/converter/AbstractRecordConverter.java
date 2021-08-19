@@ -30,6 +30,7 @@ import ch.interlis.ili2c.metamodel.AbstractClassDef;
 import ch.interlis.ili2c.metamodel.AbstractLeafElement;
 import ch.interlis.ili2c.metamodel.AssociationDef;
 import ch.interlis.ili2c.metamodel.AttributeDef;
+import ch.interlis.ili2c.metamodel.BlackboxType;
 import ch.interlis.ili2c.metamodel.CompositionType;
 import ch.interlis.ili2c.metamodel.CoordType;
 import ch.interlis.ili2c.metamodel.Domain;
@@ -79,6 +80,7 @@ public class AbstractRecordConverter {
 	protected MultiLineMappings multiLineAttrs=new MultiLineMappings();
 	protected MultiPointMappings multiPointAttrs=new MultiPointMappings();
 	protected ArrayMappings arrayAttrs=new ArrayMappings();
+	protected boolean sqlColsAsText = false;
 
 	public AbstractRecordConverter(TransferDescription td1,ch.ehi.ili2db.mapping.NameMapping ili2sqlName,ch.ehi.ili2db.gui.Config config,DbIdGen idGen1, TrafoConfig trafoConfig1,Viewable2TableMapping class2wrapper1){
 		td=td1;
@@ -113,7 +115,9 @@ public class AbstractRecordConverter {
 		isIli1Model=td1.getIli1Format()!=null;
 		createItfLineTables=isIli1Model && config.getDoItfLineTables();
 		createItfAreaRef=isIli1Model && Config.AREA_REF_KEEP.equals(config.getAreaRef());
-		
+
+		sqlColsAsText=Config.SQL_COLS_AS_TEXT_ENABLE.equals(config.getSqlColsAsText());
+
 	}
 	public String beautifyEnumDispName(String value) {
 		if(removeUnderscoreFromEnumDispName){
@@ -363,5 +367,12 @@ public class AbstractRecordConverter {
     	}
     	return ret;
     }
+
+	protected boolean mapAsTextCol(AttributeDef attributeDef) {
+		if(sqlColsAsText && attributeDef.getDomainResolvingAliases() instanceof BlackboxType){
+			return false;
+		}
+		return sqlColsAsText;
+	}
 	
 }

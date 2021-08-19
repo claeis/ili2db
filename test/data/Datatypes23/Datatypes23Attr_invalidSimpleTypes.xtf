@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TRANSFER xmlns="http://www.interlis.ch/INTERLIS2.3">
+	<HEADERSECTION SENDER="ili2fgdb-3.10.0-20170630" VERSION="2.3">
+		<MODELS>
+			<MODEL NAME="Datatypes23" VERSION="2016-12-21" URI="mailto:ce@eisenhutinformatik.ch"></MODEL>
+		</MODELS>
+	</HEADERSECTION>
+	<DATASECTION>
+		<Datatypes23.Topic BID="b1">
+			<Datatypes23.Topic.ClassAttr TID="ClassAttr.1">
+				<aufzaehlung>not an enum</aufzaehlung>
+				<aI32id OID="22"></aI32id>
+				<aUuid OID="23A"></aUuid>
+				<aStandardid OID="111"></aStandardid>
+				<textLimited>1111111111111111111111111111111111111111</textLimited>
+				<textUnlimited>abc101</textUnlimited>
+				<mtextLimited>abc200
+end200</mtextLimited>
+				<mtextUnlimited>abc201
+end201</mtextUnlimited>
+				<nametext>ClassA</nametext>
+				<uritext>mailto:ceis@localhost</uritext>
+				<horizAlignment>42</horizAlignment>
+				<vertAlignment>delete</vertAlignment>
+				<aBoolean>falschhhhhhh</aBoolean>
+				<numericInt>im not an int</numericInt>
+				<numericBigInt>im not a BIG int</numericBigInt>
+				<numericDec>im not a decimal</numericDec>
+				<aTime>is this a time?</aTime>
+				<aDate>one date</aDate>
+				<aDateTime>date and time are nice</aDateTime>
+				<binbox>
+					<BINBLBOX>AAAA</BINBLBOX>
+				</binbox>
+				<xmlbox>
+					<XMLBLBOX>
+						<x>
+							<a/>
+						</x>
+					</XMLBLBOX>
+				</xmlbox>
+				<aClass>DM01AVCH24D.FixpunkteKategorie1.LFP1</aClass>
+				<aAttribute>Grunddatensatz.Fixpunkte.LFP.Nummer</aAttribute>
+			</Datatypes23.Topic.ClassAttr>
+			<Datatypes23.Topic.ClassAttr TID="ClassAttr.2">
+				<textUnlimited>textNull</textUnlimited>
+			</Datatypes23.Topic.ClassAttr>
+		</Datatypes23.Topic>
+	</DATASECTION>
+</TRANSFER>

@@ -18,6 +18,7 @@
 package ch.ehi.ili2gpkg;
 
 import java.nio.ByteBuffer;
+import java.text.ParseException;
 
 import ch.ehi.basics.logging.EhiLogger;
 import ch.ehi.ili2db.base.DbUrlConverter;
@@ -90,7 +91,7 @@ public class GpkgMain extends ch.ehi.ili2db.AbstractMain {
 		System.err.println("--dbschema  schema     The name of the schema in the database. Defaults to not set.");
 	}
 	@Override
-	protected int doArgs(String args[],int argi,Config config)
+	protected int doArgs(String args[],int argi,Config config) throws ParseException
 	{
 		String arg=args[argi];
 		if(arg.equals("--dbfile")){

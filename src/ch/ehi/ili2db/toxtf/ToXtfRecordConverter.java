@@ -436,7 +436,11 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
                        if(proxyType!=null && (proxyType instanceof ObjectType)){
                            // skip implicit particles (base-viewables) of views
                        }else{
-                              valuei = addAttrValue(rs, valuei, sqlid, iomObj, attr,(AttributeDef)attrs.get(Ili2cUtility.getRootBaseAttr(attr)),columnWrapper.getEpsgCode(),structQueue,table,fixref,genericDomains,iliClassForXtf);
+                              if (mapAsTextCol(((AttributeDef) attrs.get(attr)))) {
+                                 valuei = addAttrValueTXT(rs, valuei, sqlid, iomObj, attr,(AttributeDef)attrs.get(Ili2cUtility.getRootBaseAttr(attr)),columnWrapper.getEpsgCode(),structQueue,table,fixref,genericDomains,iliClassForXtf);
+                              } else {
+                                 valuei = addAttrValue(rs, valuei, sqlid, iomObj, attr,(AttributeDef)attrs.get(Ili2cUtility.getRootBaseAttr(attr)),columnWrapper.getEpsgCode(),structQueue,table,fixref,genericDomains,iliClassForXtf);
+                              }
                        }
                    }
 			   }
@@ -509,6 +513,22 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 	
 	final private int  LEN_LANG_PREFIX=DbNames.MULTILINGUAL_TXT_COL_PREFIX.length();
     private String dbSchema;
+
+	public int addAttrValueTXT(java.sql.ResultSet rs, int valuei, long sqlid,
+							Iom_jObject iomObj, AttributeDef tableAttr,AttributeDef classAttr,Integer epsgCode,ArrayList<AbstractStructWrapper> structQueue,ViewableWrapper table,FixIomObjectRefs fixref,Map<String,String> genericDomains,Viewable iliClassForXtf) throws SQLException {
+		String attrName=tableAttr.getName();
+		if(classAttr==null) {
+			valuei++;
+		}else {
+			String value=rs.getString(valuei);
+			valuei++;
+			if(!rs.wasNull()){
+				iomObj.setattrvalue(attrName,value);
+			}
+		}
+		return valuei;
+	}
+
 	public int addAttrValue(java.sql.ResultSet rs, int valuei, long sqlid,
 			Iom_jObject iomObj, AttributeDef tableAttr,AttributeDef classAttr,Integer epsgCode,ArrayList<AbstractStructWrapper> structQueue,ViewableWrapper table,FixIomObjectRefs fixref,Map<String,String> genericDomains,Viewable iliClassForXtf) throws SQLException {
 		if(true) { // attr.getExtending()==null){

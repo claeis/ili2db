@@ -102,16 +102,17 @@ Fehler wird aber in der Regel schon früher ausgegeben.::
 
 Fehlerhafte Daten
 -----------------
-Um fehlerhaften Daten zu importieren (um sie zu flicken), muss mindestens die 
+Um fehlerhaften Daten zu importieren (um sie danach (z.B. im GIS) zu flicken), muss mindestens die 
 Validierung ausgeschaltet werden (``--disableValidation``). Das DB Schema muss 
-aber auch so angelegt werden, dass fehlerhafte Werte durch ``NULL`` ersetzt werden 
-können (``--sqlEnableNull``). Und die Programmlogik für den Datenimport muss die Fehler 
+aber auch so angelegt werden, dass fehlerhafte Werte als Text importiert werden können (``--sqlColsAsText``) 
+bzw. durch ``NULL`` ersetzt werden können (``--sqlEnableNull``). 
+Und die Programmlogik für den Datenimport muss die Fehler 
 tolerieren (``--skipReferenceErrors`` und ``--skipGeometryErrors``), so dass 
 z.B. eine Referenz auf ein nicht vorhandenes Objekt ignoriert wird.
 
-Um solche Daten zu importieren (um sie zu flicken)::
+Um solche Daten zu importieren (um sie danach zu flicken)::
 	
-  java -jar ili2gpkg.jar --schemaimport --sqlEnableNull --dbfile mogis.gpkg path/to/mo.ili
+  java -jar ili2gpkg.jar --schemaimport --sqlEnableNull --sqlColsAsText --dbfile mogis.gpkg path/to/mo.ili
   java -jar ili2gpkg.jar --import --skipReferenceErrors --skipGeometryErrors --disableValidation --dbfile mogis.gpkg path/to/data.xtf
 
 Bei ITF (Interlis 1): Fehlerhafte AREA Attribute können für 
@@ -124,9 +125,9 @@ mit der Validierung zu tun, sondern damit, dass aus den Linien+Punkten
 keine Polygone gebildet werden können. Die Polygonbildung muss also 
 ausgeschaltet werden (``--skipPolygonBuilding``).
 
-Um solche Daten zu importieren (um sie zu flicken)::
+Um solche Daten zu importieren (um sie danach zu flicken)::
 	
-  java -jar ili2gpkg.jar --schemaimport --sqlEnableNull --skipPolygonBuilding --dbfile mogis.gpkg path/to/mo.ili
+  java -jar ili2gpkg.jar --schemaimport --sqlEnableNull --sqlColsAsText --skipPolygonBuilding --dbfile mogis.gpkg path/to/mo.ili
   java -jar ili2gpkg.jar --import --skipReferenceErrors --skipPolygonBuilding --skipGeometryErrors --disableValidation --dbfile mogis.gpkg path/to/data.itf
 
 
@@ -759,6 +760,8 @@ Optionen:
 | --createDateTimeChecks        | Erstellt für Datum und Zeit Datentypen CHECK-Constraints in der Datenbank.                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
 +-------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | --createTypeConstraints       | Erstellt für die t\_type Spalte ein CHECK-Constraint in der Datenbank.                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
++-------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| --sqlColsAsText               | Bildet alle (einfachen/unstrukturierten) Interlis-Attribute als TEXT-Spalten ab, so dass fehlerhafte Daten importiert werden können.                                                                                                                                                                                                                                                                                                                                                                                                       |
 +-------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | --createImportTabs            | Erstellt die t\_ili2db\_import Tabellen in der Datenbank.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
 +-------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+

@@ -74,6 +74,7 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 	private HashMap tag2class=null;
 	private Integer defaultEpsgCode=null;
     private Map<AttributeDef,EnumValueMap> enumCache=new HashMap<AttributeDef,EnumValueMap>();
+    private Map<String, String> displayNameCache = new HashMap<String, String>();
     private String dbSchema;
     private boolean importTid=false;
 	
@@ -191,10 +192,16 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
                     Type proxyType=attr.getDomain();
                     if(proxyType!=null && (proxyType instanceof ObjectType)){
                         // skip implicit particles (base-viewables) of views
-                    }else{
-                        valuei = addAttrValue(iomObj, sqlType, sqlId, aclass.getSqlTablename(),ps,
-                                valuei, attr,(AttributeDef)attrs.get(rootAttr),columnWrapper.getEpsgCode(),structQueue,genericDomains,originalClass);
-                    }
+					} else {
+						if (mapAsTextCol(((AttributeDef) attrs.get(rootAttr)))) {
+							valuei = addAttrValueTXT(iomObj, sqlType, sqlId, aclass.getSqlTablename(), ps,
+									valuei, attr, (AttributeDef) attrs.get(rootAttr), columnWrapper.getEpsgCode(), structQueue, genericDomains, originalClass);
+
+						} else {
+							valuei = addAttrValue(iomObj, sqlType, sqlId, aclass.getSqlTablename(), ps,
+									valuei, attr, (AttributeDef) attrs.get(rootAttr), columnWrapper.getEpsgCode(), structQueue, genericDomains, originalClass);
+						}
+					}
                 }
 			   }
 			}
@@ -288,6 +295,7 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 			//valuei++;
 		}
 	}
+
 	private void setReferenceColumn(PreparedStatement ps,
 			AbstractClassDef destination, String refoid, OutParam<Integer> valuei) throws SQLException {
 	  	String targetRootClassName=Ili2cUtility.getRootViewable(destination).getScopedName(null);
@@ -807,6 +815,22 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 		   }
 		return sep;
 	}
+
+	public int addAttrValueTXT(IomObject iomObj, String sqlType, long sqlId,
+							   String sqlTableName, PreparedStatement ps, int valuei, AttributeDef tableAttr, AttributeDef classAttr, Integer epsgCode, ArrayList<AbstractStructWrapper> structQueue, Map<String, String> genericDomains, Viewable originalClass)
+			throws SQLException, ConverterException {
+		String attrName=tableAttr.getName();
+		String value = classAttr == null ? null : iomObj.getattrvalue(attrName);
+		if (value != null) {
+			ps.setString(valuei, value);
+		} else {
+			ps.setNull(valuei, Types.VARCHAR);
+		}
+		valuei++;
+
+		return valuei;
+	}
+
 	public int addAttrValue(IomObject iomObj, String sqlType, long sqlId,
 			String sqlTableName,PreparedStatement ps, int valuei, AttributeDef tableAttr,AttributeDef classAttr,Integer epsgCode,ArrayList<AbstractStructWrapper> structQueue,Map<String,String> genericDomains,Viewable originalClass)
 			throws SQLException, ConverterException {
@@ -1191,7 +1215,7 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 					valuei++;
 					if(createEnumTxtCol){
 						if(value!=null){
-							ps.setString(valuei, beautifyEnumDispName(value));
+							ps.setString(valuei, mapDisplayName(classAttr, value));
 						}else{
 							ps.setNull(valuei,Types.VARCHAR);
 						}
@@ -1250,6 +1274,28 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 	    }
         return map.mapXtfValue(xtfvalue);
     }
+
+	private String mapDisplayName(AttributeDef attr, String value) throws SQLException {
+		EnumValueMap map = null;
+		if(enumCache.containsKey(attr)) {
+			map=enumCache.get(attr);
+		}else {
+			OutParam<String> qualifiedIliName=new OutParam<String>();
+			DbTableName sqlDbName=getEnumTargetTableName(attr, qualifiedIliName, dbSchema);
+			map=EnumValueMap.createEnumValueMap(conn, null, false, qualifiedIliName.value, sqlDbName);
+			enumCache.put(attr,map);
+		}
+
+		String mappedDisplayName = null;
+		mappedDisplayName = map.mapXtfValueToDisplayName(value);
+		if(mappedDisplayName == null || mappedDisplayName.isEmpty()){
+			// displayName not set, fallback to beautify the value
+			mappedDisplayName = beautifyEnumDispName(value);
+		}
+
+		return mappedDisplayName;
+	}
+
     protected AttributeDef getMultiPointAttrDef(Type type, MultiPointMapping attrMapping) {
 		Table multiPointType = ((CompositionType) type).getComponentType();
 		Table pointStructureType=((CompositionType) ((AttributeDef) multiPointType.getElement(AttributeDef.class, attrMapping.getBagOfPointsAttrName())).getDomain()).getComponentType();
