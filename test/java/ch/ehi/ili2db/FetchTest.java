@@ -80,7 +80,7 @@ public abstract class FetchTest {
                 String attr1 = "bla bla bla" + i;
                 Integer attr2 = i;
 
-                stmt.execute("INSERT INTO " + setup.getSchema() + ".classa1(t_ili_tid,attr1,attr2) VALUES ('" + t_ili_tid + "', '" + attr1 + "', '" + attr2 + "')");
+                stmt.execute("INSERT INTO " + setup.prefixName("classa1")+"(t_ili_tid,attr1,attr2) VALUES ('" + t_ili_tid + "', '" + attr1 + "', '" + attr2 + "')");
             }
         }finally {
             jdbcConnection.close();

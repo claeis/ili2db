@@ -34,7 +34,7 @@ public abstract class BatchTest {
         Connection jdbcConnection = setup.createConnection();
         try {
             Statement stmt = jdbcConnection.createStatement();
-            Assert.assertTrue(stmt.execute("SELECT * FROM " + setup.getSchema() + ".classa1"));
+            Assert.assertTrue(stmt.execute("SELECT * FROM " + setup.prefixName("classa1")));
             {
                 ResultSet rs = stmt.getResultSet();
                 int count = 0;
