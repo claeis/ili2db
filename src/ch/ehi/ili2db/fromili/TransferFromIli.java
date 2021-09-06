@@ -1836,7 +1836,7 @@ public class TransferFromIli {
                 Map<ch.interlis.ili2c.metamodel.Element,ch.interlis.ili2c.metamodel.Element> srsMapping=getSrsMappingToAlternate((TransferDescription)attrOrDomainDef.getContainer(TransferDescription.class),srsModelAssignment);
                 ch.interlis.ili2c.metamodel.Element alternativeAttrOrDomainDef=srsMapping.get(attrOrDomainDef);
                 if(alternativeAttrOrDomainDef!=null) {
-                    AbstractCoordType alternativeCoord;
+                    AbstractCoordType alternativeCoord = null;
                     if(alternativeAttrOrDomainDef instanceof AttributeDef) {
                         Type attrType2=((AttributeDef)alternativeAttrOrDomainDef).getDomain();
                         if(attrType2 instanceof ch.interlis.ili2c.metamodel.TypeAlias) {
