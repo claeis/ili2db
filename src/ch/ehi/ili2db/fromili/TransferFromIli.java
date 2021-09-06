@@ -1796,7 +1796,7 @@ public class TransferFromIli {
         if(attrType instanceof ch.interlis.ili2c.metamodel.TypeAlias) {
             attrOrDomainDef=((ch.interlis.ili2c.metamodel.TypeAlias)attrType).getAliasing();
             attrType=((Domain) attrOrDomainDef).getType();
-            if(attrType instanceof CoordType) {
+            if(attrType instanceof AbstractCoordType) {
                 coordDomain=(Domain) attrOrDomainDef;
             }
         }
@@ -1817,7 +1817,7 @@ public class TransferFromIli {
             Domain concreteCoordDomains[]=((Model) attr.getContainer(Model.class)).resolveGenericDomain(coordDomain);
             HashSet<Integer> codes=new HashSet<Integer>();
             for(Domain concreteCoordDomain: concreteCoordDomains) {
-                String crs=((CoordType)concreteCoordDomain.getType()).getCrs(concreteCoordDomain);
+                String crs=((AbstractCoordType)concreteCoordDomain.getType()).getCrs(concreteCoordDomain);
                 if(crs!=null) {
                     codes.add(parseEpsgCode(crs));
                 }
