@@ -266,7 +266,7 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 						     
 						 }
 						OutParam<Integer> valueiRef=new OutParam<Integer>(valuei);
-						setReferenceColumn(ps,role.getDestination(),refoid,valueiRef);
+						setReferenceColumn(ps,role.getDestination(),refoid,valueiRef,createExtRef && role.isExternal());
 						valuei=valueiRef.value;
 					}
 				}
@@ -297,34 +297,43 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 	}
 
 	private void setReferenceColumn(PreparedStatement ps,
-			AbstractClassDef destination, String refoid, OutParam<Integer> valuei) throws SQLException {
-	  	String targetRootClassName=Ili2cUtility.getRootViewable(destination).getScopedName(null);
-	  	ViewableWrapper targetObjTable=null;
-		ArrayList<ViewableWrapper> targetTables = getTargetTables(destination);
-	  	if(refoid!=null){
-		  	String targetObjClass=oidPool.getObjecttag(targetRootClassName,refoid);
-		  	if(targetObjClass==null){
-		  		// unknown object
-		  		refoid=null; // handle reference as if it is null
-		  	}else{
-			  	targetObjTable=getViewableWrapper(getSqlType((Viewable) tag2class.get(targetObjClass)).getName());
-			  	while(!targetTables.contains(targetObjTable)){
-			  		targetObjTable=targetObjTable.getExtending();
-			  	}
-			  	if(targetObjTable==null){
-			  		throw new IllegalStateException("targetObjTable==null");
-			  	}
-		  	}
-	  	}
-		  for(ViewableWrapper targetTable : targetTables){
-			  	if(refoid!=null && targetTable==targetObjTable){
-				   long refsqlId=oidPool.getObjSqlId(targetRootClassName,refoid);
-				   ps.setLong(valuei.value, refsqlId);
-				}else{
-					ps.setNull(valuei.value, Types.BIGINT);
-				}
-				valuei.value++;
-		  }
+			AbstractClassDef destination, String refoid, OutParam<Integer> valuei,boolean isExtRef) throws SQLException {
+	    if(isExtRef) {
+	        if(refoid!=null) {
+	            ps.setString(valuei.value, refoid);
+	        }else {
+	            ps.setNull(valuei.value, Types.VARCHAR);
+	        }
+            valuei.value++;
+	    }else {
+	        String targetRootClassName=Ili2cUtility.getRootViewable(destination).getScopedName(null);
+	        ViewableWrapper targetObjTable=null;
+	        ArrayList<ViewableWrapper> targetTables = getTargetTables(destination);
+	        if(refoid!=null){
+                String targetObjClass=oidPool.getObjecttag(targetRootClassName,refoid);
+                if(targetObjClass==null){
+                    // unknown object
+                    refoid=null; // handle reference as if it is null
+                }else{
+                    targetObjTable=getViewableWrapper(getSqlType((Viewable) tag2class.get(targetObjClass)).getName());
+                    while(!targetTables.contains(targetObjTable)){
+                        targetObjTable=targetObjTable.getExtending();
+                    }
+                    if(targetObjTable==null){
+                        throw new IllegalStateException("targetObjTable==null");
+                    }
+                }
+	        }
+	          for(ViewableWrapper targetTable : targetTables){
+	                if(refoid!=null && targetTable==targetObjTable){
+                        long refsqlId=oidPool.getObjSqlId(targetRootClassName,refoid);
+                        ps.setLong(valuei.value, refsqlId);
+	                }else{
+                        ps.setNull(valuei.value, Types.BIGINT);
+	                }
+	                valuei.value++;
+	          }
+	    }
 	}
 	/** creates an insert statement for a given viewable.
 	 * @param sqlTableName table name of viewable
@@ -494,35 +503,66 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 				   if(!attrs.containsKey(rootRole)){
 				       ; // skip roles, that are not part of class of current object
 				   }else {
-						ArrayList<ViewableWrapper> targetTables = getTargetTables(role.getDestination());
-						  for(ViewableWrapper targetTable : targetTables){
-								String roleName=ili2sqlName.mapIliRoleDef(role,sqlTableName.getName(),targetTable.getSqlTablename(),targetTables.size()>1);
-								// a role of an embedded association?
-								if(obj.embedded){
-									AssociationDef roleOwner = (AssociationDef) role.getContainer();
-									if(roleOwner.getDerivedFrom()==null){
-										 // TODO if(orderPos!=0){
-										 ret.append(sep);
-										 ret.append(roleName);
-											if(isUpdate){
-												ret.append("=?");
-											}else{
-												values.append(",?");
-											}
-											sep=",";
-									}
-								 }else{
-									 // TODO if(orderPos!=0){
-									 ret.append(sep);
-									 ret.append(roleName);
-										if(isUpdate){
-											ret.append("=?");
-										}else{
-											values.append(",?");
-										}
-										sep=",";
-								 }
-						  }
+                       boolean isExtRef=createExtRef && role.isExternal();
+                       if(isExtRef) {
+                           String roleName=ili2sqlName.mapIliRoleDef(role,sqlTableName.getName(),getSqlType(role.getDestination()).getName(),false);
+                           // a role of an embedded association?
+                           if(obj.embedded){
+                               AssociationDef roleOwner = (AssociationDef) role.getContainer();
+                               if(roleOwner.getDerivedFrom()==null){
+                                    // TODO if(orderPos!=0){
+                                    ret.append(sep);
+                                    ret.append(roleName);
+                                       if(isUpdate){
+                                           ret.append("=?");
+                                       }else{
+                                           values.append(",?");
+                                       }
+                                       sep=",";
+                               }
+                            }else{
+                                // TODO if(orderPos!=0){
+                                ret.append(sep);
+                                ret.append(roleName);
+                                   if(isUpdate){
+                                       ret.append("=?");
+                                   }else{
+                                       values.append(",?");
+                                   }
+                                   sep=",";
+                            }
+                       }else {
+                           ArrayList<ViewableWrapper> targetTables = getTargetTables(role.getDestination());
+                           for(ViewableWrapper targetTable : targetTables){
+                                 String roleName=ili2sqlName.mapIliRoleDef(role,sqlTableName.getName(),targetTable.getSqlTablename(),targetTables.size()>1);
+                                 // a role of an embedded association?
+                                 if(obj.embedded){
+                                     AssociationDef roleOwner = (AssociationDef) role.getContainer();
+                                     if(roleOwner.getDerivedFrom()==null){
+                                          // TODO if(orderPos!=0){
+                                          ret.append(sep);
+                                          ret.append(roleName);
+                                             if(isUpdate){
+                                                 ret.append("=?");
+                                             }else{
+                                                 values.append(",?");
+                                             }
+                                             sep=",";
+                                     }
+                                  }else{
+                                      // TODO if(orderPos!=0){
+                                      ret.append(sep);
+                                      ret.append(roleName);
+                                         if(isUpdate){
+                                             ret.append("=?");
+                                         }else{
+                                             values.append(",?");
+                                         }
+                                         sep=",";
+                                  }
+                           }
+                           
+                       }
 					   
 				   }
 				}
@@ -636,19 +676,31 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 	                }
 			}else if (type instanceof CompositionType){
 				if(TrafoConfigNames.CATALOGUE_REF_TRAFO_COALESCE.equals(trafoConfig.getAttrConfig(attr, TrafoConfigNames.CATALOGUE_REF_TRAFO))){
-	                ArrayList<ViewableWrapper> targetTables = getTargetTables(getCatalogueRefTarget(type));
-	                for(ViewableWrapper targetTable:targetTables)
-	                {
-	                    attrSqlName=ili2sqlName.mapIliAttributeDef(attr,sqlTableName,targetTable.getSqlTablename(),targetTables.size()>1);
-	                    ret.append(sep);
-	                    ret.append(attrSqlName);
-	                    if(isUpdate){
-	                        ret.append("=?");
-	                    }else{
-	                        values.append(",?");
+				    if(createExtRef) {
+                        attrSqlName=ili2sqlName.mapIliAttributeDef(attr,sqlTableName,getSqlType(getCatalogueRefTarget(type)).getName(),false);
+                        ret.append(sep);
+                        ret.append(attrSqlName);
+                        if(isUpdate){
+                            ret.append("=?");
+                        }else{
+                            values.append(",?");
+                        }
+                        sep=",";
+				    }else {
+	                    ArrayList<ViewableWrapper> targetTables = getTargetTables(getCatalogueRefTarget(type));
+	                    for(ViewableWrapper targetTable:targetTables)
+	                    {
+	                        attrSqlName=ili2sqlName.mapIliAttributeDef(attr,sqlTableName,targetTable.getSqlTablename(),targetTables.size()>1);
+	                        ret.append(sep);
+	                        ret.append(attrSqlName);
+	                        if(isUpdate){
+	                            ret.append("=?");
+	                        }else{
+	                            values.append(",?");
+	                        }
+	                        sep=",";
 	                    }
-	                    sep=",";
-	                }
+				    }
 				}else if(TrafoConfigNames.MULTISURFACE_TRAFO_COALESCE.equals(trafoConfig.getAttrConfig(attr, TrafoConfigNames.MULTISURFACE_TRAFO))){
 					 ret.append(sep);
 					 ret.append(attrSqlName);
@@ -789,19 +841,32 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 					sep=",";
 				}
 			}else if(type instanceof ReferenceType){
-				ArrayList<ViewableWrapper> targetTables = getTargetTables(((ReferenceType)type).getReferred());
-				for(ViewableWrapper targetTable:targetTables)
-				{
-					attrSqlName=ili2sqlName.mapIliAttributeDef(attr,sqlTableName,targetTable.getSqlTablename(),targetTables.size()>1);
-					ret.append(sep);
-					ret.append(attrSqlName);
-					if(isUpdate){
-						ret.append("=?");
-					}else{
-						values.append(",?");
-					}
-					sep=",";
-				}
+                boolean isExtRef=createExtRef && ((ReferenceType)type).isExternal();
+			    if(isExtRef) {
+                    attrSqlName=ili2sqlName.mapIliAttributeDef(attr,sqlTableName,getSqlType(((ReferenceType)type).getReferred()).getName(),false);
+                    ret.append(sep);
+                    ret.append(attrSqlName);
+                    if(isUpdate){
+                        ret.append("=?");
+                    }else{
+                        values.append(",?");
+                    }
+                    sep=",";
+			    }else {
+	                ArrayList<ViewableWrapper> targetTables = getTargetTables(((ReferenceType)type).getReferred());
+	                for(ViewableWrapper targetTable:targetTables)
+	                {
+	                    attrSqlName=ili2sqlName.mapIliAttributeDef(attr,sqlTableName,targetTable.getSqlTablename(),targetTables.size()>1);
+	                    ret.append(sep);
+	                    ret.append(attrSqlName);
+	                    if(isUpdate){
+	                        ret.append("=?");
+	                    }else{
+	                        values.append(",?");
+	                    }
+	                    sep=",";
+	                }
+			    }
 			}else{
 				ret.append(sep);
 				ret.append(attrSqlName);
@@ -935,7 +1000,7 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
                             }
                         }
 	                    OutParam<Integer> valueiRef=new OutParam<Integer>(valuei);
-	                    setReferenceColumn(ps,getCatalogueRefTarget(type),refoid,valueiRef);
+	                    setReferenceColumn(ps,getCatalogueRefTarget(type),refoid,valueiRef,createExtRef);
 	                    valuei=valueiRef.value;
 					}else if(TrafoConfigNames.MULTISURFACE_TRAFO_COALESCE.equals(trafoConfig.getAttrConfig(tableAttr, TrafoConfigNames.MULTISURFACE_TRAFO))){
 						 IomObject iomValue= classAttr==null ? null : iomObj.getattrobj(attrName,0);
@@ -1228,7 +1293,7 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 						 refoid=structvalue.getobjectrefoid();
 					 }
 					OutParam<Integer> valueiRef=new OutParam<Integer>(valuei);
-					setReferenceColumn(ps,((ReferenceType) type).getReferred(),refoid,valueiRef);
+					setReferenceColumn(ps,((ReferenceType) type).getReferred(),refoid,valueiRef,createExtRef && ((ReferenceType) type).isExternal());
 					valuei=valueiRef.value;
 				}else if(type instanceof BlackboxType){
 					String value= classAttr==null ? null : iomObj.getattrvalue(attrName);

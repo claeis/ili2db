@@ -77,6 +77,8 @@ public class Config extends Settings {
 	public static final String SQL_NULL_ENABLE="enable";
 	public static final String SQL_COLS_AS_TEXT=PREFIX+".SqlColsAsText";
 	public static final String SQL_COLS_AS_TEXT_ENABLE="enable";
+	public static final String SQL_EXTREF=PREFIX+".SqlExtRefCols";
+	public static final String SQL_EXTREF_ENABLE="enable";
 	public static final String STROKE_ARCS=PREFIX+".StrokeArcs";
 	public static final String STROKE_ARCS_ENABLE="enable";
 	private static final String AREA_REF=PREFIX+".AreaRef";
@@ -813,4 +815,11 @@ public class Config extends Settings {
 	public void setSqlColsAsText(String value) {
 		setValue(SQL_COLS_AS_TEXT,value);
 	}
+    public String getSqlExtRefCols() {
+        return getValue(SQL_EXTREF);
+    }
+
+    public void setSqlExtRefCols(String value) {
+        setValue(SQL_EXTREF,value);
+    }
 }

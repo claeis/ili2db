@@ -1,0 +1,69 @@
+INTERLIS 2.3;
+
+MODEL ExtRef1
+  AT "mailto:ce@eisenhutinformatik.ch" VERSION "2015-12-03" =
+  IMPORTS CatalogueObjects_V1;
+
+    TOPIC TopicA
+    	EXTENDS CatalogueObjects_V1.Catalogues =
+    	OID AS INTERLIS.UUIDOID;
+    
+    CLASS Katalog_Programm (ABSTRACT)
+    EXTENDS CatalogueObjects_V1.Catalogues.Item =
+      Code : MANDATORY TEXT*20;
+    END Katalog_Programm;
+
+    CLASS Katalog_ProgrammA 
+    EXTENDS Katalog_Programm =
+    END Katalog_ProgrammA;
+
+    CLASS Katalog_ProgrammB 
+    EXTENDS Katalog_Programm =
+    END Katalog_ProgrammB;
+    
+    STRUCTURE Katalog_ProgrammRef
+    EXTENDS CatalogueObjects_V1.Catalogues.CatalogueReference =
+      Reference (EXTENDED) : MANDATORY REFERENCE TO (EXTERNAL) Katalog_Programm;
+    END Katalog_ProgrammRef;
+    
+    END TopicA;
+    
+  TOPIC Topic1 =
+    OID AS INTERLIS.UUIDOID;
+    DEPENDS ON TopicA;
+  
+    CLASS ClassA1 =
+    END ClassA1;
+    
+    CLASS ClassB1 (ABSTRACT) =
+    END ClassB1;
+
+    CLASS ClassB1a EXTENDS ClassB1 =
+    END ClassB1a;
+    CLASS ClassB1b EXTENDS ClassB1 =
+    END ClassB1b;
+    
+    ASSOCIATION a1=
+      a1_a -- {0..*} ClassA1;
+      a1_b (EXTERNAL) -- {0..1} ClassB1;
+    END a1;
+    
+    ASSOCIATION a2 =
+      a2_a -- {0..*} ClassA1;
+      a2_b (EXTERNAL) -- {0..*} ClassB1;
+    END a2;
+    
+    STRUCTURE StructA2 =
+    	refb3 : REFERENCE TO (EXTERNAL) ClassB1;
+    END StructA2;
+    CLASS ClassA2 =
+    	strB2 : LIST OF StructA2;
+    END ClassA2;
+    
+    CLASS ClassC =
+      progref : ExtRef1.TopicA.Katalog_ProgrammRef;    
+    END ClassC;
+    
+  END Topic1;
+ 
+END ExtRef1.

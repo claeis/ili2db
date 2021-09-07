@@ -377,14 +377,18 @@ public abstract class AbstractMain {
 					argi++;
 					if (parseBooleanArgument(arg))
 						config.setStructMapping(Config.STRUCT_MAPPING_GENERICREF);
-        }else if(isOption(arg,"--sqlColsAsText")){
-          argi++;
-					if (parseBooleanArgument(arg))
-            config.setSqlColsAsText(Config.SQL_COLS_AS_TEXT_ENABLE);
+                } else if (isOption(arg, "--sqlColsAsText")) {
+                    argi++;
+                    if (parseBooleanArgument(arg))
+                        config.setSqlColsAsText(Config.SQL_COLS_AS_TEXT_ENABLE);
 				} else if (isOption(arg, "--sqlEnableNull")) {
 					argi++;
 					if (parseBooleanArgument(arg))
 						config.setSqlNull(Config.SQL_NULL_ENABLE);
+                } else if (isOption(arg, "--sqlExtRefCols")) {
+                    argi++;
+                    if (parseBooleanArgument(arg))
+                        config.setSqlExtRefCols(Config.SQL_EXTREF_ENABLE);
 				} else if (isOption(arg, "--strokeArcs")) {
 					argi++;
 					if (parseBooleanArgument(arg))
@@ -417,22 +421,22 @@ public abstract class AbstractMain {
 				} else if (isOption(arg, "--exportTid")) {
 					argi++;
 					config.setExportTid(parseBooleanArgument(arg));
-				} else if (isOption(arg, "--importBid")) {
-					argi++;
-					config.setImportBid(parseBooleanArgument(arg));
-        }else if(isOption(arg,"--importFetchSize")){
-          argi++;
-          config.setFetchSize(Integer.parseInt(args[argi]));
-          argi++;
-        }else if(isOption(arg,"--exportBatchSize")){
-          argi++;
-          config.setBatchSize(Integer.parseInt(args[argi]));
-          argi++;
-        }else if (isOption(arg, "--createBasketCol")) {
-					argi++;
-					if (parseBooleanArgument(arg))
-						config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
-				} else if (isOption(arg, "--createDatasetCol")) {
+                } else if (isOption(arg, "--importBid")) {
+                    argi++;
+                    config.setImportBid(parseBooleanArgument(arg));
+                } else if (isOption(arg, "--importFetchSize")) {
+                    argi++;
+                    config.setFetchSize(Integer.parseInt(args[argi]));
+                    argi++;
+                } else if (isOption(arg, "--exportBatchSize")) {
+                    argi++;
+                    config.setBatchSize(Integer.parseInt(args[argi]));
+                    argi++;
+                } else if (isOption(arg, "--createBasketCol")) {
+                    argi++;
+                    if (parseBooleanArgument(arg))
+                        config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
+                } else if (isOption(arg, "--createDatasetCol")) {
 					argi++;
 					if (parseBooleanArgument(arg))
 						config.setCreateDatasetCols(Config.CREATE_DATASET_COL);
@@ -547,23 +551,22 @@ public abstract class AbstractMain {
 					System.err.println("--structWithGenericRef  generate one generic reference to parent in struct tables.");
 					System.err.println("--disableNameOptimization disable use of unqualified class name as table name.");
 					System.err.println("--nameByTopic          use topic+class name as table name.");
-
-
 					System.err.println("--nameLang lang        use names of ili model in given language as table/column name.");
 					System.err.println("--maxNameLength length max length of sql names (" + config.getMaxSqlNameLength() + ")");
 					System.err.println("--sqlEnableNull        create no NOT NULL constraints in db schema.");
 					System.err.println("--sqlColsAsText        Every simple-type attribute will be mapped to a text column, to enable the import of invalid data");
+                    System.err.println("--sqlExtRefCols        external references will be mapped to a column with the ili OID domain, to enable the import of not available objects");
 					System.err.println("--strokeArcs           stroke ARCS on import.");
 					System.err.println("--skipPolygonBuilding  keep linetables; don't build polygons on import.");
 					System.err.println("--skipReferenceErrors  ignore/do not report reference errors.");
 					System.err.println("--skipGeometryErrors   ignore/do not report geometry errors.");
-					System.err.println("--keepAreaRef          keep arreaRef as additional column on import.");
+					System.err.println("--keepAreaRef          keep areaRef as additional column on import.");
 					System.err.println("--createTidCol         create an additional column " + DbNames.T_ILI_TID_COL);
 					System.err.println("--importTid            read transient TIDs into column " + DbNames.T_ILI_TID_COL);
 					System.err.println("--exportTid            write transient TIDs from column " + DbNames.T_ILI_TID_COL);
 					System.err.println("--importBid            read transient BIDs into " + DbNames.BASKETS_TAB + "." + DbNames.T_ILI_TID_COL);
-          System.err.println("--importFetchSize nrOfRecords      set the fetch size for the import statements");
-          System.err.println("--exportBatchSize nrOfRecords     set the batch size for the export statements");
+                    System.err.println("--importFetchSize nrOfRecords      set the fetch size for the import statements");
+                    System.err.println("--exportBatchSize nrOfRecords     set the batch size for the export statements");
 					System.err.println("--createImportTabs     create tables with import statistics. (" + DbNames.IMPORTS_TAB + ")");
 					System.err.println("--createBasketCol      generate " + DbNames.T_BASKET_COL + " column.");
 					System.err.println("--createDatasetCol     generate " + DbNames.T_DATASET_COL + " column (Requires --dataset)");

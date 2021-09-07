@@ -139,25 +139,46 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 			   if(obj.obj instanceof RoleDef){
 				   RoleDef role = (RoleDef) obj.obj;
 				   if(true) { // role.getExtending()==null){
-						ArrayList<ViewableWrapper> targetTables = getTargetTables(role.getDestination());
-						  for(ViewableWrapper targetTable : targetTables){
-								String roleSqlName=ili2sqlName.mapIliRoleDef(role,sqlTableName,targetTable.getSqlTablename(),targetTables.size()>1);
-								// a role of an embedded association?
-								if(obj.embedded){
-									AssociationDef roleOwner = (AssociationDef) role.getContainer();
-									if(roleOwner.getDerivedFrom()==null){
-										 // TODO if(orderPos!=0){
-										 ret.append(sep);
-										 sep=",";
-										 ret.append(makeColumnRef(tableAlias,roleSqlName));
-									}
-								 }else{
-									 // TODO if(orderPos!=0){
-									 ret.append(sep);
-									 sep=",";
-									 ret.append(makeColumnRef(tableAlias,roleSqlName));
-								 }
-						  }
+                       boolean isExtRef=createExtRef && role.isExternal();
+                       if(isExtRef) {
+                           String roleSqlName=ili2sqlName.mapIliRoleDef(role,sqlTableName,getSqlType(role.getDestination()).getName(),false);
+                           // a role of an embedded association?
+                           if(obj.embedded){
+                               AssociationDef roleOwner = (AssociationDef) role.getContainer();
+                               if(roleOwner.getDerivedFrom()==null){
+                                    // TODO if(orderPos!=0){
+                                    ret.append(sep);
+                                    sep=",";
+                                    ret.append(makeColumnRef(tableAlias,roleSqlName));
+                               }
+                            }else{
+                                // TODO if(orderPos!=0){
+                                ret.append(sep);
+                                sep=",";
+                                ret.append(makeColumnRef(tableAlias,roleSqlName));
+                            }
+                       }else {
+                           ArrayList<ViewableWrapper> targetTables = getTargetTables(role.getDestination());
+                           for(ViewableWrapper targetTable : targetTables){
+                                 String roleSqlName=ili2sqlName.mapIliRoleDef(role,sqlTableName,targetTable.getSqlTablename(),targetTables.size()>1);
+                                 // a role of an embedded association?
+                                 if(obj.embedded){
+                                     AssociationDef roleOwner = (AssociationDef) role.getContainer();
+                                     if(roleOwner.getDerivedFrom()==null){
+                                          // TODO if(orderPos!=0){
+                                          ret.append(sep);
+                                          sep=",";
+                                          ret.append(makeColumnRef(tableAlias,roleSqlName));
+                                     }
+                                  }else{
+                                      // TODO if(orderPos!=0){
+                                      ret.append(sep);
+                                      sep=",";
+                                      ret.append(makeColumnRef(tableAlias,roleSqlName));
+                                  }
+                           }
+                           
+                       }
 				   }
 				}
 			}
@@ -256,14 +277,21 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 				 ret.append(geomConv.getSelectValueWrapperDateTime(makeColumnRef(tableAlias,attrSqlName)));
 			}else if (type instanceof CompositionType){
 				if(TrafoConfigNames.CATALOGUE_REF_TRAFO_COALESCE.equals(trafoConfig.getAttrConfig(attr, TrafoConfigNames.CATALOGUE_REF_TRAFO))){
-                    ArrayList<ViewableWrapper> targetTables = getTargetTables(getCatalogueRefTarget(type));
-                    for(ViewableWrapper targetTable:targetTables)
-                    {
-                        attrSqlName=ili2sqlName.mapIliAttributeDef(attr,sqlTableName,targetTable.getSqlTablename(),targetTables.size()>1);
-                         ret.append(sep);
-                         sep=",";
-                         ret.append(makeColumnRef(tableAlias,attrSqlName));
-                    }                
+				    if(createExtRef) {
+                        attrSqlName=ili2sqlName.mapIliAttributeDef(attr,sqlTableName,getSqlType(getCatalogueRefTarget(type)).getName(),false);
+                        ret.append(sep);
+                        sep=",";
+                        ret.append(makeColumnRef(tableAlias,attrSqlName));
+				    }else {
+	                    ArrayList<ViewableWrapper> targetTables = getTargetTables(getCatalogueRefTarget(type));
+	                    for(ViewableWrapper targetTable:targetTables)
+	                    {
+	                        attrSqlName=ili2sqlName.mapIliAttributeDef(attr,sqlTableName,targetTable.getSqlTablename(),targetTables.size()>1);
+	                         ret.append(sep);
+	                         sep=",";
+	                         ret.append(makeColumnRef(tableAlias,attrSqlName));
+	                    }                
+				    }
 				}else if(TrafoConfigNames.MULTISURFACE_TRAFO_COALESCE.equals(trafoConfig.getAttrConfig(attr, TrafoConfigNames.MULTISURFACE_TRAFO))){
 					 ret.append(sep);
 					 sep=",";
@@ -325,14 +353,22 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 				 sep=",";
 				 ret.append(geomConv.getSelectValueWrapperCoord(makeColumnRef(tableAlias,attrSqlName)));
 			 }else if(type instanceof ReferenceType){
-					ArrayList<ViewableWrapper> targetTables = getTargetTables(((ReferenceType)type).getReferred());
-					for(ViewableWrapper targetTable:targetTables)
-					{
-						attrSqlName=ili2sqlName.mapIliAttributeDef(attr,sqlTableName,targetTable.getSqlTablename(),targetTables.size()>1);
-						 ret.append(sep);
-						 sep=",";
-						 ret.append(makeColumnRef(tableAlias,attrSqlName));
-					}				 
+			         boolean isExtRef=createExtRef && ((ReferenceType)type).isExternal();
+			     if(isExtRef) {
+                     attrSqlName=ili2sqlName.mapIliAttributeDef(attr,sqlTableName,getSqlType(((ReferenceType)type).getReferred()).getName(),false);
+                     ret.append(sep);
+                     sep=",";
+                     ret.append(makeColumnRef(tableAlias,attrSqlName));
+			     }else {
+	                    ArrayList<ViewableWrapper> targetTables = getTargetTables(((ReferenceType)type).getReferred());
+	                    for(ViewableWrapper targetTable:targetTables)
+	                    {
+	                        attrSqlName=ili2sqlName.mapIliAttributeDef(attr,sqlTableName,targetTable.getSqlTablename(),targetTables.size()>1);
+	                         ret.append(sep);
+	                         sep=",";
+	                         ret.append(makeColumnRef(tableAlias,attrSqlName));
+	                    }                
+			     }
 			}else{
 				 ret.append(sep);
 				 sep=",";
@@ -448,60 +484,98 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 				   RoleDef role = (RoleDef) obj.obj;
 				   if(true) { // role.getExtending()==null){
 					 String roleName=role.getName();
-						ArrayList<ViewableWrapper> targetTables = getTargetTables(role.getDestination());
-						boolean refAlreadyDefined=false;
-						  for(ViewableWrapper targetTable : targetTables){
-								 String sqlRoleName=ili2sqlName.mapIliRoleDef(role,getSqlType(table.getViewable()).getName(),targetTable.getSqlTablename(),targetTables.size()>1);
-								 if(structWrapper==null) {
-	                                 // a role of an embedded association?
-	                                 if(obj.embedded){
-	                                    AssociationDef roleOwner = (AssociationDef) role.getContainer();
-	                                    if(roleOwner.getDerivedFrom()==null){
+	                    boolean isExtRef=createExtRef && role.isExternal();
+	                    if(isExtRef) {
+                            String sqlRoleName=ili2sqlName.mapIliRoleDef(role,getSqlType(table.getViewable()).getName(),getSqlType(role.getDestination()).getName(),false);
+                            if(structWrapper==null) {
+                                // a role of an embedded association?
+                                if(obj.embedded){
+                                   AssociationDef roleOwner = (AssociationDef) role.getContainer();
+                                   if(roleOwner.getDerivedFrom()==null){
+                                        // TODO if(orderPos!=0){
+                                       String value=rs.getString(valuei);
+                                       valuei++;
+                                       if(!rs.wasNull()){
+                                           IomObject ref=iomObj.addattrobj(roleName,roleOwner.getScopedName(null));
+                                           ref.setobjectrefoid(value);
+                                       }
+                                   }
+                                }else{
+                                    // TODO if(orderPos!=0){
+                                       String value=rs.getString(valuei);
+                                       valuei++;
+                                       if(!rs.wasNull()){
+                                           IomObject ref=iomObj.addattrobj(roleName,"REF");
+                                           ref.setobjectrefoid(value);
+                                       }
+                                }
+                                
+                            }else {
+                                String value=rs.getString(valuei);
+                                valuei++;
+                                if(!rs.wasNull()){
+                                    if(role==((EmbeddedLinkWrapper) structWrapper).getRole()) {
+                                        iomObj.setobjectrefoid(value);
+                                    }
+                                }
+                            }
+	                    }else {
+	                        ArrayList<ViewableWrapper> targetTables = getTargetTables(role.getDestination());
+	                        boolean refAlreadyDefined=false;
+	                          for(ViewableWrapper targetTable : targetTables){
+	                                 String sqlRoleName=ili2sqlName.mapIliRoleDef(role,getSqlType(table.getViewable()).getName(),targetTable.getSqlTablename(),targetTables.size()>1);
+	                                 if(structWrapper==null) {
+	                                     // a role of an embedded association?
+	                                     if(obj.embedded){
+	                                        AssociationDef roleOwner = (AssociationDef) role.getContainer();
+	                                        if(roleOwner.getDerivedFrom()==null){
+	                                             // TODO if(orderPos!=0){
+	                                            long value=rs.getLong(valuei);
+	                                            valuei++;
+	                                            if(!rs.wasNull()){
+	                                                if(refAlreadyDefined){
+	                                                    EhiLogger.logAdaption("Table "+table.getSqlTablename()+"(id "+sqlid+") more than one value for role "+roleName+"; value of "+sqlRoleName+" ignored");
+	                                                }else{
+	                                                    IomObject ref=iomObj.addattrobj(roleName,roleOwner.getScopedName(null));
+	                                                    mapSqlid2Xtfid(fixref,value,ref,role.getDestination(),targetTable.getSqlTablename());
+	                                                    refAlreadyDefined=true;
+	                                                }
+	                                            }
+	                                        }
+	                                     }else{
 	                                         // TODO if(orderPos!=0){
-	                                        long value=rs.getLong(valuei);
-	                                        valuei++;
-	                                        if(!rs.wasNull()){
-	                                            if(refAlreadyDefined){
-	                                                EhiLogger.logAdaption("Table "+table.getSqlTablename()+"(id "+sqlid+") more than one value for role "+roleName+"; value of "+sqlRoleName+" ignored");
-	                                            }else{
-	                                                IomObject ref=iomObj.addattrobj(roleName,roleOwner.getScopedName(null));
-	                                                mapSqlid2Xtfid(fixref,value,ref,role.getDestination(),targetTable.getSqlTablename());
-	                                                refAlreadyDefined=true;
+	                                            long value=rs.getLong(valuei);
+	                                            valuei++;
+	                                            if(!rs.wasNull()){
+	                                                if(refAlreadyDefined){
+	                                                    EhiLogger.logAdaption("Table "+table.getSqlTablename()+"(id "+sqlid+") more than one value for role "+roleName+"; value of "+sqlRoleName+" ignored");
+	                                                }else{
+	                                                    IomObject ref=iomObj.addattrobj(roleName,"REF");
+	                                                    mapSqlid2Xtfid(fixref,value,ref,role.getDestination(),targetTable.getSqlTablename());
+	                                                    refAlreadyDefined=true;
+	                                                }
 	                                            }
-	                                        }
-	                                    }
-	                                 }else{
-	                                     // TODO if(orderPos!=0){
-	                                        long value=rs.getLong(valuei);
-	                                        valuei++;
-	                                        if(!rs.wasNull()){
-	                                            if(refAlreadyDefined){
-	                                                EhiLogger.logAdaption("Table "+table.getSqlTablename()+"(id "+sqlid+") more than one value for role "+roleName+"; value of "+sqlRoleName+" ignored");
-	                                            }else{
-	                                                IomObject ref=iomObj.addattrobj(roleName,"REF");
-	                                                mapSqlid2Xtfid(fixref,value,ref,role.getDestination(),targetTable.getSqlTablename());
-	                                                refAlreadyDefined=true;
-	                                            }
-	                                        }
+	                                     }
+	                                     
+	                                 }else {
+	                                     long value=rs.getLong(valuei);
+	                                     valuei++;
+	                                     if(!rs.wasNull()){
+	                                         if(refAlreadyDefined){
+	                                             EhiLogger.logAdaption("Table "+table.getSqlTablename()+"(id "+sqlid+") more than one value for role "+roleName+"; value of "+sqlRoleName+" ignored");
+	                                         }else{
+	                                             if(role==((EmbeddedLinkWrapper) structWrapper).getRole()) {
+	                                                 mapSqlid2Xtfid(fixref,value,iomObj,role.getDestination(),targetTable.getSqlTablename());
+	                                             }
+	                                             refAlreadyDefined=true;
+	                                         }
+	                                     }
+	                                     
 	                                 }
-								     
-								 }else {
-                                     long value=rs.getLong(valuei);
-                                     valuei++;
-                                     if(!rs.wasNull()){
-                                         if(refAlreadyDefined){
-                                             EhiLogger.logAdaption("Table "+table.getSqlTablename()+"(id "+sqlid+") more than one value for role "+roleName+"; value of "+sqlRoleName+" ignored");
-                                         }else{
-                                             if(role==((EmbeddedLinkWrapper) structWrapper).getRole()) {
-                                                 mapSqlid2Xtfid(fixref,value,iomObj,role.getDestination(),targetTable.getSqlTablename());
-                                             }
-                                             refAlreadyDefined=true;
-                                         }
-                                     }
-								     
-								 }
-							  
-						  }
+	                              
+	                          }
+	                        
+	                    }
 				   }
 				}
 			}
@@ -605,29 +679,45 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 				Type type = tableAttr.getDomainResolvingAliases();
 				if (type instanceof CompositionType){
 					if(TrafoConfigNames.CATALOGUE_REF_TRAFO_COALESCE.equals(trafoConfig.getAttrConfig(tableAttr, TrafoConfigNames.CATALOGUE_REF_TRAFO))){
-	                    ArrayList<ViewableWrapper> targetTables = getTargetTables(getCatalogueRefTarget(type));
-	                    boolean refAlreadyDefined=false;
-	                    for(ViewableWrapper targetTable:targetTables)
-	                    {
-	                        if(classAttr==null) {
-	                            valuei++;
-	                        }else {
-	                            long value=rs.getLong(valuei);
-	                            valuei++;
-	                            if(!rs.wasNull()){
-	                                if(refAlreadyDefined){
-	                                    sqlAttrName=ili2sqlName.mapIliAttributeDef(tableAttr,table.getSqlTablename(),targetTable.getSqlTablename(),targetTables.size()>1);
-	                                    EhiLogger.logAdaption("Table "+table.getSqlTablename()+"(id "+sqlid+") more than one value for refattr "+attrName+"; value of "+sqlAttrName+" ignored");
-	                                }else{
-	                                    Table catalogueReferenceTyp = ((CompositionType) type).getComponentType();
-	                                    IomObject catref=iomObj.addattrobj(attrName,catalogueReferenceTyp.getScopedName(null));
-	                                    IomObject ref=catref.addattrobj(IliNames.CHBASE1_CATALOGUEREFERENCE_REFERENCE,"REF");
-	                                    mapSqlid2Xtfid(fixref,value,ref,getCatalogueRefTarget(type),targetTable.getSqlTablename());
-	                                    refAlreadyDefined=true;
+					    if(createExtRef) {
+                            if(classAttr==null) {
+                                valuei++;
+                            }else {
+                                String value=rs.getString(valuei);
+                                valuei++;
+                                if(!rs.wasNull()){
+                                    Table catalogueReferenceTyp = ((CompositionType) type).getComponentType();
+                                    IomObject catref=iomObj.addattrobj(attrName,catalogueReferenceTyp.getScopedName(null));
+                                    IomObject ref=catref.addattrobj(IliNames.CHBASE1_CATALOGUEREFERENCE_REFERENCE,"REF");
+                                    ref.setobjectrefoid(value);
+                                }
+                            }
+					        
+					    }else {
+	                        ArrayList<ViewableWrapper> targetTables = getTargetTables(getCatalogueRefTarget(type));
+	                        boolean refAlreadyDefined=false;
+	                        for(ViewableWrapper targetTable:targetTables)
+	                        {
+	                            if(classAttr==null) {
+	                                valuei++;
+	                            }else {
+	                                long value=rs.getLong(valuei);
+	                                valuei++;
+	                                if(!rs.wasNull()){
+	                                    if(refAlreadyDefined){
+	                                        sqlAttrName=ili2sqlName.mapIliAttributeDef(tableAttr,table.getSqlTablename(),targetTable.getSqlTablename(),targetTables.size()>1);
+	                                        EhiLogger.logAdaption("Table "+table.getSqlTablename()+"(id "+sqlid+") more than one value for refattr "+attrName+"; value of "+sqlAttrName+" ignored");
+	                                    }else{
+	                                        Table catalogueReferenceTyp = ((CompositionType) type).getComponentType();
+	                                        IomObject catref=iomObj.addattrobj(attrName,catalogueReferenceTyp.getScopedName(null));
+	                                        IomObject ref=catref.addattrobj(IliNames.CHBASE1_CATALOGUEREFERENCE_REFERENCE,"REF");
+	                                        mapSqlid2Xtfid(fixref,value,ref,getCatalogueRefTarget(type),targetTable.getSqlTablename());
+	                                        refAlreadyDefined=true;
+	                                    }
 	                                }
 	                            }
 	                        }
-	                    }
+					    }
 					}else if(TrafoConfigNames.MULTISURFACE_TRAFO_COALESCE.equals(trafoConfig.getAttrConfig(tableAttr, TrafoConfigNames.MULTISURFACE_TRAFO))){
 		                if(classAttr==null) {
 		                    valuei++;
@@ -982,27 +1072,41 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 						
 					}
 				}else if(type instanceof ReferenceType){
-					ArrayList<ViewableWrapper> targetTables = getTargetTables(((ReferenceType)type).getReferred());
-					boolean refAlreadyDefined=false;
-					for(ViewableWrapper targetTable:targetTables)
-					{
-		                if(classAttr==null) {
-		                    valuei++;
-		                }else {
-	                        long value=rs.getLong(valuei);
-	                        valuei++;
-	                        if(!rs.wasNull()){
-	                            if(refAlreadyDefined){
-	                                sqlAttrName=ili2sqlName.mapIliAttributeDef(tableAttr,table.getSqlTablename(),targetTable.getSqlTablename(),targetTables.size()>1);
-	                                EhiLogger.logAdaption("Table "+table.getSqlTablename()+"(id "+sqlid+") more than one value for refattr "+attrName+"; value of "+sqlAttrName+" ignored");
-	                            }else{
-	                                IomObject ref=iomObj.addattrobj(attrName,"REF");
-	                                mapSqlid2Xtfid(fixref,value,ref,((ReferenceType)type).getReferred(),targetTable.getSqlTablename());
-	                                refAlreadyDefined=true;
-	                            }
-	                        }
-		                }
-					}
+                    boolean isExtRef=createExtRef && ((ReferenceType)type).isExternal();
+                    if(isExtRef) {
+                        if(classAttr==null) {
+                            valuei++;
+                        }else {
+                            String value=rs.getString(valuei);
+                            valuei++;
+                            if(!rs.wasNull()){
+                                IomObject ref=iomObj.addattrobj(attrName,"REF");
+                                ref.setobjectrefoid(value);
+                            }
+                        }
+                    }else {
+                        ArrayList<ViewableWrapper> targetTables = getTargetTables(((ReferenceType)type).getReferred());
+                        boolean refAlreadyDefined=false;
+                        for(ViewableWrapper targetTable:targetTables)
+                        {
+                            if(classAttr==null) {
+                                valuei++;
+                            }else {
+                                long value=rs.getLong(valuei);
+                                valuei++;
+                                if(!rs.wasNull()){
+                                    if(refAlreadyDefined){
+                                        sqlAttrName=ili2sqlName.mapIliAttributeDef(tableAttr,table.getSqlTablename(),targetTable.getSqlTablename(),targetTables.size()>1);
+                                        EhiLogger.logAdaption("Table "+table.getSqlTablename()+"(id "+sqlid+") more than one value for refattr "+attrName+"; value of "+sqlAttrName+" ignored");
+                                    }else{
+                                        IomObject ref=iomObj.addattrobj(attrName,"REF");
+                                        mapSqlid2Xtfid(fixref,value,ref,((ReferenceType)type).getReferred(),targetTable.getSqlTablename());
+                                        refAlreadyDefined=true;
+                                    }
+                                }
+                            }
+                        }
+                    }
 				}else if(type instanceof BlackboxType){
 					if(((BlackboxType)type).getKind()==BlackboxType.eXML){
 		                if(classAttr==null) {

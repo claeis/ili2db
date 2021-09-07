@@ -70,6 +70,7 @@ public class AbstractRecordConverter {
 	protected boolean createItfAreaRef=false;
 	protected boolean createFk=false;
 	protected boolean createFkIdx=false;
+    protected boolean createExtRef=false;
 	protected boolean isIli1Model=false;
 	protected String colT_ID=null;
 	private String uuid_default_value=null;
@@ -96,6 +97,7 @@ public class AbstractRecordConverter {
 		removeUnderscoreFromEnumDispName=Config.BEAUTIFY_ENUM_DISPNAME_UNDERSCORE.equals(config.getBeautifyEnumDispName());
 		createFk=Config.CREATE_FK_YES.equals(config.getCreateFk());
 		createFkIdx=Config.CREATE_FKIDX_YES.equals(config.getCreateFkIdx());
+		createExtRef=Config.SQL_EXTREF_ENABLE.equals(config.getSqlExtRefCols());
 		colT_ID=config.getColT_ID();
 		if(colT_ID==null){
 			colT_ID=DbNames.T_ID_COL;
