@@ -30,7 +30,7 @@ public class StatementExecutionHelper {
                 totalBatchUpdatesCount += updates.length;
                 ps.clearBatch();
                 queuedBatch = 0;
-                EhiLogger.logState("batch executed, update counts: " + updates.length);
+                EhiLogger.traceState("batch executed, update counts: " + updates.length);
             }
         } else {
             ps.executeUpdate();
@@ -45,9 +45,9 @@ public class StatementExecutionHelper {
             totalBatchUpdatesCount += updates.length;
             ps.clearBatch();
             queuedBatch = 0;
-            EhiLogger.logState("total batch updates executed: " + totalBatchUpdatesCount);
+            EhiLogger.traceState("total batch updates executed: " + totalBatchUpdatesCount);
         } else {
-            EhiLogger.logState("single updates executed: " + singleUpdatesCount);
+            EhiLogger.traceState("single updates executed: " + singleUpdatesCount);
         }
     }
 
