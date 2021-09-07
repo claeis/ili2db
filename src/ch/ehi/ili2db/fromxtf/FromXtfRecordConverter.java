@@ -770,6 +770,15 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 						values.append(","+geomConv.getInsertValueWrapperCoord("?",epsgCode));
 					}
 					sep=",";
+            } else if (type instanceof MultiCoordType) {
+                ret.append(sep);
+                ret.append(attrSqlName);
+                if (isUpdate) {
+                    ret.append("=" + geomConv.getInsertValueWrapperMultiCoord("?", epsgCode));
+                } else {
+                    values.append("," + geomConv.getInsertValueWrapperMultiCoord("?", epsgCode));
+                }
+                sep = ",";
 			}else if(type instanceof EnumerationType){
 				ret.append(sep);
 				ret.append(attrSqlName);

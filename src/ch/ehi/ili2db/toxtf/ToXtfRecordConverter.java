@@ -325,6 +325,10 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 				 ret.append(sep);
 				 sep=",";
 				 ret.append(geomConv.getSelectValueWrapperCoord(makeColumnRef(tableAlias,attrSqlName)));
+            } else if (type instanceof MultiCoordType) {
+                ret.append(sep);
+                sep = ",";
+                ret.append(geomConv.getSelectValueWrapperMultiCoord(makeColumnRef(tableAlias, attrSqlName)));
 			 }else if(type instanceof ReferenceType){
 					ArrayList<ViewableWrapper> targetTables = getTargetTables(((ReferenceType)type).getReferred());
 					for(ViewableWrapper targetTable:targetTables)
