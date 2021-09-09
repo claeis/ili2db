@@ -27,6 +27,7 @@ import ch.ehi.sqlgen.repository.DbColumn;
 import ch.ehi.sqlgen.repository.DbTable;
 import ch.ehi.sqlgen.repository.DbTableName;
 import ch.interlis.ili2c.metamodel.AbstractClassDef;
+import ch.interlis.ili2c.metamodel.AbstractCoordType;
 import ch.interlis.ili2c.metamodel.AbstractLeafElement;
 import ch.interlis.ili2c.metamodel.AssociationDef;
 import ch.interlis.ili2c.metamodel.AttributeDef;
@@ -260,7 +261,7 @@ public class AbstractRecordConverter {
 		dbColUsr.setSize(40);
 		table.addColumn(dbColUsr);
 	}
-	protected void setBB(DbColGeometry ret, CoordType coord,String scopedAttrName) {
+	protected void setBB(DbColGeometry ret, AbstractCoordType coord, String scopedAttrName) {
 		NumericalType dimv[]=coord.getDimensions();
 		if(!(dimv[0] instanceof NumericType) || !(dimv[1] instanceof NumericType)){
 			EhiLogger.logError("Attribute "+scopedAttrName+": COORD type not supported ("+dimv[0].getClass().getName()+")");

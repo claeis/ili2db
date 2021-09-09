@@ -44,6 +44,7 @@ import ch.interlis.ili2c.metamodel.CoordType;
 import ch.interlis.ili2c.metamodel.Domain;
 import ch.interlis.ili2c.metamodel.EnumerationType;
 import ch.interlis.ili2c.metamodel.LineType;
+import ch.interlis.ili2c.metamodel.MultiCoordType;
 import ch.interlis.ili2c.metamodel.NumericType;
 import ch.interlis.ili2c.metamodel.NumericalType;
 import ch.interlis.ili2c.metamodel.ObjectType;
@@ -821,6 +822,15 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 						values.append(","+geomConv.getInsertValueWrapperCoord("?",epsgCode));
 					}
 					sep=",";
+            } else if (type instanceof MultiCoordType) {
+                ret.append(sep);
+                ret.append(attrSqlName);
+                if (isUpdate) {
+                    ret.append("=" + geomConv.getInsertValueWrapperMultiCoord("?", epsgCode));
+                } else {
+                    values.append("," + geomConv.getInsertValueWrapperMultiCoord("?", epsgCode));
+                }
+                sep = ",";
 			}else if(type instanceof EnumerationType){
 				ret.append(sep);
 				ret.append(attrSqlName);
@@ -1223,6 +1233,20 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 						geomConv.setCoordNull(ps,valuei);
 					 }
 					 valuei++;
+                } else if (type instanceof MultiCoordType) {
+                    IomObject value= classAttr==null ? null : iomObj.getattrobj(attrName,0);
+                    if(value!=null){
+                        int actualEpsgCode=TransferFromIli.getEpsgCode(originalClass,tableAttr, genericDomains, defaultEpsgCode);
+                        if(actualEpsgCode==epsgCode) {
+                            boolean is3D=((MultiCoordType)type).getDimensions().length==3;
+                            ps.setObject(valuei,geomConv.fromIomMultiCoord(value,epsgCode,is3D));
+                        }else {
+                            geomConv.setCoordNull(ps,valuei);
+                        }
+                    }else{
+                        geomConv.setCoordNull(ps,valuei);
+                    }
+                    valuei++;
 				}else if(type instanceof NumericType){
 					String value= classAttr==null ? null : iomObj.getattrvalue(attrName);
 					if(type.isAbstract()){

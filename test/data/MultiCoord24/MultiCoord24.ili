@@ -1,0 +1,21 @@
+INTERLIS 2.4;
+
+MODEL MultiCoord24
+    AT "mailto:noreply@localhost" VERSION "2021-09-07" =
+
+    DOMAIN
+        !!@CRS=EPSG:2056
+        MultiCoord2D = MULTICOORD
+            2460000.000 .. 2870000.000 [INTERLIS.m],
+            1045000.000 .. 1310000.000 [INTERLIS.m],
+            ROTATION 2 -> 1;
+
+    TOPIC TestA =
+
+        CLASS ClassA1 =
+            geomAttr1: MultiCoord2D;
+        END ClassA1;
+
+    END TestA;
+
+END MultiCoord24.
