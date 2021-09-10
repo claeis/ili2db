@@ -83,8 +83,10 @@ public abstract class TranslationTest {
                         {"EnumOkX.TopicX.n_nX.n_nX_X2", "n_nx_x2", "n_nx",    "classx2"},
                         {"EnumOkX.TopicX.ClassX.attrX", "attrx",   "classx",  null},
                         {"EnumOkX.TopicX.ClassX.attrX2", "classx_attrx2",   "struct",  "classx"},
+                        {"EnumOkX.TopicX.ClassX.attrX3", "classx_attrx3",   "trstructa",  "classx"},
                         {"EnumOkX.TopicX.n_nX.n_nX_X",  "n_nx_x",  "n_nx",    "classx"},
                         {"Basis.Struct.attrA", "attra",   "struct",  null},
+                        {"TranslatedBasisA.TrStructA.trAttrA", "trattra",   "trstructa",  null},
                     };
                     Ili2dbAssert.assertAttrNameTable(jdbcConnection, expectedValues, setup.getSchema());
                 }
@@ -96,6 +98,7 @@ public abstract class TranslationTest {
                         {"EnumOkX.TopicX.ClassX",   "ch.ehi.ili2db.inheritance",   "newClass"},
                         {"EnumOkX.TopicX.n_nX", "ch.ehi.ili2db.inheritance",   "newClass"},
                         {"Basis.Struct",   "ch.ehi.ili2db.inheritance",   "newClass"},
+                        {"TranslatedBasisA.TrStructA",   "ch.ehi.ili2db.inheritance",   "newClass"},
                     };
                     Ili2dbAssert.assertTrafoTable(jdbcConnection,expectedValues, setup.getSchema());
                 }
@@ -121,7 +124,7 @@ public abstract class TranslationTest {
                 config.setCreateFk(Config.CREATE_FK_YES);
                 config.setTidHandling(Config.TID_HANDLING_PROPERTY);
                 config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
-                config.setModels("BasisC;EnumOkX;EnumOkA;EnumOkB");
+                config.setModels("BasisC;TranslatedBasisB;EnumOkX;EnumOkA;EnumOkB");
                 config.setNameLanguage("de;it");
                 config.setCatalogueRefTrafo(null);
                 config.setMultiSurfaceTrafo(null);
@@ -150,8 +153,10 @@ public abstract class TranslationTest {
                         {"EnumOkX.TopicX.n_nX.n_nX_X2", "n_na_a2", "n_na",    "classa2"},
                         {"EnumOkX.TopicX.ClassX.attrX", "attra",   "classa",  null},
                         {"EnumOkX.TopicX.ClassX.attrX2", "classa_attra2",   "structc",  "classa"},
+                        {"EnumOkX.TopicX.ClassX.attrX3", "classa_attra3",   "trstructa",  "classa"},
                         {"EnumOkX.TopicX.n_nX.n_nX_X",  "n_na_a",  "n_na",    "classa"},
                         {"Basis.Struct.attrA", "attrc",   "structc",  null},
+                        {"TranslatedBasisA.TrStructA.trAttrA", "trattra",   "trstructa",  null},
                     };
                     Ili2dbAssert.assertAttrNameTable(jdbcConnection, expectedValues, setup.getSchema());
                 }
@@ -163,6 +168,9 @@ public abstract class TranslationTest {
                         {"EnumOkX.TopicX.ClassX",   "ch.ehi.ili2db.inheritance",   "newClass"},
                         {"EnumOkX.TopicX.n_nX", "ch.ehi.ili2db.inheritance",   "newClass"},
                         {"Basis.Struct",   "ch.ehi.ili2db.inheritance",   "newClass"},
+                        {"Basis.Struct2",   "ch.ehi.ili2db.inheritance",   "newClass"},
+                        {"TranslatedBasisA.TrStructA",   "ch.ehi.ili2db.inheritance",   "newClass"},
+                        {"TranslatedBasisA.TrStructA2",   "ch.ehi.ili2db.inheritance",   "newClass"},
                     };
                     Ili2dbAssert.assertTrafoTable(jdbcConnection,expectedValues, setup.getSchema());
                 }
@@ -544,6 +552,10 @@ public abstract class TranslationTest {
                  Assert.assertNotNull(struct);
                  Assert.assertEquals("Basis.Struct", struct.getobjecttag());
                  Assert.assertEquals("a3.a32", struct.getattrvalue("attrA"));
+                 struct=obj0.getattrobj("attrA3", 0);
+                 Assert.assertNotNull(struct);
+                 Assert.assertEquals("TranslatedBasisA.TrStructA", struct.getobjecttag());
+                 Assert.assertEquals("a3.a32", struct.getattrvalue("trAttrA"));
 			 }
              {
                  IomObject obj0 = objs.get("o3");
@@ -569,6 +581,10 @@ public abstract class TranslationTest {
                  Assert.assertNotNull(struct);
                  Assert.assertEquals("Basis.Struct", struct.getobjecttag());
                  Assert.assertEquals("a3.a32", struct.getattrvalue("attrA"));
+                 struct=obj0.getattrobj("attrB3", 0);
+                 Assert.assertNotNull(struct);
+                 Assert.assertEquals("TranslatedBasisB.TrStructB", struct.getobjecttag());
+                 Assert.assertEquals("b3.b32", struct.getattrvalue("trAttrB"));
 			 }
              {
                  IomObject obj0 = objs.get("x3");
@@ -767,6 +783,10 @@ public abstract class TranslationTest {
                  Assert.assertNotNull(struct);
                  Assert.assertEquals("Basis.Struct", struct.getobjecttag());
                  Assert.assertEquals("a3.a32", struct.getattrvalue("attrA"));
+                 struct=obj0.getattrobj("attrB3", 0);
+                 Assert.assertNotNull(struct);
+                 Assert.assertEquals("TranslatedBasisB.TrStructB", struct.getobjecttag());
+                 Assert.assertEquals("b3.b32", struct.getattrvalue("trAttrB"));
              }
              {
                  IomObject obj0 = objs.get("o3");
@@ -792,6 +812,10 @@ public abstract class TranslationTest {
                  Assert.assertNotNull(struct);
                  Assert.assertEquals("Basis.Struct", struct.getobjecttag());
                  Assert.assertEquals("a3.a32", struct.getattrvalue("attrA"));
+                 struct=obj0.getattrobj("attrB3", 0);
+                 Assert.assertNotNull(struct);
+                 Assert.assertEquals("TranslatedBasisB.TrStructB", struct.getobjecttag());
+                 Assert.assertEquals("b3.b32", struct.getattrvalue("trAttrB"));
              }
              {
                  IomObject obj0 = objs.get("x3");
@@ -955,6 +979,10 @@ public abstract class TranslationTest {
                  Assert.assertNotNull(struct);
                  Assert.assertEquals("Basis.Struct", struct.getobjecttag());
                  Assert.assertEquals("a3.a32", struct.getattrvalue("attrA"));
+                 struct=obj0.getattrobj("attrA3", 0);
+                 Assert.assertNotNull(struct);
+                 Assert.assertEquals("TranslatedBasisA.TrStructA", struct.getobjecttag());
+                 Assert.assertEquals("a3.a32", struct.getattrvalue("trAttrA"));
              }
              {
                  IomObject obj0 = objs.get("o3");
@@ -980,6 +1008,10 @@ public abstract class TranslationTest {
                  Assert.assertNotNull(struct);
                  Assert.assertEquals("Basis.Struct", struct.getobjecttag());
                  Assert.assertEquals("a3.a32", struct.getattrvalue("attrA"));
+                 struct=obj0.getattrobj("attrA3", 0);
+                 Assert.assertNotNull(struct);
+                 Assert.assertEquals("TranslatedBasisA.TrStructA", struct.getobjecttag());
+                 Assert.assertEquals("a3.a32", struct.getattrvalue("trAttrA"));
              }
              {
                  IomObject obj0 = objs.get("x3");

@@ -22,7 +22,7 @@ import ch.ehi.basics.settings.Settings;
 import ch.ehi.ili2db.converter.AbstractWKBColumnConverter;
 import ch.ehi.ili2db.converter.ConverterException;
 import ch.ehi.ili2db.gui.Config;
-import ch.ehi.ili2db.json.Iox2json;
+import ch.ehi.ili2db.json.Iox2jsonUtility;
 import ch.ehi.ili2db.toxtf.ToXtfRecordConverter;
 import ch.ehi.sqlgen.repository.DbColBlob;
 import ch.ehi.sqlgen.repository.DbColBoolean;
@@ -648,7 +648,7 @@ public class PostgisColumnConverter extends AbstractWKBColumnConverter {
                     jg = jsonF.createJsonGenerator(out);
                     td=(TransferDescription) iliEleAttr.getContainer(TransferDescription.class);
                 }
-                Iox2json.write(jg, iomObjects,td);
+                Iox2jsonUtility.write(jg, iomObjects,td);
                 jg.flush();
             } catch (IOException e) {
                 throw new ConverterException(e);
@@ -664,7 +664,7 @@ public class PostgisColumnConverter extends AbstractWKBColumnConverter {
             try {
                 JsonParser jg = jsonF.createJsonParser(in);
                 
-                iomObj=Iox2json.read(jg);
+                iomObj=Iox2jsonUtility.read(jg);
             }catch(IOException ex) {
                 throw new ConverterException(ex);
             }

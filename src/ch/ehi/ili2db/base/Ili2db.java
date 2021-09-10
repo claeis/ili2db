@@ -531,7 +531,7 @@ public class Ili2db {
 					  // read mapping from db
 					  mapping.readAttrMappingTable(conn,config.getDbschema());
 				  }
-				  TrafoConfig trafoConfig=new TrafoConfig();
+				  TrafoConfig trafoConfig=new TrafoConfig(config.getBatchSize());
 				  trafoConfig.readTrafoConfig(conn, config.getDbschema(),customMapping);
 
 				ModelElementSelector ms=new ModelElementSelector();
@@ -1692,6 +1692,12 @@ public class Ili2db {
 			if(modelv.getSizeFileEntry()==0){
 				throw new Ili2dbException("no models given");
 			}
+			if(config.getExportModels()!=null) {
+	            for(String modelName:getModelNames(config.getExportModels())) {
+	                modelv.addFileEntry(new ch.interlis.ili2c.config.FileEntry(modelName,ch.interlis.ili2c.config.FileEntryKind.ILIMODELFILE));             
+	            }
+			}
+			
 
 			String adapterClassName=config.getGeometryConverter();
 			if(adapterClassName==null){

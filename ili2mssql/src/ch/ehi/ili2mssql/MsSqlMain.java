@@ -4,6 +4,8 @@ import ch.ehi.ili2db.base.DbUrlConverter;
 import ch.ehi.ili2db.gui.AbstractDbPanelDescriptor;
 import ch.ehi.ili2db.gui.Config;
 
+import java.text.ParseException;
+
 
 public class MsSqlMain  extends ch.ehi.ili2db.AbstractMain {
 
@@ -82,7 +84,7 @@ public class MsSqlMain  extends ch.ehi.ili2db.AbstractMain {
 	}
 
 	@Override
-	protected int doArgs(String[] args,int argi,Config config)
+	protected int doArgs(String[] args,int argi,Config config) throws ParseException
 	{
 		String arg=args[argi];
 		if(arg.equals("--dbhost")){
@@ -113,9 +115,9 @@ public class MsSqlMain  extends ch.ehi.ili2db.AbstractMain {
 			argi++;
 			dbinstance = args[argi];
 			argi++;
-		}else if(arg.equals("--dbwindowsauth")){
+		}else if(isOption(arg, "--dbwindowsauth")){
 			argi++;
-			dbWindowsAuth = true;
+			dbWindowsAuth = parseBooleanArgument(arg);
 		}
 		return argi;
 	}

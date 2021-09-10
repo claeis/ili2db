@@ -1,15 +1,18 @@
-================
-ili2db-Anleitung
-================
+====================================
+Anleitung zur Programmfamilie ili2db
+====================================
 
 Überblick
 =========
 
-Ili2pg, ili2fgdb bzw. ili2gpkg ist ein in Java erstelltes Programm, das eine
+ilid2db ist eine in Java erstellte Programmfamilie, die zurzeit ili2pg, 
+ili2fgdb, ili2gpkg, ili2ora, ili2mssql, ili2mysql und ili2h2gis umfasst.
+
+Damit kann eine
 Interlis-Transferdatei (itf oder xtf) einem Interlis-Modell entsprechend
 (ili) mittels 1:1-Transfer in eine Datenbank (PostgreSQL/Postgis bzw.
-GeoPackage) schreibt oder aus der Datenbank mittels einem 1:1-Transfer
-eine solche Transferdatei erstellt. Folgende Funktionen sind möglich:
+GeoPackage) gelesen werden oder aus der Datenbank mittels einem 1:1-Transfer
+eine solche Transferdatei erstellt werden. Folgende Funktionen sind möglich:
 
 - erstellt das Datenbankschema aus einem Interlis Modell
 
@@ -99,16 +102,17 @@ Fehler wird aber in der Regel schon früher ausgegeben.::
 
 Fehlerhafte Daten
 -----------------
-Um fehlerhaften Daten zu importieren (um sie zu flicken), muss mindestens die 
+Um fehlerhaften Daten zu importieren (um sie danach (z.B. im GIS) zu flicken), muss mindestens die 
 Validierung ausgeschaltet werden (``--disableValidation``). Das DB Schema muss 
-aber auch so angelegt werden, dass fehlerhafte Werte durch ``NULL`` ersetzt werden 
-können (``--sqlEnableNull``). Und die Programmlogik für den Datenimport muss die Fehler 
+aber auch so angelegt werden, dass fehlerhafte Werte als Text importiert werden können (``--sqlColsAsText``) 
+bzw. durch ``NULL`` ersetzt werden können (``--sqlEnableNull``). 
+Und die Programmlogik für den Datenimport muss die Fehler 
 tolerieren (``--skipReferenceErrors`` und ``--skipGeometryErrors``), so dass 
 z.B. eine Referenz auf ein nicht vorhandenes Objekt ignoriert wird.
 
-Um solche Daten zu importieren (um sie zu flicken)::
+Um solche Daten zu importieren (um sie danach zu flicken)::
 	
-  java -jar ili2gpkg.jar --schemaimport --sqlEnableNull --dbfile mogis.gpkg path/to/mo.ili
+  java -jar ili2gpkg.jar --schemaimport --sqlEnableNull --sqlColsAsText --dbfile mogis.gpkg path/to/mo.ili
   java -jar ili2gpkg.jar --import --skipReferenceErrors --skipGeometryErrors --disableValidation --dbfile mogis.gpkg path/to/data.xtf
 
 Bei ITF (Interlis 1): Fehlerhafte AREA Attribute können für 
@@ -121,9 +125,9 @@ mit der Validierung zu tun, sondern damit, dass aus den Linien+Punkten
 keine Polygone gebildet werden können. Die Polygonbildung muss also 
 ausgeschaltet werden (``--skipPolygonBuilding``).
 
-Um solche Daten zu importieren (um sie zu flicken)::
+Um solche Daten zu importieren (um sie danach zu flicken)::
 	
-  java -jar ili2gpkg.jar --schemaimport --sqlEnableNull --skipPolygonBuilding --dbfile mogis.gpkg path/to/mo.ili
+  java -jar ili2gpkg.jar --schemaimport --sqlEnableNull --sqlColsAsText --skipPolygonBuilding --dbfile mogis.gpkg path/to/mo.ili
   java -jar ili2gpkg.jar --import --skipReferenceErrors --skipPolygonBuilding --skipGeometryErrors --disableValidation --dbfile mogis.gpkg path/to/data.itf
 
 
@@ -715,6 +719,8 @@ Optionen:
 +-------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | --sqlEnableNull               | Erstellt keine NOT NULL Anweisungen bei Spalten die Interlis-Attribute abbilden. (siehe Kapitel Abbildungsregeln/Attribute)                                                                                                                                                                                                                                                                                                                                                                                                                |
 +-------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| --sqlExtRefCols               | Erstellt Spalten die Interlis-Rollen oder Interlis-Referenz-Attribute abbilden als Textspalten, so dass der Referenzwert aus der Transferdatei in der Spalte aufgenommen werden kann und die referenzierten Objekte nicht vorliegen müssen. (siehe Kapitel Abbildungsregeln/Beziehungen)                                                                                                                                                                                                                                                   |
++-------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | --strokeArcs                  | Segmentiert Kreisbogen beim Datenimport. Der Radius geht somit verloren. Die Kreisbogen werden so segmentiert, dass die Abweichung der erzeugten Geraden kleiner als die Koordinatengenauigkeit der Stützpunkte ist.                                                                                                                                                                                                                                                                                                                       |
 +-------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | --oneGeomPerTable             | **PostGIS:** Erzeugt Hilfstabellen, falls in einer Klasse/Tabelle mehr als ein Geometrie-Attribut ist, so dass pro Tabelle in der Datenbank nur eine Geometriespalte ist.                                                                                                                                                                                                                                                                                                                                                                  |
@@ -735,6 +741,10 @@ Optionen:
 +-------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | --importBid                   | Liest die Behälteridentifikation (BID aus der Transferdatei) in die Spalte T\_Ili\_Tid der Tabelle t\_ili2db\_basket.                                                                                                                                                                                                                                                                                                                                                                                                                      |
 +-------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| --importFetchSize             | Definiert den fetchsize für die Statements beim import.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
++-------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| --exportBatchSize             | Definiert den batchSize für die Statements beim export.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
++-------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | --createBasketCol             | Erstellt in jeder Tabelle eine zusätzlich Spalte T\_basket um den Behälter identifizieren zu können. (siehe Kapitel Abbildungsregeln/Metadaten)                                                                                                                                                                                                                                                                                                                                                                                            |
 +-------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | --createDatasetCol            | Erstellt in jeder Tabelle eine zusätzlich Spalte T\_datasetname mit dem Namen/Identifikator des Datensatzes. Die Option bedingt die Option --dataset. Die Spalte ist redundant zur Spalte datasetname der Tabelle t_ili2db_dataset (siehe Kapitel Abbildungsregeln/Metadaten).                                                                                                                                                                                                                                                             |
@@ -752,6 +762,8 @@ Optionen:
 | --createDateTimeChecks        | Erstellt für Datum und Zeit Datentypen CHECK-Constraints in der Datenbank.                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
 +-------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | --createTypeConstraints       | Erstellt für die t\_type Spalte ein CHECK-Constraint in der Datenbank.                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
++-------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| --sqlColsAsText               | Bildet alle (einfachen/unstrukturierten) Interlis-Attribute als TEXT-Spalten ab, so dass fehlerhafte Daten importiert werden können.                                                                                                                                                                                                                                                                                                                                                                                                       |
 +-------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | --createImportTabs            | Erstellt die t\_ili2db\_import Tabellen in der Datenbank.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
 +-------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
@@ -1112,6 +1124,23 @@ Die Stärke der Beziehung (Assoziation, Aggregation oder Komposition) beeinfluss
 |              |    role_A -- {0..*} ClassA; |   role_a integer REFERENCES A(T_id)  |                                                                                                      |
 |              |    role_B -- {0..*} ClassB; |   role_b integer REFERENCES B(T_id)  |                                                                                                      |
 |              |  END a2b;                   |  );                                  |                                                                                                      |
++--------------+-----------------------------+--------------------------------------+------------------------------------------------------------------------------------------------------+
+| 3            | ::                          | ::                                   | Wenn die Option --sqlExtRefCols benutzt wird,                                                        |
+|              |                             |                                      | wird bei EXTERNAL statt der Fremdschlüsselspalte ein Text-Spalte erstellt, die den REF Wert          |
+|              |  CLASS A =                  |  CREATE TABLE A (                    | aus der Transferdatei aufnimmt. So muss das refernzierte Objekt nicht importiert werden.             |
+|              |  END A;                     |   T_Id integer PRIMARY KEY,          |                                                                                                      |
+|              |                             |  );                                  |                                                                                                      |
+|              |                             |                                      |                                                                                                      |
+|              |  CLASS B =                  |  CREATE TABLE B (                    |                                                                                                      |
+|              |  END B;                     |   T_Id integer PRIMARY KEY,          |                                                                                                      |
+|              |                             |   role_a varchar(255)                |                                                                                                      |
+|              |                             |  );                                  |                                                                                                      |
+|              |                             |                                      |                                                                                                      |
+|              |  ASSOCIATION a2b =          |                                      |                                                                                                      |
+|              |    role_A (EXTERNAL)        |                                      |                                                                                                      |
+|              |           -- {0..1} ClassA; |                                      |                                                                                                      |
+|              |    role_B -- {0..*} ClassB; |                                      |                                                                                                      |
+|              |  END a2b;                   |                                      |                                                                                                      |
 +--------------+-----------------------------+--------------------------------------+------------------------------------------------------------------------------------------------------+
 
 Referenzattribute

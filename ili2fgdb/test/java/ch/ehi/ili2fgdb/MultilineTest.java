@@ -57,15 +57,16 @@ public class MultilineTest {
 		File data=new File(TEST_OUT,"MultiLine2.ili");
 		Config config=initConfig(data.getPath(),data.getPath()+".log");
 		config.setFunction(Config.FC_SCHEMAIMPORT);
-		config.setCreateFk(config.CREATE_FK_YES);
+		config.setCreateFk(Config.CREATE_FK_YES);
 		config.setCreateNumChecks(true);
 		config.setTidHandling(Config.TID_HANDLING_PROPERTY);
-		config.setBasketHandling(config.BASKET_HANDLING_READWRITE);
+		config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
 		config.setCatalogueRefTrafo(null);
 		config.setMultiSurfaceTrafo(null);
 		config.setMultiLineTrafo(Config.MULTILINE_TRAFO_COALESCE);
 		config.setMultilingualTrafo(null);
 		config.setInheritanceTrafo(null);
+		config.setStrokeArcs(Config.STROKE_ARCS_ENABLE);
 		//Ili2db.readSettingsFromDb(config);
 		Ili2db.run(config,null);
 		
@@ -82,10 +83,10 @@ public class MultilineTest {
 		Config config=initConfig(data.getPath(),data.getPath()+".log");
 		config.setFunction(Config.FC_IMPORT);
 		config.setDoImplicitSchemaImport(true);
-		config.setCreateFk(config.CREATE_FK_YES);
+		config.setCreateFk(Config.CREATE_FK_YES);
 		config.setCreateNumChecks(true);
 		config.setTidHandling(Config.TID_HANDLING_PROPERTY);
-		config.setBasketHandling(config.BASKET_HANDLING_READWRITE);
+		config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
 		config.setCatalogueRefTrafo(null);
 		config.setMultiSurfaceTrafo(null);
 		config.setMultiLineTrafo(Config.MULTILINE_TRAFO_COALESCE);
@@ -94,6 +95,30 @@ public class MultilineTest {
 		//Ili2db.readSettingsFromDb(config);
         Ili2db.run(config,null);
 	}
+    @Test
+    public void importXtfStrokeArcs() throws Exception
+    {
+        //EhiLogger.getInstance().setTraceFilter(false);
+        File fgdbFile=new File(FGDBFILENAME);
+        Fgdb4j.deleteFileGdb(fgdbFile);
+        Class driverClass = Class.forName(FgdbDriver.class.getName());
+        File data=new File(TEST_OUT,"MultiLine2b.xtf");
+        Config config=initConfig(data.getPath(),data.getPath()+".log");
+        config.setFunction(Config.FC_IMPORT);
+        config.setDoImplicitSchemaImport(true);
+        config.setCreateFk(Config.CREATE_FK_YES);
+        config.setCreateNumChecks(true);
+        config.setTidHandling(Config.TID_HANDLING_PROPERTY);
+        config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
+        config.setCatalogueRefTrafo(null);
+        config.setMultiSurfaceTrafo(null);
+        config.setMultiLineTrafo(Config.MULTILINE_TRAFO_COALESCE);
+        config.setMultilingualTrafo(null);
+        config.setInheritanceTrafo(null);
+        config.setStrokeArcs(Config.STROKE_ARCS_ENABLE);
+        //Ili2db.readSettingsFromDb(config);
+        Ili2db.run(config,null);
+    }
 	
 	@Test
 	public void exportXtf() throws Exception

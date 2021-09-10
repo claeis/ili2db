@@ -27,9 +27,11 @@ import ch.ehi.sqlgen.repository.DbColumn;
 import ch.ehi.sqlgen.repository.DbTable;
 import ch.ehi.sqlgen.repository.DbTableName;
 import ch.interlis.ili2c.metamodel.AbstractClassDef;
+import ch.interlis.ili2c.metamodel.AbstractCoordType;
 import ch.interlis.ili2c.metamodel.AbstractLeafElement;
 import ch.interlis.ili2c.metamodel.AssociationDef;
 import ch.interlis.ili2c.metamodel.AttributeDef;
+import ch.interlis.ili2c.metamodel.BlackboxType;
 import ch.interlis.ili2c.metamodel.CompositionType;
 import ch.interlis.ili2c.metamodel.CoordType;
 import ch.interlis.ili2c.metamodel.Domain;
@@ -69,6 +71,7 @@ public class AbstractRecordConverter {
 	protected boolean createItfAreaRef=false;
 	protected boolean createFk=false;
 	protected boolean createFkIdx=false;
+    protected boolean createExtRef=false;
 	protected boolean isIli1Model=false;
 	protected String colT_ID=null;
 	private String uuid_default_value=null;
@@ -79,6 +82,7 @@ public class AbstractRecordConverter {
 	protected MultiLineMappings multiLineAttrs=new MultiLineMappings();
 	protected MultiPointMappings multiPointAttrs=new MultiPointMappings();
 	protected ArrayMappings arrayAttrs=new ArrayMappings();
+	protected boolean sqlColsAsText = false;
 
 	public AbstractRecordConverter(TransferDescription td1,ch.ehi.ili2db.mapping.NameMapping ili2sqlName,ch.ehi.ili2db.gui.Config config,DbIdGen idGen1, TrafoConfig trafoConfig1,Viewable2TableMapping class2wrapper1){
 		td=td1;
@@ -94,6 +98,7 @@ public class AbstractRecordConverter {
 		removeUnderscoreFromEnumDispName=Config.BEAUTIFY_ENUM_DISPNAME_UNDERSCORE.equals(config.getBeautifyEnumDispName());
 		createFk=Config.CREATE_FK_YES.equals(config.getCreateFk());
 		createFkIdx=Config.CREATE_FKIDX_YES.equals(config.getCreateFkIdx());
+		createExtRef=Config.SQL_EXTREF_ENABLE.equals(config.getSqlExtRefCols());
 		colT_ID=config.getColT_ID();
 		if(colT_ID==null){
 			colT_ID=DbNames.T_ID_COL;
@@ -113,7 +118,9 @@ public class AbstractRecordConverter {
 		isIli1Model=td1.getIli1Format()!=null;
 		createItfLineTables=isIli1Model && config.getDoItfLineTables();
 		createItfAreaRef=isIli1Model && Config.AREA_REF_KEEP.equals(config.getAreaRef());
-		
+
+		sqlColsAsText=Config.SQL_COLS_AS_TEXT_ENABLE.equals(config.getSqlColsAsText());
+
 	}
 	public String beautifyEnumDispName(String value) {
 		if(removeUnderscoreFromEnumDispName){
@@ -254,7 +261,7 @@ public class AbstractRecordConverter {
 		dbColUsr.setSize(40);
 		table.addColumn(dbColUsr);
 	}
-	protected void setBB(DbColGeometry ret, CoordType coord,String scopedAttrName) {
+	protected void setBB(DbColGeometry ret, AbstractCoordType coord, String scopedAttrName) {
 		NumericalType dimv[]=coord.getDimensions();
 		if(!(dimv[0] instanceof NumericType) || !(dimv[1] instanceof NumericType)){
 			EhiLogger.logError("Attribute "+scopedAttrName+": COORD type not supported ("+dimv[0].getClass().getName()+")");
@@ -363,5 +370,12 @@ public class AbstractRecordConverter {
     	}
     	return ret;
     }
+
+	protected boolean mapAsTextCol(AttributeDef attributeDef) {
+		if(sqlColsAsText && attributeDef.getDomainResolvingAliases() instanceof BlackboxType){
+			return false;
+		}
+		return sqlColsAsText;
+	}
 	
 }

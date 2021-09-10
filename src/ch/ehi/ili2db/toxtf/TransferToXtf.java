@@ -127,13 +127,17 @@ public class TransferToXtf {
     private ObjectPoolManager recman = null;
 	private ArrayPoolImpl<FixIomObjectRefs> delayedObjects=null;
 	private ch.interlis.ili2c.generator.IndentPrintWriter expgen=null;
+	/** translates IomObjects as stored in the DB (root/origin language) back to as they appeared in the transfer file (translated language) */
 	private TranslateToTranslation languageFilter=null;
 	private Rounder rounder=null;
+    /** translates and/or reduces IomObjects to the export transfer file (different language and/or base model) */
 	private ReduceToBaseModel exportBaseModelFilter=null;
     private Integer defaultCrsCode=null;
     private Map<Element,Element> crsFilter=null;
     private Map<Element,Element> crsFilterToTarget=null;
-	
+    boolean ignoreUnresolvedReferences=false;
+    private Integer fetchSize = null;
+
 	public TransferToXtf(NameMapping ili2sqlName1,TransferDescription td1,Connection conn1,SqlColumnConverter geomConv,Config config,TrafoConfig trafoConfig,Viewable2TableMapping class2wrapper1){
 		ili2sqlName=ili2sqlName1;
 		td=td1;
@@ -148,6 +152,7 @@ public class TransferToXtf {
 		if(config.getDefaultSrsCode()!=null) {
 	        defaultCrsCode=Integer.parseInt(config.getDefaultSrsCode());
 		}
+		fetchSize=config.getFetchSize();
 		createTypeDiscriminator=Config.CREATE_TYPE_DISCRIMINATOR_ALWAYS.equals(config.getCreateTypeDiscriminator());
 		createGenericStructRef=Config.STRUCT_MAPPING_GENERICREF.equals(config.getStructMapping());
 		writeIliTid=config.isExportTid(); 
@@ -163,6 +168,7 @@ public class TransferToXtf {
 		this.basketStat=stat;
 		this.customMapping=customMapping1;
 		boolean referrs=false;
+        ignoreUnresolvedReferences=config.isSkipReferenceErrors();
 		
 		if(!hasIliTidCol && writeIliTid) {
             throw new Ili2dbException("TID export requires a "+DbNames.T_ILI_TID_COL+" column");
@@ -624,9 +630,11 @@ public class TransferToXtf {
 						// read object
 						String tid=readObjectTid(aclass,sqlid);
 						if(tid==null){
-							EhiLogger.logError("unknown referenced object "+aclass.getScopedName(null)+" (sqltable "+sqlTargetTable+", sqlid "+sqlid+") referenced from "+fixref.getRoot().getobjecttag()+" TID "+fixref.getRoot().getobjectoid());
-							referrs=true;
-							skipObj=true;
+                            if(!ignoreUnresolvedReferences){
+                                EhiLogger.logError("unknown referenced object "+aclass.getScopedName(null)+" (sqltable "+sqlTargetTable+", sqlid "+sqlid+") referenced from "+fixref.getRoot().getobjecttag()+" TID "+fixref.getRoot().getobjectoid());
+                                referrs=true;
+                                skipObj=true;
+                            }
 						}else{
 							// fix reference
 							ref.setobjectrefoid(tid);
@@ -687,6 +695,9 @@ public class TransferToXtf {
 				dbstmt = conn.prepareStatement(stmt);
 				dbstmt.clearParameters();
 				dbstmt.setLong(1, sqlid);
+				if(fetchSize != null && fetchSize > 0){
+					dbstmt.setFetchSize(fetchSize);
+				}
 				rs = dbstmt.executeQuery();
 				if(rs.next()) {
 					sqlIliTid = rs.getString(2);
@@ -891,6 +902,9 @@ public class TransferToXtf {
 		try{
 			
 			dbstmt = conn.createStatement();
+			if(fetchSize != null && fetchSize > 0){
+				dbstmt.setFetchSize(fetchSize);
+			}
 			rs=dbstmt.executeQuery(stmt);
 			while(rs.next()){
 				String sqlid=rs.getString(1);
@@ -974,6 +988,9 @@ public class TransferToXtf {
 			int paramIdx=1;
 			if(basketSqlId!=null){
 				dbstmt.setLong(paramIdx++,basketSqlId);
+			}
+			if(fetchSize != null && fetchSize > 0){
+				dbstmt.setFetchSize(fetchSize);
 			}
 			rs=dbstmt.executeQuery();
 			while(rs.next()){
@@ -1095,6 +1112,9 @@ public class TransferToXtf {
 			
 			dbstmt = conn.prepareStatement(stmt);
 			recConv.setStmtParams(dbstmt, basketSqlId, fixref, structWrapper);
+			if(fetchSize != null && fetchSize > 0){
+				dbstmt.setFetchSize(fetchSize);
+			}
 			rs=dbstmt.executeQuery();
 			while(rs.next()){
 				// list of not yet processed struct attrs

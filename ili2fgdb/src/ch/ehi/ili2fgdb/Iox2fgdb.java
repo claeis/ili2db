@@ -25,6 +25,7 @@ package ch.ehi.ili2fgdb;
 import java.util.ArrayList;
 import com.vividsolutions.jts.algorithm.CGAlgorithms;
 import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.CoordinateList;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.Polygon;
@@ -35,6 +36,8 @@ import ch.interlis.iom_j.itf.impl.jtsext.geom.CompoundCurve;
 import ch.interlis.iom_j.itf.impl.jtsext.geom.CompoundCurveRing;
 import ch.interlis.iom_j.itf.impl.jtsext.geom.CurveSegment;
 import ch.interlis.iox.IoxException;
+import ch.interlis.iox_j.jts.Iox2jts;
+import ch.interlis.iox_j.jts.Iox2jtsException;
 import ch.interlis.iox_j.jts.Iox2jtsext;
 import ch.interlis.iox_j.wkb.ByteArrayOutputStream;
 import ch.interlis.iox_j.wkb.Iox2wkbException;
@@ -82,20 +85,22 @@ public class Iox2fgdb {
 		return os.toByteArray();
 	}
 	public byte[] polyline2wkb(IomObject polylineObj,boolean isSurfaceOrArea,boolean asCompoundCurve,double p,int srsId)
-	throws IoxException
+	throws IoxException, Iox2jtsException
 	{
 		if(polylineObj==null){
 			return null;
 		}
 		byte ret[]=null;
-        CompoundCurve polyline = Iox2jtsext.polyline2JTS(polylineObj,false, p);
+        LineString polyline = null;
 		os.reset();
 		if(asCompoundCurve){
+	        polyline = Iox2jtsext.polyline2JTS(polylineObj,false, p);
 			int shapeType=EsriShpConstants.ShapeGeneralPolyline;
 			shapeType |= EsriShpConstants.shapeHasCurves;
 			shapeType |= (outputDimension==3?EsriShpConstants.shapeHasZs:0);
 			os.writeInt(shapeType);
 		}else{
+	        polyline = Iox2jts.polyline2JTSlineString(polylineObj,false, p);
 			if(outputDimension==3){
 				os.writeInt(EsriShpConstants.ShapePolylineZ);
 			}else{
@@ -161,7 +166,7 @@ public class Iox2fgdb {
 	}
 	
 	public byte[] multiline2wkb(IomObject obj,boolean asCompoundCurve,double p,int srsId)
-	throws IoxException
+	throws IoxException, Iox2jtsException
 	{
 		if(obj==null){
 			return null;
@@ -180,13 +185,18 @@ public class Iox2fgdb {
 					os.writeInt(EsriShpConstants.ShapePolyline);
 				}
 			}
-			java.util.ArrayList<CompoundCurve> curves=new java.util.ArrayList<CompoundCurve>(); 
+			java.util.ArrayList<LineString> curves=new java.util.ArrayList<LineString>(); 
 			
 			// boundingBox
 	    	Envelope env=new Envelope();
 			for(int polylinei=0;polylinei<polylinec;polylinei++){
 				IomObject polyline=obj.getattrobj(Wkb2iox.ATTR_POLYLINE,polylinei);
-		    	CompoundCurve curve = Iox2jtsext.polyline2JTS(polyline,false, p);
+                LineString curve = null;
+				if(asCompoundCurve) {
+	                curve = Iox2jtsext.polyline2JTS(polyline,false, p);
+				}else {
+	                curve = Iox2jts.polyline2JTSlineString(polyline,false, p);
+				}
 		    	curves.add(curve);
 		    	env.expandToInclude(curve.getEnvelopeInternal());
 	    	}
@@ -199,7 +209,7 @@ public class Iox2fgdb {
 			// cPoints The total number of points for all lines.
 			int cPart=curves.size();
 			int cPoints=0;
-			for(CompoundCurve curve:curves){
+			for(LineString curve:curves){
 				cPoints+=getNumPoints(curve);
 			}
 			os.writeInt(cPart);
@@ -208,7 +218,7 @@ public class Iox2fgdb {
 			// parts[cParts] An array of length NumParts. Stores, for each Line, the index of its
 			// first point in the points array. Array indexes are with respect to 0.
 			int partStart=0;
-			for(CompoundCurve curve:curves){
+			for(LineString curve:curves){
 				os.writeInt(partStart);
 				partStart+=getNumPoints(curve);
 			}
@@ -234,7 +244,7 @@ public class Iox2fgdb {
 
 
 			int startPtIdx=0;
-			for(CompoundCurve curve:curves){
+			for(LineString curve:curves){
 				writePoints(curve, true,zv, zMin, zMax,startPtIdx,arcs);
 				startPtIdx+=getNumPoints(curve);
 			}
@@ -273,23 +283,26 @@ public class Iox2fgdb {
 	 * @param obj INTERLIS SURFACE structure
 	 * @param strokeP maximum stroke to use when removing ARCs
 	 * @return JTS Polygon
+	 * @throws Iox2jtsException 
 	 * @throws Iox2wkbException
 	 */
 	public byte[] surface2wkb(IomObject polygonObj,boolean asCurvePolygon,double strokeP,int srsId) //SurfaceOrAreaType type)
-	throws IoxException
+	throws IoxException, Iox2jtsException
 	{
 		if(polygonObj==null){
 			return null;
 		}
 		byte ret[]=null;
-        Polygon polygon = Iox2jtsext.surface2JTS(polygonObj,strokeP);
+        Polygon polygon = null;
 		os.reset();
 		if(asCurvePolygon){
+	        polygon=Iox2jtsext.surface2JTS(polygonObj,strokeP);
 			int shapeType=EsriShpConstants.ShapeGeneralPolygon;
 			shapeType |= EsriShpConstants.shapeHasCurves;
 			shapeType |= (outputDimension==3?EsriShpConstants.shapeHasZs:0);
 			os.writeInt(shapeType);
 		}else{
+	        polygon=Iox2jts.surface2JTS(polygonObj,strokeP);
 			if(outputDimension==3){
 				os.writeInt(EsriShpConstants.ShapePolygonZ);
 			}else{
@@ -475,7 +488,7 @@ public class Iox2fgdb {
 		}
 	}
 	public byte[] multisurface2wkb(IomObject multisurfaceObj,boolean asCurvePolygon,double strokeP,int srsId) //SurfaceOrAreaType type)
-	throws IoxException
+	throws IoxException, Iox2jtsException
 	{
 		if(multisurfaceObj==null){
 			return null;
@@ -504,7 +517,12 @@ public class Iox2fgdb {
 			IomObject surface=multisurfaceObj.getattrobj("surface",surfacei);
 			IomObject iomSurfaceClone=new ch.interlis.iom_j.Iom_jObject("MULTISURFACE",null);
 			iomSurfaceClone.addattrobj("surface",surface);
-			Polygon polygon = Iox2jtsext.surface2JTS(iomSurfaceClone,strokeP);
+            Polygon polygon = null;
+			if(asCurvePolygon) {
+	            polygon = Iox2jtsext.surface2JTS(iomSurfaceClone,strokeP);
+			}else {
+	            polygon = Iox2jts.surface2JTS(iomSurfaceClone,strokeP);
+			}
 	    	polygons.add(polygon);
 	    	env.expandToInclude(polygon.getEnvelopeInternal());
 		}

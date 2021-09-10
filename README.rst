@@ -23,9 +23,8 @@ The JRE (Java Runtime Environment) can be downloaded for free from the Website <
 
 Download ili2db
 ===============
-**PostGIS:** `<http://www.eisenhutinformatik.ch/interlis/ili2pg/>`_
 
-**GeoPackage:** `<http://www.eisenhutinformatik.ch/interlis/ili2gpkg/>`_
+<https://downloads.interlis.ch/>
 
 Installing ili2db
 =================

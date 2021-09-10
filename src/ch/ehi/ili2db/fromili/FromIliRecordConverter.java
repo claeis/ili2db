@@ -65,6 +65,7 @@ import ch.interlis.ili2c.metamodel.ExtendableContainer;
 import ch.interlis.ili2c.metamodel.FormattedType;
 import ch.interlis.ili2c.metamodel.LineType;
 import ch.interlis.ili2c.metamodel.LocalAttribute;
+import ch.interlis.ili2c.metamodel.MultiCoordType;
 import ch.interlis.ili2c.metamodel.NumericType;
 import ch.interlis.ili2c.metamodel.ObjectPath;
 import ch.interlis.ili2c.metamodel.ObjectType;
@@ -166,19 +167,20 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 		if(base==null && !def.isSecondaryTable()){
 		  dbTable.setRequiresSequence(true);
 		}
-		String baseRef="";
-		DbColId dbColId=addKeyCol(dbTable);
-		if(base!=null){
-		  dbColId.setScriptComment("REFERENCES "+base.getViewable().getScopedName(null));
-		  if(createFk){
-			  dbColId.setReferencedTable(getSqlType(base.getViewable()));
-		  }
-                  metaInfo.setColumnInfo(dbTable.getName().getName(), null, dbColId.getName(), DbExtMetaInfo.TAG_COL_FOREIGNKEY, getSqlType(base.getViewable()).getName());
-		}else if(def.isSecondaryTable()){
-			  if(createFk){
-				  dbColId.setReferencedTable(new DbTableName(schema.getName(),def.getMainTable().getSqlTablename()));
-			  }
-                          metaInfo.setColumnInfo(dbTable.getName().getName(), null, dbColId.getName(), DbExtMetaInfo.TAG_COL_FOREIGNKEY, def.getMainTable().getSqlTablename());
+		{
+	        DbColId dbColId=addKeyCol(dbTable);
+	        if(base!=null){
+	          dbColId.setScriptComment("REFERENCES "+base.getViewable().getScopedName(null));
+	          if(createFk){
+	              dbColId.setReferencedTable(getSqlType(base.getViewable()));
+	          }
+	                  metaInfo.setColumnInfo(dbTable.getName().getName(), null, dbColId.getName(), DbExtMetaInfo.TAG_COL_FOREIGNKEY, getSqlType(base.getViewable()).getName());
+	        }else if(def.isSecondaryTable()){
+	              if(createFk){
+	                  dbColId.setReferencedTable(new DbTableName(schema.getName(),def.getMainTable().getSqlTablename()));
+	              }
+	                          metaInfo.setColumnInfo(dbTable.getName().getName(), null, dbColId.getName(), DbExtMetaInfo.TAG_COL_FOREIGNKEY, def.getMainTable().getSqlTablename());
+	        }
 		}
 		  if(createBasketCol){
 			  // add basketCol
@@ -316,105 +318,194 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
                             AssociationDef roleOwner = (AssociationDef) role.getContainer();
                             if(roleOwner.getDerivedFrom()==null){
                                 // role is oppend;
-                                ArrayList<ViewableWrapper> targetTables = getTargetTables(role.getDestination());
-                              for(ViewableWrapper targetTable:targetTables){
-                                  dbColId=new DbColId();
-                                  DbTableName targetSqlTableName=targetTable.getSqlTable();
-                                  String roleSqlName=ili2sqlName.mapIliRoleDef(role,sqlName.getName(),targetSqlTableName.getName(),targetTables.size()>1);
-                                  dbColId.setName(roleSqlName);
-                                  boolean notNull=false;
-                                  if(!sqlEnableNull){
-                                      if(targetTables.size()>1){
-                                          notNull=false; // multiple alternative FK columns
-                                      }else if(role.getOppEnd().getDestination()!=def.getViewable()){
-                                          notNull=false; // other subtypes in of def don't have this FK
-                                      }else{
-                                          if(role.getCardinality().getMinimum()==0){
-                                              notNull=false;
-                                          }else{
-                                              notNull=true;
-                                          }
+                                boolean isExtRef=createExtRef && role.isExternal();
+                                if(isExtRef) {
+                                    DbColumn dbColRef=null;
+                                    dbColRef=new DbColVarchar();
+                                    ((DbColVarchar) dbColRef).setSize(255);
+                                    String roleSqlName=ili2sqlName.mapIliRoleDef(role,sqlName.getName(),getSqlType(role.getDestination()).getName(),false);
+                                    dbColRef.setName(roleSqlName);
+                                    boolean notNull=false;
+                                    if(!sqlEnableNull){
+                                        if(role.getOppEnd().getDestination()!=def.getViewable()){
+                                            notNull=false; // other subtypes in of def don't have this FK
+                                        }else{
+                                            if(role.getCardinality().getMinimum()==0){
+                                                notNull=false;
+                                            }else{
+                                                notNull=true;
+                                            }
+                                        }
+                                    }
+                                    dbColRef.setNotNull(notNull);
+                                    dbColRef.setPrimaryKey(false);
+                                      if(createFkIdx){
+                                          dbColRef.setIndex(true);
                                       }
-                                  }
-                                  dbColId.setNotNull(notNull);
-                                  dbColId.setPrimaryKey(false);
-                                  if(createFk){
-                                      dbColId.setReferencedTable(targetSqlTableName);
-                                  }
-                                                                  metaInfo.setColumnInfo(dbTable.getName().getName(), null, dbColId.getName(), DbExtMetaInfo.TAG_COL_FOREIGNKEY, targetSqlTableName.getName());
-                                    if(createFkIdx){
-                                        dbColId.setIndex(true);
+                                      String cmt=role.getDocumentation();
+                                      if(cmt!=null && cmt.length()>0){
+                                          dbColRef.setComment(cmt);                                    
+                                      }
+                                    dbTable.addColumn(dbColRef);
+                                    // handle ordered
+                                    if(role.getOppEnd().isOrdered()){
+                                          // add seqeunce attr
+                                          DbColId dbSeq=new DbColId();
+                                          dbSeq.setName(roleSqlName+"_"+DbNames.T_SEQ_COL);
+                                          dbSeq.setNotNull(notNull);
+                                          dbSeq.setPrimaryKey(false);
+                                          dbTable.addColumn(dbSeq);
                                     }
-                                    String cmt=role.getDocumentation();
-                                    if(cmt!=null && cmt.length()>0){
-                                        dbColId.setComment(cmt);                                    
+                                }else {
+                                    ArrayList<ViewableWrapper> targetTables = getTargetTables(role.getDestination());
+                                    for(ViewableWrapper targetTable:targetTables){
+                                        DbColumn dbColRef=null;
+                                        dbColRef=new DbColId();
+                                        DbTableName targetSqlTableName=targetTable.getSqlTable();
+                                        String roleSqlName=ili2sqlName.mapIliRoleDef(role,sqlName.getName(),targetSqlTableName.getName(),targetTables.size()>1);
+                                        dbColRef.setName(roleSqlName);
+                                        boolean notNull=false;
+                                        if(!sqlEnableNull){
+                                            if(targetTables.size()>1){
+                                                notNull=false; // multiple alternative FK columns
+                                            }else if(role.getOppEnd().getDestination()!=def.getViewable()){
+                                                notNull=false; // other subtypes in of def don't have this FK
+                                            }else{
+                                                if(role.getCardinality().getMinimum()==0){
+                                                    notNull=false;
+                                                }else{
+                                                    notNull=true;
+                                                }
+                                            }
+                                        }
+                                        dbColRef.setNotNull(notNull);
+                                        dbColRef.setPrimaryKey(false);
+                                        if(createFk){
+                                            dbColRef.setReferencedTable(targetSqlTableName);
+                                        }
+                                        metaInfo.setColumnInfo(dbTable.getName().getName(), null, dbColRef.getName(), DbExtMetaInfo.TAG_COL_FOREIGNKEY, targetSqlTableName.getName());
+                                          if(createFkIdx){
+                                              dbColRef.setIndex(true);
+                                          }
+                                          String cmt=role.getDocumentation();
+                                          if(cmt!=null && cmt.length()>0){
+                                              dbColRef.setComment(cmt);                                    
+                                          }
+                                          customMapping.fixupEmbeddedLink(dbTable,dbColRef,roleOwner,role,targetSqlTableName,colT_ID);
+                                        dbTable.addColumn(dbColRef);
+                                        // handle ordered
+                                        if(role.getOppEnd().isOrdered()){
+                                              // add seqeunce attr
+                                              DbColId dbSeq=new DbColId();
+                                              dbSeq.setName(roleSqlName+"_"+DbNames.T_SEQ_COL);
+                                              dbSeq.setNotNull(notNull);
+                                              dbSeq.setPrimaryKey(false);
+                                              dbTable.addColumn(dbSeq);
+                                        }
+                                        
                                     }
-                                  customMapping.fixupEmbeddedLink(dbTable,dbColId,roleOwner,role,targetSqlTableName,colT_ID);
-                                  dbTable.addColumn(dbColId);
-                                  // handle ordered
-                                  if(role.getOppEnd().isOrdered()){
-                                        // add seqeunce attr
-                                        DbColId dbSeq=new DbColId();
-                                        dbSeq.setName(roleSqlName+"_"+DbNames.T_SEQ_COL);
-                                        dbSeq.setNotNull(notNull);
-                                        dbSeq.setPrimaryKey(false);
-                                        dbTable.addColumn(dbSeq);
-                                  }
-                                  
-                              }
+                                }
                             }
 						}else {
-                            ArrayList<ViewableWrapper> targetTables = getTargetTables(role.getDestination());
-                          for(ViewableWrapper targetTable : targetTables){
-                              dbColId=new DbColId();
-                              DbTableName targetSqlTableName=targetTable.getSqlTable();
-                              String roleSqlName=ili2sqlName.mapIliRoleDef(role,sqlName.getName(),targetSqlTableName.getName(),targetTables.size()>1);
-                              dbColId.setName(roleSqlName);
-                              boolean notNull=false;
-                              if(!sqlEnableNull){
-                                  if(targetTables.size()>1){
-                                      notNull=false; // multiple alternative FK columns
-                                  }else{
-                                      notNull=true;
+                            boolean isExtRef=createExtRef && role.isExternal();
+                            if(isExtRef) {
+                                DbColumn dbColRef=null;
+                                dbColRef=new DbColVarchar();
+                                ((DbColVarchar) dbColRef).setSize(255);
+                                String roleSqlName=ili2sqlName.mapIliRoleDef(role,sqlName.getName(),getSqlType(role.getDestination()).getName(),false);
+                                dbColRef.setName(roleSqlName);
+                                boolean notNull=false;
+                                if(!sqlEnableNull){
+                                   notNull=true;
+                                }
+                                dbColRef.setNotNull(notNull);
+                                dbColRef.setPrimaryKey(false);
+                                  if(createFkIdx){
+                                      dbColRef.setIndex(true);
                                   }
-                              }
-                              dbColId.setNotNull(notNull);
-                              dbColId.setPrimaryKey(false);
-                              if(createFk){
-                                  dbColId.setReferencedTable(targetSqlTableName);
-                              }
-                              metaInfo.setColumnInfo(dbTable.getName().getName(), null, dbColId.getName(), DbExtMetaInfo.TAG_COL_FOREIGNKEY, targetSqlTableName.getName());                                                          
-                                if(createFkIdx){
-                                    dbColId.setIndex(true);
+                                  String cmt=role.getDocumentation();
+                                  if(cmt!=null && cmt.length()>0){
+                                      dbColRef.setComment(cmt);                                    
+                                  }
+                                dbTable.addColumn(dbColRef);
+                                // 1:n association in an intermediate table
+                                // create an unique index to prevent n:n instances
+                                if(createFk) {
+                                    if(def.getViewable() instanceof AssociationDef && ((AssociationDef)def.getViewable()).isLightweight()) {
+                                        if(role.getCardinality().getMaximum()>1) {
+                                            DbIndex dbIndex=new DbIndex();
+                                            dbIndex.setPrimary(false);
+                                            dbIndex.setUnique(true);
+                                            dbIndex.addAttr(dbColRef);
+                                            dbTable.addIndex(dbIndex);
+                                        }
+                                    }
                                 }
-                                String cmt=role.getDocumentation();
-                                if(cmt!=null && cmt.length()>0){
-                                    dbColId.setComment(cmt);                                    
+                                // handle ordered
+                                if(role.isOrdered()){
+                                      // add sequence attr
+                                      DbColId dbSeq=new DbColId();
+                                      dbSeq.setName(roleSqlName+"_"+DbNames.T_SEQ_COL);
+                                      dbSeq.setNotNull(notNull);
+                                      dbSeq.setPrimaryKey(false);
+                                      dbTable.addColumn(dbSeq);
                                 }
-                              dbTable.addColumn(dbColId);
-                              // 1:n association in an intermediate table
-                              // create an unique index to prevent n:n instances
-                              if(createFk) {
-                                  if(def.getViewable() instanceof AssociationDef && ((AssociationDef)def.getViewable()).isLightweight()) {
-                                      if(role.getCardinality().getMaximum()>1) {
-                                          DbIndex dbIndex=new DbIndex();
-                                          dbIndex.setPrimary(false);
-                                          dbIndex.setUnique(true);
-                                          dbIndex.addAttr(dbColId);
-                                          dbTable.addIndex(dbIndex);
+                            }else {
+                                ArrayList<ViewableWrapper> targetTables=null;
+                                targetTables = getTargetTables(role.getDestination());
+                                for(ViewableWrapper targetTable : targetTables){
+                                    DbColumn dbColRef=null;
+                                    dbColRef=new DbColId();
+                                    DbTableName targetSqlTableName=targetTable.getSqlTable();
+                                    String roleSqlName=ili2sqlName.mapIliRoleDef(role,sqlName.getName(),targetSqlTableName.getName(),targetTables.size()>1);
+                                    dbColRef.setName(roleSqlName);
+                                    boolean notNull=false;
+                                    if(!sqlEnableNull){
+                                        if(targetTables.size()>1){
+                                            notNull=false; // multiple alternative FK columns
+                                        }else{
+                                            notNull=true;
+                                        }
+                                    }
+                                    dbColRef.setNotNull(notNull);
+                                    dbColRef.setPrimaryKey(false);
+                                    if(createFk){
+                                        dbColRef.setReferencedTable(targetSqlTableName);
+                                    }
+                                    metaInfo.setColumnInfo(dbTable.getName().getName(), null, dbColRef.getName(), DbExtMetaInfo.TAG_COL_FOREIGNKEY, targetSqlTableName.getName());                                                          
+                                      if(createFkIdx){
+                                          dbColRef.setIndex(true);
                                       }
-                                  }
-                              }
-                              // handle ordered
-                              if(role.isOrdered()){
-                                    // add sequence attr
-                                    DbColId dbSeq=new DbColId();
-                                    dbSeq.setName(roleSqlName+"_"+DbNames.T_SEQ_COL);
-                                    dbSeq.setNotNull(notNull);
-                                    dbSeq.setPrimaryKey(false);
-                                    dbTable.addColumn(dbSeq);
-                              }
-                          }
+                                      String cmt=role.getDocumentation();
+                                      if(cmt!=null && cmt.length()>0){
+                                          dbColRef.setComment(cmt);                                    
+                                      }
+                                    dbTable.addColumn(dbColRef);
+                                    // 1:n association in an intermediate table
+                                    // create an unique index to prevent n:n instances
+                                    if(createFk) {
+                                        if(def.getViewable() instanceof AssociationDef && ((AssociationDef)def.getViewable()).isLightweight()) {
+                                            if(role.getCardinality().getMaximum()>1) {
+                                                DbIndex dbIndex=new DbIndex();
+                                                dbIndex.setPrimary(false);
+                                                dbIndex.setUnique(true);
+                                                dbIndex.addAttr(dbColRef);
+                                                dbTable.addIndex(dbIndex);
+                                            }
+                                        }
+                                    }
+                                    // handle ordered
+                                    if(role.isOrdered()){
+                                          // add sequence attr
+                                          DbColId dbSeq=new DbColId();
+                                          dbSeq.setName(roleSqlName+"_"+DbNames.T_SEQ_COL);
+                                          dbSeq.setNotNull(notNull);
+                                          dbSeq.setPrimaryKey(false);
+                                          dbTable.addColumn(dbSeq);
+                                    }
+                                }
+                                
+                            }
 						}
 					}
 			  }
@@ -568,7 +659,11 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 
 		ArrayList<DbColumn> dbColExts=new ArrayList<DbColumn>();
 		Type type = attr.getDomainResolvingAll();
-		if(createSimpleDbCol(dbTable, aclass, attr, type, dbCol, unitDef, mText, dbColExts)) {
+
+		boolean result = mapAsTextCol(attr) ? createSimpleDbColTXT(dbTable, aclass, attr, type, dbCol, unitDef, mText, dbColExts)
+				: createSimpleDbCol(dbTable, aclass, attr, type, dbCol, unitDef, mText, dbColExts);
+		if(result) {
+
 		}else if (type instanceof SurfaceOrAreaType){
 			if(createItfLineTables){
 				dbCol.value=null;
@@ -614,27 +709,47 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 			ret.setDimension(coord.getDimensions().length);
 			setBB(ret, coord,attr.getContainer().getScopedName(null)+"."+attr.getName());
 			dbCol.value=ret;
+		} else if (type instanceof MultiCoordType) {
+			DbColGeometry ret = new DbColGeometry();
+			ret.setType(DbColGeometry.MULTIPOINT);
+			setCrs(ret,epsgCode);
+			MultiCoordType coord = (MultiCoordType) type;
+			ret.setDimension(coord.getDimensions().length);
+			setBB(ret, coord,attr.getContainer().getScopedName(null) + "." + attr.getName());
+			dbCol.value = ret;
 		}else if (type instanceof CompositionType){
 			// skip it
 			if(!createGenericStructRef){
 				if(isChbaseCatalogueRef(td, attr) && (coalesceCatalogueRef 
 						|| TrafoConfigNames.CATALOGUE_REF_TRAFO_COALESCE.equals(trafoConfig.getAttrConfig(attr,TrafoConfigNames.CATALOGUE_REF_TRAFO)))){
-                    ArrayList<ViewableWrapper> targetTables = getTargetTables(getCatalogueRefTarget(type));
-                    for(ViewableWrapper targetTable:targetTables)
-                    {
-                        DbColId ret=new DbColId();
-                        ret.setName(ili2sqlName.mapIliAttributeDef(attr,dbTable.getName().getName(),targetTable.getSqlTablename(),targetTables.size()>1));
+				    if(createExtRef) {
+                        DbColVarchar ret=new DbColVarchar();
+                        ret.setSize(255);
+                        ret.setName(ili2sqlName.mapIliAttributeDef(attr,dbTable.getName().getName(),getSqlType(getCatalogueRefTarget(type)).getName(),false));
                         ret.setNotNull(false);
                         ret.setPrimaryKey(false);
-                        if(createFk){
-                            ret.setReferencedTable(targetTable.getSqlTable());
-                        }
-                        metaInfo.setColumnInfo(dbTable.getName().getName(), null, ret.getName(), DbExtMetaInfo.TAG_COL_FOREIGNKEY, targetTable.getSqlTablename());
                         if(createFkIdx){
                             ret.setIndex(true);
                         }
                         dbColExts.add(ret);
-                    }
+				    }else {
+	                    ArrayList<ViewableWrapper> targetTables = getTargetTables(getCatalogueRefTarget(type));
+	                    for(ViewableWrapper targetTable:targetTables)
+	                    {
+	                        DbColId ret=new DbColId();
+	                        ret.setName(ili2sqlName.mapIliAttributeDef(attr,dbTable.getName().getName(),targetTable.getSqlTablename(),targetTables.size()>1));
+	                        ret.setNotNull(false);
+	                        ret.setPrimaryKey(false);
+	                        if(createFk){
+	                            ret.setReferencedTable(targetTable.getSqlTable());
+	                        }
+	                        metaInfo.setColumnInfo(dbTable.getName().getName(), null, ret.getName(), DbExtMetaInfo.TAG_COL_FOREIGNKEY, targetTable.getSqlTablename());
+	                        if(createFkIdx){
+	                            ret.setIndex(true);
+	                        }
+	                        dbColExts.add(ret);
+	                    }
+				    }
                     trafoConfig.setAttrConfig(attr, TrafoConfigNames.CATALOGUE_REF_TRAFO,TrafoConfigNames.CATALOGUE_REF_TRAFO_COALESCE);
 				}else if(Ili2cUtility.isMultiSurfaceAttr(td, attr) && (coalesceMultiSurface 
 						|| TrafoConfigNames.MULTISURFACE_TRAFO_COALESCE.equals(trafoConfig.getAttrConfig(attr,TrafoConfigNames.MULTISURFACE_TRAFO)))){
@@ -742,21 +857,31 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 				dbCol.value=null;
 			}
 		}else if (type instanceof ReferenceType){
-			ArrayList<ViewableWrapper> targetTables = getTargetTables(((ReferenceType)type).getReferred());
-			for(ViewableWrapper targetTable:targetTables)
-			{
-				DbColId ret=new DbColId();
-				ret.setName(ili2sqlName.mapIliAttributeDef(attr,dbTable.getName().getName(),targetTable.getSqlTablename(),targetTables.size()>1));
-				ret.setNotNull(false);
-				ret.setPrimaryKey(false);
-				if(createFk){
-					ret.setReferencedTable(targetTable.getSqlTable());
-				}
-				if(createFkIdx){
-					ret.setIndex(true);
-				}
-				dbColExts.add(ret);
-			}
+            if(createExtRef && ((ReferenceType)type).isExternal()) {
+                DbColVarchar ret=new DbColVarchar();
+                ret.setName(ili2sqlName.mapIliAttributeDef(attr,dbTable.getName().getName(),getSqlType(((ReferenceType)type).getReferred()).getName(),false));
+                ret.setSize(255);
+                if(createFkIdx){
+                    ret.setIndex(true);
+                }
+                dbColExts.add(ret);
+            }else {
+                ArrayList<ViewableWrapper> targetTables = getTargetTables(((ReferenceType)type).getReferred());
+                for(ViewableWrapper targetTable:targetTables)
+                {
+                    DbColId ret=new DbColId();
+                    ret.setName(ili2sqlName.mapIliAttributeDef(attr,dbTable.getName().getName(),targetTable.getSqlTablename(),targetTables.size()>1));
+                    ret.setNotNull(false);
+                    ret.setPrimaryKey(false);
+                    if(createFk){
+                        ret.setReferencedTable(targetTable.getSqlTable());
+                    }
+                    if(createFkIdx){
+                        ret.setIndex(true);
+                    }
+                    dbColExts.add(ret);
+                }
+            }
 		}else{
 			DbColVarchar ret=new DbColVarchar();
 			ret.setSize(255);
@@ -883,6 +1008,14 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 			default:
 				throw new IllegalArgumentException();
 		 }
+	}
+
+	private boolean createSimpleDbColTXT(DbTable dbTable, Viewable aclass, AttributeDef attr, Type type,
+										 OutParam<DbColumn> dbCol, OutParam<Unit> unitDef, OutParam<Boolean> mText, ArrayList<DbColumn> dbColExts) {
+		DbColVarchar ret = new DbColVarchar();
+		ret.setSize(DbColVarchar.UNLIMITED);
+		dbCol.value = ret;
+		return true;
 	}
 
 	private boolean createSimpleDbCol(DbTable dbTable, Viewable aclass, AttributeDef attr, Type type,

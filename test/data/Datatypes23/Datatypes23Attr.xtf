@@ -43,6 +43,9 @@ end201</mtextUnlimited>
 				<aClass>DM01AVCH24D.FixpunkteKategorie1.LFP1</aClass>
 				<aAttribute>Grunddatensatz.Fixpunkte.LFP.Nummer</aAttribute>
 			</Datatypes23.Topic.ClassAttr>
+			<Datatypes23.Topic.ClassAttr TID="ClassAttr.2">
+				<textUnlimited>textNull</textUnlimited>
+			</Datatypes23.Topic.ClassAttr>
 		</Datatypes23.Topic>
 	</DATASECTION>
 </TRANSFER>

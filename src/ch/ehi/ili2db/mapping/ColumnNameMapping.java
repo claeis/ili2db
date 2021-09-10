@@ -7,6 +7,7 @@ import ch.ehi.basics.logging.EhiLogger;
 import ch.ehi.ili2db.base.DbNames;
 import ch.ehi.ili2db.base.Ili2db;
 import ch.ehi.ili2db.base.Ili2dbException;
+import ch.ehi.ili2db.base.StatementExecutionHelper;
 import ch.ehi.sqlgen.generator_impl.jdbc.GeneratorJdbc;
 
 public class ColumnNameMapping {
@@ -15,9 +16,15 @@ public class ColumnNameMapping {
 	 */
 	private HashMap<AttrMappingKey,String> attrNameIli2sql=new HashMap<AttrMappingKey,String>();
 	private HashMap<String,HashSet<String>> tables=new HashMap<String,HashSet<String>>();
+	private Integer batchSize = null;
 
 	public ColumnNameMapping() {
 	}
+
+	public ColumnNameMapping(Integer batchSize) {
+		this.batchSize = batchSize;
+	}
+
 	public void addAttrNameMapping(String iliname,String sqlname,String ownerSqlTablename,String targetSqlTablename)
 	{
 		if(ownerSqlTablename==null){
@@ -100,7 +107,9 @@ public class ColumnNameMapping {
 	            EhiLogger.traceBackendCmd(stmt);
 	            java.sql.PreparedStatement ps = conn.prepareStatement(stmt);
 	            AttrMappingKey entry1=null;
+				StatementExecutionHelper seHelper = new StatementExecutionHelper(batchSize);
 	            try{
+					long start = System.currentTimeMillis();
 	                for(AttrMappingKey entry:attrNameIli2sql.keySet()){
 	                    if(!exstEntries.contains(entry)){
 	                        entry1=entry;
@@ -109,9 +118,12 @@ public class ColumnNameMapping {
 	                        ps.setString(2, sqlname);
 	                        ps.setString(3, entry.getOwner());
 	                        ps.setString(4, entry.getTarget());
-	                        ps.executeUpdate();
+	                        seHelper.write(ps);
 	                    }
+
 	                }
+
+	                seHelper.flush(ps);
 	            }catch(java.sql.SQLException ex){
 	                throw new Ili2dbException("failed to insert attrname-mapping "+entry1,ex);
 	            }finally{

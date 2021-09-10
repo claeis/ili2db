@@ -117,6 +117,7 @@ public class TransferFromXtf {
 	private String dbusr=null;
 	private SqlColumnConverter geomConv=null;
 	private boolean createStdCols=false;
+	private boolean createSqlExtRef=false;
 	private boolean createGenericStructRef=false;
 	private boolean readIliTid=false;
     private boolean readIliBid=false;
@@ -187,6 +188,7 @@ public class TransferFromXtf {
 		if(createItfLineTables){
 			config.setValue(ch.interlis.iox_j.validator.Validator.CONFIG_DO_ITF_LINETABLES, ch.interlis.iox_j.validator.Validator.CONFIG_DO_ITF_LINETABLES_DO);
 		}
+		createSqlExtRef=Config.SQL_EXTREF_ENABLE.equals(config.getSqlExtRefCols());
 		createImportTabs=config.isCreateImportTabs();
 		xtffilename=config.getXtffile();
 		functionCode=function;
@@ -1208,14 +1210,14 @@ public class TransferFromXtf {
 	 	if(tid!=null && tid.length()>0){
 			oidPool.createObjSqlId(Ili2cUtility.getRootViewable(getCrsMappedOrSame((Viewable) modelele)).getScopedName(null),tag,tid);
 	 	}
-		FixIomObjectExtRefs extref=new FixIomObjectExtRefs(basketSqlId,genericDomains,tag,tid);
-		allReferencesKnownHelper(iomObj, extref);
-		if(!extref.needsFixing()){
-			return true;
-		}
-		//EhiLogger.debug("needs fixing "+iomObj.getobjectoid());
-		delayedObjects.add(extref);
-		objPool.put(tid,iomObj);
+        objPool.put(tid,iomObj);
+        FixIomObjectExtRefs extref=new FixIomObjectExtRefs(basketSqlId,genericDomains,tag,tid);
+        allReferencesKnownHelper(iomObj, extref);
+        if(!extref.needsFixing()){
+            return true;
+        }
+        //EhiLogger.debug("needs fixing "+iomObj.getobjectoid());
+        delayedObjects.add(extref);
 		return false;
 	}
 
@@ -1286,7 +1288,9 @@ public class TransferFromXtf {
 										String refoid=structvalue.getobjectrefoid();
 										Viewable targetClass=role.getDestination();
 										if(!oidPool.containsXtfid(Ili2cUtility.getRootViewable(getCrsMappedOrSame(targetClass)).getScopedName(null),refoid)){
-											extref.addFix(structvalue, targetClass,role.isExternal());
+										    if(!createSqlExtRef || !role.isExternal()) {
+	                                            extref.addFix(structvalue, targetClass,role.isExternal());
+										    }
 										}
 									}
 								}
@@ -1295,7 +1299,9 @@ public class TransferFromXtf {
 								 String refoid=structvalue.getobjectrefoid();
 									Viewable targetClass=role.getDestination();
 								if(!oidPool.containsXtfid(Ili2cUtility.getRootViewable(getCrsMappedOrSame(targetClass)).getScopedName(null),refoid)){
-									extref.addFix(structvalue, targetClass,role.isExternal());
+                                    if(!createSqlExtRef || !role.isExternal()) {
+                                        extref.addFix(structvalue, targetClass,role.isExternal());
+                                    }
 								}
 								
 							 }
@@ -1336,7 +1342,9 @@ public class TransferFromXtf {
 					 	ReferenceType refType = (ReferenceType)type;
                         Viewable targetClass=refType.getReferred(); 
 						if(!oidPool.containsXtfid(Ili2cUtility.getRootViewable(getCrsMappedOrSame(targetClass)).getScopedName(null),refoid)){
-							extref.addFix(structvalue, targetClass,refType.isExternal());
+                            if(!createSqlExtRef || !refType.isExternal()) {
+                                extref.addFix(structvalue, targetClass,refType.isExternal());
+                            }
 						}
 				 }
 			}else{

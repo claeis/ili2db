@@ -573,6 +573,8 @@ public class Datatypes23Test {
 				String attr=iomObj.getattrvalue("aAttribute");
 				assertEquals("Grunddatensatz.Fixpunkte.LFP.Nummer",attr);
 			}
+            event=reader.read();
+            assertTrue(event instanceof ObjectEvent);
 			assertTrue(reader.read() instanceof EndBasketEvent);
 			assertTrue(reader.read() instanceof EndTransferEvent);
 		}
