@@ -24,8 +24,8 @@ LATEST
 - remove duplicate ReduceToBaseModel (duplicate in iox-ili) (#405)
 - ili-cache: set ILI_CACHE_FILENAME=MD5 to use short filenames in $HOME/.ilicache (#420)
 - new option --sqlExtRefCols to map EXTERNAL references as t_ili_tid FK (#283)
-- iox-ili-1.21.7-SNAPSHOT
-- ili2c-5.2.3-SNAPSHOT
+- iox-ili-1.21.7
+- ili2c-5.2.3
 
 ili2db 4.5.0 (2021-03-12)
 ------------------------------
