@@ -56,6 +56,7 @@ import ch.ehi.sqlgen.repository.DbIndex;
 import ch.ehi.sqlgen.repository.DbSchema;
 import ch.ehi.sqlgen.repository.DbTable;
 import ch.ehi.sqlgen.repository.DbTableName;
+import ch.interlis.ili2c.metamodel.AbstractCoordType;
 import ch.interlis.ili2c.metamodel.AssociationDef;
 import ch.interlis.ili2c.metamodel.AttributeDef;
 import ch.interlis.ili2c.metamodel.AttributeRef;
@@ -1795,13 +1796,13 @@ public class TransferFromIli {
         if(attrType instanceof ch.interlis.ili2c.metamodel.TypeAlias) {
             attrOrDomainDef=((ch.interlis.ili2c.metamodel.TypeAlias)attrType).getAliasing();
             attrType=((Domain) attrOrDomainDef).getType();
-            if(attrType instanceof CoordType) {
+            if(attrType instanceof AbstractCoordType) {
                 coordDomain=(Domain) attrOrDomainDef;
             }
         }
-        CoordType coord=null;
-        if(attrType instanceof CoordType) {
-            coord=(CoordType)attrType;
+        AbstractCoordType coord=null;
+        if(attrType instanceof AbstractCoordType) {
+            coord=(AbstractCoordType)attrType;
         }else if(attrType instanceof LineType) {
             coordDomain=((LineType)attrType).getControlPointDomain();
             if(coordDomain!=null){
@@ -1816,7 +1817,7 @@ public class TransferFromIli {
             Domain concreteCoordDomains[]=((Model) attr.getContainer(Model.class)).resolveGenericDomain(coordDomain);
             HashSet<Integer> codes=new HashSet<Integer>();
             for(Domain concreteCoordDomain: concreteCoordDomains) {
-                String crs=((CoordType)concreteCoordDomain.getType()).getCrs(concreteCoordDomain);
+                String crs=((AbstractCoordType)concreteCoordDomain.getType()).getCrs(concreteCoordDomain);
                 if(crs!=null) {
                     codes.add(parseEpsgCode(crs));
                 }
@@ -1835,17 +1836,17 @@ public class TransferFromIli {
                 Map<ch.interlis.ili2c.metamodel.Element,ch.interlis.ili2c.metamodel.Element> srsMapping=getSrsMappingToAlternate((TransferDescription)attrOrDomainDef.getContainer(TransferDescription.class),srsModelAssignment);
                 ch.interlis.ili2c.metamodel.Element alternativeAttrOrDomainDef=srsMapping.get(attrOrDomainDef);
                 if(alternativeAttrOrDomainDef!=null) {
-                    CoordType alternativeCoord=null;
+                    AbstractCoordType alternativeCoord = null;
                     if(alternativeAttrOrDomainDef instanceof AttributeDef) {
                         Type attrType2=((AttributeDef)alternativeAttrOrDomainDef).getDomain();
                         if(attrType2 instanceof ch.interlis.ili2c.metamodel.TypeAlias) {
                             alternativeAttrOrDomainDef=((ch.interlis.ili2c.metamodel.TypeAlias)attrType2).getAliasing();
-                            alternativeCoord=(CoordType)((Domain)alternativeAttrOrDomainDef).getType();
+                            alternativeCoord = (AbstractCoordType)((Domain)alternativeAttrOrDomainDef).getType();
                         }else {
-                            alternativeCoord=(CoordType) attrType2;
+                            alternativeCoord = (AbstractCoordType) attrType2;
                         }
                     }else {
-                        alternativeCoord=(CoordType) ((Domain)alternativeAttrOrDomainDef).getType();
+                        alternativeCoord = (AbstractCoordType) ((Domain)alternativeAttrOrDomainDef).getType();
                     }
                     String alternativeCrs=alternativeCoord.getCrs(alternativeAttrOrDomainDef);
                     if(alternativeCrs==null) {
@@ -1966,9 +1967,9 @@ public class TransferFromIli {
                 coordDomain=(Domain) attrOrDomainDef;
             }
         }
-        CoordType coord=null;
-        if(attrType instanceof CoordType) {
-            coord=(CoordType)attrType;
+        AbstractCoordType coord=null;
+        if(attrType instanceof AbstractCoordType) {
+            coord=(AbstractCoordType)attrType;
         }else if(attrType instanceof LineType) {
             coordDomain=((LineType)attrType).getControlPointDomain();
             if(coordDomain!=null){
@@ -1981,7 +1982,7 @@ public class TransferFromIli {
         }
         if(coord.isGeneric()) {
             Domain concreteCoordDomain=((Model) attr.getContainer(Model.class)).mapGenericDomain(coordDomain,genericDomains);
-            String crs=((CoordType)concreteCoordDomain.getType()).getCrs(concreteCoordDomain);
+            String crs=((AbstractCoordType)concreteCoordDomain.getType()).getCrs(concreteCoordDomain);
             if(crs==null) {
                 
             }

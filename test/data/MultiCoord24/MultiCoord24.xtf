@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ili:transfer xmlns:ili="http://www.interlis.ch/xtf/2.4/INTERLIS" xmlns:geom="http://www.interlis.ch/geometry/1.0"
+              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+              xmlns:MultiCoord24="http://www.interlis.ch/xtf/2.4/MultiCoord24">
+    <ili:headersection>
+        <ili:models>
+            <ili:model>MultiCoord24</ili:model>
+        </ili:models>
+        <ili:sender>ili2gpkg-4.5.1-SNAPSHOT-34a149ef943889acc815bc9c3ffdb39f6e4918d3</ili:sender>
+    </ili:headersection>
+    <ili:datasection>
+        <MultiCoord24:TestA ili:bid="MultiCoord24.TestA">
+            <MultiCoord24:ClassA1 ili:tid="1">
+                <MultiCoord24:geomAttr1>
+                    <geom:multicoord>
+                        <geom:coord>
+                            <geom:c1>2530001</geom:c1>
+                            <geom:c2>1150002</geom:c2>
+                        </geom:coord>
+                        <geom:coord>
+                            <geom:c1>2740003</geom:c1>
+                            <geom:c2>1260004</geom:c2>
+                        </geom:coord>
+                    </geom:multicoord>
+                </MultiCoord24:geomAttr1>
+            </MultiCoord24:ClassA1>
+        </MultiCoord24:TestA>
+    </ili:datasection>
+</ili:transfer>
