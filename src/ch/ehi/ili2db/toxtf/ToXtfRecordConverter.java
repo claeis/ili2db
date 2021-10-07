@@ -41,6 +41,7 @@ import ch.interlis.ili2c.metamodel.CompositionType;
 import ch.interlis.ili2c.metamodel.CoordType;
 import ch.interlis.ili2c.metamodel.EnumerationType;
 import ch.interlis.ili2c.metamodel.MultiCoordType;
+import ch.interlis.ili2c.metamodel.MultiPolylineType;
 import ch.interlis.ili2c.metamodel.ObjectType;
 import ch.interlis.ili2c.metamodel.PolylineType;
 import ch.interlis.ili2c.metamodel.ReferenceType;
@@ -331,10 +332,14 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
                     sep=",";
                     ret.append(makeColumnRef(tableAlias,attrSqlName+DbNames.LOCALISED_TXT_COL_SUFFIX));
 				}
-			}else if (type instanceof PolylineType){
-				 ret.append(sep);
-				 sep=",";
-				 ret.append(geomConv.getSelectValueWrapperPolyline(makeColumnRef(tableAlias,attrSqlName)));
+			}else if (type instanceof PolylineType) {
+				ret.append(sep);
+				sep = ",";
+				ret.append(geomConv.getSelectValueWrapperPolyline(makeColumnRef(tableAlias, attrSqlName)));
+			}else if (type instanceof MultiPolylineType){
+				ret.append(sep);
+				sep=",";
+				ret.append(geomConv.getSelectValueWrapperMultiPolyline(makeColumnRef(tableAlias,attrSqlName)));
 			 }else if(type instanceof SurfaceOrAreaType){
 				 if(createItfLineTables){
 				 }else{
@@ -968,6 +973,26 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 	                        }   
 	                    }
 	                }
+				}else if (type instanceof MultiPolylineType){
+					if(classAttr==null) {
+						valuei++;
+					}else {
+						Object geomobj=rs.getObject(valuei);
+						valuei++;
+						if(!rs.wasNull()){
+							try{
+								boolean is3D=((CoordType)((MultiPolylineType)type).getControlPointDomain().getType()).getDimensions().length==3;
+								IomObject multipolyline=geomConv.toIomMultiPolyline(geomobj,sqlAttrName,is3D);
+								if(multipolyline==null) {
+									// EMPTY
+								}else {
+									iomObj.addattrobj(attrName,multipolyline);
+								}
+							}catch(ConverterException ex){
+								EhiLogger.logError("Object "+sqlid+": failed to convert polyline",ex);
+							}
+						}
+					}
 				 }else if(type instanceof SurfaceOrAreaType){
 					 if(createItfLineTables){
 					 }else{
