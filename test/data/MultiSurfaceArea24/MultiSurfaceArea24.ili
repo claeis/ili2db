@@ -1,0 +1,24 @@
+INTERLIS 2.4;
+
+MODEL MultiSurfaceArea24
+    AT "mailto:noreply@localhost" VERSION "2021-09-07" =
+
+    DOMAIN
+        !!@CRS=EPSG:2056
+        Hkoord = COORD 480000.000 .. 850000.000 [INTERLIS.m],
+                        70000.000 .. 310000.000 [INTERLIS.m],
+                              0.000 .. 5000.000 [INTERLIS.m];
+
+    TOPIC TestA =
+
+        CLASS ClassA1 =
+            geomAttr1 : MULTISURFACE WITH (STRAIGHTS,ARCS) VERTEX Hkoord WITHOUT OVERLAPS > 0.001;
+        END ClassA1;
+
+        CLASS ClassA2 =
+            geomAttr1 : MULTIAREA WITH (STRAIGHTS,ARCS) VERTEX Hkoord WITHOUT OVERLAPS > 0.001;
+        END ClassA2;
+
+    END TestA;
+
+END MultiSurfaceArea24.
