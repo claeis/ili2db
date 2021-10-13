@@ -51,6 +51,7 @@ import ch.ehi.sqlgen.repository.DbSchema;
 import ch.ehi.sqlgen.repository.DbTable;
 import ch.ehi.sqlgen.repository.DbTableName;
 import ch.interlis.ili2c.metamodel.AreaType;
+import ch.interlis.ili2c.metamodel.AbstractSurfaceOrAreaType;
 import ch.interlis.ili2c.metamodel.AssociationDef;
 import ch.interlis.ili2c.metamodel.AttributeDef;
 import ch.interlis.ili2c.metamodel.AttributeRef;
@@ -65,7 +66,9 @@ import ch.interlis.ili2c.metamodel.ExtendableContainer;
 import ch.interlis.ili2c.metamodel.FormattedType;
 import ch.interlis.ili2c.metamodel.LineType;
 import ch.interlis.ili2c.metamodel.LocalAttribute;
+import ch.interlis.ili2c.metamodel.MultiAreaType;
 import ch.interlis.ili2c.metamodel.MultiCoordType;
+import ch.interlis.ili2c.metamodel.MultiSurfaceOrAreaType;
 import ch.interlis.ili2c.metamodel.NumericType;
 import ch.interlis.ili2c.metamodel.ObjectPath;
 import ch.interlis.ili2c.metamodel.ObjectType;
@@ -664,7 +667,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 				: createSimpleDbCol(dbTable, aclass, attr, type, dbCol, unitDef, mText, dbColExts);
 		if(result) {
 
-		}else if (type instanceof SurfaceOrAreaType){
+		}else if (type instanceof AbstractSurfaceOrAreaType){
 			if(createItfLineTables){
 				dbCol.value=null;
 			}else{
@@ -673,7 +676,11 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 				if(!strokeArcs){
 					curvePolygon=true;
 				}
-				ret.setType(curvePolygon ? DbColGeometry.CURVEPOLYGON : DbColGeometry.POLYGON);
+                if (type instanceof SurfaceOrAreaType){
+                    ret.setType(curvePolygon ? DbColGeometry.CURVEPOLYGON : DbColGeometry.POLYGON);
+                } else if (type instanceof  MultiSurfaceOrAreaType){
+                    ret.setType(curvePolygon ? DbColGeometry.MULTISURFACE : DbColGeometry.MULTIPOLYGON);
+                }
 				// get crs from ili
 				setCrs(ret,epsgCode);
 				CoordType coord=(CoordType)((SurfaceOrAreaType)type).getControlPointDomain().getType();
@@ -682,7 +689,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 				dbCol.value=ret;
 			}
 			if(createItfAreaRef){
-				if(type instanceof AreaType){
+				if(type instanceof AreaType || type instanceof MultiAreaType){
 					DbColGeometry ret=new DbColGeometry();
 					String sqlName=getSqlAttrName(attr,epsgCode,dbTable.getName().getName(),null)+DbNames.ITF_MAINTABLE_GEOTABLEREF_COL_SUFFIX;
 					ret.setName(sqlName);

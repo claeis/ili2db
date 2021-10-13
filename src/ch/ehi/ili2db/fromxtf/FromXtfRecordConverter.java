@@ -35,6 +35,7 @@ import ch.ehi.ili2db.mapping.Viewable2TableMapping;
 import ch.ehi.ili2db.mapping.ViewableWrapper;
 import ch.ehi.sqlgen.repository.DbTableName;
 import ch.interlis.ili2c.metamodel.AbstractClassDef;
+import ch.interlis.ili2c.metamodel.AbstractSurfaceOrAreaType;
 import ch.interlis.ili2c.metamodel.AreaType;
 import ch.interlis.ili2c.metamodel.AssociationDef;
 import ch.interlis.ili2c.metamodel.AttributeDef;
@@ -44,6 +45,7 @@ import ch.interlis.ili2c.metamodel.CoordType;
 import ch.interlis.ili2c.metamodel.Domain;
 import ch.interlis.ili2c.metamodel.EnumerationType;
 import ch.interlis.ili2c.metamodel.LineType;
+import ch.interlis.ili2c.metamodel.MultiAreaType;
 import ch.interlis.ili2c.metamodel.MultiCoordType;
 import ch.interlis.ili2c.metamodel.NumericType;
 import ch.interlis.ili2c.metamodel.NumericalType;
@@ -789,7 +791,7 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 						values.append(","+geomConv.getInsertValueWrapperPolyline("?",epsgCode));
 					}
 					sep=",";
-			 }else if(type instanceof SurfaceOrAreaType){
+			 }else if(type instanceof AbstractSurfaceOrAreaType){
 				 if(createItfLineTables){
 				 }else{
 					 ret.append(sep);
@@ -802,7 +804,7 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 						sep=",";
 				 }
 				 if(createItfAreaRef){
-					 if(type instanceof AreaType){
+					 if(type instanceof AreaType || type instanceof  MultiAreaType){
 						 ret.append(sep);
 						 ret.append(attrSqlName+DbNames.ITF_MAINTABLE_GEOTABLEREF_COL_SUFFIX);
 							if(isUpdate){
@@ -1189,13 +1191,13 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 						geomConv.setPolylineNull(ps,valuei);
 					 }
 					 valuei++;
-				 }else if(type instanceof SurfaceOrAreaType){
+				 }else if(type instanceof AbstractSurfaceOrAreaType){
 					 if(createItfLineTables){
 					 }else{
 						 IomObject value= classAttr==null ? null : iomObj.getattrobj(attrName,0);
 						 if(value!=null){
-								boolean is3D=((CoordType)((SurfaceOrAreaType)type).getControlPointDomain().getType()).getDimensions().length==3;
-							 Object geomObj = geomConv.fromIomSurface(value,epsgCode,((SurfaceOrAreaType)type).getLineAttributeStructure()!=null,is3D,getP((SurfaceOrAreaType)type));
+								boolean is3D=((CoordType)((AbstractSurfaceOrAreaType)type).getControlPointDomain().getType()).getDimensions().length==3;
+							 Object geomObj = geomConv.fromIomSurface(value,epsgCode,((AbstractSurfaceOrAreaType)type).getLineAttributeStructure()!=null,is3D,getP((SurfaceOrAreaType)type));
 							ps.setObject(valuei,geomObj);
 						 }else{
 							geomConv.setSurfaceNull(ps,valuei);
@@ -1203,7 +1205,7 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 						 valuei++;
 					 }
 					 if(createItfAreaRef){
-						 if(type instanceof AreaType){
+						 if(type instanceof AreaType || type instanceof MultiAreaType){
 							 IomObject value=null;
 							 if(isItfReader){
 								 value= classAttr==null ? null : iomObj.getattrobj(attrName,0);
@@ -1211,7 +1213,7 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 								 value= classAttr==null ? null : iomObj.getattrobj(ItfReader2.SAVED_GEOREF_PREFIX+attrName,0);
 							 }
 							 if(value!=null){
-								boolean is3D=((CoordType)((SurfaceOrAreaType)type).getControlPointDomain().getType()).getDimensions().length==3;
+								boolean is3D=((CoordType)((AbstractSurfaceOrAreaType)type).getControlPointDomain().getType()).getDimensions().length==3;
 								ps.setObject(valuei,geomConv.fromIomCoord(value,epsgCode,is3D));
 							 }else{
 								geomConv.setCoordNull(ps,valuei);
