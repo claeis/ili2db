@@ -683,7 +683,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
                 }
 				// get crs from ili
 				setCrs(ret,epsgCode);
-				CoordType coord=(CoordType)((SurfaceOrAreaType)type).getControlPointDomain().getType();
+				CoordType coord=(CoordType)((AbstractSurfaceOrAreaType)type).getControlPointDomain().getType();
 				ret.setDimension(coord.getDimensions().length);
 				setBB(ret, coord,attr.getContainer().getScopedName(null)+"."+attr.getName());
 				dbCol.value=ret;
@@ -698,7 +698,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 					// get crs from ili
 					setCrs(ret,epsgCode);
 					ret.setDimension(2); // always 2 (even if defined as 3d in ili)
-					CoordType coord=(CoordType)((SurfaceOrAreaType)type).getControlPointDomain().getType();
+					CoordType coord=(CoordType)((AbstractSurfaceOrAreaType)type).getControlPointDomain().getType();
 					setBB(ret, coord,attr.getContainer().getScopedName(null)+"."+attr.getName());
 					dbColExts.add(ret);
 				}

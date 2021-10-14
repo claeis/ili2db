@@ -47,6 +47,7 @@ import ch.interlis.ili2c.metamodel.EnumerationType;
 import ch.interlis.ili2c.metamodel.LineType;
 import ch.interlis.ili2c.metamodel.MultiAreaType;
 import ch.interlis.ili2c.metamodel.MultiCoordType;
+import ch.interlis.ili2c.metamodel.MultiSurfaceOrAreaType;
 import ch.interlis.ili2c.metamodel.NumericType;
 import ch.interlis.ili2c.metamodel.NumericalType;
 import ch.interlis.ili2c.metamodel.ObjectType;
@@ -1196,9 +1197,14 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 					 }else{
 						 IomObject value= classAttr==null ? null : iomObj.getattrobj(attrName,0);
 						 if(value!=null){
-								boolean is3D=((CoordType)((AbstractSurfaceOrAreaType)type).getControlPointDomain().getType()).getDimensions().length==3;
-							 Object geomObj = geomConv.fromIomSurface(value,epsgCode,((AbstractSurfaceOrAreaType)type).getLineAttributeStructure()!=null,is3D,getP((SurfaceOrAreaType)type));
-							ps.setObject(valuei,geomObj);
+							 boolean is3D=((CoordType)((AbstractSurfaceOrAreaType)type).getControlPointDomain().getType()).getDimensions().length==3;
+							 if(type instanceof SurfaceOrAreaType){
+								 Object geomObj = geomConv.fromIomSurface(value,epsgCode,((SurfaceOrAreaType)type).getLineAttributeStructure()!=null,is3D,getP((SurfaceOrAreaType)type));
+								 ps.setObject(valuei,geomObj);
+							 } else if (type instanceof MultiSurfaceOrAreaType) {
+								 Object geomObj = geomConv.fromIomMultiSurface(value,epsgCode,((MultiSurfaceOrAreaType)type).getLineAttributeStructure()!=null,is3D,getP((MultiSurfaceOrAreaType)type));
+								ps.setObject(valuei,geomObj);
+							 }
 						 }else{
 							geomConv.setSurfaceNull(ps,valuei);
 						 }

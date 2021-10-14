@@ -141,8 +141,8 @@ public abstract class MultiSurfaceArea24Test {
             {
                 // t_ili2db_trafo
                 String[][] expectedValues = new String[][]{
-                        {"MultiCoord24.TestA.ClassA1", "ch.ehi.ili2db.inheritance", "newClass"},
-                        {"MultiCoord24.TestA.ClassA2", "ch.ehi.ili2db.inheritance", "newClass"},
+                        {"MultiSurfaceArea24.TestA.ClassA1", "ch.ehi.ili2db.inheritance", "newClass"},
+                        {"MultiSurfaceArea24.TestA.ClassA2", "ch.ehi.ili2db.inheritance", "newClass"},
                 };
                 Ili2dbAssert.assertTrafoTable(jdbcConnection, expectedValues, setup.getSchema());
             }
