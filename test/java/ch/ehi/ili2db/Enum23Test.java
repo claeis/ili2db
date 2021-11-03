@@ -2,8 +2,10 @@ package ch.ehi.ili2db;
 
 import java.io.File;
 import java.sql.Connection;
+import java.sql.ResultSet;
 import java.sql.Statement;
 
+import org.junit.Assert;
 import org.junit.Test;
 
 import ch.ehi.ili2db.base.Ili2db;
@@ -15,16 +17,16 @@ public abstract class Enum23Test {
     protected AbstractTestSetup setup=createTestSetup();
     protected abstract AbstractTestSetup createTestSetup() ;
 
-    Statement stmt=null;
     @Test
     public void createScriptFromIliFkTable() throws Exception
     {
         Connection jdbcConnection=null;
         try{
+            setup.resetDb();
             File data=new File(TEST_OUT,"Enum23b.ili");
             File outfile=new File(data.getPath()+"-out.sql");
             Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
-            config.setFunction(Config.FC_SCRIPT);
+            config.setFunction(Config.FC_SCHEMAIMPORT);
             config.setCreateFk(Config.CREATE_FK_YES);
             config.setCreateNumChecks(true);
             config.setTidHandling(Config.TID_HANDLING_PROPERTY);
@@ -47,6 +49,23 @@ public abstract class Enum23Test {
                 DbUtility.executeSqlScript(jdbcConnection, new java.io.FileReader(outfile));
 
                 jdbcConnection.commit();
+                {
+                    Statement stmt=null;
+                    String stmtTxt="select count(*) from "+setup.prefixName("enum1")+" where iliCode='Test1' and thisClass='Enum23b.Enum1' and baseClass is NULL";
+                    try{
+                        stmt=jdbcConnection.createStatement();
+                         Assert.assertTrue(stmt.execute(stmtTxt));
+                         ResultSet rs=stmt.getResultSet();
+                         {
+                             Assert.assertTrue(rs.next());
+                             Assert.assertEquals(1, rs.getInt(1));
+                         }
+                    }finally {
+                        if(stmt!=null) {
+                            stmt.close();
+                        }
+                    }
+                }
                 jdbcConnection.close();
                 jdbcConnection=null;
                 

@@ -13,6 +13,7 @@ ideas/open issues/questions
 
 LATEST
 ---------------------------
+- Enum values are inserted twice when generating a script (#426)
 
 ili2db 4.6.0 (2021-09-10)
 ------------------------------
