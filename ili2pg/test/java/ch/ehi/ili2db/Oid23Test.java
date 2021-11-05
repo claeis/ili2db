@@ -1221,7 +1221,6 @@ public class Oid23Test {
 	        File data=new File(TEST_DATA_DIR,"Oid1a-out.xtf");
 			Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 			config.setBaskets("Oid23.TestA");
-			config.setModels("Oid1a");
 			config.setFunction(Config.FC_EXPORT);
     		config.setTidHandling(Config.TID_HANDLING_PROPERTY);
     		config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TRANSFER
+	xmlns="http://www.interlis.ch/INTERLIS2.3">
+	<HEADERSECTION
+		SENDER="${xmlunit.ignore}"
+		VERSION="2.3">
+		<MODELS>
+			<MODEL
+				NAME="SimpleB"
+				VERSION="2020-03-23"
+				URI="mailto:ce@eisenhutinformatik.ch"></MODEL>
+		</MODELS>
+	</HEADERSECTION>
+	<DATASECTION></DATASECTION>
+</TRANSFER>
