@@ -1670,10 +1670,9 @@ public class Ili2db {
 				String topicv[]=topics.split(ch.interlis.ili2c.Main.MODELS_SEPARATOR);
 				// map BID to sqlBasketId and modelnames
 				basketSqlIds=getBasketSqlIdsFromTopic(topicv,modelv,conn,config);
-		        if(basketSqlIds==null || basketSqlIds.length==0){
-		            throw new Ili2dbException("no baskets with given topic names in table "+DbNames.BASKETS_TAB);
+		        if(basketSqlIds==null){
+		            basketSqlIds=new long[0];
 		        }
-				
 			}else{
 				if(createBasketCol){
 					String[] modelnames = getModelNames(models);
@@ -2069,12 +2068,12 @@ public class Ili2db {
 		if(schema!=null){
 			sqlName=schema+"."+sqlName;
 		}
-		HashSet<String> models=new HashSet<String>();
 		HashSet<Long> bids=new HashSet<Long>();
 		String topicQName=null;
 		long sqlId=0;
 		java.sql.PreparedStatement getstmt=null;
 		try{
+	        HashSet<String> models=new HashSet<String>();
 			String stmt="SELECT "+colT_ID+","+DbNames.BASKETS_TAB_TOPIC_COL+" FROM "+sqlName;
 			EhiLogger.traceBackendCmd(stmt);
 			getstmt=conn.prepareStatement(stmt);
@@ -2116,6 +2115,17 @@ public class Ili2db {
 					EhiLogger.logError(ex);
 				}
 			}
+		}
+		if(bids.size()==0) {
+	        HashSet<String> models=new HashSet<String>();
+            for(String qryTopic[]:qryTopics){
+                String modelName=qryTopic[0];
+                if(!models.contains(modelName)){
+                    modelv.addFileEntry(new ch.interlis.ili2c.config.FileEntry(modelName,ch.interlis.ili2c.config.FileEntryKind.ILIMODELFILE));             
+                    models.add(modelName);
+                }
+            }
+		    
 		}
 		long ret[]=new long[bids.size()];
 		idx=0;

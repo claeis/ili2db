@@ -71,12 +71,11 @@ public abstract class XtfHeaderTest {
     {
         //EhiLogger.getInstance().setTraceFilter(false);
         importXtf23();
-        File data=new File(TEST_OUT,"Simple23a-out.xtf");
-        File referenceData=new File(TEST_OUT,"Simple23a-ref.xtf");
+        File data=new File(TEST_OUT,"Simple23b-out.xtf");
+        File referenceData=new File(TEST_OUT,"Simple23b-ref.xtf");
         Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
         config.setFunction(Config.FC_EXPORT);
-        //config.setTopics("SimpleB.TestB"); // FIXME #432
-        config.setTopics("SimpleA.TestA");
+        config.setTopics("SimpleB.TestB");
         Ili2db.readSettingsFromDb(config);
         Ili2db.run(config,null);
         Diff xmlboxDiff = DiffBuilder.compare(Input.fromFile(referenceData)).withTest(Input.fromFile(data))
