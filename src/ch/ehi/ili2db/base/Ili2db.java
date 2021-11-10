@@ -1670,10 +1670,9 @@ public class Ili2db {
 				String topicv[]=topics.split(ch.interlis.ili2c.Main.MODELS_SEPARATOR);
 				// map BID to sqlBasketId and modelnames
 				basketSqlIds=getBasketSqlIdsFromTopic(topicv,modelv,conn,config);
-		        if(basketSqlIds==null || basketSqlIds.length==0){
-		            throw new Ili2dbException("no baskets with given topic names in table "+DbNames.BASKETS_TAB);
+		        if(basketSqlIds==null){
+		            basketSqlIds=new long[0];
 		        }
-				
 			}else{
 				if(createBasketCol){
 					String[] modelnames = getModelNames(models);
@@ -2069,12 +2068,12 @@ public class Ili2db {
 		if(schema!=null){
 			sqlName=schema+"."+sqlName;
 		}
-		HashSet<String> models=new HashSet<String>();
 		HashSet<Long> bids=new HashSet<Long>();
 		String topicQName=null;
 		long sqlId=0;
 		java.sql.PreparedStatement getstmt=null;
 		try{
+	        HashSet<String> models=new HashSet<String>();
 			String stmt="SELECT "+colT_ID+","+DbNames.BASKETS_TAB_TOPIC_COL+" FROM "+sqlName;
 			EhiLogger.traceBackendCmd(stmt);
 			getstmt=conn.prepareStatement(stmt);
@@ -2116,6 +2115,17 @@ public class Ili2db {
 					EhiLogger.logError(ex);
 				}
 			}
+		}
+		if(bids.size()==0) {
+	        HashSet<String> models=new HashSet<String>();
+            for(String qryTopic[]:qryTopics){
+                String modelName=qryTopic[0];
+                if(!models.contains(modelName)){
+                    modelv.addFileEntry(new ch.interlis.ili2c.config.FileEntry(modelName,ch.interlis.ili2c.config.FileEntryKind.ILIMODELFILE));             
+                    models.add(modelName);
+                }
+            }
+		    
 		}
 		long ret[]=new long[bids.size()];
 		idx=0;
@@ -2369,9 +2379,10 @@ public class Ili2db {
 	                    ioxWriter=new Iligml10Writer(outfile,td);
 	                }else{
 	                    ioxWriter=new XtfWriter(outfile,td);
-	                    if(config.getExportModels()!=null) {
-	                        ((XtfWriter) ioxWriter).setModels(buildModelList(td,config.getExportModels()));
-	                    }
+                        final XtfModel[] xtfModelList = buildModelList(td,config,conn);
+                        if(xtfModelList!=null && xtfModelList.length!=0) {
+                            ((XtfWriter) ioxWriter).setModels(xtfModelList);
+                        }
 	                }
 	            }
 	            TransferToXtf trsfr=new TransferToXtf(ili2sqlName,td,conn,geomConv,config,trafoConfig,class2wrapper);
@@ -2394,8 +2405,83 @@ public class Ili2db {
 	        }
 	    }
 	}
+    private static XtfModel[] buildModelList(TransferDescription td, Config config, Connection conn) 
+            throws Ili2dbException 
+    {
+        String modelNames=config.getExportModels();
+        if(modelNames!=null) {
+            return buildModelList(td, modelNames);
+        }
+        modelNames=config.getModels();
+        if(modelNames!=null && !modelNames.equals(XTF)) {
+            return buildModelList(td, modelNames);
+        }
+        String topicNames=config.getTopics();
+        if(topicNames!=null) {
+            String topicv[]=topicNames.split(ch.interlis.ili2c.Main.MODELS_SEPARATOR);
+            String qryModels[]=new String[topicv.length];
+            int idx=0;
+            for(String topic:topicv){
+                String qryTopic[]=splitIliQName(topic);
+                qryModels[idx++]=qryTopic[0];
+            }
+            return buildModelList(td, qryModels);
+        }
+
+        String datasetName=config.getDatasetName();
+        if(datasetName!=null) {
+            String datasetNames[] = datasetName.split(ch.interlis.ili2c.Main.MODELS_SEPARATOR);
+            List<String> tmpListOfModels = new ArrayList<String>();
+            for (String dtName : datasetNames) {
+                Long datasetId=getDatasetId(dtName, conn, config);
+                if(datasetId==null){
+                    throw new Ili2dbException("dataset <"+dtName+"> doesn't exist");
+                }
+                ch.interlis.ili2c.config.Configuration modelv=new ch.interlis.ili2c.config.Configuration();
+                getBasketSqlIdsFromDatasetId(datasetId,modelv,conn,config);
+                for (int i = 0; i < modelv.getSizeFileEntry(); i++) {
+                    String name=modelv.getFileEntry(i).getFilename();
+                    if(!tmpListOfModels.contains(name)) {
+                        tmpListOfModels.add(name);
+                    }
+                }
+            }
+            String qryModels[]=new String[tmpListOfModels.size()];
+            for (int i = 0; i < tmpListOfModels.size(); i++) {
+                qryModels[i] = tmpListOfModels.get(i);
+            }
+            return buildModelList(td, qryModels);
+        }
+        String baskets=config.getBaskets();
+        if(baskets!=null){
+            String basketids[]=baskets.split(ch.interlis.ili2c.Main.MODELS_SEPARATOR);
+            // map BID to sqlBasketId and modelnames
+            ch.interlis.ili2c.config.Configuration modelv=new ch.interlis.ili2c.config.Configuration();
+            getBasketSqlIdsFromBID(basketids,modelv,conn,config);
+            List<String> tmpListOfModels = new ArrayList<String>();
+            for (int i = 0; i < modelv.getSizeFileEntry(); i++) {
+                String name=modelv.getFileEntry(i).getFilename();
+                if(!tmpListOfModels.contains(name)) {
+                    tmpListOfModels.add(name);
+                }
+            }
+            String qryModels[]=new String[tmpListOfModels.size()];
+            for (int i = 0; i < tmpListOfModels.size(); i++) {
+                qryModels[i] = tmpListOfModels.get(i);
+            }
+            return buildModelList(td, qryModels);
+        }
+        return null;
+    }
     private static XtfModel[] buildModelList(TransferDescription td,String modelNames){
-        List modelv=getModels(modelNames, td);
+        List<Model> modelv=getModels(modelNames, td);
+        return buildModelList(modelv);
+    }
+    private static XtfModel[] buildModelList(TransferDescription td,String modelNames[]){
+        List<Model> modelv=getModels(modelNames, td);
+        return buildModelList(modelv);
+    }
+    private static XtfModel[] buildModelList(List<Model> modelv) {
         XtfModel[] ret=new XtfModel[modelv.size()];
         for(int i=0;i<modelv.size();i++){
             Model model=(Model)modelv.get(i);
@@ -2513,20 +2599,26 @@ public class Ili2db {
 		config.setInheritanceTrafo(null);
 	}
 	public static List<Model> getModels(String modelNames, TransferDescription td) {
-		List<Model> models=new ArrayList<Model>();
 		if(modelNames==null) {
-			return models;
+			return new ArrayList<Model>();
 		}
 		String modelNamev[]=getModelNames(modelNames);
-		for(String modelName:modelNamev) {
-			Model model=(Model)td.getElement(Model.class, modelName);
-			if(model==null) {
-				throw new IllegalArgumentException("unknown model <"+modelName+">");
-			}
-			models.add(model);
-		}
-		return models;
+		return getModels(modelNamev,td);
 	}
+    public static List<Model> getModels(String modelNamev[], TransferDescription td) {
+        if(modelNamev==null) {
+            return new ArrayList<Model>();
+        }
+        List<Model> models=new ArrayList<Model>();
+        for(String modelName:modelNamev) {
+            Model model=(Model)td.getElement(Model.class, modelName);
+            if(model==null) {
+                throw new IllegalArgumentException("unknown model <"+modelName+">");
+            }
+            models.add(model);
+        }
+        return models;
+    }
     public static String quoteSqlStringValue(String value) {
         if(value==null) {
             return "NULL";

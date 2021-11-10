@@ -14,6 +14,14 @@ ideas/open issues/questions
 LATEST
 ---------------------------
 
+ili2db 4.6.1 (2021-11-10)
+------------------------------
+- Enum values are inserted twice when generating a script (#426)
+- export only required MODELs in HEADERSECTION (#413)
+- export by --topics with no baskets should create an empty transfer file (#432)
+- --sqlColsAsText erzeugt leere Geometrien (#423) 
+- iox-ili-1.21.8
+
 ili2db 4.6.0 (2021-09-10)
 ------------------------------
 - replaced the legacy GUI with a message box

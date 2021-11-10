@@ -1416,7 +1416,7 @@ public class TransferFromIli {
 	                    EhiLogger.traceBackendCmd(stmt);
 	                    java.sql.PreparedStatement ps = conn.prepareStatement(stmt);
 	                    try{
-	                        updateEnumEntries(gen,exstEntries,thisSqlName.getQName(),ps, type, null, null);
+	                        updateEnumEntries(null,exstEntries,thisSqlName.getQName(),ps, type, null, null);
 	                    }catch(java.sql.SQLException ex){
 	                        throw new Ili2dbException("failed to insert enum values for type "+thisClass,ex);
 	                    }finally{
@@ -1454,7 +1454,7 @@ public class TransferFromIli {
 	                    EhiLogger.traceBackendCmd(stmt);
 	                    java.sql.PreparedStatement ps = conn.prepareStatement(stmt);
 	                    try{
-	                        updateEnumEntries(gen,exstEntries,thisSqlName.getQName(),ps, type, null, null);
+	                        updateEnumEntries(null,exstEntries,thisSqlName.getQName(),ps, type, null, null);
 	                    }catch(java.sql.SQLException ex){
 	                        throw new Ili2dbException("failed to insert enum values for type "+thisClass,ex);
 	                    }finally{
@@ -1507,7 +1507,7 @@ public class TransferFromIli {
                         EhiLogger.traceBackendCmd(stmt);
                         java.sql.PreparedStatement ps = conn.prepareStatement(stmt);
                         try{
-                            updateEnumEntries(gen,exstEntries,thisSqlName.getQName(),ps, type, thisClass, baseClass);
+                            updateEnumEntries(null,exstEntries,thisSqlName.getQName(),ps, type, thisClass, baseClass);
                         }catch(java.sql.SQLException ex){
                             throw new Ili2dbException("failed to insert enum values for type "+thisClass,ex);
                         }finally{
@@ -1550,7 +1550,7 @@ public class TransferFromIli {
                         EhiLogger.traceBackendCmd(stmt);
                         java.sql.PreparedStatement ps = conn.prepareStatement(stmt);
                         try{
-                            updateEnumEntries(gen,exstEntries,thisSqlName.getQName(),ps, type, thisClass, baseClass);
+                            updateEnumEntries(null,exstEntries,thisSqlName.getQName(),ps, type, thisClass, baseClass);
                         }catch(java.sql.SQLException ex){
                             throw new Ili2dbException("failed to insert enum values for type "+thisClass,ex);
                         }finally{
