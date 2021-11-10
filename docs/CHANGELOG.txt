@@ -17,6 +17,7 @@ LATEST
 - export only required MODELs in HEADERSECTION (#413)
 - export by --topics with no baskets should create an empty transfer file (#432)
 - --sqlColsAsText erzeugt leere Geometrien (#423) 
+- iox-ili-1.21.8
 
 ili2db 4.6.0 (2021-09-10)
 ------------------------------
