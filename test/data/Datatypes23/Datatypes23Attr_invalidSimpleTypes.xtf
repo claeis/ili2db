@@ -45,6 +45,14 @@ end201</mtextUnlimited>
 			<Datatypes23.Topic.ClassAttr TID="ClassAttr.2">
 				<textUnlimited>textNull</textUnlimited>
 			</Datatypes23.Topic.ClassAttr>
+			<Datatypes23.Topic.ClassKoord2 TID="ClassKoord2.1">
+				<lcoord>
+					<COORD>
+						<C1>2460001.000</C1>
+						<C2>1045001.000</C2>
+					</COORD>
+				</lcoord>
+			</Datatypes23.Topic.ClassKoord2>
 		</Datatypes23.Topic>
 	</DATASECTION>
 </TRANSFER>

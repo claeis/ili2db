@@ -758,6 +758,13 @@ public abstract class Datatypes23Test {
 					Assert.assertEquals("Datatypes23.Topic.ClassAttr", obj1.getobjecttag());
 					Assert.assertEquals(0, obj1.getattrvaluecount("textLimited"));
 				}
+				{
+                    IomObject obj1 = objs.get("ClassKoord2.1");
+                    Assert.assertNotNull(obj1);
+                    Assert.assertEquals("Datatypes23.Topic.ClassKoord2", obj1.getobjecttag());
+                    Assert.assertEquals(1, obj1.getattrvaluecount("lcoord"));
+				    
+				}
 			}
 		}finally{
 		}
