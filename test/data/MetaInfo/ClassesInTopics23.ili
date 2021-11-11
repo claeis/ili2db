@@ -1,0 +1,41 @@
+INTERLIS 2.3;
+
+MODEL ClassesInTopics23
+  AT "mailto:ceis@localhost" VERSION "2021-11-11" =
+
+  TOPIC TestA =
+
+    CLASS ClassA1 =
+    END ClassA1;
+
+    CLASS ClassA1b EXTENDS ClassA1 =
+    END ClassA1b;
+
+    CLASS ClassA1c EXTENDS ClassA1 =
+    END ClassA1c;
+
+    CLASS ClassA1abstract (ABSTRACT) EXTENDS ClassA1 =
+    END ClassA1abstract;
+    
+    CLASS ClassA1d EXTENDS ClassA1abstract =
+    END ClassA1d;
+
+
+  END TestA;
+  
+  TOPIC TestB EXTENDS TestA =
+    CLASS ClassA1b (EXTENDED) =
+    END ClassA1b;
+
+    CLASS ClassB1c EXTENDS ClassA1c =
+    END ClassB1c;
+    
+    CLASS ClassB1 EXTENDS ClassA1 =
+    END ClassB1;
+
+    CLASS ClassB2 =
+    END ClassB2;
+    
+  END TestB;
+
+END ClassesInTopics23.

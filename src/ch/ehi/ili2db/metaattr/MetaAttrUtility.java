@@ -1,7 +1,10 @@
 package ch.ehi.ili2db.metaattr;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.io.File;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -14,8 +17,10 @@ import ch.interlis.ili2c.metamodel.Evaluable;
 import ch.interlis.ili2c.metamodel.LocalAttribute;
 import ch.interlis.ili2c.metamodel.ObjectPath;
 import ch.interlis.ili2c.metamodel.RoleDef;
+import ch.interlis.ili2c.metamodel.Topic;
 import ch.interlis.ili2c.metamodel.TransferDescription;
 import ch.interlis.ili2c.metamodel.Type;
+import ch.interlis.ili2c.metamodel.Viewable;
 import ch.interlis.iox_j.inifile.IniFileReader;
 import ch.interlis.iox_j.validator.ValidationConfig;
 import ch.interlis.ili2c.metamodel.AttributeDef;
@@ -26,6 +31,7 @@ import ch.ehi.basics.settings.Settings;
 import ch.ehi.ili2db.base.DbNames;
 import ch.ehi.ili2db.base.Ili2db;
 import ch.ehi.ili2db.base.Ili2dbException;
+import ch.ehi.ili2db.mapping.NameMapping;
 import ch.ehi.sqlgen.repository.DbSchema;
 import ch.ehi.sqlgen.repository.DbTable;
 import ch.ehi.sqlgen.repository.DbTableName;
@@ -45,6 +51,7 @@ public class MetaAttrUtility{
 	public static final String ILI2DB_ILI_ASSOC_CARDINALITY_MAX = ILI2DB_ILI_PREFIX+"assocCardinalityMax";
     public static final String ILI2DB_ILI_ASSOC_CARDINALITY_MIN = ILI2DB_ILI_PREFIX+"assocCardinalityMin";
     public static final String ILI2DB_ILI_ASSOC_KIND = ILI2DB_ILI_PREFIX+"assocKind";
+    public static final String ILI2DB_ILI_TOPIC_CLASSES = ILI2DB_ILI_PREFIX+"topicClasses";
     /** Read meta-attributes from a toml file and add them to the ili2c metamodel.
 	 * @param td ili-model as read by the ili compiler
 	 * @param tomlFile
@@ -151,24 +158,24 @@ public class MetaAttrUtility{
 	 * @param td ili model as read by the interlis compiler
 	 * @throws Ili2dbException
 	 */
-	public static void updateMetaAttributesTable(GeneratorJdbc gen, java.sql.Connection conn, String schema, TransferDescription td) 
-	throws Ili2dbException
-	{
-	    HashMap<String,HashMap<String,String>> entries=new HashMap<String,HashMap<String,String>>();
-		Iterator transIter = td.iterator();
-		while(transIter.hasNext()){
-			Object transElem=transIter.next();
-			if(transElem instanceof ch.interlis.ili2c.metamodel.PredefinedModel){
-				continue;
-			}else if(transElem instanceof ch.interlis.ili2c.metamodel.DataModel){
-				visitElement(entries,(Element)transElem);
-			}
-		}
-		saveTableTab(gen,conn,schema,entries);
-	}
+    public static void updateMetaAttributesTable(GeneratorJdbc gen, java.sql.Connection conn, String schema, TransferDescription td, NameMapping class2wrapper) 
+    throws Ili2dbException
+    {
+        HashMap<String,HashMap<String,String>> entries=new HashMap<String,HashMap<String,String>>();
+        Iterator transIter = td.iterator();
+        while(transIter.hasNext()){
+            Object transElem=transIter.next();
+            if(transElem instanceof ch.interlis.ili2c.metamodel.PredefinedModel){
+                continue;
+            }else if(transElem instanceof ch.interlis.ili2c.metamodel.DataModel){
+                visitElement(entries,(Element)transElem,class2wrapper);
+            }
+        }
+        saveTableTab(gen,conn,schema,entries);
+    }
 
 	// Recursively iterate data model and write all found meta-attributes
-	private static void visitElement(HashMap<String,HashMap<String,String>> entries, Element el)
+	private static void visitElement(HashMap<String,HashMap<String,String>> entries, Element el,NameMapping class2wrapper)
 	throws Ili2dbException
 	{
 		Settings metaValues = el.getMetaValues();
@@ -192,6 +199,27 @@ public class MetaAttrUtility{
 	            exstValues.put(ILI2DB_ILI_ATTR_CARDINALITY_MIN, mapCardinality(getDomain(attr).getCardinality().getMinimum()));
 	            exstValues.put(ILI2DB_ILI_ATTR_CARDINALITY_MAX, mapCardinality(getDomain(attr).getCardinality().getMaximum()));
 	        }
+            if(el instanceof Topic){
+                Topic topic=(Topic)el;
+                HashMap<String,String> exstValues=getMetaValues(entries,el);
+                List<Viewable<?>> viewables = topic.getTransferViewables();
+                List<String> tableNames=new ArrayList<String>();
+                for(Viewable aclass:viewables) {
+                    String tableName=class2wrapper.mapIliClassDef(aclass);
+                    if(!tableNames.contains(tableName)) {
+                        tableNames.add(tableName);
+                    }
+                }
+                Collections.sort(tableNames);
+                StringBuffer classesInTopic=new StringBuffer();
+                String sep="";
+                for(String tableName:tableNames) {
+                    classesInTopic.append(sep);
+                    classesInTopic.append(tableName);
+                    sep=" ";
+                }
+                exstValues.put(ILI2DB_ILI_TOPIC_CLASSES, classesInTopic.toString());
+            }
 		}catch(RuntimeException e) {
 		    EhiLogger.traceUnusualState(el.getScopedName()+": "+e.getMessage());
 		    throw e;
@@ -200,7 +228,7 @@ public class MetaAttrUtility{
 			Container e = (Container) el;
 			Iterator it = e.iterator();
 			while(it.hasNext()){
-				visitElement(entries,(Element)it.next());
+				visitElement(entries,(Element)it.next(),class2wrapper);
 			}
 		}
 	}

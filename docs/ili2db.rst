@@ -1611,6 +1611,9 @@ Meta-Attribute generiert:
 +------------------------------------+---------------------------------------------------------------+
 | Tag                                | Beschreibung                                                  |
 +====================================+===============================================================+
+| ``ili2db.ili.topicClasses``        | Lister der in einem Behälter möglichen Objekte                |
+|                                    | (als Leerzeichen getrennte Liste der SQL-Namen der Klassen)   |
++------------------------------------+---------------------------------------------------------------+
 | ``ili2db.ili.attrCardinalityMin``  | minimum Anzahl Werte eines Attributes                         |
 +------------------------------------+---------------------------------------------------------------+
 | ``ili2db.ili.attrCardinalityMax``  | maximum Anzahl Werte eines Attributes                         |

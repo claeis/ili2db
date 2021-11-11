@@ -626,7 +626,7 @@ public class Ili2db {
                             }
                             if(config.getCreateMetaInfo()){
                                 // update meta-attributes table
-                                MetaAttrUtility.updateMetaAttributesTable(insertCollector,conn, config.getDbschema(), td);
+                                MetaAttrUtility.updateMetaAttributesTable(insertCollector,conn, config.getDbschema(), td,mapping);
                                 // set elements' meta-attributes
                                 MetaAttrUtility.addMetaAttrsFromDb(td, conn, config.getDbschema());
                             }
@@ -1323,7 +1323,7 @@ public class Ili2db {
                     }
                     if(config.getCreateMetaInfo()){
                         // update meta-attributes table
-                        MetaAttrUtility.updateMetaAttributesTable(insertCollector,conn, config.getDbschema(), td);
+                        MetaAttrUtility.updateMetaAttributesTable(insertCollector,conn, config.getDbschema(), td,mapping);
                         // set elements' meta-attributes
                         if(conn!=null) {
                             MetaAttrUtility.addMetaAttrsFromDb(td, conn, config.getDbschema());
