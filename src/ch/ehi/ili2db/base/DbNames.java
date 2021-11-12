@@ -1,5 +1,7 @@
 package ch.ehi.ili2db.base;
 
+import ch.ehi.sqlgen.repository.DbColVarchar;
+
 public class DbNames {
 	public static final String DEPRECATED="DEPRECATED, do not use";
 	public static final String BASKETS_TAB="T_ILI2DB_BASKET";
@@ -19,6 +21,7 @@ public class DbNames {
 	public static final String ENUM_TAB_ITFCODE_COL="itfCode";
 	public static final String ENUM_TAB_DISPNAME_COL="dispName";
 	public static final String ENUM_TAB_DESCRIPTION_COL="description";
+    public static final int ENUM_TAB_DESCRIPTION_COL_SIZE=DbColVarchar.UNLIMITED;
 	public static final String ENUM_TXT_COL_SUFFIX="_txt";
 	public static final String MULTILINGUAL_TXT_COL_SUFFIX="";
 	public static final String MULTILINGUAL_TXT_COL_PREFIX="_";

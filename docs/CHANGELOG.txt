@@ -14,6 +14,7 @@ ideas/open issues/questions
 LATEST
 ---------------------------
 - create metainfo about possible classes in a topic (#216)
+- set length of description field in ENUM tables to 'unlimited' (#429)
 
 ili2db 4.6.1 (2021-11-10)
 ------------------------------
