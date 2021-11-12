@@ -444,7 +444,7 @@ public class Ili2db {
 				
                 // verify dataset/basket settings
 				if(function==Config.FC_DELETE){
-					boolean createBasketCol=config.BASKET_HANDLING_READWRITE.equals(config.getBasketHandling());
+					boolean createBasketCol=Config.BASKET_HANDLING_READWRITE.equals(config.getBasketHandling());
 					if(!createBasketCol){
 						throw new Ili2dbException("delete requires column "+DbNames.T_BASKET_COL);
 					}
@@ -464,7 +464,7 @@ public class Ili2db {
 								throw new Ili2dbException("dataset <"+datasetName+"> already exists");
 							}
 						}
-						boolean createBasketCol=config.BASKET_HANDLING_READWRITE.equals(config.getBasketHandling());
+						boolean createBasketCol=Config.BASKET_HANDLING_READWRITE.equals(config.getBasketHandling());
 						if(!createBasketCol){
 							throw new Ili2dbException("import with dataset name requires column "+DbNames.T_BASKET_COL);
 						}
@@ -545,7 +545,7 @@ public class Ili2db {
 				}
 				// use models explicitly given by user --models, --topics and/or as read from transferfile
 				java.util.List<Element> eles=ms.getModelElements(modelNames,td, td.getIli1Format()!=null && config.getDoItfLineTables(),Config.CREATE_ENUM_DEFS_MULTI.equals(config.getCreateEnumDefs()),config);
-				Viewable2TableMapping class2wrapper=Viewable2TableMapper.getClass2TableMapping(config,trafoConfig,eles,mapping);
+				Viewable2TableMapping class2wrapper=Viewable2TableMapper.getClass2TableMapping(td.getIli1Format()!=null,config,trafoConfig,eles,mapping);
 
 				Generator gen=null;
 				try{
@@ -720,7 +720,7 @@ public class Ili2db {
 				}else{
 					IoxReader ioxReader=null;
 					try {
-						if(function!=config.FC_DELETE){
+						if(function!=Config.FC_DELETE){
 							  EhiLogger.logState("data <"+inputFilename+">");
 								if(isItfFilename(inputFilename)){
 									config.setValue(ch.interlis.iox_j.validator.Validator.CONFIG_DO_ITF_OIDPERTABLE, ch.interlis.iox_j.validator.Validator.CONFIG_DO_ITF_OIDPERTABLE_DO);
@@ -1217,7 +1217,7 @@ public class Ili2db {
 			}
 			// use models explicitly given by user (or last model of given ili-file)
 			java.util.List<Element> eles=ms.getModelElements(modelNames,td, td.getIli1Format()!=null && config.getDoItfLineTables(),Config.CREATE_ENUM_DEFS_MULTI.equals(config.getCreateEnumDefs()),config);
-			Viewable2TableMapping class2wrapper=Viewable2TableMapper.getClass2TableMapping(config,trafoConfig,eles,mapping);
+			Viewable2TableMapping class2wrapper=Viewable2TableMapper.getClass2TableMapping(td.getIli1Format()!=null,config,trafoConfig,eles,mapping);
 
 			SqlColumnConverter geomConverter=null;
 			try{
@@ -1628,7 +1628,7 @@ public class Ili2db {
 			}
 			  
 			ch.interlis.ili2c.config.Configuration modelv=new ch.interlis.ili2c.config.Configuration();
-			boolean createBasketCol=config.BASKET_HANDLING_READWRITE.equals(config.getBasketHandling());
+			boolean createBasketCol=Config.BASKET_HANDLING_READWRITE.equals(config.getBasketHandling());
 			String exportModelnames[]=null;
 			long basketSqlIds[]=null;
 			if(datasetName!=null){
@@ -1773,7 +1773,7 @@ public class Ili2db {
 				    modelNames.remove(alternativeSrsModelName);
 				}
 			  java.util.List<Element> eles=ms.getModelElements(modelNames,td, td.getIli1Format()!=null && config.getDoItfLineTables(),Config.CREATE_ENUM_DEFS_MULTI.equals(config.getCreateEnumDefs()),config);
-			  Viewable2TableMapping class2wrapper=Viewable2TableMapper.getClass2TableMapping(config,trafoConfig,eles,mapping);
+			  Viewable2TableMapping class2wrapper=Viewable2TableMapper.getClass2TableMapping(td.getIli1Format()!=null,config,trafoConfig,eles,mapping);
 
 			  // process xtf files
 			  EhiLogger.logState("process data...");
@@ -2584,8 +2584,9 @@ public class Ili2db {
 		return mapping;
 	}
 	public static void setSkipPolygonBuilding(Config config) {
+        config.setDoXtfLineTables(true);
 		config.setDoItfLineTables(true);
-		config.setAreaRef(config.AREA_REF_KEEP);
+		config.setAreaRef(Config.AREA_REF_KEEP);
 	}
 	public static void setNoSmartMapping(Config config) {
 		config.setCatalogueRefTrafo(null);

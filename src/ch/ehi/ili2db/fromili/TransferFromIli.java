@@ -105,10 +105,8 @@ public class TransferFromIli {
 	private boolean createBasketCol=false;
 	private boolean createDatasetCol=false;
 	private CustomMapping customMapping=null;
-	private boolean createItfLineTables=false;
 	private boolean createFk=false;
 	private boolean createFkIdx=false;
-	private boolean isIli1Model=false;
 	private String colT_ID=null;
 	private String nl=System.getProperty("line.separator");
 	private FromIliRecordConverter recConv=null;
@@ -137,9 +135,6 @@ public class TransferFromIli {
 		}
         srsModelAssignment=config.getSrsModelAssignment();
 
-		isIli1Model=td1.getIli1Format()!=null;
-		createItfLineTables=isIli1Model && config.getDoItfLineTables();
-		
 		customMapping=customMapping1;
 		customMapping.fromIliInit(config);
 

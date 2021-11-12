@@ -61,6 +61,7 @@ import ch.interlis.ili2c.metamodel.Viewable;
 import ch.interlis.ili2c.metamodel.ViewableTransferElement;
 import ch.interlis.iom.IomObject;
 import ch.interlis.iom_j.itf.ItfReader2;
+import ch.interlis.iox_j.jts.Iox2jtsException;
 import ch.interlis.iox_j.wkb.Wkb2iox;
 
 public class FromXtfRecordConverter extends AbstractRecordConverter {
@@ -791,6 +792,15 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 					sep=",";
 			 }else if(type instanceof SurfaceOrAreaType){
 				 if(createItfLineTables){
+				 }else if(createXtfLineTables){
+                     ret.append(sep);
+                     ret.append(attrSqlName);
+                        if(isUpdate){
+                            ret.append("="+geomConv.getInsertValueWrapperMultiPolyline("?",epsgCode));
+                        }else{
+                            values.append(","+geomConv.getInsertValueWrapperMultiPolyline("?",epsgCode));
+                        }
+                        sep=",";
 				 }else{
 					 ret.append(sep);
 					 ret.append(attrSqlName);
@@ -1191,6 +1201,21 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 					 valuei++;
 				 }else if(type instanceof SurfaceOrAreaType){
 					 if(createItfLineTables){
+					 }else if(createXtfLineTables){
+                         IomObject value= classAttr==null ? null : iomObj.getattrobj(attrName,0);
+                         IomObject iomMultiline=null;
+                         if(value!=null){
+                             iomMultiline=mapSurface2MultiPolyline(value);
+                         }
+                         if(iomMultiline!=null){
+                             boolean is3D=((CoordType)((SurfaceOrAreaType)type).getControlPointDomain().getType()).getDimensions().length==3;
+                             // map polygon to list of poylines
+                             Object geomObj = geomConv.fromIomMultiPolyline(iomMultiline,epsgCode,is3D,getP((SurfaceOrAreaType)type));
+                             ps.setObject(valuei,geomObj);
+                         }else{
+                             geomConv.setSurfaceNull(ps,valuei);
+                         }
+                         valuei++;
 					 }else{
 						 IomObject value= classAttr==null ? null : iomObj.getattrobj(attrName,0);
 						 if(value!=null){
@@ -1351,7 +1376,25 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 		}
 		return valuei;
 	}
-	private long mapEnumValue(AttributeDef attr, String xtfvalue) throws SQLException  {
+	private IomObject mapSurface2MultiPolyline(IomObject obj) {
+	    IomObject iomMultiline=null;
+        for(int surfacei=0;surfacei<obj.getattrvaluecount("surface");surfacei++){
+            IomObject surface=obj.getattrobj("surface",surfacei);
+            int boundaryc=surface.getattrvaluecount("boundary");
+            for(int boundaryi=0;boundaryi<boundaryc;boundaryi++){
+                IomObject boundary=surface.getattrobj("boundary",boundaryi);
+                for(int polylinei=0;polylinei<boundary.getattrvaluecount("polyline");polylinei++){
+                    IomObject polyline=boundary.getattrobj("polyline",polylinei);
+                    if(iomMultiline==null){
+                        iomMultiline=new ch.interlis.iom_j.Iom_jObject(Wkb2iox.OBJ_MULTIPOLYLINE,null);
+                    }
+                    iomMultiline.addattrobj(Wkb2iox.ATTR_POLYLINE, polyline);
+                }
+            }
+        }
+        return iomMultiline;
+    }
+    private long mapEnumValue(AttributeDef attr, String xtfvalue) throws SQLException  {
 	    EnumValueMap map=null;
 	    if(enumCache.containsKey(attr)) {
 	        map=enumCache.get(attr);
