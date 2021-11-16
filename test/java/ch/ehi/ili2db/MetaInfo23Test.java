@@ -372,6 +372,7 @@ public abstract class MetaInfo23Test {
                 config.setFunction(Config.FC_SCHEMAIMPORT);
                 config.setCreateFk(Config.CREATE_FK_YES);
                 config.setInheritanceTrafo(Config.INHERITANCE_TRAFO_SMART1);
+                config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
                 config.setCreateMetaInfo(true);
                 Ili2db.readSettingsFromDb(config);
                 Ili2db.run(config,null);
