@@ -47,7 +47,7 @@ public class Viewable2TableMapper {
         srsModelAssignment=config.getSrsModelAssignment();
 	}
 
-	public static Viewable2TableMapping getClass2TableMapping(Config config,
+	public static Viewable2TableMapping getClass2TableMapping(boolean isIli1, Config config,
 			TrafoConfig trafoConfig, List<Element> eles,NameMapping nameMapping) throws Ili2dbException {
 		Viewable2TableMapper mapper=new Viewable2TableMapper(config, trafoConfig, nameMapping);
 		mapper.singleGeom=config.isOneGeomPerTable();
@@ -56,7 +56,7 @@ public class Viewable2TableMapper {
 		mapper.coalesceMultiPoint=Config.MULTIPOINT_TRAFO_COALESCE.equals(config.getMultiPointTrafo());
 		mapper.coalesceArray=Config.ARRAY_TRAFO_COALESCE.equals(config.getArrayTrafo());
         mapper.coalesceJson=Config.JSON_TRAFO_COALESCE.equals(config.getJsonTrafo());
-		mapper.createItfLineTables=config.getDoItfLineTables();
+		mapper.createItfLineTables=isIli1 && config.getDoItfLineTables();
 		return mapper.doit(eles);
 	}
 	private Viewable2TableMapping doit(List<Element> eles) throws Ili2dbException {

@@ -68,6 +68,7 @@ public class AbstractRecordConverter {
 	protected boolean createBasketCol=false;
 	protected boolean createDatasetCol=false;
 	protected boolean createItfLineTables=false;
+    protected boolean createXtfLineTables=false;
 	protected boolean createItfAreaRef=false;
 	protected boolean createFk=false;
 	protected boolean createFkIdx=false;
@@ -118,6 +119,7 @@ public class AbstractRecordConverter {
 		isIli1Model=td1.getIli1Format()!=null;
 		createItfLineTables=isIli1Model && config.getDoItfLineTables();
 		createItfAreaRef=isIli1Model && Config.AREA_REF_KEEP.equals(config.getAreaRef());
+        createXtfLineTables=!isIli1Model && config.getDoXtfLineTables();
 
 		sqlColsAsText=Config.SQL_COLS_AS_TEXT_ENABLE.equals(config.getSqlColsAsText());
 
@@ -372,10 +374,19 @@ public class AbstractRecordConverter {
     }
 
 	protected boolean mapAsTextCol(AttributeDef attributeDef) {
-		if(sqlColsAsText && attributeDef.getDomainResolvingAliases() instanceof BlackboxType){
+		if(!sqlColsAsText){
 			return false;
 		}
-		return sqlColsAsText;
+        if(attributeDef.getDomainResolvingAliases() instanceof BlackboxType){
+            return false;
+        }else if(attributeDef.getDomainResolvingAliases() instanceof AbstractCoordType){
+            return false;
+        }else if(attributeDef.getDomainResolvingAliases() instanceof LineType){
+            return false;
+        }else if(attributeDef.getDomainResolvingAliases() instanceof CompositionType){
+            return false;
+        }
+		return true;
 	}
 	
 }

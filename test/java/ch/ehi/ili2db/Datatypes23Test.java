@@ -1,6 +1,8 @@
 package ch.ehi.ili2db;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 import java.io.File;
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -538,6 +540,54 @@ public abstract class Datatypes23Test {
             }
 		}
 	}
+    @Test
+    public void importXtfSurface_asLines() throws Exception
+    {
+        Connection jdbcConnection=null;
+        Statement stmt=null;
+        try {
+            setup.resetDb();
+            jdbcConnection = setup.createConnection();
+            stmt=jdbcConnection.createStatement();
+            File data=new File(TEST_OUT+"Datatypes23Surface_asLines.xtf");
+            Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+            config.setFunction(Config.FC_IMPORT);
+            config.setDoImplicitSchemaImport(true);
+            config.setValidation(false);
+            config.setCreateFk(Config.CREATE_FK_YES);
+            config.setTidHandling(Config.TID_HANDLING_PROPERTY);
+            config.setImportTid(true);
+            config.setCatalogueRefTrafo(null);
+            config.setMultiSurfaceTrafo(null);
+            config.setMultilingualTrafo(null);
+            config.setInheritanceTrafo(null);
+            Ili2db.setSkipPolygonBuilding(config);
+            //Ili2db.readSettingsFromDb(config);
+            Ili2db.run(config,null);
+            // imported surface
+            {
+                ResultSet rs = stmt.executeQuery("SELECT st_astext(surface2d) FROM "+setup.prefixName("simplesurface2")+" WHERE t_ili_tid = 'SimpleSurface2.1';");
+                assertTrue(rs.next());
+                String geom=rs.getString(1);
+                if(setup.supportsCompoundGeometry()) {
+                    assertEquals("MULTICURVE(COMPOUNDCURVE((2460005 1045005,2460010 1045005,2460010 1045010,2460005 1045010,2460010 1045010)))", geom);
+                }else {
+                    assertEquals("MULTILINE(LINESTRING((2460005 1045005,2460010 1045005,2460010 1045010,2460005 1045010,2460010 1045010)))", geom);
+                }
+            }
+        }catch(SQLException e) {
+            throw new IoxException(e);
+        }finally{
+            if(stmt!=null) {
+                stmt.close();
+                stmt=null;
+            }
+            if(jdbcConnection!=null){
+                jdbcConnection.close();
+                jdbcConnection=null;
+            }
+        }
+    }
 	
 	@Test
 	public void exportXtfAttr() throws Exception
@@ -758,6 +808,13 @@ public abstract class Datatypes23Test {
 					Assert.assertEquals("Datatypes23.Topic.ClassAttr", obj1.getobjecttag());
 					Assert.assertEquals(0, obj1.getattrvaluecount("textLimited"));
 				}
+				{
+                    IomObject obj1 = objs.get("ClassKoord2.1");
+                    Assert.assertNotNull(obj1);
+                    Assert.assertEquals("Datatypes23.Topic.ClassKoord2", obj1.getobjecttag());
+                    Assert.assertEquals(1, obj1.getattrvaluecount("lcoord"));
+				    
+				}
 			}
 		}finally{
 		}
@@ -895,4 +952,53 @@ public abstract class Datatypes23Test {
 		}finally{
 		}
 	}
+    @Test
+    public void exportXtfSurface_asLines() throws Exception {
+        {
+            importXtfSurface_asLines();
+        }
+        try{
+            
+            File data=new File(TEST_OUT+"Datatypes23Surface_asLines-out.xtf");
+            Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+            config.setFunction(Config.FC_EXPORT);
+            config.setExportTid(true);
+            config.setModels("Datatypes23");
+            config.setBasketHandling(null);
+            config.setValidation(false);
+            Ili2db.readSettingsFromDb(config);
+            try{
+                Ili2db.run(config,null);
+            }catch(Exception ex){
+                EhiLogger.logError(ex);
+                Assert.fail();
+            }
+            // tests
+            // read objects of db and write objectValue to HashMap
+            HashMap<String,IomObject> objs=new HashMap<String,IomObject>();
+            XtfReader reader=new XtfReader(data);
+            IoxEvent event=null;
+             do{
+                event=reader.read();
+                if(event instanceof StartTransferEvent){
+                }else if(event instanceof StartBasketEvent){
+                }else if(event instanceof ObjectEvent){
+                    IomObject iomObj=((ObjectEvent)event).getIomObject();
+                    if(iomObj.getobjectoid()!=null){
+                        objs.put(iomObj.getobjectoid(), iomObj);
+                    }
+                }else if(event instanceof EndBasketEvent){
+                }else if(event instanceof EndTransferEvent){
+                }
+             }while(!(event instanceof EndTransferEvent));
+             {
+                 IomObject obj1 = objs.get("SimpleSurface2.1");
+                 Assert.assertNotNull(obj1);
+                 Assert.assertEquals("Datatypes23.Topic.SimpleSurface2", obj1.getobjecttag());
+                 IomObject surface = obj1.getattrobj("surface2d", 0);
+                 Assert.assertEquals("MULTISURFACE {surface SURFACE {boundary BOUNDARY {polyline POLYLINE {sequence SEGMENTS {segment [COORD {C1 2460005.000, C2 1045005.000}, COORD {C1 2460010.000, C2 1045005.000}, COORD {C1 2460010.000, C2 1045010.000}, COORD {C1 2460005.000, C2 1045010.000}, COORD {C1 2460010.000, C2 1045010.000}]}}}}}", surface.toString());
+              }
+        }finally{
+        }
+    }
 }

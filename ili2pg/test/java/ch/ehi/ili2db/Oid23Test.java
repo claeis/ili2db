@@ -1221,7 +1221,6 @@ public class Oid23Test {
 	        File data=new File(TEST_DATA_DIR,"Oid1a-out.xtf");
 			Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
 			config.setBaskets("Oid23.TestA");
-			config.setModels("Oid1a");
 			config.setFunction(Config.FC_EXPORT);
     		config.setTidHandling(Config.TID_HANDLING_PROPERTY);
     		config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
@@ -1322,7 +1321,7 @@ public class Oid23Test {
         }
     }
     @Test
-    public void importIliExtendedTopicWoBasketCol_Smart1() throws Exception
+    public void importIliExtendedTopicWoBasketCol_Smart1_fails() throws Exception
     {
         //EhiLogger.getInstance().setTraceFilter(false);
         Connection jdbcConnection=null;
@@ -1344,38 +1343,10 @@ public class Oid23Test {
                 config.setInheritanceTrafo(Config.INHERITANCE_TRAFO_SMART1);
                 Ili2db.readSettingsFromDb(config);
                 Ili2db.run(config,null);
+                Assert.fail();
             }
-            {
-                // t_ili2db_attrname
-                String [][] expectedValues=new String[][] {
-                    {"Oid2.TestD.a2b.a","a","classdb","classda"}                    
-                };
-                Ili2dbAssert.assertAttrNameTable(jdbcConnection,expectedValues, DBSCHEMA);
-                
-            }
-            {
-                // t_ili2db_trafo
-                String [][] expectedValues=new String[][] {
-                    {"Oid2.TestD.a2b","ch.ehi.ili2db.inheritance","embedded"},
-                    {"Oid2.TestD.ClassDb","ch.ehi.ili2db.inheritance","newClass"},
-                    {"Oid2.TestD.ClassDa","ch.ehi.ili2db.inheritance","newClass"},
-                    {"Oid2.TestE.ClassDa","ch.ehi.ili2db.inheritance","superClass"},
-                    {"Oid2.TestE.ClassDb","ch.ehi.ili2db.inheritance","superClass"}                  
-                };
-                Ili2dbAssert.assertTrafoTable(jdbcConnection,expectedValues, DBSCHEMA);
-            }
-            {
-                String stmtTxt="SELECT "+DbNames.META_INFO_COLUMN_TAB_TABLENAME_COL+","+DbNames.META_INFO_COLUMN_TAB_SETTING_COL+" FROM "+DBSCHEMA+"."+DbNames.META_INFO_COLUMN_TAB+" WHERE "+DbNames.META_INFO_COLUMN_TAB_TAG_COL+" = '"+DbExtMetaInfo.TAG_COL_OIDDOMAIN+"' AND "+DbNames.META_INFO_COLUMN_TAB_COLUMNNAME_COL+" = '"+DbNames.T_ILI_TID_COL+"'";
-                HashMap<String,String> res=new HashMap<String,String>();
-                ResultSet rs=stmt.executeQuery(stmtTxt);
-                while(rs.next()) {
-                    String tableName=rs.getString(1);
-                    String oidDomain=rs.getString(2);
-                    res.put(tableName,oidDomain);
-                }
-                Assert.assertEquals(0, res.size());
-                
-            }
+        }catch(Ili2dbException ex) {
+            Assert.assertEquals("Model Oid2 requires column T_basket",ex.getMessage());
         }finally{
             if(jdbcConnection!=null){
                 jdbcConnection.close();
@@ -1404,32 +1375,6 @@ public class Oid23Test {
             }
             {
                 File data=new File(TEST_DATA_DIR,"Oid2b.xtf");
-                Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
-                config.setFunction(Config.FC_IMPORT);
-                config.setValidation(false);
-                Ili2db.readSettingsFromDb(config);
-                Ili2db.run(config,null);
-            }
-        }finally{
-            if(jdbcConnection!=null){
-                jdbcConnection.close();
-            }
-        }
-    }
-    @Test
-    public void importXtfExtendedTopicWoBasketCol_Smart1() throws Exception
-    {
-        {
-            importIliExtendedTopicWoBasketCol_Smart1();
-        }
-        //EhiLogger.getInstance().setTraceFilter(false);
-        Connection jdbcConnection=null;
-        try{
-            Class driverClass = Class.forName("org.postgresql.Driver");
-            jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
-            stmt=jdbcConnection.createStatement();
-            {
-                File data=new File(TEST_DATA_DIR,"Oid2a.xtf");
                 Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
                 config.setFunction(Config.FC_IMPORT);
                 config.setValidation(false);
@@ -1513,69 +1458,4 @@ public class Oid23Test {
             }
         }
     }
-    @Test
-    public void exportXtfExtendedTopicWoBasketCol_Smart1() throws Exception
-    {
-        {
-            importXtfExtendedTopicWoBasketCol_Smart1();
-        }
-        Connection jdbcConnection=null;
-        try{
-            Class driverClass = Class.forName("org.postgresql.Driver");
-            jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
-            File data=new File(TEST_DATA_DIR,"Oid2-out.xtf");
-            Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
-            config.setModels("Oid2");
-            config.setFunction(Config.FC_EXPORT);
-            config.setValidation(false);
-            Ili2db.readSettingsFromDb(config);
-            Ili2db.run(config,null);
-            // read objects of db and write objectValue to HashMap
-            HashMap<String,StartBasketEvent> baskets=new HashMap<String,StartBasketEvent>();
-            HashMap<String,IomObject> objs=new HashMap<String,IomObject>();
-            XtfReader reader=new XtfReader(data);
-            IoxEvent event=null;
-             do{
-                event=reader.read();
-                if(event instanceof StartTransferEvent){
-                }else if(event instanceof StartBasketEvent){
-                    baskets.put(((StartBasketEvent) event).getBid(),(StartBasketEvent) event);
-                }else if(event instanceof ObjectEvent){
-                    IomObject iomObj=((ObjectEvent)event).getIomObject();
-                    if(iomObj.getobjectoid()!=null){
-                        objs.put(iomObj.getobjectoid(), iomObj);
-                    }
-                }else if(event instanceof EndBasketEvent){
-                }else if(event instanceof EndTransferEvent){
-                }
-             }while(!(event instanceof EndTransferEvent));
-             Assert.assertEquals(2,objs.size());
-             {
-                 IomObject obj0 = objs.get("c34c86ec-2a75-4a89-a194-f9ebc422f8bc");
-                 Assert.assertNotNull(obj0);
-                 Assert.assertEquals("Oid2.TestE.ClassDa", obj0.getobjecttag());
-             }
-             {
-                 IomObject obj0 = objs.get("81fc3941-01ec-4c51-b1ba-46b6295d9b4e");
-                 Assert.assertNotNull(obj0);
-                 Assert.assertEquals("Oid2.TestE.ClassDa", obj0.getobjecttag());
-             }
-             Assert.assertEquals(2,baskets.size());
-             {
-                 StartBasketEvent basket0 = baskets.get("1832a8d4-45be-4ede-ad85-c63940de272d");
-                 Assert.assertNotNull(basket0);
-                 Assert.assertEquals("Oid2.TestE", basket0.getType());
-             }
-             {
-                 StartBasketEvent basket0 = baskets.get("Oid2.TestD");
-                 Assert.assertNotNull(basket0);
-                 Assert.assertEquals("Oid2.TestD", basket0.getType());
-             }
-        }finally{
-            if(jdbcConnection!=null){
-                jdbcConnection.close();
-            }
-        }
-    }
-	
 }

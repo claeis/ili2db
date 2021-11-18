@@ -33,33 +33,10 @@ import ch.interlis.iox.StartBasketEvent;
 import ch.interlis.iox.StartTransferEvent;
 
 //-Ddburl=jdbc:postgresql:dbname -Ddbusr=usrname -Ddbpwd=1234
-public class MetaInfo23Test {
-	private static final String DBSCHEMA = "MetaInfo23";
-    private static final String TEST_DATA_DIR = "test/data/MetaInfo";
-	String dburl=System.getProperty("dburl"); 
-	String dbuser=System.getProperty("dbusr");
-	String dbpwd=System.getProperty("dbpwd"); 
-	Connection jdbcConnection=null;
-	Statement stmt=null;
-	
-	public Config initConfig(String xtfFilename,String dbschema,String logfile) {
-		Config config=new Config();
-		new ch.ehi.ili2pg.PgMain().initConfig(config);
-		config.setDburl(dburl);
-		config.setDbusr(dbuser);
-		config.setDbpwd(dbpwd);
-		if(dbschema!=null){
-			config.setDbschema(dbschema);
-		}
-		if(logfile!=null){
-			config.setLogfile(logfile);
-		}
-		config.setXtffile(xtfFilename);
-		if(xtfFilename!=null && Ili2db.isItfFilename(xtfFilename)){
-			config.setItfTransferfile(true);
-		}
-		return config;
-	}
+public abstract class MetaInfo23Test {
+    protected static final String TEST_DATA_DIR = "test/data/MetaInfo";
+    protected AbstractTestSetup setup=createTestSetup();
+    protected abstract AbstractTestSetup createTestSetup() ;
 	
 	@Test
 	public void importIli() throws Exception
@@ -67,13 +44,10 @@ public class MetaInfo23Test {
 		//EhiLogger.getInstance().setTraceFilter(false);
 		Connection jdbcConnection=null;
 		try{
-		    Class driverClass = Class.forName("org.postgresql.Driver");
-	        jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
-	        stmt=jdbcConnection.createStatement();
-			stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");
+	        setup.resetDb();
 			{
 				File data=new File(TEST_DATA_DIR,"MetaInfo23.ili");
-				Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+	            Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
 				config.setFunction(Config.FC_SCHEMAIMPORT);
 				config.setCreateFk(Config.CREATE_FK_YES);
 				config.setTidHandling(Config.TID_HANDLING_PROPERTY);
@@ -87,7 +61,8 @@ public class MetaInfo23Test {
 				Ili2db.readSettingsFromDb(config);
 				Ili2db.run(config,null);
 				{
-					String selStmt="SELECT "+DbNames.META_INFO_COLUMN_TAB_SETTING_COL+", "+DbNames.META_INFO_COLUMN_TAB_SUBTYPE_COL+" FROM "+DBSCHEMA+"."+DbNames.META_INFO_COLUMN_TAB+" WHERE "+DbNames.META_INFO_COLUMN_TAB_TABLENAME_COL+"=? AND "+DbNames.META_INFO_COLUMN_TAB_COLUMNNAME_COL+"=? AND "+DbNames.META_INFO_COLUMN_TAB_TAG_COL+"=?";
+                    jdbcConnection=setup.createConnection();
+					String selStmt="SELECT "+DbNames.META_INFO_COLUMN_TAB_SETTING_COL+", "+DbNames.META_INFO_COLUMN_TAB_SUBTYPE_COL+" FROM "+setup.prefixName(DbNames.META_INFO_COLUMN_TAB)+" WHERE "+DbNames.META_INFO_COLUMN_TAB_TABLENAME_COL+"=? AND "+DbNames.META_INFO_COLUMN_TAB_COLUMNNAME_COL+"=? AND "+DbNames.META_INFO_COLUMN_TAB_TAG_COL+"=?";
 					java.sql.PreparedStatement selPrepStmt = jdbcConnection.prepareStatement(selStmt);
 					{
 						selPrepStmt.setString(1, "classa1");
@@ -138,7 +113,7 @@ public class MetaInfo23Test {
 		                    {"MetaInfo23.TestA.ClassA1.structa", "classa1_structa", "structa1", "classa1"},
 		                    {"MetaInfo23.TestA.ClassC.geom","geom","classc",null}
 		                };
-		                Ili2dbAssert.assertAttrNameTable(jdbcConnection,expectedValues, DBSCHEMA);
+		                Ili2dbAssert.assertAttrNameTable(jdbcConnection,expectedValues, setup.getSchema());
 		            }
 		            {
 		                // t_ili2db_trafo
@@ -153,7 +128,7 @@ public class MetaInfo23Test {
 		                    {"MetaInfo23.TestA.ClassA1",  "ch.ehi.ili2db.inheritance", "newClass"},
 		                    {"MetaInfo23.TestA.ClassC","ch.ehi.ili2db.inheritance","newClass"}
 		                };
-		                Ili2dbAssert.assertTrafoTable(jdbcConnection,expectedValues, DBSCHEMA);
+		                Ili2dbAssert.assertTrafoTable(jdbcConnection,expectedValues, setup.getSchema());
 		            }
 				}
 			}
@@ -169,13 +144,10 @@ public class MetaInfo23Test {
         //EhiLogger.getInstance().setTraceFilter(false);
         Connection jdbcConnection=null;
         try{
-            Class driverClass = Class.forName("org.postgresql.Driver");
-            jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
-            stmt=jdbcConnection.createStatement();
-            stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");
+            setup.resetDb();
             {
                 File data=new File(TEST_DATA_DIR,"View23.ili");
-                Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+                Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
                 config.setFunction(Config.FC_SCHEMAIMPORT);
                 config.setCreateFk(Config.CREATE_FK_YES);
                 config.setTidHandling(Config.TID_HANDLING_PROPERTY);
@@ -189,6 +161,7 @@ public class MetaInfo23Test {
                 Ili2db.readSettingsFromDb(config);
                 Ili2db.run(config,null);
                 {
+                    jdbcConnection=setup.createConnection();
                 }
             }
         }finally{
@@ -203,13 +176,10 @@ public class MetaInfo23Test {
         //EhiLogger.getInstance().setTraceFilter(false);
         Connection jdbcConnection=null;
         try{
-            Class driverClass = Class.forName("org.postgresql.Driver");
-            jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
-            stmt=jdbcConnection.createStatement();
-            stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");
+            setup.resetDb();
             {
                 File data=new File(TEST_DATA_DIR,"Assoc23.ili");
-                Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+                Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
                 config.setFunction(Config.FC_SCHEMAIMPORT);
                 config.setCreateFk(Config.CREATE_FK_YES);
                 config.setInheritanceTrafo(Config.INHERITANCE_TRAFO_SMART1);
@@ -217,7 +187,8 @@ public class MetaInfo23Test {
                 Ili2db.readSettingsFromDb(config);
                 Ili2db.run(config,null);
                 {
-                    String selStmt="SELECT "+DbNames.META_ATTRIBUTES_TAB_ATTRVALUE_COL+" FROM "+DBSCHEMA+"."+DbNames.META_ATTRIBUTES_TAB+" WHERE "+DbNames.META_ATTRIBUTES_TAB_ILIELEMENT_COL+"=? AND "+DbNames.META_ATTRIBUTES_TAB_ATTRNAME_COL+"=?";
+                    jdbcConnection=setup.createConnection();
+                    String selStmt="SELECT "+DbNames.META_ATTRIBUTES_TAB_ATTRVALUE_COL+" FROM "+setup.prefixName(DbNames.META_ATTRIBUTES_TAB)+" WHERE "+DbNames.META_ATTRIBUTES_TAB_ILIELEMENT_COL+"=? AND "+DbNames.META_ATTRIBUTES_TAB_ATTRNAME_COL+"=?";
                     java.sql.PreparedStatement selPrepStmt = jdbcConnection.prepareStatement(selStmt);
                     {
                         {
@@ -312,13 +283,10 @@ public class MetaInfo23Test {
         //EhiLogger.getInstance().setTraceFilter(false);
         Connection jdbcConnection=null;
         try{
-            Class driverClass = Class.forName("org.postgresql.Driver");
-            jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
-            stmt=jdbcConnection.createStatement();
-            stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");
+            setup.resetDb();
             {
                 File data=new File(TEST_DATA_DIR,"Bag23.ili");
-                Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+                Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
                 config.setFunction(Config.FC_SCHEMAIMPORT);
                 config.setCreateFk(Config.CREATE_FK_YES);
                 config.setInheritanceTrafo(Config.INHERITANCE_TRAFO_SMART1);
@@ -326,7 +294,8 @@ public class MetaInfo23Test {
                 Ili2db.readSettingsFromDb(config);
                 Ili2db.run(config,null);
                 {
-                    String selStmt="SELECT "+DbNames.META_ATTRIBUTES_TAB_ATTRVALUE_COL+" FROM "+DBSCHEMA+"."+DbNames.META_ATTRIBUTES_TAB+" WHERE "+DbNames.META_ATTRIBUTES_TAB_ILIELEMENT_COL+"=? AND "+DbNames.META_ATTRIBUTES_TAB_ATTRNAME_COL+"=?";
+                    jdbcConnection=setup.createConnection();
+                    String selStmt="SELECT "+DbNames.META_ATTRIBUTES_TAB_ATTRVALUE_COL+" FROM "+setup.prefixName(DbNames.META_ATTRIBUTES_TAB)+" WHERE "+DbNames.META_ATTRIBUTES_TAB_ILIELEMENT_COL+"=? AND "+DbNames.META_ATTRIBUTES_TAB_ATTRNAME_COL+"=?";
                     java.sql.PreparedStatement selPrepStmt = jdbcConnection.prepareStatement(selStmt);
                     {
                         {
@@ -391,20 +360,64 @@ public class MetaInfo23Test {
         }
     }
     @Test
-    public void importXtfTwice() throws Exception
+    public void importIliClassesInTopics() throws Exception
     {
         //EhiLogger.getInstance().setTraceFilter(false);
         Connection jdbcConnection=null;
         try{
-            Class driverClass = Class.forName("org.postgresql.Driver");
-            jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
-            stmt=jdbcConnection.createStatement();
-            stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");
+            setup.resetDb();
+            {
+                File data=new File(TEST_DATA_DIR,"ClassesInTopics23.ili");
+                Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+                config.setFunction(Config.FC_SCHEMAIMPORT);
+                config.setCreateFk(Config.CREATE_FK_YES);
+                config.setInheritanceTrafo(Config.INHERITANCE_TRAFO_SMART1);
+                config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
+                config.setCreateMetaInfo(true);
+                Ili2db.readSettingsFromDb(config);
+                Ili2db.run(config,null);
+                {
+                    jdbcConnection=setup.createConnection();
+                    String selStmt="SELECT "+DbNames.META_ATTRIBUTES_TAB_ATTRVALUE_COL+" FROM "+setup.prefixName(DbNames.META_ATTRIBUTES_TAB)+" WHERE "+DbNames.META_ATTRIBUTES_TAB_ILIELEMENT_COL+"=? AND "+DbNames.META_ATTRIBUTES_TAB_ATTRNAME_COL+"=?";
+                    java.sql.PreparedStatement selPrepStmt = jdbcConnection.prepareStatement(selStmt);
+                    {
+                        {
+                            selPrepStmt.setString(1, "ClassesInTopics23.TestA");
+                            selPrepStmt.setString(2, MetaAttrUtility.ILI2DB_ILI_TOPIC_CLASSES);
+                            ResultSet rs = selPrepStmt.executeQuery();
+                            Assert.assertTrue(rs.next());
+                            Assert.assertEquals("classa1 classa1b classa1c classa1d",rs.getString(1));
+                            Assert.assertFalse(rs.next());
+                        }
+                        {
+                            selPrepStmt.setString(1, "ClassesInTopics23.TestB");
+                            selPrepStmt.setString(2, MetaAttrUtility.ILI2DB_ILI_TOPIC_CLASSES);
+                            ResultSet rs = selPrepStmt.executeQuery();
+                            Assert.assertTrue(rs.next());
+                            Assert.assertEquals("classa1 classa1c classa1d classb1 classb1c classb2 classesntpcs23testb_classa1b",rs.getString(1));
+                            Assert.assertFalse(rs.next());
+                        }
+                    }
+                }
+            }
+        }finally{
+            if(jdbcConnection!=null){
+                jdbcConnection.close();
+            }
+        }
+    }
+    @Test
+    public void importXtfTwice() throws Exception
+    {
+        //EhiLogger.getInstance().setTraceFilter(false);
+        Connection jdbcConnection = null;
+        try{
+            setup.resetDb();
             {
                 
                 File data=new File(TEST_DATA_DIR,"MetaInfo23a.xtf");
                 {
-                    Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+                    Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
                     config.setFunction(Config.FC_IMPORT);
                     config.setDoImplicitSchemaImport(true);
                     config.setCreateFk(Config.CREATE_FK_YES);
@@ -420,14 +433,15 @@ public class MetaInfo23Test {
                     Ili2db.run(config,null);
                 }
                 {
-                    Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+                    Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
                     config.setFunction(Config.FC_IMPORT);
                     config.setDoImplicitSchemaImport(true);
                     Ili2db.readSettingsFromDb(config);
                     Ili2db.run(config,null);
                 }
                 {
-                    String selStmt="SELECT "+DbNames.META_INFO_COLUMN_TAB_SETTING_COL+", "+DbNames.META_INFO_COLUMN_TAB_SUBTYPE_COL+" FROM "+DBSCHEMA+"."+DbNames.META_INFO_COLUMN_TAB+" WHERE "+DbNames.META_INFO_COLUMN_TAB_TABLENAME_COL+"=? AND "+DbNames.META_INFO_COLUMN_TAB_COLUMNNAME_COL+"=? AND "+DbNames.META_INFO_COLUMN_TAB_TAG_COL+"=?";
+                    jdbcConnection=setup.createConnection();
+                    String selStmt="SELECT "+DbNames.META_INFO_COLUMN_TAB_SETTING_COL+", "+DbNames.META_INFO_COLUMN_TAB_SUBTYPE_COL+" FROM "+setup.prefixName(DbNames.META_INFO_COLUMN_TAB)+" WHERE "+DbNames.META_INFO_COLUMN_TAB_TABLENAME_COL+"=? AND "+DbNames.META_INFO_COLUMN_TAB_COLUMNNAME_COL+"=? AND "+DbNames.META_INFO_COLUMN_TAB_TAG_COL+"=?";
                     java.sql.PreparedStatement selPrepStmt = jdbcConnection.prepareStatement(selStmt);
                     {
                         selPrepStmt.setString(1, "classa1");
@@ -478,7 +492,7 @@ public class MetaInfo23Test {
                             {"MetaInfo23.TestA.ClassA1.structa", "classa1_structa", "structa1", "classa1"},
                             {"MetaInfo23.TestA.ClassC.geom","geom","classc",null}
                         };
-                        Ili2dbAssert.assertAttrNameTable(jdbcConnection,expectedValues, DBSCHEMA);
+                        Ili2dbAssert.assertAttrNameTable(jdbcConnection,expectedValues, setup.getSchema());
                     }
                     {
                         // t_ili2db_trafo
@@ -493,7 +507,7 @@ public class MetaInfo23Test {
                             {"MetaInfo23.TestA.ClassA1",  "ch.ehi.ili2db.inheritance", "newClass"},
                             {"MetaInfo23.TestA.ClassC","ch.ehi.ili2db.inheritance","newClass"}
                         };
-                        Ili2dbAssert.assertTrafoTable(jdbcConnection,expectedValues, DBSCHEMA);
+                        Ili2dbAssert.assertTrafoTable(jdbcConnection,expectedValues, setup.getSchema());
                     }
                 }
             }
@@ -509,68 +523,28 @@ public class MetaInfo23Test {
         Statement stmt = null;
 
         try{
-            Class driverClass = Class.forName("org.postgresql.Driver");
-            jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
-            stmt=jdbcConnection.createStatement();
-            stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");
+            setup.resetDb();
 
             File data = new File(TEST_DATA_DIR, "T_Type23.ili");
-            Config config = initConfig(data.getPath(), DBSCHEMA,data.getPath()+".log");
+            Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
             config.setFunction(Config.FC_SCHEMAIMPORT);
             config.setCreateMetaInfo(true);
 
             Ili2db.readSettingsFromDb(config);
             Ili2db.run(config, null);
 
-            String query = "SELECT setting FROM "+DBSCHEMA+"."+DbNames.META_INFO_COLUMN_TAB+
+            String query = "SELECT setting FROM "+setup.prefixName(DbNames.META_INFO_COLUMN_TAB)+
                 " WHERE "+DbNames.META_INFO_COLUMN_TAB_TAG_COL+" = 'ch.ehi.ili2db.types' and "
                 + DbNames.META_INFO_COLUMN_TAB_COLUMNNAME_COL+" = 'T_Type' and "
                 + DbNames.META_INFO_TABLE_TAB_TABLENAME_COL+" = 'classa1';";
-
+            jdbcConnection=setup.createConnection();
+            stmt=jdbcConnection.createStatement();
             Assert.assertTrue(stmt.execute(query));
             ResultSet rs = stmt.getResultSet();
 
             Assert.assertTrue(rs.next());
             String setting = rs.getString(1);
             Assert.assertEquals("[\"classa1\",\"classa1b\",\"classa1c\",\"classa1d\"]", setting);
-
-        }finally{
-            if(jdbcConnection != null){
-                jdbcConnection.close();
-            }
-        }
-    }
-
-    @Test
-    public void importIliT_TypeConstraint() throws Exception {
-        Connection jdbcConnection = null;
-        Statement stmt = null;
-
-        try{
-            Class driverClass = Class.forName("org.postgresql.Driver");
-            jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
-            stmt=jdbcConnection.createStatement();
-            stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");
-
-            File data = new File(TEST_DATA_DIR, "T_Type23.ili");
-            Config config = initConfig(data.getPath(), DBSCHEMA,data.getPath()+".log");
-            config.setFunction(Config.FC_SCHEMAIMPORT);
-            config.setCreateTypeConstraint(true);
-
-            Ili2db.readSettingsFromDb(config);
-            Ili2db.run(config, null);
-
-            String query = "SELECT pg_catalog.pg_get_constraintdef(r.oid, true) as condef FROM pg_catalog.pg_constraint r WHERE r.conrelid = '"+DBSCHEMA.toLowerCase()+".classa1'::regclass AND r.contype = 'c';";
-
-            Assert.assertTrue(stmt.execute(query));
-            ResultSet rs = stmt.getResultSet();
-
-            Assert.assertTrue(rs.next());
-            String constraint = rs.getString(1);
-            Assert.assertTrue(constraint.contains("classa1"));
-            Assert.assertTrue(constraint.contains("classa1b"));
-            Assert.assertTrue(constraint.contains("classa1c"));
-            Assert.assertTrue(constraint.contains("classa1d"));
 
         }finally{
             if(jdbcConnection != null){
