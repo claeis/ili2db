@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TRANSFER xmlns="http://www.interlis.ch/INTERLIS2.3">
+	<HEADERSECTION SENDER="${xmlunit.ignore}" VERSION="2.3">
+		<MODELS>
+			<MODEL
+				NAME="SimpleA"
+				VERSION="2020-03-23"
+				URI="mailto:ce@eisenhutinformatik.ch"></MODEL>
+		</MODELS>
+	</HEADERSECTION>
+	<DATASECTION>
+		<SimpleA.TestA BID="0075e866-4e5d-4645-9b2d-87db843002cd">
+			<SimpleA.TestA.ClassA1 TID="${xmlunit.ignore}">
+				<attr23>a23</attr23>
+			</SimpleA.TestA.ClassA1>
+		</SimpleA.TestA>
+	</DATASECTION>
+</TRANSFER>

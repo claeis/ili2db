@@ -98,4 +98,23 @@ public class MsSqlTestSetup extends AbstractTestSetup {
     public String getSchema() {
         return dbschema;
     }
+    @Override
+    public Connection createDbSchema() throws SQLException {
+        if(dbschema!=null) {
+            Connection jdbcConnection=createConnection();
+            try {
+                Statement stmt=jdbcConnection.createStatement();
+                try {
+                    stmt.execute("CREATE SCHEMA "+dbschema+";");
+                }finally {
+                    stmt.close();
+                    stmt=null;
+                }
+            }finally {
+                jdbcConnection.close();
+                jdbcConnection=null;
+            }
+        }
+        return createConnection();
+    }
 }

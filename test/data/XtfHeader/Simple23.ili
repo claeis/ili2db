@@ -1,0 +1,31 @@
+INTERLIS 2.3;
+
+MODEL SimpleA
+  AT "mailto:ce@eisenhutinformatik.ch" VERSION "2020-03-23" =
+  
+  TOPIC TestA =
+  	BASKET OID AS INTERLIS.UUIDOID;
+    
+    CLASS ClassA1 =
+    	attr23 : TEXT*20;
+    END ClassA1;
+    
+  END TestA;
+  
+  
+END SimpleA.
+
+MODEL SimpleB
+  AT "mailto:ce@eisenhutinformatik.ch" VERSION "2020-03-23" =
+  
+  TOPIC TestB =
+  	BASKET OID AS INTERLIS.UUIDOID;
+    
+    CLASS ClassB1 =
+    	attr23 : TEXT*20;
+    END ClassB1;
+    
+  END TestB;
+  
+  
+END SimpleB.

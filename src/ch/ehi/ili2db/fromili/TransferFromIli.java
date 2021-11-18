@@ -105,10 +105,8 @@ public class TransferFromIli {
 	private boolean createBasketCol=false;
 	private boolean createDatasetCol=false;
 	private CustomMapping customMapping=null;
-	private boolean createItfLineTables=false;
 	private boolean createFk=false;
 	private boolean createFkIdx=false;
-	private boolean isIli1Model=false;
 	private String colT_ID=null;
 	private String nl=System.getProperty("line.separator");
 	private FromIliRecordConverter recConv=null;
@@ -137,9 +135,6 @@ public class TransferFromIli {
 		}
         srsModelAssignment=config.getSrsModelAssignment();
 
-		isIli1Model=td1.getIli1Format()!=null;
-		createItfLineTables=isIli1Model && config.getDoItfLineTables();
-		
 		customMapping=customMapping1;
 		customMapping.fromIliInit(config);
 
@@ -978,6 +973,7 @@ public class TransferFromIli {
 	}
 	public void addEnumTable(DbSchema schema)
 	{
+	    
 		if(Config.CREATE_ENUM_DEFS_SINGLE.equals(createEnumTable)){
 			DbTable tab=new DbTable();
 			DbColVarchar thisClass=new DbColVarchar();
@@ -1018,7 +1014,7 @@ public class TransferFromIli {
 			DbColVarchar description=new DbColVarchar();
 			description.setName(DbNames.ENUM_TAB_DESCRIPTION_COL);
 			description.setNotNull(false);
-			description.setSize(1024);
+			description.setSize(DbNames.ENUM_TAB_DESCRIPTION_COL_SIZE);
 			tab.addColumn(description);
 			schema.addTable(tab);
 		}else if(Config.CREATE_ENUM_DEFS_MULTI.equals(createEnumTable)){
@@ -1073,7 +1069,7 @@ public class TransferFromIli {
 					DbColVarchar description=new DbColVarchar();
 					description.setName(DbNames.ENUM_TAB_DESCRIPTION_COL);
 					description.setNotNull(false);
-					description.setSize(1024);
+					description.setSize(DbNames.ENUM_TAB_DESCRIPTION_COL_SIZE);
 					tab.addColumn(description);
 					schema.addTable(tab);
 					metaInfo.setTableInfo(tab.getName().getName(), DbExtMetaInfo.TAG_TAB_TABLEKIND, DbExtMetaInfo.TAG_TAB_TABLEKIND_ENUM);
@@ -1152,7 +1148,7 @@ public class TransferFromIli {
                     DbColVarchar description=new DbColVarchar();
                     description.setName(DbNames.ENUM_TAB_DESCRIPTION_COL);
                     description.setNotNull(false);
-                    description.setSize(1024);
+                    description.setSize(DbNames.ENUM_TAB_DESCRIPTION_COL_SIZE);
                     tab.addColumn(description);
                     schema.addTable(tab);
                     metaInfo.setTableInfo(tab.getName().getName(), DbExtMetaInfo.TAG_TAB_TABLEKIND, DbExtMetaInfo.TAG_TAB_TABLEKIND_ENUM);
@@ -1416,7 +1412,7 @@ public class TransferFromIli {
 	                    EhiLogger.traceBackendCmd(stmt);
 	                    java.sql.PreparedStatement ps = conn.prepareStatement(stmt);
 	                    try{
-	                        updateEnumEntries(gen,exstEntries,thisSqlName.getQName(),ps, type, null, null);
+	                        updateEnumEntries(null,exstEntries,thisSqlName.getQName(),ps, type, null, null);
 	                    }catch(java.sql.SQLException ex){
 	                        throw new Ili2dbException("failed to insert enum values for type "+thisClass,ex);
 	                    }finally{
@@ -1454,7 +1450,7 @@ public class TransferFromIli {
 	                    EhiLogger.traceBackendCmd(stmt);
 	                    java.sql.PreparedStatement ps = conn.prepareStatement(stmt);
 	                    try{
-	                        updateEnumEntries(gen,exstEntries,thisSqlName.getQName(),ps, type, null, null);
+	                        updateEnumEntries(null,exstEntries,thisSqlName.getQName(),ps, type, null, null);
 	                    }catch(java.sql.SQLException ex){
 	                        throw new Ili2dbException("failed to insert enum values for type "+thisClass,ex);
 	                    }finally{
@@ -1507,7 +1503,7 @@ public class TransferFromIli {
                         EhiLogger.traceBackendCmd(stmt);
                         java.sql.PreparedStatement ps = conn.prepareStatement(stmt);
                         try{
-                            updateEnumEntries(gen,exstEntries,thisSqlName.getQName(),ps, type, thisClass, baseClass);
+                            updateEnumEntries(null,exstEntries,thisSqlName.getQName(),ps, type, thisClass, baseClass);
                         }catch(java.sql.SQLException ex){
                             throw new Ili2dbException("failed to insert enum values for type "+thisClass,ex);
                         }finally{
@@ -1550,7 +1546,7 @@ public class TransferFromIli {
                         EhiLogger.traceBackendCmd(stmt);
                         java.sql.PreparedStatement ps = conn.prepareStatement(stmt);
                         try{
-                            updateEnumEntries(gen,exstEntries,thisSqlName.getQName(),ps, type, thisClass, baseClass);
+                            updateEnumEntries(null,exstEntries,thisSqlName.getQName(),ps, type, thisClass, baseClass);
                         }catch(java.sql.SQLException ex){
                             throw new Ili2dbException("failed to insert enum values for type "+thisClass,ex);
                         }finally{

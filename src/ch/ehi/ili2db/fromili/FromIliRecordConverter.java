@@ -668,6 +668,19 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 		}else if (type instanceof SurfaceOrAreaType){
 			if(createItfLineTables){
 				dbCol.value=null;
+			}else if(createXtfLineTables){
+                DbColGeometry ret=new DbColGeometry();
+                boolean curvePolygon=false;
+                if(!strokeArcs){
+                    curvePolygon=true;
+                }
+                ret.setType(curvePolygon ? DbColGeometry.MULTICURVE : DbColGeometry.MULTILINESTRING);
+                // get crs from ili
+                setCrs(ret,epsgCode);
+                CoordType coord=(CoordType)((SurfaceOrAreaType)type).getControlPointDomain().getType();
+                ret.setDimension(coord.getDimensions().length);
+                setBB(ret, coord,attr.getContainer().getScopedName(null)+"."+attr.getName());
+                dbCol.value=ret;
 			}else{
 				DbColGeometry ret=new DbColGeometry();
 				boolean curvePolygon=false;

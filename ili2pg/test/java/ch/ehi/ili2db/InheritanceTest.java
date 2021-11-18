@@ -1070,7 +1070,6 @@ public class InheritanceTest {
 	        jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
 	        File data=new File(TEST_DATA_DIR,"StructAttr1a-out.xtf");
 			Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
-			config.setModels("Inheritance1");
 			config.setDatasetName(DATASETNAME);
 			config.setFunction(Config.FC_EXPORT);
 			config.setExportTid(true);
@@ -1137,7 +1136,6 @@ public class InheritanceTest {
             jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
             File data=new File(TEST_DATA_DIR,"StructAttr1a-out.xtf");
             Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
-            config.setModels("Inheritance1");
             config.setDatasetName(DATASETNAME);
             config.setFunction(Config.FC_EXPORT);
             config.setExportTid(true);
@@ -1204,7 +1202,6 @@ public class InheritanceTest {
             jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
             File data=new File(TEST_DATA_DIR,"StructAttr1a-out.xtf");
             Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
-            config.setModels("Inheritance1");
             config.setDatasetName(DATASETNAME);
             config.setFunction(Config.FC_EXPORT);
             config.setExportTid(true);

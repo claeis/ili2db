@@ -13,6 +13,18 @@ ideas/open issues/questions
 
 LATEST
 ---------------------------
+- create metainfo about possible classes in a topic (#216)
+- set length of description field in ENUM tables to 'unlimited' (#429)
+- import polygons from XTF as boundary lines (#269)
+- check that --createBasketCol is used (if required) (#130)
+
+ili2db 4.6.1 (2021-11-10)
+------------------------------
+- Enum values are inserted twice when generating a script (#426)
+- export only required MODELs in HEADERSECTION (#413)
+- export by --topics with no baskets should create an empty transfer file (#432)
+- --sqlColsAsText erzeugt leere Geometrien (#423) 
+- iox-ili-1.21.8
 
 ili2db 4.6.0 (2021-09-10)
 ------------------------------

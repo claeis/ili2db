@@ -26,24 +26,11 @@ public class ModelElementSelector {
 	private TransferDescription td=null;
 	private boolean createItfLineTables=false;
 	private boolean includeEnums=false;
-	public List<Element> getModelElements(List<String> modelNames,TransferDescription td,boolean createItfLineTables,boolean includeEnums,Config config)
+    public List<Element> getModelElements(List<Model> models,TransferDescription td,boolean createItfLineTables,boolean includeEnums,Config config)
 	{
 		this.td=td;
 		this.createItfLineTables=createItfLineTables;
 		this.includeEnums=includeEnums;
-		List<Model> models=new ArrayList<Model>();
-		if(modelNames==null || modelNames.isEmpty()){
-			Model lastModel = td.getLastModel();
-			models.add(lastModel);
-		}else{
-			for(String modelName:modelNames){
-				Model model=(Model)td.getElement(Model.class, modelName);
-				if(model==null){
-					throw new IllegalArgumentException("unknown model <"+modelName+">");
-				}
-				models.add(model);
-			}
-		}
 		HashSet<Element> accu=new HashSet<Element>();
 		HashSet<Model> accuScope=new HashSet<Model>();
 		for(Model model:models){
