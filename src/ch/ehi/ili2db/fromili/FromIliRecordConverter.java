@@ -710,12 +710,12 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 					dbColExts.add(ret);
 				}
 			}
-		}else if (type instanceof PolylineType) {
-            String attrName = attr.getContainer().getScopedName(null) + "." + attr.getName();
-            DbColGeometry ret = generatePolylineType((PolylineType) type, attrName);
-            setCrs(ret, epsgCode);
-            dbCol.value = ret;
-        }
+		}else if (type instanceof PolylineType){
+			String attrName=attr.getContainer().getScopedName(null)+"."+attr.getName();
+			DbColGeometry ret = generatePolylineType((PolylineType)type, attrName);
+			setCrs(ret,epsgCode);
+			dbCol.value=ret;
+		}
 		else if (type instanceof MultiPolylineType){
             String attrName = attr.getContainer().getScopedName(null) + "." + attr.getName();
             DbColGeometry ret = generateMultiPolylineType((MultiPolylineType) type, attrName);

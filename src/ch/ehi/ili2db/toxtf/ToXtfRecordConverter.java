@@ -332,10 +332,10 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
                     sep=",";
                     ret.append(makeColumnRef(tableAlias,attrSqlName+DbNames.LOCALISED_TXT_COL_SUFFIX));
 				}
-			}else if (type instanceof PolylineType) {
-				ret.append(sep);
-				sep = ",";
-				ret.append(geomConv.getSelectValueWrapperPolyline(makeColumnRef(tableAlias, attrSqlName)));
+			}else if (type instanceof PolylineType){
+				 ret.append(sep);
+				 sep=",";
+				 ret.append(geomConv.getSelectValueWrapperPolyline(makeColumnRef(tableAlias,attrSqlName)));
 			}else if (type instanceof MultiPolylineType){
 				ret.append(sep);
 				sep=",";
