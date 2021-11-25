@@ -679,7 +679,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
                 ret.setType(curvePolygon ? DbColGeometry.MULTICURVE : DbColGeometry.MULTILINESTRING);
                 // get crs from ili
                 setCrs(ret,epsgCode);
-                CoordType coord=(CoordType)((SurfaceOrAreaType)type).getControlPointDomain().getType();
+                CoordType coord=(CoordType)((AbstractSurfaceOrAreaType)type).getControlPointDomain().getType();
                 ret.setDimension(coord.getDimensions().length);
                 setBB(ret, coord,attr.getContainer().getScopedName(null)+"."+attr.getName());
                 dbCol.value=ret;
