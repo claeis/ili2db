@@ -22,7 +22,7 @@ public class MultiPolyline24Test extends ch.ehi.ili2db.MultiPolyline24Test {
         Gpkg2iox gpkg2iox = new Gpkg2iox();
 
         while (rs.next()) {
-            assertEquals("MULTIPOLYLINE {polyline POLYLINE {sequence SEGMENTS {segment [COORD {C1 480000.111, C2 70000.111, C3 5000.111}, COORD {C1 480000.222, C2 70000.222, C3 5000.222}, COORD {C1 480000.333, C2 70000.333, C3 5000.333}]}}}", gpkg2iox.read(rs.getBytes(1)).toString());
+            assertEquals("MULTIPOLYLINE {polyline [POLYLINE {sequence SEGMENTS {segment [COORD {C1 480000.111, C2 70000.111, C3 5000.111}, COORD {C1 480000.222, C2 70000.222, C3 5000.222}, COORD {C1 480000.333, C2 70000.333, C3 5000.333}]}}, POLYLINE {sequence SEGMENTS {segment [COORD {C1 480000.444, C2 70000.444, C3 5000.444}, COORD {C1 480000.555, C2 70000.555, C3 5000.555}, COORD {C1 480000.666, C2 70000.666, C3 5000.666}]}}]}", gpkg2iox.read(rs.getBytes(1)).toString());
         }
     }
 }

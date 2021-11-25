@@ -127,6 +127,30 @@ public abstract class MultiPolyline24Test {
         assertEquals("70000.333", coord3.getattrvalue("C2"));
         assertEquals("5000.333", coord3.getattrvalue("C3"));
 
+        IomObject polyline2 = multiPolylineAttr.getattrobj("polyline", 1);
+        assertNotNull(polyline2);
+
+        IomObject sequence2 = polyline2.getattrobj("sequence", 0);
+        assertNotNull(sequence2);
+
+        IomObject coord4 = sequence2.getattrobj("segment", 0);
+        assertNotNull(coord4);
+        assertEquals("480000.444", coord4.getattrvalue("C1"));
+        assertEquals("70000.444", coord4.getattrvalue("C2"));
+        assertEquals("5000.444", coord4.getattrvalue("C3"));
+
+        IomObject coord5 = sequence2.getattrobj("segment", 1);
+        assertNotNull(coord5);
+        assertEquals("480000.555", coord5.getattrvalue("C1"));
+        assertEquals("70000.555", coord5.getattrvalue("C2"));
+        assertEquals("5000.555", coord5.getattrvalue("C3"));
+
+        IomObject coord6 = sequence2.getattrobj("segment", 2);
+        assertNotNull(coord6);
+        assertEquals("480000.666", coord6.getattrvalue("C1"));
+        assertEquals("70000.666", coord6.getattrvalue("C2"));
+        assertEquals("5000.666", coord6.getattrvalue("C3"));
+
         assertTrue(reader.read() instanceof EndBasketEvent);
         assertTrue(reader.read() instanceof EndTransferEvent);
     }

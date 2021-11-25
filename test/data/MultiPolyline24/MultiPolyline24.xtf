@@ -30,6 +30,23 @@
                                 <geom:c3>5000.333</geom:c3>
                             </geom:coord>
                         </geom:polyline>
+                        <geom:polyline>
+                            <geom:coord>
+                                <geom:c1>480000.444</geom:c1>
+                                <geom:c2>70000.444</geom:c2>
+                                <geom:c3>5000.444</geom:c3>
+                            </geom:coord>
+                            <geom:coord>
+                                <geom:c1>480000.555</geom:c1>
+                                <geom:c2>70000.555</geom:c2>
+                                <geom:c3>5000.555</geom:c3>
+                            </geom:coord>
+                            <geom:coord>
+                                <geom:c1>480000.666</geom:c1>
+                                <geom:c2>70000.666</geom:c2>
+                                <geom:c3>5000.666</geom:c3>
+                            </geom:coord>
+                        </geom:polyline>
                     </geom:multipolyline>
                 </MultiPolyline24:geomAttr1>
             </MultiPolyline24:ClassA1>
