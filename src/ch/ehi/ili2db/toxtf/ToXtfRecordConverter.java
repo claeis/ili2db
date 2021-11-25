@@ -999,7 +999,7 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
                              valuei++;
                              if(!rs.wasNull()){
                                  try{
-                                     boolean is3D=((CoordType)((SurfaceOrAreaType)type).getControlPointDomain().getType()).getDimensions().length==3;
+                                     boolean is3D=((CoordType)((AbstractSurfaceOrAreaType)type).getControlPointDomain().getType()).getDimensions().length==3;
                                      IomObject multiline=geomConv.toIomMultiPolyline(geomobj,sqlAttrName,is3D);
                                      IomObject surface=null;
                                      if(multiline!=null) {
