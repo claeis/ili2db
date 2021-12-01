@@ -48,7 +48,7 @@ before_script:
 script: 
   - # ant -f build-ili2pg.xml jar
   - gradle jar test 
-  - gradle ili2mysqlJar ili2mysqlTest -Dmyurl=jdbc:mysql://127.0.0.1/ili2db?useSSL=false -Dmyusr=root
+  - gradle ili2mysqlJar ili2mysqlTest -Dmyurl=jdbc:mysql://localhost/ili2db?useSSL=false -Dmyusr=root
   - gradle ili2pgJar ili2pgTest -Ddburl=jdbc:postgresql:ili2db -Ddbusr=postgres
   - gradle ili2gpkgJar ili2gpkgTest
   - gradle ili2fgdbJar
