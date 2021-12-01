@@ -17,6 +17,7 @@ LATEST
 - set length of description field in ENUM tables to 'unlimited' (#429)
 - import polygons from XTF as boundary lines (#269)
 - check that --createBasketCol is used (if required) (#130)
+- mysql:mysql-connector-java:5.1.49
 
 ili2db 4.6.1 (2021-11-10)
 ------------------------------
