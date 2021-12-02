@@ -1354,6 +1354,39 @@ public class Oid23Test {
         }
     }
     @Test
+    public void importIliStableBidWoBasketCol_Smart1_fails() throws Exception
+    {
+        //EhiLogger.getInstance().setTraceFilter(false);
+        Connection jdbcConnection=null;
+        try{
+            Class driverClass = Class.forName("org.postgresql.Driver");
+            jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
+            stmt=jdbcConnection.createStatement();
+            stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");
+            {
+                File data=new File(TEST_DATA_DIR,"Bid5.ili");
+                Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+                config.setFunction(Config.FC_SCHEMAIMPORT);
+                config.setCreateFk(Config.CREATE_FK_YES);
+                config.setTidHandling(null);
+                config.setBasketHandling(null);
+                config.setCatalogueRefTrafo(null);
+                config.setMultiSurfaceTrafo(null);
+                config.setMultilingualTrafo(null);
+                config.setInheritanceTrafo(Config.INHERITANCE_TRAFO_SMART1);
+                Ili2db.readSettingsFromDb(config);
+                Ili2db.run(config,null);
+                Assert.fail();
+            }
+        }catch(Ili2dbException ex) {
+            Assert.assertEquals("Model Bid5 requires column T_basket",ex.getMessage());
+        }finally{
+            if(jdbcConnection!=null){
+                jdbcConnection.close();
+            }
+        }
+    }
+    @Test
     public void importXtfExtendedTopic_Smart1() throws Exception
     {
         {
