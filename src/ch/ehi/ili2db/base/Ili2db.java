@@ -1438,7 +1438,7 @@ public class Ili2db {
         if(createBasketCol) {
             return;
         }
-        List<String> extendedModels=new ArrayList<String>();
+        List<String> modelsThatRequireBasketCol=new ArrayList<String>();
         for(Model model:models) {
             Iterator it=model.iterator();
             while(it.hasNext()) {
@@ -1446,23 +1446,28 @@ public class Ili2db {
                 if(el instanceof Topic) {
                     Topic topic=(Topic)el;
                     if(topic.getExtending()!=null) {
-                        if(!extendedModels.contains(model.getName())) {
-                            extendedModels.add(model.getName());
+                        if(!modelsThatRequireBasketCol.contains(model.getName())) {
+                            modelsThatRequireBasketCol.add(model.getName());
+                        }
+                    }
+                    if(topic.getBasketOid()!=null) {
+                        if(!modelsThatRequireBasketCol.contains(model.getName())) {
+                            modelsThatRequireBasketCol.add(model.getName());
                         }
                     }
                 }
             }
         }
-        if(extendedModels.size()>0) {
-            Collections.sort(extendedModels);
+        if(modelsThatRequireBasketCol.size()>0) {
+            Collections.sort(modelsThatRequireBasketCol);
             StringBuffer modelNames=new StringBuffer();
             String sep="";
-            for(String modelName:extendedModels) {
+            for(String modelName:modelsThatRequireBasketCol) {
                 modelNames.append(sep);
                 modelNames.append(modelName);
                 sep=", ";
             }
-            if(extendedModels.size()==1) {
+            if(modelsThatRequireBasketCol.size()==1) {
                 throw new Ili2dbException("Model "+modelNames+" requires column "+DbNames.T_BASKET_COL);
             }else {
                 throw new Ili2dbException("Models "+modelNames+" require column "+DbNames.T_BASKET_COL);
