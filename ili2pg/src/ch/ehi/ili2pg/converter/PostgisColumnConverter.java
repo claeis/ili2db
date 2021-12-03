@@ -79,7 +79,13 @@ public class PostgisColumnConverter extends AbstractWKBColumnConverter {
 		super.setup(conn,config);
 		strokeArcs=Config.STROKE_ARCS_ENABLE.equals(Config.getStrokeArcs(config));
 	}
-	
+
+	private String wrapMakeValid(String innerString) {
+		return strokeArcs ?
+				String.format("ST_MakeValid(%s)", innerString) :
+				innerString;
+	}
+
 	@Override
 	public String getInsertValueWrapperCoord(String wkfValue,int srid) {
 		return "ST_GeomFromWKB("+wkfValue+(srid==-1?"":","+srid)+")";
@@ -102,12 +108,12 @@ public class PostgisColumnConverter extends AbstractWKBColumnConverter {
 	}
 	@Override
 	public String getInsertValueWrapperSurface(String wkfValue,int srid) {
-		return "ST_GeomFromWKB("+wkfValue+(srid==-1?"":","+srid)+")";
+		return wrapMakeValid("ST_GeomFromWKB("+wkfValue+(srid==-1?"":","+srid)+")");
 		//return "GeomFromWKB("+wkfValue+(srid==-1?"":","+srid)+")";
 	}
 	@Override
 	public String getInsertValueWrapperMultiSurface(String wkfValue,int srid) {
-		return "ST_GeomFromWKB("+wkfValue+(srid==-1?"":","+srid)+")";
+		return wrapMakeValid("ST_GeomFromWKB("+wkfValue+(srid==-1?"":","+srid)+")");
 		//return "GeomFromWKB("+wkfValue+(srid==-1?"":","+srid)+")";
 	}
 	@Override
