@@ -1,0 +1,25 @@
+INTERLIS 2.3;
+
+MODEL RtreeSpatialIndex
+  AT "mailto:ce@eisenhutinformatik.ch" VERSION "2021-11-25" =
+
+  DOMAIN
+    Vertex2D = COORD
+      2480000.000 .. 2850000.000 [INTERLIS.m],
+      1070000.000 .. 1310000.000 [INTERLIS.m],
+      ROTATION 2 -> 1;
+
+  TOPIC Test =
+
+    CLASS CompoundCurve2D =
+      Geometrie: POLYLINE WITH (STRAIGHTS)
+        VERTEX Vertex2D;
+    END CompoundCurve2D;
+
+    CLASS Point2D =
+      Geometrie: Vertex2D;
+    END Point2D;
+
+  END Test;
+
+END RtreeSpatialIndex.

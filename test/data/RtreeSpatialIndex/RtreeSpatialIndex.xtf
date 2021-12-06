@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TRANSFER xmlns="http://www.interlis.ch/INTERLIS2.3">
+  <HEADERSECTION SENDER="" VERSION="2.3">
+    <MODELS>
+      <MODEL NAME="RtreeSpatialIndex"></MODEL>
+    </MODELS>
+  </HEADERSECTION>
+  <DATASECTION>
+
+    <RtreeSpatialIndex.Test BID="b1">
+      <RtreeSpatialIndex.Test.Point2D TID="o1">
+        <Geometrie>
+          <COORD><C1>2612530.626</C1><C2>1238645.861</C2></COORD>
+        </Geometrie>
+      </RtreeSpatialIndex.Test.Point2D>
+      <RtreeSpatialIndex.Test.Point2D TID="o2">
+        <Geometrie>
+          <COORD><C1>2612762.733</C1><C2>1241984.858</C2></COORD>
+        </Geometrie>
+      </RtreeSpatialIndex.Test.Point2D>
+      <RtreeSpatialIndex.Test.Point2D TID="o3">
+        <Geometrie>
+          <COORD><C1>2612709.319</C1><C2>1241959.382</C2></COORD>
+        </Geometrie>
+      </RtreeSpatialIndex.Test.Point2D>
+
+      <RtreeSpatialIndex.Test.CompoundCurve2D TID="o4">
+        <Geometrie>
+          <POLYLINE>
+            <COORD><C1>2608280.818</C1><C2>1240444.955</C2></COORD>
+            <COORD><C1>2608286.789</C1><C2>1240515.245</C2></COORD>
+          </POLYLINE>
+        </Geometrie>
+      </RtreeSpatialIndex.Test.CompoundCurve2D>
+      <RtreeSpatialIndex.Test.CompoundCurve2D TID="o5">
+        <Geometrie>
+          <POLYLINE>
+            <COORD><C1>2612747.276</C1><C2>1236603.009</C2></COORD>
+            <COORD><C1>2613152.660</C1><C2>1236680.784</C2></COORD>
+            <COORD><C1>2613196.232</C1><C2>1236692.569</C2></COORD>
+          </POLYLINE>
+        </Geometrie>
+      </RtreeSpatialIndex.Test.CompoundCurve2D>
+    </RtreeSpatialIndex.Test>
+
+  </DATASECTION>
+</TRANSFER>
