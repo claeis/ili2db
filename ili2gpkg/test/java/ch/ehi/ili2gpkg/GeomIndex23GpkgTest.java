@@ -260,24 +260,50 @@ public class GeomIndex23GpkgTest {
         }
     }
 
+    @Test
+    public void testImportXtf() throws Exception {
+        createSchema(true);
+        runImport(true);
+        openDb(FILENAME_GPKG_OUT);
+
+        // test if there is a rtree spatial index created and populated
+        rs=stmt.executeQuery("SELECT COUNT(*) AS count FROM rtree_point2d_geometrie");
+        Assert.assertTrue(rs.next() && rs.getInt("count") == 3);
+        rs=stmt.executeQuery("SELECT COUNT(*) AS count FROM rtree_compoundcurve2d_geometrie");
+        Assert.assertTrue(rs.next() && rs.getInt("count") == 2);
+    }
+
     private void createSchema(boolean createGeomIdx) throws Exception {
+        Config config=initConfig();
+        if(createGeomIdx) {
+            config.setValue(Config.CREATE_GEOM_INDEX, Config.TRUE);
+        }
+        config.setFunction(Config.FC_SCHEMAIMPORT);
+        Ili2db.run(config,null); // set up database schema
+    }
+
+    private void runImport(boolean loadSQLFunctions) throws Exception {
+        Config config=initConfig();
+        config.setFunction(Config.FC_IMPORT);
+        if(loadSQLFunctions) {
+            config.setValue(Config.CREATE_GEOM_INDEX, Config.TRUE);
+        }
+        Ili2db.run(config,null); // run import
+    }
+
+    private Config initConfig() {
         Config config=new Config();
         (new GpkgMain()).initConfig(config);
 
         config.setDbfile(FILENAME_GPKG_OUT);
-        config.setDburl("jdbc:sqlite:"+ FILENAME_GPKG_OUT);
+        config.setDburl("jdbc:sqlite:" + FILENAME_GPKG_OUT);
 
         config.setXtffile(FILENAME_XTF);
         config.setModels(MODEL_XTF);
         config.setModeldir(TEST_OUT);
         config.setDefaultSrsCode("2056");
 
-        config.setFunction(Config.FC_SCHEMAIMPORT);
-        if(createGeomIdx) {
-            config.setValue(Config.CREATE_GEOM_INDEX, Config.TRUE);
-        }
-
-        Ili2db.run(config,null); // set up database schema
+        return config;
     }
 
     // helper class
