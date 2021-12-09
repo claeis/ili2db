@@ -19,6 +19,7 @@ LATEST
 - check that --createBasketCol is used (if required) (#130)
 - mysql:mysql-connector-java:5.1.49
 - iox-ili-1.21.9-SNAPSHOT
+- ehisqlgen-1.14.1-SNAPSHOT
 
 ili2db 4.6.1 (2021-11-10)
 ------------------------------
