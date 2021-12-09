@@ -2,7 +2,7 @@
 <TRANSFER xmlns="http://www.interlis.ch/INTERLIS2.3">
   <HEADERSECTION SENDER="" VERSION="2.3">
     <MODELS>
-      <MODEL NAME="RtreeSpatialIndex"></MODEL>
+      <MODEL NAME="GeomIndex23"></MODEL>
     </MODELS>
   </HEADERSECTION>
   <DATASECTION>

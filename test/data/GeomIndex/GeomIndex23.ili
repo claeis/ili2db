@@ -1,6 +1,6 @@
 INTERLIS 2.3;
 
-MODEL RtreeSpatialIndex
+MODEL GeomIndex23
   AT "mailto:ce@eisenhutinformatik.ch" VERSION "2021-11-25" =
 
   DOMAIN
@@ -22,4 +22,4 @@ MODEL RtreeSpatialIndex
 
   END Test;
 
-END RtreeSpatialIndex.
+END GeomIndex23.

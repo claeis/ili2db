@@ -11,14 +11,14 @@ import java.io.File;
 import java.sql.*;
 import java.util.ArrayList;
 
-public class RtreeSpatialIndexTest {
-    private static final String TEST_OUT="test/data/RtreeSpatialIndex/";
-    private static final String FILENAME_XTF=TEST_OUT+"RtreeSpatialIndex.xtf";
-    private static final String MODEL_XTF="RtreeSpatialIndex";
-    private static final String FILENAME_XTF_GPKG=TEST_OUT+"RtreeSpatialIndex.gpkg";
-    private static final String PRIMARY_KEY_XTF_GPKG="T_Id";
-    private static final String FILENAME_TEST_DATA_GPKG=TEST_OUT+"test_data.gpkg";
-    private static final String PRIMARY_KEY_TEST_DATA_GPKG="id";
+public class GeomIndex23GpkgTest {
+    private static final String TEST_OUT="test/data/GeomIndex/";
+    private static final String FILENAME_XTF=TEST_OUT+"GeomIndex23.xtf";
+    private static final String MODEL_XTF="GeomIndex23";
+    private static final String FILENAME_GPKG_OUT=TEST_OUT+"GeomIndex23.gpkg";
+    private static final String PRIMARY_KEY_GPKG_OUT="T_Id";
+    private static final String FILENAME_GPKG_EXISTING=TEST_OUT+"test_data.gpkg";
+    private static final String PRIMARY_KEY_GPKG_EXISTING="id";
 
     private Connection jdbcConnection=null;
     private Statement stmt=null,stmt2=null;
@@ -30,7 +30,7 @@ public class RtreeSpatialIndexTest {
     }
 
     private void clearDb() throws Exception {
-        File gpkgFile=new File(FILENAME_XTF_GPKG);
+        File gpkgFile=new File(FILENAME_GPKG_OUT);
         if(gpkgFile.exists()){
             gpkgFile.delete();
         }
@@ -65,7 +65,7 @@ public class RtreeSpatialIndexTest {
     public void testSQLFunctionsMissing() throws Exception {
         createSchema(false);
 
-        openDb(FILENAME_XTF_GPKG);
+        openDb(FILENAME_GPKG_OUT);
         // don't load the SQL functions ST_IsEmpty, ST_MinX, ST_MaxX, ST_MinY, ST_MaxY
 
         try {
@@ -79,7 +79,7 @@ public class RtreeSpatialIndexTest {
 
     @Test
     public void testSQLFunctionsImplementation() throws Exception {
-        openDb(FILENAME_TEST_DATA_GPKG);
+        openDb(FILENAME_GPKG_EXISTING);
 
         // load the SQL functions ST_IsEmpty, ST_MinX, ST_MaxX, ST_MinY, ST_MaxY
         Config config = new Config();
@@ -111,7 +111,7 @@ public class RtreeSpatialIndexTest {
 
                 rs2=stmt2.executeQuery("SELECT ST_MinX("+column_name+") AS minx,ST_MaxX("+column_name+") AS maxx,"
                         +"ST_MinY("+column_name+") AS miny,ST_MaxY("+column_name+") AS maxy FROM "+table_name+
-                        " WHERE "+PRIMARY_KEY_TEST_DATA_GPKG+" = "+Long.toString(id));
+                        " WHERE "+PRIMARY_KEY_GPKG_EXISTING+" = "+Long.toString(id));
                 Assert.assertTrue(rs2.next());
 
                 // tolerance for floating-point equality
@@ -124,12 +124,12 @@ public class RtreeSpatialIndexTest {
             }
 
             // test if the result of ST_IsEmpty matches the test data
-            rs=stmt.executeQuery("SELECT "+PRIMARY_KEY_TEST_DATA_GPKG+" FROM "+table_name+" WHERE "+
-                    PRIMARY_KEY_TEST_DATA_GPKG+" NOT IN (SELECT id FROM rtree_"+table_name+"_"+column_name+")");
+            rs=stmt.executeQuery("SELECT "+PRIMARY_KEY_GPKG_EXISTING+" FROM "+table_name+" WHERE "+
+                    PRIMARY_KEY_GPKG_EXISTING+" NOT IN (SELECT id FROM rtree_"+table_name+"_"+column_name+")");
             while(rs.next()) {
-                long primary_key=rs.getLong(PRIMARY_KEY_TEST_DATA_GPKG);
+                long primary_key=rs.getLong(PRIMARY_KEY_GPKG_EXISTING);
 
-                rs2=stmt2.executeQuery("SELECT * FROM "+table_name+" WHERE "+PRIMARY_KEY_TEST_DATA_GPKG+" = "+Long.toString(primary_key)+" AND NOT "+
+                rs2=stmt2.executeQuery("SELECT * FROM "+table_name+" WHERE "+PRIMARY_KEY_GPKG_EXISTING+" = "+Long.toString(primary_key)+" AND NOT "+
                         "("+column_name+" ISNULL OR ST_IsEmpty("+column_name+"))"); // use short-circuit evaluation, ST_IsEmpty(NULL) is invalid
                 Assert.assertFalse(rs2.next());
             }
@@ -139,7 +139,7 @@ public class RtreeSpatialIndexTest {
     @Test
     public void testSpatialIndexImplementation() throws Exception {
         createSchema(true);
-        openDb(FILENAME_XTF_GPKG);
+        openDb(FILENAME_GPKG_OUT);
 
         // get table_name,column_name for all geometric columns having a rtree spatial index
         ArrayList<Tuple<String>> tabColTuples=new ArrayList<Tuple<String>>();
@@ -168,7 +168,7 @@ public class RtreeSpatialIndexTest {
                     "WHEN (NEW.\""+column_name+"\" NOT NULL AND NOT ST_IsEmpty(NEW.\""+column_name+"\")) "+
                     "BEGIN "+
                     "INSERT OR REPLACE INTO \"rtree_"+table_name+"_"+column_name+"\" VALUES ("+
-                    "NEW.\""+ PRIMARY_KEY_XTF_GPKG +"\","+
+                    "NEW.\""+ PRIMARY_KEY_GPKG_OUT +"\","+
                     "ST_MinX(NEW.\""+column_name+"\"),ST_MaxX(NEW.\""+column_name+"\"),"+
                     "ST_MinY(NEW.\""+column_name+"\"),ST_MaxY(NEW.\""+column_name+"\")"+
                     "); "+
@@ -181,7 +181,7 @@ public class RtreeSpatialIndexTest {
             Assert.assertEquals("CREATE TRIGGER \"rtree_"+table_name+"_"+column_name+"_delete\" AFTER DELETE ON \""+table_name+"\" "+
                     "WHEN OLD.\""+column_name+"\" NOT NULL "+
                     "BEGIN "+
-                    "DELETE FROM \"rtree_"+table_name+"_"+column_name+"\" WHERE id = OLD.\""+ PRIMARY_KEY_XTF_GPKG +"\"; "+
+                    "DELETE FROM \"rtree_"+table_name+"_"+column_name+"\" WHERE id = OLD.\""+ PRIMARY_KEY_GPKG_OUT +"\"; "+
                     "END",
                     triggerStmt6);
 
@@ -189,11 +189,11 @@ public class RtreeSpatialIndexTest {
             Assert.assertTrue(rs.next());
             String triggerStmt2=rs.getString("sql");
             Assert.assertEquals("CREATE TRIGGER \"rtree_"+table_name+"_"+column_name+"_update1\" AFTER UPDATE OF \""+column_name+"\" ON \""+table_name+"\" "+
-                    "WHEN OLD.\""+ PRIMARY_KEY_XTF_GPKG +"\" = NEW.\""+ PRIMARY_KEY_XTF_GPKG +"\" AND "+
+                    "WHEN OLD.\""+ PRIMARY_KEY_GPKG_OUT +"\" = NEW.\""+ PRIMARY_KEY_GPKG_OUT +"\" AND "+
                     "(NEW.\""+column_name+"\" NOTNULL AND NOT ST_IsEmpty(NEW.\""+column_name+"\")) "+
                     "BEGIN "+
                     "INSERT OR REPLACE INTO \"rtree_"+table_name+"_"+column_name+"\" VALUES ("+
-                    "NEW.\""+ PRIMARY_KEY_XTF_GPKG +"\","+
+                    "NEW.\""+ PRIMARY_KEY_GPKG_OUT +"\","+
                     "ST_MinX(NEW.\""+column_name+"\"),ST_MaxX(NEW.\""+column_name+"\"),"+
                     "ST_MinY(NEW.\""+column_name+"\"),ST_MaxY(NEW.\""+column_name+"\")"+
                     "); "+
@@ -204,10 +204,10 @@ public class RtreeSpatialIndexTest {
             Assert.assertTrue(rs.next());
             String triggerStmt3=rs.getString("sql");
             Assert.assertEquals("CREATE TRIGGER \"rtree_"+table_name+"_"+column_name+"_update2\" AFTER UPDATE OF \""+column_name+"\" ON \""+table_name+"\" "+
-                    "WHEN OLD.\""+ PRIMARY_KEY_XTF_GPKG +"\" = NEW.\""+ PRIMARY_KEY_XTF_GPKG +"\" AND "+
+                    "WHEN OLD.\""+ PRIMARY_KEY_GPKG_OUT +"\" = NEW.\""+ PRIMARY_KEY_GPKG_OUT +"\" AND "+
                     "(NEW.\""+column_name+"\" ISNULL OR ST_IsEmpty(NEW.\""+column_name+"\")) "+
                     "BEGIN "+
-                    "DELETE FROM \"rtree_"+table_name+"_"+column_name+"\" WHERE id = OLD.\""+ PRIMARY_KEY_XTF_GPKG +"\"; "+
+                    "DELETE FROM \"rtree_"+table_name+"_"+column_name+"\" WHERE id = OLD.\""+ PRIMARY_KEY_GPKG_OUT +"\"; "+
                     "END",
                     triggerStmt3);
 
@@ -215,12 +215,12 @@ public class RtreeSpatialIndexTest {
             Assert.assertTrue(rs.next());
             String triggerStmt4=rs.getString("sql");
             Assert.assertEquals("CREATE TRIGGER \"rtree_"+table_name+"_"+column_name+"_update3\" AFTER UPDATE ON \""+table_name+"\" "+
-                    "WHEN OLD.\""+ PRIMARY_KEY_XTF_GPKG +"\" != NEW.\""+ PRIMARY_KEY_XTF_GPKG +"\" AND "+
+                    "WHEN OLD.\""+ PRIMARY_KEY_GPKG_OUT +"\" != NEW.\""+ PRIMARY_KEY_GPKG_OUT +"\" AND "+
                     "(NEW.\""+column_name+"\" NOTNULL AND NOT ST_IsEmpty(NEW.\""+column_name+"\")) "+
                     "BEGIN "+
-                    "DELETE FROM \"rtree_"+table_name+"_"+column_name+"\" WHERE id = OLD.\""+ PRIMARY_KEY_XTF_GPKG +"\"; "+
+                    "DELETE FROM \"rtree_"+table_name+"_"+column_name+"\" WHERE id = OLD.\""+ PRIMARY_KEY_GPKG_OUT +"\"; "+
                     "INSERT OR REPLACE INTO \"rtree_"+table_name+"_"+column_name+"\" VALUES ("+
-                    "NEW.\""+ PRIMARY_KEY_XTF_GPKG +"\","+
+                    "NEW.\""+ PRIMARY_KEY_GPKG_OUT +"\","+
                     "ST_MinX(NEW.\""+column_name+"\"),ST_MaxX(NEW.\""+column_name+"\"),"+
                     "ST_MinY(NEW.\""+column_name+"\"),ST_MaxY(NEW.\""+column_name+"\")"+
                     "); "+
@@ -231,10 +231,10 @@ public class RtreeSpatialIndexTest {
             Assert.assertTrue(rs.next());
             String triggerStmt5=rs.getString("sql");
             Assert.assertEquals("CREATE TRIGGER \"rtree_"+table_name+"_"+column_name+"_update4\" AFTER UPDATE ON \""+table_name+"\" "+
-                    "WHEN OLD.\""+ PRIMARY_KEY_XTF_GPKG +"\" != NEW.\""+ PRIMARY_KEY_XTF_GPKG +"\" AND "+
+                    "WHEN OLD.\""+ PRIMARY_KEY_GPKG_OUT +"\" != NEW.\""+ PRIMARY_KEY_GPKG_OUT +"\" AND "+
                     "(NEW.\""+column_name+"\" ISNULL OR ST_IsEmpty(NEW.\""+column_name+"\")) "+
                     "BEGIN "+
-                    "DELETE FROM \"rtree_"+table_name+"_"+column_name+"\" WHERE id IN (OLD.\""+ PRIMARY_KEY_XTF_GPKG +"\",NEW.\""+ PRIMARY_KEY_XTF_GPKG +"\"); "+
+                    "DELETE FROM \"rtree_"+table_name+"_"+column_name+"\" WHERE id IN (OLD.\""+ PRIMARY_KEY_GPKG_OUT +"\",NEW.\""+ PRIMARY_KEY_GPKG_OUT +"\"); "+
                     "END",
                     triggerStmt5);
         }
@@ -243,7 +243,7 @@ public class RtreeSpatialIndexTest {
     @Test
     public void testTableContentGpkgExtensions() throws Exception {
         createSchema(true);
-        openDb(FILENAME_XTF_GPKG);
+        openDb(FILENAME_GPKG_OUT);
 
         // test if table gpkg_extensions exists
         ResultSet rs=stmt.executeQuery("SELECT EXISTS (SELECT * FROM sqlite_master WHERE type='table' AND name='gpkg_extensions')");
@@ -264,8 +264,8 @@ public class RtreeSpatialIndexTest {
         Config config=new Config();
         (new GpkgMain()).initConfig(config);
 
-        config.setDbfile(FILENAME_XTF_GPKG);
-        config.setDburl("jdbc:sqlite:"+ FILENAME_XTF_GPKG);
+        config.setDbfile(FILENAME_GPKG_OUT);
+        config.setDburl("jdbc:sqlite:"+ FILENAME_GPKG_OUT);
 
         config.setXtffile(FILENAME_XTF);
         config.setModels(MODEL_XTF);
