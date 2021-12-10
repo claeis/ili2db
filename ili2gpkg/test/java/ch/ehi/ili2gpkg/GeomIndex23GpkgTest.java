@@ -261,7 +261,7 @@ public class GeomIndex23GpkgTest {
     }
 
     @Test
-    public void testImportXtf() throws Exception {
+    public void importXtf() throws Exception {
         createSchema(true);
         runImport(true);
         openDb(FILENAME_GPKG_OUT);
