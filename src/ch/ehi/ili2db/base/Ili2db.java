@@ -500,7 +500,7 @@ public class Ili2db {
 				if (td == null) {
 					throw new Ili2dbException("compiler failed");
 				}
-				
+				config.setTransientObject(Config.TRANSIENT_MODEL, td);
 				// if meta attribute table already exists, read it
                 if(config.getCreateMetaInfo() && customMapping.tableExists(conn,new DbTableName(config.getDbschema(),DbNames.META_ATTRIBUTES_TAB))){
                     // set elements' meta-attributes
@@ -1136,6 +1136,7 @@ public class Ili2db {
 			if (td == null) {
 				throw new Ili2dbException("compiler failed");
 			}
+            config.setTransientObject(Config.TRANSIENT_MODEL, td);
             // import meta-attributes from .toml file
             if(config.getIliMetaAttrsFile()!=null){
                 if(config.getCreateMetaInfo()){
@@ -1769,6 +1770,7 @@ public class Ili2db {
 				if (td == null) {
 					throw new Ili2dbException("compiler failed");
 				}
+                config.setTransientObject(Config.TRANSIENT_MODEL, td);
 			  
 				if(config.getCreateMetaInfo()){
 					// set elements' meta-attributes
