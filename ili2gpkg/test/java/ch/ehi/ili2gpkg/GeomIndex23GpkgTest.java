@@ -267,10 +267,18 @@ public class GeomIndex23GpkgTest {
         openDb(FILENAME_GPKG_OUT);
 
         // test if there is a rtree spatial index created and populated
-        rs=stmt.executeQuery("SELECT COUNT(*) AS count FROM rtree_point2d_geometrie");
+        rs=stmt.executeQuery("SELECT COUNT(*) AS count FROM rtree_classa1_coord");
         Assert.assertTrue(rs.next() && rs.getInt("count") == 3);
-        rs=stmt.executeQuery("SELECT COUNT(*) AS count FROM rtree_compoundcurve2d_geometrie");
+        rs=stmt.executeQuery("SELECT COUNT(*) AS count FROM rtree_classa2_line");
         Assert.assertTrue(rs.next() && rs.getInt("count") == 2);
+        rs=stmt.executeQuery("SELECT COUNT(*) AS count FROM rtree_classa3_surface2d");
+        Assert.assertTrue(rs.next() && rs.getInt("count") == 2);
+        rs=stmt.executeQuery("SELECT COUNT(*) AS count FROM rtree_classa4_geom");
+        Assert.assertTrue(rs.next() && rs.getInt("count") == 2);
+        rs=stmt.executeQuery("SELECT COUNT(*) AS count FROM rtree_classa5_geom");
+        Assert.assertTrue(rs.next() && rs.getInt("count") == 2);
+        rs=stmt.executeQuery("SELECT COUNT(*) AS count FROM rtree_classa6_geom");
+        Assert.assertTrue(rs.next() && rs.getInt("count") == 1);
     }
 
     private void createSchema(boolean createGeomIdx) throws Exception {

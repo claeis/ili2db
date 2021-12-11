@@ -8,39 +8,239 @@
   <DATASECTION>
 
     <GeomIndex23.Test BID="b1">
-      <GeomIndex23.Test.Point2D TID="o1">
-        <Geometrie>
-          <COORD><C1>2612530.626</C1><C2>1238645.861</C2></COORD>
-        </Geometrie>
-      </GeomIndex23.Test.Point2D>
-      <GeomIndex23.Test.Point2D TID="o2">
-        <Geometrie>
-          <COORD><C1>2612762.733</C1><C2>1241984.858</C2></COORD>
-        </Geometrie>
-      </GeomIndex23.Test.Point2D>
-      <GeomIndex23.Test.Point2D TID="o3">
-        <Geometrie>
-          <COORD><C1>2612709.319</C1><C2>1241959.382</C2></COORD>
-        </Geometrie>
-      </GeomIndex23.Test.Point2D>
 
-      <GeomIndex23.Test.CompoundCurve2D TID="o4">
-        <Geometrie>
+      <GeomIndex23.Test.ClassA1 TID="1">
+        <coord>
+          <COORD><C1>2460001.000</C1><C2>1045001.000</C2></COORD>
+        </coord>
+      </GeomIndex23.Test.ClassA1>
+
+      <GeomIndex23.Test.ClassA1 TID="2">
+        <coord>
+          <COORD><C1>2460020.000</C1><C2>1045015.000</C2></COORD>
+        </coord>
+      </GeomIndex23.Test.ClassA1>
+
+      <GeomIndex23.Test.ClassA1 TID="3">
+        <coord>
+          <COORD><C1>2460001.000</C1><C2>1045001.000</C2></COORD>
+        </coord>
+      </GeomIndex23.Test.ClassA1>
+
+
+      <GeomIndex23.Test.ClassA2 TID="4">
+        <line>
           <POLYLINE>
-            <COORD><C1>2608280.818</C1><C2>1240444.955</C2></COORD>
-            <COORD><C1>2608286.789</C1><C2>1240515.245</C2></COORD>
+            <COORD><C1>2460001.000</C1><C2>1045001.000</C2></COORD>
+            <COORD><C1>2460020.000</C1><C2>1045015.000</C2></COORD>
           </POLYLINE>
-        </Geometrie>
-      </GeomIndex23.Test.CompoundCurve2D>
-      <GeomIndex23.Test.CompoundCurve2D TID="o5">
-        <Geometrie>
+        </line>
+      </GeomIndex23.Test.ClassA2>
+
+      <GeomIndex23.Test.ClassA2 TID="5">
+        <line>
           <POLYLINE>
-            <COORD><C1>2612747.276</C1><C2>1236603.009</C2></COORD>
-            <COORD><C1>2613152.660</C1><C2>1236680.784</C2></COORD>
-            <COORD><C1>2613196.232</C1><C2>1236692.569</C2></COORD>
+            <COORD><C1>2460005.000</C1><C2>1045005.000</C2></COORD>
+            <COORD><C1>2460010.000</C1><C2>1045010.000</C2></COORD>
+            <COORD><C1>2460005.000</C1><C2>1045010.000</C2></COORD>
           </POLYLINE>
-        </Geometrie>
-      </GeomIndex23.Test.CompoundCurve2D>
+        </line>
+      </GeomIndex23.Test.ClassA2>
+
+
+      <GeomIndex23.Test.ClassA3 TID="6">
+        <surface2d>
+          <SURFACE>
+            <BOUNDARY>
+              <POLYLINE>
+                <COORD><C1>2460001.000</C1><C2>1045001.000</C2></COORD>
+                <COORD><C1>2460020.000</C1><C2>1045015.000</C2></COORD>
+                <ARC><C1>2460001.000</C1><C2>1045015.000</C2><A1>2460010.000</A1><A2>1045018.000</A2></ARC>
+                <COORD><C1>2460001.000</C1><C2>1045001.000</C2></COORD>
+              </POLYLINE>
+            </BOUNDARY>
+            <BOUNDARY>
+              <POLYLINE>
+                <COORD><C1>2460005.000</C1><C2>1045005.000</C2></COORD>
+                <COORD><C1>2460010.000</C1><C2>1045010.000</C2></COORD>
+                <ARC><C1>2460005.000</C1><C2>1045010.000</C2><A1>2460007.000</A1><A2>1045009.000</A2></ARC>
+                <COORD><C1>2460005.000</C1><C2>1045005.000</C2></COORD>
+              </POLYLINE>
+            </BOUNDARY>
+          </SURFACE>
+        </surface2d>
+      </GeomIndex23.Test.ClassA3>
+
+      <GeomIndex23.Test.ClassA3 TID="7">
+        <surface2d></surface2d>
+      </GeomIndex23.Test.ClassA3>
+
+      <GeomIndex23.Test.ClassA3 TID="8">
+        <surface2d>
+          <SURFACE>
+            <BOUNDARY>
+              <POLYLINE>
+                <COORD><C1>2460005.000</C1><C2>1045005.000</C2></COORD>
+                <COORD><C1>2460010.000</C1><C2>1045010.000</C2></COORD>
+                <COORD><C1>2460005.000</C1><C2>1045010.000</C2></COORD>
+                <COORD><C1>2460005.000</C1><C2>1045005.000</C2></COORD>
+              </POLYLINE>
+            </BOUNDARY>
+          </SURFACE>
+        </surface2d>
+      </GeomIndex23.Test.ClassA3>
+
+
+      <GeomIndex23.Test.ClassA4 TID="9">
+        <geom>
+          <GeomIndex23.MultiPoint2D>
+            <points>
+              <GeomIndex23.Point2D>
+                <coord>
+                  <COORD><C1>2460001.000</C1><C2>1045001.000</C2></COORD>
+                </coord>
+              </GeomIndex23.Point2D>
+              <GeomIndex23.Point2D>
+                <coord>
+                  <COORD><C1>2460020.000</C1><C2>1045015.000</C2></COORD>
+                </coord>
+              </GeomIndex23.Point2D>
+            </points>
+          </GeomIndex23.MultiPoint2D>
+        </geom>
+      </GeomIndex23.Test.ClassA4>
+
+      <GeomIndex23.Test.ClassA4 TID="10">
+        <geom></geom>
+      </GeomIndex23.Test.ClassA4>
+
+      <GeomIndex23.Test.ClassA4 TID="11">
+        <geom>
+            <GeomIndex23.MultiPoint2D>
+              <points>
+              <GeomIndex23.Point2D>
+                <coord>
+                  <COORD><C1>2460005.000</C1><C2>1045005.000</C2></COORD>
+                </coord>
+              </GeomIndex23.Point2D>
+              <GeomIndex23.Point2D>
+                <coord>
+                  <COORD><C1>2460010.000</C1><C2>1045010.000</C2></COORD>
+                </coord>
+              </GeomIndex23.Point2D>
+              <GeomIndex23.Point2D>
+                <coord>
+                  <COORD><C1>2460005.000</C1><C2>1045010.000</C2></COORD>
+                </coord>
+              </GeomIndex23.Point2D>
+            </points>
+          </GeomIndex23.MultiPoint2D>
+        </geom>
+      </GeomIndex23.Test.ClassA4>
+
+
+      <GeomIndex23.Test.ClassA5 TID="12">
+        <geom></geom>
+      </GeomIndex23.Test.ClassA5>
+
+      <GeomIndex23.Test.ClassA5 TID="13">
+        <geom>
+          <GeomIndex23.MultiLine2D>
+            <lines>
+              <GeomIndex23.Line2D>
+                <line>
+                  <POLYLINE>
+                    <COORD><C1>2460001.000</C1><C2>1045001.000</C2></COORD>
+                    <COORD><C1>2460020.000</C1><C2>1045015.000</C2></COORD>
+                    <ARC><C1>2460001.000</C1><C2>1045015.000</C2><A1>2460010.000</A1><A2>1045018.000</A2></ARC>
+                    <COORD><C1>2460001.000</C1><C2>1045001.000</C2></COORD>
+                  </POLYLINE>
+                </line>
+              </GeomIndex23.Line2D>
+              <GeomIndex23.Line2D>
+                <line>
+                  <POLYLINE>
+                    <COORD><C1>2460005.000</C1><C2>1045005.000</C2></COORD>
+                    <COORD><C1>2460010.000</C1><C2>1045010.000</C2></COORD>
+                    <COORD><C1>2460005.000</C1><C2>1045010.000</C2></COORD>
+                    <COORD><C1>2460005.000</C1><C2>1045005.000</C2></COORD>
+                  </POLYLINE>
+                </line>
+              </GeomIndex23.Line2D>
+            </lines>
+          </GeomIndex23.MultiLine2D>
+        </geom>
+      </GeomIndex23.Test.ClassA5>
+
+      <GeomIndex23.Test.ClassA5 TID="14">
+        <geom>
+          <GeomIndex23.MultiLine2D>
+            <lines>
+              <GeomIndex23.Line2D>
+                <line>
+                  <POLYLINE>
+                    <COORD><C1>2460005.000</C1><C2>1045005.000</C2></COORD>
+                    <COORD><C1>2460010.000</C1><C2>1045010.000</C2></COORD>
+                    <ARC><C1>2460005.000</C1><C2>1045010.000</C2><A1>2460007.000</A1><A2>1045009.000</A2></ARC>
+                    <COORD><C1>2460005.000</C1><C2>1045005.000</C2></COORD>
+                  </POLYLINE>
+                </line>
+              </GeomIndex23.Line2D>
+            </lines>
+          </GeomIndex23.MultiLine2D>
+        </geom>
+      </GeomIndex23.Test.ClassA5>
+
+
+      <GeomIndex23.Test.ClassA6 TID="15">
+        <geom>
+          <GeomIndex23.MultiSurface2D>
+            <surfaces>
+              <GeomIndex23.Surface2D>
+                <surface>
+                  <SURFACE>
+                    <BOUNDARY>
+                      <POLYLINE>
+                        <COORD><C1>2460001.000</C1><C2>1045001.000</C2></COORD>
+                        <COORD><C1>2460020.000</C1><C2>1045015.000</C2></COORD>
+                        <ARC><C1>2460001.000</C1><C2>1045015.000</C2><A1>2460010.000</A1><A2>1045018.000</A2></ARC>
+                        <COORD><C1>2460001.000</C1><C2>1045001.000</C2></COORD>
+                      </POLYLINE>
+                    </BOUNDARY>
+                    <BOUNDARY>
+                      <POLYLINE>
+                        <COORD><C1>2460005.000</C1><C2>1045005.000</C2></COORD>
+                        <COORD><C1>2460010.000</C1><C2>1045010.000</C2></COORD>
+                        <ARC><C1>2460005.000</C1><C2>1045010.000</C2><A1>2460007.000</A1><A2>1045009.000</A2></ARC>
+                        <COORD><C1>2460005.000</C1><C2>1045005.000</C2></COORD>
+                      </POLYLINE>
+                    </BOUNDARY>
+                  </SURFACE>
+                </surface>
+              </GeomIndex23.Surface2D>
+              <GeomIndex23.Surface2D>
+                <surface>
+                  <SURFACE>
+                    <BOUNDARY>
+                      <POLYLINE>
+                        <COORD><C1>2460005.000</C1><C2>1045005.000</C2></COORD>
+                        <COORD><C1>2460010.000</C1><C2>1045010.000</C2></COORD>
+                        <COORD><C1>2460005.000</C1><C2>1045010.000</C2></COORD>
+                        <COORD><C1>2460005.000</C1><C2>1045005.000</C2></COORD>
+                      </POLYLINE>
+                    </BOUNDARY>
+                  </SURFACE>
+                </surface>
+              </GeomIndex23.Surface2D>
+            </surfaces>
+          </GeomIndex23.MultiSurface2D>
+        </geom>
+      </GeomIndex23.Test.ClassA6>
+
+      <GeomIndex23.Test.ClassA6 TID="16">
+        <geom></geom>
+      </GeomIndex23.Test.ClassA6>
+
     </GeomIndex23.Test>
 
   </DATASECTION>
