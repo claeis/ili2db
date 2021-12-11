@@ -360,6 +360,51 @@ public abstract class MetaInfo23Test {
         }
     }
     @Test
+    public void importIliBidDomain() throws Exception
+    {
+        //EhiLogger.getInstance().setTraceFilter(false);
+        Connection jdbcConnection=null;
+        try{
+            setup.resetDb();
+            {
+                File data=new File(TEST_DATA_DIR,"BidDomain23.ili");
+                Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+                config.setFunction(Config.FC_SCHEMAIMPORT);
+                config.setCreateFk(Config.CREATE_FK_YES);
+                config.setInheritanceTrafo(Config.INHERITANCE_TRAFO_SMART1);
+                config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
+                config.setCreateMetaInfo(true);
+                Ili2db.readSettingsFromDb(config);
+                Ili2db.run(config,null);
+                {
+                    jdbcConnection=setup.createConnection();
+                    String selStmt="SELECT "+DbNames.META_ATTRIBUTES_TAB_ATTRVALUE_COL+" FROM "+setup.prefixName(DbNames.META_ATTRIBUTES_TAB)+" WHERE "+DbNames.META_ATTRIBUTES_TAB_ILIELEMENT_COL+"=? AND "+DbNames.META_ATTRIBUTES_TAB_ATTRNAME_COL+"=?";
+                    java.sql.PreparedStatement selPrepStmt = jdbcConnection.prepareStatement(selStmt);
+                    {
+                        {
+                            selPrepStmt.setString(1, "BidDomain23.TopicA");
+                            selPrepStmt.setString(2, MetaAttrUtility.ILI2DB_ILI_TOPIC_BIDDOMAIN);
+                            ResultSet rs = selPrepStmt.executeQuery();
+                            Assert.assertFalse(rs.next());
+                        }
+                        {
+                            selPrepStmt.setString(1, "BidDomain23.TopicB");
+                            selPrepStmt.setString(2, MetaAttrUtility.ILI2DB_ILI_TOPIC_BIDDOMAIN);
+                            ResultSet rs = selPrepStmt.executeQuery();
+                            Assert.assertTrue(rs.next());
+                            Assert.assertEquals("INTERLIS.UUIDOID",rs.getString(1));
+                            Assert.assertFalse(rs.next());
+                        }
+                    }
+                }
+            }
+        }finally{
+            if(jdbcConnection!=null){
+                jdbcConnection.close();
+            }
+        }
+    }
+    @Test
     public void importIliClassesInTopics() throws Exception
     {
         //EhiLogger.getInstance().setTraceFilter(false);

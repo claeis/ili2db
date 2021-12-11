@@ -1,0 +1,13 @@
+INTERLIS 2.3;
+
+MODEL BidDomain23
+  AT "mailto:ceis@localhost" VERSION "2021-12-11" =
+
+  TOPIC TopicA =
+  END TopicA;
+  
+  TOPIC TopicB =
+    BASKET OID AS INTERLIS.UUIDOID;
+  END TopicB;
+
+END BidDomain23.
