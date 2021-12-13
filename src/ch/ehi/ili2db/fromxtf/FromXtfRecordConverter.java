@@ -1236,7 +1236,7 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 						 valuei++;
 					 }
 					 if(createItfAreaRef){
-						 if(type instanceof AreaType || type instanceof MultiAreaType){
+						 if(type instanceof AreaType){
 							 IomObject value=null;
 							 if(isItfReader){
 								 value= classAttr==null ? null : iomObj.getattrobj(attrName,0);

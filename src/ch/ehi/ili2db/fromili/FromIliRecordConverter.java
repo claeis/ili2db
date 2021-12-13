@@ -702,7 +702,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 				dbCol.value=ret;
 			}
 			if(createItfAreaRef){
-				if(type instanceof AreaType || type instanceof MultiAreaType){
+				if(type instanceof AreaType){
 					DbColGeometry ret=new DbColGeometry();
 					String sqlName=getSqlAttrName(attr,epsgCode,dbTable.getName().getName(),null)+DbNames.ITF_MAINTABLE_GEOTABLEREF_COL_SUFFIX;
 					ret.setName(sqlName);

@@ -1039,7 +1039,7 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 			                }
 					 }
 					 if(createItfAreaRef){
-						 if(type instanceof AreaType || type instanceof  MultiAreaType){
+						 if(type instanceof AreaType){
 				                if(classAttr==null) {
 				                    valuei++;
 				                }else {
