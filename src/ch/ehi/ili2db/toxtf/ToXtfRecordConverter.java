@@ -357,19 +357,9 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 					 }
 				 }
 			}else if(type instanceof MultiSurfaceOrAreaType){
-				if(createItfLineTables){
-				}else{
-					ret.append(sep);
-					sep=",";
-					ret.append(geomConv.getSelectValueWrapperMultiSurface(makeColumnRef(tableAlias,attrSqlName)));
-				}
-				if(createItfAreaRef){
-					if(type instanceof MultiAreaType){
-						ret.append(sep);
-						sep=",";
-						ret.append(geomConv.getSelectValueWrapperCoord(makeColumnRef(tableAlias,attrSqlName+DbNames.ITF_MAINTABLE_GEOTABLEREF_COL_SUFFIX)));
-					}
-				}
+				ret.append(sep);
+				sep=",";
+				ret.append(geomConv.getSelectValueWrapperMultiSurface(makeColumnRef(tableAlias,attrSqlName)));
 			}else if(type instanceof CoordType){
 				 ret.append(sep);
 				 sep=",";
