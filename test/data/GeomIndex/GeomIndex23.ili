@@ -10,7 +10,7 @@ MODEL GeomIndex23
       ROTATION 2 -> 1;
 
   STRUCTURE Point2D =
-    coord: Lkoord;
+    point: Lkoord;
   END Point2D;
 
   !!@ili2db.mapping=MultiPoint
@@ -38,37 +38,25 @@ MODEL GeomIndex23
 
   TOPIC Test =
 
-    /* Point */
-
     CLASS ClassA1 =
-      coord: Lkoord;
+      geom: Lkoord;
     END ClassA1;
 
-    /* Line */
-
     CLASS ClassA2 =
-      line: POLYLINE WITH (STRAIGHTS,ARCS) VERTEX Lkoord WITHOUT OVERLAPS > 0.001;
+      geom: POLYLINE WITH (STRAIGHTS,ARCS) VERTEX Lkoord WITHOUT OVERLAPS > 0.001;
     END ClassA2;
 
-    /* Surface */
-
     CLASS ClassA3 =
-      surface2d: SURFACE WITH (STRAIGHTS,ARCS) VERTEX Lkoord WITHOUT OVERLAPS > 0.001;
+      geom: SURFACE WITH (STRAIGHTS,ARCS) VERTEX Lkoord WITHOUT OVERLAPS > 0.001;
     END ClassA3;
-
-    /* MultiPoint */
 
     CLASS ClassA4 =
       geom: MultiPoint2D;
     END ClassA4;
 
-    /* MultiLine */
-
     CLASS ClassA5 =
       geom: MultiLine2D;
     END ClassA5;
-
-    /* MultiSurface */
 
     CLASS ClassA6 =
       geom: MultiSurface2D;

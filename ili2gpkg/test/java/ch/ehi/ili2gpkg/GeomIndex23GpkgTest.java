@@ -267,11 +267,11 @@ public class GeomIndex23GpkgTest {
         openDb(FILENAME_GPKG_OUT);
 
         // test if there is a rtree spatial index created and populated
-        rs=stmt.executeQuery("SELECT COUNT(*) AS count FROM rtree_classa1_coord");
+        rs=stmt.executeQuery("SELECT COUNT(*) AS count FROM rtree_classa1_geom");
         Assert.assertTrue(rs.next() && rs.getInt("count") == 3);
-        rs=stmt.executeQuery("SELECT COUNT(*) AS count FROM rtree_classa2_line");
+        rs=stmt.executeQuery("SELECT COUNT(*) AS count FROM rtree_classa2_geom");
         Assert.assertTrue(rs.next() && rs.getInt("count") == 2);
-        rs=stmt.executeQuery("SELECT COUNT(*) AS count FROM rtree_classa3_surface2d");
+        rs=stmt.executeQuery("SELECT COUNT(*) AS count FROM rtree_classa3_geom");
         Assert.assertTrue(rs.next() && rs.getInt("count") == 2);
         rs=stmt.executeQuery("SELECT COUNT(*) AS count FROM rtree_classa4_geom");
         Assert.assertTrue(rs.next() && rs.getInt("count") == 2);

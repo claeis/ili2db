@@ -10,46 +10,46 @@
     <GeomIndex23.Test BID="b1">
 
       <GeomIndex23.Test.ClassA1 TID="1">
-        <coord>
+        <geom>
           <COORD><C1>2460001.000</C1><C2>1045001.000</C2></COORD>
-        </coord>
+        </geom>
       </GeomIndex23.Test.ClassA1>
 
       <GeomIndex23.Test.ClassA1 TID="2">
-        <coord>
+        <geom>
           <COORD><C1>2460020.000</C1><C2>1045015.000</C2></COORD>
-        </coord>
+        </geom>
       </GeomIndex23.Test.ClassA1>
 
       <GeomIndex23.Test.ClassA1 TID="3">
-        <coord>
+        <geom>
           <COORD><C1>2460001.000</C1><C2>1045001.000</C2></COORD>
-        </coord>
+        </geom>
       </GeomIndex23.Test.ClassA1>
 
 
       <GeomIndex23.Test.ClassA2 TID="4">
-        <line>
+        <geom>
           <POLYLINE>
             <COORD><C1>2460001.000</C1><C2>1045001.000</C2></COORD>
             <COORD><C1>2460020.000</C1><C2>1045015.000</C2></COORD>
           </POLYLINE>
-        </line>
+        </geom>
       </GeomIndex23.Test.ClassA2>
 
       <GeomIndex23.Test.ClassA2 TID="5">
-        <line>
+        <geom>
           <POLYLINE>
             <COORD><C1>2460005.000</C1><C2>1045005.000</C2></COORD>
             <COORD><C1>2460010.000</C1><C2>1045010.000</C2></COORD>
             <COORD><C1>2460005.000</C1><C2>1045010.000</C2></COORD>
           </POLYLINE>
-        </line>
+        </geom>
       </GeomIndex23.Test.ClassA2>
 
 
       <GeomIndex23.Test.ClassA3 TID="6">
-        <surface2d>
+        <geom>
           <SURFACE>
             <BOUNDARY>
               <POLYLINE>
@@ -68,15 +68,15 @@
               </POLYLINE>
             </BOUNDARY>
           </SURFACE>
-        </surface2d>
+        </geom>
       </GeomIndex23.Test.ClassA3>
 
       <GeomIndex23.Test.ClassA3 TID="7">
-        <surface2d></surface2d>
+        <geom></geom>
       </GeomIndex23.Test.ClassA3>
 
       <GeomIndex23.Test.ClassA3 TID="8">
-        <surface2d>
+        <geom>
           <SURFACE>
             <BOUNDARY>
               <POLYLINE>
@@ -87,7 +87,7 @@
               </POLYLINE>
             </BOUNDARY>
           </SURFACE>
-        </surface2d>
+        </geom>
       </GeomIndex23.Test.ClassA3>
 
 
@@ -96,14 +96,14 @@
           <GeomIndex23.MultiPoint2D>
             <points>
               <GeomIndex23.Point2D>
-                <coord>
+                <point>
                   <COORD><C1>2460001.000</C1><C2>1045001.000</C2></COORD>
-                </coord>
+                </point>
               </GeomIndex23.Point2D>
               <GeomIndex23.Point2D>
-                <coord>
+                <point>
                   <COORD><C1>2460020.000</C1><C2>1045015.000</C2></COORD>
-                </coord>
+                </point>
               </GeomIndex23.Point2D>
             </points>
           </GeomIndex23.MultiPoint2D>
@@ -119,19 +119,19 @@
             <GeomIndex23.MultiPoint2D>
               <points>
               <GeomIndex23.Point2D>
-                <coord>
+                <point>
                   <COORD><C1>2460005.000</C1><C2>1045005.000</C2></COORD>
-                </coord>
+                </point>
               </GeomIndex23.Point2D>
               <GeomIndex23.Point2D>
-                <coord>
+                <point>
                   <COORD><C1>2460010.000</C1><C2>1045010.000</C2></COORD>
-                </coord>
+                </point>
               </GeomIndex23.Point2D>
               <GeomIndex23.Point2D>
-                <coord>
+                <point>
                   <COORD><C1>2460005.000</C1><C2>1045010.000</C2></COORD>
-                </coord>
+                </point>
               </GeomIndex23.Point2D>
             </points>
           </GeomIndex23.MultiPoint2D>
