@@ -69,6 +69,7 @@ import ch.interlis.ili2c.metamodel.LocalAttribute;
 import ch.interlis.ili2c.metamodel.MultiAreaType;
 import ch.interlis.ili2c.metamodel.MultiCoordType;
 import ch.interlis.ili2c.metamodel.MultiSurfaceOrAreaType;
+import ch.interlis.ili2c.metamodel.MultiPolylineType;
 import ch.interlis.ili2c.metamodel.NumericType;
 import ch.interlis.ili2c.metamodel.ObjectPath;
 import ch.interlis.ili2c.metamodel.ObjectType;
@@ -721,6 +722,12 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 			DbColGeometry ret = generatePolylineType((PolylineType)type, attrName);
 			setCrs(ret,epsgCode);
 			dbCol.value=ret;
+		}
+		else if (type instanceof MultiPolylineType){
+            String attrName = attr.getContainer().getScopedName(null) + "." + attr.getName();
+            DbColGeometry ret = generateMultiPolylineType((MultiPolylineType) type, attrName);
+            setCrs(ret, epsgCode);
+            dbCol.value = ret;
 		}else if (type instanceof CoordType){
 			DbColGeometry ret=new DbColGeometry();
 			ret.setType(DbColGeometry.POINT);

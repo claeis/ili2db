@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ili:transfer xmlns:ili="http://www.interlis.ch/xtf/2.4/INTERLIS" xmlns:geom="http://www.interlis.ch/geometry/1.0"
+              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+              xmlns:MultiPolyline24="http://www.interlis.ch/xtf/2.4/MultiPolyline24">
+    <ili:headersection>
+        <ili:models>
+            <ili:model>MultiPolyline24</ili:model>
+        </ili:models>
+        <ili:sender>ili2gpkg-4.5.1-SNAPSHOT-34a149ef943889acc815bc9c3ffdb39f6e4918d3</ili:sender>
+    </ili:headersection>
+    <ili:datasection>
+        <MultiPolyline24:TestA ili:bid="MultiPolyline24.TestA">
+            <MultiPolyline24:ClassA1 ili:tid="1">
+                <MultiPolyline24:geomAttr1>
+                    <geom:multipolyline>
+                        <geom:polyline>
+                            <geom:coord>
+                                <geom:c1>480000.111</geom:c1>
+                                <geom:c2>70000.111</geom:c2>
+                                <geom:c3>5000.111</geom:c3>
+                            </geom:coord>
+                            <geom:coord>
+                                <geom:c1>480000.222</geom:c1>
+                                <geom:c2>70000.222</geom:c2>
+                                <geom:c3>5000.222</geom:c3>
+                            </geom:coord>
+                            <geom:coord>
+                                <geom:c1>480000.333</geom:c1>
+                                <geom:c2>70000.333</geom:c2>
+                                <geom:c3>5000.333</geom:c3>
+                            </geom:coord>
+                        </geom:polyline>
+                        <geom:polyline>
+                            <geom:coord>
+                                <geom:c1>480000.444</geom:c1>
+                                <geom:c2>70000.444</geom:c2>
+                                <geom:c3>5000.444</geom:c3>
+                            </geom:coord>
+                            <geom:coord>
+                                <geom:c1>480000.555</geom:c1>
+                                <geom:c2>70000.555</geom:c2>
+                                <geom:c3>5000.555</geom:c3>
+                            </geom:coord>
+                            <geom:coord>
+                                <geom:c1>480000.666</geom:c1>
+                                <geom:c2>70000.666</geom:c2>
+                                <geom:c3>5000.666</geom:c3>
+                            </geom:coord>
+                        </geom:polyline>
+                    </geom:multipolyline>
+                </MultiPolyline24:geomAttr1>
+            </MultiPolyline24:ClassA1>
+        </MultiPolyline24:TestA>
+    </ili:datasection>
+</ili:transfer>

@@ -14,9 +14,14 @@ ideas/open issues/questions
 LATEST
 ---------------------------
 - create metainfo about possible classes in a topic (#216)
+- create metainfo about BID domain (#440)
 - set length of description field in ENUM tables to 'unlimited' (#429)
 - import polygons from XTF as boundary lines (#269)
 - check that --createBasketCol is used (if required) (#130)
+- add used TransferDescription to Settings as ch.ehi.ili2db.model
+- mysql:mysql-connector-java:5.1.49
+- iox-ili-1.21.9-SNAPSHOT
+- ehisqlgen-1.14.1-SNAPSHOT
 
 ili2db 4.6.1 (2021-11-10)
 ------------------------------

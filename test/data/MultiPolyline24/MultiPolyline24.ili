@@ -1,0 +1,19 @@
+INTERLIS 2.4;
+
+MODEL MultiPolyline24
+    AT "mailto:noreply@localhost" VERSION "2021-09-07" =
+
+    DOMAIN
+        !!@CRS=EPSG:2056
+        Hkoord = COORD 480000.000 .. 850000.000 [INTERLIS.m],
+                        70000.000 .. 310000.000 [INTERLIS.m],
+                              0.000 .. 5000.000 [INTERLIS.m];
+    TOPIC TestA =
+
+        CLASS ClassA1 =
+            geomAttr1 : MULTIPOLYLINE WITH (STRAIGHTS,ARCS) VERTEX Hkoord;
+        END ClassA1;
+
+    END TestA;
+
+END MultiPolyline24.

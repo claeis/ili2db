@@ -26,6 +26,7 @@ import ch.interlis.iox_j.validator.ValidationConfig;
 import ch.interlis.ili2c.metamodel.AttributeDef;
 import ch.interlis.ili2c.metamodel.Cardinality;
 import ch.interlis.ili2c.metamodel.Container;
+import ch.interlis.ili2c.metamodel.Domain;
 import ch.ehi.basics.logging.EhiLogger;
 import ch.ehi.basics.settings.Settings;
 import ch.ehi.ili2db.base.DbNames;
@@ -52,6 +53,7 @@ public class MetaAttrUtility{
     public static final String ILI2DB_ILI_ASSOC_CARDINALITY_MIN = ILI2DB_ILI_PREFIX+"assocCardinalityMin";
     public static final String ILI2DB_ILI_ASSOC_KIND = ILI2DB_ILI_PREFIX+"assocKind";
     public static final String ILI2DB_ILI_TOPIC_CLASSES = ILI2DB_ILI_PREFIX+"topicClasses";
+    public static final String ILI2DB_ILI_TOPIC_BIDDOMAIN = ILI2DB_ILI_PREFIX+"bidDomain";
     /** Read meta-attributes from a toml file and add them to the ili2c metamodel.
 	 * @param td ili-model as read by the ili compiler
 	 * @param tomlFile
@@ -219,6 +221,10 @@ public class MetaAttrUtility{
                     sep=" ";
                 }
                 exstValues.put(ILI2DB_ILI_TOPIC_CLASSES, classesInTopic.toString());
+                Domain bidDomain=topic.getBasketOid();
+                if(bidDomain!=null) {
+                    exstValues.put(ILI2DB_ILI_TOPIC_BIDDOMAIN, bidDomain.getScopedName());
+                }
             }
 		}catch(RuntimeException e) {
 		    EhiLogger.traceUnusualState(el.getScopedName()+": "+e.getMessage());

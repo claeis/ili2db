@@ -48,6 +48,7 @@ import ch.interlis.ili2c.metamodel.LineType;
 import ch.interlis.ili2c.metamodel.MultiAreaType;
 import ch.interlis.ili2c.metamodel.MultiCoordType;
 import ch.interlis.ili2c.metamodel.MultiSurfaceOrAreaType;
+import ch.interlis.ili2c.metamodel.MultiPolylineType;
 import ch.interlis.ili2c.metamodel.NumericType;
 import ch.interlis.ili2c.metamodel.NumericalType;
 import ch.interlis.ili2c.metamodel.ObjectType;
@@ -793,7 +794,17 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 						values.append(","+geomConv.getInsertValueWrapperPolyline("?",epsgCode));
 					}
 					sep=",";
-			 }else if(type instanceof AbstractSurfaceOrAreaType){
+			 }else if (type instanceof MultiPolylineType){
+				ret.append(sep);
+				ret.append(attrSqlName);
+				if(isUpdate){
+					ret.append("="+geomConv.getInsertValueWrapperMultiPolyline("?",epsgCode));
+				}else{
+					values.append(","+geomConv.getInsertValueWrapperMultiPolyline("?",epsgCode));
+				}
+				sep=",";
+			}
+			else if(type instanceof AbstractSurfaceOrAreaType){
 				 if(createItfLineTables){
 				 }else if(createXtfLineTables){
                      ret.append(sep);
@@ -1202,7 +1213,16 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 						geomConv.setPolylineNull(ps,valuei);
 					 }
 					 valuei++;
-				 }else if(type instanceof AbstractSurfaceOrAreaType){
+				 }else if (type instanceof MultiPolylineType){
+					IomObject value= classAttr==null ? null : iomObj.getattrobj(attrName,0);
+					if(value!=null){
+						boolean is3D=((CoordType)((MultiPolylineType)type).getControlPointDomain().getType()).getDimensions().length==3;
+						ps.setObject(valuei,geomConv.fromIomMultiPolyline(value,epsgCode,is3D,getP((MultiPolylineType)type)));
+					}else{
+						geomConv.setPolylineNull(ps,valuei);
+					}
+					valuei++;
+				}else if(type instanceof AbstractSurfaceOrAreaType){
 					 if(createItfLineTables){
 					 }else if(createXtfLineTables){
                          IomObject value= classAttr==null ? null : iomObj.getattrobj(attrName,0);

@@ -145,6 +145,23 @@ public class AbstractRecordConverter {
 		}
 		return ret;
 	}
+
+	public DbColGeometry generateMultiPolylineType(LineType type, String attrName) {
+		DbColGeometry ret=new DbColGeometry();
+		boolean curvePolyline=false;
+		if(!strokeArcs){
+			curvePolyline=true;
+		}
+		ret.setType(curvePolyline ? DbColGeometry.MULTICURVE : DbColGeometry.MULTILINESTRING);
+		Domain coordDomain=type.getControlPointDomain();
+		if(coordDomain!=null){
+			CoordType coord=(CoordType)coordDomain.getType();
+			ret.setDimension(coord.getDimensions().length);
+			setBB(ret, coord,attrName);
+		}
+		return ret;
+	}
+
     public void setCrs(DbColGeometry ret,int epsgCode) {
         ret.setSrsAuth("EPSG");
         ret.setSrsId(Integer.toString(epsgCode));
