@@ -193,46 +193,64 @@ public abstract class MultiSurfaceArea24Test {
             assertNotNull(innerSequence);
 
             assertEquals(1, outerSequence.getattrcount());
-            assertEquals(3, outerSequence.getattrvaluecount("segment"));
-            IomObject coord1 = outerSequence.getattrobj("segment", 0);
-            assertNotNull(coord1);
-            IomObject coord2 = outerSequence.getattrobj("segment", 1);
-            assertNotNull(coord2);
-            IomObject coord3 = outerSequence.getattrobj("segment", 2);
-            assertNotNull(coord3);
+            assertEquals(4, outerSequence.getattrvaluecount("segment"));
+            {
+                IomObject coord1 = outerSequence.getattrobj("segment", 0);
+                assertNotNull(coord1);
+                IomObject coord2 = outerSequence.getattrobj("segment", 1);
+                assertNotNull(coord2);
+                IomObject coord3 = outerSequence.getattrobj("segment", 2);
+                assertNotNull(coord3);
+                IomObject coord4 = outerSequence.getattrobj("segment", 3);
+                assertNotNull(coord4);
 
-            assertEquals("480000.111", coord1.getattrvalue("C1"));
-            assertEquals("70000.111", coord1.getattrvalue("C2"));
-            assertEquals("5000.111", coord1.getattrvalue("C3"));
+                assertEquals("480000.111", coord1.getattrvalue("C1"));
+                assertEquals("70000.111", coord1.getattrvalue("C2"));
+                assertEquals("5000.111", coord1.getattrvalue("C3"));
 
-            assertEquals("480000.222", coord2.getattrvalue("C1"));
-            assertEquals("70000.222", coord2.getattrvalue("C2"));
-            assertEquals("5000.222", coord2.getattrvalue("C3"));
+                assertEquals("480000.222", coord2.getattrvalue("C1"));
+                assertEquals("70000.222", coord2.getattrvalue("C2"));
+                assertEquals("5000.222", coord2.getattrvalue("C3"));
 
-            assertEquals("480000.333", coord3.getattrvalue("C1"));
-            assertEquals("70000.333", coord3.getattrvalue("C2"));
-            assertEquals("5000.333", coord3.getattrvalue("C3"));
+                assertEquals("480000.333", coord3.getattrvalue("C1"));
+                assertEquals("70000.333", coord3.getattrvalue("C2"));
+                assertEquals("5000.333", coord3.getattrvalue("C3"));
 
+                assertEquals("480000.111", coord4.getattrvalue("C1"));
+                assertEquals("70000.111", coord4.getattrvalue("C2"));
+                assertEquals("5000.111", coord4.getattrvalue("C3"));
+                
+            }
+            
             assertEquals(1, innerSequence.getattrcount());
-            assertEquals(3, innerSequence.getattrvaluecount("segment"));
-            IomObject coord4 = innerSequence.getattrobj("segment", 0);
-            assertNotNull(coord1);
-            IomObject coord5 = innerSequence.getattrobj("segment", 1);
-            assertNotNull(coord2);
-            IomObject coord6 = innerSequence.getattrobj("segment", 2);
-            assertNotNull(coord3);
+            assertEquals(4, innerSequence.getattrvaluecount("segment"));
+            {
+                IomObject coord4 = innerSequence.getattrobj("segment", 0);
+                assertNotNull(coord4);
+                IomObject coord5 = innerSequence.getattrobj("segment", 1);
+                assertNotNull(coord5);
+                IomObject coord6 = innerSequence.getattrobj("segment", 2);
+                assertNotNull(coord6);
+                IomObject coord7 = innerSequence.getattrobj("segment", 3);
+                assertNotNull(coord7);
 
-            assertEquals("480000.444", coord4.getattrvalue("C1"));
-            assertEquals("70000.444", coord4.getattrvalue("C2"));
-            assertEquals("5000.444", coord4.getattrvalue("C3"));
+                assertEquals("480000.444", coord4.getattrvalue("C1"));
+                assertEquals("70000.444", coord4.getattrvalue("C2"));
+                assertEquals("5000.444", coord4.getattrvalue("C3"));
 
-            assertEquals("480000.555", coord5.getattrvalue("C1"));
-            assertEquals("70000.555", coord5.getattrvalue("C2"));
-            assertEquals("5000.555", coord5.getattrvalue("C3"));
+                assertEquals("480000.555", coord5.getattrvalue("C1"));
+                assertEquals("70000.555", coord5.getattrvalue("C2"));
+                assertEquals("5000.555", coord5.getattrvalue("C3"));
 
-            assertEquals("480000.666", coord6.getattrvalue("C1"));
-            assertEquals("70000.666", coord6.getattrvalue("C2"));
-            assertEquals("5000.666", coord6.getattrvalue("C3"));
+                assertEquals("480000.666", coord6.getattrvalue("C1"));
+                assertEquals("70000.666", coord6.getattrvalue("C2"));
+                assertEquals("5000.666", coord6.getattrvalue("C3"));
+
+                assertEquals("480000.444", coord7.getattrvalue("C1"));
+                assertEquals("70000.444", coord7.getattrvalue("C2"));
+                assertEquals("5000.444", coord7.getattrvalue("C3"));
+                
+            }
         }
     }
 }
