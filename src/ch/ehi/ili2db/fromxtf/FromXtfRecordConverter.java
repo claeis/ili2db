@@ -826,7 +826,7 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 						sep=",";
 				 }
 				 if(createItfAreaRef){
-					 if(type instanceof AreaType || type instanceof  MultiAreaType){
+					 if(type instanceof AreaType){
 						 ret.append(sep);
 						 ret.append(attrSqlName+DbNames.ITF_MAINTABLE_GEOTABLEREF_COL_SUFFIX);
 							if(isUpdate){
