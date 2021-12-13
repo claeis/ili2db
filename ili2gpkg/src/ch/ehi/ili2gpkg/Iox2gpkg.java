@@ -30,6 +30,7 @@ import java.util.Iterator;
 import ch.interlis.iom_j.Iom_jObject;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Polygon;
+import com.vividsolutions.jts.geom.Coordinate;
 
 import ch.ehi.basics.logging.EhiLogger;
 import ch.interlis.iom.IomConstants;
@@ -72,12 +73,17 @@ public class Iox2gpkg {
 		}
 	    try {
 	    	os.reset();
-	    	writeGeoPackageBinaryHeader(srsId,null);
+			Coordinate coord = Iox2jtsext.coord2JTS(obj);
+			Envelope env = new Envelope();
+			env.expandToInclude(coord);
+	    	writeGeoPackageBinaryHeader(srsId, env);
 	    	// wkb
 			Iox2wkb helper=new Iox2wkb(outputDimension,os.order());
 			os.write(helper.coord2wkb(obj));
 		} catch (IOException e) {
 	        throw new RuntimeException("Unexpected IO exception: " + e.getMessage());
+		} catch (IoxException e) {
+			throw new RuntimeException("Unexpected exception: " + e.getMessage());
 		}
 		return os.toByteArray();
 	}
@@ -89,12 +95,20 @@ public class Iox2gpkg {
 		}
 	    try {
 	    	os.reset();
-	    	writeGeoPackageBinaryHeader(srsId,null);
+			Envelope env = new Envelope();
+			int coordc = obj.getattrvaluecount("coord");
+			for(int coordi = 0; coordi < coordc; ++coordi) {
+				IomObject coord = obj.getattrobj("coord", coordi);
+				env.expandToInclude(Iox2jtsext.coord2JTS(coord));
+			}
+	    	writeGeoPackageBinaryHeader(srsId,env);
 	    	// wkb
 			Iox2wkb helper=new Iox2wkb(outputDimension,os.order());
 			os.write(helper.multicoord2wkb(obj));
 		} catch (IOException e) {
 	        throw new RuntimeException("Unexpected IO exception: " + e.getMessage());
+		} catch (IoxException e) {
+			throw new RuntimeException("Unexpected exception: " + e.getMessage());
 		}
 		return os.toByteArray();
 	}
