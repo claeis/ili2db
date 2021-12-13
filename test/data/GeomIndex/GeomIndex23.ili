@@ -1,0 +1,67 @@
+INTERLIS 2.3;
+
+MODEL GeomIndex23
+  AT "mailto:ce@eisenhutinformatik.ch" VERSION "2021-12-11" =
+
+  DOMAIN
+    Lkoord = COORD
+      2460000.000 .. 2870000.000 [INTERLIS.m],
+      1045000.000 .. 1310000.000 [INTERLIS.m],
+      ROTATION 2 -> 1;
+
+  STRUCTURE Point2D =
+    point: Lkoord;
+  END Point2D;
+
+  !!@ili2db.mapping=MultiPoint
+  STRUCTURE MultiPoint2D =
+    points: BAG {0..*} OF Point2D;
+  END MultiPoint2D;
+
+  STRUCTURE Line2D =
+    line: POLYLINE WITH (STRAIGHTS,ARCS) VERTEX Lkoord WITHOUT OVERLAPS > 0.001;
+  END Line2D;
+
+  !!@ili2db.mapping=MultiLine
+  STRUCTURE MultiLine2D =
+    lines: BAG {0..*} OF Line2D;
+  END MultiLine2D;
+
+  STRUCTURE Surface2D =
+    surface: SURFACE WITH (STRAIGHTS,ARCS) VERTEX Lkoord WITHOUT OVERLAPS > 0.001;
+  END Surface2D;
+
+  !!@ili2db.mapping=MultiSurface
+  STRUCTURE MultiSurface2D =
+    surfaces: BAG {0..*} OF Surface2D;
+  END MultiSurface2D;
+
+  TOPIC Test =
+
+    CLASS ClassA1 =
+      geom: Lkoord;
+    END ClassA1;
+
+    CLASS ClassA2 =
+      geom: POLYLINE WITH (STRAIGHTS,ARCS) VERTEX Lkoord WITHOUT OVERLAPS > 0.001;
+    END ClassA2;
+
+    CLASS ClassA3 =
+      geom: SURFACE WITH (STRAIGHTS,ARCS) VERTEX Lkoord WITHOUT OVERLAPS > 0.001;
+    END ClassA3;
+
+    CLASS ClassA4 =
+      geom: MultiPoint2D;
+    END ClassA4;
+
+    CLASS ClassA5 =
+      geom: MultiLine2D;
+    END ClassA5;
+
+    CLASS ClassA6 =
+      geom: MultiSurface2D;
+    END ClassA6;
+
+  END Test;
+
+END GeomIndex23.
