@@ -3,13 +3,18 @@ package ch.ehi.ili2db.fromxtf;
 import ch.ehi.basics.logging.EhiLogger;
 import ch.ehi.ili2db.base.DbNames;
 import ch.ehi.ili2db.base.Ili2dbException;
+import ch.ehi.ili2db.metaattr.IliMetaAttrNames;
 import ch.ehi.sqlgen.repository.DbTableName;
+import ch.interlis.ili2c.metamodel.AttributeDef;
+import ch.interlis.ili2c.metamodel.Enumeration;
+import ch.interlis.ili2c.metamodel.EnumerationType;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 
 public class EnumValueMap {
     private HashMap<Long,String> id2xtf=new HashMap<Long,String>();
@@ -75,11 +80,9 @@ public class EnumValueMap {
     	return ret;
     }
 
-    private void addValue(long id, String xtfCode, String displayName) {
+    void addValue(long id, String xtfCode, String displayName) {
         id2xtf.put(id,xtfCode);
         xtf2id.put(xtfCode,id);
         xtf2displayName.put(xtfCode, displayName);
     }
-
-
 }

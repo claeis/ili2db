@@ -33,6 +33,7 @@ import ch.ehi.ili2db.mapping.TrafoConfig;
 import ch.ehi.ili2db.mapping.TrafoConfigNames;
 import ch.ehi.ili2db.mapping.Viewable2TableMapping;
 import ch.ehi.ili2db.mapping.ViewableWrapper;
+import ch.ehi.ili2db.metaattr.IliMetaAttrNames;
 import ch.ehi.sqlgen.repository.DbTableName;
 import ch.interlis.ili2c.metamodel.AbstractClassDef;
 import ch.interlis.ili2c.metamodel.AbstractSurfaceOrAreaType;
@@ -43,6 +44,7 @@ import ch.interlis.ili2c.metamodel.BlackboxType;
 import ch.interlis.ili2c.metamodel.CompositionType;
 import ch.interlis.ili2c.metamodel.CoordType;
 import ch.interlis.ili2c.metamodel.Domain;
+import ch.interlis.ili2c.metamodel.Enumeration;
 import ch.interlis.ili2c.metamodel.EnumerationType;
 import ch.interlis.ili2c.metamodel.LineType;
 import ch.interlis.ili2c.metamodel.MultiAreaType;
@@ -1440,9 +1442,13 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 		if(enumCache.containsKey(attr)) {
 			map=enumCache.get(attr);
 		}else {
-			OutParam<String> qualifiedIliName=new OutParam<String>();
-			DbTableName sqlDbName=getEnumTargetTableName(attr, qualifiedIliName, dbSchema);
-			map=EnumValueMap.createEnumValueMap(conn, null, false, qualifiedIliName.value, sqlDbName);
+			if(createEnumTable!=null) {
+	            OutParam<String> qualifiedIliName=new OutParam<String>();
+	            DbTableName sqlDbName=getEnumTargetTableName(attr, qualifiedIliName, dbSchema);
+	            map=EnumValueMap.createEnumValueMap(conn, null, false, qualifiedIliName.value, sqlDbName);
+			}else {
+                map=createEnumValueMap(attr);
+			}
 			enumCache.put(attr,map);
 		}
 
@@ -1455,6 +1461,30 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 
 		return mappedDisplayName;
 	}
+    private EnumValueMap createEnumValueMap(AttributeDef attr) {
+        EnumValueMap ret=new EnumValueMap();
+        EnumerationType type=(EnumerationType)attr.getDomainResolvingAll();
+        java.util.List<java.util.Map.Entry<String,ch.interlis.ili2c.metamodel.Enumeration.Element>> ev=new java.util.ArrayList<java.util.Map.Entry<String,ch.interlis.ili2c.metamodel.Enumeration.Element>>();
+        ch.interlis.iom_j.itf.ModelUtilities.buildEnumElementList(ev,"",type.getConsolidatedEnumeration());
+        boolean isOrdered=type.isOrdered();
+        int itfCode=0;
+        int seq=0;
+        Iterator<java.util.Map.Entry<String,ch.interlis.ili2c.metamodel.Enumeration.Element>> evi=ev.iterator();
+        while(evi.hasNext()){
+            java.util.Map.Entry<String,ch.interlis.ili2c.metamodel.Enumeration.Element> ele=evi.next();
+            String eleName=ele.getKey();
+            Enumeration.Element eleElement=ele.getValue();
+            String dispName = eleElement.getMetaValues().getValue(IliMetaAttrNames.METAATTR_DISPNAME);
+            if (dispName==null){
+                dispName=beautifyEnumDispName(eleName);
+            }
+            ret.addValue(seq,eleName,dispName);
+            itfCode++;
+            seq++;
+            
+        }        
+        return ret;
+    }
 
     protected AttributeDef getMultiPointAttrDef(Type type, MultiPointMapping attrMapping) {
 		Table multiPointType = ((CompositionType) type).getComponentType();
