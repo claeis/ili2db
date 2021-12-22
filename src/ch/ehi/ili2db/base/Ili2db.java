@@ -2615,7 +2615,7 @@ public class Ili2db {
 		}
 		
 	}
-	private static CustomMapping getCustomMappingStrategy(ch.ehi.ili2db.gui.Config config)
+	public static CustomMapping getCustomMappingStrategy(ch.ehi.ili2db.gui.Config config)
 	throws Ili2dbException
 	{
 		String mappingClassName=config.getIli2dbCustomStrategy();

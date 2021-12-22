@@ -19,6 +19,7 @@ LATEST
 - import polygons from XTF as boundary lines (#269)
 - check that --createBasketCol is used (if required) (#130)
 - add used TransferDescription to Settings as ch.ehi.ili2db.model
+- API: add getCustomMappingStrategy() 
 - ili24: implement MULTISURFACE/MULTIAREA (#410)
 - ili24: implement MULTIPOLYLINE (#409)
 - ili2gpkg: create spatial index (#391) 
