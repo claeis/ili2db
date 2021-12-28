@@ -33,8 +33,10 @@ import ch.ehi.ili2db.mapping.TrafoConfig;
 import ch.ehi.ili2db.mapping.TrafoConfigNames;
 import ch.ehi.ili2db.mapping.Viewable2TableMapping;
 import ch.ehi.ili2db.mapping.ViewableWrapper;
+import ch.ehi.ili2db.metaattr.IliMetaAttrNames;
 import ch.ehi.sqlgen.repository.DbTableName;
 import ch.interlis.ili2c.metamodel.AbstractClassDef;
+import ch.interlis.ili2c.metamodel.AbstractSurfaceOrAreaType;
 import ch.interlis.ili2c.metamodel.AreaType;
 import ch.interlis.ili2c.metamodel.AssociationDef;
 import ch.interlis.ili2c.metamodel.AttributeDef;
@@ -42,9 +44,13 @@ import ch.interlis.ili2c.metamodel.BlackboxType;
 import ch.interlis.ili2c.metamodel.CompositionType;
 import ch.interlis.ili2c.metamodel.CoordType;
 import ch.interlis.ili2c.metamodel.Domain;
+import ch.interlis.ili2c.metamodel.Enumeration;
 import ch.interlis.ili2c.metamodel.EnumerationType;
 import ch.interlis.ili2c.metamodel.LineType;
+import ch.interlis.ili2c.metamodel.MultiAreaType;
 import ch.interlis.ili2c.metamodel.MultiCoordType;
+import ch.interlis.ili2c.metamodel.MultiSurfaceOrAreaType;
+import ch.interlis.ili2c.metamodel.MultiPolylineType;
 import ch.interlis.ili2c.metamodel.NumericType;
 import ch.interlis.ili2c.metamodel.NumericalType;
 import ch.interlis.ili2c.metamodel.ObjectType;
@@ -61,6 +67,7 @@ import ch.interlis.ili2c.metamodel.Viewable;
 import ch.interlis.ili2c.metamodel.ViewableTransferElement;
 import ch.interlis.iom.IomObject;
 import ch.interlis.iom_j.itf.ItfReader2;
+import ch.interlis.iox_j.jts.Iox2jtsException;
 import ch.interlis.iox_j.wkb.Wkb2iox;
 
 public class FromXtfRecordConverter extends AbstractRecordConverter {
@@ -789,8 +796,27 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 						values.append(","+geomConv.getInsertValueWrapperPolyline("?",epsgCode));
 					}
 					sep=",";
-			 }else if(type instanceof SurfaceOrAreaType){
+			 }else if (type instanceof MultiPolylineType){
+				ret.append(sep);
+				ret.append(attrSqlName);
+				if(isUpdate){
+					ret.append("="+geomConv.getInsertValueWrapperMultiPolyline("?",epsgCode));
+				}else{
+					values.append(","+geomConv.getInsertValueWrapperMultiPolyline("?",epsgCode));
+				}
+				sep=",";
+			}
+			else if(type instanceof AbstractSurfaceOrAreaType){
 				 if(createItfLineTables){
+				 }else if(createXtfLineTables){
+                     ret.append(sep);
+                     ret.append(attrSqlName);
+                        if(isUpdate){
+                            ret.append("="+geomConv.getInsertValueWrapperMultiPolyline("?",epsgCode));
+                        }else{
+                            values.append(","+geomConv.getInsertValueWrapperMultiPolyline("?",epsgCode));
+                        }
+                        sep=",";
 				 }else{
 					 ret.append(sep);
 					 ret.append(attrSqlName);
@@ -1189,14 +1215,43 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 						geomConv.setPolylineNull(ps,valuei);
 					 }
 					 valuei++;
-				 }else if(type instanceof SurfaceOrAreaType){
+				 }else if (type instanceof MultiPolylineType){
+					IomObject value= classAttr==null ? null : iomObj.getattrobj(attrName,0);
+					if(value!=null){
+						boolean is3D=((CoordType)((MultiPolylineType)type).getControlPointDomain().getType()).getDimensions().length==3;
+						ps.setObject(valuei,geomConv.fromIomMultiPolyline(value,epsgCode,is3D,getP((MultiPolylineType)type)));
+					}else{
+						geomConv.setPolylineNull(ps,valuei);
+					}
+					valuei++;
+				}else if(type instanceof AbstractSurfaceOrAreaType){
 					 if(createItfLineTables){
+					 }else if(createXtfLineTables){
+                         IomObject value= classAttr==null ? null : iomObj.getattrobj(attrName,0);
+                         IomObject iomMultiline=null;
+                         if(value!=null){
+                             iomMultiline=mapSurface2MultiPolyline(value);
+                         }
+                         if(iomMultiline!=null){
+                             boolean is3D=((CoordType)((SurfaceOrAreaType)type).getControlPointDomain().getType()).getDimensions().length==3;
+                             // map polygon to list of poylines
+                             Object geomObj = geomConv.fromIomMultiPolyline(iomMultiline,epsgCode,is3D,getP((SurfaceOrAreaType)type));
+                             ps.setObject(valuei,geomObj);
+                         }else{
+                             geomConv.setSurfaceNull(ps,valuei);
+                         }
+                         valuei++;
 					 }else{
 						 IomObject value= classAttr==null ? null : iomObj.getattrobj(attrName,0);
 						 if(value!=null){
-								boolean is3D=((CoordType)((SurfaceOrAreaType)type).getControlPointDomain().getType()).getDimensions().length==3;
-							 Object geomObj = geomConv.fromIomSurface(value,epsgCode,((SurfaceOrAreaType)type).getLineAttributeStructure()!=null,is3D,getP((SurfaceOrAreaType)type));
-							ps.setObject(valuei,geomObj);
+							 boolean is3D=((CoordType)((AbstractSurfaceOrAreaType)type).getControlPointDomain().getType()).getDimensions().length==3;
+							 if(type instanceof SurfaceOrAreaType){
+								 Object geomObj = geomConv.fromIomSurface(value,epsgCode,((SurfaceOrAreaType)type).getLineAttributeStructure()!=null,is3D,getP((SurfaceOrAreaType)type));
+								 ps.setObject(valuei,geomObj);
+							 } else if (type instanceof MultiSurfaceOrAreaType) {
+								 Object geomObj = geomConv.fromIomMultiSurface(value,epsgCode,((MultiSurfaceOrAreaType)type).getLineAttributeStructure()!=null,is3D,getP((MultiSurfaceOrAreaType)type));
+								ps.setObject(valuei,geomObj);
+							 }
 						 }else{
 							geomConv.setSurfaceNull(ps,valuei);
 						 }
@@ -1211,7 +1266,7 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 								 value= classAttr==null ? null : iomObj.getattrobj(ItfReader2.SAVED_GEOREF_PREFIX+attrName,0);
 							 }
 							 if(value!=null){
-								boolean is3D=((CoordType)((SurfaceOrAreaType)type).getControlPointDomain().getType()).getDimensions().length==3;
+								boolean is3D=((CoordType)((AbstractSurfaceOrAreaType)type).getControlPointDomain().getType()).getDimensions().length==3;
 								ps.setObject(valuei,geomConv.fromIomCoord(value,epsgCode,is3D));
 							 }else{
 								geomConv.setCoordNull(ps,valuei);
@@ -1351,7 +1406,25 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 		}
 		return valuei;
 	}
-	private long mapEnumValue(AttributeDef attr, String xtfvalue) throws SQLException  {
+	private IomObject mapSurface2MultiPolyline(IomObject obj) {
+	    IomObject iomMultiline=null;
+        for(int surfacei=0;surfacei<obj.getattrvaluecount("surface");surfacei++){
+            IomObject surface=obj.getattrobj("surface",surfacei);
+            int boundaryc=surface.getattrvaluecount("boundary");
+            for(int boundaryi=0;boundaryi<boundaryc;boundaryi++){
+                IomObject boundary=surface.getattrobj("boundary",boundaryi);
+                for(int polylinei=0;polylinei<boundary.getattrvaluecount("polyline");polylinei++){
+                    IomObject polyline=boundary.getattrobj("polyline",polylinei);
+                    if(iomMultiline==null){
+                        iomMultiline=new ch.interlis.iom_j.Iom_jObject(Wkb2iox.OBJ_MULTIPOLYLINE,null);
+                    }
+                    iomMultiline.addattrobj(Wkb2iox.ATTR_POLYLINE, polyline);
+                }
+            }
+        }
+        return iomMultiline;
+    }
+    private long mapEnumValue(AttributeDef attr, String xtfvalue) throws SQLException  {
 	    EnumValueMap map=null;
 	    if(enumCache.containsKey(attr)) {
 	        map=enumCache.get(attr);
@@ -1369,9 +1442,13 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 		if(enumCache.containsKey(attr)) {
 			map=enumCache.get(attr);
 		}else {
-			OutParam<String> qualifiedIliName=new OutParam<String>();
-			DbTableName sqlDbName=getEnumTargetTableName(attr, qualifiedIliName, dbSchema);
-			map=EnumValueMap.createEnumValueMap(conn, null, false, qualifiedIliName.value, sqlDbName);
+			if(createEnumTable!=null) {
+	            OutParam<String> qualifiedIliName=new OutParam<String>();
+	            DbTableName sqlDbName=getEnumTargetTableName(attr, qualifiedIliName, dbSchema);
+	            map=EnumValueMap.createEnumValueMap(conn, null, false, qualifiedIliName.value, sqlDbName);
+			}else {
+                map=createEnumValueMap(attr);
+			}
 			enumCache.put(attr,map);
 		}
 
@@ -1384,6 +1461,30 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 
 		return mappedDisplayName;
 	}
+    private EnumValueMap createEnumValueMap(AttributeDef attr) {
+        EnumValueMap ret=new EnumValueMap();
+        EnumerationType type=(EnumerationType)attr.getDomainResolvingAll();
+        java.util.List<java.util.Map.Entry<String,ch.interlis.ili2c.metamodel.Enumeration.Element>> ev=new java.util.ArrayList<java.util.Map.Entry<String,ch.interlis.ili2c.metamodel.Enumeration.Element>>();
+        ch.interlis.iom_j.itf.ModelUtilities.buildEnumElementList(ev,"",type.getConsolidatedEnumeration());
+        boolean isOrdered=type.isOrdered();
+        int itfCode=0;
+        int seq=0;
+        Iterator<java.util.Map.Entry<String,ch.interlis.ili2c.metamodel.Enumeration.Element>> evi=ev.iterator();
+        while(evi.hasNext()){
+            java.util.Map.Entry<String,ch.interlis.ili2c.metamodel.Enumeration.Element> ele=evi.next();
+            String eleName=ele.getKey();
+            Enumeration.Element eleElement=ele.getValue();
+            String dispName = eleElement.getMetaValues().getValue(IliMetaAttrNames.METAATTR_DISPNAME);
+            if (dispName==null){
+                dispName=beautifyEnumDispName(eleName);
+            }
+            ret.addValue(seq,eleName,dispName);
+            itfCode++;
+            seq++;
+            
+        }        
+        return ret;
+    }
 
     protected AttributeDef getMultiPointAttrDef(Type type, MultiPointMapping attrMapping) {
 		Table multiPointType = ((CompositionType) type).getComponentType();

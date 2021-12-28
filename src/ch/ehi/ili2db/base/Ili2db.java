@@ -25,6 +25,7 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -68,6 +69,7 @@ import ch.interlis.ili2c.gui.UserSettings;
 import ch.interlis.ili2c.metamodel.Element;
 import ch.interlis.ili2c.metamodel.Ili2cMetaAttrs;
 import ch.interlis.ili2c.metamodel.Model;
+import ch.interlis.ili2c.metamodel.Topic;
 import ch.interlis.ili2c.metamodel.TransferDescription;
 import ch.interlis.ilirepository.IliFiles;
 import ch.interlis.iom_j.iligml.Iligml10Writer;
@@ -444,7 +446,7 @@ public class Ili2db {
 				
                 // verify dataset/basket settings
 				if(function==Config.FC_DELETE){
-					boolean createBasketCol=config.BASKET_HANDLING_READWRITE.equals(config.getBasketHandling());
+					boolean createBasketCol=Config.BASKET_HANDLING_READWRITE.equals(config.getBasketHandling());
 					if(!createBasketCol){
 						throw new Ili2dbException("delete requires column "+DbNames.T_BASKET_COL);
 					}
@@ -464,7 +466,7 @@ public class Ili2db {
 								throw new Ili2dbException("dataset <"+datasetName+"> already exists");
 							}
 						}
-						boolean createBasketCol=config.BASKET_HANDLING_READWRITE.equals(config.getBasketHandling());
+						boolean createBasketCol=Config.BASKET_HANDLING_READWRITE.equals(config.getBasketHandling());
 						if(!createBasketCol){
 							throw new Ili2dbException("import with dataset name requires column "+DbNames.T_BASKET_COL);
 						}
@@ -498,7 +500,7 @@ public class Ili2db {
 				if (td == null) {
 					throw new Ili2dbException("compiler failed");
 				}
-				
+				config.setTransientObject(Config.TRANSIENT_MODEL, td);
 				// if meta attribute table already exists, read it
                 if(config.getCreateMetaInfo() && customMapping.tableExists(conn,new DbTableName(config.getDbschema(),DbNames.META_ATTRIBUTES_TAB))){
                     // set elements' meta-attributes
@@ -544,8 +546,8 @@ public class Ili2db {
 					}
 				}
 				// use models explicitly given by user --models, --topics and/or as read from transferfile
-				java.util.List<Element> eles=ms.getModelElements(modelNames,td, td.getIli1Format()!=null && config.getDoItfLineTables(),Config.CREATE_ENUM_DEFS_MULTI.equals(config.getCreateEnumDefs()),config);
-				Viewable2TableMapping class2wrapper=Viewable2TableMapper.getClass2TableMapping(config,trafoConfig,eles,mapping);
+				java.util.List<Element> eles=ms.getModelElements(getRequestedModels(modelNames,td),td, td.getIli1Format()!=null && config.getDoItfLineTables(),Config.CREATE_ENUM_DEFS_MULTI.equals(config.getCreateEnumDefs()),config);
+				Viewable2TableMapping class2wrapper=Viewable2TableMapper.getClass2TableMapping(td.getIli1Format()!=null,config,trafoConfig,eles,mapping);
 
 				Generator gen=null;
 				try{
@@ -626,7 +628,7 @@ public class Ili2db {
                             }
                             if(config.getCreateMetaInfo()){
                                 // update meta-attributes table
-                                MetaAttrUtility.updateMetaAttributesTable(insertCollector,conn, config.getDbschema(), td);
+                                MetaAttrUtility.updateMetaAttributesTable(insertCollector,conn, config.getDbschema(), td,mapping);
                                 // set elements' meta-attributes
                                 MetaAttrUtility.addMetaAttrsFromDb(td, conn, config.getDbschema());
                             }
@@ -720,7 +722,7 @@ public class Ili2db {
 				}else{
 					IoxReader ioxReader=null;
 					try {
-						if(function!=config.FC_DELETE){
+						if(function!=Config.FC_DELETE){
 							  EhiLogger.logState("data <"+inputFilename+">");
 								if(isItfFilename(inputFilename)){
 									config.setValue(ch.interlis.iox_j.validator.Validator.CONFIG_DO_ITF_OIDPERTABLE, ch.interlis.iox_j.validator.Validator.CONFIG_DO_ITF_OIDPERTABLE_DO);
@@ -1134,6 +1136,7 @@ public class Ili2db {
 			if (td == null) {
 				throw new Ili2dbException("compiler failed");
 			}
+            config.setTransientObject(Config.TRANSIENT_MODEL, td);
             // import meta-attributes from .toml file
             if(config.getIliMetaAttrsFile()!=null){
                 if(config.getCreateMetaInfo()){
@@ -1216,8 +1219,10 @@ public class Ili2db {
 				}
 			}
 			// use models explicitly given by user (or last model of given ili-file)
-			java.util.List<Element> eles=ms.getModelElements(modelNames,td, td.getIli1Format()!=null && config.getDoItfLineTables(),Config.CREATE_ENUM_DEFS_MULTI.equals(config.getCreateEnumDefs()),config);
-			Viewable2TableMapping class2wrapper=Viewable2TableMapper.getClass2TableMapping(config,trafoConfig,eles,mapping);
+			List<Model> modelDefs=getRequestedModels(modelNames,td);
+			java.util.List<Element> eles=ms.getModelElements(modelDefs,td, td.getIli1Format()!=null && config.getDoItfLineTables(),Config.CREATE_ENUM_DEFS_MULTI.equals(config.getCreateEnumDefs()),config);
+			verifyIfBasketColRequired(modelDefs,Config.BASKET_HANDLING_READWRITE.equals(config.getBasketHandling()));
+			Viewable2TableMapping class2wrapper=Viewable2TableMapper.getClass2TableMapping(td.getIli1Format()!=null,config,trafoConfig,eles,mapping);
 
 			SqlColumnConverter geomConverter=null;
 			try{
@@ -1323,7 +1328,7 @@ public class Ili2db {
                     }
                     if(config.getCreateMetaInfo()){
                         // update meta-attributes table
-                        MetaAttrUtility.updateMetaAttributesTable(insertCollector,conn, config.getDbschema(), td);
+                        MetaAttrUtility.updateMetaAttributesTable(insertCollector,conn, config.getDbschema(), td,mapping);
                         // set elements' meta-attributes
                         if(conn!=null) {
                             MetaAttrUtility.addMetaAttrsFromDb(td, conn, config.getDbschema());
@@ -1430,7 +1435,48 @@ public class Ili2db {
 		}
 		
 }
-	private static void validateSchemaNames(DbSchema schema, NameMapping mapping) {
+	private static void verifyIfBasketColRequired(List<Model> models, boolean createBasketCol) throws Ili2dbException {
+        if(createBasketCol) {
+            return;
+        }
+        List<String> modelsThatRequireBasketCol=new ArrayList<String>();
+        for(Model model:models) {
+            Iterator it=model.iterator();
+            while(it.hasNext()) {
+                Element el=(Element)it.next();
+                if(el instanceof Topic) {
+                    Topic topic=(Topic)el;
+                    if(topic.getExtending()!=null) {
+                        if(!modelsThatRequireBasketCol.contains(model.getName())) {
+                            modelsThatRequireBasketCol.add(model.getName());
+                        }
+                    }
+                    if(topic.getBasketOid()!=null) {
+                        if(!modelsThatRequireBasketCol.contains(model.getName())) {
+                            modelsThatRequireBasketCol.add(model.getName());
+                        }
+                    }
+                }
+            }
+        }
+        if(modelsThatRequireBasketCol.size()>0) {
+            Collections.sort(modelsThatRequireBasketCol);
+            StringBuffer modelNames=new StringBuffer();
+            String sep="";
+            for(String modelName:modelsThatRequireBasketCol) {
+                modelNames.append(sep);
+                modelNames.append(modelName);
+                sep=", ";
+            }
+            if(modelsThatRequireBasketCol.size()==1) {
+                throw new Ili2dbException("Model "+modelNames+" requires column "+DbNames.T_BASKET_COL);
+            }else {
+                throw new Ili2dbException("Models "+modelNames+" require column "+DbNames.T_BASKET_COL);
+            }
+        }
+
+    }
+    private static void validateSchemaNames(DbSchema schema, NameMapping mapping) {
 	    if(false) {
 	        boolean invalidNames=false;
 	        for(DbTable table:schema.getTables()) {
@@ -1628,7 +1674,7 @@ public class Ili2db {
 			}
 			  
 			ch.interlis.ili2c.config.Configuration modelv=new ch.interlis.ili2c.config.Configuration();
-			boolean createBasketCol=config.BASKET_HANDLING_READWRITE.equals(config.getBasketHandling());
+			boolean createBasketCol=Config.BASKET_HANDLING_READWRITE.equals(config.getBasketHandling());
 			String exportModelnames[]=null;
 			long basketSqlIds[]=null;
 			if(datasetName!=null){
@@ -1724,6 +1770,7 @@ public class Ili2db {
 				if (td == null) {
 					throw new Ili2dbException("compiler failed");
 				}
+                config.setTransientObject(Config.TRANSIENT_MODEL, td);
 			  
 				if(config.getCreateMetaInfo()){
 					// set elements' meta-attributes
@@ -1772,8 +1819,8 @@ public class Ili2db {
 	                String alternativeSrsModelName=srsModelNames[1];
 				    modelNames.remove(alternativeSrsModelName);
 				}
-			  java.util.List<Element> eles=ms.getModelElements(modelNames,td, td.getIli1Format()!=null && config.getDoItfLineTables(),Config.CREATE_ENUM_DEFS_MULTI.equals(config.getCreateEnumDefs()),config);
-			  Viewable2TableMapping class2wrapper=Viewable2TableMapper.getClass2TableMapping(config,trafoConfig,eles,mapping);
+			  java.util.List<Element> eles=ms.getModelElements(getRequestedModels(modelNames,td),td, td.getIli1Format()!=null && config.getDoItfLineTables(),Config.CREATE_ENUM_DEFS_MULTI.equals(config.getCreateEnumDefs()),config);
+			  Viewable2TableMapping class2wrapper=Viewable2TableMapper.getClass2TableMapping(td.getIli1Format()!=null,config,trafoConfig,eles,mapping);
 
 			  // process xtf files
 			  EhiLogger.logState("process data...");
@@ -2568,7 +2615,7 @@ public class Ili2db {
 		}
 		
 	}
-	private static CustomMapping getCustomMappingStrategy(ch.ehi.ili2db.gui.Config config)
+	public static CustomMapping getCustomMappingStrategy(ch.ehi.ili2db.gui.Config config)
 	throws Ili2dbException
 	{
 		String mappingClassName=config.getIli2dbCustomStrategy();
@@ -2584,8 +2631,9 @@ public class Ili2db {
 		return mapping;
 	}
 	public static void setSkipPolygonBuilding(Config config) {
+        config.setDoXtfLineTables(true);
 		config.setDoItfLineTables(true);
-		config.setAreaRef(config.AREA_REF_KEEP);
+		config.setAreaRef(Config.AREA_REF_KEEP);
 	}
 	public static void setNoSmartMapping(Config config) {
 		config.setCatalogueRefTrafo(null);
@@ -2619,6 +2667,23 @@ public class Ili2db {
         }
         return models;
     }
+    public static List<Model> getRequestedModels(List<String> modelNames,TransferDescription td)
+    {
+        List<Model> models=new ArrayList<Model>();
+        if(modelNames==null || modelNames.isEmpty()){
+            Model lastModel = td.getLastModel();
+            models.add(lastModel);
+        }else{
+            for(String modelName:modelNames){
+                Model model=(Model)td.getElement(Model.class, modelName);
+                if(model==null){
+                    throw new IllegalArgumentException("unknown model <"+modelName+">");
+                }
+                models.add(model);
+            }
+        }
+        return models;
+    }
     public static String quoteSqlStringValue(String value) {
         if(value==null) {
             return "NULL";
@@ -2629,5 +2694,4 @@ public class Ili2db {
         f.createNewFile();
         return f.canWrite();
     }
-
 }

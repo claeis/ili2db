@@ -10,6 +10,7 @@ public class Config extends Settings {
 	public static final String TRUE = "True";
 	public static final String PREFIX="ch.ehi.ili2db";
 	public static final String SENDER=PREFIX+".sender";
+    public static final String TRANSIENT_MODEL=PREFIX+".model";
 	private static final String DEFAULT_SRS_AUTHORITY=PREFIX+".defaultSrsAuthority";
 	private static final String DEFAULT_SRS_CODE=PREFIX+".defaultSrsCode";
     private static final String MODEL_SRS_CODE=PREFIX+".modelSrsCode";
@@ -91,6 +92,7 @@ public class Config extends Settings {
 	private static final String ATTACHMENTS_PATH=PREFIX+".attachmentsPath";
 	private static final String ATTACHMENT_KEY=PREFIX+".attachmentKey";
 	private static final String DO_ITF_LINE_TABLES=PREFIX+".doItfLineTables";
+    private static final String DO_XTF_LINE_TABLES=PREFIX+".doXtfLineTables";
 	private static final String COLNAME_T_ID=PREFIX+".colName_T_ID";
     public static final String VER3_TRANSLATION=PREFIX+".ver3_translation";
 	public static final String ILI1TRANSLATION=PREFIX+".ili1translation";
@@ -514,6 +516,12 @@ public class Config extends Settings {
 	public void setDoItfLineTables(boolean value) {
 		setValue(DO_ITF_LINE_TABLES,value?TRUE:FALSE);
 	}
+    public boolean getDoXtfLineTables() {
+        return TRUE.equals(getValue(DO_XTF_LINE_TABLES));
+    }
+    public void setDoXtfLineTables(boolean value) {
+        setValue(DO_XTF_LINE_TABLES,value?TRUE:FALSE);
+    }
 	public void setCreateUniqueConstraints(boolean ignore) {
 		setValue(UNIQUE_CONSTRAINTS,ignore?UNIQUE_CONSTRAINTS_CREATE:null);
 	}

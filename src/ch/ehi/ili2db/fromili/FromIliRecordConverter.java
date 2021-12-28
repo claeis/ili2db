@@ -51,6 +51,7 @@ import ch.ehi.sqlgen.repository.DbSchema;
 import ch.ehi.sqlgen.repository.DbTable;
 import ch.ehi.sqlgen.repository.DbTableName;
 import ch.interlis.ili2c.metamodel.AreaType;
+import ch.interlis.ili2c.metamodel.AbstractSurfaceOrAreaType;
 import ch.interlis.ili2c.metamodel.AssociationDef;
 import ch.interlis.ili2c.metamodel.AttributeDef;
 import ch.interlis.ili2c.metamodel.AttributeRef;
@@ -65,7 +66,10 @@ import ch.interlis.ili2c.metamodel.ExtendableContainer;
 import ch.interlis.ili2c.metamodel.FormattedType;
 import ch.interlis.ili2c.metamodel.LineType;
 import ch.interlis.ili2c.metamodel.LocalAttribute;
+import ch.interlis.ili2c.metamodel.MultiAreaType;
 import ch.interlis.ili2c.metamodel.MultiCoordType;
+import ch.interlis.ili2c.metamodel.MultiSurfaceOrAreaType;
+import ch.interlis.ili2c.metamodel.MultiPolylineType;
 import ch.interlis.ili2c.metamodel.NumericType;
 import ch.interlis.ili2c.metamodel.ObjectPath;
 import ch.interlis.ili2c.metamodel.ObjectType;
@@ -664,19 +668,36 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 				: createSimpleDbCol(dbTable, aclass, attr, type, dbCol, unitDef, mText, dbColExts);
 		if(result) {
 
-		}else if (type instanceof SurfaceOrAreaType){
+		}else if (type instanceof AbstractSurfaceOrAreaType){
 			if(createItfLineTables){
 				dbCol.value=null;
+			}else if(createXtfLineTables){
+                DbColGeometry ret=new DbColGeometry();
+                boolean curvePolygon=false;
+                if(!strokeArcs){
+                    curvePolygon=true;
+                }
+                ret.setType(curvePolygon ? DbColGeometry.MULTICURVE : DbColGeometry.MULTILINESTRING);
+                // get crs from ili
+                setCrs(ret,epsgCode);
+                CoordType coord=(CoordType)((AbstractSurfaceOrAreaType)type).getControlPointDomain().getType();
+                ret.setDimension(coord.getDimensions().length);
+                setBB(ret, coord,attr.getContainer().getScopedName(null)+"."+attr.getName());
+                dbCol.value=ret;
 			}else{
 				DbColGeometry ret=new DbColGeometry();
 				boolean curvePolygon=false;
 				if(!strokeArcs){
 					curvePolygon=true;
 				}
-				ret.setType(curvePolygon ? DbColGeometry.CURVEPOLYGON : DbColGeometry.POLYGON);
+                if (type instanceof SurfaceOrAreaType){
+                    ret.setType(curvePolygon ? DbColGeometry.CURVEPOLYGON : DbColGeometry.POLYGON);
+                } else if (type instanceof  MultiSurfaceOrAreaType){
+                    ret.setType(curvePolygon ? DbColGeometry.MULTISURFACE : DbColGeometry.MULTIPOLYGON);
+                }
 				// get crs from ili
 				setCrs(ret,epsgCode);
-				CoordType coord=(CoordType)((SurfaceOrAreaType)type).getControlPointDomain().getType();
+				CoordType coord=(CoordType)((AbstractSurfaceOrAreaType)type).getControlPointDomain().getType();
 				ret.setDimension(coord.getDimensions().length);
 				setBB(ret, coord,attr.getContainer().getScopedName(null)+"."+attr.getName());
 				dbCol.value=ret;
@@ -691,7 +712,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 					// get crs from ili
 					setCrs(ret,epsgCode);
 					ret.setDimension(2); // always 2 (even if defined as 3d in ili)
-					CoordType coord=(CoordType)((SurfaceOrAreaType)type).getControlPointDomain().getType();
+					CoordType coord=(CoordType)((AbstractSurfaceOrAreaType)type).getControlPointDomain().getType();
 					setBB(ret, coord,attr.getContainer().getScopedName(null)+"."+attr.getName());
 					dbColExts.add(ret);
 				}
@@ -701,6 +722,12 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 			DbColGeometry ret = generatePolylineType((PolylineType)type, attrName);
 			setCrs(ret,epsgCode);
 			dbCol.value=ret;
+		}
+		else if (type instanceof MultiPolylineType){
+            String attrName = attr.getContainer().getScopedName(null) + "." + attr.getName();
+            DbColGeometry ret = generateMultiPolylineType((MultiPolylineType) type, attrName);
+            setCrs(ret, epsgCode);
+            dbCol.value = ret;
 		}else if (type instanceof CoordType){
 			DbColGeometry ret=new DbColGeometry();
 			ret.setType(DbColGeometry.POINT);

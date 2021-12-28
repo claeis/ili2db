@@ -1,0 +1,20 @@
+INTERLIS 2.3;
+
+MODEL Bid5
+  AT "mailto:ce@eisenhutinformatik.ch" VERSION "2019-11-22" =
+    
+  TOPIC TestA =
+    BASKET OID AS INTERLIS.UUIDOID;
+  
+    CLASS ClassA1 =
+    	attrA : TEXT*20;
+    END ClassA1;
+
+    CLASS ClassB1=
+    	attrB : TEXT*20;
+    END ClassB1;
+
+  END TestA;
+  
+  
+END Bid5.
