@@ -13,6 +13,9 @@ ideas/open issues/questions
 
 LATEST
 ---------------------------
+
+ili2db 4.7.0 (2021-12-28)
+------------------------------
 - create metainfo about possible classes in a topic (#216)
 - create metainfo about BID domain (#440)
 - set length of description field in ENUM tables to 'unlimited' (#429)
@@ -24,8 +27,9 @@ LATEST
 - ili24: implement MULTIPOLYLINE (#409)
 - ili2gpkg: create spatial index (#391) 
 - mysql:mysql-connector-java:5.1.49
-- iox-ili-1.21.9-SNAPSHOT
-- ehisqlgen-1.14.1-SNAPSHOT
+- iox-ili-1.21.9
+- ehisqlgen-1.14.1
+- ili2c-5.2.5
 
 ili2db 4.6.1 (2021-11-10)
 ------------------------------
