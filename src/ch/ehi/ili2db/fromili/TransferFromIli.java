@@ -449,9 +449,10 @@ public class TransferFromIli {
 	            }
 			}
 			EhiLogger.traceBackendCmd(insStmt);
-			java.sql.PreparedStatement insPrepStmt = conn.prepareStatement(insStmt);
+			java.sql.PreparedStatement insPrepStmt = null;
             java.sql.ResultSet rs=null;
 			try{
+	            insPrepStmt = conn.prepareStatement(insStmt);
 				rs=insPrepStmt.executeQuery();
 				while(rs.next()){
 					String file=rs.getString(1);
@@ -469,7 +470,10 @@ public class TransferFromIli {
 			        rs.close();
 			        rs=null;
 			    }
-				insPrepStmt.close();
+			    if(insPrepStmt!=null) {
+	                insPrepStmt.close();
+	                insPrepStmt=null;
+			    }
 			}
 		}catch(java.sql.SQLException ex){		
 			throw new Ili2dbException("failed to read models-table "+sqlName,ex);
@@ -502,9 +506,10 @@ public class TransferFromIli {
 	            }
 			}
 			EhiLogger.traceBackendCmd(selStmt);
-			java.sql.PreparedStatement selPrepStmt = conn.prepareStatement(selStmt);
+			java.sql.PreparedStatement selPrepStmt = null;
             java.sql.ResultSet rs=null;
 			try{
+	            selPrepStmt = conn.prepareStatement(selStmt);
 				selPrepStmt.clearParameters();
 				selPrepStmt.setString(1, filename);
 				rs=selPrepStmt.executeQuery();
@@ -519,7 +524,10 @@ public class TransferFromIli {
 			        rs.close();
 			        rs=null;
 			    }
-				selPrepStmt.close();
+			    if(selPrepStmt!=null) {
+	                selPrepStmt.close();
+	                selPrepStmt=null;
+			    }
 			}
 		}catch(java.sql.SQLException ex){		
 			throw new Ili2dbException("failed to read models-table "+sqlName,ex);
@@ -685,10 +693,11 @@ public class TransferFromIli {
 				// select entries
 				String insStmt="SELECT "+DbNames.SETTINGS_TAB_TAG_COL+","+DbNames.SETTINGS_TAB_SETTING_COL+" FROM "+sqlName;
 				EhiLogger.traceBackendCmd(insStmt);
-				java.sql.PreparedStatement insPrepStmt = conn.prepareStatement(insStmt);
+				java.sql.PreparedStatement insPrepStmt = null;
                 java.sql.ResultSet rs=null;
 				boolean settingsExists=false;
 				try{
+	                insPrepStmt = conn.prepareStatement(insStmt);
 					rs=insPrepStmt.executeQuery();
 					while(rs.next()){
 						String tag=rs.getString(1);
@@ -707,7 +716,10 @@ public class TransferFromIli {
 				        rs.close();
 				        rs=null;
 				    }
-					insPrepStmt.close();
+				    if(insPrepStmt!=null) {
+	                    insPrepStmt.close();
+	                    insPrepStmt=null;
+				    }
 				}
 			}catch(java.sql.SQLException ex){		
 				throw new Ili2dbException("failed to read settings-table "+sqlName,ex);
@@ -1189,9 +1201,10 @@ public class TransferFromIli {
 			String exstStmt=null;
 			exstStmt="SELECT "+DbNames.INHERIT_TAB_THIS_COL+" FROM "+sqlName;
 			EhiLogger.traceBackendCmd(exstStmt);
-			java.sql.PreparedStatement exstPrepStmt = conn.prepareStatement(exstStmt);
+			java.sql.PreparedStatement exstPrepStmt = null;
             java.sql.ResultSet rs=null;
 			try{
+	            exstPrepStmt = conn.prepareStatement(exstStmt);
 				rs=exstPrepStmt.executeQuery();
 				while(rs.next()){
 					String iliClassQName=rs.getString(1);
@@ -1202,7 +1215,10 @@ public class TransferFromIli {
 			        rs.close();
 			        rs=null;
 			    }
-				exstPrepStmt.close();
+			    if(exstPrepStmt!=null) {
+	                exstPrepStmt.close();
+	                exstPrepStmt=null;
+			    }
 			}
 		}catch(java.sql.SQLException ex){		
 			throw new Ili2dbException("failed to read inheritance-table "+sqlName,ex);

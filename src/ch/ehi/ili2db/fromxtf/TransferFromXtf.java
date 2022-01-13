@@ -1010,12 +1010,13 @@ public class TransferFromXtf {
 			sqlName=schema+"."+sqlName;
 		}
 		java.sql.PreparedStatement getstmt=null;
+        java.sql.ResultSet res=null;
 		try{
 			String stmt="SELECT "+colT_ID+","+DbNames.BASKETS_TAB_TOPIC_COL+" FROM "+sqlName+" WHERE "+DbNames.BASKETS_TAB_DATASET_COL+"= ?";
 			EhiLogger.traceBackendCmd(stmt);
 			getstmt=conn.prepareStatement(stmt);
 			getstmt.setLong(1,datasetSqlId);
-			java.sql.ResultSet res=getstmt.executeQuery();
+			res=getstmt.executeQuery();
 			while(res.next()){
 				long sqlId=res.getLong(1);
 				String topicQName=res.getString(2);
@@ -1024,6 +1025,14 @@ public class TransferFromXtf {
 		}catch(java.sql.SQLException ex){
 			throw new Ili2dbException("failed to query "+sqlName,ex);
 		}finally{
+            if(res!=null){
+                try{
+                    res.close();
+                    res=null;
+                }catch(java.sql.SQLException ex){
+                    EhiLogger.logError(ex);
+                }
+            }
 			if(getstmt!=null){
 				try{
 					getstmt.close();
@@ -1378,10 +1387,10 @@ public class TransferFromXtf {
             if (rs != null) {
                 try {
                     rs.close();
-                    rs=null;
                 } catch (java.sql.SQLException ex) {
                     EhiLogger.logError("failed to close query of "+ xclass.getScopedName(null), ex);
                 }
+                rs=null;
             }
 			if (dbstmt != null) {
 				try {
@@ -1389,6 +1398,7 @@ public class TransferFromXtf {
 				} catch (java.sql.SQLException ex) {
 					EhiLogger.logError("failed to close query of "+ xclass.getScopedName(null), ex);
 				}
+				dbstmt=null;
 			}
 		}
 		// remember found sqlid
@@ -1461,10 +1471,10 @@ public class TransferFromXtf {
             if (rs != null) {
                 try {
                     rs.close();
-                    rs=null;
                 } catch (java.sql.SQLException ex) {
                     EhiLogger.logError("failed to close query of "+ sqltablename, ex);
                 }
+                rs=null;
             }
 			if (dbstmt != null) {
 				try {
@@ -1472,6 +1482,7 @@ public class TransferFromXtf {
 				} catch (java.sql.SQLException ex) {
 					EhiLogger.logError("failed to close query of "+ sqltablename, ex);
 				}
+				dbstmt=null;
 			}
 		}
 	}

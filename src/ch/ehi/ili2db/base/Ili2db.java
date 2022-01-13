@@ -1966,6 +1966,7 @@ public class Ili2db {
                 }catch(java.sql.SQLException ex){
                     EhiLogger.logError(ex);
                 }
+                res=null;
             }
 			if(getstmt!=null){
 				try{
@@ -1973,6 +1974,7 @@ public class Ili2db {
 				}catch(java.sql.SQLException ex){
 					EhiLogger.logError(ex);
 				}
+				getstmt=null;
 			}
 		}
 		return null;
@@ -1992,12 +1994,13 @@ public class Ili2db {
 		}
 		HashSet<String> models=new HashSet<String>();
 		java.sql.PreparedStatement getstmt=null;
+        java.sql.ResultSet res=null;
 		try{
 			String stmt="SELECT "+colT_ID+","+DbNames.BASKETS_TAB_TOPIC_COL+" FROM "+sqlName+" WHERE "+DbNames.BASKETS_TAB_DATASET_COL+"= ?";
 			EhiLogger.traceBackendCmd(stmt);
 			getstmt=conn.prepareStatement(stmt);
 			getstmt.setLong(1,datasetId);
-			java.sql.ResultSet res=getstmt.executeQuery();
+			res=getstmt.executeQuery();
 			while(res.next()){
 				long sqlId=res.getLong(1);
 				String topicQName=res.getString(2);
@@ -2016,9 +2019,18 @@ public class Ili2db {
 		}catch(java.sql.SQLException ex){
 			throw new Ili2dbException("failed to query "+sqlName,ex);
 		}finally{
+            if(res!=null){
+                try{
+                    res.close();
+                    res=null;
+                }catch(java.sql.SQLException ex){
+                    EhiLogger.logError(ex);
+                }
+            }
 			if(getstmt!=null){
 				try{
 					getstmt.close();
+					getstmt=null;
 				}catch(java.sql.SQLException ex){
 					EhiLogger.logError(ex);
 				}
@@ -2074,12 +2086,13 @@ public class Ili2db {
 		}
 		long sqlId=0;
 		java.sql.PreparedStatement getstmt=null;
+        java.sql.ResultSet res=null;
 		try{
 			String stmt="SELECT "+colT_ID+","+DbNames.BASKETS_TAB_TOPIC_COL+" FROM "+sqlName+" WHERE "+DbNames.T_ILI_TID_COL+"= ?";
 			EhiLogger.traceBackendCmd(stmt);
 			getstmt=conn.prepareStatement(stmt);
 			getstmt.setString(1,basketid);
-			java.sql.ResultSet res=getstmt.executeQuery();
+			res=getstmt.executeQuery();
 			if(res.next()){
 				sqlId=res.getLong(1);
 				topicName.append(res.getString(2));
@@ -2088,9 +2101,18 @@ public class Ili2db {
 		}catch(java.sql.SQLException ex){
 			throw new Ili2dbException("failed to query "+sqlName,ex);
 		}finally{
+            if(res!=null){
+                try{
+                    res.close();
+                    res=null;
+                }catch(java.sql.SQLException ex){
+                    EhiLogger.logError(ex);
+                }
+            }
 			if(getstmt!=null){
 				try{
 					getstmt.close();
+					getstmt=null;
 				}catch(java.sql.SQLException ex){
 					EhiLogger.logError(ex);
 				}
@@ -2119,12 +2141,13 @@ public class Ili2db {
 		String topicQName=null;
 		long sqlId=0;
 		java.sql.PreparedStatement getstmt=null;
+        java.sql.ResultSet res=null;
 		try{
 	        HashSet<String> models=new HashSet<String>();
 			String stmt="SELECT "+colT_ID+","+DbNames.BASKETS_TAB_TOPIC_COL+" FROM "+sqlName;
 			EhiLogger.traceBackendCmd(stmt);
 			getstmt=conn.prepareStatement(stmt);
-			java.sql.ResultSet res=getstmt.executeQuery();
+			res=getstmt.executeQuery();
 			while(res.next()){
 				sqlId=res.getLong(1);
 				topicQName=res.getString(2);
@@ -2155,9 +2178,18 @@ public class Ili2db {
 		}catch(java.sql.SQLException ex){
 			throw new Ili2dbException("failed to query "+sqlName,ex);
 		}finally{
+            if(res!=null){
+                try{
+                    res.close();
+                    res=null;;
+                }catch(java.sql.SQLException ex){
+                    EhiLogger.logError(ex);
+                }
+            }
 			if(getstmt!=null){
 				try{
 					getstmt.close();
+					getstmt=null;;
 				}catch(java.sql.SQLException ex){
 					EhiLogger.logError(ex);
 				}
@@ -2598,16 +2630,27 @@ public class Ili2db {
 			EhiLogger.logState("driverVersion <"
 					+ conn.getMetaData().getDriverVersion() + ">");
 			if(conn.getMetaData().getURL().startsWith("jdbc:postgresql:")){
+                java.sql.Statement stmt=null;
+                ResultSet rs=null;
 				try {
-					java.sql.Statement stmt=conn.createStatement();
+					stmt=conn.createStatement();
 					String sql="SELECT PostGIS_Full_Version()";
-					ResultSet rs=stmt.executeQuery(sql);
+					rs=stmt.executeQuery(sql);
 					if(rs.next()){
 						String ver=rs.getString(1);
 						EhiLogger.logState("postGISVersion <"+ ver + ">");
 					}
 				} catch (SQLException e) {
 					throw new IllegalStateException("failed to get PostGIS version",e);
+				}finally {
+                    if(rs!=null) {
+                        rs.close();
+                        rs=null;
+                    }
+				    if(stmt!=null) {
+				        stmt.close();
+				        stmt=null;
+				    }
 				}
 			}
 		} catch (SQLException e) {

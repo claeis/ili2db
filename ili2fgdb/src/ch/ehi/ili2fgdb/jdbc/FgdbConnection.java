@@ -47,13 +47,14 @@ public class FgdbConnection implements Connection {
 	public void close() throws SQLException {
 		if(wksp!=null){
 			int ret=fgbd4j.CloseGeodatabase(wksp);
+			wksp.delete();
+	        wksp=null;
 			if(ret!=0){
 				StringBuffer errorDescription=new StringBuffer();
 				fgbd4j.GetErrorDescription(ret, errorDescription);
 				throw new SQLException(errorDescription.toString());
 			}
 		}
-		wksp=null;
 	}
 
 	@Override

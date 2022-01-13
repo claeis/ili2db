@@ -109,6 +109,7 @@ public class TableBasedIdGen implements DbIdGen {
 				}catch(java.sql.SQLException ex){
 					EhiLogger.logError(ex);
 				}
+				getstmt=null;
 			}
 		}
 			

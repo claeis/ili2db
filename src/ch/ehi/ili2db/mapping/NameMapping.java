@@ -451,9 +451,10 @@ public class NameMapping {
 			String exstStmt=null;
 			exstStmt="SELECT "+DbNames.CLASSNAME_TAB_ILINAME_COL+" FROM "+sqlName;
 			EhiLogger.traceBackendCmd(exstStmt);
-			java.sql.PreparedStatement exstPrepStmt = conn.prepareStatement(exstStmt);
+			java.sql.PreparedStatement exstPrepStmt = null;
             java.sql.ResultSet rs=null;
 			try{
+	            exstPrepStmt = conn.prepareStatement(exstStmt);
 				rs=exstPrepStmt.executeQuery();
 				while(rs.next()){
 					String iliCode=rs.getString(1);
@@ -464,8 +465,10 @@ public class NameMapping {
 			        rs.close();
 			        rs=null;
 			    }
-				exstPrepStmt.close();
-				exstPrepStmt=null;
+			    if(exstPrepStmt!=null) {
+	                exstPrepStmt.close();
+	                exstPrepStmt=null;
+			    }
 			}
 		}catch(java.sql.SQLException ex){		
 			throw new Ili2dbException("failed to read class-mapping-table "+sqlName,ex);
@@ -571,6 +574,7 @@ public class NameMapping {
 				}catch(java.sql.SQLException ex){		
 					throw new Ili2dbException("failed to close query of "+mapTableName,ex);
 				}
+				dbstmt=null;
 			}
 		}
 

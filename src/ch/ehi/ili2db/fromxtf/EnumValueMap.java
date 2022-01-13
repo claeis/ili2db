@@ -57,9 +57,11 @@ public class EnumValueMap {
     			exstStmt="SELECT "+DbNames.ENUM_TAB_ILICODE_COL+(tidColumnName!=null?","+tidColumnName:"")+","+DbNames.ENUM_TAB_DISPNAME_COL+" FROM "+sqlName+" WHERE "+DbNames.ENUM_TAB_THIS_COL+" = '"+qualifiedIliName+"'";
     		}
     		EhiLogger.traceBackendCmd(exstStmt);
-    		java.sql.PreparedStatement exstPrepStmt = conn.prepareStatement(exstStmt);
+    		java.sql.PreparedStatement exstPrepStmt = null;
+            java.sql.ResultSet rs=null;
     		try{
-    			java.sql.ResultSet rs=exstPrepStmt.executeQuery();
+                exstPrepStmt = conn.prepareStatement(exstStmt);
+    			rs=exstPrepStmt.executeQuery();
                 Long id=0L;
     			while(rs.next()){
     				String iliCode=rs.getString(1);
@@ -75,7 +77,14 @@ public class EnumValueMap {
     				ret.addValue(id,iliCode,displayName);
     			}
     		}finally{
-    			exstPrepStmt.close();
+    		    if(rs!=null) {
+    		        rs.close();
+    		        rs=null;
+    		    }
+    		    if(exstPrepStmt!=null) {
+                    exstPrepStmt.close();
+                    exstPrepStmt=null;
+    		    }
     		}
     	return ret;
     }

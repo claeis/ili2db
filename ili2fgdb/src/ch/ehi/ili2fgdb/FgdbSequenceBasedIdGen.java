@@ -86,7 +86,10 @@ public class FgdbSequenceBasedIdGen implements DbIdGen {
 					}
 				}
 			}finally{
-				if(rs!=null)rs.close();
+				if(rs!=null) {
+				    rs.close();
+				    rs=null;
+				}
 			}
 		}catch(java.sql.SQLException ex){
 			IOException iox=new IOException("failed to check if table "+tableName+" exists");
@@ -152,11 +155,12 @@ public class FgdbSequenceBasedIdGen implements DbIdGen {
 			sqlName=schema+"."+sqlName;
 		}
 		java.sql.PreparedStatement getstmt=null;
+        java.sql.ResultSet res=null;
 		try{
 			String stmt="SELECT nextval('"+sqlName+"')";
 			EhiLogger.traceBackendCmd(stmt);
 			getstmt=conn.prepareStatement(stmt);
-			java.sql.ResultSet res=getstmt.executeQuery();
+			res=getstmt.executeQuery();
 			long ret=0;
 			if(res.next()){
 				ret=res.getLong(1);
@@ -166,12 +170,21 @@ public class FgdbSequenceBasedIdGen implements DbIdGen {
 			EhiLogger.logError("failed to query "+sqlName,ex);
 			throw new IllegalStateException(ex);
 		}finally{
+            if(res!=null){
+                try{
+                    res.close();
+                }catch(java.sql.SQLException ex){
+                    EhiLogger.logError(ex);
+                }
+                res=null;
+            }
 			if(getstmt!=null){
 				try{
 					getstmt.close();
 				}catch(java.sql.SQLException ex){
 					EhiLogger.logError(ex);
 				}
+				getstmt=null;
 			}
 		}
 		throw new IllegalStateException("no nextval "+sqlName);

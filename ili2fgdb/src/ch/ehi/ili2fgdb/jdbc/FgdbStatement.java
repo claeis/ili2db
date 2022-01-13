@@ -137,15 +137,25 @@ public class FgdbStatement implements Statement {
 
 	private ResultSet executeStringQuery(String stmtStr) throws SQLException {
 		ResultSet ret;
-		EnumRows rows=new EnumRows();
-		  int err=0;
-		err=conn.getGeodatabase().ExecuteSQL(stmtStr, true, rows);
-		if(err!=0){
-			StringBuffer errDesc=new StringBuffer();
-			fgbd4j.GetErrorDescription(err, errDesc);
-			throw new SQLException(errDesc.toString());
+        EnumRows rows=null;
+		try {
+	        rows=new EnumRows();
+	          int err=0;
+	        err=conn.getGeodatabase().ExecuteSQL(stmtStr, true, rows);
+	        if(err!=0){
+	            StringBuffer errDesc=new StringBuffer();
+	            fgbd4j.GetErrorDescription(err, errDesc);
+	            throw new SQLException(errDesc.toString());
+	        }
+	        ret=new FgdbResultSet(conn,null,rows,null);
+	        rows=null;
+		}finally {
+		    if(rows!=null) {
+		        rows.Close();
+		        rows.delete();
+		        rows=null;
+		    }
 		}
-		ret=new FgdbResultSet(conn,null,rows,null);
 		return ret;
 	}
 
@@ -213,10 +223,12 @@ public class FgdbStatement implements Statement {
 		}finally {
 		    if(rows!=null) {
 		        rows.Close();
+		        rows.delete();
 		        rows=null;
 		    }
 		    if(table!=null) {
 		        conn.getGeodatabase().CloseTable(table);
+		        table.delete();
 		        table=null;
 		    }
 		}
@@ -224,14 +236,23 @@ public class FgdbStatement implements Statement {
 
 	@Override
 	public int executeUpdate(String stmtStr) throws SQLException {
-        EnumRows rows=new EnumRows();
+        EnumRows rows=null;
           int err=0;
-        err=conn.getGeodatabase().ExecuteSQL(stmtStr, true, rows);
-        if(err!=0){
-            StringBuffer errDesc=new StringBuffer();
-            fgbd4j.GetErrorDescription(err, errDesc);
-            throw new SQLException(errDesc.toString());
-        }
+          try {
+              rows=new EnumRows();
+              err=conn.getGeodatabase().ExecuteSQL(stmtStr, true, rows);
+              if(err!=0){
+                  StringBuffer errDesc=new StringBuffer();
+                  fgbd4j.GetErrorDescription(err, errDesc);
+                  throw new SQLException(errDesc.toString());
+              }
+          }finally {
+              if(rows!=null) {
+                  rows.Close();
+                  rows.delete();
+                  rows=null;
+              }
+          }
 		return 0;
 	}
 

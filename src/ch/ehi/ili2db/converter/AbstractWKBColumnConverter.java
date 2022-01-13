@@ -331,15 +331,34 @@ public abstract class AbstractWKBColumnConverter implements SqlColumnConverter {
 	{
 		
 		int srsid;
+        java.sql.Statement stmt=null;
+        java.sql.ResultSet ret=null;
 		try{
-			java.sql.Statement stmt=conn.createStatement();
-			java.sql.ResultSet ret=stmt.executeQuery("SELECT srid FROM SPATIAL_REF_SYS WHERE AUTH_NAME=\'"+crsAuthority+"\' AND AUTH_SRID="+crsCode);
+			stmt=conn.createStatement();
+			ret=stmt.executeQuery("SELECT srid FROM SPATIAL_REF_SYS WHERE AUTH_NAME=\'"+crsAuthority+"\' AND AUTH_SRID="+crsCode);
 			if(!ret.next()){
 				return null;
 			}
 			srsid=ret.getInt("srid");
 		}catch(java.sql.SQLException ex){
 			throw new ConverterException("failed to query srsid from database",ex);
+		}finally {
+		    if(ret!=null) {
+		        try {
+                    ret.close();
+                } catch (SQLException e) {
+                    throw new ConverterException("failed to close rs",e);
+                }
+		        ret=null;
+		    }
+            if(stmt!=null) {
+                try {
+                    stmt.close();
+                } catch (SQLException e) {
+                    throw new ConverterException("failed to close stmt",e);
+                }
+                stmt=null;
+            }
 		}
 		return srsid;
 	}

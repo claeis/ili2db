@@ -62,8 +62,10 @@ public class TrafoConfig {
 				        rs.close();
 				        rs=null;
 				    }
-					insPrepStmt.close();
-					insPrepStmt=null;
+				    if(insPrepStmt!=null) {
+	                    insPrepStmt.close();
+	                    insPrepStmt=null;
+				    }
 				}
 			}catch(java.sql.SQLException ex){		
 				throw new Ili2dbException("failed to read "+sqlName,ex);

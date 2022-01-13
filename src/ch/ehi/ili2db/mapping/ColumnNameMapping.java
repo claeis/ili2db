@@ -82,8 +82,10 @@ public class ColumnNameMapping {
 	                rs.close();
 	                rs=null;
 			    }
-				exstPrepStmt.close();
-				exstPrepStmt=null;
+			    if(exstPrepStmt!=null) {
+	                exstPrepStmt.close();
+	                exstPrepStmt=null;
+			    }
 			}
 		}catch(java.sql.SQLException ex){		
 			throw new Ili2dbException("failed to read attr-mapping-table "+sqlName,ex);
@@ -179,10 +181,10 @@ public class ColumnNameMapping {
             if(rs!=null){
                 try{
                     rs.close();
-                    rs=null;
                 }catch(java.sql.SQLException ex){       
                     throw new Ili2dbException("failed to close query of "+mapTableName,ex);
                 }
+                rs=null;
             }
 			if(dbstmt!=null){
 				try{
@@ -190,6 +192,7 @@ public class ColumnNameMapping {
 				}catch(java.sql.SQLException ex){		
 					throw new Ili2dbException("failed to close query of "+mapTableName,ex);
 				}
+				dbstmt=null;
 			}
 		}
 
