@@ -106,6 +106,7 @@ public class Config extends Settings {
     public static final String CLASSNAME_TAB_ILINAME_COLSIZE = PREFIX+".classnameTabIlinameColSize";
     public static final String INHERIT_TAB_THIS_COLSIZE = PREFIX+".inheritTabThisColSize";
 	public static final String CREATE_TYPE_CONSTRAINT=PREFIX+".createTypeConstraint";
+	public static final String REPAIR_TOUCHING_LINES=PREFIX+".RepairTouchingLines";
 	private int function=FC_UNDEFINED;
 	private String dburl;
 	private String dbusr;
@@ -159,6 +160,7 @@ public class Config extends Settings {
 	private String iliMetaAttrsFile=null;
     private String domainAssignments=null;
     private boolean xtfAttrText=false;
+
 	final static public String ILIGML20="ILIGML20"; 
 	
     static public final int FC_UNDEFINED=0;
@@ -830,4 +832,12 @@ public class Config extends Settings {
     public void setSqlExtRefCols(String value) {
         setValue(SQL_EXTREF,value);
     }
+
+	public void setRepairTouchingLines(String value) {
+		setValue(REPAIR_TOUCHING_LINES, value);
+	}
+
+	public static String getRepairTouchingLines(Settings config){
+		return config.getValue(REPAIR_TOUCHING_LINES);
+	}
 }
