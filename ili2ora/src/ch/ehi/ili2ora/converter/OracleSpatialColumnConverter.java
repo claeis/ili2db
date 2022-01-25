@@ -18,6 +18,7 @@ import ch.interlis.iox_j.wkb.Wkb2iox;
 public class OracleSpatialColumnConverter extends AbstractWKBColumnConverter {
     
     private boolean strokeArcs=true;
+    private boolean repairTouchingLines;
     private String geomFromWkbFunction;
     private static final String GEOM_FROM_WKB_FUNCTION="ILI2ORA_SDO_GEOMETRY";
     private static final String GEOM_TO_WKB_FUNCTION="SDO_UTIL.TO_WKBGEOMETRY";
@@ -26,6 +27,7 @@ public class OracleSpatialColumnConverter extends AbstractWKBColumnConverter {
     public void setup(Connection conn, Settings config) {
         super.setup(conn,config);
         strokeArcs=Config.STROKE_ARCS_ENABLE.equals(Config.getStrokeArcs(config));
+        repairTouchingLines = Config.TRUE.equals(Config.getRepairTouchingLines(config));
         geomFromWkbFunction=GEOM_FROM_WKB_FUNCTION;
         if(config instanceof Config) {
             String dbschema=((Config)config).getDbschema();
@@ -94,7 +96,7 @@ public class OracleSpatialColumnConverter extends AbstractWKBColumnConverter {
             Iox2wkb conv=new Iox2wkb(is3D?3:2);
             byte[] geomObj;
             try {
-                geomObj = conv.surface2wkb(value,!strokeArcs,p);
+                geomObj = conv.surface2wkb(value,!strokeArcs,p,repairTouchingLines);
             } catch (Iox2wkbException ex) {
                 throw new ConverterException(ex);
             }
@@ -113,7 +115,7 @@ public class OracleSpatialColumnConverter extends AbstractWKBColumnConverter {
             Iox2wkb conv=new Iox2wkb(is3D?3:2);
             byte[] geomObj;
             try {
-                geomObj =conv.multisurface2wkb(value,!strokeArcs,p);
+                geomObj =conv.multisurface2wkb(value,!strokeArcs,p,repairTouchingLines);
             } catch (Iox2wkbException ex) {
                 throw new ConverterException(ex);
             }

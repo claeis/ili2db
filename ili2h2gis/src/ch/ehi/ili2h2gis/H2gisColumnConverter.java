@@ -50,6 +50,7 @@ import net.iharder.Base64;
 
 public class H2gisColumnConverter extends AbstractWKBColumnConverter {
     private TransferDescription td=null;
+	private boolean repairTouchingLines;
 	@Override
 	public Integer getSrsid(String crsAuthority, String crsCode, Connection conn)
 			throws ConverterException {
@@ -99,6 +100,7 @@ public class H2gisColumnConverter extends AbstractWKBColumnConverter {
 		if(!Config.STROKE_ARCS_ENABLE.equals(Config.getStrokeArcs(config))){
 		    throw new IllegalArgumentException("h2gis supports only straights");
 		}
+		repairTouchingLines = Config.TRUE.equals(Config.getRepairTouchingLines(config));
 	}
 	
 	@Override
@@ -195,7 +197,7 @@ public class H2gisColumnConverter extends AbstractWKBColumnConverter {
 				    Iox2wkb conv=new Iox2wkb(is3D?3:2);
 					//EhiLogger.debug("conv "+conv); // select st_asewkt(form) from tablea
 					try {
-						return conv.surface2wkb(value,!strokeArcs,p);
+						return conv.surface2wkb(value,!strokeArcs,p,repairTouchingLines);
 					} catch (Iox2wkbException ex) {
 						throw new ConverterException(ex);
 					}
@@ -213,7 +215,7 @@ public class H2gisColumnConverter extends AbstractWKBColumnConverter {
 					Iox2wkb conv=new Iox2wkb(is3D?3:2);
 					//EhiLogger.debug("conv "+conv); // select st_asewkt(form) from tablea
 					try {
-						return conv.multisurface2wkb(value,!strokeArcs,p);
+						return conv.multisurface2wkb(value,!strokeArcs,p,repairTouchingLines);
 					} catch (Iox2wkbException ex) {
 						throw new ConverterException(ex);
 					}

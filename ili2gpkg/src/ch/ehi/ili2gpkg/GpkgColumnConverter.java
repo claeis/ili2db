@@ -84,10 +84,12 @@ public class GpkgColumnConverter extends AbstractWKBColumnConverter {
 		return srsid;
 	}
 	private boolean strokeArcs=true;
+	private boolean repairTouchingLines;
 	@Override
 	public void setup(Connection conn, Settings config) {
 		super.setup(conn,config);
 		strokeArcs=Config.STROKE_ARCS_ENABLE.equals(Config.getStrokeArcs(config));
+		repairTouchingLines = Config.TRUE.equals(Config.getRepairTouchingLines(config));
 	}
 	
 	@Override
@@ -188,7 +190,7 @@ public class GpkgColumnConverter extends AbstractWKBColumnConverter {
 					Iox2gpkg conv=new Iox2gpkg(is3D?3:2);
 					//EhiLogger.debug("conv "+conv); // select st_asewkt(form) from tablea
 					try {
-						return conv.surface2wkb(value,!strokeArcs,p,srsid);
+						return conv.surface2wkb(value,!strokeArcs,p,repairTouchingLines,srsid);
 					} catch (Iox2wkbException ex) {
 						throw new ConverterException(ex);
 					}
@@ -206,7 +208,7 @@ public class GpkgColumnConverter extends AbstractWKBColumnConverter {
 					Iox2gpkg conv=new Iox2gpkg(is3D?3:2);
 					//EhiLogger.debug("conv "+conv); // select st_asewkt(form) from tablea
 					try {
-						return conv.multisurface2wkb(value,!strokeArcs,p,srsid);
+						return conv.multisurface2wkb(value,!strokeArcs,p,repairTouchingLines,srsid);
 					} catch (Iox2wkbException ex) {
 						throw new ConverterException(ex);
 					}

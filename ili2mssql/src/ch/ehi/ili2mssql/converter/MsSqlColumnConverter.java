@@ -18,6 +18,7 @@ import ch.interlis.iox_j.wkb.Wkb2iox;
 public class MsSqlColumnConverter extends AbstractWKBColumnConverter {
 	
 	private boolean strokeArcs=true;
+    private boolean repairTouchingLines;
     private static final String GEOM_FROM_WKB_FUNCTION="geometry::STGeomFromWKB";
     private static final String GEOM_TO_WKB_FUNCTION=".AsBinaryZM()";
 	
@@ -25,6 +26,7 @@ public class MsSqlColumnConverter extends AbstractWKBColumnConverter {
 	public void setup(Connection conn, Settings config) {
 		super.setup(conn,config);
 		strokeArcs=Config.STROKE_ARCS_ENABLE.equals(Config.getStrokeArcs(config));
+        repairTouchingLines = Config.TRUE.equals(Config.getRepairTouchingLines(config));
 	}
 	
 	@Override
@@ -149,7 +151,7 @@ public class MsSqlColumnConverter extends AbstractWKBColumnConverter {
 				Iox2wkb conv=new Iox2wkb(is3D?3:2, ByteOrder.BIG_ENDIAN, false);
 				
 				try {
-					return conv.multisurface2wkb(value,!strokeArcs,p);
+					return conv.multisurface2wkb(value,!strokeArcs,p,repairTouchingLines);
 				} catch (Iox2wkbException ex) {
 					throw new ConverterException(ex);
 				}
@@ -168,7 +170,7 @@ public class MsSqlColumnConverter extends AbstractWKBColumnConverter {
             Iox2wkb conv=new Iox2wkb(is3D?3:2, ByteOrder.BIG_ENDIAN, false);
 
             try {
-                return conv.surface2wkb(value,!strokeArcs,p);
+                return conv.surface2wkb(value,!strokeArcs,p,repairTouchingLines);
             } catch (Iox2wkbException ex) {
                 throw new ConverterException(ex);
             }
