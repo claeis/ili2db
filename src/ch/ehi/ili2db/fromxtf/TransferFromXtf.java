@@ -639,6 +639,7 @@ public class TransferFromXtf {
 						}
 						
 						{
+                            EhiLogger.traceState("write delayed objects ("+delayedObjects.size()+")...");
 							for(FixIomObjectExtRefs fixref : delayedObjects){
 								boolean skipObj=false;
 								for(IomObject ref:fixref.getRefs()){
@@ -675,6 +676,7 @@ public class TransferFromXtf {
 								}
 							}
 						}
+                        EhiLogger.traceState("...EndTransferEvent done");
 						
 						break;
 					}else if(event instanceof StartTransferEvent){
