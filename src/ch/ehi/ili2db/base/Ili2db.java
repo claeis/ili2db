@@ -1998,7 +1998,7 @@ public class Ili2db {
             EhiLogger.traceBackendCmd(stmt);
             getstmt=conn.prepareStatement(stmt);
             res=getstmt.executeQuery();
-            if(res.next()){
+            while(res.next()){
                 datasets.add(res.getString(1));
             }
         }catch(java.sql.SQLException ex){
