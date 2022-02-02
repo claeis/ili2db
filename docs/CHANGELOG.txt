@@ -13,6 +13,7 @@ ideas/open issues/questions
 
 LATEST
 ---------------------------
+- API: added Ili2db.getDatasets()
 
 ili2db 4.7.0 (2021-12-28)
 ------------------------------
