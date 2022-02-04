@@ -59,7 +59,7 @@ public abstract class AbstractMain {
         config.setLocalisedTrafo(Config.LOCALISED_TRAFO_EXPAND);
 		config.setValidation(true);
 	}
-	protected abstract DbUrlConverter getDbUrlConverter();
+	public abstract DbUrlConverter getDbUrlConverter();
 
 	public void domain(String args[]){
 		Config config=new Config();

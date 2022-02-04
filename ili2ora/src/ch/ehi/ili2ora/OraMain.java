@@ -46,7 +46,8 @@ public class OraMain extends ch.ehi.ili2db.AbstractMain {
 		config.setIli2dbCustomStrategy(ch.ehi.ili2ora.OracleCustomStrategy.class.getName());
 		config.setValue(Config.MODELS_TAB_MODELNAME_COLSIZE, "400");
 	}
-	protected DbUrlConverter getDbUrlConverter() {
+	@Override
+	public DbUrlConverter getDbUrlConverter() {
 		return new DbUrlConverter(){
 			public String makeUrl(Config config) {
 				/*
