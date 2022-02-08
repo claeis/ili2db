@@ -160,7 +160,6 @@ public class Config extends Settings {
 	private String iliMetaAttrsFile=null;
     private String domainAssignments=null;
     private boolean xtfAttrText=false;
-
 	final static public String ILIGML20="ILIGML20"; 
 	
     static public final int FC_UNDEFINED=0;
