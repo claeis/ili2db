@@ -50,7 +50,6 @@ import net.iharder.Base64;
 
 public class H2gisColumnConverter extends AbstractWKBColumnConverter {
     private TransferDescription td=null;
-	private boolean repairTouchingLines;
 	@Override
 	public Integer getSrsid(String crsAuthority, String crsCode, Connection conn)
 			throws ConverterException {
@@ -94,6 +93,7 @@ public class H2gisColumnConverter extends AbstractWKBColumnConverter {
 		return srsid;
 	}
 	private boolean strokeArcs=true;
+	private boolean repairTouchingLines;
 	@Override
 	public void setup(Connection conn, Settings config) {
 		super.setup(conn,config);
