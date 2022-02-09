@@ -1979,6 +1979,51 @@ public class Ili2db {
 		}
 		return null;
 	}
+    public static List<String> getDatasets(Connection conn,Config config) throws Ili2dbException {
+        String schema=config.getDbschema();
+        String colT_ID=config.getColT_ID();
+        if(colT_ID==null){
+            colT_ID=DbNames.T_ID_COL;
+        }
+
+        String sqlName=DbNames.DATASETS_TAB;
+        if(schema!=null){
+            sqlName=schema+"."+sqlName;
+        }
+        java.sql.PreparedStatement getstmt=null;
+        java.sql.ResultSet res=null;
+        List<String> datasets=new ArrayList<String>();
+        try{
+            String stmt="SELECT "+DbNames.DATASETS_TAB_DATASETNAME+" FROM "+sqlName;
+            EhiLogger.traceBackendCmd(stmt);
+            getstmt=conn.prepareStatement(stmt);
+            res=getstmt.executeQuery();
+            while(res.next()){
+                datasets.add(res.getString(1));
+            }
+        }catch(java.sql.SQLException ex){
+            throw new Ili2dbException("failed to query "+sqlName,ex);
+        }finally{
+            if(res!=null){
+                try{
+                    res.close();
+                }catch(java.sql.SQLException ex){
+                    EhiLogger.logError(ex);
+                }
+                res=null;
+            }
+            if(getstmt!=null){
+                try{
+                    getstmt.close();
+                }catch(java.sql.SQLException ex){
+                    EhiLogger.logError(ex);
+                }
+                getstmt=null;
+            }
+        }
+        Collections.sort(datasets);
+        return datasets;
+    }
 	public static long[] getBasketSqlIdsFromDatasetId(long datasetId,
 			Configuration modelv,Connection conn,Config config) throws Ili2dbException {
 		ArrayList<Long> ret=new ArrayList<Long>();

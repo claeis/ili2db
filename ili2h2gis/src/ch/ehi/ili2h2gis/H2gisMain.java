@@ -41,7 +41,7 @@ public class H2gisMain extends ch.ehi.ili2db.AbstractMain {
 		config.setStrokeArcs(Config.STROKE_ARCS_ENABLE);
 	}
 	@Override
-	protected DbUrlConverter getDbUrlConverter() {
+    public DbUrlConverter getDbUrlConverter() {
 		return new DbUrlConverter(){
 			public String makeUrl(Config config) {
 				/*

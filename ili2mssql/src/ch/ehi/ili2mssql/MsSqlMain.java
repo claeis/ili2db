@@ -25,7 +25,7 @@ public class MsSqlMain  extends ch.ehi.ili2db.AbstractMain {
 	}
 	
 	@Override
-	protected DbUrlConverter getDbUrlConverter() {
+    public DbUrlConverter getDbUrlConverter() {
 		return new DbUrlConverter(){
 			public String makeUrl(Config config) {
 				if(config.getDbdatabase()!=null){

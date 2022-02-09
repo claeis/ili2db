@@ -46,7 +46,7 @@ public class MysqlMain extends ch.ehi.ili2db.AbstractMain {
         config.setValue(Config.INHERIT_TAB_THIS_COLSIZE,"766");
 	}
 	@Override
-	protected DbUrlConverter getDbUrlConverter() {
+    public DbUrlConverter getDbUrlConverter() {
 		return new DbUrlConverter(){
 			public String makeUrl(Config config) {
 				/*

@@ -60,7 +60,7 @@ public abstract class AbstractMain {
 		config.setValidation(true);
 		config.setRepairTouchingLines(Config.TRUE);
 	}
-	protected abstract DbUrlConverter getDbUrlConverter();
+	public abstract DbUrlConverter getDbUrlConverter();
 
 	public void domain(String args[]){
 		Config config=new Config();
