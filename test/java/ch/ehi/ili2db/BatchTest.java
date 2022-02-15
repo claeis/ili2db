@@ -1,5 +1,6 @@
 package ch.ehi.ili2db;
 
+import ch.ehi.basics.logging.EhiLogger;
 import ch.ehi.ili2db.base.Ili2db;
 import ch.ehi.ili2db.gui.Config;
 import org.junit.Assert;

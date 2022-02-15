@@ -31,11 +31,13 @@ import java.util.Map;
 import java.util.Set;
 
 import ch.ehi.basics.logging.EhiLogger;
+import ch.ehi.basics.types.OutParam;
 import ch.ehi.ili2db.base.DbIdGen;
 import ch.ehi.ili2db.base.DbNames;
 import ch.ehi.ili2db.base.Ili2cUtility;
 import ch.ehi.ili2db.base.Ili2db;
 import ch.ehi.ili2db.base.Ili2dbException;
+import ch.ehi.ili2db.base.StatementExecutionHelper;
 import ch.ehi.ili2db.converter.AbstractRecordConverter;
 import ch.ehi.ili2db.converter.ConverterException;
 import ch.ehi.ili2db.converter.SqlColumnConverter;
@@ -149,6 +151,10 @@ public class TransferFromXtf {
     private String srsModelAssignment=null;
     private Map<Element,Element> crsFilter=null;
     private boolean createImportTabs=false;
+    private Integer batchSize = null;
+    private boolean doBatchInsert=false;
+    private Map<String,StatementExecutionHelper> cachedStatementExecutionHelper=new HashMap<String,StatementExecutionHelper>();
+    private Map<String,PreparedStatement> cachedPreparedStatement=new HashMap<String,PreparedStatement>();
 	public TransferFromXtf(int function,NameMapping ili2sqlName1,
 			TransferDescription td1,
 			Connection conn1,
@@ -191,6 +197,11 @@ public class TransferFromXtf {
 		createSqlExtRef=Config.SQL_EXTREF_ENABLE.equals(config.getSqlExtRefCols());
 		createImportTabs=config.isCreateImportTabs();
 		xtffilename=config.getXtffile();
+        batchSize = config.getBatchSize();
+        if(batchSize!=null) {
+            doBatchInsert=true;
+        }
+		
 		functionCode=function;
 		if(!config.isVer3_translation() || config.getIli1Translation()!=null){
 			languageFilter=new TranslateToOrigin(td1, config);
@@ -676,6 +687,7 @@ public class TransferFromXtf {
 								}
 							}
 						}
+						flushBatchedRecords();
                         EhiLogger.traceState("...EndTransferEvent done");
 						
 						break;
@@ -707,6 +719,7 @@ public class TransferFromXtf {
 				if(languageFilter!=null){
 					languageFilter.close();
 				}
+				closePreparedStatements();
 			}
 		}finally{
 			recman.close();
@@ -1581,30 +1594,29 @@ public class TransferFromXtf {
 		 }
 		 while(aclass!=null){
 			 {
-					String insert = getInsertStmt(updateObj,aclass1,aclass,structEle);
+		         OutParam<String> stmtKey=new OutParam<String>();
+					String insert = getInsertStmt(updateObj,aclass1,aclass,structEle,stmtKey);
 					EhiLogger.traceBackendCmd(insert);
-					PreparedStatement ps = conn.prepareStatement(insert);
-					try{
-						recConv.writeRecord(basketSqlId, genericDomains,iomObj, aclass1,structEle, aclass, sqlType,
-								sqlId, updateObj, ps,structQueue,aclass0);
-						ps.executeUpdate();
-					}finally{
-						ps.close();
-					}
+					PreparedStatement ps = getPreparedStatement(stmtKey.value,insert);
+		            StatementExecutionHelper seHelper = getStatementExecutionHelper(stmtKey.value);
+
+                    recConv.writeRecord(basketSqlId, genericDomains,iomObj, aclass1,structEle, aclass, sqlType,
+                            sqlId, updateObj, ps,structQueue,aclass0);
+                    seHelper.write(ps);
+                    closeUnbatchedPreparedStatement(stmtKey.value);
 			 }
 			for(ViewableWrapper secondary:aclass.getSecondaryTables()){
 				// secondarytable contains attributes of this class?
 				if(secondary.containsAttributes(recConv.getIomObjectAttrs(aclass1).keySet())){
-					String insert = getInsertStmt(updateObj,aclass1,secondary,structEle);
+			         OutParam<String> stmtKey=new OutParam<String>();
+					String insert = getInsertStmt(updateObj,aclass1,secondary,structEle,stmtKey);
 					EhiLogger.traceBackendCmd(insert);
-					PreparedStatement ps = conn.prepareStatement(insert);
-					try{
-						recConv.writeRecord(basketSqlId, genericDomains,iomObj, aclass1,structEle, secondary, sqlType,
-								sqlId, updateObj, ps,structQueue,aclass0);
-						ps.executeUpdate();
-					}finally{
-						ps.close();
-					}
+					PreparedStatement ps = getPreparedStatement(stmtKey.value,insert);
+                    StatementExecutionHelper seHelper = getStatementExecutionHelper(stmtKey.value);
+                    recConv.writeRecord(basketSqlId, genericDomains,iomObj, aclass1,structEle, secondary, sqlType,
+                            sqlId, updateObj, ps,structQueue,aclass0);
+                    seHelper.write(ps);
+                    closeUnbatchedPreparedStatement(stmtKey.value);
 				}
 				
 			}
@@ -1629,6 +1641,95 @@ public class TransferFromXtf {
 		     }
 		 }
 	}
+	
+    private StatementExecutionHelper getStatementExecutionHelper(String key) {
+        StatementExecutionHelper helper=cachedStatementExecutionHelper.get(key);
+        if(helper==null) {
+            helper=new StatementExecutionHelper(batchSize);
+            cachedStatementExecutionHelper.put(key,helper);
+        }
+        return helper;
+    }
+
+    private PreparedStatement getPreparedStatement(String key, String sql) throws SQLException {
+        PreparedStatement stmt=cachedPreparedStatement.get(key);
+        if(stmt==null) {
+            stmt=conn.prepareStatement(sql);
+            cachedPreparedStatement.put(key,stmt);
+        }
+        return stmt;
+    }
+    private void closeUnbatchedPreparedStatement(String key) throws SQLException {
+        if(!doBatchInsert) {
+            PreparedStatement stmt=cachedPreparedStatement.get(key);
+            StatementExecutionHelper helper=cachedStatementExecutionHelper.get(key);
+            try {
+                if(stmt!=null) {
+                    try {
+                        if(helper!=null) {
+                            helper.flush(stmt);
+                        }
+                    }finally {
+                        stmt.close();
+                    }
+                }
+            }finally {
+                if(stmt!=null) {
+                    cachedPreparedStatement.remove(key);
+                }
+                if(helper!=null) {
+                    cachedStatementExecutionHelper.remove(key);
+                }
+            }
+        }
+    }
+    private void closePreparedStatements() {
+        if(doBatchInsert) {
+            try {
+                for(String key:cachedPreparedStatement.keySet()) {
+                    PreparedStatement stmt=cachedPreparedStatement.get(key);
+                    StatementExecutionHelper helper=cachedStatementExecutionHelper.get(key);
+                    if(stmt!=null) {
+                        try {
+                            if(helper!=null) {
+                                helper.flush(stmt);
+                            }
+                        } catch (SQLException ex) {
+                            EhiLogger.logError("flush of recordbatch "+key+" failed", ex);
+                        }finally {
+                            try {
+                                stmt.close();
+                            } catch (SQLException ex) {
+                                EhiLogger.logError("close of statement "+key+" failed", ex);
+                            }
+                        }
+                    }
+                }
+            }finally {
+                cachedPreparedStatement.clear();
+                cachedStatementExecutionHelper.clear();
+            }
+        }
+    }
+
+    private void flushBatchedRecords() {
+        if(doBatchInsert) {
+            for(String key:cachedPreparedStatement.keySet()) {
+                PreparedStatement stmt=cachedPreparedStatement.get(key);
+                StatementExecutionHelper helper=cachedStatementExecutionHelper.get(key);
+                if(stmt!=null) {
+                    if(helper!=null) {
+                        try {
+                            helper.flush(stmt);
+                        } catch (SQLException ex) {
+                            EhiLogger.logError("flush of recordbatch "+key+" failed", ex);
+                        }
+                    }
+                }
+            }
+            
+        }
+    }
 
     private Viewable getCrsMappedOrSame(Viewable aclass) {
         if(crsFilter==null) {
@@ -2066,21 +2167,25 @@ public class TransferFromXtf {
 		stmt.append(")");
 		return stmt.toString();
 	}
-	private HashMap<Object,String> insertStmts=new HashMap<Object,String>();
-	private HashMap<Object,String> updateStmts=new HashMap<Object,String>();
+	private Map<String,String> insertStmts=new HashMap<String,String>();
+	private Map<String,String> updateStmts=new HashMap<String,String>();
 	/** gets an insert statement for a given viewable. Creates only a new
 	 *  statement if this is not yet seen sqlname.
 	 * @param sqlname table name of viewable
 	 * @param sqltable viewable
+	 * @param stmtKey 
 	 * @return insert statement
 	 */
-	private String getInsertStmt(boolean isUpdate,Viewable iomClass,ViewableWrapper sqltable,AbstractStructWrapper structEle){
-		Object key=null;
+	private String getInsertStmt(boolean isUpdate,Viewable iomClass,ViewableWrapper sqltable,AbstractStructWrapper structEle, OutParam<String> stmtKey){
+		final String key;
 		if(!createGenericStructRef && structEle!=null && (structEle instanceof StructWrapper) && sqltable.getExtending()==null){
 			ViewableWrapper parentTable=recConv.getViewableWrapper(((StructWrapper) structEle).getParentSqlType());
 			key=sqltable.getSqlTablename()+":"+iomClass.getScopedName(null)+":"+parentTable.getSqlTablename()+":"+((StructWrapper) structEle).getParentAttr();
 		}else{
 			key=sqltable.getSqlTablename()+":"+iomClass.getScopedName(null);
+		}
+		if(stmtKey!=null) {
+		    stmtKey.value=key;
 		}
 		if(isUpdate){
 			if(updateStmts.containsKey(key)){

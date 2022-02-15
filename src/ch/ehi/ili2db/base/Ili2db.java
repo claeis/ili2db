@@ -2698,6 +2698,8 @@ public class Ili2db {
 				    }
 				}
 			}
+            EhiLogger.logState("maxStatements <"
+                    + conn.getMetaData().getMaxStatements() + ">");
 		} catch (SQLException e) {
 			EhiLogger.logError(e);
 		}
