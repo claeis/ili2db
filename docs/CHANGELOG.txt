@@ -15,6 +15,8 @@ LATEST
 ---------------------------
 - API: added Ili2db.getDatasets()
 - API: make AbstractMain.getDbUrlConverter() public
+- rename option --importBatchSize to set JDBC batchSize (#458)
+- rename option --exportFetchSize to set JDBC fetchSize (#458)
 
 ili2db 4.7.0 (2021-12-28)
 ------------------------------

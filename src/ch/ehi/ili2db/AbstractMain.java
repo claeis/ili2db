@@ -424,11 +424,11 @@ public abstract class AbstractMain {
                 } else if (isOption(arg, "--importBid")) {
                     argi++;
                     config.setImportBid(parseBooleanArgument(arg));
-                } else if (isOption(arg, "--importFetchSize")) {
+                } else if (isOption(arg, "--exportFetchSize")) {
                     argi++;
                     config.setFetchSize(Integer.parseInt(args[argi]));
                     argi++;
-                } else if (isOption(arg, "--exportBatchSize")) {
+                } else if (isOption(arg, "--importBatchSize")) {
                     argi++;
                     config.setBatchSize(Integer.parseInt(args[argi]));
                     argi++;
@@ -565,8 +565,8 @@ public abstract class AbstractMain {
 					System.err.println("--importTid            read transient TIDs into column " + DbNames.T_ILI_TID_COL);
 					System.err.println("--exportTid            write transient TIDs from column " + DbNames.T_ILI_TID_COL);
 					System.err.println("--importBid            read transient BIDs into " + DbNames.BASKETS_TAB + "." + DbNames.T_ILI_TID_COL);
-                    System.err.println("--importFetchSize nrOfRecords      set the fetch size for the import statements");
-                    System.err.println("--exportBatchSize nrOfRecords     set the batch size for the export statements");
+                    System.err.println("--exportFetchSize nrOfRecords      set the fetch size for the SQL query statements");
+                    System.err.println("--importBatchSize nrOfRecords     set the batch size for the SQL insert/update statements");
 					System.err.println("--createImportTabs     create tables with import statistics. (" + DbNames.IMPORTS_TAB + ")");
 					System.err.println("--createBasketCol      generate " + DbNames.T_BASKET_COL + " column.");
 					System.err.println("--createDatasetCol     generate " + DbNames.T_DATASET_COL + " column (Requires --dataset)");
