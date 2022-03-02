@@ -58,7 +58,7 @@ public abstract class AbstractMain {
 		config.setMultilingualTrafo(Config.MULTILINGUAL_TRAFO_EXPAND);
         config.setLocalisedTrafo(Config.LOCALISED_TRAFO_EXPAND);
 		config.setValidation(true);
-		config.setRepairTouchingLines(Config.TRUE);
+		config.setRepairTouchingLines(true);
 	}
 	public abstract DbUrlConverter getDbUrlConverter();
 
@@ -246,8 +246,7 @@ public abstract class AbstractMain {
 					config.setDisableRounding(parseBooleanArgument(arg));
 				} else if (isOption(arg, "--disableTouchingLinesRepair")) {
 					argi++;
-					String configValue = parseBooleanArgument(arg) ? Config.FALSE : Config.TRUE;
-					config.setRepairTouchingLines(configValue);
+					config.setRepairTouchingLines(!parseBooleanArgument(arg));
 				} else if (isOption(arg, "--forceTypeValidation")) {
 					argi++;
 					config.setOnlyMultiplicityReduction(parseBooleanArgument(arg));

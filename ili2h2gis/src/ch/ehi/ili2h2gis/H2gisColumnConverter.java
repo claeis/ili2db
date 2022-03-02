@@ -100,7 +100,7 @@ public class H2gisColumnConverter extends AbstractWKBColumnConverter {
 		if(!Config.STROKE_ARCS_ENABLE.equals(Config.getStrokeArcs(config))){
 		    throw new IllegalArgumentException("h2gis supports only straights");
 		}
-		repairTouchingLines = Config.TRUE.equals(Config.getRepairTouchingLines(config));
+		repairTouchingLines = ((Config)config).getRepairTouchingLines();
 	}
 	
 	@Override

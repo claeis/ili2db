@@ -26,7 +26,7 @@ public class MsSqlColumnConverter extends AbstractWKBColumnConverter {
 	public void setup(Connection conn, Settings config) {
 		super.setup(conn,config);
 		strokeArcs=Config.STROKE_ARCS_ENABLE.equals(Config.getStrokeArcs(config));
-        repairTouchingLines = Config.TRUE.equals(Config.getRepairTouchingLines(config));
+        repairTouchingLines = ((Config)config).getRepairTouchingLines();
 	}
 	
 	@Override
