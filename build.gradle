@@ -351,7 +351,7 @@ dependencies {
 	ili2fgdbImplementation "antlr:antlr:2.7.7" 	
 	compileOnly group: 'ch.ehi', name: 'fgdb4j', version: "1.1.1" // add as compileOnly, so that eclipse sees it
 	ili2mssqlImplementation group: 'com.microsoft.sqlserver', name: 'mssql-jdbc', version: '6.4.0.jre7'
-	ili2oraImplementation files('lib/ojdbc14.jar')
+	ili2oraImplementation files('libs/ojdbc14.jar')
 	ili2db group: project.group, name: project.name, version: project.version
     deployerJars "org.apache.maven.wagon:wagon-ftp:3.3.3"
     deployerJars "org.apache.maven.wagon:wagon-ssh:3.3.3"
