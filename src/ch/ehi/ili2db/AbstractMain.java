@@ -58,6 +58,7 @@ public abstract class AbstractMain {
 		config.setMultilingualTrafo(Config.MULTILINGUAL_TRAFO_EXPAND);
         config.setLocalisedTrafo(Config.LOCALISED_TRAFO_EXPAND);
 		config.setValidation(true);
+		config.setRepairTouchingLines(true);
 	}
 	public abstract DbUrlConverter getDbUrlConverter();
 
@@ -243,6 +244,9 @@ public abstract class AbstractMain {
 				} else if (isOption(arg, "--disableRounding")) {
 					argi++;
 					config.setDisableRounding(parseBooleanArgument(arg));
+				} else if (isOption(arg, "--disableBoundaryRecoding")) {
+					argi++;
+					config.setRepairTouchingLines(!parseBooleanArgument(arg));
 				} else if (isOption(arg, "--forceTypeValidation")) {
 					argi++;
 					config.setOnlyMultiplicityReduction(parseBooleanArgument(arg));
@@ -510,6 +514,7 @@ public abstract class AbstractMain {
 					System.err.println("--disableValidation    Disable validation of data.");
 					System.err.println("--disableAreaValidation Disable AREA validation.");
 					System.err.println("--forceTypeValidation  restrict customization of validation related to \"multiplicity\"");
+					System.err.println("--disableBoundaryRecoding disables the correction of self touching lines");
 					System.err.println("--disableRounding      Disable rounding of import/export data.");
 					System.err.println("--deleteData           on schema/data import, delete existing data from existing tables.");
 					System.err.println("--defaultSrsAuth  auth Default SRS authority " + config.getDefaultSrsAuthority());
