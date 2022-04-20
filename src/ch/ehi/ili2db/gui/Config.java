@@ -159,6 +159,7 @@ public class Config extends Settings {
 	private String iliMetaAttrsFile=null;
     private String domainAssignments=null;
     private boolean xtfAttrText=false;
+    private boolean repairTouchingLines = true;
 	final static public String ILIGML20="ILIGML20"; 
 	
     static public final int FC_UNDEFINED=0;
@@ -830,4 +831,12 @@ public class Config extends Settings {
     public void setSqlExtRefCols(String value) {
         setValue(SQL_EXTREF,value);
     }
+
+	public void setRepairTouchingLines(boolean value) {
+		repairTouchingLines = value;
+	}
+
+	public boolean getRepairTouchingLines(){
+		return repairTouchingLines;
+	}
 }
