@@ -18,7 +18,7 @@ LATEST
 - rename option --importBatchSize to set JDBC batchSize (#458)
 - rename option --exportFetchSize to set JDBC fetchSize (#458)
 - use batchSize to INSERT/UPDATE xtf/itf-data (#458) 
-- fix: imported geometry may not fulfill OGC validity (#437)
+- new option --disableBoundaryRecoding to fix imported geometry (#437)
 - iox-ili-1.21.10+
 
 ili2db 4.7.0 (2021-12-28)
