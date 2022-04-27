@@ -10,6 +10,7 @@ public class Config extends Settings {
 	public static final String TRUE = "True";
 	public static final String PREFIX="ch.ehi.ili2db";
 	public static final String SENDER=PREFIX+".sender";
+    public static final String NAME_LANGUAGE=PREFIX+".nameLanguage";
     public static final String TRANSIENT_MODEL=PREFIX+".model";
 	private static final String DEFAULT_SRS_AUTHORITY=PREFIX+".defaultSrsAuthority";
 	private static final String DEFAULT_SRS_CODE=PREFIX+".defaultSrsCode";
@@ -237,12 +238,6 @@ public class Config extends Settings {
 	public void setModels(String models) {
 		this.models = models;
 	}
-    public String getNameLanguage() {
-        return nameLanguage;
-    }
-    public void setNameLanguage(String models) {
-        this.nameLanguage = models;
-    }
 	public String getExportModels() {
 		return exportModels;
 	}
@@ -333,6 +328,12 @@ public class Config extends Settings {
 	public void setSender(String sender) {
 		setValue(SENDER,sender);
 	}
+    public String getNameLanguage() {
+        return getValue(NAME_LANGUAGE);
+    }
+    public void setNameLanguage(String models) {
+        setValue(NAME_LANGUAGE,models);
+    }
 	public String getDefaultSrsAuthority() {
 		return getValue(DEFAULT_SRS_AUTHORITY);
 	}

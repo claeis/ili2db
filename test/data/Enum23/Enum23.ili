@@ -23,3 +23,29 @@ MODEL Enum23
   
   
 END Enum23.
+
+MODEL Enum23_fr (fr)
+  AT "mailto:ce@eisenhutinformatik.ch" VERSION "2022-04-26" 
+  TRANSLATION OF Enum23 ["2016-12-21"]
+  =
+
+  DOMAIN
+    Enum1_fr = (Test1_fr, Test2_ele_fr, Test3_fr (ele1_fr, ele_2_fr),
+            !!@ili2db.dispName_fr=testelevier_fr
+            Test4_ele_fr);
+    
+  TOPIC TestA_fr =
+    
+    CLASS ClassA1_fr =
+    	attr1_fr : TEXT*60;
+    	attr2_fr : Enum1_fr;
+    	attr3_fr : (Test1_fr, Test2_ele_fr, Test3_fr (ele1_fr, ele_2_fr),
+    	    !!@ili2db.dispName=Attr3_elevier_fr
+             Test4_ele_fr);
+	attr4_fr : BOOLEAN;
+    END ClassA1_fr;
+    
+  END TestA_fr;
+  
+  
+END Enum23_fr.

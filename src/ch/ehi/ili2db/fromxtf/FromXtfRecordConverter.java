@@ -33,7 +33,6 @@ import ch.ehi.ili2db.mapping.TrafoConfig;
 import ch.ehi.ili2db.mapping.TrafoConfigNames;
 import ch.ehi.ili2db.mapping.Viewable2TableMapping;
 import ch.ehi.ili2db.mapping.ViewableWrapper;
-import ch.ehi.ili2db.metaattr.IliMetaAttrNames;
 import ch.ehi.sqlgen.repository.DbTableName;
 import ch.interlis.ili2c.metamodel.AbstractClassDef;
 import ch.interlis.ili2c.metamodel.AbstractSurfaceOrAreaType;
@@ -44,7 +43,6 @@ import ch.interlis.ili2c.metamodel.BlackboxType;
 import ch.interlis.ili2c.metamodel.CompositionType;
 import ch.interlis.ili2c.metamodel.CoordType;
 import ch.interlis.ili2c.metamodel.Domain;
-import ch.interlis.ili2c.metamodel.Enumeration;
 import ch.interlis.ili2c.metamodel.EnumerationType;
 import ch.interlis.ili2c.metamodel.LineType;
 import ch.interlis.ili2c.metamodel.MultiAreaType;
@@ -82,7 +80,6 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 	private HashMap tag2class=null;
 	private Integer defaultEpsgCode=null;
     private Map<AttributeDef,EnumValueMap> enumCache=new HashMap<AttributeDef,EnumValueMap>();
-    private Map<String, String> displayNameCache = new HashMap<String, String>();
     private String dbSchema;
     private boolean importTid=false;
 	
@@ -951,7 +948,7 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 					valuei++;
                     if(createEnumTxtCol){
                         if(value!=null){
-                            ps.setString(valuei, beautifyEnumDispName(value));
+                            ps.setString(valuei, ili2sqlName.beautifyEnumDispName(value));
                         }else{
                             ps.setNull(valuei,Types.VARCHAR);
                         }
@@ -1133,7 +1130,7 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 							     if(createEnumColAsItfCode) {
 	                                 value=enumTypes.mapXtfCode2ItfCode((EnumerationType)arrayElementType, value);
 							     }else if(Config.CREATE_ENUM_DEFS_MULTI_WITH_ID.equals(createEnumTable)) {
-							         value=Long.toString(mapEnumValue(attrMapping.getValueAttr(),value));
+							         value=Long.toString(mapEnumValue2sqlid(attrMapping.getValueAttr(),value));
 							     }
 							 }
 							 iomArray[elei]=value;
@@ -1344,7 +1341,7 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 					}else{
 		                if(Config.CREATE_ENUM_DEFS_MULTI_WITH_ID.equals(createEnumTable)) {
 	                        if(value!=null){
-	                            ps.setLong(valuei, mapEnumValue(classAttr,value));
+	                            ps.setLong(valuei, mapEnumValue2sqlid(classAttr,value));
 	                        }else{
 	                            ps.setNull(valuei,Types.BIGINT);
 	                        }
@@ -1359,7 +1356,7 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 					valuei++;
 					if(createEnumTxtCol){
 						if(value!=null){
-							ps.setString(valuei, mapDisplayName(classAttr, value));
+							ps.setString(valuei, mapEnumValue2dispName(classAttr, value));
 						}else{
 							ps.setNull(valuei,Types.VARCHAR);
 						}
@@ -1424,20 +1421,20 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
         }
         return iomMultiline;
     }
-    private long mapEnumValue(AttributeDef attr, String xtfvalue) throws SQLException  {
+    private long mapEnumValue2sqlid(AttributeDef attr, String xtfvalue) throws SQLException  {
 	    EnumValueMap map=null;
 	    if(enumCache.containsKey(attr)) {
 	        map=enumCache.get(attr);
 	    }else {
 	        OutParam<String> qualifiedIliName=new OutParam<String>();
 	        DbTableName sqlDbName=getEnumTargetTableName(attr, qualifiedIliName, dbSchema);
-	        map=EnumValueMap.createEnumValueMap(conn, colT_ID, true, qualifiedIliName.value, sqlDbName);
+	        map=EnumValueMap.readEnumValueMapFromDb(conn, colT_ID, true, qualifiedIliName.value, sqlDbName);
             enumCache.put(attr,map);
 	    }
         return map.mapXtfValue(xtfvalue);
     }
 
-	private String mapDisplayName(AttributeDef attr, String value) throws SQLException {
+	private String mapEnumValue2dispName(AttributeDef attr, String xtfvalue) throws SQLException {
 		EnumValueMap map = null;
 		if(enumCache.containsKey(attr)) {
 			map=enumCache.get(attr);
@@ -1445,47 +1442,22 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 			if(createEnumTable!=null) {
 	            OutParam<String> qualifiedIliName=new OutParam<String>();
 	            DbTableName sqlDbName=getEnumTargetTableName(attr, qualifiedIliName, dbSchema);
-	            map=EnumValueMap.createEnumValueMap(conn, null, false, qualifiedIliName.value, sqlDbName);
+	            map=EnumValueMap.readEnumValueMapFromDb(conn, null, false, qualifiedIliName.value, sqlDbName);
 			}else {
-                map=createEnumValueMap(attr);
+                map=EnumValueMap.createEnumValueMap(attr,ili2sqlName);
 			}
 			enumCache.put(attr,map);
 		}
 
 		String mappedDisplayName = null;
-		mappedDisplayName = map.mapXtfValueToDisplayName(value);
+		mappedDisplayName = map.mapXtfValueToDisplayName(xtfvalue);
 		if(mappedDisplayName == null || mappedDisplayName.isEmpty()){
 			// displayName not set, fallback to beautify the value
-			mappedDisplayName = beautifyEnumDispName(value);
+			mappedDisplayName = ili2sqlName.beautifyEnumDispName(xtfvalue);
 		}
 
 		return mappedDisplayName;
 	}
-    private EnumValueMap createEnumValueMap(AttributeDef attr) {
-        EnumValueMap ret=new EnumValueMap();
-        EnumerationType type=(EnumerationType)attr.getDomainResolvingAll();
-        java.util.List<java.util.Map.Entry<String,ch.interlis.ili2c.metamodel.Enumeration.Element>> ev=new java.util.ArrayList<java.util.Map.Entry<String,ch.interlis.ili2c.metamodel.Enumeration.Element>>();
-        ch.interlis.iom_j.itf.ModelUtilities.buildEnumElementList(ev,"",type.getConsolidatedEnumeration());
-        boolean isOrdered=type.isOrdered();
-        int itfCode=0;
-        int seq=0;
-        Iterator<java.util.Map.Entry<String,ch.interlis.ili2c.metamodel.Enumeration.Element>> evi=ev.iterator();
-        while(evi.hasNext()){
-            java.util.Map.Entry<String,ch.interlis.ili2c.metamodel.Enumeration.Element> ele=evi.next();
-            String eleName=ele.getKey();
-            Enumeration.Element eleElement=ele.getValue();
-            String dispName = eleElement.getMetaValues().getValue(IliMetaAttrNames.METAATTR_DISPNAME);
-            if (dispName==null){
-                dispName=beautifyEnumDispName(eleName);
-            }
-            ret.addValue(seq,eleName,dispName);
-            itfCode++;
-            seq++;
-            
-        }        
-        return ret;
-    }
-
     protected AttributeDef getMultiPointAttrDef(Type type, MultiPointMapping attrMapping) {
 		Table multiPointType = ((CompositionType) type).getComponentType();
 		Table pointStructureType=((CompositionType) ((AttributeDef) multiPointType.getElement(AttributeDef.class, attrMapping.getBagOfPointsAttrName())).getDomain()).getComponentType();

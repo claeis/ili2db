@@ -59,7 +59,6 @@ public class AbstractRecordConverter {
 	protected String createEnumTable=null;
 	protected boolean createStdCols=false;
 	protected boolean createEnumTxtCol=false;
-	protected boolean removeUnderscoreFromEnumDispName=false;
 	protected boolean createEnumColAsItfCode=false;
 	protected boolean createTypeDiscriminator=false;
 	protected boolean createGenericStructRef=false;
@@ -96,7 +95,6 @@ public class AbstractRecordConverter {
 		createEnumColAsItfCode=Config.CREATE_ENUMCOL_AS_ITFCODE_YES.equals(config.getValue(Config.CREATE_ENUMCOL_AS_ITFCODE));
 		createStdCols=Config.CREATE_STD_COLS_ALL.equals(config.getCreateStdCols());
 		createEnumTxtCol=Config.CREATE_ENUM_TXT_COL.equals(config.getCreateEnumCols());
-		removeUnderscoreFromEnumDispName=Config.BEAUTIFY_ENUM_DISPNAME_UNDERSCORE.equals(config.getBeautifyEnumDispName());
 		createFk=Config.CREATE_FK_YES.equals(config.getCreateFk());
 		createFkIdx=Config.CREATE_FKIDX_YES.equals(config.getCreateFkIdx());
 		createExtRef=Config.SQL_EXTREF_ENABLE.equals(config.getSqlExtRefCols());
@@ -123,12 +121,6 @@ public class AbstractRecordConverter {
 
 		sqlColsAsText=Config.SQL_COLS_AS_TEXT_ENABLE.equals(config.getSqlColsAsText());
 
-	}
-	public String beautifyEnumDispName(String value) {
-		if(removeUnderscoreFromEnumDispName){
-			return value.replace('_', ' ');
-		}
-		return value;
 	}
 	public DbColGeometry generatePolylineType(LineType type, String attrName) {
 		DbColGeometry ret=new DbColGeometry();

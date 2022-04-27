@@ -249,6 +249,83 @@ public class Enum23Test extends ch.ehi.ili2db.Enum23Test{
         }       
     }
     @Test
+    public void importIliWithTxtCol_fr() throws Exception
+    {
+        Connection jdbcConnection=null;
+        try{
+            Class driverClass = Class.forName("org.postgresql.Driver");
+            jdbcConnection = DriverManager.getConnection(
+                    dburl, dbuser, dbpwd);
+            stmt=jdbcConnection.createStatement();          
+            stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");
+            {
+                File data=new File("test/data/Enum23/Enum23.ili");
+                Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+                config.setFunction(Config.FC_SCHEMAIMPORT);
+                config.setCreateFk(Config.CREATE_FK_YES);
+                config.setTidHandling(Config.TID_HANDLING_PROPERTY);
+                config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
+                config.setCreateEnumCols(Config.CREATE_ENUM_TXT_COL);
+                config.setCreateEnumDefs(Config.CREATE_ENUM_DEFS_MULTI);
+                config.setBeautifyEnumDispName(Config.BEAUTIFY_ENUM_DISPNAME_UNDERSCORE);
+                config.setCatalogueRefTrafo(null);
+                config.setMultiSurfaceTrafo(null);
+                config.setMultilingualTrafo(null);
+                config.setInheritanceTrafo(null);
+                config.setNameLanguage("fr");
+                Ili2db.readSettingsFromDb(config);
+                Ili2db.run(config,null);
+        
+                if(true){
+                    String stmtTxt="SELECT dispName FROM "+DBSCHEMA+".enum1_fr WHERE ilicode ='Test2_ele'";
+                    Assert.assertTrue(stmt.execute(stmtTxt));
+                    ResultSet rs=stmt.getResultSet();
+                    Assert.assertTrue(rs.next());
+                    Assert.assertEquals("Test2 ele fr",rs.getString(1));
+                }
+                if(true){
+                    String stmtTxt="SELECT dispName FROM "+DBSCHEMA+".enum1_fr WHERE ilicode ='Test3.ele_2'";
+                    Assert.assertTrue(stmt.execute(stmtTxt));
+                    ResultSet rs=stmt.getResultSet();
+                    Assert.assertTrue(rs.next());
+                    Assert.assertEquals("Test3 fr.ele 2 fr",rs.getString(1));
+                }
+                if(true){
+                    String stmtTxt="SELECT dispName FROM "+DBSCHEMA+".enum1_fr WHERE ilicode ='Test4_ele'";
+                    Assert.assertTrue(stmt.execute(stmtTxt));
+                    ResultSet rs=stmt.getResultSet();
+                    Assert.assertTrue(rs.next());
+                    Assert.assertEquals("testelevier_fr",rs.getString(1));
+                }
+                if(true){
+                    String stmtTxt="SELECT dispName FROM "+DBSCHEMA+".classa1_fr_attr3_fr WHERE ilicode ='Test2_ele'";
+                    Assert.assertTrue(stmt.execute(stmtTxt));
+                    ResultSet rs=stmt.getResultSet();
+                    Assert.assertTrue(rs.next());
+                    Assert.assertEquals("Test2 ele fr",rs.getString(1));
+                }
+                if(true){
+                    String stmtTxt="SELECT dispName FROM "+DBSCHEMA+".classa1_fr_attr3_fr WHERE ilicode ='Test3.ele_2'";
+                    Assert.assertTrue(stmt.execute(stmtTxt));
+                    ResultSet rs=stmt.getResultSet();
+                    Assert.assertTrue(rs.next());
+                    Assert.assertEquals("Test3 fr.ele 2 fr",rs.getString(1));
+                }
+                if(true){
+                    String stmtTxt="SELECT dispName FROM "+DBSCHEMA+".classa1_fr_attr3_fr WHERE ilicode ='Test4_ele'";
+                    Assert.assertTrue(stmt.execute(stmtTxt));
+                    ResultSet rs=stmt.getResultSet();
+                    Assert.assertTrue(rs.next());
+                    Assert.assertEquals("Attr3_elevier_fr",rs.getString(1));
+                }
+            }
+        }finally{
+            if(jdbcConnection!=null){
+                jdbcConnection.close();
+            }
+        }       
+    }
+    @Test
     public void importIliWithTxtColwoEnumTab() throws Exception
     {
         Connection jdbcConnection=null;
@@ -272,6 +349,41 @@ public class Enum23Test extends ch.ehi.ili2db.Enum23Test{
                 config.setMultiSurfaceTrafo(null);
                 config.setMultilingualTrafo(null);
                 config.setInheritanceTrafo(null);
+                Ili2db.readSettingsFromDb(config);
+                Ili2db.run(config,null);
+        
+            }
+        }finally{
+            if(jdbcConnection!=null){
+                jdbcConnection.close();
+            }
+        }       
+    }
+    @Test
+    public void importIliWithTxtColwoEnumTab_fr() throws Exception
+    {
+        Connection jdbcConnection=null;
+        try{
+            Class driverClass = Class.forName("org.postgresql.Driver");
+            jdbcConnection = DriverManager.getConnection(
+                    dburl, dbuser, dbpwd);
+            stmt=jdbcConnection.createStatement();          
+            stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");
+            {
+                File data=new File("test/data/Enum23/Enum23.ili");
+                Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+                config.setFunction(Config.FC_SCHEMAIMPORT);
+                config.setCreateFk(Config.CREATE_FK_YES);
+                config.setTidHandling(Config.TID_HANDLING_PROPERTY);
+                config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
+                config.setCreateEnumCols(Config.CREATE_ENUM_TXT_COL);
+                config.setCreateEnumDefs(null);
+                config.setBeautifyEnumDispName(Config.BEAUTIFY_ENUM_DISPNAME_UNDERSCORE);
+                config.setCatalogueRefTrafo(null);
+                config.setMultiSurfaceTrafo(null);
+                config.setMultilingualTrafo(null);
+                config.setInheritanceTrafo(null);
+                config.setNameLanguage("fr");
                 Ili2db.readSettingsFromDb(config);
                 Ili2db.run(config,null);
         
@@ -434,6 +546,88 @@ public class Enum23Test extends ch.ehi.ili2db.Enum23Test{
                 }
                 {
                     String stmtTxt="SELECT attr4_txt FROM "+DBSCHEMA+".classa1 WHERE attr4=true";
+                    Assert.assertTrue(stmt.execute(stmtTxt));
+                    ResultSet rs=stmt.getResultSet();
+                    Assert.assertTrue(rs.next());
+                    Assert.assertEquals("true",rs.getString(1));
+                }
+            }
+        }finally{
+            if(jdbcConnection!=null){
+                jdbcConnection.close();
+            }
+        }       
+    }
+    @Test
+    public void importXtfWithTxtColwoEnumTab_fr() throws Exception
+    {
+        {
+            importIliWithTxtColwoEnumTab_fr();
+        }
+        Connection jdbcConnection=null;
+        try{
+            Class driverClass = Class.forName("org.postgresql.Driver");
+            jdbcConnection = DriverManager.getConnection(
+                    dburl, dbuser, dbpwd);
+            stmt=jdbcConnection.createStatement();          
+            {
+                File data=new File("test/data/Enum23/Enum23a.xtf");
+                Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+                config.setFunction(Config.FC_IMPORT);
+                Ili2db.readSettingsFromDb(config);
+                Ili2db.run(config,null);
+        
+                {
+                    String stmtTxt="SELECT attr2_fr_txt FROM "+DBSCHEMA+".classa1_fr WHERE attr2_fr ='Test2_ele'";
+                    Assert.assertTrue(stmt.execute(stmtTxt));
+                    ResultSet rs=stmt.getResultSet();
+                    Assert.assertTrue(rs.next());
+                    Assert.assertEquals("Test2 ele fr",rs.getString(1));
+                }
+                {
+                    String stmtTxt="SELECT attr2_fr_txt FROM "+DBSCHEMA+".classa1_fr WHERE attr2_fr ='Test3.ele_2'";
+                    Assert.assertTrue(stmt.execute(stmtTxt));
+                    ResultSet rs=stmt.getResultSet();
+                    Assert.assertTrue(rs.next());
+                    Assert.assertEquals("Test3 fr.ele 2 fr",rs.getString(1));
+                }
+                {
+                    String stmtTxt="SELECT attr2_fr_txt FROM "+DBSCHEMA+".classa1_fr WHERE attr2_fr ='Test4_ele'";
+                    Assert.assertTrue(stmt.execute(stmtTxt));
+                    ResultSet rs=stmt.getResultSet();
+                    Assert.assertTrue(rs.next());
+                    Assert.assertEquals("testelevier_fr",rs.getString(1));
+                }
+                {
+                    String stmtTxt="SELECT attr3_fr_txt FROM "+DBSCHEMA+".classa1_fr WHERE attr3_fr ='Test2_ele'";
+                    Assert.assertTrue(stmt.execute(stmtTxt));
+                    ResultSet rs=stmt.getResultSet();
+                    Assert.assertTrue(rs.next());
+                    Assert.assertEquals("Test2 ele fr",rs.getString(1));
+                }
+                {
+                    String stmtTxt="SELECT attr3_fr_txt FROM "+DBSCHEMA+".classa1_fr WHERE attr3_fr ='Test3.ele_2'";
+                    Assert.assertTrue(stmt.execute(stmtTxt));
+                    ResultSet rs=stmt.getResultSet();
+                    Assert.assertTrue(rs.next());
+                    Assert.assertEquals("Test3 fr.ele 2 fr",rs.getString(1));
+                }
+                {
+                    String stmtTxt="SELECT attr3_fr_txt FROM "+DBSCHEMA+".classa1_fr WHERE attr3_fr ='Test4_ele'";
+                    Assert.assertTrue(stmt.execute(stmtTxt));
+                    ResultSet rs=stmt.getResultSet();
+                    Assert.assertTrue(rs.next());
+                    Assert.assertEquals("Attr3_elevier_fr",rs.getString(1));
+                }
+                {
+                    String stmtTxt="SELECT attr4_fr_txt FROM "+DBSCHEMA+".classa1_fr WHERE attr4_fr is null";
+                    Assert.assertTrue(stmt.execute(stmtTxt));
+                    ResultSet rs=stmt.getResultSet();
+                    Assert.assertTrue(rs.next());
+                    Assert.assertEquals(null,rs.getString(1));
+                }
+                {
+                    String stmtTxt="SELECT attr4_fr_txt FROM "+DBSCHEMA+".classa1_fr WHERE attr4_fr=true";
                     Assert.assertTrue(stmt.execute(stmtTxt));
                     ResultSet rs=stmt.getResultSet();
                     Assert.assertTrue(rs.next());
