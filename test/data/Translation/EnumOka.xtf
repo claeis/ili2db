@@ -15,13 +15,16 @@
 				<attrA2>
 					<Basis.Struct>
 						<attrA>a3.a32</attrA>
+						<attrA2>a3.a32</attrA2>
 					</Basis.Struct>
 				</attrA2>
 				<attrA3>
 					<TranslatedBasisA.TrStructA>
 						<trAttrA>a3.a32</trAttrA>
+						<trAttrA2>a3.a32</trAttrA2>
 					</TranslatedBasisA.TrStructA>
 				</attrA3>
+				<attrA4>a2.a21</attrA4>
 				<n_1A_A2 REF="o3"/>
 			</EnumOkA.TopicA.ClassA>
 			<EnumOkA.TopicA.n_nA>
@@ -50,13 +53,16 @@
 				<attrB2>
 					<Basis.Struct>
 						<attrA>a3.a32</attrA>
+						<attrA2>a3.a32</attrA2>
 					</Basis.Struct>
 				</attrB2>
 				<attrB3>
 					<TranslatedBasisB.TrStructB>
 						<trAttrB>b3.b32</trAttrB>
+						<trAttrB2>b3.b32</trAttrB2>
 					</TranslatedBasisB.TrStructB>
 				</attrB3>
+				<attrB4>b2.b21</attrB4>
 				<n_1B_B2 REF="x3"/>
 			</EnumOkB.TopicB.ClassB>
 			<EnumOkB.TopicB.n_nB>
