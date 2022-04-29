@@ -13,6 +13,9 @@ ideas/open issues/questions
 
 LATEST
 ---------------------------
+
+ili2db 4.8.0 (2022-04-29)
+------------------------------
 - API: added Ili2db.getDatasets()
 - API: make AbstractMain.getDbUrlConverter() public
 - rename option --importBatchSize to set JDBC batchSize (#458)
@@ -22,7 +25,8 @@ LATEST
 - save --nameLanguage to t_ili2db_settings
 - use translated enum model element name for dispName in enum tables (#460)
 - export: fix ALL OF missing translations of values German to French (#439) 
-- iox-ili-1.21.10+
+- iox-ili-1.21.10
+- ili2c-5.2.6
 
 ili2db 4.7.0 (2021-12-28)
 ------------------------------
