@@ -2,8 +2,12 @@ INTERLIS 2.3;
 
 MODEL Basis AT "http://www.interlis.ch/ili2db/tests/" VERSION "1" =
 
+	DOMAIN
+		DomainA = (a1,a3(a31,a32));
+
 	STRUCTURE Struct =
 			attrA : (a1,a3(a31,a32));
+			attrA2 : ALL OF DomainA;
 	END Struct;
 
 	STRUCTURE Struct2 EXTENDS Struct =
@@ -14,9 +18,12 @@ END Basis.
 MODEL BasisC (it) AT "http://www.interlis.ch/ili2db/tests/" VERSION "1" 
 TRANSLATION OF Basis ["1"]
 =
-
+	DOMAIN
+			DomainC = (c1,c3(c31,c32));
+	
 	STRUCTURE StructC =
 			attrC : (c1,c3(c31,c32));
+			attrC2 : ALL OF DomainC;
 	END StructC;
 	
 	STRUCTURE StructC2 EXTENDS StructC =
@@ -25,9 +32,13 @@ TRANSLATION OF Basis ["1"]
 END BasisC.
 
 MODEL TranslatedBasisA (de) AT "http://www.interlis.ch/ili2db/tests/" VERSION "1" =
-
+	
+	DOMAIN
+		DomainTrA=(a1,a3(a31,a32));
+		
 	STRUCTURE TrStructA =
 			trAttrA : (a1,a3(a31,a32));
+			trAttrA2 : ALL OF DomainTrA;
 	END TrStructA;
 	
 	STRUCTURE TrStructA2 EXTENDS TrStructA =
@@ -38,9 +49,12 @@ END TranslatedBasisA.
 MODEL TranslatedBasisB (fr) AT "http://www.interlis.ch/ili2db/tests/" VERSION "1" 
 TRANSLATION OF TranslatedBasisA ["1"]
 =
+	DOMAIN
+		DomainTrB=(b1,b3(b31,b32));
 
 	STRUCTURE TrStructB =
 			trAttrB : (b1,b3(b31,b32));
+			trAttrB2 : ALL OF DomainTrB;
 	END TrStructB;
 	
 	STRUCTURE TrStructB2 EXTENDS TrStructB =
@@ -50,6 +64,9 @@ END TranslatedBasisB.
 
 MODEL EnumOkX AT "http://www.interlis.ch/ili2c/tests/" VERSION "1" =
 	IMPORTS Basis,TranslatedBasisA;
+
+	DOMAIN
+			DomainX = (x1,x2(x21,x22));
 	
 	TOPIC TopicX =
 
@@ -57,6 +74,7 @@ MODEL EnumOkX AT "http://www.interlis.ch/ili2c/tests/" VERSION "1" =
 			attrX : (x1,x2(x21,x22));
 			attrX2 : Basis.Struct;
 			attrX3 : TranslatedBasisA.TrStructA;
+			attrX4 : ALL OF DomainX;
 		END ClassX;
 
 		CLASS ClassX2 =
@@ -81,12 +99,16 @@ TRANSLATION OF EnumOkX [ "1"]
 =
 	IMPORTS Basis,TranslatedBasisA;
 	
+	DOMAIN
+		DomainA = (a1,a2(a21,a22));
+	
 	TOPIC TopicA =
 
 		CLASS ClassA =
 			attrA : (a1,a2(a21,a22));
 			attrA2 : Basis.Struct;
 			attrA3 : TranslatedBasisA.TrStructA;
+			attrA4 : ALL OF DomainA;
 		END ClassA;
 
 		CLASS ClassA2 =
@@ -111,12 +133,16 @@ TRANSLATION OF EnumOkA [ "1"]
 =
 	IMPORTS Basis,TranslatedBasisB;
 
+	DOMAIN
+		DomainB = (b1,b2(b21,b22));
+
 	TOPIC TopicB =
 
 		CLASS ClassB =
 			attrB : (b1,b2(b21,b22));
 			attrB2 : Basis.Struct;
 			attrB3 : TranslatedBasisB.TrStructB;
+			attrB4 : ALL OF DomainB;
 		END ClassB;
 
 		CLASS ClassB2 =

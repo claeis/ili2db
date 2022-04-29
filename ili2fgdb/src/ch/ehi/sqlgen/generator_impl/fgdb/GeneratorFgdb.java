@@ -69,6 +69,7 @@ public class GeneratorFgdb implements Generator {
 		}finally{
 			if(table!=null){
 				db.CloseTable(table);
+				table.delete();
 				table=null;
 			}
 		}
@@ -94,6 +95,7 @@ public class GeneratorFgdb implements Generator {
 				}
 				if(table!=null){
 					db.CloseTable(table);
+					table.delete();
 					table=null;
 				}
 			}
@@ -112,6 +114,7 @@ public class GeneratorFgdb implements Generator {
 				}finally {
 				    if(rows!=null) {
 	                    rows.Close();
+	                    rows.delete();
 	                    rows=null;
 				    }
 				}

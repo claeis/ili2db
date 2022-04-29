@@ -26,9 +26,12 @@ import ch.ehi.ili2db.base.DbNames;
 import ch.ehi.ili2db.base.Ili2db;
 import ch.ehi.ili2db.base.Ili2dbException;
 import ch.ehi.ili2db.base.StatementExecutionHelper;
+import ch.ehi.ili2db.gui.Config;
+import ch.ehi.ili2db.metaattr.IliMetaAttrNames;
 import ch.ehi.sqlgen.generator_impl.jdbc.GeneratorJdbc;
 import ch.interlis.ili2c.metamodel.AttributeDef;
 import ch.interlis.ili2c.metamodel.Domain;
+import ch.interlis.ili2c.metamodel.Enumeration;
 import ch.interlis.ili2c.metamodel.TransferDescription;
 import ch.interlis.ili2c.metamodel.Viewable;
 
@@ -52,6 +55,7 @@ public class NameMapping {
 	private static final int UNQUALIFIED_NAMES=0;
 	private static final int TOPIC_QUALIFIED_NAMES=1;
 	private static final int FULL_QUALIFIED_NAMES=2;
+    private boolean removeUnderscoreFromEnumDispName=false;
 	private boolean useEpsg=false;
     private boolean isVer3_export=false;
 	private Integer batchSize = null;
@@ -68,6 +72,7 @@ public class NameMapping {
 		}else{
 			nameing=UNQUALIFIED_NAMES;
 		}
+        removeUnderscoreFromEnumDispName=Config.BEAUTIFY_ENUM_DISPNAME_UNDERSCORE.equals(config.getBeautifyEnumDispName());
 		useEpsg=config.useEpsgInNames();
 		isVer3_export=config.isVer3_export();
 		batchSize = config.getBatchSize();
@@ -187,6 +192,12 @@ public class NameMapping {
 		}
 		return sqlname;
 	}
+    public String beautifyEnumDispName(String value) {
+        if(removeUnderscoreFromEnumDispName){
+            return value.replace('_', ' ');
+        }
+        return value;
+    }
 	public String mapIliEnumAttributeDefAsTable(ch.interlis.ili2c.metamodel.AttributeDef def){
 		String iliname=def.getContainer().getScopedName(null)+"."+def.getName();
 		String sqlname=(String)classNameIli2sql.get(iliname);
@@ -353,7 +364,7 @@ public class NameMapping {
 		}
 		return sqlname;
 	}
-	private ch.interlis.ili2c.metamodel.Element getTranslatedElement(ch.interlis.ili2c.metamodel.Element def) {
+	public ch.interlis.ili2c.metamodel.Element getTranslatedElement(ch.interlis.ili2c.metamodel.Element def) {
         if(translationNameMapper!=null) {
             return translationNameMapper.translateElement(languagePath, def);
         }
@@ -451,9 +462,10 @@ public class NameMapping {
 			String exstStmt=null;
 			exstStmt="SELECT "+DbNames.CLASSNAME_TAB_ILINAME_COL+" FROM "+sqlName;
 			EhiLogger.traceBackendCmd(exstStmt);
-			java.sql.PreparedStatement exstPrepStmt = conn.prepareStatement(exstStmt);
+			java.sql.PreparedStatement exstPrepStmt = null;
             java.sql.ResultSet rs=null;
 			try{
+	            exstPrepStmt = conn.prepareStatement(exstStmt);
 				rs=exstPrepStmt.executeQuery();
 				while(rs.next()){
 					String iliCode=rs.getString(1);
@@ -464,8 +476,10 @@ public class NameMapping {
 			        rs.close();
 			        rs=null;
 			    }
-				exstPrepStmt.close();
-				exstPrepStmt=null;
+			    if(exstPrepStmt!=null) {
+	                exstPrepStmt.close();
+	                exstPrepStmt=null;
+			    }
 			}
 		}catch(java.sql.SQLException ex){		
 			throw new Ili2dbException("failed to read class-mapping-table "+sqlName,ex);
@@ -571,6 +585,7 @@ public class NameMapping {
 				}catch(java.sql.SQLException ex){		
 					throw new Ili2dbException("failed to close query of "+mapTableName,ex);
 				}
+				dbstmt=null;
 			}
 		}
 

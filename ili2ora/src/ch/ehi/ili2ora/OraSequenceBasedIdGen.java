@@ -98,9 +98,13 @@ public class OraSequenceBasedIdGen implements DbIdGen {
                     return ret;
                 }
             } finally {
+                if(res!=null) {
+                    res.close();
+                    res=null;
+                }
                 if(getstmt!=null) {
-                    if(res!=null) res.close();
                     getstmt.close();
+                    getstmt=null;
                 }
             }
         }catch(java.sql.SQLException ex){

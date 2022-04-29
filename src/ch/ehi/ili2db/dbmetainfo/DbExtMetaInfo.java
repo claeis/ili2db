@@ -142,9 +142,11 @@ public class DbExtMetaInfo {
 			// insert entries
 			String selStmt="SELECT "+DbNames.META_INFO_COLUMN_TAB_TABLENAME_COL+","+DbNames.META_INFO_COLUMN_TAB_SUBTYPE_COL+","+DbNames.META_INFO_COLUMN_TAB_COLUMNNAME_COL+","+DbNames.META_INFO_COLUMN_TAB_TAG_COL+","+DbNames.META_INFO_COLUMN_TAB_SETTING_COL+" FROM "+sqlName;
 			EhiLogger.traceBackendCmd(selStmt);
-			java.sql.PreparedStatement selPrepStmt = conn.prepareStatement(selStmt);
-			ResultSet rs = selPrepStmt.executeQuery();
+			java.sql.PreparedStatement selPrepStmt = null;
+			ResultSet rs = null;
 			try{
+	            selPrepStmt = conn.prepareStatement(selStmt);
+	            rs = selPrepStmt.executeQuery();
 				while(rs.next()){
 					String table=rs.getString(1);
 					String subtype=rs.getString(2);
@@ -162,8 +164,14 @@ public class DbExtMetaInfo {
 			}catch(java.sql.SQLException ex){
 				throw new Ili2dbException("failed to read meta info values from "+sqlName,ex);
 			}finally{
-			    rs.close();
-				selPrepStmt.close();
+			    if(rs!=null) {
+	                rs.close();
+	                rs=null;
+			    }
+			    if(selPrepStmt!=null) {
+	                selPrepStmt.close();
+	                selPrepStmt=null;
+			    }
 			}
 		}catch(java.sql.SQLException ex){		
 			throw new Ili2dbException("failed to read meta-info table "+sqlName,ex);
@@ -230,9 +238,11 @@ public class DbExtMetaInfo {
 			// select entries
 			String selStmt="SELECT "+DbNames.META_INFO_TABLE_TAB_TABLENAME_COL+","+DbNames.META_INFO_TABLE_TAB_TAG_COL+","+DbNames.META_INFO_TABLE_TAB_SETTING_COL+" FROM "+sqlName;
 			EhiLogger.traceBackendCmd(selStmt);
-			java.sql.PreparedStatement selPrepStmt = conn.prepareStatement(selStmt);
-			ResultSet rs = selPrepStmt.executeQuery();
+			java.sql.PreparedStatement selPrepStmt = null;
+			ResultSet rs = null;
 			try{
+	            selPrepStmt = conn.prepareStatement(selStmt);
+	            rs = selPrepStmt.executeQuery();
 				while(rs.next()){
 					String table=rs.getString(1);
 					String tag=rs.getString(2);
@@ -247,8 +257,14 @@ public class DbExtMetaInfo {
 			}catch(java.sql.SQLException ex){
 				throw new Ili2dbException("failed to read meta info values from "+sqlName,ex);
 			}finally{
-			    rs.close();
-				selPrepStmt.close();
+			    if(rs!=null) {
+	                rs.close();
+	                rs=null;
+			    }
+			    if(selPrepStmt!=null) {
+	                selPrepStmt.close();
+	                selPrepStmt=null;
+			    }
 			}
 		}catch(java.sql.SQLException ex){		
 			throw new Ili2dbException("failed to read meta-info table "+sqlName,ex);

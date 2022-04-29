@@ -25,6 +25,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 
 import ch.ehi.basics.logging.EhiLogger;
 import ch.ehi.basics.settings.Settings;
@@ -449,9 +450,10 @@ public class TransferFromIli {
 	            }
 			}
 			EhiLogger.traceBackendCmd(insStmt);
-			java.sql.PreparedStatement insPrepStmt = conn.prepareStatement(insStmt);
+			java.sql.PreparedStatement insPrepStmt = null;
             java.sql.ResultSet rs=null;
 			try{
+	            insPrepStmt = conn.prepareStatement(insStmt);
 				rs=insPrepStmt.executeQuery();
 				while(rs.next()){
 					String file=rs.getString(1);
@@ -469,7 +471,10 @@ public class TransferFromIli {
 			        rs.close();
 			        rs=null;
 			    }
-				insPrepStmt.close();
+			    if(insPrepStmt!=null) {
+	                insPrepStmt.close();
+	                insPrepStmt=null;
+			    }
 			}
 		}catch(java.sql.SQLException ex){		
 			throw new Ili2dbException("failed to read models-table "+sqlName,ex);
@@ -502,9 +507,10 @@ public class TransferFromIli {
 	            }
 			}
 			EhiLogger.traceBackendCmd(selStmt);
-			java.sql.PreparedStatement selPrepStmt = conn.prepareStatement(selStmt);
+			java.sql.PreparedStatement selPrepStmt = null;
             java.sql.ResultSet rs=null;
 			try{
+	            selPrepStmt = conn.prepareStatement(selStmt);
 				selPrepStmt.clearParameters();
 				selPrepStmt.setString(1, filename);
 				rs=selPrepStmt.executeQuery();
@@ -519,7 +525,10 @@ public class TransferFromIli {
 			        rs.close();
 			        rs=null;
 			    }
-				selPrepStmt.close();
+			    if(selPrepStmt!=null) {
+	                selPrepStmt.close();
+	                selPrepStmt=null;
+			    }
 			}
 		}catch(java.sql.SQLException ex){		
 			throw new Ili2dbException("failed to read models-table "+sqlName,ex);
@@ -685,10 +694,11 @@ public class TransferFromIli {
 				// select entries
 				String insStmt="SELECT "+DbNames.SETTINGS_TAB_TAG_COL+","+DbNames.SETTINGS_TAB_SETTING_COL+" FROM "+sqlName;
 				EhiLogger.traceBackendCmd(insStmt);
-				java.sql.PreparedStatement insPrepStmt = conn.prepareStatement(insStmt);
+				java.sql.PreparedStatement insPrepStmt = null;
                 java.sql.ResultSet rs=null;
 				boolean settingsExists=false;
 				try{
+	                insPrepStmt = conn.prepareStatement(insStmt);
 					rs=insPrepStmt.executeQuery();
 					while(rs.next()){
 						String tag=rs.getString(1);
@@ -707,7 +717,10 @@ public class TransferFromIli {
 				        rs.close();
 				        rs=null;
 				    }
-					insPrepStmt.close();
+				    if(insPrepStmt!=null) {
+	                    insPrepStmt.close();
+	                    insPrepStmt=null;
+				    }
 				}
 			}catch(java.sql.SQLException ex){		
 				throw new Ili2dbException("failed to read settings-table "+sqlName,ex);
@@ -1189,9 +1202,10 @@ public class TransferFromIli {
 			String exstStmt=null;
 			exstStmt="SELECT "+DbNames.INHERIT_TAB_THIS_COL+" FROM "+sqlName;
 			EhiLogger.traceBackendCmd(exstStmt);
-			java.sql.PreparedStatement exstPrepStmt = conn.prepareStatement(exstStmt);
+			java.sql.PreparedStatement exstPrepStmt = null;
             java.sql.ResultSet rs=null;
 			try{
+	            exstPrepStmt = conn.prepareStatement(exstStmt);
 				rs=exstPrepStmt.executeQuery();
 				while(rs.next()){
 					String iliClassQName=rs.getString(1);
@@ -1202,7 +1216,10 @@ public class TransferFromIli {
 			        rs.close();
 			        rs=null;
 			    }
-				exstPrepStmt.close();
+			    if(exstPrepStmt!=null) {
+	                exstPrepStmt.close();
+	                exstPrepStmt=null;
+			    }
 			}
 		}catch(java.sql.SQLException ex){		
 			throw new Ili2dbException("failed to read inheritance-table "+sqlName,ex);
@@ -1315,8 +1332,8 @@ public class TransferFromIli {
 	                        if(base!=null){
 	                            baseClass=base.getContainer().getScopedName(null)+"."+base.getName();
 	                        }
-	                        HashSet<String> exstEntries=EnumValueMap.readEnumTable(conn,null,true,thisClass,tabName);
-	                        updateEnumEntries(null,exstEntries,sqlName, insPrepStmt,type, thisClass, baseClass);
+	                        Set<String> exstEntries=EnumValueMap.readIliCodesFromDb(conn,null,true,thisClass,tabName);
+	                        updateEnumEntries(null,exstEntries,sqlName, insPrepStmt,EnumValueMap.createEnumValueMap(attr, ili2sqlName), type.isOrdered(),thisClass, baseClass);
 	                    }else if(entro instanceof Domain){
 	                        Domain domain=(Domain)entro;
 	                        if(domain==td.INTERLIS.BOOLEAN){
@@ -1330,8 +1347,8 @@ public class TransferFromIli {
 	                        if(base!=null){
 	                            baseClass=base.getScopedName(null);
 	                        }
-	                        HashSet<String> exstEntries=EnumValueMap.readEnumTable(conn,null,true,thisClass,tabName);
-	                        updateEnumEntries(null,exstEntries,sqlName,insPrepStmt, type, thisClass, baseClass);
+	                        Set<String> exstEntries=EnumValueMap.readIliCodesFromDb(conn,null,true,thisClass,tabName);
+	                        updateEnumEntries(null,exstEntries,sqlName,insPrepStmt, EnumValueMap.createEnumValueMap(domain, ili2sqlName), type.isOrdered(),thisClass, baseClass);
 	                    }
 	                }
 	            }catch(java.sql.SQLException ex){
@@ -1362,8 +1379,8 @@ public class TransferFromIli {
                         if(base!=null){
                             baseClass=base.getContainer().getScopedName(null)+"."+base.getName();
                         }
-                        HashSet<String> exstEntries=new HashSet<String>();
-                        updateEnumEntries(gen,exstEntries,sqlName,null, type, thisClass, baseClass);
+                        Set<String> exstEntries=new HashSet<String>();
+                        updateEnumEntries(gen,exstEntries,sqlName,null, EnumValueMap.createEnumValueMap(attr, ili2sqlName), type.isOrdered(),thisClass, baseClass);
                     }else if(entro instanceof Domain){
                         Domain domain=(Domain)entro;
                         if(domain==td.INTERLIS.BOOLEAN){
@@ -1377,8 +1394,8 @@ public class TransferFromIli {
                         if(base!=null){
                             baseClass=base.getScopedName(null);
                         }
-                        HashSet<String> exstEntries=new HashSet<String>();
-                        updateEnumEntries(gen,exstEntries,sqlName,null, type, thisClass, baseClass);
+                        Set<String> exstEntries=new HashSet<String>();
+                        updateEnumEntries(gen,exstEntries,sqlName,null, EnumValueMap.createEnumValueMap(domain, ili2sqlName), type.isOrdered(),thisClass, baseClass);
                     }
                 }
             }catch(java.sql.SQLException ex){       
@@ -1406,13 +1423,13 @@ public class TransferFromIli {
 				if(conn!=null) {
 	                try{
 
-	                    HashSet<String> exstEntries=EnumValueMap.readEnumTable(conn,null,false,thisClass,thisSqlName);
+	                    Set<String> exstEntries=EnumValueMap.readIliCodesFromDb(conn,null,false,thisClass,thisSqlName);
 	                    // insert entries
 	                    String stmt="INSERT INTO "+thisSqlName+" ("+DbNames.ENUM_TAB_SEQ_COL+","+DbNames.ENUM_TAB_ILICODE_COL+","+DbNames.ENUM_TAB_ITFCODE_COL+","+DbNames.ENUM_TAB_DISPNAME_COL+","+DbNames.ENUM_TAB_INACTIVE_COL+","+DbNames.ENUM_TAB_DESCRIPTION_COL+") VALUES (?,?,?,?,?,?)";
 	                    EhiLogger.traceBackendCmd(stmt);
 	                    java.sql.PreparedStatement ps = conn.prepareStatement(stmt);
 	                    try{
-	                        updateEnumEntries(null,exstEntries,thisSqlName.getQName(),ps, type, null, null);
+	                        updateEnumEntries(null,exstEntries,thisSqlName.getQName(),ps, EnumValueMap.createEnumValueMap(attr, ili2sqlName), type.isOrdered(),null, null);
 	                    }catch(java.sql.SQLException ex){
 	                        throw new Ili2dbException("failed to insert enum values for type "+thisClass,ex);
 	                    }finally{
@@ -1425,8 +1442,8 @@ public class TransferFromIli {
 				if(gen!=null){
                     try{
 
-                        HashSet<String> exstEntries=new HashSet<String>();
-                        updateEnumEntries(gen,exstEntries,thisSqlName.getQName(),null, type, null, null);
+                        Set<String> exstEntries=new HashSet<String>();
+                        updateEnumEntries(gen,exstEntries,thisSqlName.getQName(),null, EnumValueMap.createEnumValueMap(attr, ili2sqlName), type.isOrdered(),null, null);
                     }catch(java.sql.SQLException ex){       
                         throw new Ili2dbException("failed to create inserts to enum-table "+thisSqlName,ex);
                     }
@@ -1443,14 +1460,14 @@ public class TransferFromIli {
 				DbTableName thisSqlName=getSqlTableName(domain);
 				if(conn!=null) {
 	                try{
-	                    HashSet<String> exstEntries=EnumValueMap.readEnumTable(conn,null,false,thisClass,thisSqlName);
+	                    Set<String> exstEntries=EnumValueMap.readIliCodesFromDb(conn,null,false,thisClass,thisSqlName);
 
 	                    // insert entries
 	                    String stmt="INSERT INTO "+thisSqlName+" ("+DbNames.ENUM_TAB_SEQ_COL+","+DbNames.ENUM_TAB_ILICODE_COL+","+DbNames.ENUM_TAB_ITFCODE_COL+","+DbNames.ENUM_TAB_DISPNAME_COL+","+DbNames.ENUM_TAB_INACTIVE_COL+","+DbNames.ENUM_TAB_DESCRIPTION_COL+") VALUES (?,?,?,?,?,?)";
 	                    EhiLogger.traceBackendCmd(stmt);
 	                    java.sql.PreparedStatement ps = conn.prepareStatement(stmt);
 	                    try{
-	                        updateEnumEntries(null,exstEntries,thisSqlName.getQName(),ps, type, null, null);
+	                        updateEnumEntries(null,exstEntries,thisSqlName.getQName(),ps, EnumValueMap.createEnumValueMap(domain, ili2sqlName), type.isOrdered(),null, null);
 	                    }catch(java.sql.SQLException ex){
 	                        throw new Ili2dbException("failed to insert enum values for type "+thisClass,ex);
 	                    }finally{
@@ -1462,8 +1479,8 @@ public class TransferFromIli {
 				}
 				if(gen!=null){
                     try{
-                        HashSet<String> exstEntries=new HashSet<String>();
-                        updateEnumEntries(gen,exstEntries,thisSqlName.getQName(),null, type, null, null);
+                        Set<String> exstEntries=new HashSet<String>();
+                        updateEnumEntries(gen,exstEntries,thisSqlName.getQName(),null, EnumValueMap.createEnumValueMap(domain, ili2sqlName), type.isOrdered(),null, null);
                     }catch(java.sql.SQLException ex){       
                         throw new Ili2dbException("failed to create inserts to enum-table "+thisSqlName,ex);
                     }
@@ -1496,14 +1513,14 @@ public class TransferFromIli {
                 DbTableName thisSqlName=getSqlTableNameEnum(Ili2cUtility.getRootBaseAttr(attr));
                 if(conn!=null) {
                     try{
-                        HashSet<String> exstEntries=EnumValueMap.readEnumTable(conn,colT_ID,true,thisClass,thisSqlName);
+                        Set<String> exstEntries=EnumValueMap.readIliCodesFromDb(conn,colT_ID,true,thisClass,thisSqlName);
 
                         // insert entries
                         String stmt="INSERT INTO "+thisSqlName+" ("+DbNames.ENUM_TAB_SEQ_COL+","+DbNames.ENUM_TAB_ILICODE_COL+","+DbNames.ENUM_TAB_ITFCODE_COL+","+DbNames.ENUM_TAB_DISPNAME_COL+","+DbNames.ENUM_TAB_INACTIVE_COL+","+DbNames.ENUM_TAB_DESCRIPTION_COL+","+DbNames.ENUM_TAB_THIS_COL+","+DbNames.ENUM_TAB_BASE_COL+") VALUES (?,?,?,?,?,?,?,?)";
                         EhiLogger.traceBackendCmd(stmt);
                         java.sql.PreparedStatement ps = conn.prepareStatement(stmt);
                         try{
-                            updateEnumEntries(null,exstEntries,thisSqlName.getQName(),ps, type, thisClass, baseClass);
+                            updateEnumEntries(null,exstEntries,thisSqlName.getQName(),ps, EnumValueMap.createEnumValueMap(attr, ili2sqlName), type.isOrdered(),thisClass, baseClass);
                         }catch(java.sql.SQLException ex){
                             throw new Ili2dbException("failed to insert enum values for type "+thisClass,ex);
                         }finally{
@@ -1516,8 +1533,8 @@ public class TransferFromIli {
                 }
                 if(gen!=null){
                     try{
-                        HashSet<String> exstEntries=new HashSet<String>();
-                        updateEnumEntries(gen,exstEntries,thisSqlName.getQName(),null, type, thisClass, baseClass);
+                        Set<String> exstEntries=new HashSet<String>();
+                        updateEnumEntries(gen,exstEntries,thisSqlName.getQName(),null, EnumValueMap.createEnumValueMap(attr, ili2sqlName),type.isOrdered(), thisClass, baseClass);
                     }catch(java.sql.SQLException ex){       
                         throw new Ili2dbException("failed to create inserts into enum-table "+thisSqlName,ex);
                     }
@@ -1538,7 +1555,7 @@ public class TransferFromIli {
                 DbTableName thisSqlName=getSqlTableName(Ili2cUtility.getRootBaseDomain(domain));
                 if(conn!=null) {
                     try{
-                        HashSet<String> exstEntries=EnumValueMap.readEnumTable(conn,colT_ID,true,thisClass,thisSqlName);
+                        Set<String> exstEntries=EnumValueMap.readIliCodesFromDb(conn,colT_ID,true,thisClass,thisSqlName);
 
                         // insert entries
                         //String stmt="INSERT INTO "+thisSqlName+" ("+DbNames.ENUM_TAB_SEQ_COL+","+DbNames.ENUM_TAB_ILICODE_COL+","+DbNames.ENUM_TAB_ITFCODE_COL+","+DbNames.ENUM_TAB_DISPNAME_COL+","+DbNames.ENUM_TAB_INACTIVE_COL+","+DbNames.ENUM_TAB_DESCRIPTION_COL+") VALUES (?,?,?,?,?,?)";
@@ -1546,7 +1563,7 @@ public class TransferFromIli {
                         EhiLogger.traceBackendCmd(stmt);
                         java.sql.PreparedStatement ps = conn.prepareStatement(stmt);
                         try{
-                            updateEnumEntries(null,exstEntries,thisSqlName.getQName(),ps, type, thisClass, baseClass);
+                            updateEnumEntries(null,exstEntries,thisSqlName.getQName(),ps, EnumValueMap.createEnumValueMap(domain, ili2sqlName), type.isOrdered(),thisClass, baseClass);
                         }catch(java.sql.SQLException ex){
                             throw new Ili2dbException("failed to insert enum values for type "+thisClass,ex);
                         }finally{
@@ -1558,8 +1575,8 @@ public class TransferFromIli {
                 }
                 if(gen!=null){
                     try{
-                        HashSet<String> exstEntries=new HashSet<String>();
-                        updateEnumEntries(gen,exstEntries,thisSqlName.getQName(),null, type, thisClass, baseClass);
+                        Set<String> exstEntries=new HashSet<String>();
+                        updateEnumEntries(gen,exstEntries,thisSqlName.getQName(),null, EnumValueMap.createEnumValueMap(domain, ili2sqlName), type.isOrdered(),thisClass, baseClass);
                     }catch(java.sql.SQLException ex){       
                         throw new Ili2dbException("failed to create inserts into enum-table "+thisSqlName,ex);
                     }
@@ -1570,19 +1587,14 @@ public class TransferFromIli {
         
 
     }
-	private void updateEnumEntries(GeneratorJdbc gen, java.util.Set<String> exstEntries,String sqlTableName,java.sql.PreparedStatement ps, EnumerationType type, String thisClass, String baseClass) 
+	private void updateEnumEntries(GeneratorJdbc gen, java.util.Set<String> exstEntries,String sqlTableName,java.sql.PreparedStatement ps, EnumValueMap type, boolean isOrdered,String thisClass, String baseClass) 
 	throws SQLException 
 	{
-		java.util.List<java.util.Map.Entry<String,ch.interlis.ili2c.metamodel.Enumeration.Element>> ev=new java.util.ArrayList<java.util.Map.Entry<String,ch.interlis.ili2c.metamodel.Enumeration.Element>>();
-		ch.interlis.iom_j.itf.ModelUtilities.buildEnumElementList(ev,"",type.getConsolidatedEnumeration());
-		boolean isOrdered=type.isOrdered();
 		int itfCode=0;
 		int seq=0;
-		Iterator<java.util.Map.Entry<String,ch.interlis.ili2c.metamodel.Enumeration.Element>> evi=ev.iterator();
+		Iterator<String> evi=type.getXtfCodes().iterator();
 		while(evi.hasNext()){
-			java.util.Map.Entry<String,ch.interlis.ili2c.metamodel.Enumeration.Element> ele=evi.next();
-			String eleName=ele.getKey();
-			Enumeration.Element eleElement=ele.getValue();
+			String eleName=evi.next();
 
             if(ps!=null) {
                 // entry exists already?
@@ -1596,14 +1608,14 @@ public class TransferFromIli {
                     ps.setString(2, eleName);
                     ps.setInt(3, itfCode);
 
-                    String dispName = eleElement.getMetaValues().getValue(IliMetaAttrNames.METAATTR_DISPNAME);
+                    String dispName = type.mapXtfValueToDisplayName(eleName);
                     if (dispName!=null){
                         ps.setString(4, dispName); // do not beautify name provided by user
                     }else{
-                        ps.setString(4, recConv.beautifyEnumDispName(eleName)); 
+                        ps.setString(4, ili2sqlName.beautifyEnumDispName(eleName)); 
                     }
                     ps.setBoolean(5, false);  // inactive
-                    String description = eleElement.getDocumentation();
+                    String description = type.mapXtfValueToDoc(eleName);
                     if (description!=null){
                         ps.setString(6, description);
                     }else{
@@ -1637,14 +1649,14 @@ public class TransferFromIli {
                 insStmt.append(","+Ili2db.quoteSqlStringValue(eleName));
                 insStmt.append(","+itfCode);
 
-                String dispName = eleElement.getMetaValues().getValue(IliMetaAttrNames.METAATTR_DISPNAME);
+                String dispName = type.mapXtfValueToDisplayName(eleName);
                 if (dispName!=null){
                     insStmt.append(","+Ili2db.quoteSqlStringValue(dispName)); // do not beautify name provided by user
                 }else{
-                    insStmt.append(","+ Ili2db.quoteSqlStringValue(recConv.beautifyEnumDispName(eleName))); 
+                    insStmt.append(","+ Ili2db.quoteSqlStringValue(ili2sqlName.beautifyEnumDispName(eleName))); 
                 }
                 insStmt.append(",'0'");  // inactive
-                String description = eleElement.getDocumentation();
+                String description = type.mapXtfValueToDoc(eleName);
                 insStmt.append(","+ Ili2db.quoteSqlStringValue(description));
 
                 // single table for all enums?

@@ -159,10 +159,12 @@ public class FgdbPreparedStatement implements PreparedStatement {
 		  }finally {
 		      if(rows!=null) {
 		          rows.Close();
+		          rows.delete();
 		          rows=null;
 		      }
 		      if(table!=null) {
 		          conn.getGeodatabase().CloseTable(table);
+		          table.delete();
 		          table=null;
 		      }
 		  }
@@ -175,120 +177,148 @@ public class FgdbPreparedStatement implements PreparedStatement {
 	public int executeUpdate() throws SQLException {
 		int err=0;
 		if(stmt instanceof InsertStmt){
-			Table table=new Table();
-			err=conn.getGeodatabase().OpenTable(((InsertStmt) stmt).getTableName(), table);
-			if(err!=0){
-				StringBuffer errDesc=new StringBuffer();
-				fgbd4j.GetErrorDescription(err, errDesc);
-				throw new SQLException(errDesc.toString());
+			Table table=null;
+            Row row=null;
+            ShapeBuffer shapeBuffer=null;
+			try{
+	            table=new Table();
+	            err=conn.getGeodatabase().OpenTable(((InsertStmt) stmt).getTableName(), table);
+	            if(err!=0){
+	                StringBuffer errDesc=new StringBuffer();
+	                fgbd4j.GetErrorDescription(err, errDesc);
+	                throw new SQLException(errDesc.toString());
+	            }
+	            setupFieldInfo(table);
+	            row=new Row();
+	            err=table.CreateRowObject(row);
+	            if(err!=0){
+	                StringBuffer errDesc=new StringBuffer();
+	                fgbd4j.GetErrorDescription(err, errDesc);
+	                throw new SQLException(errDesc.toString());
+	            }
+	            for(int i=0;i<((InsertStmt) stmt).getFields().size();i++){
+	                String colName=((InsertStmt) stmt).getFields().get(i);
+	                Object val=params.get(i);
+	                if(colName.equals(geometryColumn)){
+	                    if(val==null){
+	                        setRowVal(row, geometryColumn, null);
+	                    }else{
+                            shapeBuffer=new ShapeBuffer();
+                            shapeBuffer.setBuffer((byte[])val);
+                            row.SetGeometry(shapeBuffer);
+	                    }
+	                }else{
+	                    setRowVal(row, colName, val);
+	                }
+	            }
+	            if(shapeBuffer==null && geometryColumn!=null){
+	                setRowVal(row, geometryColumn, null);
+	            }
+                if(shapeBuffer!=null){
+                    shapeBuffer.delete();
+                    shapeBuffer=null;
+                }
+	            err=table.Insert(row);
+	            if(err!=0){
+	                StringBuffer errDesc=new StringBuffer();
+	                fgbd4j.GetErrorDescription(err, errDesc);
+	                throw new SQLException(errDesc.toString());
+	            }
+	            params=null;
+			}finally {
+                if(shapeBuffer!=null){
+                    shapeBuffer.delete();
+                    shapeBuffer=null;
+                }
+			    if(row!=null) {
+	                row.delete();
+	                row=null;
+			    }
+			    if(table!=null) {
+	                err=conn.getGeodatabase().CloseTable(table);
+	                if(err!=0){
+	                    StringBuffer errDesc=new StringBuffer();
+	                    fgbd4j.GetErrorDescription(err, errDesc);
+	                    throw new SQLException(errDesc.toString());
+	                }
+			        table.delete();
+			        table=null;
+			    }
 			}
-			setupFieldInfo(table);
-			Row row=new Row();
-			ShapeBuffer shapeBuffer=null;
-			err=table.CreateRowObject(row);
-			if(err!=0){
-				StringBuffer errDesc=new StringBuffer();
-				fgbd4j.GetErrorDescription(err, errDesc);
-				throw new SQLException(errDesc.toString());
-			}
-			for(int i=0;i<((InsertStmt) stmt).getFields().size();i++){
-				String colName=((InsertStmt) stmt).getFields().get(i);
-				Object val=params.get(i);
-				if(colName.equals(geometryColumn)){
-					if(val==null){
-						setRowVal(row, geometryColumn, null);
-					}else{
-						shapeBuffer=new ShapeBuffer();
-						shapeBuffer.setBuffer((byte[])val);
-						row.SetGeometry(shapeBuffer);
-					}
-				}else{
-					setRowVal(row, colName, val);
-				}
-			}
-			if(shapeBuffer==null && geometryColumn!=null){
-				setRowVal(row, geometryColumn, null);
-			}
-			err=table.Insert(row);
-			if(err!=0){
-				StringBuffer errDesc=new StringBuffer();
-				fgbd4j.GetErrorDescription(err, errDesc);
-				throw new SQLException(errDesc.toString());
-			}
-			if(shapeBuffer!=null){
-				shapeBuffer.delete();
-				shapeBuffer=null;
-			}
-			row.delete();
-			row=null;
-			err=conn.getGeodatabase().CloseTable(table);
-			if(err!=0){
-				StringBuffer errDesc=new StringBuffer();
-				fgbd4j.GetErrorDescription(err, errDesc);
-				throw new SQLException(errDesc.toString());
-			}
-			params=null;
 		}else if(stmt instanceof UpdateStmt){
 			UpdateStmt ustmt=(UpdateStmt)stmt;
-			Table table=new Table();
-			err=conn.getGeodatabase().OpenTable(ustmt.getTableName(), table);
-			if(err!=0){
-				StringBuffer errDesc=new StringBuffer();
-				fgbd4j.GetErrorDescription(err, errDesc);
-				throw new SQLException(errDesc.toString());
+			Table table=null;
+            Row row=null;
+            EnumRows rows=null;
+			try {
+	            table=new Table();
+	            err=conn.getGeodatabase().OpenTable(ustmt.getTableName(), table);
+	            if(err!=0){
+	                StringBuffer errDesc=new StringBuffer();
+	                fgbd4j.GetErrorDescription(err, errDesc);
+	                throw new SQLException(errDesc.toString());
+	            }
+	            setupFieldInfo(table);
+	              rows=new EnumRows();
+	              StringBuffer where=new StringBuffer();
+	              {
+	                  String sep="";
+	                  int paramIdx=ustmt.getSettings().size();
+	                  for(java.util.Map.Entry<Value,Value> set:ustmt.getConditions()){
+	                      ColRef colref=(ColRef)set.getKey();
+	                      where.append(sep);sep=" AND ";
+	                      where.append(colref.getName());
+	                      Object param=params.get(paramIdx++);
+	                      appendParam(where, paramIdx, param);
+	                  }
+	              }
+	              
+	              // Make sure to disable recycling when intending to edit rows.
+	              err= table.Search("*", where.toString(), false, rows);
+	                if(err!=0){
+	                    StringBuffer errDesc=new StringBuffer();
+	                    fgbd4j.GetErrorDescription(err, errDesc);
+	                    throw new SQLException(errDesc.toString());
+	                }
+	            
+	              row=new Row();
+	              while (rows.Next(row) == 0)
+	              {
+	                  int paramIdx=0;
+	                  for(java.util.Map.Entry<Value,Value> set:ustmt.getSettings()){
+	                      Object param=params.get(paramIdx++);
+	                      String colName=((ColRef) set.getKey()).getName();
+	                      setRowVal(row, colName, param);
+	                  }
+	                    err=table.Update(row);
+	                    if(err!=0){
+	                        StringBuffer errDesc=new StringBuffer();
+	                        fgbd4j.GetErrorDescription(err, errDesc);
+	                        throw new SQLException(errDesc.toString());
+	                    }
+	              }
+	            params=null;
+			}finally {
+			    if(rows!=null) {
+	                  rows.Close();
+	                  rows.delete();
+	                  rows=null;
+			    }
+			    if(row!=null) {
+	                  row.delete();
+	                  row=null;
+			    }
+			    if(table!=null) {
+	                err=conn.getGeodatabase().CloseTable(table);
+	                if(err!=0){
+	                    StringBuffer errDesc=new StringBuffer();
+	                    fgbd4j.GetErrorDescription(err, errDesc);
+	                    throw new SQLException(errDesc.toString());
+	                }
+	                table.delete();
+	                table=null;
+			    }
 			}
-			setupFieldInfo(table);
-			  EnumRows rows=new EnumRows();
-			  StringBuffer where=new StringBuffer();
-			  {
-				  String sep="";
-				  int paramIdx=ustmt.getSettings().size();
-				  for(java.util.Map.Entry<Value,Value> set:ustmt.getConditions()){
-					  ColRef colref=(ColRef)set.getKey();
-					  where.append(sep);sep=" AND ";
-					  where.append(colref.getName());
-					  Object param=params.get(paramIdx++);
-					  appendParam(where, paramIdx, param);
-				  }
-			  }
-			  
-			  // Make sure to disable recycling when intending to edit rows.
-			  err= table.Search("*", where.toString(), false, rows);
-				if(err!=0){
-					StringBuffer errDesc=new StringBuffer();
-					fgbd4j.GetErrorDescription(err, errDesc);
-					throw new SQLException(errDesc.toString());
-				}
-			
-				Row row=new Row();
-			  while (rows.Next(row) == 0)
-			  {
-				  int paramIdx=0;
-				  for(java.util.Map.Entry<Value,Value> set:ustmt.getSettings()){
-					  Object param=params.get(paramIdx++);
-					  String colName=((ColRef) set.getKey()).getName();
-					  setRowVal(row, colName, param);
-				  }
-					err=table.Update(row);
-					if(err!=0){
-						StringBuffer errDesc=new StringBuffer();
-						fgbd4j.GetErrorDescription(err, errDesc);
-						throw new SQLException(errDesc.toString());
-					}
-			  }
-			  row.delete();
-			  row=null;
-			  rows.Close();
-			  rows.delete();
-			  rows=null;
-			err=conn.getGeodatabase().CloseTable(table);
-			if(err!=0){
-				StringBuffer errDesc=new StringBuffer();
-				fgbd4j.GetErrorDescription(err, errDesc);
-				throw new SQLException(errDesc.toString());
-			}
-			params=null;
-			
 		}
 		return 0;
 	}
@@ -298,23 +328,29 @@ public class FgdbPreparedStatement implements PreparedStatement {
 		if(fieldType==null){
 			fieldType=new java.util.HashMap<String,Integer>();
 			int err;
-			FieldInfo fieldInfo=new FieldInfo();
-			err=table.GetFieldInformation(fieldInfo);
-			int[] fieldCounto=new int[1];
-			err=fieldInfo.GetFieldCount(fieldCounto);
-			fieldCount=fieldCounto[0];
-			int[] fieldType=new int[1];
-			for(int colIdx=0;colIdx<fieldCount;colIdx++){
-				StringBuffer fieldName=new StringBuffer();
-				fieldInfo.GetFieldName(colIdx, fieldName);
-				fieldInfo.GetFieldType(colIdx, fieldType);
-				this.fieldType.put(fieldName.toString(), fieldType[0]);
-				if(fieldType[0]==FieldType.fieldTypeGeometry.swigValue()){
-					geometryColumn=fieldName.toString();
-				}
+			FieldInfo fieldInfo=null;
+			try {
+	            fieldInfo=new FieldInfo();
+	            err=table.GetFieldInformation(fieldInfo);
+	            int[] fieldCounto=new int[1];
+	            err=fieldInfo.GetFieldCount(fieldCounto);
+	            fieldCount=fieldCounto[0];
+	            int[] fieldType=new int[1];
+	            for(int colIdx=0;colIdx<fieldCount;colIdx++){
+	                StringBuffer fieldName=new StringBuffer();
+	                fieldInfo.GetFieldName(colIdx, fieldName);
+	                fieldInfo.GetFieldType(colIdx, fieldType);
+	                this.fieldType.put(fieldName.toString(), fieldType[0]);
+	                if(fieldType[0]==FieldType.fieldTypeGeometry.swigValue()){
+	                    geometryColumn=fieldName.toString();
+	                }
+	            }
+			}finally {
+			    if(fieldInfo!=null) {
+	                fieldInfo.delete();
+	                fieldInfo=null;
+			    }
 			}
-			fieldInfo.delete();
-			fieldInfo=null;
 		}
 	}
 
@@ -358,45 +394,66 @@ public class FgdbPreparedStatement implements PreparedStatement {
 			}else if(val instanceof java.sql.Timestamp){
 				GregorianCalendar value=new GregorianCalendar();
 				value.setTimeInMillis(((java.sql.Timestamp) val).getTime());
-				ce_time time=new ce_time();
-				time.setTm_year(value.get(GregorianCalendar.YEAR)-1900);
-				time.setTm_mon(value.get(GregorianCalendar.MONTH));
-				time.setTm_mday(value.get(GregorianCalendar.DAY_OF_MONTH));
-				time.setTm_hour(value.get(GregorianCalendar.HOUR_OF_DAY));
-				time.setTm_min(value.get(GregorianCalendar.MINUTE));
-				time.setTm_sec(value.get(GregorianCalendar.SECOND));
-				time.setTm_isdst(0);
-				time.setTm_wday(0);
-				time.setTm_yday(0);
-				err=row.setDateTime(colName, time); 
+                ce_time time=null;
+				try {
+	                time=new ce_time();
+	                time.setTm_year(value.get(GregorianCalendar.YEAR)-1900);
+	                time.setTm_mon(value.get(GregorianCalendar.MONTH));
+	                time.setTm_mday(value.get(GregorianCalendar.DAY_OF_MONTH));
+	                time.setTm_hour(value.get(GregorianCalendar.HOUR_OF_DAY));
+	                time.setTm_min(value.get(GregorianCalendar.MINUTE));
+	                time.setTm_sec(value.get(GregorianCalendar.SECOND));
+	                time.setTm_isdst(0);
+	                time.setTm_wday(0);
+	                time.setTm_yday(0);
+	                err=row.setDateTime(colName, time); 
+				}finally {
+				    if(time!=null) {
+				        time.delete();
+				    }
+				}
 			}else if(val instanceof java.sql.Date){
 				GregorianCalendar value=new GregorianCalendar();
 				value.setTimeInMillis(((java.sql.Date) val).getTime());
-				ce_time time=new ce_time();
-				time.setTm_year(value.get(GregorianCalendar.YEAR)-1900);
-				time.setTm_mon(value.get(GregorianCalendar.MONTH));
-				time.setTm_mday(value.get(GregorianCalendar.DAY_OF_MONTH));
-				time.setTm_hour(FgdbResultSet.MAGIC_HOUR_DATEONLY);
-				time.setTm_min(0);
-				time.setTm_sec(0);
-				time.setTm_isdst(0);
-				time.setTm_wday(0);
-				time.setTm_yday(0);
-				err=row.setDateTime(colName, time); 
+                ce_time time=null;
+				try {
+                    time=new ce_time();
+                    time.setTm_year(value.get(GregorianCalendar.YEAR)-1900);
+                    time.setTm_mon(value.get(GregorianCalendar.MONTH));
+                    time.setTm_mday(value.get(GregorianCalendar.DAY_OF_MONTH));
+                    time.setTm_hour(FgdbResultSet.MAGIC_HOUR_DATEONLY);
+                    time.setTm_min(0);
+                    time.setTm_sec(0);
+                    time.setTm_isdst(0);
+                    time.setTm_wday(0);
+                    time.setTm_yday(0);
+                    err=row.setDateTime(colName, time); 
+				}finally {
+                    if(time!=null) {
+                        time.delete();
+                    }
+				}
 			}else if(val instanceof java.sql.Time){
 				GregorianCalendar value=new GregorianCalendar();
 				value.setTimeInMillis(((java.sql.Time) val).getTime());
-				ce_time time=new ce_time();
-				time.setTm_year(FgdbResultSet.MAGIC_YEAR_TIMEONLY);
-				time.setTm_mon(FgdbResultSet.MAGIC_MON_TIMEONLY);
-				time.setTm_mday(FgdbResultSet.MAGIC_MDAY_TIMEONLY);
-				time.setTm_hour(value.get(GregorianCalendar.HOUR_OF_DAY));
-				time.setTm_min(value.get(GregorianCalendar.MINUTE));
-				time.setTm_sec(value.get(GregorianCalendar.SECOND));
-				time.setTm_isdst(FgdbResultSet.MAGIC_ISDST_TIMEONLY);
-				time.setTm_wday(FgdbResultSet.MAGIC_WDAY_TIMEONLY);
-				time.setTm_yday(FgdbResultSet.MAGIC_YDAY_TIMEONLY);
-				err=row.setDateTime(colName, time); 
+                ce_time time=null;
+                try {
+                    time=new ce_time();
+                    time.setTm_year(FgdbResultSet.MAGIC_YEAR_TIMEONLY);
+                    time.setTm_mon(FgdbResultSet.MAGIC_MON_TIMEONLY);
+                    time.setTm_mday(FgdbResultSet.MAGIC_MDAY_TIMEONLY);
+                    time.setTm_hour(value.get(GregorianCalendar.HOUR_OF_DAY));
+                    time.setTm_min(value.get(GregorianCalendar.MINUTE));
+                    time.setTm_sec(value.get(GregorianCalendar.SECOND));
+                    time.setTm_isdst(FgdbResultSet.MAGIC_ISDST_TIMEONLY);
+                    time.setTm_wday(FgdbResultSet.MAGIC_WDAY_TIMEONLY);
+                    time.setTm_yday(FgdbResultSet.MAGIC_YDAY_TIMEONLY);
+                    err=row.setDateTime(colName, time); 
+                }finally {
+                    if(time!=null) {
+                        time.delete();
+                    }
+                }
 			}else if(val instanceof byte[]){
 				byte[] value= (byte[])val;
 				ByteArray binaryBuf=new ByteArray();

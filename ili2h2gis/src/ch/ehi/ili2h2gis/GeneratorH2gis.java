@@ -457,7 +457,10 @@ public class GeneratorH2gis extends GeneratorJdbc {
                         }
                     }
                 }finally{
-                    if(rs!=null)rs.close();
+                    if(rs!=null) {
+                        rs.close();
+                        rs=null;
+                    }
                 }
             }
         }catch(java.sql.SQLException ex){

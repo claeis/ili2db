@@ -374,6 +374,7 @@ public class TransferToXtf {
             if(getstmt!=null){
                 try{
                     getstmt.close();
+                    getstmt=null;
                 }catch(java.sql.SQLException ex){
                     EhiLogger.logError(ex);
                 }
@@ -435,10 +436,10 @@ public class TransferToXtf {
             if(res!=null){
                 try{
                     res.close();
-                    res=null;
                 }catch(java.sql.SQLException ex){
                     EhiLogger.logError(ex);
                 }
+                res=null;
             }
 			if(getstmt!=null){
 				try{
@@ -446,6 +447,7 @@ public class TransferToXtf {
 				}catch(java.sql.SQLException ex){
 					EhiLogger.logError(ex);
 				}
+				getstmt=null;
 			}
 		}
 		if(topicName!=null){
@@ -716,10 +718,10 @@ public class TransferToXtf {
                 if (rs != null) {
                     try {
                         rs.close();
-                        rs=null;
                     } catch (java.sql.SQLException ex) {
                         EhiLogger.logError("failed to close query of "+ aclass.getScopedName(null), ex);
                     }
+                    rs=null;
                 }
 				if (dbstmt != null) {
 					try {
@@ -727,6 +729,7 @@ public class TransferToXtf {
 					} catch (java.sql.SQLException ex) {
 						EhiLogger.logError("failed to close query of "+ aclass.getScopedName(null), ex);
 					}
+					dbstmt=null;
 				}
 			}
 		}else{
@@ -931,6 +934,7 @@ public class TransferToXtf {
             if(rs!=null){
                 try{
                     rs.close();
+                    rs=null;
                 }catch(java.sql.SQLException ex){       
                     EhiLogger.logError("failed to close query of structure elements "+baseClass.getScopedName(null),ex);
                 }
@@ -938,6 +942,7 @@ public class TransferToXtf {
 			if(dbstmt!=null){
 				try{
 					dbstmt.close();
+					dbstmt=null;
 				}catch(java.sql.SQLException ex){		
 					EhiLogger.logError("failed to close query of structure elements "+baseClass.getScopedName(null),ex);
 				}

@@ -1268,7 +1268,7 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
         }else {
             OutParam<String> qualifiedIliName=new OutParam<String>();
             DbTableName sqlDbName=getEnumTargetTableName(attr, qualifiedIliName, dbSchema);
-            map=EnumValueMap.createEnumValueMap(conn, colT_ID, true, qualifiedIliName.value, sqlDbName);
+            map=EnumValueMap.readEnumValueMapFromDb(conn, colT_ID, true, qualifiedIliName.value, sqlDbName);
             enumCache.put(attr,map);
         }
         return map.mapIdValue(value);

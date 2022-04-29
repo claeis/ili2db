@@ -121,11 +121,12 @@ public class PgSequenceBasedIdGen implements DbIdGen {
 			sqlName=schema+"."+sqlName;
 		}
 		java.sql.PreparedStatement getstmt=null;
+        java.sql.ResultSet res=null;
 		try{
 			String stmt="SELECT nextval('"+sqlName+"')";
 			EhiLogger.traceBackendCmd(stmt);
 			getstmt=conn.prepareStatement(stmt);
-			java.sql.ResultSet res=getstmt.executeQuery();
+			res=getstmt.executeQuery();
 			long ret=0;
 			if(res.next()){
 				ret=res.getLong(1);
@@ -135,13 +136,22 @@ public class PgSequenceBasedIdGen implements DbIdGen {
 			EhiLogger.logError("failed to query "+sqlName,ex);
 			throw new IllegalStateException(ex);
 		}finally{
-			if(getstmt!=null){
+			if(res!=null){
 				try{
-					getstmt.close();
+					res.close();
 				}catch(java.sql.SQLException ex){
 					EhiLogger.logError(ex);
 				}
+				res=null;
 			}
+            if(getstmt!=null){
+                try{
+                    getstmt.close();
+                }catch(java.sql.SQLException ex){
+                    EhiLogger.logError(ex);
+                }
+                getstmt=null;
+            }
 		}
 		throw new IllegalStateException("no nextval "+sqlName);
 	}

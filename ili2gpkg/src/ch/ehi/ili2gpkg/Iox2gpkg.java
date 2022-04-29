@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 
 
+import ch.ehi.ili2db.gui.Config;
 import ch.interlis.iom_j.Iom_jObject;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Polygon;
@@ -170,7 +171,7 @@ public class Iox2gpkg {
 	 * @return JTS Polygon
 	 * @throws Iox2wkbException
 	 */
-	public byte[] surface2wkb(IomObject obj,boolean asCurvePolygon,double strokeP,int srsId) //SurfaceOrAreaType type)
+	public byte[] surface2wkb(IomObject obj,boolean asCurvePolygon,double strokeP,boolean repairTouchingLines,int srsId) //SurfaceOrAreaType type)
 	throws Iox2wkbException
 	{
 		if(obj==null){
@@ -182,7 +183,7 @@ public class Iox2gpkg {
 	    	writeGeoPackageBinaryHeader(srsId,surface.getEnvelopeInternal());
 	    	// wkb
 			Iox2wkb helper=new Iox2wkb(outputDimension,os.order());
-			os.write(helper.surface2wkb(obj,asCurvePolygon,strokeP));
+			os.write(helper.surface2wkb(obj,asCurvePolygon,strokeP,repairTouchingLines));
 		} catch (IOException e) {
 	        throw new RuntimeException("Unexpected IO exception: " + e.getMessage());
 		} catch (IoxException e) {
@@ -190,7 +191,7 @@ public class Iox2gpkg {
 		}
 		return os.toByteArray();
 	}
-	public byte[] multisurface2wkb(IomObject obj,boolean asCurvePolygon,double strokeP,int srsId) //SurfaceOrAreaType type)
+	public byte[] multisurface2wkb(IomObject obj,boolean asCurvePolygon,double strokeP,boolean repairTouchingLines,int srsId) //SurfaceOrAreaType type)
 	throws Iox2wkbException
 	{
 		if(obj==null){
@@ -209,7 +210,7 @@ public class Iox2gpkg {
 	    	writeGeoPackageBinaryHeader(srsId,env);
 	    	// wkb
 			Iox2wkb helper=new Iox2wkb(outputDimension,os.order());
-			os.write(helper.multisurface2wkb(obj,asCurvePolygon,strokeP));
+			os.write(helper.multisurface2wkb(obj,asCurvePolygon,strokeP,repairTouchingLines));
 		} catch (IOException e) {
 	        throw new RuntimeException("Unexpected IO exception: " + e.getMessage());
 		} catch (IoxException e) {

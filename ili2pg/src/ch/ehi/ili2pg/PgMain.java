@@ -41,7 +41,7 @@ public class PgMain extends ch.ehi.ili2db.AbstractMain {
 		config.setUuidDefaultValue("uuid_generate_v4()");
 	}
 	@Override
-	protected DbUrlConverter getDbUrlConverter() {
+	public DbUrlConverter getDbUrlConverter() {
 		return new DbUrlConverter(){
 			public String makeUrl(Config config) {
 				/*

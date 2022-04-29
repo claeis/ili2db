@@ -10,7 +10,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.Statement;
 import java.sql.ResultSet;
-
+import java.sql.SQLException;
 
 import ch.interlis.ili2c.metamodel.Element;
 import ch.interlis.ili2c.metamodel.Evaluable;
@@ -92,6 +92,8 @@ public class MetaAttrUtility{
 		if(schema!=null){
 			sqlName=schema+"."+sqlName;
 		}
+        Statement dbstmt = null;
+        ResultSet rs=null;
 		try{
 			String stmt="SELECT " +
 				DbNames.META_ATTRIBUTES_TAB_ILIELEMENT_COL + ", " + 
@@ -100,8 +102,8 @@ public class MetaAttrUtility{
 				"FROM " + sqlName; 
 				
 			EhiLogger.traceBackendCmd(stmt);
-			Statement dbstmt = conn.createStatement();
-			ResultSet rs=dbstmt.executeQuery(stmt);
+			dbstmt = conn.createStatement();
+			rs=dbstmt.executeQuery(stmt);
 
 			while(rs.next()){
 				String ilielement=rs.getString(DbNames.META_ATTRIBUTES_TAB_ILIELEMENT_COL);
@@ -126,6 +128,23 @@ public class MetaAttrUtility{
 			
 		}catch(java.sql.SQLException ex){
 			throw new Ili2dbException("failed to read meta-attributes table", ex);
+		}finally {
+		    if(rs!=null) {
+		        try {
+                    rs.close();
+                } catch (SQLException e) {
+                    EhiLogger.logAdaption(e+"; ignored");
+                }
+		        rs=null;
+		    }
+		    if(dbstmt!=null) {
+		        try {
+                    dbstmt.close();
+                } catch (SQLException e) {
+                    EhiLogger.logAdaption(e+"; ignored");
+                }
+		        dbstmt=null;
+		    }
 		}
 	}
 	
@@ -332,9 +351,11 @@ public class MetaAttrUtility{
             // select entries
             String selStmt="SELECT "+DbNames.META_ATTRIBUTES_TAB_ILIELEMENT_COL+","+DbNames.META_ATTRIBUTES_TAB_ATTRNAME_COL+","+DbNames.META_ATTRIBUTES_TAB_ATTRVALUE_COL+" FROM "+sqlName;
             EhiLogger.traceBackendCmd(selStmt);
-            java.sql.PreparedStatement selPrepStmt = conn.prepareStatement(selStmt);
-            ResultSet rs = selPrepStmt.executeQuery();
+            java.sql.PreparedStatement selPrepStmt = null;
+            ResultSet rs = null;
             try{
+                selPrepStmt = conn.prepareStatement(selStmt);
+                rs = selPrepStmt.executeQuery();
                 while(rs.next()){
                     String table=rs.getString(1);
                     String tag=rs.getString(2);
@@ -349,8 +370,13 @@ public class MetaAttrUtility{
             }catch(java.sql.SQLException ex){
                 throw new Ili2dbException("failed to read meta info values from "+sqlName,ex);
             }finally{
-                rs.close();
-                selPrepStmt.close();
+                if(rs!=null) {
+                    rs.close();
+                }
+                if(selPrepStmt!=null) {
+                    selPrepStmt.close();
+                    selPrepStmt=null;
+                }
             }
         }catch(java.sql.SQLException ex){       
             throw new Ili2dbException("failed to read meta-info table "+sqlName,ex);
