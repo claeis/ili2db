@@ -4,6 +4,8 @@ import java.util.Properties;
 
 import ch.ehi.basics.settings.Settings;
 import ch.ehi.sqlgen.generator.SqlConfiguration;
+import ch.interlis.iox_j.validator.ValidationConfig;
+import ch.interlis.iox_j.validator.Validator;
 
 public class Config extends Settings {
 	public static final String FALSE = "False";
@@ -838,5 +840,13 @@ public class Config extends Settings {
 
 	public boolean getRepairTouchingLines(){
 		return repairTouchingLines;
+	}
+
+	public void setVerbose(boolean value) {
+		setTransientValue(Validator.CONFIG_VERBOSE, value ? ValidationConfig.TRUE : ValidationConfig.FALSE);
+	}
+
+	public boolean isVerbose() {
+		return ValidationConfig.TRUE.equals(getTransientValue(Validator.CONFIG_VERBOSE));
 	}
 }
