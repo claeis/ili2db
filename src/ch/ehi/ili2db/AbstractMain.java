@@ -491,6 +491,9 @@ public abstract class AbstractMain {
 				} else if (isOption(arg, "--createTypeConstraint")) {
 					argi++;
 					config.setCreateTypeConstraint(parseBooleanArgument(arg));
+				} else if (arg.equals("--verbose")) {
+					argi++;
+					config.setVerbose(parseBooleanArgument(arg));
 				} else if (arg.equals("--help")) {
 					printVersion();
 					System.err.println();
@@ -597,6 +600,7 @@ public abstract class AbstractMain {
 					System.err.println("--proxyPort port       proxy port to access model repositories.");
 					System.err.println("--log filename         log messages to given file.");
 					System.err.println("--xtflog filename      log messages to given XTF file.");
+					System.err.println("--verbose              print additional information in validation results.");
 					System.err.println("--gui                  start GUI.");
 					System.err.println("--trace                enable trace messages.");
 					System.err.println("--help                 Display this help text.");
