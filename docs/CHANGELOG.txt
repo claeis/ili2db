@@ -13,6 +13,8 @@ ideas/open issues/questions
 
 LATEST
 ---------------------------
+- new option --verbose
+- iox-ili-1.21.11-SNAPSHOT
 
 ili2db 4.8.0 (2022-04-29)
 ------------------------------
