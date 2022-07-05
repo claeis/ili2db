@@ -196,6 +196,9 @@ public abstract class AbstractMain {
 					argi++;
 					config.setLogfile(args[argi]);
 					argi++;
+                } else if (arg.equals("--logtime")) {
+                    argi++;
+                    config.setLogtime(parseBooleanArgument(arg));
 				} else if (arg.equals("--xtflog")) {
 					argi++;
 					config.setXtfLogfile(args[argi]);
@@ -599,6 +602,7 @@ public abstract class AbstractMain {
 					System.err.println("--proxy host           proxy server to access model repositories.");
 					System.err.println("--proxyPort port       proxy port to access model repositories.");
 					System.err.println("--log filename         log messages to given file.");
+                    System.err.println("--logtime              include timestamps in logfile.");
 					System.err.println("--xtflog filename      log messages to given XTF file.");
 					System.err.println("--verbose              print additional information in validation results.");
 					System.err.println("--gui                  start GUI.");

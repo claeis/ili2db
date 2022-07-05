@@ -163,6 +163,7 @@ public class Config extends Settings {
     private String domainAssignments=null;
     private boolean xtfAttrText=false;
     private boolean repairTouchingLines = true;
+    private boolean logTime=false;
 	final static public String ILIGML20="ILIGML20"; 
 	
     static public final int FC_UNDEFINED=0;
@@ -842,7 +843,13 @@ public class Config extends Settings {
 	public boolean getRepairTouchingLines(){
 		return repairTouchingLines;
 	}
+    public void setLogtime(boolean value) {
+        logTime=value;
+    }
 
+    public boolean isLogtime() {
+        return logTime;
+    }
 	public void setVerbose(boolean value) {
 		setTransientValue(Validator.CONFIG_VERBOSE, value ? ValidationConfig.TRUE : ValidationConfig.FALSE);
 	}
