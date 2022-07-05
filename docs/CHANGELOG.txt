@@ -15,6 +15,7 @@ LATEST
 ---------------------------
 - new option --verbose
 - new option --logtime
+- fix JRE 1.6 compatibility
 - iox-ili-1.21.11-SNAPSHOT
 
 ili2db 4.8.0 (2022-04-29)
