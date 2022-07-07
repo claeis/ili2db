@@ -815,6 +815,7 @@ public abstract class Datatypes23Test {
 	                 Assert.assertEquals("Left", obj1.getattrvalue("horizAlignment"));
 	                 Assert.assertEquals("mailto:ceis@localhost", obj1.getattrvalue("uritext"));
 	                 Assert.assertEquals("5", obj1.getattrvalue("numericInt"));
+                     Assert.assertEquals("9223372036854775800", obj1.getattrvalue("numericBigInt"));
 	                 
 	                 // do xml comparison
 	                 String expectedXmlValue="<?xml version=\"1.0\" encoding=\"UTF-8\"?><x>\n" + 

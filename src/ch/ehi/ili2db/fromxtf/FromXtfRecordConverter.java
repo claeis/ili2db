@@ -1318,8 +1318,8 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 						}else{
 							if(value!=null){
 								try{
-									int val=(int)Math.round(Double.parseDouble(value));
-									ps.setInt(valuei, val);
+									long val=Long.parseLong(value);
+									ps.setLong(valuei, val);
 								}catch(java.lang.NumberFormatException ex){
 									EhiLogger.logError(ex);
 								}
