@@ -22,7 +22,9 @@ import org.xmlunit.builder.Input;
 import org.xmlunit.diff.Diff;
 
 import ch.ehi.basics.logging.EhiLogger;
+import ch.ehi.ili2db.base.DbNames;
 import ch.ehi.ili2db.base.Ili2db;
+import ch.ehi.ili2db.dbmetainfo.DbExtMetaInfo;
 import ch.ehi.ili2db.gui.Config;
 import ch.interlis.iom.IomObject;
 import ch.interlis.iom_j.xtf.XtfReader;
@@ -40,100 +42,263 @@ public abstract class Datatypes23Test {
     protected AbstractTestSetup setup=createTestSetup();
     protected abstract AbstractTestSetup createTestSetup() ;
     
-	@Test
-	public void importIli() throws Exception{
-	    Connection jdbcConnection=null;
-	    Statement stmt=null;
-		try {
-		    //EhiLogger.getInstance().setTraceFilter(false);
-	        setup.resetDb();
+	private void doImportIli(Connection jdbcConnection,Statement stmt,boolean withMetadata) throws Exception{
+        File data=new File(TEST_OUT+"Datatypes23.ili");
+        Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+        config.setFunction(Config.FC_SCHEMAIMPORT);
+        config.setCreateFk(Config.CREATE_FK_YES);
+        config.setCreateTextChecks(true);
+        config.setCreateNumChecks(true);
+        config.setCreateDateTimeChecks(true);
+        config.setTidHandling(Config.TID_HANDLING_PROPERTY);
+        config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
+        config.setCatalogueRefTrafo(null);
+        config.setMultiSurfaceTrafo(null);
+        config.setMultilingualTrafo(null);
+        config.setInheritanceTrafo(null);
+        if(withMetadata) {
+            config.setCreateMetaInfo(true);
+        }
+        //Ili2db.readSettingsFromDb(config);
+        Ili2db.run(config,null);
+        {
+            // t_ili2db_attrname
+            String [][] expectedValues=new String[][] {
+                {"Datatypes23.Topic.SimpleSurface3.surface3d", "surface3d", "simplesurface3", null},
+                {"Datatypes23.Topic.ClassAttr.vertAlignment", "vertalignment", "classattr", null},
+                {"Datatypes23.Topic.ClassAttr.aTime", "atime", "classattr", null},
+                {"Datatypes23.Topic.SimpleSurface2.surface2d", "surface2d", "simplesurface2", null},
+                {"Datatypes23.Topic.Surface2.surfacearcs2d", "surfacearcs2d", "surface2", null},
+                {"Datatypes23.Topic.ClassAttr.aUuid", "auuid", "classattr", null},
+                {"Datatypes23.Topic.ClassAttr.aClass", "aclass", "classattr", null},
+                {"Datatypes23.Topic.ClassAttr.uritext", "uritext", "classattr", null},
+                {"Datatypes23.Topic.ClassAttr.horizAlignment", "horizalignment", "classattr", null},
+                {"Datatypes23.Topic.ClassAttr.aI32id", "ai32id", "classattr", null},
+                {"Datatypes23.Topic.Line3.straightsarcs3d", "straightsarcs3d", "line3", null},
+                {"Datatypes23.Topic.ClassAttr.mtextLimited", "mtextlimited", "classattr", null},
+                {"Datatypes23.Topic.SimpleLine3.straights3d", "straights3d", "simpleline3", null},
+                {"Datatypes23.Topic.ClassAttr.aAttribute", "aattribute", "classattr", null},
+                {"Datatypes23.Topic.ClassAttr.aBoolean", "aboolean", "classattr", null},
+                {"Datatypes23.Topic.ClassAttr.aDateTime", "adatetime", "classattr", null},
+                {"Datatypes23.Topic.ClassAttr.formattedText", "formattedtext", "classattr", null},
+                {"Datatypes23.Topic.ClassAttr.textLimited", "textlimited", "classattr", null},
+                {"Datatypes23.Topic.ClassAttr.nametext", "nametext", "classattr", null},
+                {"Datatypes23.Topic.ClassAttr.aufzaehlung", "aufzaehlung", "classattr", null},
+                {"Datatypes23.Topic.ClassAttr.xmlbox", "xmlbox", "classattr", null},
+                {"Datatypes23.Topic.ClassAttr.aStandardid", "astandardid", "classattr", null},
+                {"Datatypes23.Topic.ClassAttr.aDate", "adate", "classattr", null},
+                {"Datatypes23.Topic.ClassKoord3.hcoord", "hcoord", "classkoord3", null},
+                {"Datatypes23.Topic.ClassKoord2.lcoord", "lcoord", "classkoord2", null},
+                {"Datatypes23.Topic.ClassAttr.numericInt", "numericint", "classattr", null},
+                {"Datatypes23.Topic.ClassAttr.numericBigInt", "numericbigint", "classattr", null},
+                {"Datatypes23.Topic.ClassAttr.numericDec", "numericdec", "classattr", null},
+                {"Datatypes23.Topic.SimpleLine2.straights2d", "straights2d", "simpleline2", null},
+                {"Datatypes23.Topic.Line2.straightsarcs2d", "straightsarcs2d", "line2", null},
+                {"Datatypes23.Topic.ClassAttr.textUnlimited", "textunlimited", "classattr", null},
+                {"Datatypes23.Topic.ClassAttr.binbox", "binbox", "classattr", null},
+                {"Datatypes23.Topic.Surface3.surfacearcs3d", "surfacearcs3d", "surface3", null},
+                {"Datatypes23.Topic.ClassAttr.mtextUnlimited", "mtextunlimited", "classattr", null},
+                {"Datatypes23.Topic.Form.a", "a", "form", null},
+                {"Datatypes23.Topic.Form.b", "b", "form", null},
+            };
+            Ili2dbAssert.assertAttrNameTable(jdbcConnection,expectedValues, setup.getSchema());
+            
+        }
+        {
+            // t_ili2db_trafo
+            String [][] expectedValues=new String[][] {
+                {"Datatypes23.Topic.SimpleLine3", "ch.ehi.ili2db.inheritance", "newClass"},
+                {"Datatypes23.Topic.SimpleSurface3", "ch.ehi.ili2db.inheritance", "newClass"},
+                {"Datatypes23.Topic.Surface2", "ch.ehi.ili2db.inheritance", "newClass"},
+                {"Datatypes23.Topic.SimpleSurface2", "ch.ehi.ili2db.inheritance", "newClass"},
+                {"Datatypes23.Topic.Surface3", "ch.ehi.ili2db.inheritance", "newClass"},
+                {"Datatypes23.Topic.Form", "ch.ehi.ili2db.inheritance", "newClass"},
+                {"Datatypes23.Topic.ClassAttr", "ch.ehi.ili2db.inheritance", "newClass"},
+                {"Datatypes23.Topic.ClassKoord3", "ch.ehi.ili2db.inheritance", "newClass"},
+                {"Datatypes23.Topic.Line3", "ch.ehi.ili2db.inheritance", "newClass"},
+                {"Datatypes23.Topic.ClassKoord2", "ch.ehi.ili2db.inheritance", "newClass"},
+                {"Datatypes23.Topic.SimpleLine2", "ch.ehi.ili2db.inheritance", "newClass"},
+                {"Datatypes23.Topic.Line2", "ch.ehi.ili2db.inheritance", "newClass"}
+            };
+            Ili2dbAssert.assertTrafoTable(jdbcConnection,expectedValues, setup.getSchema());
+        }
+	}
+    @Test
+    public void importIli() throws Exception{
+        Connection jdbcConnection=null;
+        Statement stmt=null;
+        try {
+            //EhiLogger.getInstance().setTraceFilter(false);
+            setup.resetDb();
             jdbcConnection = setup.createConnection();
-	        stmt=jdbcConnection.createStatement();
-			File data=new File(TEST_OUT+"Datatypes23.ili");
-			Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
-			config.setFunction(Config.FC_SCHEMAIMPORT);
-			config.setCreateFk(Config.CREATE_FK_YES);
-            config.setCreateTextChecks(true);
-			config.setCreateNumChecks(true);
-            config.setCreateDateTimeChecks(true);
-			config.setTidHandling(Config.TID_HANDLING_PROPERTY);
-			config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
-			config.setCatalogueRefTrafo(null);
-			config.setMultiSurfaceTrafo(null);
-			config.setMultilingualTrafo(null);
-			config.setInheritanceTrafo(null);
-			//Ili2db.readSettingsFromDb(config);
-			Ili2db.run(config,null);
+            stmt=jdbcConnection.createStatement();
+            doImportIli(jdbcConnection,stmt,false);
+        }catch(SQLException e) {
+            throw new IoxException(e);
+        }finally{
+            if(stmt!=null) {
+                stmt.close();
+                stmt=null;
+            }
+            if(jdbcConnection!=null){
+                jdbcConnection.close();
+                jdbcConnection=null;
+            }
+        }
+    }
+    @Test
+    public void importIliWithMetadata() throws Exception{
+        Connection jdbcConnection=null;
+        Statement stmt=null;
+        java.sql.PreparedStatement selPrepStmt=null;
+        try {
+            //EhiLogger.getInstance().setTraceFilter(false);
+            setup.resetDb();
+            jdbcConnection = setup.createConnection();
+            stmt=jdbcConnection.createStatement();
+            doImportIli(jdbcConnection,stmt,true);
             {
-                // t_ili2db_attrname
-                String [][] expectedValues=new String[][] {
-                    {"Datatypes23.Topic.SimpleSurface3.surface3d", "surface3d", "simplesurface3", null},
-                    {"Datatypes23.Topic.ClassAttr.vertAlignment", "vertalignment", "classattr", null},
-                    {"Datatypes23.Topic.ClassAttr.aTime", "atime", "classattr", null},
-                    {"Datatypes23.Topic.SimpleSurface2.surface2d", "surface2d", "simplesurface2", null},
-                    {"Datatypes23.Topic.Surface2.surfacearcs2d", "surfacearcs2d", "surface2", null},
-                    {"Datatypes23.Topic.ClassAttr.aUuid", "auuid", "classattr", null},
-                    {"Datatypes23.Topic.ClassAttr.aClass", "aclass", "classattr", null},
-                    {"Datatypes23.Topic.ClassAttr.uritext", "uritext", "classattr", null},
-                    {"Datatypes23.Topic.ClassAttr.horizAlignment", "horizalignment", "classattr", null},
-                    {"Datatypes23.Topic.ClassAttr.aI32id", "ai32id", "classattr", null},
-                    {"Datatypes23.Topic.Line3.straightsarcs3d", "straightsarcs3d", "line3", null},
-                    {"Datatypes23.Topic.ClassAttr.mtextLimited", "mtextlimited", "classattr", null},
-                    {"Datatypes23.Topic.SimpleLine3.straights3d", "straights3d", "simpleline3", null},
-                    {"Datatypes23.Topic.ClassAttr.aAttribute", "aattribute", "classattr", null},
-                    {"Datatypes23.Topic.ClassAttr.aBoolean", "aboolean", "classattr", null},
-                    {"Datatypes23.Topic.ClassAttr.aDateTime", "adatetime", "classattr", null},
-                    {"Datatypes23.Topic.ClassAttr.textLimited", "textlimited", "classattr", null},
-                    {"Datatypes23.Topic.ClassAttr.nametext", "nametext", "classattr", null},
-                    {"Datatypes23.Topic.ClassAttr.aufzaehlung", "aufzaehlung", "classattr", null},
-                    {"Datatypes23.Topic.ClassAttr.xmlbox", "xmlbox", "classattr", null},
-                    {"Datatypes23.Topic.ClassAttr.aStandardid", "astandardid", "classattr", null},
-                    {"Datatypes23.Topic.ClassAttr.aDate", "adate", "classattr", null},
-                    {"Datatypes23.Topic.ClassKoord3.hcoord", "hcoord", "classkoord3", null},
-                    {"Datatypes23.Topic.ClassKoord2.lcoord", "lcoord", "classkoord2", null},
-                    {"Datatypes23.Topic.ClassAttr.numericInt", "numericint", "classattr", null},
-                    {"Datatypes23.Topic.ClassAttr.numericBigInt", "numericbigint", "classattr", null},
-                    {"Datatypes23.Topic.ClassAttr.numericDec", "numericdec", "classattr", null},
-                    {"Datatypes23.Topic.SimpleLine2.straights2d", "straights2d", "simpleline2", null},
-                    {"Datatypes23.Topic.Line2.straightsarcs2d", "straightsarcs2d", "line2", null},
-                    {"Datatypes23.Topic.ClassAttr.textUnlimited", "textunlimited", "classattr", null},
-                    {"Datatypes23.Topic.ClassAttr.binbox", "binbox", "classattr", null},
-                    {"Datatypes23.Topic.Surface3.surfacearcs3d", "surfacearcs3d", "surface3", null},
-                    {"Datatypes23.Topic.ClassAttr.mtextUnlimited", "mtextunlimited", "classattr", null}
-                };
-                Ili2dbAssert.assertAttrNameTable(jdbcConnection,expectedValues, setup.getSchema());
+                String selStmt="SELECT "+DbNames.META_INFO_COLUMN_TAB_SETTING_COL+", "+DbNames.META_INFO_COLUMN_TAB_SUBTYPE_COL+" FROM "+setup.prefixName(DbNames.META_INFO_COLUMN_TAB)+" WHERE "+DbNames.META_INFO_COLUMN_TAB_TABLENAME_COL+"=? AND "+DbNames.META_INFO_COLUMN_TAB_COLUMNNAME_COL+"=? AND "+DbNames.META_INFO_COLUMN_TAB_TAG_COL+"=?";
+                selPrepStmt = jdbcConnection.prepareStatement(selStmt);
+                {
+                    selPrepStmt.setString(1, "classattr");
+                    selPrepStmt.setString(2, "textunlimited");
+                    selPrepStmt.setString(3, DbExtMetaInfo.TAG_COL_TYPEKIND);
+                    ResultSet rs = selPrepStmt.executeQuery();
+                    Assert.assertTrue(rs.next());
+                    Assert.assertEquals(DbExtMetaInfo.TAG_COL_TYPEKIND_TEXT,rs.getString(1));
+                    Assert.assertEquals(null,rs.getString(2));
+                    Assert.assertFalse(rs.next());
+                }
+                {
+                    selPrepStmt.setString(1, "classattr");
+                    selPrepStmt.setString(2, "mtextlimited");
+                    selPrepStmt.setString(3, DbExtMetaInfo.TAG_COL_TYPEKIND);
+                    ResultSet rs = selPrepStmt.executeQuery();
+                    Assert.assertTrue(rs.next());
+                    Assert.assertEquals(DbExtMetaInfo.TAG_COL_TYPEKIND_MTEXT,rs.getString(1));
+                    Assert.assertEquals(null,rs.getString(2));
+                    Assert.assertFalse(rs.next());
+                }
+                {
+                    selPrepStmt.setString(1, "classattr");
+                    selPrepStmt.setString(2, "nametext");
+                    selPrepStmt.setString(3, DbExtMetaInfo.TAG_COL_TYPEKIND);
+                    ResultSet rs = selPrepStmt.executeQuery();
+                    Assert.assertTrue(rs.next());
+                    Assert.assertEquals(DbExtMetaInfo.TAG_COL_TYPEKIND_NAME,rs.getString(1));
+                    Assert.assertEquals(null,rs.getString(2));
+                    Assert.assertFalse(rs.next());
+                }
+                {
+                    selPrepStmt.setString(1, "classattr");
+                    selPrepStmt.setString(2, "uritext");
+                    selPrepStmt.setString(3, DbExtMetaInfo.TAG_COL_TYPEKIND);
+                    ResultSet rs = selPrepStmt.executeQuery();
+                    Assert.assertTrue(rs.next());
+                    Assert.assertEquals(DbExtMetaInfo.TAG_COL_TYPEKIND_URI,rs.getString(1));
+                    Assert.assertEquals(null,rs.getString(2));
+                    Assert.assertFalse(rs.next());
+                }
+                {
+                    selPrepStmt.setString(1, "classattr");
+                    selPrepStmt.setString(2, "xmlbox");
+                    selPrepStmt.setString(3, DbExtMetaInfo.TAG_COL_TYPEKIND);
+                    ResultSet rs = selPrepStmt.executeQuery();
+                    Assert.assertTrue(rs.next());
+                    Assert.assertEquals(DbExtMetaInfo.TAG_COL_TYPEKIND_XML,rs.getString(1));
+                    Assert.assertEquals(null,rs.getString(2));
+                    Assert.assertFalse(rs.next());
+                }
+                {
+                    selPrepStmt.setString(1, "classattr");
+                    selPrepStmt.setString(2, "binbox");
+                    selPrepStmt.setString(3, DbExtMetaInfo.TAG_COL_TYPEKIND);
+                    ResultSet rs = selPrepStmt.executeQuery();
+                    Assert.assertTrue(rs.next());
+                    Assert.assertEquals(DbExtMetaInfo.TAG_COL_TYPEKIND_BINARY,rs.getString(1));
+                    Assert.assertEquals(null,rs.getString(2));
+                    Assert.assertFalse(rs.next());
+                }
+                {
+                    selPrepStmt.setString(1, "classattr");
+                    selPrepStmt.setString(2, "horizalignment");
+                    selPrepStmt.setString(3, DbExtMetaInfo.TAG_COL_TYPEKIND);
+                    ResultSet rs = selPrepStmt.executeQuery();
+                    Assert.assertTrue(rs.next());
+                    Assert.assertEquals(DbExtMetaInfo.TAG_COL_TYPEKIND_ENUM,rs.getString(1));
+                    Assert.assertEquals(null,rs.getString(2));
+                    Assert.assertFalse(rs.next());
+                }
+                {
+                    selPrepStmt.setString(1, "classattr");
+                    selPrepStmt.setString(2, "astandardid");
+                    selPrepStmt.setString(3, DbExtMetaInfo.TAG_COL_TYPEKIND);
+                    ResultSet rs = selPrepStmt.executeQuery();
+                    Assert.assertTrue(rs.next());
+                    Assert.assertEquals(DbExtMetaInfo.TAG_COL_TYPEKIND_OID,rs.getString(1));
+                    Assert.assertEquals(null,rs.getString(2));
+                    Assert.assertFalse(rs.next());
+                }
+                {
+                    selPrepStmt.setString(1, "classattr");
+                    selPrepStmt.setString(2, "adate");
+                    selPrepStmt.setString(3, DbExtMetaInfo.TAG_COL_TYPEKIND);
+                    ResultSet rs = selPrepStmt.executeQuery();
+                    Assert.assertTrue(rs.next());
+                    Assert.assertEquals(DbExtMetaInfo.TAG_COL_TYPEKIND_DATE,rs.getString(1));
+                    Assert.assertEquals(null,rs.getString(2));
+                    Assert.assertFalse(rs.next());
+                }
+                {
+                    selPrepStmt.setString(1, "classattr");
+                    selPrepStmt.setString(2, "formattedtext");
+                    selPrepStmt.setString(3, DbExtMetaInfo.TAG_COL_TYPEKIND);
+                    ResultSet rs = selPrepStmt.executeQuery();
+                    Assert.assertTrue(rs.next());
+                    Assert.assertEquals(DbExtMetaInfo.TAG_COL_TYPEKIND_FORMATTED,rs.getString(1));
+                    Assert.assertEquals(null,rs.getString(2));
+                    Assert.assertFalse(rs.next());
+                }
+                {
+                    selPrepStmt.setString(1, "classattr");
+                    selPrepStmt.setString(2, "aclass");
+                    selPrepStmt.setString(3, DbExtMetaInfo.TAG_COL_TYPEKIND);
+                    ResultSet rs = selPrepStmt.executeQuery();
+                    Assert.assertTrue(rs.next());
+                    Assert.assertEquals(DbExtMetaInfo.TAG_COL_TYPEKIND_CLASSQNAME,rs.getString(1));
+                    Assert.assertEquals(null,rs.getString(2));
+                    Assert.assertFalse(rs.next());
+                }
+                {
+                    selPrepStmt.setString(1, "classattr");
+                    selPrepStmt.setString(2, "aattribute");
+                    selPrepStmt.setString(3, DbExtMetaInfo.TAG_COL_TYPEKIND);
+                    ResultSet rs = selPrepStmt.executeQuery();
+                    Assert.assertTrue(rs.next());
+                    Assert.assertEquals(DbExtMetaInfo.TAG_COL_TYPEKIND_ATTRIBUTEQNAME,rs.getString(1));
+                    Assert.assertEquals(null,rs.getString(2));
+                    Assert.assertFalse(rs.next());
+                }
                 
             }
-            {
-                // t_ili2db_trafo
-                String [][] expectedValues=new String[][] {
-                    {"Datatypes23.Topic.SimpleLine3", "ch.ehi.ili2db.inheritance", "newClass"},
-                    {"Datatypes23.Topic.SimpleSurface3", "ch.ehi.ili2db.inheritance", "newClass"},
-                    {"Datatypes23.Topic.Surface2", "ch.ehi.ili2db.inheritance", "newClass"},
-                    {"Datatypes23.Topic.SimpleSurface2", "ch.ehi.ili2db.inheritance", "newClass"},
-                    {"Datatypes23.Topic.Surface3", "ch.ehi.ili2db.inheritance", "newClass"},
-                    {"Datatypes23.Topic.ClassAttr", "ch.ehi.ili2db.inheritance", "newClass"},
-                    {"Datatypes23.Topic.ClassKoord3", "ch.ehi.ili2db.inheritance", "newClass"},
-                    {"Datatypes23.Topic.Line3", "ch.ehi.ili2db.inheritance", "newClass"},
-                    {"Datatypes23.Topic.ClassKoord2", "ch.ehi.ili2db.inheritance", "newClass"},
-                    {"Datatypes23.Topic.SimpleLine2", "ch.ehi.ili2db.inheritance", "newClass"},
-                    {"Datatypes23.Topic.Line2", "ch.ehi.ili2db.inheritance", "newClass"}
-                };
-                Ili2dbAssert.assertTrafoTable(jdbcConnection,expectedValues, setup.getSchema());
+        }catch(SQLException e) {
+            throw new IoxException(e);
+        }finally{
+            if(stmt!=null) {
+                stmt.close();
+                stmt=null;
             }
-		}catch(SQLException e) {
-			throw new IoxException(e);
-		}finally{
-	        if(stmt!=null) {
-	            stmt.close();
-	            stmt=null;
-	        }
-			if(jdbcConnection!=null){
-				jdbcConnection.close();
+            if(selPrepStmt!=null) {
+                selPrepStmt.close();
+                selPrepStmt=null;
+            }
+            if(jdbcConnection!=null){
+                jdbcConnection.close();
                 jdbcConnection=null;
-			}
-		}
-	}
+            }
+        }
+    }
 	
 	@Test
 	public void importXtfAttr() throws Exception{

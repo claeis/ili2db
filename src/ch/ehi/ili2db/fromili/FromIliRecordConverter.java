@@ -54,9 +54,11 @@ import ch.interlis.ili2c.metamodel.AreaType;
 import ch.interlis.ili2c.metamodel.AbstractSurfaceOrAreaType;
 import ch.interlis.ili2c.metamodel.AssociationDef;
 import ch.interlis.ili2c.metamodel.AttributeDef;
+import ch.interlis.ili2c.metamodel.AttributePathType;
 import ch.interlis.ili2c.metamodel.AttributeRef;
 import ch.interlis.ili2c.metamodel.BasketType;
 import ch.interlis.ili2c.metamodel.BlackboxType;
+import ch.interlis.ili2c.metamodel.ClassType;
 import ch.interlis.ili2c.metamodel.CompositionType;
 import ch.interlis.ili2c.metamodel.CoordType;
 import ch.interlis.ili2c.metamodel.Domain;
@@ -69,8 +71,10 @@ import ch.interlis.ili2c.metamodel.LocalAttribute;
 import ch.interlis.ili2c.metamodel.MultiAreaType;
 import ch.interlis.ili2c.metamodel.MultiCoordType;
 import ch.interlis.ili2c.metamodel.MultiSurfaceOrAreaType;
+import ch.interlis.ili2c.metamodel.MultiSurfaceType;
 import ch.interlis.ili2c.metamodel.MultiPolylineType;
 import ch.interlis.ili2c.metamodel.NumericType;
+import ch.interlis.ili2c.metamodel.OIDType;
 import ch.interlis.ili2c.metamodel.ObjectPath;
 import ch.interlis.ili2c.metamodel.ObjectType;
 import ch.interlis.ili2c.metamodel.PathEl;
@@ -660,14 +664,15 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 		OutParam<DbColumn> dbCol=new OutParam<DbColumn>();dbCol.value=null;
 		OutParam<Unit> unitDef=new OutParam<Unit>();unitDef.value=null;
 		OutParam<Boolean> mText=new OutParam<Boolean>();mText.value=false;
+        OutParam<String> simpleTypeKind=new OutParam<String>();simpleTypeKind.value=null;
 
 		ArrayList<DbColumn> dbColExts=new ArrayList<DbColumn>();
 		Type type = attr.getDomainResolvingAll();
-
+		String typeKind=null;
 		boolean result = mapAsTextCol(attr) ? createSimpleDbColTXT(dbTable, aclass, attr, type, dbCol, unitDef, mText, dbColExts)
-				: createSimpleDbCol(dbTable, aclass, attr, type, dbCol, unitDef, mText, dbColExts);
+				: createSimpleDbCol(dbTable, aclass, attr, type, dbCol, simpleTypeKind,unitDef, mText, dbColExts);
 		if(result) {
-
+		    typeKind=simpleTypeKind.value;
 		}else if (type instanceof AbstractSurfaceOrAreaType){
 			if(createItfLineTables){
 				dbCol.value=null;
@@ -692,8 +697,18 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 				}
                 if (type instanceof SurfaceOrAreaType){
                     ret.setType(curvePolygon ? DbColGeometry.CURVEPOLYGON : DbColGeometry.POLYGON);
+                    if(type instanceof SurfaceType) {
+                        typeKind=DbExtMetaInfo.TAG_COL_TYPEKIND_SURFACE;
+                    }else if(type instanceof AreaType) {
+                        typeKind=DbExtMetaInfo.TAG_COL_TYPEKIND_AREA;                        
+                    }
                 } else if (type instanceof  MultiSurfaceOrAreaType){
                     ret.setType(curvePolygon ? DbColGeometry.MULTISURFACE : DbColGeometry.MULTIPOLYGON);
+                    if(type instanceof MultiSurfaceType) {
+                        typeKind=DbExtMetaInfo.TAG_COL_TYPEKIND_MULTISURFACE;
+                    }else if(type instanceof MultiAreaType) {
+                        typeKind=DbExtMetaInfo.TAG_COL_TYPEKIND_MULTIAREA;                        
+                    }
                 }
 				// get crs from ili
 				setCrs(ret,epsgCode);
@@ -722,12 +737,14 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 			DbColGeometry ret = generatePolylineType((PolylineType)type, attrName);
 			setCrs(ret,epsgCode);
 			dbCol.value=ret;
+            typeKind=DbExtMetaInfo.TAG_COL_TYPEKIND_POLYLINE;                        
 		}
 		else if (type instanceof MultiPolylineType){
             String attrName = attr.getContainer().getScopedName(null) + "." + attr.getName();
             DbColGeometry ret = generateMultiPolylineType((MultiPolylineType) type, attrName);
             setCrs(ret, epsgCode);
             dbCol.value = ret;
+            typeKind=DbExtMetaInfo.TAG_COL_TYPEKIND_MULTIPOLYLINE;                        
 		}else if (type instanceof CoordType){
 			DbColGeometry ret=new DbColGeometry();
 			ret.setType(DbColGeometry.POINT);
@@ -736,6 +753,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 			ret.setDimension(coord.getDimensions().length);
 			setBB(ret, coord,attr.getContainer().getScopedName(null)+"."+attr.getName());
 			dbCol.value=ret;
+            typeKind=DbExtMetaInfo.TAG_COL_TYPEKIND_COORD;                        
 		} else if (type instanceof MultiCoordType) {
 			DbColGeometry ret = new DbColGeometry();
 			ret.setType(DbColGeometry.MULTIPOINT);
@@ -744,6 +762,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 			ret.setDimension(coord.getDimensions().length);
 			setBB(ret, coord,attr.getContainer().getScopedName(null) + "." + attr.getName());
 			dbCol.value = ret;
+            typeKind=DbExtMetaInfo.TAG_COL_TYPEKIND_MULTICOORD;                        
 		}else if (type instanceof CompositionType){
 			// skip it
 			if(!createGenericStructRef){
@@ -796,6 +815,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 					setBB(ret, coord,attr.getContainer().getScopedName(null)+"."+attr.getName());
 					dbCol.value=ret;
 					trafoConfig.setAttrConfig(attr, TrafoConfigNames.MULTISURFACE_TRAFO,TrafoConfigNames.MULTISURFACE_TRAFO_COALESCE);
+		            typeKind=DbExtMetaInfo.TAG_COL_TYPEKIND_MULTISURFACE;                        
 				}else if(Ili2cUtility.isMultiLineAttr(td, attr) && (coalesceMultiLine 
 						|| TrafoConfigNames.MULTILINE_TRAFO_COALESCE.equals(trafoConfig.getAttrConfig(attr,TrafoConfigNames.MULTILINE_TRAFO)))){
 					multiLineAttrs.addMultiLineAttr(attr);
@@ -814,6 +834,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 					setBB(ret, coord,attr.getContainer().getScopedName(null)+"."+attr.getName());
 					dbCol.value=ret;
 					trafoConfig.setAttrConfig(attr, TrafoConfigNames.MULTILINE_TRAFO,TrafoConfigNames.MULTILINE_TRAFO_COALESCE);
+                    typeKind=DbExtMetaInfo.TAG_COL_TYPEKIND_MULTIPOLYLINE;                       
 				}else if(Ili2cUtility.isMultiPointAttr(td, attr) && (coalesceMultiPoint 
 						|| TrafoConfigNames.MULTIPOINT_TRAFO_COALESCE.equals(trafoConfig.getAttrConfig(attr,TrafoConfigNames.MULTIPOINT_TRAFO)))){
 					multiPointAttrs.addMultiPointAttr(attr);
@@ -827,13 +848,14 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 					setBB(ret, coord,attr.getContainer().getScopedName(null)+"."+attr.getName());
 					dbCol.value=ret;
 					trafoConfig.setAttrConfig(attr, TrafoConfigNames.MULTIPOINT_TRAFO,TrafoConfigNames.MULTIPOINT_TRAFO_COALESCE);
+                    typeKind=DbExtMetaInfo.TAG_COL_TYPEKIND_MULTICOORD;                       
 				}else if(Ili2cUtility.isArrayAttr(td, attr) && (coalesceArray 
 						|| TrafoConfigNames.ARRAY_TRAFO_COALESCE.equals(trafoConfig.getAttrConfig(attr,TrafoConfigNames.ARRAY_TRAFO)))){
 					arrayAttrs.addArrayAttr(attr);
 					ArrayMapping attrMapping=arrayAttrs.getMapping(attr);
 					AttributeDef localAttr=attrMapping.getValueAttr();
 					Type localType = localAttr.getDomainResolvingAll();
-					if(!createSimpleDbCol(dbTable, aclass, localAttr, localType, dbCol, unitDef, mText, dbColExts)) {
+					if(!createSimpleDbCol(dbTable, aclass, localAttr, localType, dbCol, simpleTypeKind,unitDef, mText, dbColExts)) {
 						  throw new IllegalStateException("unexpected attr type "+localAttr.getScopedName());
 					}
 					dbCol.value.setArraySize(DbColumn.UNLIMITED_ARRAY);		
@@ -843,6 +865,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
                     DbColJson ret=new DbColJson();
                     dbCol.value=ret;
                     trafoConfig.setAttrConfig(attr, TrafoConfigNames.JSON_TRAFO,TrafoConfigNames.JSON_TRAFO_COALESCE);
+                    typeKind=DbExtMetaInfo.TAG_COL_TYPEKIND_STRUCTURE;
 				}else if(isMultilingualTextAttr(td, attr) && (expandMultilingual 
 							|| TrafoConfigNames.MULTILINGUAL_TRAFO_EXPAND.equals(trafoConfig.getAttrConfig(attr,TrafoConfigNames.MULTILINGUAL_TRAFO)))){
 					for(String sfx:DbNames.MULTILINGUAL_TXT_COL_SUFFIXS){
@@ -892,6 +915,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
                     ret.setIndex(true);
                 }
                 dbColExts.add(ret);
+                typeKind=DbExtMetaInfo.TAG_COL_TYPEKIND_REFERENCE;
             }else {
                 ArrayList<ViewableWrapper> targetTables = getTargetTables(((ReferenceType)type).getReferred());
                 for(ViewableWrapper targetTable:targetTables)
@@ -948,6 +972,9 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 			Viewable attrClass=(Viewable)attr.getContainer();
 			if(attrClass!=aclass && attrClass.isExtending(aclass)){
 				subType=getSqlType(attrClass).getName();
+			}
+			if(typeKind!=null) {
+	            metaInfo.setColumnInfo(dbTable.getName().getName(), subType, sqlColName, DbExtMetaInfo.TAG_COL_TYPEKIND, typeKind);
 			}
 			if(unitDef.value!=null){
 				String unitName=unitDef.value.getName();
@@ -1046,16 +1073,20 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 	}
 
 	private boolean createSimpleDbCol(DbTable dbTable, Viewable aclass, AttributeDef attr, Type type,
-			OutParam<DbColumn> dbCol, OutParam<Unit> unitDef, OutParam<Boolean> mText, ArrayList<DbColumn> dbColExts) {
+			OutParam<DbColumn> dbCol, OutParam<String> typeKind,OutParam<Unit> unitDef, OutParam<Boolean> mText, ArrayList<DbColumn> dbColExts) {
 		if (attr.isDomainBoolean()) {
 			dbCol.value= new DbColBoolean();
+			typeKind.value=DbExtMetaInfo.TAG_COL_TYPEKIND_BOOLEAN;
 		}else if (attr.isDomainIli1Date()) {
 			dbCol.value= new DbColDate();
+            typeKind.value=DbExtMetaInfo.TAG_COL_TYPEKIND_DATE;
 		}else if (attr.isDomainIliUuid()) {
 			dbCol.value= new DbColUuid();
+            typeKind.value=DbExtMetaInfo.TAG_COL_TYPEKIND_OID;
 		}else if (attr.isDomainIli2Date()) {
 		    DbColDate ret=new DbColDate();
 			dbCol.value= ret;
+            typeKind.value=DbExtMetaInfo.TAG_COL_TYPEKIND_DATE;
 			if(createDateTimeCheck) {
 	            DateFormat dateTimeFormatter = new SimpleDateFormat("yyyy-MM-dd");
 	            FormattedType fmtType = (FormattedType)type;
@@ -1069,6 +1100,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 		}else if (attr.isDomainIli2DateTime()) {
             DbColDateTime ret=new DbColDateTime();
 			dbCol.value= ret;
+            typeKind.value=DbExtMetaInfo.TAG_COL_TYPEKIND_DATETIME;
             if(createDateTimeCheck) {
                 DateFormat dateTimeFormatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
                 FormattedType fmtType = (FormattedType)type;
@@ -1082,6 +1114,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 		}else if (attr.isDomainIli2Time()) {
 		    DbColTime ret=new DbColTime();
 			dbCol.value= ret;
+            typeKind.value=DbExtMetaInfo.TAG_COL_TYPEKIND_TIMEOFDAY;
             if(createDateTimeCheck) {
                 DateFormat dateTimeFormatter = new SimpleDateFormat("HH:mm:ss.SSS");
                 FormattedType fmtType = (FormattedType)type;
@@ -1100,10 +1133,12 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 			if(createEnumColAsItfCode){
 				DbColId ret=new DbColId();
 				dbCol.value=ret;
+	            typeKind.value=DbExtMetaInfo.TAG_COL_TYPEKIND_ENUM;
 			}else{
 			    if(Config.CREATE_ENUM_DEFS_MULTI_WITH_ID.equals(createEnumTable)) {
 	                DbColId ret=new DbColId();
 	                dbCol.value=ret;
+	                typeKind.value=DbExtMetaInfo.TAG_COL_TYPEKIND_ENUM;
 	                DbTableName targetTable=getEnumTargetTableName(attr,null,schema.getName());
                     if(createFk){
 	                    ret.setReferencedTable(targetTable);
@@ -1115,6 +1150,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 	                DbColVarchar ret=new DbColVarchar();
 	                ret.setSize(255);
 	                dbCol.value=ret;                
+	                typeKind.value=DbExtMetaInfo.TAG_COL_TYPEKIND_ENUM;
 			    }
 			}
 		}else if(type instanceof NumericType){
@@ -1142,6 +1178,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 						ret.setMaxValue(max.doubleValue());
 					}
 					dbCol.value=ret;
+	                typeKind.value=DbExtMetaInfo.TAG_COL_TYPEKIND_NUMERIC;
 				}else{
 					DbColNumber ret=new DbColNumber();
 					int size=Math.max(minLen,maxLen);
@@ -1151,6 +1188,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 						ret.setMaxValue(max.getUnscaledValue().longValue());
 					}
 					dbCol.value=ret;
+                    typeKind.value=DbExtMetaInfo.TAG_COL_TYPEKIND_NUMERIC;
 				}
 				unitDef.value=((NumericType)type).getUnit();
 			}
@@ -1169,17 +1207,51 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
             }
 			if(!((TextType)type).isNormalized()){
 			    mText.value=true;
+                typeKind.value=DbExtMetaInfo.TAG_COL_TYPEKIND_MTEXT;
 			}else {
+			    if(attr.isDomainName()) {
+	                typeKind.value=DbExtMetaInfo.TAG_COL_TYPEKIND_NAME;
+			    }else if(attr.isDomainUri()) {
+	                typeKind.value=DbExtMetaInfo.TAG_COL_TYPEKIND_URI;
+			    }else {
+	                typeKind.value=DbExtMetaInfo.TAG_COL_TYPEKIND_TEXT;
+			    }
 			}
 			dbCol.value=ret;
 		}else if(type instanceof BlackboxType){
 			if(((BlackboxType)type).getKind()==BlackboxType.eXML){
 				DbColXml ret=new DbColXml();
 				dbCol.value=ret;
+                typeKind.value=DbExtMetaInfo.TAG_COL_TYPEKIND_XML;
 			}else{
 				DbColBlob ret=new DbColBlob();
 				dbCol.value=ret;
+                typeKind.value=DbExtMetaInfo.TAG_COL_TYPEKIND_BINARY;
 			}
+        }else if(type instanceof OIDType) {
+            DbColVarchar ret=new DbColVarchar();
+            ret.setSize(255);
+            dbCol.value=ret;
+            typeKind.value=DbExtMetaInfo.TAG_COL_TYPEKIND_OID;
+        }else if(type instanceof FormattedType) {
+            DbColVarchar ret=new DbColVarchar();
+            ret.setSize(255);
+            dbCol.value=ret;
+            typeKind.value=DbExtMetaInfo.TAG_COL_TYPEKIND_FORMATTED;
+        }else if(type instanceof ClassType) {
+            DbColVarchar ret=new DbColVarchar();
+            ret.setSize(255);
+            dbCol.value=ret;
+            typeKind.value=DbExtMetaInfo.TAG_COL_TYPEKIND_CLASSQNAME;
+        }else if(type instanceof AttributePathType) {
+            DbColVarchar ret=new DbColVarchar();
+            ret.setSize(255);
+            dbCol.value=ret;
+            typeKind.value=DbExtMetaInfo.TAG_COL_TYPEKIND_ATTRIBUTEQNAME;
+		}else if(false) {
+            DbColVarchar ret=new DbColVarchar();
+            ret.setSize(255);
+            dbCol.value=ret;
 		}else{
 			return false;
 		}

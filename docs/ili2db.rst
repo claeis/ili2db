@@ -1542,6 +1542,28 @@ sie beliebige (auch zukünftige) Werte/Zusatzangaben aufnehmen kann.
 +------------------------------------+---------------------------------------------------------------+
 | Tag                                | Beschreibung                                                  |
 +====================================+===============================================================+
+| ``ch.ehi.ili2db.typeKind``         | Art des Interlis Datentyps. Mögliche Werte:                   |
+|                                    |                                                               |
+|                                    | - TextType: MTEXT \| TEXT \| NAME \| URI                      |
+|                                    | - EnumerationType: ENUM                                       | 
+|                                    | - EnumTreeValueType: ENUMTREE                                 | 
+|                                    | - AlignmentType: ENUM                                         |
+|                                    | - BooleanType: BOOLEAN                                        |
+|                                    | - NumericType: NUMERIC                                        |
+|                                    | - FormattedType: FORMATTED                                    |
+|                                    | - DateTimeType: DATE \| TIMEOFDAY \| DATETIME                 |
+|                                    | - CoordinateType: COORD \| MULTICOORD                         |
+|                                    | - OIDType: OID                                                |
+|                                    | - BlackboxType: XML \| BINARY                                 |
+|                                    | - ClassType: CLASSQNAME                                       |
+|                                    | - AttributePathType: ATTRIBUTEQNAME                           |
+|                                    | - LineType: POLYLINE \| SURFACE \| AREA \|                    |
+|                                    |              MULTIPOLYLINE \| MULTISURFACE \| MULTIAREA       |
+|                                    | - ReferenceAttr: REFERENCE                                    |
+|                                    | - RestrictedStructureRef: STRUCTURE                           |
+|                                    |                                                               |
+|                                    | Generell: Domain basiert oder Inline wird nicht unterschieden.|
++------------------------------------+---------------------------------------------------------------+
 | ``ch.ehi.ili2db.c1Min``            | Bei Geometriespalten der Minimalwert der 1. Dimension         |
 +------------------------------------+---------------------------------------------------------------+
 | ``ch.ehi.ili2db.c1Max``            | Bei Geometriespalten der Maximalwert der 1. Dimension         |
@@ -1554,7 +1576,7 @@ sie beliebige (auch zukünftige) Werte/Zusatzangaben aufnehmen kann.
 +------------------------------------+---------------------------------------------------------------+
 | ``ch.ehi.ili2db.c3Max``            | Bei Geometriespalten der Maximalwert der 3. Dimension         |
 +------------------------------------+---------------------------------------------------------------+
-| ``ch.ehi.ili2db.geomType``         | Bei Geometriespalten die Art der Geometrie. Mögliche Wert:    |
+| ``ch.ehi.ili2db.geomType``         | Bei Geometriespalten die Art der Geometrie. Mögliche Werte:   |
 |                                    | POINT, LINESTRING, POLYGON, MULTIPOINT, MULTILINESTRING       |
 |                                    | MULTIPOLYGON, GEOMETRYCOLLECTION, CIRCULARSTRING              |
 |                                    | COMPOUNDCURVE, CURVEPOLYGON, MULTICURVE, MULTISURFACE         |
