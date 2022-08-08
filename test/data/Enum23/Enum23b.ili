@@ -8,6 +8,41 @@ MODEL Enum23b
     Enum1a EXTENDS Enum1 = (Test2 (Test2a, Test2b));
     Enum1b EXTENDS Enum1 = (Test2 (Test2a, Test2b));
     
+     BBArt = (
+        Gebaeude,
+        befestigt (
+          Strasse_Weg,
+          Trottoir,
+          Verkehrsinsel,
+          Bahn,
+          Flugplatz,
+          Wasserbecken,
+          uebrige_befestigte),
+        humusiert (
+          Acker_Wiese_Weide,
+          Intensivkultur (
+            Reben,
+            uebrige_Intensivkultur),
+          Gartenanlage,
+          Hoch_Flachmoor,
+          uebrige_humusierte),
+        Gewaesser (
+          stehendes,
+          fliessendes,
+          Schilfguertel),
+        bestockt (
+          geschlossener_Wald,
+          Wytweide (
+            Wytweide_dicht,
+            Wytweide_offen),
+          uebrige_bestockte),
+        vegetationslos (
+          Fels,
+          Gletscher_Firn,
+          Geroell_Sand,
+          Abbau_Deponie,
+          uebrige_vegetationslose));
+          
   TOPIC TestA =
     
     CLASS ClassA1 =

@@ -1590,11 +1590,11 @@ public class TransferFromIli {
 	private void updateEnumEntries(GeneratorJdbc gen, java.util.Set<String> exstEntries,String sqlTableName,java.sql.PreparedStatement ps, EnumValueMap type, boolean isOrdered,String thisClass, String baseClass) 
 	throws SQLException 
 	{
-		int itfCode=0;
 		int seq=0;
 		Iterator<String> evi=type.getXtfCodes().iterator();
 		while(evi.hasNext()){
 			String eleName=evi.next();
+            int itfCode=type.mapXtfValueToItfCode(eleName);
 
             if(ps!=null) {
                 // entry exists already?
@@ -1667,7 +1667,6 @@ public class TransferFromIli {
                 insStmt=insStmt.append(")");
                 gen.addCreateLine(gen.new Stmt(insStmt.toString()));
             }
-			itfCode++;
 			seq++;
 		}
 	}

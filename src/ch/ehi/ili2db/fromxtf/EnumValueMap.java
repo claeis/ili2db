@@ -30,6 +30,7 @@ public class EnumValueMap {
     private EnumValueMap() {};
     private HashMap<Long,String> id2xtf=new HashMap<Long,String>();
     private HashMap<String,Long> xtf2id=new HashMap<String,Long>();
+    private HashMap<String,Integer> xtf2itfCode=new HashMap<String,Integer>();
     private HashMap<String,String> xtf2displayName=new HashMap<String,String>();
     private HashMap<String,String> xtf2doc=new HashMap<String,String>();
     public long mapXtfValue(String xtfvalue) {
@@ -40,6 +41,9 @@ public class EnumValueMap {
     }
     public String mapXtfValueToDisplayName(String xtfvalue) {
         return xtf2displayName.get(xtfvalue);
+    }
+    public int mapXtfValueToItfCode(String xtfvalue) {
+        return xtf2itfCode.get(xtfvalue);
     }
     public String mapXtfValueToDoc(String xtfvalue) {
         return xtf2doc.get(xtfvalue);
@@ -70,9 +74,9 @@ public class EnumValueMap {
     	}
     		String exstStmt=null;
     		if(!hasThisClassColumn){
-    			exstStmt="SELECT "+DbNames.ENUM_TAB_ILICODE_COL+(tidColumnName!=null?","+tidColumnName:"")+","+DbNames.ENUM_TAB_DISPNAME_COL+","+DbNames.ENUM_TAB_DESCRIPTION_COL+" FROM "+sqlName;
+    			exstStmt="SELECT "+DbNames.ENUM_TAB_ILICODE_COL+(tidColumnName!=null?","+tidColumnName:"")+","+DbNames.ENUM_TAB_DISPNAME_COL+","+DbNames.ENUM_TAB_DESCRIPTION_COL+","+DbNames.ENUM_TAB_ITFCODE_COL+" FROM "+sqlName;
     		}else{
-    			exstStmt="SELECT "+DbNames.ENUM_TAB_ILICODE_COL+(tidColumnName!=null?","+tidColumnName:"")+","+DbNames.ENUM_TAB_DISPNAME_COL+","+DbNames.ENUM_TAB_DESCRIPTION_COL+" FROM "+sqlName+" WHERE "+DbNames.ENUM_TAB_THIS_COL+" = '"+qualifiedIliName+"'";
+    			exstStmt="SELECT "+DbNames.ENUM_TAB_ILICODE_COL+(tidColumnName!=null?","+tidColumnName:"")+","+DbNames.ENUM_TAB_DISPNAME_COL+","+DbNames.ENUM_TAB_DESCRIPTION_COL+","+DbNames.ENUM_TAB_ITFCODE_COL+" FROM "+sqlName+" WHERE "+DbNames.ENUM_TAB_THIS_COL+" = '"+qualifiedIliName+"'";
     		}
     		EhiLogger.traceBackendCmd(exstStmt);
     		java.sql.PreparedStatement exstPrepStmt = null;
@@ -91,7 +95,8 @@ public class EnumValueMap {
                     }
                     String displayName=rs.getString(col++);
                     String desc=rs.getString(col++);
-    				ret.addValue(id,iliCode,displayName,desc);
+                    int itfCode=rs.getInt(col++);
+    				ret.addValue(id,iliCode,itfCode,displayName,desc);
     			}
     		}finally{
     		    if(rs!=null) {
@@ -106,10 +111,11 @@ public class EnumValueMap {
     	return ret;
     }
 
-    void addValue(long id, String xtfCode, String displayName,String doc) {
+    void addValue(long id, String xtfCode, int itfCode,String displayName,String doc) {
         id2xtf.put(id,xtfCode);
         xtf2id.put(xtfCode,id);
         xtf2displayName.put(xtfCode, displayName);
+        xtf2itfCode.put(xtfCode, itfCode);
         xtf2doc.put(xtfCode, doc);
     }
     public static EnumValueMap createEnumValueMap(Element attrOrDomain,ch.ehi.ili2db.mapping.NameMapping ili2sqlName) {
@@ -160,7 +166,7 @@ public class EnumValueMap {
             if(doc==null) {
                 doc=eleElement.getDocumentation();
             }
-            ret.addValue(seq,eleName,dispName,doc);
+            ret.addValue(seq,eleName,itfCode,dispName,doc);
             itfCode++;
             seq++;
             

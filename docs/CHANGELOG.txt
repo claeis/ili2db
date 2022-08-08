@@ -17,6 +17,7 @@ LATEST
 - new option --logtime
 - new meta info about ili attr type ch.ehi.ili2db.typeKind (#469)
 - fix bigint import (#464)
+- fix enum itfCode on ili-import (#478) 
 - fix JRE 1.6 compatibility
 - iox-ili-1.21.11-SNAPSHOT
 - ili2c-5.2.7-SNAPSHOT
