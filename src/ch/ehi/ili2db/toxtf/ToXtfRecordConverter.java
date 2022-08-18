@@ -33,6 +33,7 @@ import ch.ehi.ili2db.mapping.TrafoConfigNames;
 import ch.ehi.ili2db.mapping.Viewable2TableMapping;
 import ch.ehi.ili2db.mapping.ViewableWrapper;
 import ch.ehi.sqlgen.repository.DbTableName;
+import ch.interlis.ili2c.metamodel.AbstractEnumerationType;
 import ch.interlis.ili2c.metamodel.AbstractSurfaceOrAreaType;
 import ch.interlis.ili2c.metamodel.AreaType;
 import ch.interlis.ili2c.metamodel.AssociationDef;
@@ -1116,7 +1117,7 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
                             }
                         }
                     }
-				}else if(type instanceof EnumerationType){
+				}else if(type instanceof AbstractEnumerationType){
 					if(createEnumColAsItfCode){
 		                if(classAttr==null) {
 		                    valuei++;

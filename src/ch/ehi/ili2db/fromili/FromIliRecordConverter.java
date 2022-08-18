@@ -51,6 +51,7 @@ import ch.ehi.sqlgen.repository.DbSchema;
 import ch.ehi.sqlgen.repository.DbTable;
 import ch.ehi.sqlgen.repository.DbTableName;
 import ch.interlis.ili2c.metamodel.AreaType;
+import ch.interlis.ili2c.metamodel.AbstractEnumerationType;
 import ch.interlis.ili2c.metamodel.AbstractSurfaceOrAreaType;
 import ch.interlis.ili2c.metamodel.AssociationDef;
 import ch.interlis.ili2c.metamodel.AttributeDef;
@@ -62,6 +63,7 @@ import ch.interlis.ili2c.metamodel.ClassType;
 import ch.interlis.ili2c.metamodel.CompositionType;
 import ch.interlis.ili2c.metamodel.CoordType;
 import ch.interlis.ili2c.metamodel.Domain;
+import ch.interlis.ili2c.metamodel.EnumTreeValueType;
 import ch.interlis.ili2c.metamodel.EnumerationType;
 import ch.interlis.ili2c.metamodel.Evaluable;
 import ch.interlis.ili2c.metamodel.ExtendableContainer;
@@ -98,7 +100,7 @@ import ch.interlis.ili2c.metamodel.Viewable;
 public class FromIliRecordConverter extends AbstractRecordConverter {
 	private DbSchema schema=null;
 	private CustomMapping customMapping=null;
-	private HashSet visitedEnumsAttrs=null;
+	private Set<ch.interlis.ili2c.metamodel.Element> visitedEnumsAttrs=null;
 	private String nl=System.getProperty("line.separator");
 	private boolean coalesceCatalogueRef=true;
 	private boolean coalesceMultiSurface=true;
@@ -118,7 +120,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 
 	public FromIliRecordConverter(TransferDescription td1, NameMapping ili2sqlName,
 			Config config, DbSchema schema1, CustomMapping customMapping1,
-			DbIdGen idGen1, HashSet visitedEnumsAttrs1, TrafoConfig trafoConfig,	Viewable2TableMapping class2wrapper1
+			DbIdGen idGen1, Set<ch.interlis.ili2c.metamodel.Element> visitedEnumsAttrs1, TrafoConfig trafoConfig,	Viewable2TableMapping class2wrapper1
 			,DbExtMetaInfo metaInfo
 			) {
 		super(td1, ili2sqlName, config, idGen1,trafoConfig,class2wrapper1);
@@ -1128,17 +1130,17 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 		}else if (type instanceof BasketType){
 			// skip it; type no longer exists in ili 2.3
 			dbCol.value=null;
-		}else if(type instanceof EnumerationType){
+		}else if(type instanceof AbstractEnumerationType){
 			visitedEnumsAttrs.add(attr);
 			if(createEnumColAsItfCode){
 				DbColId ret=new DbColId();
 				dbCol.value=ret;
-	            typeKind.value=DbExtMetaInfo.TAG_COL_TYPEKIND_ENUM;
+	            typeKind.value=type instanceof EnumTreeValueType ? DbExtMetaInfo.TAG_COL_TYPEKIND_ENUMTREE:DbExtMetaInfo.TAG_COL_TYPEKIND_ENUM;
 			}else{
 			    if(Config.CREATE_ENUM_DEFS_MULTI_WITH_ID.equals(createEnumTable)) {
 	                DbColId ret=new DbColId();
 	                dbCol.value=ret;
-	                typeKind.value=DbExtMetaInfo.TAG_COL_TYPEKIND_ENUM;
+	                typeKind.value=type instanceof EnumTreeValueType ? DbExtMetaInfo.TAG_COL_TYPEKIND_ENUMTREE:DbExtMetaInfo.TAG_COL_TYPEKIND_ENUM;
 	                DbTableName targetTable=getEnumTargetTableName(attr,null,schema.getName());
                     if(createFk){
 	                    ret.setReferencedTable(targetTable);
@@ -1150,7 +1152,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 	                DbColVarchar ret=new DbColVarchar();
 	                ret.setSize(255);
 	                dbCol.value=ret;                
-	                typeKind.value=DbExtMetaInfo.TAG_COL_TYPEKIND_ENUM;
+	                typeKind.value=type instanceof EnumTreeValueType ? DbExtMetaInfo.TAG_COL_TYPEKIND_ENUMTREE:DbExtMetaInfo.TAG_COL_TYPEKIND_ENUM;
 			    }
 			}
 		}else if(type instanceof NumericType){

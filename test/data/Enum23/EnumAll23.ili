@@ -1,0 +1,25 @@
+INTERLIS 2.3;
+
+MODEL EnumAll23
+  AT "mailto:ce@eisenhutinformatik.ch" VERSION "2017-03-29" =
+
+  DOMAIN
+    Enum1 = (Test1, Test2, Test3 (Test3a, Test3b));
+    Enum1a EXTENDS Enum1 = (Test2 (Test2a, Test2b));
+    Enum1b EXTENDS Enum1 = (Test2 (Test2a, Test2b));
+    Enum2 = ALL OF Enum1;
+    Enum2a = ALL OF Enum1a;
+    Enum2b = ALL OF Enum1b;
+          
+  TOPIC TestA =
+    
+    CLASS ClassA1 =
+    	attr1 : Enum2;
+    	attr1a : Enum2a;
+    	attr1b : Enum2b;
+    END ClassA1;
+    
+  END TestA;
+  
+  
+END EnumAll23.

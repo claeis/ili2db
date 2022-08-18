@@ -58,6 +58,7 @@ import ch.ehi.sqlgen.repository.DbSchema;
 import ch.ehi.sqlgen.repository.DbTable;
 import ch.ehi.sqlgen.repository.DbTableName;
 import ch.interlis.ili2c.metamodel.AbstractCoordType;
+import ch.interlis.ili2c.metamodel.AbstractEnumerationType;
 import ch.interlis.ili2c.metamodel.AssociationDef;
 import ch.interlis.ili2c.metamodel.AttributeDef;
 import ch.interlis.ili2c.metamodel.AttributeRef;
@@ -65,6 +66,7 @@ import ch.interlis.ili2c.metamodel.Container;
 import ch.interlis.ili2c.metamodel.CoordType;
 import ch.interlis.ili2c.metamodel.Domain;
 import ch.interlis.ili2c.metamodel.Element;
+import ch.interlis.ili2c.metamodel.EnumTreeValueType;
 import ch.interlis.ili2c.metamodel.Enumeration;
 import ch.interlis.ili2c.metamodel.EnumerationType;
 import ch.interlis.ili2c.metamodel.Evaluable;
@@ -97,7 +99,7 @@ public class TransferFromIli {
 	private HashSet<Element> visitedElements=null;
 	private Viewable2TableMapping class2wrapper=null;
 	private HashSet<ViewableWrapper> visitedWrapper=null;
-	private HashSet visitedEnums=null;
+	private Set<Element> visitedEnums=null;
 	private TransferDescription td=null;
 	private ch.ehi.ili2db.mapping.NameMapping ili2sqlName=null;
 	private String createEnumTable=null;
@@ -143,7 +145,7 @@ public class TransferFromIli {
 		schema.setName(config.getDbschema());
 		visitedElements=new HashSet<Element>();
 		class2wrapper=class2wrapper1;
-		visitedEnums=new HashSet();
+		visitedEnums=new HashSet<Element>();
 		td=td1;
 		recConv=new FromIliRecordConverter(td,ili2sqlName,config,schema,customMapping,idGen,visitedEnums,trafoConfig,class2wrapper,metaInfo);
 
@@ -201,7 +203,7 @@ public class TransferFromIli {
 				    for(int epsgCode:getEpsgCodes(attr,srsModelAssignment,defaultCrsCode)) {
 	                    generateItfLineTable(attr,epsgCode,pass);
 				    }
-				}else if(attr.getDomainResolvingAll() instanceof EnumerationType){
+				}else if(attr.getDomainResolvingAll() instanceof AbstractEnumerationType){
 					if(pass==2){
 						visitedEnums.add(attr);
 					}
@@ -231,7 +233,7 @@ public class TransferFromIli {
 	private void generateDomain(Domain def)
 	throws Ili2dbException
 	{
-		if(def.getType() instanceof EnumerationType){
+		if(def.getType() instanceof AbstractEnumerationType){
 			visitedEnums.add(def);
 		}
 	}
@@ -1032,7 +1034,7 @@ public class TransferFromIli {
 			schema.addTable(tab);
 		}else if(Config.CREATE_ENUM_DEFS_MULTI.equals(createEnumTable)){
 			addMissingEnumDomains(visitedEnums);
-			java.util.Iterator entri=visitedEnums.iterator();
+			java.util.Iterator<Element> entri=visitedEnums.iterator();
 			while(entri.hasNext()){
 				Object entro=entri.next();
 				DbTableName thisSqlName=null;
@@ -1092,7 +1094,7 @@ public class TransferFromIli {
         }else if(Config.CREATE_ENUM_DEFS_MULTI_WITH_ID.equals(createEnumTable)){
             addMissingEnumDomains(visitedEnums);
             java.util.HashSet<Element> enumDefs=new HashSet<Element>();
-            java.util.Iterator entri=visitedEnums.iterator();
+            java.util.Iterator<Element> entri=visitedEnums.iterator();
             while(entri.hasNext()){
                 Object entro=entri.next();
                 DbTableName thisSqlName=null;
@@ -1170,8 +1172,8 @@ public class TransferFromIli {
             
 		}
 	}
-	private void addMissingEnumDomains(HashSet enums) {
-		java.util.Iterator entri=enums.iterator();
+	private void addMissingEnumDomains(Set<Element> enums) {
+		java.util.Iterator<Element> entri=enums.iterator();
 		HashSet<Domain> missingDomains=new HashSet<Domain>();
 		while(entri.hasNext()){
 			Object entro=entri.next();
@@ -1316,7 +1318,7 @@ public class TransferFromIli {
 	            String thisClass=null;
 	            try{
 	                addMissingEnumDomains(visitedEnums);
-	                java.util.Iterator entri=visitedEnums.iterator();
+	                java.util.Iterator<Element> entri=visitedEnums.iterator();
 	                while(entri.hasNext()){
 	                    Object entro=entri.next();
 	                    if(entro instanceof AttributeDef){
@@ -1324,7 +1326,7 @@ public class TransferFromIli {
 	                        if(attr.getDomain() instanceof ch.interlis.ili2c.metamodel.TypeAlias){
 	                            continue;
 	                        }
-	                        EnumerationType type=(EnumerationType)attr.getDomainResolvingAll();
+	                        AbstractEnumerationType type=(AbstractEnumerationType)attr.getDomainResolvingAll();
 	                        
 	                        thisClass=attr.getContainer().getScopedName(null)+"."+attr.getName();
 	                        AttributeDef base=(AttributeDef)attr.getExtending();
@@ -1339,7 +1341,7 @@ public class TransferFromIli {
 	                        if(domain==td.INTERLIS.BOOLEAN){
 	                            continue;
 	                        }
-	                        EnumerationType type=(EnumerationType)domain.getType();
+	                        AbstractEnumerationType type=(AbstractEnumerationType)domain.getType();
 	                        
 	                        thisClass=domain.getScopedName(null);
 	                        Domain base=(Domain)domain.getExtending();
@@ -1362,7 +1364,7 @@ public class TransferFromIli {
 		}
 		if(gen!=null){
             addMissingEnumDomains(visitedEnums);
-            java.util.Iterator entri=visitedEnums.iterator();
+            java.util.Iterator<Element> entri=visitedEnums.iterator();
             try {
                 while(entri.hasNext()){
                     Object entro=entri.next();
@@ -1371,7 +1373,7 @@ public class TransferFromIli {
                         if(attr.getDomain() instanceof ch.interlis.ili2c.metamodel.TypeAlias){
                             continue;
                         }
-                        EnumerationType type=(EnumerationType)attr.getDomainResolvingAll();
+                        AbstractEnumerationType type=(AbstractEnumerationType)attr.getDomainResolvingAll();
                         
                         String thisClass=attr.getContainer().getScopedName(null)+"."+attr.getName();
                         AttributeDef base=(AttributeDef)attr.getExtending();
@@ -1386,7 +1388,7 @@ public class TransferFromIli {
                         if(domain==td.INTERLIS.BOOLEAN){
                             continue;
                         }
-                        EnumerationType type=(EnumerationType)domain.getType();
+                        AbstractEnumerationType type=(AbstractEnumerationType)domain.getType();
                         
                         String thisClass=domain.getScopedName(null);
                         Domain base=(Domain)domain.getExtending();
@@ -1409,7 +1411,7 @@ public class TransferFromIli {
 	throws Ili2dbException
 	{
 		addMissingEnumDomains(visitedEnums);
-		java.util.Iterator entri=visitedEnums.iterator();
+		java.util.Iterator<Element> entri=visitedEnums.iterator();
 		while(entri.hasNext()){
 			Object entro=entri.next();
 			if(entro instanceof AttributeDef){
@@ -1417,7 +1419,7 @@ public class TransferFromIli {
 				if(attr.getDomain() instanceof ch.interlis.ili2c.metamodel.TypeAlias){
 					continue;
 				}
-				EnumerationType type=(EnumerationType)attr.getDomainResolvingAll();
+				AbstractEnumerationType type=(AbstractEnumerationType)attr.getDomainResolvingAll();
 				String thisClass=attr.getContainer().getScopedName(null)+"."+attr.getName();
 				DbTableName thisSqlName=getSqlTableNameEnum(attr);
 				if(conn!=null) {
@@ -1454,7 +1456,7 @@ public class TransferFromIli {
 				if(domain==td.INTERLIS.BOOLEAN){
 					continue;
 				}
-				EnumerationType type=(EnumerationType)domain.getType();
+				AbstractEnumerationType type=(AbstractEnumerationType)domain.getType();
 				
 				String thisClass=domain.getScopedName(null);
 				DbTableName thisSqlName=getSqlTableName(domain);
@@ -1495,7 +1497,7 @@ public class TransferFromIli {
     throws Ili2dbException
     {
         addMissingEnumDomains(visitedEnums);
-        java.util.Iterator entri=visitedEnums.iterator();
+        java.util.Iterator<Element> entri=visitedEnums.iterator();
         while(entri.hasNext()){
             Object entro=entri.next();
             if(entro instanceof AttributeDef){
@@ -1503,7 +1505,7 @@ public class TransferFromIli {
                 if(attr.getDomain() instanceof ch.interlis.ili2c.metamodel.TypeAlias){
                     continue;
                 }
-                EnumerationType type=(EnumerationType)attr.getDomainResolvingAll();
+                AbstractEnumerationType type=(AbstractEnumerationType)attr.getDomainResolvingAll();
                 String thisClass=attr.getContainer().getScopedName(null)+"."+attr.getName();
                 AttributeDef base=(AttributeDef)attr.getExtending();
                 String baseClass=null;
@@ -1545,7 +1547,7 @@ public class TransferFromIli {
                 if(domain==td.INTERLIS.BOOLEAN){
                     continue;
                 }
-                EnumerationType type=(EnumerationType)domain.getType();
+                AbstractEnumerationType type=(AbstractEnumerationType)domain.getType();
                 String thisClass=domain.getScopedName(null);
                 Domain base=(Domain)domain.getExtending();
                 String baseClass=null;

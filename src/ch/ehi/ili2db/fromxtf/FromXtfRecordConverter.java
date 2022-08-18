@@ -35,6 +35,7 @@ import ch.ehi.ili2db.mapping.Viewable2TableMapping;
 import ch.ehi.ili2db.mapping.ViewableWrapper;
 import ch.ehi.sqlgen.repository.DbTableName;
 import ch.interlis.ili2c.metamodel.AbstractClassDef;
+import ch.interlis.ili2c.metamodel.AbstractEnumerationType;
 import ch.interlis.ili2c.metamodel.AbstractSurfaceOrAreaType;
 import ch.interlis.ili2c.metamodel.AreaType;
 import ch.interlis.ili2c.metamodel.AssociationDef;
@@ -854,7 +855,7 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
                     values.append("," + geomConv.getInsertValueWrapperMultiCoord("?", epsgCode));
                 }
                 sep = ",";
-			}else if(type instanceof EnumerationType){
+			}else if(type instanceof AbstractEnumerationType){
 				ret.append(sep);
 				ret.append(attrSqlName);
 				if(isUpdate){
@@ -1329,7 +1330,7 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 						}
 						valuei++;
 					}
-				}else if(type instanceof EnumerationType){
+				}else if(type instanceof AbstractEnumerationType){
 					String value= classAttr==null ? null : iomObj.getattrvalue(attrName);
 					if(createEnumColAsItfCode){
 						if(value!=null){

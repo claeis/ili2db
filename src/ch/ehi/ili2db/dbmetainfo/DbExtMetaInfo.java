@@ -28,7 +28,7 @@ public class DbExtMetaInfo {
     public static final String TAG_COL_TYPEKIND_URI = "URI"; // todo
     public static final String TAG_COL_TYPEKIND_NAME = "NAME"; // todo
     public static final String TAG_COL_TYPEKIND_ENUM = "ENUM";
-    public static final String TAG_COL_TYPEKIND_ENUMTREE = "ENUMTREE"; // todo
+    public static final String TAG_COL_TYPEKIND_ENUMTREE = "ENUMTREE";
     public static final String TAG_COL_TYPEKIND_BOOLEAN = "BOOLEAN";
     public static final String TAG_COL_TYPEKIND_NUMERIC = "NUMERIC";
     public static final String TAG_COL_TYPEKIND_FORMATTED = "FORMATTED"; // todo

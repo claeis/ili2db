@@ -6,9 +6,11 @@ import ch.ehi.ili2db.base.Ili2dbException;
 import ch.ehi.ili2db.mapping.NameMapping;
 import ch.ehi.ili2db.metaattr.IliMetaAttrNames;
 import ch.ehi.sqlgen.repository.DbTableName;
+import ch.interlis.ili2c.metamodel.AbstractEnumerationType;
 import ch.interlis.ili2c.metamodel.AttributeDef;
 import ch.interlis.ili2c.metamodel.Domain;
 import ch.interlis.ili2c.metamodel.Element;
+import ch.interlis.ili2c.metamodel.EnumTreeValueType;
 import ch.interlis.ili2c.metamodel.Enumeration;
 import ch.interlis.ili2c.metamodel.EnumerationType;
 import ch.interlis.ili2c.metamodel.Model;
@@ -121,22 +123,27 @@ public class EnumValueMap {
     public static EnumValueMap createEnumValueMap(Element attrOrDomain,ch.ehi.ili2db.mapping.NameMapping ili2sqlName) {
         Element attrOrDomain_tr=ili2sqlName.getTranslatedElement(attrOrDomain);
         String lang_tr=((Model)attrOrDomain_tr.getContainer(Model.class)).getLanguage();
-        EnumerationType type=null;
-        EnumerationType type_tr=null;
+        AbstractEnumerationType type=null;
+        AbstractEnumerationType type_tr=null;
         if(attrOrDomain instanceof AttributeDef) {
-            type=(EnumerationType)((AttributeDef)attrOrDomain).getDomainResolvingAll();
-            type_tr=(EnumerationType)((AttributeDef)attrOrDomain_tr).getDomainResolvingAll();
+            type=(AbstractEnumerationType)((AttributeDef)attrOrDomain).getDomainResolvingAll();
+            type_tr=(AbstractEnumerationType)((AttributeDef)attrOrDomain_tr).getDomainResolvingAll();
         }else if(attrOrDomain instanceof Domain) {
-            type=(EnumerationType)((Domain)attrOrDomain).getType();
-            type_tr=(EnumerationType)((Domain)attrOrDomain_tr).getType();
+            type=(AbstractEnumerationType)((Domain)attrOrDomain).getType();
+            type_tr=(AbstractEnumerationType)((Domain)attrOrDomain_tr).getType();
         }else {
             throw new IllegalArgumentException("unexpected element "+attrOrDomain);
         }
         EnumValueMap ret=new EnumValueMap();
         java.util.List<java.util.Map.Entry<String,ch.interlis.ili2c.metamodel.Enumeration.Element>> ev=new java.util.ArrayList<java.util.Map.Entry<String,ch.interlis.ili2c.metamodel.Enumeration.Element>>();
         java.util.List<java.util.Map.Entry<String,ch.interlis.ili2c.metamodel.Enumeration.Element>> ev_tr=new java.util.ArrayList<java.util.Map.Entry<String,ch.interlis.ili2c.metamodel.Enumeration.Element>>();
-        ch.interlis.iom_j.itf.ModelUtilities.buildEnumElementList(ev,"",type.getConsolidatedEnumeration());
-        ch.interlis.iom_j.itf.ModelUtilities.buildEnumElementList(ev_tr,"",type_tr.getConsolidatedEnumeration());
+        if(type instanceof EnumTreeValueType) {
+            ch.interlis.iom_j.itf.ModelUtilities.buildEnumElementListAll(ev,"",type.getConsolidatedEnumeration());
+            ch.interlis.iom_j.itf.ModelUtilities.buildEnumElementListAll(ev_tr,"",type_tr.getConsolidatedEnumeration());
+        }else {
+            ch.interlis.iom_j.itf.ModelUtilities.buildEnumElementList(ev,"",type.getConsolidatedEnumeration());
+            ch.interlis.iom_j.itf.ModelUtilities.buildEnumElementList(ev_tr,"",type_tr.getConsolidatedEnumeration());
+        }
         boolean isOrdered=type.isOrdered();
         int itfCode=0;
         int seq=0;

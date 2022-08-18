@@ -18,9 +18,10 @@ LATEST
 - new meta info about ili attr type ch.ehi.ili2db.typeKind (#469)
 - fix bigint import (#464)
 - fix enum itfCode on ili-import (#478) 
+- support ALL OF enum-domain (#476)
 - fix JRE 1.6 compatibility
-- iox-ili-1.21.11-SNAPSHOT
-- ili2c-5.2.7-SNAPSHOT
+- iox-ili-1.21.12-SNAPSHOT
+- ili2c-5.2.8-SNAPSHOT
 
 ili2db 4.8.0 (2022-04-29)
 ------------------------------
