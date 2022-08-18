@@ -279,6 +279,7 @@ public class TransferFromXtf {
 			long basketSqlId=0;
 			long startTid=0;
 			long endTid=0;
+			long objCountPerBasket=0;
 			long objCount=0;
 			boolean referrs=false;
 			
@@ -461,6 +462,8 @@ public class TransferFromXtf {
 			delayedObjects=new ArrayList<FixIomObjectExtRefs>();
 			HashMap<String, ClassStat> objStat=null;			
 			StartBasketEvent basket=null;
+            long startTime=System.currentTimeMillis();
+            long currentSlice=0l;
 			// more baskets?
 			IoxEvent event=reader.read();
 			try{
@@ -547,7 +550,7 @@ public class TransferFromXtf {
 							}
 							startTid=oidPool.getLastSqlId();
 							objStat=new HashMap<String, ClassStat>();
-							objCount=0;
+							objCountPerBasket=0;
                             String filename=null;
                             if(xtffilename!=null){
                                 filename=new java.io.File(xtffilename).getName();
@@ -609,7 +612,7 @@ public class TransferFromXtf {
 							endTid=oidPool.getLastSqlId();
 							try {
 								if(config.isCreateImportTabs()) {
-	                                long importId=writeImportBasketStat(importSqlId,basketSqlId,startTid,endTid,objCount);
+	                                long importId=writeImportBasketStat(importSqlId,basketSqlId,startTid,endTid,objCountPerBasket);
 	                                writeObjStat(importId,basketSqlId,objStat);
 								}
 							} catch (SQLException ex) {
@@ -631,12 +634,20 @@ public class TransferFromXtf {
 							if(languageFilter!=null){
 								event=languageFilter.filter(event);
 							}
+							objCountPerBasket++;
 							objCount++;
 							IomObject iomObj=((ObjectEvent)event).getIomObject();
 							if(allReferencesKnown(basketSqlId,basket.getDomains(),iomObj)){
 								// translate object
 								doObject(datasetName,basketSqlId, basket.getDomains(),iomObj,objStat);
 							}
+		                    long currentTime=System.currentTimeMillis();
+		                    long slice=(currentTime-startTime)/1000l/60l/10l;
+		                    if(slice>currentSlice) {
+		                        currentSlice=slice;
+		                        //EhiLogger.logState("...object count "+validator.getObjectCount()+" (structured elements "+validator.getStructCount()+")...");
+		                        EhiLogger.logState("...object count "+objCount);
+		                    }
 						}
 					}else if(event instanceof EndTransferEvent){
                         if(rounder!=null) {
@@ -689,6 +700,7 @@ public class TransferFromXtf {
 						}
 						flushBatchedRecords();
                         EhiLogger.traceState("...EndTransferEvent done");
+                        EhiLogger.logState("object count "+objCount);
 						
 						break;
 					}else if(event instanceof StartTransferEvent){

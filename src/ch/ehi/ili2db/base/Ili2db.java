@@ -2698,7 +2698,7 @@ public class Ili2db {
 				    }
 				}
 			}
-            EhiLogger.logState("maxStatements <"
+            EhiLogger.logState("max active DB statements <"
                     + conn.getMetaData().getMaxStatements() + ">");
 		} catch (SQLException e) {
 			EhiLogger.logError(e);
