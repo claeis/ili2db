@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TRANSFER
+	xmlns="http://www.interlis.ch/INTERLIS2.3">
+	<HEADERSECTION
+		SENDER="IOX"
+		VERSION="2.3">
+		<MODELS>
+			<MODEL
+				NAME="Assoc23"
+				VERSION="2016-03-07"
+				URI="mailto:ce@eisenhutinformatik.ch"></MODEL>
+		</MODELS>
+	</HEADERSECTION>
+	<DATASECTION>
+		<Assoc23.TestA
+			BID="b1">
+			<Assoc23.TestA.ClassA1
+				TID="o1"></Assoc23.TestA.ClassA1>
+			<Assoc23.TestA.ClassA1p
+				TID="o2"></Assoc23.TestA.ClassA1p>
+			<Assoc23.TestA.ClassA1q
+				TID="o3"></Assoc23.TestA.ClassA1q>
+			<Assoc23.TestA.ClassA2
+				TID="o11"></Assoc23.TestA.ClassA2>
+			<Assoc23.TestA.ClassA2p
+				TID="o12">
+				<a1 REF="o2"/>
+			</Assoc23.TestA.ClassA2p>
+			<Assoc23.TestA.link>
+				<link_a1 REF="o1"/>
+				<link_a2 REF="o12"/>
+			</Assoc23.TestA.link>
+			<Assoc23.TestA.link>
+				<link_a1 REF="o2"/>
+				<link_a2 REF="o12"/>
+			</Assoc23.TestA.link>
+			<Assoc23.TestA.link>
+				<link_a1 REF="o3"/>
+				<link_a2 REF="o12"/>
+			</Assoc23.TestA.link>
+		</Assoc23.TestA>
+	</DATASECTION>
+</TRANSFER>

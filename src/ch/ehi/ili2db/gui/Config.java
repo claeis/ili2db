@@ -69,6 +69,8 @@ public class Config extends Settings {
     public static final String TEXT_CHECK_CONSTRAINTS_CREATE="create";
     public static final String DATETIME_CHECK_CONSTRAINTS=PREFIX+".datetimeCheckConstraints";
     public static final String DATETIME_CHECK_CONSTRAINTS_CREATE="create";
+    public static final String MANDATORY_CHECK_CONSTRAINTS=PREFIX+".mandatoryCheckConstraints";
+    public static final String MANDATORY_CHECK_CONSTRAINTS_CREATE="create";
     public static final String IMPORT_TABS=PREFIX+".importTabs";
     public static final String IMPORT_TABS_CREATE="simple";
 	public static final String GEOMATTR_PER_TABLE=PREFIX+".geomAttrPerTable";
@@ -550,6 +552,12 @@ public class Config extends Settings {
     }
     public boolean isCreateCreateDateTimeChecks() {
         return DATETIME_CHECK_CONSTRAINTS_CREATE.equals(getValue(DATETIME_CHECK_CONSTRAINTS));
+    }
+    public void setCreateMandatoryChecks(boolean ignore) {
+        setValue(MANDATORY_CHECK_CONSTRAINTS,ignore?MANDATORY_CHECK_CONSTRAINTS_CREATE:null);
+    }
+    public boolean isCreateMandatoryChecks() {
+        return MANDATORY_CHECK_CONSTRAINTS_CREATE.equals(getValue(MANDATORY_CHECK_CONSTRAINTS));
     }
     public void setCreateImportTabs(boolean ignore) {
         setValue(IMPORT_TABS,ignore?IMPORT_TABS_CREATE:null);

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TRANSFER
+	xmlns="http://www.interlis.ch/INTERLIS2.3">
+	<HEADERSECTION
+		SENDER="IOX"
+		VERSION="2.3">
+		<MODELS>
+			<MODEL
+				NAME="RefAttr23"
+				VERSION="2016-03-07"
+				URI="mailto:ce@eisenhutinformatik.ch"></MODEL>
+		</MODELS>
+	</HEADERSECTION>
+	<DATASECTION>
+		<RefAttr23.TestA
+			BID="b1">
+			<RefAttr23.TestA.ClassA1
+				TID="o1"></RefAttr23.TestA.ClassA1>
+			<RefAttr23.TestA.ClassA1p
+				TID="o2"></RefAttr23.TestA.ClassA1p>
+			<RefAttr23.TestA.ClassA3
+				TID="o3">
+				<attra3>
+					<RefAttr23.TestA.StructA2></RefAttr23.TestA.StructA2>
+				</attra3>
+				<attra3>
+					<RefAttr23.TestA.StructA2p>
+						<attra2
+							REF="o2"/>
+					</RefAttr23.TestA.StructA2p>
+				</attra3>
+			</RefAttr23.TestA.ClassA3>
+		</RefAttr23.TestA>
+	</DATASECTION>
+</TRANSFER>

@@ -1,0 +1,36 @@
+INTERLIS 2.3;
+
+MODEL Assoc23
+  AT "mailto:ce@eisenhutinformatik.ch" VERSION "2016-12-21" =
+    
+  TOPIC TestA =
+
+    CLASS ClassA1 =
+    END ClassA1;
+
+    CLASS ClassA1p EXTENDS ClassA1=
+    END ClassA1p;
+
+    CLASS ClassA1q EXTENDS ClassA1=
+    END ClassA1q;
+    
+    CLASS ClassA2 =
+    END ClassA2;
+
+    CLASS ClassA2p EXTENDS ClassA2=
+    END ClassA2p;
+    
+    ASSOCIATION embedded =
+      a1 -- {1} ClassA1p;
+      a2 -- {1..*} ClassA2p;
+    END embedded;
+
+    ASSOCIATION link =
+      link_a1 -- {1..*} ClassA1;
+      link_a2 -- {1..*} ClassA2p;
+    END link;
+    
+  END TestA;
+  
+  
+END Assoc23.

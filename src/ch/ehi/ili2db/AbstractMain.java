@@ -341,6 +341,9 @@ public abstract class AbstractMain {
 				} else if (isOption(arg, "--createDateTimeChecks")) {
 					argi++;
 					config.setCreateDateTimeChecks(parseBooleanArgument(arg));
+                } else if (isOption(arg, "--createMandatoryChecks")) {
+                    argi++;
+                    config.setCreateMandatoryChecks(parseBooleanArgument(arg));
 				} else if (isOption(arg, "--createImportTabs")) {
 					argi++;
 					config.setCreateImportTabs(parseBooleanArgument(arg));
@@ -587,6 +590,7 @@ public abstract class AbstractMain {
 					System.err.println("--createNumChecks      create CHECK db constraints for numeric data types.");
 					System.err.println("--createTextChecks     create CHECK db constraints for text data types.");
 					System.err.println("--createDateTimeChecks create CHECK db constraints for date/time data types.");
+                    System.err.println("--createMandatoryChecks create CHECK db constraints for MANDATORY attributes.");
 					System.err.println("--ILIGML20             use eCH-0118-2.0 as transferformat");
 					System.err.println("--exportModels modelname  export data according to the given base ili-models");
 					System.err.println("--exportCrsModels modelname  export data according to the given ili-model (with alternate CRS)");

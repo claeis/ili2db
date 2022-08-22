@@ -340,7 +340,7 @@ public class TransferFromIli {
 			    Iterator attri = lineAttrTable.getAttributes ();
 			    while(attri.hasNext()){
 			    	AttributeDef lineattr=(AttributeDef)attri.next();
-			    	recConv.generateAttr(dbTable,lineAttrTable,lineattr,null);
+			    	recConv.generateAttr(dbTable,null,lineAttrTable,lineattr,null);
 			    }
 			}
 		
