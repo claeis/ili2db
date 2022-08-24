@@ -4,6 +4,8 @@ import java.util.Properties;
 
 import ch.ehi.basics.settings.Settings;
 import ch.ehi.sqlgen.generator.SqlConfiguration;
+import ch.interlis.iox_j.validator.ValidationConfig;
+import ch.interlis.iox_j.validator.Validator;
 
 public class Config extends Settings {
 	public static final String FALSE = "False";
@@ -67,6 +69,8 @@ public class Config extends Settings {
     public static final String TEXT_CHECK_CONSTRAINTS_CREATE="create";
     public static final String DATETIME_CHECK_CONSTRAINTS=PREFIX+".datetimeCheckConstraints";
     public static final String DATETIME_CHECK_CONSTRAINTS_CREATE="create";
+    public static final String MANDATORY_CHECK_CONSTRAINTS=PREFIX+".mandatoryCheckConstraints";
+    public static final String MANDATORY_CHECK_CONSTRAINTS_CREATE="create";
     public static final String IMPORT_TABS=PREFIX+".importTabs";
     public static final String IMPORT_TABS_CREATE="simple";
 	public static final String GEOMATTR_PER_TABLE=PREFIX+".geomAttrPerTable";
@@ -161,6 +165,7 @@ public class Config extends Settings {
     private String domainAssignments=null;
     private boolean xtfAttrText=false;
     private boolean repairTouchingLines = true;
+    private boolean logTime=false;
 	final static public String ILIGML20="ILIGML20"; 
 	
     static public final int FC_UNDEFINED=0;
@@ -548,6 +553,12 @@ public class Config extends Settings {
     public boolean isCreateCreateDateTimeChecks() {
         return DATETIME_CHECK_CONSTRAINTS_CREATE.equals(getValue(DATETIME_CHECK_CONSTRAINTS));
     }
+    public void setCreateMandatoryChecks(boolean ignore) {
+        setValue(MANDATORY_CHECK_CONSTRAINTS,ignore?MANDATORY_CHECK_CONSTRAINTS_CREATE:null);
+    }
+    public boolean isCreateMandatoryChecks() {
+        return MANDATORY_CHECK_CONSTRAINTS_CREATE.equals(getValue(MANDATORY_CHECK_CONSTRAINTS));
+    }
     public void setCreateImportTabs(boolean ignore) {
         setValue(IMPORT_TABS,ignore?IMPORT_TABS_CREATE:null);
     }
@@ -839,5 +850,19 @@ public class Config extends Settings {
 
 	public boolean getRepairTouchingLines(){
 		return repairTouchingLines;
+	}
+    public void setLogtime(boolean value) {
+        logTime=value;
+    }
+
+    public boolean isLogtime() {
+        return logTime;
+    }
+	public void setVerbose(boolean value) {
+		setTransientValue(Validator.CONFIG_VERBOSE, value ? ValidationConfig.TRUE : ValidationConfig.FALSE);
+	}
+
+	public boolean isVerbose() {
+		return ValidationConfig.TRUE.equals(getTransientValue(Validator.CONFIG_VERBOSE));
 	}
 }

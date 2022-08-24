@@ -238,7 +238,7 @@ public class Ili2db {
 		ch.ehi.basics.logging.FileListener logfile=null;
         ch.interlis.iox_j.logging.XtfErrorsLogger xtflog=null;
 		if(config.getLogfile()!=null){
-			logfile=new FileLogger(new java.io.File(config.getLogfile()));
+			logfile=new FileLogger(new java.io.File(config.getLogfile()),config.isLogtime());
 			EhiLogger.getInstance().addListener(logfile);
 		}
 		String xtflogFilename=config.getXtfLogfile();
@@ -977,7 +977,7 @@ public class Ili2db {
 		ch.ehi.basics.logging.FileListener logfile=null;
         ch.interlis.iox_j.logging.XtfErrorsLogger xtflog=null;
 		if(config.getLogfile()!=null){
-			logfile=new FileLogger(new java.io.File(config.getLogfile()));
+			logfile=new FileLogger(new java.io.File(config.getLogfile()),config.isLogtime());
 			EhiLogger.getInstance().addListener(logfile);
 		}
         String xtflogFilename=config.getXtfLogfile();
@@ -1559,7 +1559,7 @@ public class Ili2db {
 		ch.ehi.basics.logging.FileListener logfile=null;
 		ch.interlis.iox_j.logging.XtfErrorsLogger xtflog=null;
 		if(config.getLogfile()!=null){
-			logfile=new FileLogger(new java.io.File(config.getLogfile()));
+			logfile=new FileLogger(new java.io.File(config.getLogfile()),config.isLogtime());
 			EhiLogger.getInstance().addListener(logfile);
 		}
         String xtflogFilename=config.getXtfLogfile();
@@ -2698,7 +2698,7 @@ public class Ili2db {
 				    }
 				}
 			}
-            EhiLogger.logState("maxStatements <"
+            EhiLogger.logState("max active DB statements <"
                     + conn.getMetaData().getMaxStatements() + ">");
 		} catch (SQLException e) {
 			EhiLogger.logError(e);

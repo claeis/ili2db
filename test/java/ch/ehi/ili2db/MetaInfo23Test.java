@@ -85,6 +85,26 @@ public abstract class MetaInfo23Test {
                         Assert.assertFalse(rs.next());
 					}
                     {
+                        selPrepStmt.setString(1, "classa1");
+                        selPrepStmt.setString(2, "enuma");
+                        selPrepStmt.setString(3, DbExtMetaInfo.TAG_COL_TYPEKIND);
+                        ResultSet rs = selPrepStmt.executeQuery();
+                        Assert.assertTrue(rs.next());
+                        Assert.assertEquals(DbExtMetaInfo.TAG_COL_TYPEKIND_ENUM,rs.getString(1));
+                        Assert.assertEquals(null,rs.getString(2));
+                        Assert.assertFalse(rs.next());
+                    }
+                    {
+                        selPrepStmt.setString(1, "classa1");
+                        selPrepStmt.setString(2, "enumb");
+                        selPrepStmt.setString(3, DbExtMetaInfo.TAG_COL_TYPEKIND);
+                        ResultSet rs = selPrepStmt.executeQuery();
+                        Assert.assertTrue(rs.next());
+                        Assert.assertEquals(DbExtMetaInfo.TAG_COL_TYPEKIND_ENUM,rs.getString(1));
+                        Assert.assertEquals(null,rs.getString(2));
+                        Assert.assertFalse(rs.next());
+                    }
+                    {
                         selPrepStmt.setString(1, "classc");
                         selPrepStmt.setString(2, "geom");
                         selPrepStmt.setString(3, DbExtMetaInfo.TAG_COL_C1_MAX);

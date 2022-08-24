@@ -51,15 +51,19 @@ import ch.ehi.sqlgen.repository.DbSchema;
 import ch.ehi.sqlgen.repository.DbTable;
 import ch.ehi.sqlgen.repository.DbTableName;
 import ch.interlis.ili2c.metamodel.AreaType;
+import ch.interlis.ili2c.metamodel.AbstractEnumerationType;
 import ch.interlis.ili2c.metamodel.AbstractSurfaceOrAreaType;
 import ch.interlis.ili2c.metamodel.AssociationDef;
 import ch.interlis.ili2c.metamodel.AttributeDef;
+import ch.interlis.ili2c.metamodel.AttributePathType;
 import ch.interlis.ili2c.metamodel.AttributeRef;
 import ch.interlis.ili2c.metamodel.BasketType;
 import ch.interlis.ili2c.metamodel.BlackboxType;
+import ch.interlis.ili2c.metamodel.ClassType;
 import ch.interlis.ili2c.metamodel.CompositionType;
 import ch.interlis.ili2c.metamodel.CoordType;
 import ch.interlis.ili2c.metamodel.Domain;
+import ch.interlis.ili2c.metamodel.EnumTreeValueType;
 import ch.interlis.ili2c.metamodel.EnumerationType;
 import ch.interlis.ili2c.metamodel.Evaluable;
 import ch.interlis.ili2c.metamodel.ExtendableContainer;
@@ -69,8 +73,10 @@ import ch.interlis.ili2c.metamodel.LocalAttribute;
 import ch.interlis.ili2c.metamodel.MultiAreaType;
 import ch.interlis.ili2c.metamodel.MultiCoordType;
 import ch.interlis.ili2c.metamodel.MultiSurfaceOrAreaType;
+import ch.interlis.ili2c.metamodel.MultiSurfaceType;
 import ch.interlis.ili2c.metamodel.MultiPolylineType;
 import ch.interlis.ili2c.metamodel.NumericType;
+import ch.interlis.ili2c.metamodel.OIDType;
 import ch.interlis.ili2c.metamodel.ObjectPath;
 import ch.interlis.ili2c.metamodel.ObjectType;
 import ch.interlis.ili2c.metamodel.PathEl;
@@ -94,7 +100,7 @@ import ch.interlis.ili2c.metamodel.Viewable;
 public class FromIliRecordConverter extends AbstractRecordConverter {
 	private DbSchema schema=null;
 	private CustomMapping customMapping=null;
-	private HashSet visitedEnumsAttrs=null;
+	private Set<ch.interlis.ili2c.metamodel.Element> visitedEnumsAttrs=null;
 	private String nl=System.getProperty("line.separator");
 	private boolean coalesceCatalogueRef=true;
 	private boolean coalesceMultiSurface=true;
@@ -108,13 +114,14 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 	private boolean createNumCheck=false;
     private boolean createTextCheck=false;
     private boolean createDateTimeCheck=false;
+    private boolean createMandatoryCheck=false;
 	private DbExtMetaInfo metaInfo=null;
     private boolean createTypeConstraint=false;
     private boolean createIliTidCol=false;
 
 	public FromIliRecordConverter(TransferDescription td1, NameMapping ili2sqlName,
 			Config config, DbSchema schema1, CustomMapping customMapping1,
-			DbIdGen idGen1, HashSet visitedEnumsAttrs1, TrafoConfig trafoConfig,	Viewable2TableMapping class2wrapper1
+			DbIdGen idGen1, Set<ch.interlis.ili2c.metamodel.Element> visitedEnumsAttrs1, TrafoConfig trafoConfig,	Viewable2TableMapping class2wrapper1
 			,DbExtMetaInfo metaInfo
 			) {
 		super(td1, ili2sqlName, config, idGen1,trafoConfig,class2wrapper1);
@@ -133,6 +140,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 		createNumCheck=config.isCreateCreateNumChecks();
         createTextCheck=config.isCreateCreateTextChecks();
         createDateTimeCheck=config.isCreateCreateDateTimeChecks();
+        createMandatoryCheck=config.isCreateMandatoryChecks() && !sqlEnableNull;
 		this.metaInfo=metaInfo;
         createTypeConstraint=config.getCreateTypeConstraint();
         createIliTidCol=Config.TID_HANDLING_PROPERTY.equals(config.getTidHandling());
@@ -208,91 +216,93 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 				t_dsName.setIndex(true);
 				dbTable.addColumn(t_dsName);
 		  }
-		DbColumn dbCol;
-		if(base==null && !def.isSecondaryTable()){
-			if(createTypeDiscriminator || def.includesMultipleTypes()){
-				  dbCol=createSqlTypeCol(DbNames.T_TYPE_COL);
+          DbColumn dbTypeCol=null;
+		  {
+		        if(base==null && !def.isSecondaryTable()){
+		            if(createTypeDiscriminator || def.includesMultipleTypes()){
+		                  dbTypeCol=createSqlTypeCol(DbNames.T_TYPE_COL);
 
-                  ArrayList<String> extensions = new ArrayList<String>();
-                  for (Object o : def.getViewable().getExtensions()){
-                      Viewable v = (Viewable) o;
-                      if (! v.isAbstract()){
-                          extensions.add(ili2sqlName.mapIliClassDef(v));
-                      }
-                  }
+		                  ArrayList<String> extensions = new ArrayList<String>();
+		                  for (Object o : def.getViewable().getExtensions()){
+		                      Viewable v = (Viewable) o;
+		                      if (! v.isAbstract()){
+		                          extensions.add(ili2sqlName.mapIliClassDef(v));
+		                      }
+		                  }
 
-                  Collections.sort(extensions);
-                  
-                  String jsonExtensions = "";
+		                  Collections.sort(extensions);
+		                  
+		                  String jsonExtensions = "";
 
-                  JsonFactory factory = new JsonFactory();
-                  StringWriter out = new StringWriter();
-                  try{
-                      JsonGenerator generator = factory.createGenerator(out);
-                      generator.writeStartArray();
-                      for (String e : extensions){
-                          generator.writeString(e);
-                      }
-                      generator.writeEndArray();
-                      generator.flush();
-                      jsonExtensions = out.toString();
-                      generator.close();
-                  }catch (IOException e){
-                      throw new Ili2dbException(e);
-                  }
+		                  JsonFactory factory = new JsonFactory();
+		                  StringWriter out = new StringWriter();
+		                  try{
+		                      JsonGenerator generator = factory.createGenerator(out);
+		                      generator.writeStartArray();
+		                      for (String e : extensions){
+		                          generator.writeString(e);
+		                      }
+		                      generator.writeEndArray();
+		                      generator.flush();
+		                      jsonExtensions = out.toString();
+		                      generator.close();
+		                  }catch (IOException e){
+		                      throw new Ili2dbException(e);
+		                  }
 
-                  // Add t_type possible values to meta-info table
-                  metaInfo.setColumnInfo(dbTable.getName().getName(),
-                                         DbNames.T_TYPE_COL,
-                                         DbExtMetaInfo.TAG_COL_TYPES,
-                                         jsonExtensions);
+		                  // Add t_type possible values to meta-info table
+		                  metaInfo.setColumnInfo(dbTable.getName().getName(),
+		                                         DbNames.T_TYPE_COL,
+		                                         DbExtMetaInfo.TAG_COL_TYPES,
+		                                         jsonExtensions);
 
-                  if(createTypeConstraint){
+		                  if(createTypeConstraint){
 
-                      // Add check constraint on t_type column
-                      String[] possibleValues = new String[extensions.size()];
-                      ((DbColVarchar) dbCol).setValueRestriction(extensions.toArray(possibleValues));
-                  }
-                  dbTable.addColumn(dbCol);
-			}
-			
-			// if CLASS
-			  if(!(def.getViewable() instanceof AssociationDef && ((AssociationDef)def.getViewable()).isLightweight())){
-                if ((createIliTidCol && !(def.getViewable() instanceof AssociationDef)) || def.hasOid()) {
-                    addIliTidCol(dbTable, def.getOid());
-                    if (def.getOid() != null) {
-                        metaInfo.setColumnInfo(dbTable.getName().getName(), DbNames.T_ILI_TID_COL,
-                                DbExtMetaInfo.TAG_COL_OIDDOMAIN, def.getOid().getScopedName());
-                    }
-                }
-			  }
-			  
-		  // if STRUCTURE, add ref to parent
-		  if(def.isStructure()){
-			  if(createGenericStructRef){
-				  // add parentid
-					DbColId dbParentId=new DbColId();
-					dbParentId.setName(DbNames.T_PARENT_ID_COL);
-					dbParentId.setNotNull(true);
-					dbParentId.setPrimaryKey(false);
-					dbTable.addColumn(dbParentId);
-					  // add parent_type
-					dbCol=createSqlTypeCol(DbNames.T_PARENT_TYPE_COL);
-					dbTable.addColumn(dbCol);
-					// add parent_attr
-					dbCol=createSqlTypeCol(DbNames.T_PARENT_ATTR_COL);
-					dbTable.addColumn(dbCol);
-			  }else{
-				  // add reference to parent for each structAttr when generating structAttr
-			  }
-			// add sequence attr
-			DbColId dbSeq=new DbColId();
-			dbSeq.setName(DbNames.T_SEQ_COL);
-			//dbSeq.setNotNull(true); // must be optional for cases where struct is exdended by a class
-			dbSeq.setPrimaryKey(false);
-			dbTable.addColumn(dbSeq);
+		                      // Add check constraint on t_type column
+		                      String[] possibleValues = new String[extensions.size()];
+		                      ((DbColVarchar) dbTypeCol).setValueRestriction(extensions.toArray(possibleValues));
+		                  }
+		                  dbTable.addColumn(dbTypeCol);
+		            }
+		            
+		            // if CLASS
+		              if(!(def.getViewable() instanceof AssociationDef && ((AssociationDef)def.getViewable()).isLightweight())){
+		                if ((createIliTidCol && !(def.getViewable() instanceof AssociationDef)) || def.hasOid()) {
+		                    addIliTidCol(dbTable, def.getOid());
+		                    if (def.getOid() != null) {
+		                        metaInfo.setColumnInfo(dbTable.getName().getName(), DbNames.T_ILI_TID_COL,
+		                                DbExtMetaInfo.TAG_COL_OIDDOMAIN, def.getOid().getScopedName());
+		                    }
+		                }
+		              }
+		              
+		          // if STRUCTURE, add ref to parent
+		          if(def.isStructure()){
+		              if(createGenericStructRef){
+		                  // add parentid
+		                    DbColId dbParentId=new DbColId();
+		                    dbParentId.setName(DbNames.T_PARENT_ID_COL);
+		                    dbParentId.setNotNull(true);
+		                    dbParentId.setPrimaryKey(false);
+		                    dbTable.addColumn(dbParentId);
+		                      // add parent_type
+		                    DbColumn dbCol=createSqlTypeCol(DbNames.T_PARENT_TYPE_COL);
+		                    dbTable.addColumn(dbCol);
+		                    // add parent_attr
+		                    dbCol=createSqlTypeCol(DbNames.T_PARENT_ATTR_COL);
+		                    dbTable.addColumn(dbCol);
+		              }else{
+		                  // add reference to parent for each structAttr when generating structAttr
+		              }
+		            // add sequence attr
+		            DbColId dbSeq=new DbColId();
+		            dbSeq.setName(DbNames.T_SEQ_COL);
+		            //dbSeq.setNotNull(true); // must be optional for cases where struct is exdended by a class
+		            dbSeq.setPrimaryKey(false);
+		            dbTable.addColumn(dbSeq);
+		          }
+		        }
 		  }
-		}
 
 		// body
 		Iterator<ColumnWrapper> iter=def.getAttrIterator();
@@ -307,7 +317,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
                               // skip implicit particles (base-viewables) of views
                           }else{
                               Integer epsgCode=columnWrapper.getEpsgCode();
-                              generateAttr(dbTable,def.getViewable(),attr,epsgCode);
+                              generateAttr(dbTable,dbTypeCol,def.getViewable(),attr,epsgCode);
                           }
                       }
                   }catch(Exception ex){
@@ -361,6 +371,8 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
                                           dbTable.addColumn(dbSeq);
                                     }
                                 }else {
+                                    List<String> fkColNames=new ArrayList<String>();
+                                    boolean notNull=false;
                                     ArrayList<ViewableWrapper> targetTables = getTargetTables(role.getDestination());
                                     for(ViewableWrapper targetTable:targetTables){
                                         DbColumn dbColRef=null;
@@ -368,7 +380,8 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
                                         DbTableName targetSqlTableName=targetTable.getSqlTable();
                                         String roleSqlName=ili2sqlName.mapIliRoleDef(role,sqlName.getName(),targetSqlTableName.getName(),targetTables.size()>1);
                                         dbColRef.setName(roleSqlName);
-                                        boolean notNull=false;
+                                        fkColNames.add(roleSqlName);
+                                        notNull=false;
                                         if(!sqlEnableNull){
                                             if(targetTables.size()>1){
                                                 notNull=false; // multiple alternative FK columns
@@ -407,6 +420,15 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
                                               dbTable.addColumn(dbSeq);
                                         }
                                         
+                                    }
+                                    if(createMandatoryCheck) {
+                                        if(!notNull) {
+                                            Viewable sourceClass=(Viewable)role.getOppEnd().getDestination();
+                                            List<Viewable> exts=getPotentialClassTypes(sourceClass);
+                                            String cnstrName="ili_"+ili2sqlName.mapIliRoleDef(role,sqlName.getName(),getSqlType(role.getDestination()).getName());
+                                            String cnstr = createReferenceAttrCheck(dbTypeCol!=null?exts:null,fkColNames);
+                                            dbTable.setNativeConstraint(cnstrName, cnstr);
+                                        }
                                     }
                                 }
                             }
@@ -455,6 +477,8 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
                                       dbTable.addColumn(dbSeq);
                                 }
                             }else {
+                                List<String> fkColNames=new ArrayList<String>();
+                                boolean notNull=false;
                                 ArrayList<ViewableWrapper> targetTables=null;
                                 targetTables = getTargetTables(role.getDestination());
                                 for(ViewableWrapper targetTable : targetTables){
@@ -463,7 +487,8 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
                                     DbTableName targetSqlTableName=targetTable.getSqlTable();
                                     String roleSqlName=ili2sqlName.mapIliRoleDef(role,sqlName.getName(),targetSqlTableName.getName(),targetTables.size()>1);
                                     dbColRef.setName(roleSqlName);
-                                    boolean notNull=false;
+                                    fkColNames.add(roleSqlName);
+                                    notNull=false;
                                     if(!sqlEnableNull){
                                         if(targetTables.size()>1){
                                             notNull=false; // multiple alternative FK columns
@@ -509,6 +534,13 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
                                     }
                                 }
                                 
+                                if(createMandatoryCheck) {
+                                    if(!notNull) {
+                                        String cnstrName="ili_"+ili2sqlName.mapIliRoleDef(role,sqlName.getName(),getSqlType(role.getDestination()).getName());
+                                        String cnstr = createReferenceAttrCheck(null,fkColNames);
+                                        dbTable.setNativeConstraint(cnstrName, cnstr);
+                                    }
+                                }
                             }
 						}
 					}
@@ -654,20 +686,21 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
           return ret;
 	}
 
-	public void generateAttr(DbTable dbTable,Viewable aclass,AttributeDef attr,Integer epsgCode)
+	public void generateAttr(DbTable dbTable,DbColumn dbTypeCol, Viewable aclass,AttributeDef attr,Integer epsgCode)
 	throws Ili2dbException
 	{
 		OutParam<DbColumn> dbCol=new OutParam<DbColumn>();dbCol.value=null;
 		OutParam<Unit> unitDef=new OutParam<Unit>();unitDef.value=null;
 		OutParam<Boolean> mText=new OutParam<Boolean>();mText.value=false;
+        OutParam<String> simpleTypeKind=new OutParam<String>();simpleTypeKind.value=null;
 
 		ArrayList<DbColumn> dbColExts=new ArrayList<DbColumn>();
 		Type type = attr.getDomainResolvingAll();
-
+		String typeKind=null;
 		boolean result = mapAsTextCol(attr) ? createSimpleDbColTXT(dbTable, aclass, attr, type, dbCol, unitDef, mText, dbColExts)
-				: createSimpleDbCol(dbTable, aclass, attr, type, dbCol, unitDef, mText, dbColExts);
+				: createSimpleDbCol(dbTable, aclass, attr, type, dbCol, simpleTypeKind,unitDef, mText, dbColExts);
 		if(result) {
-
+		    typeKind=simpleTypeKind.value;
 		}else if (type instanceof AbstractSurfaceOrAreaType){
 			if(createItfLineTables){
 				dbCol.value=null;
@@ -692,8 +725,18 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 				}
                 if (type instanceof SurfaceOrAreaType){
                     ret.setType(curvePolygon ? DbColGeometry.CURVEPOLYGON : DbColGeometry.POLYGON);
+                    if(type instanceof SurfaceType) {
+                        typeKind=DbExtMetaInfo.TAG_COL_TYPEKIND_SURFACE;
+                    }else if(type instanceof AreaType) {
+                        typeKind=DbExtMetaInfo.TAG_COL_TYPEKIND_AREA;                        
+                    }
                 } else if (type instanceof  MultiSurfaceOrAreaType){
                     ret.setType(curvePolygon ? DbColGeometry.MULTISURFACE : DbColGeometry.MULTIPOLYGON);
+                    if(type instanceof MultiSurfaceType) {
+                        typeKind=DbExtMetaInfo.TAG_COL_TYPEKIND_MULTISURFACE;
+                    }else if(type instanceof MultiAreaType) {
+                        typeKind=DbExtMetaInfo.TAG_COL_TYPEKIND_MULTIAREA;                        
+                    }
                 }
 				// get crs from ili
 				setCrs(ret,epsgCode);
@@ -722,12 +765,14 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 			DbColGeometry ret = generatePolylineType((PolylineType)type, attrName);
 			setCrs(ret,epsgCode);
 			dbCol.value=ret;
+            typeKind=DbExtMetaInfo.TAG_COL_TYPEKIND_POLYLINE;                        
 		}
 		else if (type instanceof MultiPolylineType){
             String attrName = attr.getContainer().getScopedName(null) + "." + attr.getName();
             DbColGeometry ret = generateMultiPolylineType((MultiPolylineType) type, attrName);
             setCrs(ret, epsgCode);
             dbCol.value = ret;
+            typeKind=DbExtMetaInfo.TAG_COL_TYPEKIND_MULTIPOLYLINE;                        
 		}else if (type instanceof CoordType){
 			DbColGeometry ret=new DbColGeometry();
 			ret.setType(DbColGeometry.POINT);
@@ -736,6 +781,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 			ret.setDimension(coord.getDimensions().length);
 			setBB(ret, coord,attr.getContainer().getScopedName(null)+"."+attr.getName());
 			dbCol.value=ret;
+            typeKind=DbExtMetaInfo.TAG_COL_TYPEKIND_COORD;                        
 		} else if (type instanceof MultiCoordType) {
 			DbColGeometry ret = new DbColGeometry();
 			ret.setType(DbColGeometry.MULTIPOINT);
@@ -744,6 +790,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 			ret.setDimension(coord.getDimensions().length);
 			setBB(ret, coord,attr.getContainer().getScopedName(null) + "." + attr.getName());
 			dbCol.value = ret;
+            typeKind=DbExtMetaInfo.TAG_COL_TYPEKIND_MULTICOORD;                        
 		}else if (type instanceof CompositionType){
 			// skip it
 			if(!createGenericStructRef){
@@ -796,6 +843,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 					setBB(ret, coord,attr.getContainer().getScopedName(null)+"."+attr.getName());
 					dbCol.value=ret;
 					trafoConfig.setAttrConfig(attr, TrafoConfigNames.MULTISURFACE_TRAFO,TrafoConfigNames.MULTISURFACE_TRAFO_COALESCE);
+		            typeKind=DbExtMetaInfo.TAG_COL_TYPEKIND_MULTISURFACE;                        
 				}else if(Ili2cUtility.isMultiLineAttr(td, attr) && (coalesceMultiLine 
 						|| TrafoConfigNames.MULTILINE_TRAFO_COALESCE.equals(trafoConfig.getAttrConfig(attr,TrafoConfigNames.MULTILINE_TRAFO)))){
 					multiLineAttrs.addMultiLineAttr(attr);
@@ -814,6 +862,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 					setBB(ret, coord,attr.getContainer().getScopedName(null)+"."+attr.getName());
 					dbCol.value=ret;
 					trafoConfig.setAttrConfig(attr, TrafoConfigNames.MULTILINE_TRAFO,TrafoConfigNames.MULTILINE_TRAFO_COALESCE);
+                    typeKind=DbExtMetaInfo.TAG_COL_TYPEKIND_MULTIPOLYLINE;                       
 				}else if(Ili2cUtility.isMultiPointAttr(td, attr) && (coalesceMultiPoint 
 						|| TrafoConfigNames.MULTIPOINT_TRAFO_COALESCE.equals(trafoConfig.getAttrConfig(attr,TrafoConfigNames.MULTIPOINT_TRAFO)))){
 					multiPointAttrs.addMultiPointAttr(attr);
@@ -827,13 +876,14 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 					setBB(ret, coord,attr.getContainer().getScopedName(null)+"."+attr.getName());
 					dbCol.value=ret;
 					trafoConfig.setAttrConfig(attr, TrafoConfigNames.MULTIPOINT_TRAFO,TrafoConfigNames.MULTIPOINT_TRAFO_COALESCE);
+                    typeKind=DbExtMetaInfo.TAG_COL_TYPEKIND_MULTICOORD;                       
 				}else if(Ili2cUtility.isArrayAttr(td, attr) && (coalesceArray 
 						|| TrafoConfigNames.ARRAY_TRAFO_COALESCE.equals(trafoConfig.getAttrConfig(attr,TrafoConfigNames.ARRAY_TRAFO)))){
 					arrayAttrs.addArrayAttr(attr);
 					ArrayMapping attrMapping=arrayAttrs.getMapping(attr);
 					AttributeDef localAttr=attrMapping.getValueAttr();
 					Type localType = localAttr.getDomainResolvingAll();
-					if(!createSimpleDbCol(dbTable, aclass, localAttr, localType, dbCol, unitDef, mText, dbColExts)) {
+					if(!createSimpleDbCol(dbTable, aclass, localAttr, localType, dbCol, simpleTypeKind,unitDef, mText, dbColExts)) {
 						  throw new IllegalStateException("unexpected attr type "+localAttr.getScopedName());
 					}
 					dbCol.value.setArraySize(DbColumn.UNLIMITED_ARRAY);		
@@ -843,6 +893,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
                     DbColJson ret=new DbColJson();
                     dbCol.value=ret;
                     trafoConfig.setAttrConfig(attr, TrafoConfigNames.JSON_TRAFO,TrafoConfigNames.JSON_TRAFO_COALESCE);
+                    typeKind=DbExtMetaInfo.TAG_COL_TYPEKIND_STRUCTURE;
 				}else if(isMultilingualTextAttr(td, attr) && (expandMultilingual 
 							|| TrafoConfigNames.MULTILINGUAL_TRAFO_EXPAND.equals(trafoConfig.getAttrConfig(attr,TrafoConfigNames.MULTILINGUAL_TRAFO)))){
 					for(String sfx:DbNames.MULTILINGUAL_TXT_COL_SUFFIXS){
@@ -892,12 +943,16 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
                     ret.setIndex(true);
                 }
                 dbColExts.add(ret);
+                typeKind=DbExtMetaInfo.TAG_COL_TYPEKIND_REFERENCE;
             }else {
                 ArrayList<ViewableWrapper> targetTables = getTargetTables(((ReferenceType)type).getReferred());
+                List<String> fkColNames=new ArrayList<String>();
                 for(ViewableWrapper targetTable:targetTables)
                 {
                     DbColId ret=new DbColId();
-                    ret.setName(ili2sqlName.mapIliAttributeDef(attr,dbTable.getName().getName(),targetTable.getSqlTablename(),targetTables.size()>1));
+                    String colName=ili2sqlName.mapIliAttributeDef(attr,dbTable.getName().getName(),targetTable.getSqlTablename(),targetTables.size()>1);
+                    ret.setName(colName);
+                    fkColNames.add(colName);
                     ret.setNotNull(false);
                     ret.setPrimaryKey(false);
                     if(createFk){
@@ -907,6 +962,13 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
                         ret.setIndex(true);
                     }
                     dbColExts.add(ret);
+                }
+                if(createMandatoryCheck) {
+                    Viewable sourceClass=(Viewable)attr.getContainer();
+                    List<Viewable> exts=getPotentialClassTypes(sourceClass);
+                    String cnstrName="ili_"+getSqlAttrName(attr,null,dbTable.getName().getName(),null);
+                    String cnstr = createReferenceAttrCheck(dbTypeCol!=null?exts:null,fkColNames);
+                    dbTable.setNativeConstraint(cnstrName, cnstr);
                 }
             }
 		}else{
@@ -949,6 +1011,9 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 			if(attrClass!=aclass && attrClass.isExtending(aclass)){
 				subType=getSqlType(attrClass).getName();
 			}
+			if(typeKind!=null) {
+	            metaInfo.setColumnInfo(dbTable.getName().getName(), subType, sqlColName, DbExtMetaInfo.TAG_COL_TYPEKIND, typeKind);
+			}
 			if(unitDef.value!=null){
 				String unitName=unitDef.value.getName();
 				metaInfo.setColumnInfo(dbTable.getName().getName(), subType, sqlColName, DbExtMetaInfo.TAG_COL_UNIT, unitName);
@@ -987,6 +1052,35 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 			customMapping.fixupAttribute(dbTable, null, attr);
 		}
 	}
+
+    private String createReferenceAttrCheck(List<Viewable> exts, List<String> fkColNames) {
+        StringBuffer action=new StringBuffer("CHECK(");
+        if(exts!=null){
+            action.append(DbNames.T_TYPE_COL);
+            action.append(" NOT IN (");
+            String sep="";
+            for(Viewable candView:exts){
+                action.append(sep);
+                action.append("'");
+                action.append(ili2sqlName.mapIliClassDef(candView));
+                action.append("'");
+                sep=",";
+            }
+            action.append(") OR ");
+        }
+        {
+            String sep="";
+            for(String fkCol:fkColNames){
+                action.append(sep);
+                action.append(fkCol);
+                action.append(" IS NOT NULL");
+                sep=" OR ";
+            }
+            
+        }
+        action.append(")");
+        return action.toString();
+    }
 	
 	private AttributeDef getDefinedAttribute(Viewable aclass, String attrName) {
 	    Iterator attri=aclass.getDefinedAttributes();
@@ -1046,16 +1140,20 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 	}
 
 	private boolean createSimpleDbCol(DbTable dbTable, Viewable aclass, AttributeDef attr, Type type,
-			OutParam<DbColumn> dbCol, OutParam<Unit> unitDef, OutParam<Boolean> mText, ArrayList<DbColumn> dbColExts) {
+			OutParam<DbColumn> dbCol, OutParam<String> typeKind,OutParam<Unit> unitDef, OutParam<Boolean> mText, ArrayList<DbColumn> dbColExts) {
 		if (attr.isDomainBoolean()) {
 			dbCol.value= new DbColBoolean();
+			typeKind.value=DbExtMetaInfo.TAG_COL_TYPEKIND_BOOLEAN;
 		}else if (attr.isDomainIli1Date()) {
 			dbCol.value= new DbColDate();
+            typeKind.value=DbExtMetaInfo.TAG_COL_TYPEKIND_DATE;
 		}else if (attr.isDomainIliUuid()) {
 			dbCol.value= new DbColUuid();
+            typeKind.value=DbExtMetaInfo.TAG_COL_TYPEKIND_OID;
 		}else if (attr.isDomainIli2Date()) {
 		    DbColDate ret=new DbColDate();
 			dbCol.value= ret;
+            typeKind.value=DbExtMetaInfo.TAG_COL_TYPEKIND_DATE;
 			if(createDateTimeCheck) {
 	            DateFormat dateTimeFormatter = new SimpleDateFormat("yyyy-MM-dd");
 	            FormattedType fmtType = (FormattedType)type;
@@ -1069,6 +1167,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 		}else if (attr.isDomainIli2DateTime()) {
             DbColDateTime ret=new DbColDateTime();
 			dbCol.value= ret;
+            typeKind.value=DbExtMetaInfo.TAG_COL_TYPEKIND_DATETIME;
             if(createDateTimeCheck) {
                 DateFormat dateTimeFormatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
                 FormattedType fmtType = (FormattedType)type;
@@ -1082,6 +1181,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 		}else if (attr.isDomainIli2Time()) {
 		    DbColTime ret=new DbColTime();
 			dbCol.value= ret;
+            typeKind.value=DbExtMetaInfo.TAG_COL_TYPEKIND_TIMEOFDAY;
             if(createDateTimeCheck) {
                 DateFormat dateTimeFormatter = new SimpleDateFormat("HH:mm:ss.SSS");
                 FormattedType fmtType = (FormattedType)type;
@@ -1095,15 +1195,17 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 		}else if (type instanceof BasketType){
 			// skip it; type no longer exists in ili 2.3
 			dbCol.value=null;
-		}else if(type instanceof EnumerationType){
+		}else if(type instanceof AbstractEnumerationType){
 			visitedEnumsAttrs.add(attr);
 			if(createEnumColAsItfCode){
 				DbColId ret=new DbColId();
 				dbCol.value=ret;
+	            typeKind.value=type instanceof EnumTreeValueType ? DbExtMetaInfo.TAG_COL_TYPEKIND_ENUMTREE:DbExtMetaInfo.TAG_COL_TYPEKIND_ENUM;
 			}else{
 			    if(Config.CREATE_ENUM_DEFS_MULTI_WITH_ID.equals(createEnumTable)) {
 	                DbColId ret=new DbColId();
 	                dbCol.value=ret;
+	                typeKind.value=type instanceof EnumTreeValueType ? DbExtMetaInfo.TAG_COL_TYPEKIND_ENUMTREE:DbExtMetaInfo.TAG_COL_TYPEKIND_ENUM;
 	                DbTableName targetTable=getEnumTargetTableName(attr,null,schema.getName());
                     if(createFk){
 	                    ret.setReferencedTable(targetTable);
@@ -1115,6 +1217,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 	                DbColVarchar ret=new DbColVarchar();
 	                ret.setSize(255);
 	                dbCol.value=ret;                
+	                typeKind.value=type instanceof EnumTreeValueType ? DbExtMetaInfo.TAG_COL_TYPEKIND_ENUMTREE:DbExtMetaInfo.TAG_COL_TYPEKIND_ENUM;
 			    }
 			}
 		}else if(type instanceof NumericType){
@@ -1142,6 +1245,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 						ret.setMaxValue(max.doubleValue());
 					}
 					dbCol.value=ret;
+	                typeKind.value=DbExtMetaInfo.TAG_COL_TYPEKIND_NUMERIC;
 				}else{
 					DbColNumber ret=new DbColNumber();
 					int size=Math.max(minLen,maxLen);
@@ -1151,6 +1255,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 						ret.setMaxValue(max.getUnscaledValue().longValue());
 					}
 					dbCol.value=ret;
+                    typeKind.value=DbExtMetaInfo.TAG_COL_TYPEKIND_NUMERIC;
 				}
 				unitDef.value=((NumericType)type).getUnit();
 			}
@@ -1169,17 +1274,51 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
             }
 			if(!((TextType)type).isNormalized()){
 			    mText.value=true;
+                typeKind.value=DbExtMetaInfo.TAG_COL_TYPEKIND_MTEXT;
 			}else {
+			    if(attr.isDomainName()) {
+	                typeKind.value=DbExtMetaInfo.TAG_COL_TYPEKIND_NAME;
+			    }else if(attr.isDomainUri()) {
+	                typeKind.value=DbExtMetaInfo.TAG_COL_TYPEKIND_URI;
+			    }else {
+	                typeKind.value=DbExtMetaInfo.TAG_COL_TYPEKIND_TEXT;
+			    }
 			}
 			dbCol.value=ret;
 		}else if(type instanceof BlackboxType){
 			if(((BlackboxType)type).getKind()==BlackboxType.eXML){
 				DbColXml ret=new DbColXml();
 				dbCol.value=ret;
+                typeKind.value=DbExtMetaInfo.TAG_COL_TYPEKIND_XML;
 			}else{
 				DbColBlob ret=new DbColBlob();
 				dbCol.value=ret;
+                typeKind.value=DbExtMetaInfo.TAG_COL_TYPEKIND_BINARY;
 			}
+        }else if(type instanceof OIDType) {
+            DbColVarchar ret=new DbColVarchar();
+            ret.setSize(255);
+            dbCol.value=ret;
+            typeKind.value=DbExtMetaInfo.TAG_COL_TYPEKIND_OID;
+        }else if(type instanceof FormattedType) {
+            DbColVarchar ret=new DbColVarchar();
+            ret.setSize(255);
+            dbCol.value=ret;
+            typeKind.value=DbExtMetaInfo.TAG_COL_TYPEKIND_FORMATTED;
+        }else if(type instanceof ClassType) {
+            DbColVarchar ret=new DbColVarchar();
+            ret.setSize(255);
+            dbCol.value=ret;
+            typeKind.value=DbExtMetaInfo.TAG_COL_TYPEKIND_CLASSQNAME;
+        }else if(type instanceof AttributePathType) {
+            DbColVarchar ret=new DbColVarchar();
+            ret.setSize(255);
+            dbCol.value=ret;
+            typeKind.value=DbExtMetaInfo.TAG_COL_TYPEKIND_ATTRIBUTEQNAME;
+		}else if(false) {
+            DbColVarchar ret=new DbColVarchar();
+            ret.setSize(255);
+            dbCol.value=ret;
 		}else{
 			return false;
 		}

@@ -196,6 +196,9 @@ public abstract class AbstractMain {
 					argi++;
 					config.setLogfile(args[argi]);
 					argi++;
+                } else if (arg.equals("--logtime")) {
+                    argi++;
+                    config.setLogtime(parseBooleanArgument(arg));
 				} else if (arg.equals("--xtflog")) {
 					argi++;
 					config.setXtfLogfile(args[argi]);
@@ -338,6 +341,9 @@ public abstract class AbstractMain {
 				} else if (isOption(arg, "--createDateTimeChecks")) {
 					argi++;
 					config.setCreateDateTimeChecks(parseBooleanArgument(arg));
+                } else if (isOption(arg, "--createMandatoryChecks")) {
+                    argi++;
+                    config.setCreateMandatoryChecks(parseBooleanArgument(arg));
 				} else if (isOption(arg, "--createImportTabs")) {
 					argi++;
 					config.setCreateImportTabs(parseBooleanArgument(arg));
@@ -491,6 +497,9 @@ public abstract class AbstractMain {
 				} else if (isOption(arg, "--createTypeConstraint")) {
 					argi++;
 					config.setCreateTypeConstraint(parseBooleanArgument(arg));
+				} else if (arg.equals("--verbose")) {
+					argi++;
+					config.setVerbose(parseBooleanArgument(arg));
 				} else if (arg.equals("--help")) {
 					printVersion();
 					System.err.println();
@@ -581,6 +590,7 @@ public abstract class AbstractMain {
 					System.err.println("--createNumChecks      create CHECK db constraints for numeric data types.");
 					System.err.println("--createTextChecks     create CHECK db constraints for text data types.");
 					System.err.println("--createDateTimeChecks create CHECK db constraints for date/time data types.");
+                    System.err.println("--createMandatoryChecks create CHECK db constraints for MANDATORY attributes.");
 					System.err.println("--ILIGML20             use eCH-0118-2.0 as transferformat");
 					System.err.println("--exportModels modelname  export data according to the given base ili-models");
 					System.err.println("--exportCrsModels modelname  export data according to the given ili-model (with alternate CRS)");
@@ -596,7 +606,9 @@ public abstract class AbstractMain {
 					System.err.println("--proxy host           proxy server to access model repositories.");
 					System.err.println("--proxyPort port       proxy port to access model repositories.");
 					System.err.println("--log filename         log messages to given file.");
+                    System.err.println("--logtime              include timestamps in logfile.");
 					System.err.println("--xtflog filename      log messages to given XTF file.");
+					System.err.println("--verbose              print additional information in validation results.");
 					System.err.println("--gui                  start GUI.");
 					System.err.println("--trace                enable trace messages.");
 					System.err.println("--help                 Display this help text.");

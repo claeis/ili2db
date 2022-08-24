@@ -1,12 +1,16 @@
 group 'ch.interlis'
-version '4.8.0'+System.getProperty('release','-SNAPSHOT')
+version '4.9.0'+System.getProperty('release','-SNAPSHOT')
 
 apply plugin: "java"
 apply plugin: "maven"
 
 
-sourceCompatibility = "1.6" 
-targetCompatibility = "1.6"
+if(!JavaVersion.current().isJava8()){
+  compileJava.options.compilerArgs.addAll(['--release', '6'])
+}else{
+  sourceCompatibility = JavaVersion.VERSION_1_6 
+  targetCompatibility = JavaVersion.VERSION_1_6
+}
 compileJava.options.encoding = 'US-ASCII'
 
 
@@ -319,10 +323,10 @@ configurations {
     ftpAntTask
 }
 dependencies {
-    implementation group: 'ch.interlis', name: 'iox-ili', version: '1.21.10'
-    implementation group: 'ch.interlis', name: 'ili2c-tool', version: "5.2.6"
-    implementation group: 'ch.interlis', name: 'ili2c-core', version: "5.2.6"
-    implementation group: 'ch.ehi', name: 'ehisqlgen', version: "1.14.1"
+    implementation group: 'ch.interlis', name: 'iox-ili', version: '1.21.12'
+    implementation group: 'ch.interlis', name: 'ili2c-tool', version: "5.2.8"
+    implementation group: 'ch.interlis', name: 'ili2c-core', version: "5.2.8"
+    implementation group: 'ch.ehi', name: 'ehisqlgen', version: "1.15.0"
     implementation group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: '2.9.7'
 	implementation group: 'net.iharder', name: 'base64', version: '2.3.9'
     
@@ -351,7 +355,7 @@ dependencies {
 	ili2fgdbImplementation "antlr:antlr:2.7.7" 	
 	compileOnly group: 'ch.ehi', name: 'fgdb4j', version: "1.1.1" // add as compileOnly, so that eclipse sees it
 	ili2mssqlImplementation group: 'com.microsoft.sqlserver', name: 'mssql-jdbc', version: '6.4.0.jre7'
-	ili2oraImplementation files('lib/ojdbc14.jar')
+	ili2oraImplementation files('libs/ojdbc14.jar')
 	ili2db group: project.group, name: project.name, version: project.version
     deployerJars "org.apache.maven.wagon:wagon-ftp:3.3.3"
     deployerJars "org.apache.maven.wagon:wagon-ssh:3.3.3"
