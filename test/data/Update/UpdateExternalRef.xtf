@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TRANSFER xmlns="http://www.interlis.ch/INTERLIS2.3">
+    <HEADERSECTION SENDER="ili2pg" VERSION="2.3">
+        <MODELS>
+            <MODEL NAME="Update" VERSION="2022-09-06"></MODEL>
+        </MODELS>
+    </HEADERSECTION>
+    <DATASECTION>
+        <Update.TestA BID="bid2">
+            <Update.TestA.ClassA2 TID="oid_A2_3">
+                <attrA2>SPRONGAS</attrA2>
+                <ClassA1 REF="oid_A1_3"></ClassA1>
+            </Update.TestA.ClassA2>
+            <Update.TestA.ClassA2 TID="oid_A2_5">
+                <attrA2>NOUSERON</attrA2>
+                <ClassA1 REF="oid_A1_3"></ClassA1>
+            </Update.TestA.ClassA2>
+        </Update.TestA>
+    </DATASECTION>
+</TRANSFER>
