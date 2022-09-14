@@ -606,8 +606,14 @@ public class TransferFromXtf {
 							delayedObjects.removeAll(fixedObjects);
 							if(functionCode==Config.FC_UPDATE){
 								// delete no longer existing objects
+								// also delete objects that still have missing references (delayedObjects)!
 								deleteExisitingObjects(existingObjectsOfCurrentBasket);
+
+								// clear existingObjectsOfCurrentBasket so it reflects the state of the DB.
+								// existingObjectsOfCurrentBasket is later used to decide whether to use an INSERT or UPDATE statement.
+								existingObjectsOfCurrentBasket.clear();
 							}
+
 							// TODO update import counters
 							endTid=oidPool.getLastSqlId();
 							try {
