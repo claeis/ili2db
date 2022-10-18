@@ -1,0 +1,19 @@
+INTERLIS 2.4;
+
+MODEL BagOfPrimTypes24
+    AT "mailto:noreply@localhost" VERSION "2022-09-26" =
+
+    DOMAIN
+        MyEnums = (E1, E2, E3);
+
+    TOPIC TestA =
+
+        CLASS ClassA1 =
+            Attr1: BAG {3} OF TEXT*16;
+            Attr2: BAG {12} OF 0 .. 60;
+            Attr3: BAG {9} OF MyEnums;
+        END ClassA1;
+
+    END TestA;
+
+END BagOfPrimTypes24.
