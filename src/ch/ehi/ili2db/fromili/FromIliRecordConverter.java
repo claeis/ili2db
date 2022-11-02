@@ -188,7 +188,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 	          }
 	                  metaInfo.setColumnInfo(dbTable.getName().getName(), null, dbColId.getName(), DbExtMetaInfo.TAG_COL_FOREIGNKEY, getSqlType(base.getViewable()).getName());
 	        }else if(def.isSecondaryTable()){
-	              if(createFk){
+                if(createFk && def.getAttrIfListOrBagCollectionOfPrimitiveType() == null){
 	                  dbColId.setReferencedTable(new DbTableName(schema.getName(),def.getMainTable().getSqlTablename()));
 	              }
 	                          metaInfo.setColumnInfo(dbTable.getName().getName(), null, dbColId.getName(), DbExtMetaInfo.TAG_COL_FOREIGNKEY, def.getMainTable().getSqlTablename());
@@ -303,6 +303,35 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 		          }
 		        }
 		  }
+
+        if (def.isSecondaryTable()) {
+            AttributeDef attr = def.getAttrIfListOrBagCollectionOfPrimitiveType();
+            if (attr != null) {
+                Type type  = attr.getDomain();
+                if (type.isOrdered()) {
+                    // add sequence column
+                    DbColId dbSeq = new DbColId();
+                    dbSeq.setName(DbNames.T_SEQ_COL);
+                    dbTable.addColumn(dbSeq);
+                }
+
+                ViewableWrapper parent = def.getMainTable();
+
+                String refAttrSqlName = ili2sqlName.mapIliAttributeDefReverse(attr, def.getSqlTablename(), parent.getSqlTablename());
+                DbColId dbParentId = new DbColId();
+                dbParentId.setName(refAttrSqlName);
+                dbParentId.setNotNull(true);
+
+                if(createFk){
+                    dbParentId.setReferencedTable(parent.getSqlTable());
+                }
+                metaInfo.setColumnInfo(dbTable.getName().getName(), null, dbParentId.getName(), DbExtMetaInfo.TAG_COL_FOREIGNKEY, parent.getSqlTablename());
+                if(createFkIdx){
+                    dbParentId.setIndex(true);
+                }
+                dbTable.addColumn(dbParentId);
+            }
+        }
 
 		// body
 		Iterator<ColumnWrapper> iter=def.getAttrIterator();

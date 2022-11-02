@@ -6,15 +6,14 @@ import java.util.List;
 import java.util.Set;
 
 import ch.ehi.ili2db.base.Ili2cUtility;
-import ch.ehi.ili2db.fromili.TransferFromIli;
 import ch.ehi.sqlgen.repository.DbTableName;
 import ch.interlis.ili2c.metamodel.AbstractClassDef;
-import ch.interlis.ili2c.metamodel.AssociationDef;
+import ch.interlis.ili2c.metamodel.AbstractCoordType;
 import ch.interlis.ili2c.metamodel.AttributeDef;
+import ch.interlis.ili2c.metamodel.BaseType;
 import ch.interlis.ili2c.metamodel.Domain;
-import ch.interlis.ili2c.metamodel.OIDType;
 import ch.interlis.ili2c.metamodel.Table;
-import ch.interlis.ili2c.metamodel.TransferDescription;
+import ch.interlis.ili2c.metamodel.Type;
 import ch.interlis.ili2c.metamodel.Viewable;
 
 /** Wrapper around a Viewable to  
@@ -95,6 +94,24 @@ public class ViewableWrapper {
 	}
 	public boolean isStructure() {
 		return (viewable instanceof Table) && !((Table)viewable).isIdentifiable();
+	}
+
+	/**
+	 * If this viewableWrapper represents a secondary table, that has only a single attribute with a maximum cardinality
+	 * greater than one and the type of that attribute is primitive then that attribute is returned. Otherwise, null is returned.
+	 */
+	public AttributeDef getAttrIfListOrBagCollectionOfPrimitiveType() {
+		if (isSecondaryTable() && attrv.size() == 1) {
+			ColumnWrapper columnWrapper = attrv.get(0);
+			if (columnWrapper.getViewableTransferElement().obj instanceof AttributeDef) {
+				AttributeDef attr = (AttributeDef) columnWrapper.getViewableTransferElement().obj;
+				Type type = attr.getDomain();
+				if (type.getCardinality().getMaximum() > 1 && (type instanceof BaseType && !(type instanceof AbstractCoordType))) {
+					return attr;
+				}
+			}
+		}
+		return null;
 	}
     public boolean hasOid() {
         if(isSecondaryTable()){

@@ -1619,7 +1619,7 @@ public class TransferFromXtf {
 		            StatementExecutionHelper seHelper = getStatementExecutionHelper(stmtKey.value);
 
                     recConv.writeRecord(basketSqlId, genericDomains,iomObj, aclass1,structEle, aclass, sqlType,
-                            sqlId, updateObj, ps,structQueue,aclass0);
+                            sqlId, updateObj, ps,structQueue,aclass0, null);
                     seHelper.write(ps);
                     closeUnbatchedPreparedStatement(stmtKey.value);
 			 }
@@ -1630,11 +1630,22 @@ public class TransferFromXtf {
 					String insert = getInsertStmt(updateObj,aclass1,secondary,structEle,stmtKey);
 					EhiLogger.traceBackendCmd(insert);
 					PreparedStatement ps = getPreparedStatement(stmtKey.value,insert);
-                    StatementExecutionHelper seHelper = getStatementExecutionHelper(stmtKey.value);
-                    recConv.writeRecord(basketSqlId, genericDomains,iomObj, aclass1,structEle, secondary, sqlType,
-                            sqlId, updateObj, ps,structQueue,aclass0);
-                    seHelper.write(ps);
-                    closeUnbatchedPreparedStatement(stmtKey.value);
+					StatementExecutionHelper seHelper = getStatementExecutionHelper(stmtKey.value);
+
+					AttributeDef attr = secondary.getAttrIfListOrBagCollectionOfPrimitiveType();
+					if (attr != null) {
+						for (int i = 0; i < iomObj.getattrvaluecount(attr.getName()); i++) {
+							recConv.writeRecord(basketSqlId, genericDomains, iomObj, aclass1, structEle, secondary, sqlType,
+									oidPool.newObjSqlId(), updateObj, ps, structQueue, aclass0, i);
+							seHelper.write(ps);
+						}
+					} else {
+						recConv.writeRecord(basketSqlId, genericDomains,iomObj, aclass1,structEle, secondary, sqlType,
+								sqlId, updateObj, ps,structQueue,aclass0, null);
+						seHelper.write(ps);
+					}
+
+					closeUnbatchedPreparedStatement(stmtKey.value);
 				}
 				
 			}
@@ -1830,7 +1841,7 @@ public class TransferFromXtf {
 			    while(attri.hasNext()){
 			    	AttributeDef lineattr=(AttributeDef)attri.next();
 					valuei = recConv.addAttrValue(iomObj, ili2sqlName.mapItfGeometryAsTable((Viewable)attrDef.getContainer(),attrDef,null), sqlId, sqlTableName,ps,
-							valuei, lineattr,lineattr,null,null,new HashMap<String,String>(),null);
+							valuei, lineattr,lineattr,null,null,new HashMap<String,String>(),null, null);
 			    }
 			}
 

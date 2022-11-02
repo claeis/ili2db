@@ -11,9 +11,12 @@ import ch.ehi.ili2db.base.Ili2dbException;
 import ch.ehi.ili2db.fromili.TransferFromIli;
 import ch.ehi.ili2db.gui.Config;
 import ch.interlis.ili2c.metamodel.AbstractClassDef;
+import ch.interlis.ili2c.metamodel.AbstractCoordType;
 import ch.interlis.ili2c.metamodel.AssociationDef;
 import ch.interlis.ili2c.metamodel.AttributeDef;
+import ch.interlis.ili2c.metamodel.BaseType;
 import ch.interlis.ili2c.metamodel.Element;
+import ch.interlis.ili2c.metamodel.LineType;
 import ch.interlis.ili2c.metamodel.RoleDef;
 import ch.interlis.ili2c.metamodel.TransferDescription;
 import ch.interlis.ili2c.metamodel.Viewable;
@@ -386,6 +389,14 @@ public class Viewable2TableMapper {
                                     addColumn(viewable,existingAttrs,newProp);
                                 }
                             }
+                        } else if (type.getCardinality().getMaximum() > 1 && type instanceof BaseType) {
+                            // create a new secondary table for attribute with cardinality greater than one
+                            sqlname=nameMapping.mapAttributeAsTable(iliclass, attr, epsgCode);
+                            ViewableWrapper attrWrapper = viewable.createSecondaryTable(sqlname);
+
+                            // add attribute to new secondary table
+                            addColumn(viewable, attrWrapper.getAttrv(), new ColumnWrapper(viewableTransferElement));
+                            trafoConfig.setAttrConfig(attr, TrafoConfigNames.SECONDARY_TABLE, sqlname);
                         }else{
                             // not a Geom type
                             addColumn(viewable,existingAttrs,new ColumnWrapper(viewableTransferElement));
