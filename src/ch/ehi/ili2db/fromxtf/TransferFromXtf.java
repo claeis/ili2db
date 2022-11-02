@@ -1619,7 +1619,7 @@ public class TransferFromXtf {
 		            StatementExecutionHelper seHelper = getStatementExecutionHelper(stmtKey.value);
 
                     recConv.writeRecord(basketSqlId, genericDomains,iomObj, aclass1,structEle, aclass, sqlType,
-                            sqlId, updateObj, ps,structQueue,aclass0, null);
+                            sqlId, updateObj, ps,structQueue,aclass0, 0, 0);
                     seHelper.write(ps);
                     closeUnbatchedPreparedStatement(stmtKey.value);
 			 }
@@ -1636,12 +1636,12 @@ public class TransferFromXtf {
 					if (attr != null) {
 						for (int i = 0; i < iomObj.getattrvaluecount(attr.getName()); i++) {
 							recConv.writeRecord(basketSqlId, genericDomains, iomObj, aclass1, structEle, secondary, sqlType,
-									oidPool.newObjSqlId(), updateObj, ps, structQueue, aclass0, i);
+									oidPool.newObjSqlId(), updateObj, ps, structQueue, aclass0, i, sqlId);
 							seHelper.write(ps);
 						}
 					} else {
 						recConv.writeRecord(basketSqlId, genericDomains,iomObj, aclass1,structEle, secondary, sqlType,
-								sqlId, updateObj, ps,structQueue,aclass0, null);
+								sqlId, updateObj, ps,structQueue,aclass0, 0, 0);
 						seHelper.write(ps);
 					}
 
@@ -1841,7 +1841,7 @@ public class TransferFromXtf {
 			    while(attri.hasNext()){
 			    	AttributeDef lineattr=(AttributeDef)attri.next();
 					valuei = recConv.addAttrValue(iomObj, ili2sqlName.mapItfGeometryAsTable((Viewable)attrDef.getContainer(),attrDef,null), sqlId, sqlTableName,ps,
-							valuei, lineattr,lineattr,null,null,new HashMap<String,String>(),null, null);
+							valuei, lineattr,lineattr,null,null,new HashMap<String,String>(),null, 0);
 			    }
 			}
 

@@ -119,12 +119,8 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 	}
 	public void writeRecord(long basketSqlId, java.util.Map<String,String> genericDomains,IomObject iomObj,Viewable iomClass,
 			AbstractStructWrapper structEle0, ViewableWrapper aclass, String sqlType,
-			long sqlId, boolean updateObj, PreparedStatement ps,ArrayList<AbstractStructWrapper> structQueue,Viewable originalClass, Integer attrIndex)
+			long sqlId, boolean updateObj, PreparedStatement ps,ArrayList<AbstractStructWrapper> structQueue,Viewable originalClass, int attrIndex, long parentSqlId)
 			throws SQLException, ConverterException {
-		if (attrIndex == null) {
-			attrIndex = 0;
-		}
-
 		int valuei=1;
 		
 		if(updateObj){
@@ -156,8 +152,7 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 				}
 
 				// reference to parent
-				String scopedName = Ili2cUtility.getRootViewable(aclass.getViewable()).getScopedName(null);
-				ps.setLong(valuei, oidPool.getObjSqlId(scopedName,iomObj.getobjectoid()));
+				ps.setLong(valuei, parentSqlId);
 				valuei++;
 			}
 		} else {
@@ -977,12 +972,8 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 	}
 
 	public int addAttrValue(IomObject iomObj, String sqlType, long sqlId,
-			String sqlTableName,PreparedStatement ps, int valuei, AttributeDef tableAttr,AttributeDef classAttr,Integer epsgCode,ArrayList<AbstractStructWrapper> structQueue,Map<String,String> genericDomains,Viewable originalClass, Integer attrIndex)
+			String sqlTableName,PreparedStatement ps, int valuei, AttributeDef tableAttr,AttributeDef classAttr,Integer epsgCode,ArrayList<AbstractStructWrapper> structQueue,Map<String,String> genericDomains,Viewable originalClass, int attrIndex)
 			throws SQLException, ConverterException {
-		if (attrIndex == null) {
-			attrIndex = 0;
-		}
-
 		if(true) { // attr.getExtending()==null){
 			 String attrName=tableAttr.getName();
 			if( tableAttr.isDomainBoolean()) {
