@@ -47,25 +47,25 @@ before_script:
     - 
 script: 
   - # ant -f build-ili2pg.xml jar
-  - gradle jar test 
-  - gradle ili2mysqlJar ili2mysqlTest -Dmyurl=jdbc:mysql://localhost/ili2db?useSSL=false -Dmyusr=root
-  - gradle ili2pgJar ili2pgTest -Ddburl=jdbc:postgresql:ili2db -Ddbusr=postgres
-  - gradle ili2gpkgJar ili2gpkgTest
-  - gradle ili2fgdbJar
-  - gradle ili2mssqlJar ili2mssqlTest "-Ddburl=jdbc:sqlserver://localhost;databaseName=ili2db" -Ddbusr=sa -Ddbpwd=MsInst2019x
-  - # gradle ili2oraJar ili2oraTest
-  - gradle -Drst2html=`which rst2html.py` usrdoc testreport ili2mysqlBindist ili2pgBindist ili2fgdbBindist ili2mssqlBindist ili2oraBindist
+  - ./gradlew jar test 
+  - ./gradlew ili2mysqlJar ili2mysqlTest -Dmyurl=jdbc:mysql://localhost/ili2db?useSSL=false -Dmyusr=root
+  - ./gradlew ili2pgJar ili2pgTest -Ddburl=jdbc:postgresql:ili2db -Ddbusr=postgres
+  - ./gradlew ili2gpkgJar ili2gpkgTest
+  - ./gradlew ili2fgdbJar
+  - ./gradlew ili2mssqlJar ili2mssqlTest "-Ddburl=jdbc:sqlserver://localhost;databaseName=ili2db" -Ddbusr=sa -Ddbpwd=MsInst2019x
+  - # ./gradlew ili2oraJar ili2oraTest
+  - ./gradlew -Drst2html=`which rst2html.py` usrdoc testreport ili2mysqlBindist ili2pgBindist ili2fgdbBindist ili2mssqlBindist ili2oraBindist
 after_failure:
   - cat build/junitreport/junit-noframes.html && sleep 10
 deploy:
   - provider: script
     skip_cleanup: true
-    script: ssh-keyscan -H ftp.interlis.ch >> ~/.ssh/known_hosts;gradle -Drst2html=`which rst2html.py` -Drepos_pwd=${repos_pwd} -Drepos_usr=jql_jars-INTE uploadArchives
+    script: ssh-keyscan -H ftp.interlis.ch >> ~/.ssh/known_hosts;./gradlew -Drst2html=`which rst2html.py` -Drepos_pwd=${repos_pwd} -Drepos_usr=jql_jars-INTE uploadArchives
     on:
       branch: master
   - provider: script
     skip_cleanup: true
-    script: ssh-keyscan -H ftp.interlis.ch >> ~/.ssh/known_hosts;gradle -Drst2html=`which rst2html.py` -Drepos_pwd=${repos_pwd} -Drepos_usr=jql_jars-INTE '-Drelease=' -Ddownloads_pwd=${downloads_pwd} -Ddownloads_usr=jql_downloads uploadArchives uploadBin
+    script: ssh-keyscan -H ftp.interlis.ch >> ~/.ssh/known_hosts;./gradlew -Drst2html=`which rst2html.py` -Drepos_pwd=${repos_pwd} -Drepos_usr=jql_jars-INTE '-Drelease=' -Ddownloads_pwd=${downloads_pwd} -Ddownloads_usr=jql_downloads uploadArchives uploadBin
     on:
       branch: stable
 notifications:
