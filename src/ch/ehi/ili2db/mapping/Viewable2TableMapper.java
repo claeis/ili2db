@@ -15,6 +15,7 @@ import ch.interlis.ili2c.metamodel.AbstractCoordType;
 import ch.interlis.ili2c.metamodel.AssociationDef;
 import ch.interlis.ili2c.metamodel.AttributeDef;
 import ch.interlis.ili2c.metamodel.BaseType;
+import ch.interlis.ili2c.metamodel.Cardinality;
 import ch.interlis.ili2c.metamodel.Element;
 import ch.interlis.ili2c.metamodel.LineType;
 import ch.interlis.ili2c.metamodel.RoleDef;
@@ -350,6 +351,7 @@ public class Viewable2TableMapper {
 	                    addColumn(viewable,attrProps,newProp);
 	                    attrWrapper.setAttrv(attrProps);
 	                }else{
+                        Cardinality cardinality = attr.getDomain().getCardinality();
                         ch.interlis.ili2c.metamodel.Type type=attr.getDomainResolvingAll();
                         if(type instanceof ch.interlis.ili2c.metamodel.AbstractCoordType || type instanceof ch.interlis.ili2c.metamodel.LineType
                             || (Ili2cUtility.isMultiSurfaceAttr(getTransferDescription(attr), attr) && (coalesceMultiSurface 
@@ -389,7 +391,7 @@ public class Viewable2TableMapper {
                                     addColumn(viewable,existingAttrs,newProp);
                                 }
                             }
-                        } else if (type.getCardinality().getMaximum() > 1 && type instanceof BaseType) {
+                        } else if (cardinality.getMaximum() > 1 && type instanceof BaseType) {
                             // create a new secondary table for attribute with cardinality greater than one
                             sqlname=nameMapping.mapAttributeAsTable(iliclass, attr, epsgCode);
                             ViewableWrapper attrWrapper = viewable.createSecondaryTable(sqlname);

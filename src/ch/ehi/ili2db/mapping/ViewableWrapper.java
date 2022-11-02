@@ -11,6 +11,7 @@ import ch.interlis.ili2c.metamodel.AbstractClassDef;
 import ch.interlis.ili2c.metamodel.AbstractCoordType;
 import ch.interlis.ili2c.metamodel.AttributeDef;
 import ch.interlis.ili2c.metamodel.BaseType;
+import ch.interlis.ili2c.metamodel.Cardinality;
 import ch.interlis.ili2c.metamodel.Domain;
 import ch.interlis.ili2c.metamodel.Table;
 import ch.interlis.ili2c.metamodel.Type;
@@ -105,8 +106,9 @@ public class ViewableWrapper {
 			ColumnWrapper columnWrapper = attrv.get(0);
 			if (columnWrapper.getViewableTransferElement().obj instanceof AttributeDef) {
 				AttributeDef attr = (AttributeDef) columnWrapper.getViewableTransferElement().obj;
-				Type type = attr.getDomain();
-				if (type.getCardinality().getMaximum() > 1 && (type instanceof BaseType && !(type instanceof AbstractCoordType))) {
+				Cardinality cardinality = attr.getDomain().getCardinality();
+				Type type = attr.getDomainResolvingAll();
+				if (cardinality.getMaximum() > 1 && (type instanceof BaseType && !(type instanceof AbstractCoordType))) {
 					return attr;
 				}
 			}
