@@ -26,6 +26,8 @@ import ch.ehi.ili2db.gui.Config;
 import ch.ehi.ili2db.mapping.NameMapping;
 import ch.interlis.ili2c.gui.UserSettings;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.text.ParseException;
 
 /**
@@ -69,7 +71,7 @@ public abstract class AbstractMain {
 		config.setAppSettings(settings);
 		if(args.length==0){
 			Ili2db.readAppSettings(settings);
-			ch.ehi.ili2db.gui.MainWizard.main(config,getAPP_HOME(),getAPP_NAME(),getDbPanelDescriptor(),getDbUrlConverter());
+			runGUI(config);
 			Ili2db.writeAppSettings(settings);
 			return;
 		}else{
@@ -643,7 +645,7 @@ public abstract class AbstractMain {
 			}
 		}
 		if(doGui){
-			ch.ehi.ili2db.gui.MainWizard.main(config,getAPP_HOME(),getAPP_NAME(),getDbPanelDescriptor(),getDbUrlConverter());
+			runGUI(config);
 			Ili2db.writeAppSettings(settings);
 		}else{
 		    if(config.getFunction()!=Config.FC_SCRIPT) {
@@ -734,4 +736,47 @@ public abstract class AbstractMain {
 	  }
 	  return null;
 	}
+	
+    public boolean runGUI(Config config) {
+    //ch.ehi.ili2db.gui.MainWizard dialog=new ch.ehi.ili2db.gui.MainWizard();
+    //return dialog.showDialog();
+    Class dialogClass=null;
+    try {
+        dialogClass=Class.forName(preventOptimziation("ch.ehi.ili2db.gui.MainWizard")); // avoid, that graalvm native-image detects a reference to MainFrame
+    } catch (ClassNotFoundException e) {
+        // ignore; report later
+    } 
+    Method mainFrameShowDialog=null;
+    if(dialogClass!=null) {
+        try {
+            mainFrameShowDialog = dialogClass.getMethod("showDialog");
+        }catch(NoSuchMethodException ex) {
+            // ignore; report later
+        }
+    }
+    if(mainFrameShowDialog!=null) {
+        try {
+            Object dialog=dialogClass.newInstance();
+            Object ret=mainFrameShowDialog.invoke(dialog);
+            return (Boolean)ret;                 
+        } catch (IllegalArgumentException ex) {
+            EhiLogger.logError("failed to open GUI",ex);
+        } catch (IllegalAccessException ex) {
+            EhiLogger.logError("failed to open GUI",ex);
+        } catch (InvocationTargetException ex) {
+            EhiLogger.logError("failed to open GUI",ex);
+        } catch (InstantiationException ex) {
+            EhiLogger.logError("failed to open GUI",ex);
+        }
+    }else {
+        EhiLogger.logError(getAPP_NAME()+": no GUI available");
+    }
+    return false;
+    }
+    private static String preventOptimziation(String val) {
+        StringBuffer buf=new StringBuffer(val.length());
+        buf.append(val);
+        return buf.toString();
+    }
+	
 }

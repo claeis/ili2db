@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TRANSFER xmlns="http://www.interlis.ch/INTERLIS2.3">
+    <HEADERSECTION SENDER="ili2pg" VERSION="2.3">
+        <MODELS>
+            <MODEL NAME="Update" VERSION="2022-09-06"></MODEL>
+        </MODELS>
+    </HEADERSECTION>
+    <DATASECTION>
+        <Update.TestA BID="bid1">
+            <Update.TestA.ClassA1 TID="oid_A1_1">
+                <attrA1>ADETANGL</attrA1>
+            </Update.TestA.ClassA1>
+            <Update.TestA.ClassA1 TID="oid_A1_4">
+                <attrA1>GUYEMASP</attrA1>
+            </Update.TestA.ClassA1>
+        </Update.TestA>
+    </DATASECTION>
+</TRANSFER>
