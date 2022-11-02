@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TRANSFER xmlns="http://www.interlis.ch/INTERLIS2.3">
+    <HEADERSECTION SENDER="ili2pg" VERSION="2.3">
+        <MODELS>
+            <MODEL NAME="Update" VERSION="2022-09-06"></MODEL>
+        </MODELS>
+    </HEADERSECTION>
+    <DATASECTION>
+        <Update.TestA BID="bid1">
+            <Update.TestA.ClassA1 TID="oid_A1_1">
+                <attrA1>OSLINATE</attrA1>
+            </Update.TestA.ClassA1>
+            <Update.TestA.ClassA1 TID="oid_A1_2">
+                <attrA1>VERADEST</attrA1>
+            </Update.TestA.ClassA1>
+            <Update.TestA.ClassA1 TID="oid_A1_3">
+                <attrA1>ERSIPTIN</attrA1>
+            </Update.TestA.ClassA1>
+            <Update.TestA.ClassA2 TID="oid_A2_1">
+                <attrA2>AULTIONY</attrA2>
+                <ClassA1 REF="oid_A1_1"></ClassA1>
+            </Update.TestA.ClassA2>
+            <Update.TestA.ClassA2 TID="oid_A2_2">
+                <attrA2>ROMARBIL</attrA2>
+                <ClassA1 REF="oid_A1_1"></ClassA1>
+            </Update.TestA.ClassA2>
+        </Update.TestA>
+    </DATASECTION>
+</TRANSFER>

@@ -1,0 +1,20 @@
+INTERLIS 2.3;
+
+MODEL Update
+  AT "mailto:noreply@localhost" VERSION "2022-09-06" =
+
+  TOPIC TestA =
+    CLASS ClassA1 =
+      attrA1 : TEXT;
+    END ClassA1;
+
+    CLASS ClassA2 =
+      attrA2 : TEXT;
+    END ClassA2;
+
+    ASSOCIATION ClassA1_A2 =
+          ClassA1 (EXTERNAL) -- {1} ClassA1;
+          ClassA2 -<> {0..*} ClassA2;
+    END ClassA1_A2;
+  END TestA;
+END Update.
