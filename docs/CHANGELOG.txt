@@ -16,6 +16,7 @@ LATEST
 
 ili2db 4.9.1 (2022-11-02)
 ------------------------------
+- remove Swing reference from Main (#496) 
 - fix error when using --update function (#450)
 - iox-ili-1.21.13
 - ili2c-5.3.0
