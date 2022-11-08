@@ -215,7 +215,7 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 					} else {
 						if (mapAsTextCol(((AttributeDef) attrs.get(rootAttr)))) {
 							valuei = addAttrValueTXT(iomObj, sqlType, sqlId, aclass.getSqlTablename(), ps,
-									valuei, attr, (AttributeDef) attrs.get(rootAttr), columnWrapper.getEpsgCode(), structQueue, genericDomains, originalClass);
+									valuei, attr, (AttributeDef) attrs.get(rootAttr), columnWrapper.getEpsgCode(), structQueue, genericDomains, originalClass, attrIndex);
 
 						} else {
 							valuei = addAttrValue(iomObj, sqlType, sqlId, aclass.getSqlTablename(), ps,
@@ -957,10 +957,10 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 	}
 
 	public int addAttrValueTXT(IomObject iomObj, String sqlType, long sqlId,
-							   String sqlTableName, PreparedStatement ps, int valuei, AttributeDef tableAttr, AttributeDef classAttr, Integer epsgCode, ArrayList<AbstractStructWrapper> structQueue, Map<String, String> genericDomains, Viewable originalClass)
+							   String sqlTableName, PreparedStatement ps, int valuei, AttributeDef tableAttr, AttributeDef classAttr, Integer epsgCode, ArrayList<AbstractStructWrapper> structQueue, Map<String, String> genericDomains, Viewable originalClass, int attrIndex)
 			throws SQLException, ConverterException {
 		String attrName=tableAttr.getName();
-		String value = classAttr == null ? null : iomObj.getattrvalue(attrName);
+		String value = classAttr == null ? null : iomObj.getattrprim(attrName, attrIndex);
 		if (value != null) {
 			ps.setString(valuei, value);
 		} else {

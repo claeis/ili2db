@@ -77,11 +77,27 @@ public class ViewableWrapper {
 			ViewableWrapper base=this;
 			while(base!=null){
 				allTablev.add(0,base);	// root (table with column t_type) must be first (because of query stmt)
-				allTablev.addAll(secondaryTables);
+
+				// omit secondary attribute tables with primitive type and cardinality greater than 1
+				for (ViewableWrapper secondary : secondaryTables) {
+					if (secondary.getAttrIfListOrBagCollectionOfPrimitiveType() == null) {
+						allTablev.add(secondary);
+					}
+				}
 				base=base.getExtending();
 			}
 		}
 		return allTablev;
+	}
+
+	public ArrayList<ViewableWrapper> getListOrBagCollectionOfPrimitiveTypeWrappers() {
+		ArrayList<ViewableWrapper> ret = new ArrayList<ViewableWrapper>();
+		for (ViewableWrapper secondary : secondaryTables) {
+			if (secondary.getAttrIfListOrBagCollectionOfPrimitiveType() != null) {
+				ret.add(secondary);
+			}
+		}
+		return ret;
 	}
 
 

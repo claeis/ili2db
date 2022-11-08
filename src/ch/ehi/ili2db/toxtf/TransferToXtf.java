@@ -18,9 +18,9 @@
 package ch.ehi.ili2db.toxtf;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.sql.Connection;
-import java.sql.ResultSetMetaData;
+import java.sql.ResultSet;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -46,10 +46,6 @@ import ch.ehi.ili2db.mapping.Viewable2TableMapping;
 import ch.ehi.ili2db.mapping.ViewableWrapper;
 import ch.ehi.iox.objpool.ObjectPoolManager;
 import ch.ehi.iox.objpool.impl.ArrayPoolImpl;
-import ch.ehi.iox.objpool.impl.IomObjectSerializer;
-import ch.ehi.iox.objpool.impl.JavaSerializer;
-import ch.ehi.iox.objpool.impl.StringSerializer;
-import ch.ehi.sqlgen.DbUtility;
 import ch.ehi.sqlgen.repository.DbTableName;
 import ch.interlis.ili2c.metamodel.AbstractClassDef;
 import ch.interlis.ili2c.metamodel.AssociationDef;
@@ -92,7 +88,6 @@ import ch.interlis.iox_j.StartBasketEvent;
 import ch.interlis.iox_j.StartTransferEvent;
 import ch.interlis.iox_j.filter.ReduceToBaseModel;
 import ch.interlis.iox_j.filter.Rounder;
-import ch.interlis.iox_j.filter.TranslateToOrigin;
 import ch.interlis.iox_j.filter.TranslateToTranslation;
 import ch.interlis.iox_j.logging.LogEventFactory;
 import ch.interlis.iox_j.validator.ValidationConfig;
@@ -1132,8 +1127,22 @@ public class TransferToXtf {
 				iomObj = recConv.convertRecord(rs, aclassWrapper, aclass,fixref, structWrapper,
 						structelev, structQueue, sqlid,genericDomains,iomTargetClass);
 				updateObjStat(iomObj.getobjecttag(), sqlid);
-				
-				
+
+				for (ViewableWrapper attrtableWrapper : aclassWrapper.getListOrBagCollectionOfPrimitiveTypeWrappers()) {
+					AttributeDef attributeDef = attrtableWrapper.getAttrIfListOrBagCollectionOfPrimitiveType();
+					if (attributeDef != null && !attributeDef.isTransient()) {
+						String query = createQueryStatementForListOrBagOfAttribute(attrtableWrapper, attributeDef, sqlid);
+
+						EhiLogger.traceBackendCmd(query);
+						Statement statement = conn.createStatement();
+						ResultSet resultSet = statement.executeQuery(query);
+
+						while (resultSet.next()) {
+							recConv.addAttrValue(resultSet, 1, sqlid, iomObj, attributeDef,attributeDef,null,structQueue,attrtableWrapper,fixref,genericDomains,null);
+						}
+					}
+				}
+
 		         // add StructWrapper around embedded associations that are mapped to a link table
 		         for(Iterator roleIt=aclass.getAttributesAndRoles2();roleIt.hasNext();) {
 		             ViewableTransferElement roleEle=(ViewableTransferElement) roleIt.next();
@@ -1145,7 +1154,6 @@ public class TransferToXtf {
 		                 }
 		             }
 		         }
-				
 				
 				// collect structvalues
 				while(!structQueue.isEmpty()){
@@ -1649,6 +1657,30 @@ public class TransferToXtf {
 
         return ret.toString();
     }
+
+	private String createQueryStatementForListOrBagOfAttribute(ViewableWrapper attrtableWrapper, AttributeDef attributeDef, long parentSqlid) {
+		ViewableWrapper parent = attrtableWrapper.getMainTable();
+		String refAttrSqlName = ili2sqlName.mapIliAttributeDefReverse(attributeDef, attrtableWrapper.getSqlTablename(), parent.getSqlTablename());
+
+		StringBuffer sb = new StringBuffer();
+		sb.append("SELECT ");
+
+		recConv.addAttrToQueryStmt(sb, "", attrtableWrapper.getSqlTableQName(), attributeDef, null, attrtableWrapper.getSqlTablename());
+
+		//sb.append(attributeDef.getName());
+		sb.append(" FROM ");
+		sb.append(attrtableWrapper.getSqlTableQName());
+		sb.append(" WHERE ");
+		sb.append(refAttrSqlName);
+		sb.append(" = ");
+		sb.append(parentSqlid);
+
+		if (attributeDef.getDomain().isOrdered()) {
+			sb.append(" ORDER BY ");
+			sb.append(DbNames.T_SEQ_COL);
+		}
+		return sb.toString();
+	}
 
 	private Map<String,BasketStat> basketStat=null;
 	private HashMap<String, ClassStat> objStat=new HashMap<String, ClassStat>();
