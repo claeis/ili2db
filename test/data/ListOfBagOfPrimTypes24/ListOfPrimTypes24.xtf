@@ -10,15 +10,33 @@
     </ili:headersection>
     <ili:datasection>
         <ListOfPrimTypes24:TestA ili:bid="ListOfPrimTypes24.TestA">
+
             <ListOfPrimTypes24:ClassA1 ili:tid="1">
                 <ListOfPrimTypes24:Attr1>Blaa</ListOfPrimTypes24:Attr1>
                 <ListOfPrimTypes24:Attr1>Ftaa</ListOfPrimTypes24:Attr1>
+                <ListOfPrimTypes24:Attr1>Gluu</ListOfPrimTypes24:Attr1>
                 <ListOfPrimTypes24:Attr2>12</ListOfPrimTypes24:Attr2>
-                <ListOfPrimTypes24:Attr2>14</ListOfPrimTypes24:Attr2>
-                <ListOfPrimTypes24:Attr2>61</ListOfPrimTypes24:Attr2>
+                <ListOfPrimTypes24:Attr2>14.1234</ListOfPrimTypes24:Attr2>
                 <ListOfPrimTypes24:Attr3>E2</ListOfPrimTypes24:Attr3>
                 <ListOfPrimTypes24:Attr3>E1</ListOfPrimTypes24:Attr3>
+                <ListOfPrimTypes24:Attr4>prefix-019-postfix</ListOfPrimTypes24:Attr4>
+                <ListOfPrimTypes24:Attr4>prefix-199-postfix</ListOfPrimTypes24:Attr4>
+                <ListOfPrimTypes24:Attr5><MIDEPS/></ListOfPrimTypes24:Attr5>
+                <ListOfPrimTypes24:Attr5><WOROLF/></ListOfPrimTypes24:Attr5>
+                <ListOfPrimTypes24:Attr6>ORYSIT</ListOfPrimTypes24:Attr6>
+                <ListOfPrimTypes24:Attr7>1997-10-14</ListOfPrimTypes24:Attr7>
+                <ListOfPrimTypes24:Attr7>2008-01-29</ListOfPrimTypes24:Attr7>
             </ListOfPrimTypes24:ClassA1>
+
+            <ListOfPrimTypes24:ClassA2 ili:tid="2">
+                <ListOfPrimTypes24:Attr1>
+                    <ListOfPrimTypes24:StructA2>
+                        <ListOfPrimTypes24:Attr1>HERSEN</ListOfPrimTypes24:Attr1>
+                        <ListOfPrimTypes24:Attr1>FLORIN</ListOfPrimTypes24:Attr1>
+                    </ListOfPrimTypes24:StructA2>
+                </ListOfPrimTypes24:Attr1>
+            </ListOfPrimTypes24:ClassA2>
+
         </ListOfPrimTypes24:TestA>
     </ili:datasection>
 </ili:transfer>
