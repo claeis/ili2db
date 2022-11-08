@@ -351,7 +351,7 @@ public class Viewable2TableMapper {
 	                    addColumn(viewable,attrProps,newProp);
 	                    attrWrapper.setAttrv(attrProps);
 	                }else{
-                        Cardinality cardinality = attr.getDomain().getCardinality();
+                        Cardinality cardinality = attr.getDomainOrDerivedDomain().getCardinality();
                         ch.interlis.ili2c.metamodel.Type type=attr.getDomainResolvingAll();
                         if(type instanceof ch.interlis.ili2c.metamodel.AbstractCoordType || type instanceof ch.interlis.ili2c.metamodel.LineType
                             || (Ili2cUtility.isMultiSurfaceAttr(getTransferDescription(attr), attr) && (coalesceMultiSurface 

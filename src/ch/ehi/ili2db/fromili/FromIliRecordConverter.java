@@ -307,7 +307,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
         if (def.isSecondaryTable()) {
             AttributeDef attr = def.getAttrIfListOrBagCollectionOfPrimitiveType();
             if (attr != null) {
-                Type type  = attr.getDomain();
+                Type type  = attr.getDomainOrDerivedDomain();
                 if (type.isOrdered()) {
                     // add sequence column
                     DbColId dbSeq = new DbColId();

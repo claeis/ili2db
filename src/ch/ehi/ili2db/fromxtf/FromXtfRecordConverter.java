@@ -144,7 +144,7 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 		if(aclass.isSecondaryTable()) {
 			AttributeDef attr = aclass.getAttrIfListOrBagCollectionOfPrimitiveType();
 			if (attr != null) {
-				Type type = attr.getDomain();
+				Type type = attr.getDomainOrDerivedDomain();
 				if (type.isOrdered()) {
 					// T_Seq
 					ps.setInt(valuei, attrIndex);

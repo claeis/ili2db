@@ -1675,7 +1675,7 @@ public class TransferToXtf {
 		sb.append(" = ");
 		sb.append(parentSqlid);
 
-		if (attributeDef.getDomain().isOrdered()) {
+		if (attributeDef.getDomainOrDerivedDomain().isOrdered()) {
 			sb.append(" ORDER BY ");
 			sb.append(DbNames.T_SEQ_COL);
 		}
