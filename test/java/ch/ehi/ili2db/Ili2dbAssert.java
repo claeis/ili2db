@@ -179,7 +179,10 @@ public class Ili2dbAssert {
 
     /**
      * see String.join introduced in Java 8.
+     *
+     * @deprecated replaced by String.join in Java 8
      */
+    @Deprecated
     private static String join(String delimiter, String[] elements) {
         if (elements == null || elements.length == 0) {
             return "";
