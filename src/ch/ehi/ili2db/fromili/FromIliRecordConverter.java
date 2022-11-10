@@ -188,7 +188,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 	          }
 	                  metaInfo.setColumnInfo(dbTable.getName().getName(), null, dbColId.getName(), DbExtMetaInfo.TAG_COL_FOREIGNKEY, getSqlType(base.getViewable()).getName());
 	        }else if(def.isSecondaryTable()){
-                if(createFk && def.getAttrIfListOrBagCollectionOfPrimitiveType() == null){
+                if(createFk && def.getPrimitiveCollectionAttr() == null){
 	                  dbColId.setReferencedTable(new DbTableName(schema.getName(),def.getMainTable().getSqlTablename()));
 	              }
 	                          metaInfo.setColumnInfo(dbTable.getName().getName(), null, dbColId.getName(), DbExtMetaInfo.TAG_COL_FOREIGNKEY, def.getMainTable().getSqlTablename());
@@ -305,7 +305,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 		  }
 
         if (def.isSecondaryTable()) {
-            AttributeDef attr = def.getAttrIfListOrBagCollectionOfPrimitiveType();
+            AttributeDef attr = def.getPrimitiveCollectionAttr();
             if (attr != null) {
                 Type type  = attr.getDomainOrDerivedDomain();
                 if (type.isOrdered()) {

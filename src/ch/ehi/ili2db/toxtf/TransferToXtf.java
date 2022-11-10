@@ -1128,10 +1128,10 @@ public class TransferToXtf {
 						structelev, structQueue, sqlid,genericDomains,iomTargetClass);
 				updateObjStat(iomObj.getobjecttag(), sqlid);
 
-				for (ViewableWrapper attrtableWrapper : aclassWrapper.getListOrBagCollectionOfPrimitiveTypeWrappers()) {
-					AttributeDef attributeDef = attrtableWrapper.getAttrIfListOrBagCollectionOfPrimitiveType();
+				for (ViewableWrapper attrtableWrapper : aclassWrapper.getPrimitiveCollectionWrappers()) {
+					AttributeDef attributeDef = attrtableWrapper.getPrimitiveCollectionAttr();
 					if (attributeDef != null && !attributeDef.isTransient()) {
-						String query = createQueryStatementForListOrBagOfAttribute(attrtableWrapper, attributeDef, sqlid);
+						String query = createQueryStatementForPrimitiveCollectionAttribute(attrtableWrapper, attributeDef, sqlid);
 
 						EhiLogger.traceBackendCmd(query);
 						Statement statement = conn.createStatement();
@@ -1658,7 +1658,7 @@ public class TransferToXtf {
         return ret.toString();
     }
 
-	private String createQueryStatementForListOrBagOfAttribute(ViewableWrapper attrtableWrapper, AttributeDef attributeDef, long parentSqlid) {
+	private String createQueryStatementForPrimitiveCollectionAttribute(ViewableWrapper attrtableWrapper, AttributeDef attributeDef, long parentSqlid) {
 		ViewableWrapper parent = attrtableWrapper.getMainTable();
 		String refAttrSqlName = ili2sqlName.mapIliAttributeDefReverse(attributeDef, attrtableWrapper.getSqlTablename(), parent.getSqlTablename());
 

@@ -80,7 +80,7 @@ public class ViewableWrapper {
 
 				// omit secondary attribute tables with primitive type and cardinality greater than 1
 				for (ViewableWrapper secondary : secondaryTables) {
-					if (secondary.getAttrIfListOrBagCollectionOfPrimitiveType() == null) {
+					if (secondary.getPrimitiveCollectionAttr() == null) {
 						allTablev.add(secondary);
 					}
 				}
@@ -90,10 +90,10 @@ public class ViewableWrapper {
 		return allTablev;
 	}
 
-	public ArrayList<ViewableWrapper> getListOrBagCollectionOfPrimitiveTypeWrappers() {
+	public ArrayList<ViewableWrapper> getPrimitiveCollectionWrappers() {
 		ArrayList<ViewableWrapper> ret = new ArrayList<ViewableWrapper>();
 		for (ViewableWrapper secondary : secondaryTables) {
-			if (secondary.getAttrIfListOrBagCollectionOfPrimitiveType() != null) {
+			if (secondary.getPrimitiveCollectionAttr() != null) {
 				ret.add(secondary);
 			}
 		}
@@ -114,10 +114,13 @@ public class ViewableWrapper {
 	}
 
 	/**
-	 * If this viewableWrapper represents a secondary table, that has only a single attribute with a maximum cardinality
-	 * greater than one and the type of that attribute is primitive then that attribute is returned. Otherwise, null is returned.
+	 * Get defining attribute definition for secondary collection table.
+	 *
+	 * @return Attribute definition of this secondary table, that has only a single attribute and a maximum cardinality
+	 * greater than one and a type of that attribute is primitive.
+	 * Null if this viewableWrapper does not represent a BAG / LIST OF primitive
 	 */
-	public AttributeDef getAttrIfListOrBagCollectionOfPrimitiveType() {
+	public AttributeDef getPrimitiveCollectionAttr() {
 		if (isSecondaryTable() && attrv.size() == 1) {
 			ColumnWrapper columnWrapper = attrv.get(0);
 			if (columnWrapper.getViewableTransferElement().obj instanceof AttributeDef) {

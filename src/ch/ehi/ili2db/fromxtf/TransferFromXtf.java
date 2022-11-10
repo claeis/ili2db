@@ -1632,7 +1632,7 @@ public class TransferFromXtf {
 					PreparedStatement ps = getPreparedStatement(stmtKey.value,insert);
 					StatementExecutionHelper seHelper = getStatementExecutionHelper(stmtKey.value);
 
-					AttributeDef attr = secondary.getAttrIfListOrBagCollectionOfPrimitiveType();
+					AttributeDef attr = secondary.getPrimitiveCollectionAttr();
 					if (attr != null) {
 						for (int i = 0; i < iomObj.getattrvaluecount(attr.getName()); i++) {
 							recConv.writeRecord(basketSqlId, genericDomains, iomObj, aclass1, structEle, secondary, sqlType,

@@ -142,7 +142,7 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 		}
 		
 		if(aclass.isSecondaryTable()) {
-			AttributeDef attr = aclass.getAttrIfListOrBagCollectionOfPrimitiveType();
+			AttributeDef attr = aclass.getPrimitiveCollectionAttr();
 			if (attr != null) {
 				Type type = attr.getDomainOrDerivedDomain();
 				if (type.isOrdered()) {
@@ -413,7 +413,7 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 		}
 		
 		if(aclass.isSecondaryTable()) {
-			AttributeDef attr = aclass.getAttrIfListOrBagCollectionOfPrimitiveType();
+			AttributeDef attr = aclass.getPrimitiveCollectionAttr();
 			if (attr != null) {
 				Type type = attr.getDomain();
 				if (type.isOrdered()) {
