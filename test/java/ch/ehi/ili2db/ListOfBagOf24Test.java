@@ -95,16 +95,16 @@ public abstract class ListOfBagOf24Test {
 
             assertTableContainsColumns(jdbcConnection, "classa1", "T_Id", "T_basket", "T_Ili_Tid", "attr6");
             assertTableContainsColumns(jdbcConnection, "structa", "T_Id", "T_basket", "T_Ili_Tid", "T_Seq", "attr1");
-            assertTableContainsColumns(jdbcConnection, "classa1_attr1", "T_Id", "T_basket", "classa1_attr1", "attr1");
-            assertTableContainsColumns(jdbcConnection, "classa1_attr2", "T_Id", "T_basket", "classa1_attr2", "attr2");
-            assertTableContainsColumns(jdbcConnection, "classa1_attr3", "T_Id", "T_basket", "classa1_attr3", "attr3");
-            assertTableContainsColumns(jdbcConnection, "classa1_attr4", "T_Id", "T_basket", "classa1_attr4", "attr4");
-            assertTableContainsColumns(jdbcConnection, "classa1_attr5", "T_Id", "T_basket", "classa1_attr5", "attr5");
-            assertTableContainsColumns(jdbcConnection, "classa1_attr7", "T_Id", "T_basket", "classa1_attr7", "attr7");
+            assertTableContainsColumns(jdbcConnection, "classa1_attr1", "T_Id", "T_basket", "T_Seq", "classa1_attr1", "attr1");
+            assertTableContainsColumns(jdbcConnection, "classa1_attr2", "T_Id", "T_basket", "T_Seq", "classa1_attr2", "attr2");
+            assertTableContainsColumns(jdbcConnection, "classa1_attr3", "T_Id", "T_basket", "T_Seq", "classa1_attr3", "attr3");
+            assertTableContainsColumns(jdbcConnection, "classa1_attr4", "T_Id", "T_basket", "T_Seq", "classa1_attr4", "attr4");
+            assertTableContainsColumns(jdbcConnection, "classa1_attr5", "T_Id", "T_basket", "T_Seq", "classa1_attr5", "attr5");
+            assertTableContainsColumns(jdbcConnection, "classa1_attr7", "T_Id", "T_basket", "T_Seq", "classa1_attr7", "attr7");
 
             assertTableContainsColumns(jdbcConnection, "classa2", "T_Id", "T_basket", "T_Ili_Tid");
             assertTableContainsColumns(jdbcConnection, "structa2", "T_Id", "T_basket", "T_Ili_Tid", "T_Seq", "classa2_attr1");
-            assertTableContainsColumns(jdbcConnection, "structa2_attr1", "T_Id", "T_basket", "structa2_attr1", "attr1");
+            assertTableContainsColumns(jdbcConnection, "structa2_attr1", "T_Id", "T_basket", "T_Seq", "structa2_attr1", "attr1");
         } finally {
             if (jdbcConnection != null) {
                 jdbcConnection.close();

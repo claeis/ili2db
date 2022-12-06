@@ -144,12 +144,9 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 		if(aclass.isSecondaryTable()) {
 			AttributeDef attr = aclass.getPrimitiveCollectionAttr();
 			if (attr != null) {
-				Type type = attr.getDomainOrDerivedDomain();
-				if (type.isOrdered()) {
-					// T_Seq
-					ps.setInt(valuei, attrIndex);
-					valuei++;
-				}
+				// T_Seq
+				ps.setInt(valuei, attrIndex);
+				valuei++;
 
 				// reference to parent
 				ps.setLong(valuei, parentSqlId);
@@ -415,18 +412,15 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 		if(aclass.isSecondaryTable()) {
 			AttributeDef attr = aclass.getPrimitiveCollectionAttr();
 			if (attr != null) {
-				Type type = attr.getDomainOrDerivedDomain();
-				if (type.isOrdered()) {
-					// sequence column
-					ret.append(sep);
-					ret.append(DbNames.T_SEQ_COL);
-					if(isUpdate){
-						ret.append("=?");
-					}else{
-						values.append(",?");
-					}
-					sep=",";
+				// sequence column
+				ret.append(sep);
+				ret.append(DbNames.T_SEQ_COL);
+				if(isUpdate){
+					ret.append("=?");
+				}else{
+					values.append(",?");
 				}
+				sep=",";
 
 				// reference to parent
 				ret.append(sep);

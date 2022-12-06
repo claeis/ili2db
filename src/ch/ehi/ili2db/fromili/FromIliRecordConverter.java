@@ -307,13 +307,10 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
         if (def.isSecondaryTable()) {
             AttributeDef attr = def.getPrimitiveCollectionAttr();
             if (attr != null) {
-                Type type  = attr.getDomainOrDerivedDomain();
-                if (type.isOrdered()) {
-                    // add sequence column
-                    DbColId dbSeq = new DbColId();
-                    dbSeq.setName(DbNames.T_SEQ_COL);
-                    dbTable.addColumn(dbSeq);
-                }
+                // add sequence column
+                DbColId dbSeq = new DbColId();
+                dbSeq.setName(DbNames.T_SEQ_COL);
+                dbTable.addColumn(dbSeq);
 
                 ViewableWrapper parent = def.getMainTable();
 
