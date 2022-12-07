@@ -11,6 +11,11 @@ MODEL BagOfPrimTypes24
         MyEnums = (E1, E2, E3);
         MyFormattedType = FORMAT BASED ON StructA ( "prefix-" Attr1/3 "-postfix" );
 
+        !!@CRS=EPSG:2056
+        Lkoord = COORD 480000.000 .. 850000.000 [INTERLIS.m],
+                       70000.000 .. 310000.000 [INTERLIS.m],
+                       ROTATION 2 -> 1;
+
     TOPIC TestA =
 
         CLASS ClassA1 =
@@ -21,6 +26,8 @@ MODEL BagOfPrimTypes24
             Attr5: BAG {2..*} OF BLACKBOX XML;
             Attr6: BAG {0..1} OF TEXT*8;
             Attr7: BAG OF DATE;
+            Attr8: BAG OF Lkoord;
+            Attr9: Lkoord;
         END ClassA1;
 
         STRUCTURE StructA2 =

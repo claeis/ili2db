@@ -26,6 +26,24 @@
                 <BagOfPrimTypes24:Attr6>ORYSIT</BagOfPrimTypes24:Attr6>
                 <BagOfPrimTypes24:Attr7>1997-10-14</BagOfPrimTypes24:Attr7>
                 <BagOfPrimTypes24:Attr7>2008-01-29</BagOfPrimTypes24:Attr7>
+                <BagOfPrimTypes24:Attr8>
+                    <geom:coord>
+                        <geom:c1>480000</geom:c1>
+                        <geom:c2>70000</geom:c2>
+                    </geom:coord>
+                </BagOfPrimTypes24:Attr8>
+                <BagOfPrimTypes24:Attr8>
+                    <geom:coord>
+                        <geom:c1>490000</geom:c1>
+                        <geom:c2>71000</geom:c2>
+                    </geom:coord>
+                </BagOfPrimTypes24:Attr8>
+                <BagOfPrimTypes24:Attr9>
+                    <geom:coord>
+                        <geom:c1>500000</geom:c1>
+                        <geom:c2>72000</geom:c2>
+                    </geom:coord>
+                </BagOfPrimTypes24:Attr9>
             </BagOfPrimTypes24:ClassA1>
 
             <BagOfPrimTypes24:ClassA2 ili:tid="2">

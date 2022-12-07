@@ -31,6 +31,10 @@ public abstract class ListOfBagOf24Test {
         Ili2dbAssert.assertTableContainsValues(jdbcConnection, table, columns, expectedValues, null);
     }
 
+    abstract protected void assertClassA1Attr8(Connection jdbcConnection) throws Exception;
+
+    abstract protected void assertClassA1Attr9(Connection jdbcConnection) throws Exception;
+
     @Test
     public void importBagOfPrimitiveTypesIli() throws SQLException, Ili2dbException {
         setup.resetDb();
@@ -48,6 +52,7 @@ public abstract class ListOfBagOf24Test {
         config.setMultiSurfaceTrafo(null);
         config.setMultilingualTrafo(null);
         config.setInheritanceTrafo(null);
+        config.setOneGeomPerTable(true);
         Ili2db.run(config, null);
 
         Connection jdbcConnection = null;
@@ -73,6 +78,8 @@ public abstract class ListOfBagOf24Test {
                         {"BagOfPrimTypes24.TestA.ClassA1.Attr7", "attr7", "classa1_attr7", null},
                         {"BagOfPrimTypes24.TestA.ClassA1.Attr6", "attr6", "classa1", null},
                         {"BagOfPrimTypes24.TestA.ClassA2.Attr1", "classa2_attr1", "structa2", "classa2"},
+                        {"BagOfPrimTypes24.TestA.ClassA1.Attr8", "attr8", "classa1", null},
+                        {"BagOfPrimTypes24.TestA.ClassA1.Attr9", "attr9", "classa1_attr9", null},
                 };
                 Ili2dbAssert.assertAttrNameTable(jdbcConnection, expectedValues, setup.getSchema());
             }
@@ -89,11 +96,12 @@ public abstract class ListOfBagOf24Test {
                         {"BagOfPrimTypes24.TestA.StructA2", "ch.ehi.ili2db.inheritance", "newClass"},
                         {"BagOfPrimTypes24.TestA.ClassA1.Attr4", "ch.ehi.ili2db.secondaryTable", "classa1_attr4"},
                         {"BagOfPrimTypes24.TestA.ClassA1.Attr5", "ch.ehi.ili2db.secondaryTable", "classa1_attr5"},
+                        {"BagOfPrimTypes24.TestA.ClassA1.Attr9:2056(BagOfPrimTypes24.TestA.ClassA1)", "ch.ehi.ili2db.secondaryTable", "classa1_attr9"},
                 };
                 Ili2dbAssert.assertTrafoTable(jdbcConnection, expectedValues, setup.getSchema());
             }
 
-            assertTableContainsColumns(jdbcConnection, "classa1", "T_Id", "T_basket", "T_Ili_Tid", "attr6");
+            assertTableContainsColumns(jdbcConnection, "classa1", "T_Id", "T_basket", "T_Ili_Tid", "attr6", "attr8");
             assertTableContainsColumns(jdbcConnection, "structa", "T_Id", "T_basket", "T_Ili_Tid", "T_Seq", "attr1");
             assertTableContainsColumns(jdbcConnection, "classa1_attr1", "T_Id", "T_basket", "T_Seq", "classa1_attr1", "attr1");
             assertTableContainsColumns(jdbcConnection, "classa1_attr2", "T_Id", "T_basket", "T_Seq", "classa1_attr2", "attr2");
@@ -101,6 +109,7 @@ public abstract class ListOfBagOf24Test {
             assertTableContainsColumns(jdbcConnection, "classa1_attr4", "T_Id", "T_basket", "T_Seq", "classa1_attr4", "attr4");
             assertTableContainsColumns(jdbcConnection, "classa1_attr5", "T_Id", "T_basket", "T_Seq", "classa1_attr5", "attr5");
             assertTableContainsColumns(jdbcConnection, "classa1_attr7", "T_Id", "T_basket", "T_Seq", "classa1_attr7", "attr7");
+            assertTableContainsColumns(jdbcConnection, "classa1_attr9", "T_Id", "T_basket", "attr9");
 
             assertTableContainsColumns(jdbcConnection, "classa2", "T_Id", "T_basket", "T_Ili_Tid");
             assertTableContainsColumns(jdbcConnection, "structa2", "T_Id", "T_basket", "T_Ili_Tid", "T_Seq", "classa2_attr1");
@@ -129,6 +138,7 @@ public abstract class ListOfBagOf24Test {
         config.setMultiSurfaceTrafo(null);
         config.setMultilingualTrafo(null);
         config.setInheritanceTrafo(null);
+        config.setOneGeomPerTable(true);
         Ili2db.run(config, null);
 
         Connection jdbcConnection = null;
@@ -154,6 +164,8 @@ public abstract class ListOfBagOf24Test {
                         {"ListOfPrimTypes24.TestA.ClassA1.Attr7", "attr7", "classa1_attr7", null},
                         {"ListOfPrimTypes24.TestA.ClassA1.Attr6", "attr6", "classa1", null},
                         {"ListOfPrimTypes24.TestA.ClassA2.Attr1", "classa2_attr1", "structa2", "classa2"},
+                        {"ListOfPrimTypes24.TestA.ClassA1.Attr8", "attr8", "classa1", null},
+                        {"ListOfPrimTypes24.TestA.ClassA1.Attr9", "attr9", "classa1_attr9", null},
                 };
                 Ili2dbAssert.assertAttrNameTable(jdbcConnection, expectedValues, setup.getSchema());
             }
@@ -170,11 +182,12 @@ public abstract class ListOfBagOf24Test {
                         {"ListOfPrimTypes24.TestA.StructA2", "ch.ehi.ili2db.inheritance", "newClass"},
                         {"ListOfPrimTypes24.TestA.ClassA1.Attr4", "ch.ehi.ili2db.secondaryTable", "classa1_attr4"},
                         {"ListOfPrimTypes24.TestA.ClassA1.Attr5", "ch.ehi.ili2db.secondaryTable", "classa1_attr5"},
+                        {"ListOfPrimTypes24.TestA.ClassA1.Attr9:2056(ListOfPrimTypes24.TestA.ClassA1)", "ch.ehi.ili2db.secondaryTable", "classa1_attr9"},
                 };
                 Ili2dbAssert.assertTrafoTable(jdbcConnection, expectedValues, setup.getSchema());
             }
 
-            assertTableContainsColumns(jdbcConnection, "classa1", "T_Id", "T_basket", "T_Ili_Tid", "attr6");
+            assertTableContainsColumns(jdbcConnection, "classa1", "T_Id", "T_basket", "T_Ili_Tid", "attr6", "attr8");
             assertTableContainsColumns(jdbcConnection, "structa", "T_Id", "T_basket", "T_Ili_Tid", "T_Seq", "attr1");
             assertTableContainsColumns(jdbcConnection, "classa1_attr1", "T_Id", "T_basket", "T_Seq", "classa1_attr1", "attr1");
             assertTableContainsColumns(jdbcConnection, "classa1_attr2", "T_Id", "T_basket", "T_Seq", "classa1_attr2", "attr2");
@@ -182,6 +195,7 @@ public abstract class ListOfBagOf24Test {
             assertTableContainsColumns(jdbcConnection, "classa1_attr4", "T_Id", "T_basket", "T_Seq", "classa1_attr4", "attr4");
             assertTableContainsColumns(jdbcConnection, "classa1_attr5", "T_Id", "T_basket", "T_Seq", "classa1_attr5", "attr5");
             assertTableContainsColumns(jdbcConnection, "classa1_attr7", "T_Id", "T_basket", "T_Seq", "classa1_attr7", "attr7");
+            assertTableContainsColumns(jdbcConnection, "classa1_attr9", "T_Id", "T_basket", "attr9");
 
             assertTableContainsColumns(jdbcConnection, "classa2", "T_Id", "T_basket", "T_Ili_Tid");
             assertTableContainsColumns(jdbcConnection, "structa2", "T_Id", "T_basket", "T_Ili_Tid", "T_Seq", "classa2_attr1");
@@ -210,6 +224,7 @@ public abstract class ListOfBagOf24Test {
         config.setMultilingualTrafo(null);
         config.setInheritanceTrafo(null);
         config.setDefaultSrsCode("2056");
+        config.setOneGeomPerTable(true);
         setup.setXYParams(config);
         Ili2db.run(config, null);
 
@@ -225,6 +240,8 @@ public abstract class ListOfBagOf24Test {
             assertTableContainsValues(jdbcConnection, "classa1_attr5", new String[]{"attr5"}, new String[][]{{"<MIDEPS xmlns=\"\"></MIDEPS>"}, {"<WOROLF xmlns=\"\"></WOROLF>"}});
             assertTableContainsValues(jdbcConnection, "classa1_attr7", new String[]{"attr7"}, new String[][]{{"1997-10-14"}, {"2008-01-29"}});
             assertTableContainsValues(jdbcConnection, "structa2_attr1", new String[]{"attr1"}, new String[][]{{"HERSEN"}, {"FLORIN"}});
+            assertClassA1Attr8(jdbcConnection);
+            assertClassA1Attr9(jdbcConnection);
 
         } finally {
             if (jdbcConnection != null) {
@@ -250,6 +267,7 @@ public abstract class ListOfBagOf24Test {
         config.setMultilingualTrafo(null);
         config.setInheritanceTrafo(null);
         config.setDefaultSrsCode("2056");
+        config.setOneGeomPerTable(true);
         setup.setXYParams(config);
         Ili2db.run(config, null);
 
@@ -273,6 +291,7 @@ public abstract class ListOfBagOf24Test {
         config.setMultilingualTrafo(null);
         config.setInheritanceTrafo(null);
         config.setDefaultSrsCode("2056");
+        config.setOneGeomPerTable(true);
         setup.setXYParams(config);
 
         config.setSqlColsAsText(Config.SQL_COLS_AS_TEXT_ENABLE);
@@ -282,7 +301,7 @@ public abstract class ListOfBagOf24Test {
         assertListOf24DbContent();
     }
 
-    private void assertListOf24DbContent() throws SQLException {
+    private void assertListOf24DbContent() throws Exception {
         Connection jdbcConnection = null;
         try {
             jdbcConnection = setup.createConnection();
@@ -335,6 +354,9 @@ public abstract class ListOfBagOf24Test {
                     {"0", "1997-10-14"},
                     {"1", "2008-01-29"},
             });
+
+            assertClassA1Attr8(jdbcConnection);
+            assertClassA1Attr9(jdbcConnection);
 
             assertTableContainsValues(jdbcConnection, "structa2_attr1", new String[]{
                     "T_Seq", "attr1"
@@ -421,7 +443,7 @@ public abstract class ListOfBagOf24Test {
         IomObject iomObj = ((ObjectEvent) event).getIomObject();
 
         assertTrue(iomObj.getobjecttag().endsWith(".TestA.ClassA1"));
-        assertEquals(7, iomObj.getattrcount());
+        assertEquals(9, iomObj.getattrcount());
 
         assertEquals(3, iomObj.getattrvaluecount("Attr1"));
         assertEquals("Blaa", iomObj.getattrprim("Attr1", 0));
@@ -450,6 +472,14 @@ public abstract class ListOfBagOf24Test {
         assertEquals(2, iomObj.getattrvaluecount("Attr7"));
         assertEquals("1997-10-14", iomObj.getattrprim("Attr7", 0));
         assertEquals("2008-01-29", iomObj.getattrprim("Attr7", 1));
+
+        assertEquals(1, iomObj.getattrvaluecount("Attr8"));
+        assertEquals("480000.000", iomObj.getattrobj("Attr8", 0).getattrvalue("C1"));
+        assertEquals("70000.000", iomObj.getattrobj("Attr8", 0).getattrvalue("C2"));
+
+        assertEquals(1, iomObj.getattrvaluecount("Attr9"));
+        assertEquals("500000.000", iomObj.getattrobj("Attr9", 0).getattrvalue("C1"));
+        assertEquals("72000.000", iomObj.getattrobj("Attr9", 0).getattrvalue("C2"));
     }
 
     private void assertClassA2(IoxEvent event) {
