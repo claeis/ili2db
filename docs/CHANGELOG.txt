@@ -13,6 +13,8 @@ ideas/open issues/questions
 
 LATEST
 ---------------------------
+- ili24: LIST/BAG mit primitiven Typen (nicht nur mit Strukturen) (#471) 
+- iox-ili-1.21.14
 
 ili2db 4.9.1 (2022-11-02)
 ------------------------------

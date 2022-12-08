@@ -107,7 +107,7 @@ public class Rounder implements IoxFilter {
                 String attrValue=iomObj.getattrprim(srcAttrName,attri);
                 try {
                     BigDecimal value=roundNumber(attrValue,(NumericType)type);
-                    ((Iom_jObject)iomObj).changeattrvalue(srcAttrName, attri, value.toString());
+                    ((Iom_jObject)iomObj).setattrvalue(srcAttrName, attri, value.toString());
                 }catch(NumberFormatException ex) {
                     // ignore; keep value as it is
                 }
