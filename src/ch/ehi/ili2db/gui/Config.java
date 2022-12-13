@@ -4,6 +4,7 @@ import java.util.Properties;
 
 import ch.ehi.basics.settings.Settings;
 import ch.ehi.sqlgen.generator.SqlConfiguration;
+import ch.interlis.iox_j.inifile.MetaConfig;
 import ch.interlis.iox_j.validator.ValidationConfig;
 import ch.interlis.iox_j.validator.Validator;
 
@@ -111,61 +112,66 @@ public class Config extends Settings {
     public static final String CLASSNAME_TAB_ILINAME_COLSIZE = PREFIX+".classnameTabIlinameColSize";
     public static final String INHERIT_TAB_THIS_COLSIZE = PREFIX+".inheritTabThisColSize";
 	public static final String CREATE_TYPE_CONSTRAINT=PREFIX+".createTypeConstraint";
-	private int function=FC_UNDEFINED;
-	private String dburl;
-	private String dbusr;
-	private String dbpwd;
-	private Properties dbprops=null;
-    private String dbparams=null;
-	private String dbhost;
-	private String dbport;
-	private String dbdatabase;
-	private String dbfile;
-	private String dbschema=null;
-	private String modeldir;
-	private String models=null;
-    private String nameLanguage=null;
-	private String exportModels=null;
-    private String exportCrsModels=null;
-	private String datasetName=null;
-	private String baskets=null;
-	private String topics=null;
-	private String createscript;
-	private String dropscript;
-	private String xtffile;
-	private String preScript;
-	private String postScript;
-	private String idGenerator=null;
-	private String geometryConverter;
-	private String ili2dbCustomStrategy;
-	private String initStrategy;
-	private String jdbcDriver=null;
-	private String ddlGenerator=null;
-	private String deleteMode=null;
-	private String logfile=null;
-    private String xtfLogfile=null;
-	private boolean configReadFromDb=false;
-	private boolean itfTransferFile=false;
-	private String validConfigFileName=null;
-    private boolean doImplicitSchemaImport=false; // do implicit schema import during data import
-	private boolean validation=false;
-	private boolean skipReferenceErrors=false;
-    private boolean exportTid=false;
-    private boolean ver3_export=false;
-    private boolean importTid=false;
-    private boolean importBid=false;
-    private Integer fetchSize = null;
-    private Integer batchSize = null;
-    private boolean disableRounding=false;
-    private Long minIdSeqValue=null;
-	private Long maxIdSeqValue=null;
-	private boolean setupPgExt=false;
-	private String transferFileFormat=null;
-	private String iliMetaAttrsFile=null;
-    private String domainAssignments=null;
-    private boolean xtfAttrText=false;
-    private boolean repairTouchingLines = true;
-    private boolean logTime=false;
+	
+    public static final String TRANSIENT_STRING_DBURL=PREFIX+".dburl";
+    public static final String TRANSIENT_STRING_DBUSR=PREFIX+".dbusr";
+    public static final String TRANSIENT_STRING_DBPWD=PREFIX+".dbpwd";
+    public static final String TRANSIENT_STRING_DBPARAMS=PREFIX+".dbparams";
+    public static final String TRANSIENT_STRING_DBHOST=PREFIX+".dbhost";
+    public static final String TRANSIENT_STRING_DBPORT=PREFIX+".dbport";
+    public static final String TRANSIENT_STRING_DBDATABASE=PREFIX+".dbdatabase";
+    public static final String TRANSIENT_STRING_DBFILE=PREFIX+".dbfile";
+    public static final String TRANSIENT_STRING_DBSCHEMA=PREFIX+".dbschema";
+    public static final String TRANSIENT_STRING_MODELDIR=PREFIX+".modeldir";
+    public static final String TRANSIENT_STRING_MODELS=PREFIX+".models";
+    public static final String TRANSIENT_STRING_NAMELANGUAGE=PREFIX+".nameLanguage";
+    public static final String TRANSIENT_STRING_EXPORTMODELS=PREFIX+".exportModels";
+    public static final String TRANSIENT_STRING_EXPORTCRSMODELS=PREFIX+".exportCrsModels";
+    public static final String TRANSIENT_STRING_DATASETNAME=PREFIX+".datasetName";
+    public static final String TRANSIENT_STRING_BASKETS=PREFIX+".baskets";
+    public static final String TRANSIENT_STRING_TOPICS=PREFIX+".topics";
+    public static final String TRANSIENT_STRING_CREATSCRIPT=PREFIX+".createscript";
+    public static final String TRANSIENT_STRING_DROPSCRIPT=PREFIX+".dropscript";
+    public static final String TRANSIENT_STRING_XTFFILE=PREFIX+".xtffile";
+    public static final String TRANSIENT_STRING_PRESCRIPT=PREFIX+".preScript";
+    public static final String TRANSIENT_STRING_POSTSCRIPT=PREFIX+".postScript";
+    public static final String TRANSIENT_STRING_IDGENERATOR=PREFIX+".idGenerator";
+    public static final String TRANSIENT_STRING_GEOMETRYCONVERTER=PREFIX+".geometryConverter";
+    public static final String TRANSIENT_STRING_ILI2DBCUSTOMSTRATEGY=PREFIX+".ili2dbCustomStrategy";
+    public static final String TRANSIENT_STRING_INITSTRATEGY=PREFIX+".initStrategy";
+    public static final String TRANSIENT_STRING_JDBCDRIVER=PREFIX+".jdbcDriver";
+    public static final String TRANSIENT_STRING_DDLGENERATOR=PREFIX+".ddlGenerator";
+    public static final String TRANSIENT_STRING_DELETEMODE=PREFIX+".deleteMode";
+    public static final String TRANSIENT_STRING_LOGFILE=PREFIX+".logfile";
+    public static final String TRANSIENT_STRING_XTFLOGFILE=PREFIX+".xtfLogfile";
+    public static final String TRANSIENT_STRING_VALIDCONFIGFILENAME=PREFIX+".validConfigFileName";
+    public static final String TRANSIENT_STRING_METACONFIGFILENAME=PREFIX+".metaConfigFileName";
+    public static final String TRANSIENT_STRING_ILIMETAATTRSFILE=PREFIX+".iliMetaAttrsFile";
+    public static final String TRANSIENT_STRING_DOMAINASSIGNMENTS=PREFIX+".domainAssignments";
+    public static final String TRANSIENT_STRING_TRANSFERFILEFORMAT=PREFIX+".transferFileFormat";
+    public static final String TRANSIENT_BOOLEAN_CONFIGREADFROMDB=PREFIX+".configReadFromDb";
+    public static final String TRANSIENT_BOOLEAN_ITFTRANSFERFILE=PREFIX+".itfTransferFile";
+    public static final String TRANSIENT_BOOLEAN_VALIDATION=PREFIX+".validation";
+    public static final String TRANSIENT_BOOLEAN_SKIPREFERENCEERRRORS=PREFIX+".skipReferenceErrors";
+    public static final String TRANSIENT_BOOLEAN_EXPORTTID=PREFIX+".exportTid";
+    public static final String TRANSIENT_BOOLEAN_VER3_EXPORT=PREFIX+".ver3_export";
+    public static final String TRANSIENT_BOOLEAN_IMPORTTID=PREFIX+".importTid";
+    public static final String TRANSIENT_BOOLEAN_IMPORTBID=PREFIX+".importBid";
+    public static final String TRANSIENT_BOOLEAN_DISABLEROUNDING=PREFIX+".disableRounding";
+    public static final String TRANSIENT_BOOLEAN_SETUPPGEXT=PREFIX+".setupPgExt";
+    public static final String TRANSIENT_BOOLEAN_REPAIRTOUCHINGLINES=PREFIX+".repairTouchingLines";
+    public static final String TRANSIENT_BOOLEAN_LOGTIME=PREFIX+".logTime";
+    public static final String TRANSIENT_BOOLEAN_DOIMPLICITSCHEMAIMPORT=PREFIX+".doImplicitSchemaImport";
+    public static final String TRANSIENT_BOOLEAN_DISABLEAREAVALIDATION=PREFIX+".disableAreaValidation";
+    public static final String TRANSIENT_BOOLEAN_ONLYMULTIPLICITYREDUCTION=PREFIX+".onlyMultiplicityReduction";
+    public static final String TRANSIENT_BOOLEAN_SKIPGEOMETRYERRORS=PREFIX+".skipGeometryErrors";
+    public static final String TRANSIENT_INTEGER_FETCHSIZE=PREFIX+".fetchSize";
+    public static final String TRANSIENT_INTEGER_BATCHSIZE=PREFIX+".batchSize";
+    public static final String TRANSIENT_INTEGER_FUNCTION=PREFIX+".function";
+    public static final String TRANSIENT_LONG_MINIDSEQVALUE=PREFIX+".minIdSeqValue";
+    public static final String TRANSIENT_LONG_MAXIDSEQVALUE=PREFIX+".maxIdSeqValue";
+    public static final String TRANSIENT_PROPERTIES_DBPROPS=PREFIX+".dbprops";
+    
 	final static public String ILIGML20="ILIGML20"; 
 	
     static public final int FC_UNDEFINED=0;
@@ -178,154 +184,158 @@ public class Config extends Settings {
     static public final int FC_SCRIPT=7;
     static public final int FC_VALIDATE=8;
 	public String getIdGenerator() {
-		return idGenerator;
+		return getTransientValue(TRANSIENT_STRING_IDGENERATOR);
 	}
 	public void setIdGenerator(String idGeneratorClassName) {
-		this.idGenerator = idGeneratorClassName;
+	    setTransientValue(TRANSIENT_STRING_IDGENERATOR,idGeneratorClassName);
 	}
 	public String getGeometryConverter() {
-		return geometryConverter;
+		return getTransientValue(TRANSIENT_STRING_GEOMETRYCONVERTER);
 	}
 	public void setGeometryConverter(String adapterClassName) {
-		this.geometryConverter = adapterClassName;
+	    setTransientValue(TRANSIENT_STRING_GEOMETRYCONVERTER,adapterClassName);
 	}
 	public String getIli2dbCustomStrategy() {
-		return this.ili2dbCustomStrategy;
+		return getTransientValue(TRANSIENT_STRING_ILI2DBCUSTOMSTRATEGY);
 	}
 	public void setIli2dbCustomStrategy(String value) {
-		this.ili2dbCustomStrategy=value;
+        setTransientValue(TRANSIENT_STRING_ILI2DBCUSTOMSTRATEGY,value);
 	}
 	public String getCreatescript() {
-		return createscript;
+		return getTransientValue(TRANSIENT_STRING_CREATSCRIPT);
 	}
 	public void setCreatescript(String createscript) {
-		this.createscript = createscript;
+	    setTransientValue(TRANSIENT_STRING_CREATSCRIPT,createscript);
 	}
 	public String getDbpwd() {
-		return dbpwd;
+		return getTransientValue(TRANSIENT_STRING_DBPWD);
 	}
 	public void setDbpwd(String dbpwd) {
-		this.dbpwd = dbpwd;
+	    setTransientValue(TRANSIENT_STRING_DBPWD,dbpwd);
 	}
 	public String getDburl() {
-		return dburl;
+		return getTransientValue(TRANSIENT_STRING_DBURL);
 	}
 	public void setDburl(String dburl) {
-		this.dburl = dburl;
+	    setTransientValue(TRANSIENT_STRING_DBURL,dburl);
 	}
 	public String getDbusr() {
-		return dbusr;
+		return getTransientValue(TRANSIENT_STRING_DBUSR);
 	}
 	public void setDbusr(String dbusr) {
-		this.dbusr = dbusr;
+	    setTransientValue(TRANSIENT_STRING_DBUSR,dbusr);
 	}
     public Properties getDbProperties() {
-        return dbprops;
+        return (Properties)getTransientObject(TRANSIENT_PROPERTIES_DBPROPS);
     }
     public void setDbProperties(Properties props) {
-        this.dbprops=props;
+        setTransientObject(TRANSIENT_PROPERTIES_DBPROPS,props);
     }
 	public String getDropscript() {
-		return dropscript;
+		return getTransientValue(TRANSIENT_STRING_DROPSCRIPT);
 	}
 	public void setDropscript(String dropscript) {
-		this.dropscript = dropscript;
+	    setTransientValue(TRANSIENT_STRING_DROPSCRIPT,dropscript);
 	}
 	public String getModeldir() {
-		return modeldir;
+		return getTransientValue(TRANSIENT_STRING_MODELDIR);
 	}
 	public void setModeldir(String modeldir) {
-		this.modeldir = modeldir;
+	    setTransientValue(TRANSIENT_STRING_MODELDIR,modeldir);
 	}
 	public String getModels() {
-		return models;
+		return getTransientValue(TRANSIENT_STRING_MODELS);
 	}
 	public void setModels(String models) {
-		this.models = models;
+	    setTransientValue(TRANSIENT_STRING_MODELS,models);
 	}
 	public String getExportModels() {
-		return exportModels;
+		return getTransientValue(TRANSIENT_STRING_EXPORTMODELS);
 	}
 	public void setExportModels(String models) {
-		this.exportModels = models;
+	    setTransientValue(TRANSIENT_STRING_EXPORTMODELS,models);
 	}
     public String getCrsExportModels() {
-        return exportCrsModels;
+        return getTransientValue(TRANSIENT_STRING_EXPORTCRSMODELS);
     }
     public void setCrsExportModels(String models) {
-        this.exportCrsModels = models;
+        setTransientValue(TRANSIENT_STRING_EXPORTCRSMODELS,models);
     }
 	public String getDatasetName() {
-		return datasetName;
+		return getTransientValue(TRANSIENT_STRING_DATASETNAME);
 	}
 	public void setDatasetName(String datasetName) {
-		this.datasetName = datasetName;
+	    setTransientValue(TRANSIENT_STRING_DATASETNAME,datasetName);
 	}
 	public String getBaskets() {
-		return baskets;
+		return getTransientValue(TRANSIENT_STRING_BASKETS);
 	}
 	public void setBaskets(String baskets) {
-		this.baskets = baskets;
+	    setTransientValue(TRANSIENT_STRING_BASKETS, baskets);
 	}
 	public String getTopics() {
-		return topics;
+		return getTransientValue(TRANSIENT_STRING_TOPICS);
 	}
 	public void setTopics(String topics) {
-		this.topics = topics;
+	    setTransientValue(TRANSIENT_STRING_TOPICS,topics);
 	}
 	public String getXtffile() {
-		return xtffile;
+        String value=getTransientValue(TRANSIENT_STRING_XTFFILE);
+        if(MetaConfig.NULL.equals(value))return null;
+        return value;
 	}
 	public void setXtffile(String xtffile) {
-		this.xtffile = xtffile;
+	    setTransientValue(TRANSIENT_STRING_XTFFILE,xtffile);
 	}
 	public int getFunction() {
+	    Integer function=(Integer)getTransientObject(TRANSIENT_INTEGER_FUNCTION);
+	    if(function==null) return FC_UNDEFINED;
 		return function;
 	}
 	public void setFunction(int function) {
-		this.function = function;
+	    setTransientObject(TRANSIENT_INTEGER_FUNCTION,new Integer(function));
 	}
     public String getDbParams() {
-        return dbparams;
+        return getTransientValue(TRANSIENT_STRING_DBPARAMS);
     }
     public void setDbParams(String propFile) {
-        this.dbparams = propFile;
+        setTransientValue(TRANSIENT_STRING_DBPARAMS, propFile);
     }
 	public String getDbfile() {
-		return dbfile;
+		return getTransientValue(TRANSIENT_STRING_DBFILE);
 	}
     public void setDbfile(String dbfile) {
-		this.dbfile = dbfile;
+        setTransientValue(TRANSIENT_STRING_DBFILE,dbfile);
 	}
 	public String getDbhost() {
-		return dbhost;
+		return getTransientValue(TRANSIENT_STRING_DBHOST);
 	}
 	public void setDbhost(String dbhost) {
-		this.dbhost = dbhost;
+	    setTransientValue(TRANSIENT_STRING_DBHOST,dbhost);
 	}
 	public String getDbport() {
-		return dbport;
+		return getTransientValue(TRANSIENT_STRING_DBPORT);
 	}
 	public void setDbport(String dbport) {
-		this.dbport = dbport;
+	    setTransientValue(TRANSIENT_STRING_DBPORT,dbport);
 	}
 	public String getDbdatabase() {
-		return dbdatabase;
+		return getTransientValue(TRANSIENT_STRING_DBDATABASE);
 	}
 	public void setDbdatabase(String dbdatabase) {
-		this.dbdatabase = dbdatabase;
+	    setTransientValue(TRANSIENT_STRING_DBDATABASE,dbdatabase);
 	}
 	public String getDdlGenerator() {
-		return ddlGenerator;
+		return getTransientValue(TRANSIENT_STRING_DDLGENERATOR);
 	}
 	public void setDdlGenerator(String ddlGenerator) {
-		this.ddlGenerator = ddlGenerator;
+	    setTransientValue(TRANSIENT_STRING_DDLGENERATOR, ddlGenerator);
 	}
 	public String getJdbcDriver() {
-		return jdbcDriver;
+		return getTransientValue(TRANSIENT_STRING_JDBCDRIVER);
 	}
 	public void setJdbcDriver(String jdbcDriver) {
-		this.jdbcDriver = jdbcDriver;
+	    setTransientValue(TRANSIENT_STRING_JDBCDRIVER, jdbcDriver);
 	}
 	public String getSender() {
 		return getValue(SENDER);
@@ -591,16 +601,20 @@ public class Config extends Settings {
 		setValue(TID_HANDLING,value);
 	}
     public void setImportTid(boolean enable) {
-        importTid=enable;
+        setTransientObject(TRANSIENT_BOOLEAN_IMPORTTID,new Boolean(enable));
     }
     public boolean isImportTid() {
-        return importTid;
+        Boolean value=(Boolean)getTransientObject(TRANSIENT_BOOLEAN_IMPORTTID);
+        if(value==null)return false;
+        return value;
     }
     public void setExportTid(boolean enable) {
-        exportTid=enable;
+        setTransientObject(TRANSIENT_BOOLEAN_EXPORTTID,new Boolean(enable));
     }
     public boolean isExportTid() {
-        return exportTid;
+        Boolean value=(Boolean)getTransientObject(TRANSIENT_BOOLEAN_EXPORTTID);
+        if(value==null)return false;
+        return value;
     }
 	
 	public String getBasketHandling() {
@@ -622,10 +636,10 @@ public class Config extends Settings {
 		setTransientValue(ATTACHMENT_KEY,value);
 	}
 	public String getInitStrategy() {
-		return initStrategy;
+		return getTransientValue(TRANSIENT_STRING_INITSTRATEGY);
 	}
 	public void setInitStrategy(String value) {
-		initStrategy=value;
+	    setTransientValue(TRANSIENT_STRING_INITSTRATEGY,value);
 	}
 	public java.sql.Connection getJdbcConnection() {
 		return (java.sql.Connection)getTransientObject(ch.ehi.sqlgen.generator.SqlConfiguration.JDBC_CONNECTION);
@@ -634,98 +648,119 @@ public class Config extends Settings {
 		setTransientObject(ch.ehi.sqlgen.generator.SqlConfiguration.JDBC_CONNECTION,value);
 	}
 	public String getDeleteMode() {
-		return deleteMode;
+		return getTransientValue(TRANSIENT_STRING_DELETEMODE);
 	}
 	public void setDeleteMode(String deleteMode) {
-		this.deleteMode = deleteMode;
+	    setTransientValue(TRANSIENT_STRING_DELETEMODE,deleteMode);
 	}
 	public String getLogfile() {
-		return logfile;
+		String value=getTransientValue(TRANSIENT_STRING_LOGFILE);
+        if(MetaConfig.NULL.equals(value))return null;
+		return value;
 	}
 	public void setLogfile(String logfile) {
-		this.logfile = logfile;
+	    setTransientValue(TRANSIENT_STRING_LOGFILE,logfile);
 	}
     public String getXtfLogfile() {
-        return xtfLogfile;
+        String value=getTransientValue(TRANSIENT_STRING_XTFLOGFILE);
+        if(MetaConfig.NULL.equals(value))return null;
+        return value;
     }
     public void setXtfLogfile(String logfile) {
-        this.xtfLogfile = logfile;
+        setTransientValue(TRANSIENT_STRING_XTFLOGFILE,logfile);
     }
 	public boolean isConfigReadFromDb() {
-		return configReadFromDb;
+        Boolean value=(Boolean)getTransientObject(TRANSIENT_BOOLEAN_CONFIGREADFROMDB);
+        if(value==null)return false;
+        return value;
 	}
 	public void setConfigReadFromDb(boolean configReadFromDb) {
-		this.configReadFromDb = configReadFromDb;
+        setTransientObject(TRANSIENT_BOOLEAN_CONFIGREADFROMDB,new Boolean(configReadFromDb));
 	}
 	public String getDbschema() {
-		return dbschema;
+		return getTransientValue(TRANSIENT_STRING_DBSCHEMA);
 	}
 	public void setDbschema(String dbschema) {
-		this.dbschema = dbschema;
+	    setTransientValue(TRANSIENT_STRING_DBSCHEMA,dbschema);
 	}
 	public boolean isItfTransferfile() {
-		return itfTransferFile;
+        Boolean value=(Boolean)getTransientObject(TRANSIENT_BOOLEAN_ITFTRANSFERFILE);
+        if(value==null)return false;
+        return value;
 	}
 	public void setItfTransferfile(boolean value) {
-		itfTransferFile=value;
+        setTransientObject(TRANSIENT_BOOLEAN_ITFTRANSFERFILE,new Boolean(value));
 	}
+    public String getMetaConfigFile() {
+        return getTransientValue(TRANSIENT_STRING_METACONFIGFILENAME);
+    }
+    public void setMetaConfigFile(String fileName) {
+        setTransientValue(TRANSIENT_STRING_METACONFIGFILENAME,fileName);
+    }
 	public String getValidConfigFile() {
-		return validConfigFileName;
+		return getTransientValue(TRANSIENT_STRING_VALIDCONFIGFILENAME);
 	}
 	public void setValidConfigFile(String fileName) {
-		this.validConfigFileName = fileName;
+	    setTransientValue(TRANSIENT_STRING_VALIDCONFIGFILENAME ,fileName);
 	}
 	public boolean isValidation() {
-		return validation;
+        Boolean value=(Boolean)getTransientObject(TRANSIENT_BOOLEAN_VALIDATION);
+        if(value==null)return false;
+        return value;
 	}
 	public void setValidation(boolean enable) {
-		this.validation = enable;
+        setTransientObject(TRANSIENT_BOOLEAN_VALIDATION,new Boolean(enable));
 	}
 	public Long getMinIdSeqValue() {
-		return minIdSeqValue;
+        return (Long)getTransientObject(TRANSIENT_LONG_MINIDSEQVALUE);
 	}
 	public void setMinIdSeqValue(Long minIdSeqValue) {
-		this.minIdSeqValue = minIdSeqValue;
+        setTransientObject(TRANSIENT_LONG_MINIDSEQVALUE,new Long(minIdSeqValue));
 	}
 	public Long getMaxIdSeqValue() {
-		return maxIdSeqValue;
+		return (Long)getTransientObject(TRANSIENT_LONG_MAXIDSEQVALUE);
 	}
 	public void setMaxIdSeqValue(Long maxIdSeqValue) {
-		this.maxIdSeqValue = maxIdSeqValue;
+        setTransientObject(TRANSIENT_LONG_MAXIDSEQVALUE,new Long(maxIdSeqValue));
 	}
 	public String getTransferFileFormat() {
-		return transferFileFormat;
+		return getTransientValue(TRANSIENT_STRING_TRANSFERFILEFORMAT);
 	}
 	public void setTransferFileFormat(String transferFileFormat) {
-		this.transferFileFormat = transferFileFormat;
+	    setTransientValue(TRANSIENT_STRING_TRANSFERFILEFORMAT, transferFileFormat);
 	}
-	private boolean onlyMultiplicityReduction=false;
 	public boolean isOnlyMultiplicityReduction() {
-		return onlyMultiplicityReduction;
+        Boolean value=(Boolean)getTransientObject(TRANSIENT_BOOLEAN_ONLYMULTIPLICITYREDUCTION);
+        if(value==null)return false;
+        return value;
 	}
 	public void setOnlyMultiplicityReduction(boolean onlyMultiplicityReduction) {
-		this.onlyMultiplicityReduction = onlyMultiplicityReduction;
+        setTransientObject(TRANSIENT_BOOLEAN_ONLYMULTIPLICITYREDUCTION,new Boolean(onlyMultiplicityReduction));
 	}
     public boolean isSkipReferenceErrors() {
-        return skipReferenceErrors;
+        Boolean value=(Boolean)getTransientObject(TRANSIENT_BOOLEAN_SKIPREFERENCEERRRORS);
+        if(value==null)return false;
+        return value;
     }
     public void setSkipReferenceErrors(boolean skipReferenceErrors) {
-        this.skipReferenceErrors = skipReferenceErrors;
+        setTransientObject(TRANSIENT_BOOLEAN_SKIPREFERENCEERRRORS,new Boolean(skipReferenceErrors));
     }
-	private boolean skipGeometryErrors=false;
 	public boolean isSkipGeometryErrors() {
-		return skipGeometryErrors;
+        Boolean value=(Boolean)getTransientObject(TRANSIENT_BOOLEAN_SKIPGEOMETRYERRORS);
+        if(value==null)return false;
+        return value;
 	}
 	public void setSkipGeometryErrors(boolean skipGeometryTypeValidation) {
-		this.skipGeometryErrors = skipGeometryTypeValidation;
+        setTransientObject(TRANSIENT_BOOLEAN_SKIPGEOMETRYERRORS,new Boolean(skipGeometryTypeValidation));
 	}
 	public boolean isDisableAreaValidation() {
-		return disableAreaValidation;
+        Boolean value=(Boolean)getTransientObject(TRANSIENT_BOOLEAN_DISABLEAREAVALIDATION);
+        if(value==null)return false;
+        return value;
 	}
 	public void setDisableAreaValidation(boolean disableAreaValidation) {
-		this.disableAreaValidation = disableAreaValidation;
+        setTransientObject(TRANSIENT_BOOLEAN_DISABLEAREAVALIDATION,new Boolean(disableAreaValidation));
 	}
-	private boolean disableAreaValidation=false;
 	public void setVer3_translation(boolean b) {
 		setValue(VER3_TRANSLATION,b?TRUE:FALSE);
 	}
@@ -739,22 +774,24 @@ public class Config extends Settings {
 		return getValue(ILI1TRANSLATION);
 	}
 	public String getPreScript() {
-		return preScript;
+		return getTransientValue(TRANSIENT_STRING_PRESCRIPT);
 	}
 	public void setPreScript(String preScript) {
-		this.preScript = preScript;
+	    setTransientValue(TRANSIENT_STRING_PRESCRIPT,preScript);
 	}
 	public String getPostScript() {
-		return postScript;
+		return getTransientValue(TRANSIENT_STRING_POSTSCRIPT);
 	}
 	public void setPostScript(String postScript) {
-		this.postScript = postScript;
+	    setTransientValue(TRANSIENT_STRING_POSTSCRIPT,postScript);
 	}
 	public boolean isSetupPgExt() {
-		return setupPgExt;
+        Boolean value=(Boolean)getTransientObject(TRANSIENT_BOOLEAN_SETUPPGEXT);
+        if(value==null)return false;
+        return value;
 	}
 	public void setSetupPgExt(boolean setupPgExt) {
-		this.setupPgExt = setupPgExt;
+        setTransientObject(TRANSIENT_BOOLEAN_SETUPPGEXT,new Boolean(setupPgExt));
 	}
 	public void setCreateMetaInfo(boolean value) {
 		setValue(CREATE_META_INFO,value?TRUE:FALSE);
@@ -763,34 +800,38 @@ public class Config extends Settings {
 		return TRUE.equals(getValue(CREATE_META_INFO))?true:false;
 	}
 	public String getIliMetaAttrsFile() {
-		return iliMetaAttrsFile;
+		return getTransientValue(TRANSIENT_STRING_ILIMETAATTRSFILE);
 	}
 	public void setIliMetaAttrsFile(String iliMetaAttrsFile) {
-		this.iliMetaAttrsFile = iliMetaAttrsFile;
+	    setTransientValue(TRANSIENT_STRING_ILIMETAATTRSFILE,iliMetaAttrsFile);
 	}
     public boolean isDoImplicitSchemaImport() {
-        return doImplicitSchemaImport;
+        Boolean value=(Boolean)getTransientObject(TRANSIENT_BOOLEAN_DOIMPLICITSCHEMAIMPORT);
+        if(value==null)return false;
+        return value;
     }
     public void setDoImplicitSchemaImport(boolean doImplicitSchemaImport) {
-        this.doImplicitSchemaImport = doImplicitSchemaImport;
-    }
-    public void setImportBid(boolean enable) {
-        importBid=enable;
+        setTransientObject(TRANSIENT_BOOLEAN_DOIMPLICITSCHEMAIMPORT,new Boolean(doImplicitSchemaImport));
     }
     public boolean isImportBid() {
-        return importBid;
+        Boolean value=(Boolean)getTransientObject(TRANSIENT_BOOLEAN_IMPORTBID);
+        if(value==null)return false;
+        return value;
+    }
+    public void setImportBid(boolean enable) {
+        setTransientObject(TRANSIENT_BOOLEAN_IMPORTBID,new Boolean(enable));
     }
     public void setFetchSize(Integer fetchSize) {
-        this.fetchSize = fetchSize;
+        setTransientObject(TRANSIENT_INTEGER_FETCHSIZE,new Integer(fetchSize));
     }
     public Integer getFetchSize() {
-        return fetchSize;
+        return (Integer)getTransientObject(TRANSIENT_INTEGER_FETCHSIZE);
     }
     public void setBatchSize(Integer batchSize) {
-        this.batchSize = batchSize;
+        setTransientObject(TRANSIENT_INTEGER_BATCHSIZE,new Integer(batchSize));
     }
     public Integer getBatchSize() {
-        return batchSize;
+        return (Integer)getTransientObject(TRANSIENT_INTEGER_BATCHSIZE);
     }
     public void setUseEpsgInNames(boolean value) {
         setValue(USE_EPGS_IN_NAMES,value?TRUE:FALSE);
@@ -798,11 +839,11 @@ public class Config extends Settings {
     public boolean useEpsgInNames() {
         return TRUE.equals(getValue(USE_EPGS_IN_NAMES))?true:false;
     }
-    public void setDomainAssignments(String value) {
-        domainAssignments=value;
-    }
     public String getDomainAssignments() {
-        return domainAssignments;
+        return getTransientValue(TRANSIENT_STRING_DOMAINASSIGNMENTS);
+    }
+    public void setDomainAssignments(String value) {
+        setTransientValue(TRANSIENT_STRING_DOMAINASSIGNMENTS,value);
     }
     public void setSrsModelAssignment(String value) {
         setValue(SRS_MODEL_ASSIGNMENT,value);
@@ -816,17 +857,21 @@ public class Config extends Settings {
 	public boolean getCreateTypeConstraint() {
 		return TRUE.equals(getValue(CREATE_TYPE_CONSTRAINT))?true:false;
 	}
-    public void setVer3_export(boolean b) {
-        ver3_export=true;
-    }
     public boolean isVer3_export() {
+        Boolean ver3_export=(Boolean)getTransientObject(TRANSIENT_BOOLEAN_VER3_EXPORT);
+        if(ver3_export==null)return false;
         return ver3_export;
     }
+    public void setVer3_export(boolean b) {
+        setTransientObject(TRANSIENT_BOOLEAN_VER3_EXPORT,new Boolean(b));
+    }
     public boolean isDisableRounding() {
+        Boolean disableRounding=(Boolean)getTransientObject(TRANSIENT_BOOLEAN_DISABLEROUNDING);
+        if(disableRounding==null)return false;
         return disableRounding;
     }
     public void setDisableRounding(boolean disableRounding) {
-        this.disableRounding = disableRounding;
+        setTransientObject(TRANSIENT_BOOLEAN_DISABLEROUNDING,new Boolean(disableRounding));
     }
 
 	public String getSqlColsAsText() {
@@ -843,25 +888,26 @@ public class Config extends Settings {
     public void setSqlExtRefCols(String value) {
         setValue(SQL_EXTREF,value);
     }
-
-	public void setRepairTouchingLines(boolean value) {
-		repairTouchingLines = value;
-	}
-
-	public boolean getRepairTouchingLines(){
-		return repairTouchingLines;
-	}
-    public void setLogtime(boolean value) {
-        logTime=value;
+    public boolean getRepairTouchingLines(){
+        Boolean repairTouchingLines=(Boolean)getTransientObject(TRANSIENT_BOOLEAN_REPAIRTOUCHINGLINES);
+        if(repairTouchingLines==null)return true;
+        return repairTouchingLines;
     }
-
+	public void setRepairTouchingLines(boolean value) {
+        setTransientObject(TRANSIENT_BOOLEAN_REPAIRTOUCHINGLINES,new Boolean(value));
+	}
     public boolean isLogtime() {
+        Boolean logTime=(Boolean)getTransientObject(TRANSIENT_BOOLEAN_LOGTIME);
+        if(logTime==null)return false;
         return logTime;
     }
+    public void setLogtime(boolean value) {
+        setTransientObject(TRANSIENT_BOOLEAN_LOGTIME,new Boolean(value));
+    }
+
 	public void setVerbose(boolean value) {
 		setTransientValue(Validator.CONFIG_VERBOSE, value ? ValidationConfig.TRUE : ValidationConfig.FALSE);
 	}
-
 	public boolean isVerbose() {
 		return ValidationConfig.TRUE.equals(getTransientValue(Validator.CONFIG_VERBOSE));
 	}

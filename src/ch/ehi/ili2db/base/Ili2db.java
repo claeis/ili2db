@@ -37,6 +37,7 @@ import ch.ehi.basics.logging.LogEvent;
 import ch.ehi.basics.logging.StdListener;
 import ch.ehi.basics.logging.StdLogEvent;
 import ch.ehi.basics.settings.Settings;
+import ch.ehi.basics.types.OutParam;
 import ch.ehi.ili2db.converter.ConverterException;
 import ch.ehi.ili2db.converter.SqlColumnConverter;
 import ch.ehi.ili2db.dbmetainfo.DbExtMetaInfo;
@@ -72,6 +73,7 @@ import ch.interlis.ili2c.metamodel.Model;
 import ch.interlis.ili2c.metamodel.Topic;
 import ch.interlis.ili2c.metamodel.TransferDescription;
 import ch.interlis.ilirepository.IliFiles;
+import ch.interlis.ilirepository.IliManager;
 import ch.interlis.iom_j.iligml.Iligml10Writer;
 import ch.interlis.iom_j.iligml.Iligml20Writer;
 //import ch.interlis.iom.swig.iom_javaConstants;
@@ -87,6 +89,7 @@ import ch.interlis.iox.IoxException;
 import ch.interlis.iox.IoxReader;
 import ch.interlis.iox.IoxWriter;
 import ch.interlis.iox_j.utility.IoxUtility;
+import ch.interlis.iox_j.inifile.MetaConfig;
 import ch.interlis.iox_j.logging.FileLogger;
 import ch.interlis.iox_j.logging.LogEventFactory;
 import ch.interlis.iox_j.logging.StdLogger;
@@ -235,6 +238,7 @@ public class Ili2db {
 	public static void runUpdate(Config config,String appHome,int function) 
 	throws Ili2dbException
 		{
+        MetaConfig.removeNullFromSettings(config);
 		ch.ehi.basics.logging.FileListener logfile=null;
         ch.interlis.iox_j.logging.XtfErrorsLogger xtflog=null;
 		if(config.getLogfile()!=null){
@@ -976,8 +980,9 @@ public class Ili2db {
 	{
 		ch.ehi.basics.logging.FileListener logfile=null;
         ch.interlis.iox_j.logging.XtfErrorsLogger xtflog=null;
-		if(config.getLogfile()!=null){
-			logfile=new FileLogger(new java.io.File(config.getLogfile()),config.isLogtime());
+		String logfileName = config.getLogfile();
+        if(logfileName!=null){
+			logfile=new FileLogger(new java.io.File(logfileName),config.isLogtime());
 			EhiLogger.getInstance().addListener(logfile);
 		}
         String xtflogFilename=config.getXtfLogfile();
@@ -985,7 +990,8 @@ public class Ili2db {
             File f=new java.io.File(xtflogFilename);
             try {
                 if(isWriteable(f)) {
-                    xtflog=new ch.interlis.iox_j.logging.XtfErrorsLogger(f, config.getSender());
+                    String sender = config.getSender();
+                    xtflog=new ch.interlis.iox_j.logging.XtfErrorsLogger(f, sender);
                     EhiLogger.getInstance().addListener(xtflog);
                 }else {
                     throw new Ili2dbException("failed to write to logfile <"+f.getPath()+">");
@@ -994,7 +1000,7 @@ public class Ili2db {
                 throw new Ili2dbException("failed to write to logfile <"+f.getPath()+">",e);
             }
         }
-		StdLogger logStderr=new StdLogger(config.getLogfile());
+		StdLogger logStderr=new StdLogger(logfileName);
 		EhiLogger.getInstance().addListener(logStderr);
 		EhiLogger.getInstance().removeListener(StdListener.getInstance());
 		
@@ -1003,6 +1009,63 @@ public class Ili2db {
 			boolean connectionFromExtern=config.getJdbcConnection()!=null;
 			logGeneralInfo(config);
 			
+            String xtffile=config.getXtffile();
+            String ilifile=null;
+            if(xtffile!=null && xtffile.endsWith(".ili")){
+                ilifile=xtffile;
+            }
+			
+			// setup repos access
+	        ch.interlis.ili2c.Main.setHttpProxySystemProperties(config);
+	        ch.interlis.ilirepository.IliManager repositoryManager = (ch.interlis.ilirepository.IliManager)config
+	                .getTransientObject(UserSettings.CUSTOM_ILI_MANAGER);
+	        {
+	            if(repositoryManager==null) {
+	                repositoryManager=new ch.interlis.ilirepository.IliManager();
+	                config.setTransientObject(UserSettings.CUSTOM_ILI_MANAGER,repositoryManager);
+	            }
+	            java.util.Map<String,String> pathMap=getPathMap(appHome, ilifile);
+	            java.util.List<String> modeldirv=ch.interlis.ili2c.Main.resolvePathMap(config.getModeldir(),pathMap);
+	            repositoryManager.setRepositories(modeldirv.toArray(new String[]{}));
+	        }
+			
+	        // setup meta-config
+	        {
+	            String metaConfigFilename=config.getMetaConfigFile();
+	            if(metaConfigFilename!=null) {
+	                List<String> metaConfigFiles=new ArrayList<String>();
+	                java.util.Set<String> visitedFiles=new HashSet<String>();
+	                metaConfigFiles.add(metaConfigFilename);
+	                Settings metaSettings=new Settings();
+	                while(!metaConfigFiles.isEmpty()) {
+	                    metaConfigFilename=metaConfigFiles.remove(0);
+	                    if(!visitedFiles.contains(metaConfigFilename)) {
+	                        visitedFiles.add(metaConfigFilename);
+	                        EhiLogger.traceState("metaConfigFile <"+metaConfigFilename+">");
+	                        File metaConfigFile=IliManager.getLocalCopyOfReposFile(repositoryManager,metaConfigFilename);
+	                        if(metaConfigFile==null) {
+	                            throw new Ili2dbException("failed to get local copy of meta config file <"+metaConfigFile.getPath()+">");
+	                        }
+	                        OutParam<String> baseConfigs=new OutParam<String>();
+	                        Config newSettings=null;
+	                        try {
+	                            newSettings = readMetaConfig(metaConfigFile,baseConfigs);
+	                            if(baseConfigs.value!=null) {
+	                                String[] baseConfigv = baseConfigs.value.split(";");
+	                                for(String baseConfig:baseConfigv){
+	                                    metaConfigFiles.add(baseConfig);
+	                                }
+	                            }
+	                        } catch (IOException e) {
+	                            throw new Ili2dbException("failed to read meta config file <"+metaConfigFile.getPath()+">", e);
+	                        }
+	                        MetaConfig.mergeSettings(newSettings,metaSettings);
+	                    }
+	                }
+	                MetaConfig.mergeSettings(metaSettings,config);
+	            }
+	            MetaConfig.removeNullFromSettings(config);
+	        }
 			Ili2dbLibraryInit ao=null;
             Connection conn=null;
 			try{
@@ -1010,10 +1073,7 @@ public class Ili2db {
 				ao.init();
 				
 			ch.interlis.ili2c.config.Configuration modelv=new ch.interlis.ili2c.config.Configuration();
-			String xtffile=config.getXtffile();
-			String ilifile=null;
-			if(xtffile!=null && xtffile.endsWith(".ili")){
-				ilifile=xtffile;
+			if(ilifile!=null){
 				modelv.addFileEntry(new ch.interlis.ili2c.config.FileEntry(ilifile,ch.interlis.ili2c.config.FileEntryKind.ILIMODELFILE));				
 			}
 			
@@ -1435,7 +1495,11 @@ public class Ili2db {
 		}
 		
 }
-	private static void verifyIfBasketColRequired(List<Model> models, boolean createBasketCol) throws Ili2dbException {
+	private static Config readMetaConfig(File metaConfigFile, OutParam<String> baseConfigs) throws IOException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+    private static void verifyIfBasketColRequired(List<Model> models, boolean createBasketCol) throws Ili2dbException {
         if(createBasketCol) {
             return;
         }
@@ -1509,16 +1573,21 @@ public class Ili2db {
 		EhiLogger.logState("maxMemory "+java.lang.Runtime.getRuntime().maxMemory()/1024L+" KB");
 		EhiLogger.logState("currentTime "+new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new java.util.Date()));
 	}
+    private static java.util.Map<String,String> getPathMap(String xtffile,String appHome)
+    {
+        java.util.HashMap<String,String> pathMap=new java.util.HashMap<String,String>();
+        if(xtffile!=null){
+            pathMap.put(Ili2db.XTF_DIR,new java.io.File(xtffile).getAbsoluteFile().getParent());
+        }else{
+            pathMap.put(Ili2db.XTF_DIR,null);
+        }
+        pathMap.put(Ili2db.JAR_DIR,appHome);
+        return pathMap;
+    }
 	private static void setupIli2cPathmap(Config config, String appHome,
 			String xtffile,java.sql.Connection conn, CustomMapping mapping) throws Ili2dbException {
 		config.setValue(ch.interlis.ili2c.gui.UserSettings.ILIDIRS,config.getModeldir());
-		java.util.HashMap pathMap=new java.util.HashMap();
-		if(xtffile!=null){
-			pathMap.put(Ili2db.XTF_DIR,new java.io.File(xtffile).getAbsoluteFile().getParent());
-		}else{
-			pathMap.put(Ili2db.XTF_DIR,null);
-		}
-		pathMap.put(Ili2db.JAR_DIR,appHome);
+		java.util.Map<String,String> pathMap=getPathMap(xtffile,appHome);
 		config.setTransientObject(ch.interlis.ili2c.gui.UserSettings.ILIDIRS_PATHMAP,pathMap);
 		
 	  	// if ilimodels exists in db
@@ -1556,6 +1625,7 @@ public class Ili2db {
         if(function==Config.FC_VALIDATE) {
             functionName="validate";
         }
+        MetaConfig.removeNullFromSettings(config);
 		ch.ehi.basics.logging.FileListener logfile=null;
 		ch.interlis.iox_j.logging.XtfErrorsLogger xtflog=null;
 		if(config.getLogfile()!=null){
