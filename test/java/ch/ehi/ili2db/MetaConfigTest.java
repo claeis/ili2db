@@ -53,10 +53,6 @@ public abstract class MetaConfigTest {
 		Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
         Ili2db.setNoSmartMapping(config);
 		config.setFunction(Config.FC_IMPORT);
-        config.setDoImplicitSchemaImport(true);
-		config.setCreateFk(Config.CREATE_FK_YES);
-		config.setCreateNumChecks(true);
-		config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
 		Ili2db.run(config,null);
 	}
 	

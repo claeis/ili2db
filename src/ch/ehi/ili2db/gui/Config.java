@@ -11,6 +11,9 @@ import ch.interlis.iox_j.validator.Validator;
 public class Config extends Settings {
 	public static final String FALSE = "False";
 	public static final String TRUE = "True";
+	/** use only as a special value for cmdline options or config file settings to explicitly unset a setting. Do not use internally.
+	 */
+    public static final String NULL = MetaConfig.NULL;
 	public static final String PREFIX="ch.ehi.ili2db";
 	public static final String SENDER=PREFIX+".sender";
     public static final String NAME_LANGUAGE=PREFIX+".nameLanguage";
@@ -112,6 +115,8 @@ public class Config extends Settings {
     public static final String CLASSNAME_TAB_ILINAME_COLSIZE = PREFIX+".classnameTabIlinameColSize";
     public static final String INHERIT_TAB_THIS_COLSIZE = PREFIX+".inheritTabThisColSize";
 	public static final String CREATE_TYPE_CONSTRAINT=PREFIX+".createTypeConstraint";
+
+    public static final String METACONFIG_ILI2DB="ch.ehi.ili2db";
 	
     public static final String TRANSIENT_STRING_DBURL=PREFIX+".dburl";
     public static final String TRANSIENT_STRING_DBUSR=PREFIX+".dbusr";
@@ -145,6 +150,7 @@ public class Config extends Settings {
     public static final String TRANSIENT_STRING_LOGFILE=PREFIX+".logfile";
     public static final String TRANSIENT_STRING_XTFLOGFILE=PREFIX+".xtfLogfile";
     public static final String TRANSIENT_STRING_VALIDCONFIGFILENAME=PREFIX+".validConfigFileName";
+    public static final String TRANSIENT_STRING_REFERENCEDATA=PREFIX+".referenceData";
     public static final String TRANSIENT_STRING_METACONFIGFILENAME=PREFIX+".metaConfigFileName";
     public static final String TRANSIENT_STRING_ILIMETAATTRSFILE=PREFIX+".iliMetaAttrsFile";
     public static final String TRANSIENT_STRING_DOMAINASSIGNMENTS=PREFIX+".domainAssignments";
@@ -703,6 +709,12 @@ public class Config extends Settings {
 	public void setValidConfigFile(String fileName) {
 	    setTransientValue(TRANSIENT_STRING_VALIDCONFIGFILENAME ,fileName);
 	}
+    public String getReferenceData() {
+        return getTransientValue(TRANSIENT_STRING_REFERENCEDATA);
+    }
+    public void setReferenceData(String fileName) {
+        setTransientValue(TRANSIENT_STRING_REFERENCEDATA ,fileName);
+    }
 	public boolean isValidation() {
         Boolean value=(Boolean)getTransientObject(TRANSIENT_BOOLEAN_VALIDATION);
         if(value==null)return false;

@@ -1,0 +1,29 @@
+INTERLIS 2.3;
+
+MODEL ExtRef23
+  AT "mailto:ce@eisenhutinformatik.ch" VERSION "2020-03-23" =
+  
+  TOPIC TestA =
+    BASKET OID AS INTERLIS.UUIDOID;
+    OID AS INTERLIS.UUIDOID;
+    
+    CLASS ClassA1 =
+    END ClassA1;
+    
+  END TestA;
+
+  TOPIC TestB =
+    DEPENDS ON ExtRef23.TestA;
+    
+    CLASS ClassB1 =
+    END ClassB1;
+    
+    ASSOCIATION a2b =
+      a (EXTERNAL) -- {1} ExtRef23.TestA.ClassA1;
+      b -- {0..*} ClassB1;
+    END a2b;
+    
+  END TestB;
+  
+  
+END ExtRef23.

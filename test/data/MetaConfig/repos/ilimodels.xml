@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TRANSFER xmlns="http://www.interlis.ch/INTERLIS2.3">
+	<HEADERSECTION SENDER="mkilimodelsxml-5.0.9-20200406" VERSION="2.3">
+		<MODELS>
+			<MODEL NAME="IliRepository20" VERSION="2020-01-15" URI="http://models.interlis.ch/core"></MODEL>
+		</MODELS>
+	</HEADERSECTION>
+	<DATASECTION>
+		<IliRepository20.RepositoryIndex BID="b1">
+			<IliRepository20.RepositoryIndex.ModelMetadata TID="7">
+				<Name>ExtRef23</Name>                       
+				<SchemaLanguage>ili2_3</SchemaLanguage>
+				<File>ExtRef23.ili</File>
+				<Version>2020-03-23</Version>
+				<publishingDate>2020-03-23</publishingDate>
+				<Issuer>mailto:ce@eisenhutinformatik.ch</Issuer>
+				<browseOnly>false</browseOnly>
+			</IliRepository20.RepositoryIndex.ModelMetadata>
+		</IliRepository20.RepositoryIndex>
+	</DATASECTION>
+</TRANSFER>

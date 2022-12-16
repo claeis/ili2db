@@ -45,22 +45,7 @@ public abstract class AbstractMain {
 	public void initConfig(Config config)
 	{
 		config.setSender(getAPP_NAME()+"-"+getVersion());
-		config.setModeldir(Ili2db.ILI_FROM_DB+ch.interlis.ili2c.Main.ILIDIR_SEPARATOR+Ili2db.XTF_DIR+ch.interlis.ili2c.Main.ILIDIR_SEPARATOR+ch.interlis.ili2c.Main.ILI_REPOSITORY+ch.interlis.ili2c.Main.ILIDIR_SEPARATOR+Ili2db.JAR_DIR);
-		config.setModels(Ili2db.XTF);
-		config.setDefaultSrsAuthority("EPSG");
-		config.setMaxSqlNameLength(Integer.toString(NameMapping.DEFAULT_NAME_LENGTH));
 		config.setIdGenerator(ch.ehi.ili2db.base.TableBasedIdGen.class.getName());
-		config.setInheritanceTrafo(Config.INHERITANCE_TRAFO_SMART1);
-		config.setCatalogueRefTrafo(Config.CATALOGUE_REF_TRAFO_COALESCE);
-		config.setMultiSurfaceTrafo(Config.MULTISURFACE_TRAFO_COALESCE);
-		config.setMultiLineTrafo(Config.MULTILINE_TRAFO_COALESCE);
-		config.setMultiPointTrafo(Config.MULTIPOINT_TRAFO_COALESCE);
-		config.setArrayTrafo(Config.ARRAY_TRAFO_COALESCE);
-        config.setJsonTrafo(Config.JSON_TRAFO_COALESCE);
-		config.setMultilingualTrafo(Config.MULTILINGUAL_TRAFO_EXPAND);
-        config.setLocalisedTrafo(Config.LOCALISED_TRAFO_EXPAND);
-		config.setValidation(true);
-		config.setRepairTouchingLines(true);
 	}
 	public abstract DbUrlConverter getDbUrlConverter();
 
@@ -240,6 +225,10 @@ public abstract class AbstractMain {
 					argi++;
 					config.setValidConfigFile(args[argi]);
 					argi++;
+                } else if (arg.equals("--metaConfig")) {
+                    argi++;
+                    config.setMetaConfigFile(args[argi]);
+                    argi++;
 				} else if (isOption(arg, "--disableValidation")) {
 					argi++;
 					config.setValidation(!parseBooleanArgument(arg));
@@ -521,6 +510,7 @@ public abstract class AbstractMain {
 					System.err.println("--postScript file      after running a function, run a script.");
 					System.err.println("--dbparams file        config file with connection parameters.");
 					printConnectOptions();
+                    System.err.println("--metaConfig file      Meta-Config file for ili2db.");
 					System.err.println("--validConfig file     Config file for validation.");
 					System.err.println("--disableValidation    Disable validation of data.");
 					System.err.println("--disableAreaValidation Disable AREA validation.");

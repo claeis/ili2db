@@ -17,7 +17,7 @@ compileJava.options.encoding = 'US-ASCII'
 // to get the latest SNAPSHOT uncomment the following lines
 //configurations.all {
     // check for updates every build
-//    resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
+    //resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
 //}
 
 
