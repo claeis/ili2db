@@ -72,14 +72,11 @@ public class Oid23GpkgTest {
         }
 		File data=new File(TEST_OUT,"Oid1.ili");
 		Config config=initConfig(data.getPath(),data.getPath()+".log");
+        Ili2db.setNoSmartMapping(config);
 		config.setFunction(Config.FC_SCHEMAIMPORT);
 		config.setCreateFk(config.CREATE_FK_YES);
 		config.setTidHandling(Config.TID_HANDLING_PROPERTY);
 		config.setBasketHandling(config.BASKET_HANDLING_READWRITE);
-		config.setCatalogueRefTrafo(null);
-		config.setMultiSurfaceTrafo(null);
-		config.setMultilingualTrafo(null);
-		config.setInheritanceTrafo(null);
 		Ili2db.readSettingsFromDb(config);
 		Ili2db.run(config,null);
 		initDb();
@@ -114,15 +111,12 @@ public class Oid23GpkgTest {
         {
     		File data=new File(TEST_OUT,"Oid1a.xtf");
     		Config config=initConfig(data.getPath(),data.getPath()+".log");
+            Ili2db.setNoSmartMapping(config);
     		config.setFunction(Config.FC_IMPORT);
             config.setDoImplicitSchemaImport(true);
     		config.setCreateFk(config.CREATE_FK_YES);
     		config.setTidHandling(Config.TID_HANDLING_PROPERTY);
     		config.setBasketHandling(config.BASKET_HANDLING_READWRITE);
-    		config.setCatalogueRefTrafo(null);
-    		config.setMultiSurfaceTrafo(null);
-    		config.setMultilingualTrafo(null);
-    		config.setInheritanceTrafo(null);
     		config.setValidation(false);
     		config.setImportBid(true);
     		Ili2db.readSettingsFromDb(config);

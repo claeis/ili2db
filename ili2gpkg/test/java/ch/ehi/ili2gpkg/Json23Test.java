@@ -64,15 +64,12 @@ public class Json23Test {
 	    }
 		File data=new File(TEST_OUT,"Json23.ili");
 		Config config=initConfig(data.getPath(),data.getPath()+".log");
+        Ili2db.setNoSmartMapping(config);
 		config.setFunction(Config.FC_SCHEMAIMPORT);
 		config.setCreateFk(config.CREATE_FK_YES);
 		config.setCreateNumChecks(true);
 		config.setTidHandling(Config.TID_HANDLING_PROPERTY);
 		config.setBasketHandling(config.BASKET_HANDLING_READWRITE);
-		config.setCatalogueRefTrafo(null);
-		config.setMultiSurfaceTrafo(null);
-		config.setMultilingualTrafo(null);
-		config.setInheritanceTrafo(null);
         config.setJsonTrafo(Config.JSON_TRAFO_COALESCE);
 		Ili2db.run(config,null);
 		{
@@ -124,6 +121,7 @@ public class Json23Test {
 	    }
 		File data=new File(TEST_OUT,"Json23a.xtf");
 		Config config=initConfig(data.getPath(),data.getPath()+".log");
+        Ili2db.setNoSmartMapping(config);
 		config.setFunction(Config.FC_IMPORT);
         config.setDoImplicitSchemaImport(true);
 		config.setCreateFk(config.CREATE_FK_YES);
@@ -131,10 +129,6 @@ public class Json23Test {
 		config.setTidHandling(Config.TID_HANDLING_PROPERTY);
 		config.setImportTid(true);
 		config.setBasketHandling(config.BASKET_HANDLING_READWRITE);
-		config.setCatalogueRefTrafo(null);
-		config.setMultiSurfaceTrafo(null);
-		config.setMultilingualTrafo(null);
-		config.setInheritanceTrafo(null);
 		config.setJsonTrafo(Config.JSON_TRAFO_COALESCE);
 		try{
 			Ili2db.run(config,null);

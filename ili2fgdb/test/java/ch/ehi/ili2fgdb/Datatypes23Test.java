@@ -63,15 +63,12 @@ public class Datatypes23Test {
 	    Class driverClass = Class.forName(FgdbDriver.class.getName());
 		File data=new File(TEST_OUT,"Datatypes23.ili");
 		Config config=initConfig(data.getPath(),data.getPath()+".log");
+        Ili2db.setNoSmartMapping(config);
 		config.setFunction(Config.FC_SCHEMAIMPORT);
 		config.setCreateFk(Config.CREATE_FK_YES);
 		config.setCreateNumChecks(true);
 		config.setTidHandling(Config.TID_HANDLING_PROPERTY);
 		config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
-		config.setCatalogueRefTrafo(null);
-		config.setMultiSurfaceTrafo(null);
-		config.setMultilingualTrafo(null);
-		config.setInheritanceTrafo(null);
 		//Ili2db.readSettingsFromDb(config);
 		Ili2db.run(config,null);
 	}
@@ -85,16 +82,13 @@ public class Datatypes23Test {
 	    Class driverClass = Class.forName(FgdbDriver.class.getName());
 		File data=new File(TEST_OUT,"Datatypes23Attr.xtf");
 		Config config=initConfig(data.getPath(),data.getPath()+".log");
+        Ili2db.setNoSmartMapping(config);
 		config.setFunction(Config.FC_IMPORT);
         config.setDoImplicitSchemaImport(true);
 		config.setCreateFk(Config.CREATE_FK_YES);
 		config.setCreateNumChecks(true);
 		config.setTidHandling(Config.TID_HANDLING_PROPERTY);
 		config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
-		config.setCatalogueRefTrafo(null);
-		config.setMultiSurfaceTrafo(null);
-		config.setMultilingualTrafo(null);
-		config.setInheritanceTrafo(null);
 		//Ili2db.readSettingsFromDb(config);
         Ili2db.run(config,null);
 	}
@@ -108,16 +102,13 @@ public class Datatypes23Test {
 	    Class driverClass = Class.forName(FgdbDriver.class.getName());
 		File data=new File(TEST_OUT,"Datatypes23Line.xtf");
 		Config config=initConfig(data.getPath(),data.getPath()+".log");
+        Ili2db.setNoSmartMapping(config);
 		config.setFunction(Config.FC_IMPORT);
         config.setDoImplicitSchemaImport(true);
 		config.setCreateFk(Config.CREATE_FK_YES);
 		config.setCreateNumChecks(true);
 		config.setTidHandling(Config.TID_HANDLING_PROPERTY);
 		config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
-		config.setCatalogueRefTrafo(null);
-		config.setMultiSurfaceTrafo(null);
-		config.setMultilingualTrafo(null);
-		config.setInheritanceTrafo(null);
 		//Ili2db.readSettingsFromDb(config);
         Ili2db.run(config,null);
 	}
@@ -131,6 +122,7 @@ public class Datatypes23Test {
 	    Class driverClass = Class.forName(FgdbDriver.class.getName());
 		File data=new File(TEST_OUT,"Datatypes23Surface.xtf");
 		Config config=initConfig(data.getPath(),data.getPath()+".log");
+        Ili2db.setNoSmartMapping(config);
 		config.setFunction(Config.FC_IMPORT);
         config.setDoImplicitSchemaImport(true);
 		config.setCreateFk(Config.CREATE_FK_YES);
@@ -138,10 +130,6 @@ public class Datatypes23Test {
 		config.setTidHandling(Config.TID_HANDLING_PROPERTY);
 		config.setImportTid(true);
 		config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
-		config.setCatalogueRefTrafo(null);
-		config.setMultiSurfaceTrafo(null);
-		config.setMultilingualTrafo(null);
-		config.setInheritanceTrafo(null);
 		//Ili2db.readSettingsFromDb(config);
         Ili2db.run(config,null);
 	}

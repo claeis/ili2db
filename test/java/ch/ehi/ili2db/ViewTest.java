@@ -38,15 +38,12 @@ public abstract class ViewTest {
         setup.resetDb();
 		File data=new File(TEST_OUT,"View23.ili");
 		Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+        Ili2db.setNoSmartMapping(config);
 		config.setFunction(Config.FC_SCHEMAIMPORT);
 		config.setCreateFk(Config.CREATE_FK_YES);
 		config.setCreateNumChecks(true);
 		config.setTidHandling(Config.TID_HANDLING_PROPERTY);
 		config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
-		config.setCatalogueRefTrafo(null);
-		config.setMultiSurfaceTrafo(null);
-		config.setMultilingualTrafo(null);
-		config.setInheritanceTrafo(null);
 		config.setDefaultSrsCode("2056");
         Ili2db.run(config,null);
 	}

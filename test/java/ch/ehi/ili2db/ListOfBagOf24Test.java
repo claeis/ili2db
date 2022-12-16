@@ -41,6 +41,7 @@ public abstract class ListOfBagOf24Test {
 
         File data = new File(TEST_OUT, "BagOfPrimTypes24.ili");
         Config config = setup.initConfig(data.getPath(), data.getPath() + ".log");
+        Ili2db.setNoSmartMapping(config);
         config.setFunction(Config.FC_SCHEMAIMPORT);
         config.setCreateFk(Config.CREATE_FK_YES);
         config.setCreateTextChecks(true);
@@ -48,10 +49,6 @@ public abstract class ListOfBagOf24Test {
         config.setCreateDateTimeChecks(true);
         config.setTidHandling(Config.TID_HANDLING_PROPERTY);
         config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
-        config.setCatalogueRefTrafo(null);
-        config.setMultiSurfaceTrafo(null);
-        config.setMultilingualTrafo(null);
-        config.setInheritanceTrafo(null);
         config.setOneGeomPerTable(true);
         Ili2db.run(config, null);
 
@@ -127,6 +124,7 @@ public abstract class ListOfBagOf24Test {
 
         File data = new File(TEST_OUT, "ListOfPrimTypes24.ili");
         Config config = setup.initConfig(data.getPath(), data.getPath() + ".log");
+        Ili2db.setNoSmartMapping(config);
         config.setFunction(Config.FC_SCHEMAIMPORT);
         config.setCreateFk(Config.CREATE_FK_YES);
         config.setCreateTextChecks(true);
@@ -134,10 +132,6 @@ public abstract class ListOfBagOf24Test {
         config.setCreateDateTimeChecks(true);
         config.setTidHandling(Config.TID_HANDLING_PROPERTY);
         config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
-        config.setCatalogueRefTrafo(null);
-        config.setMultiSurfaceTrafo(null);
-        config.setMultilingualTrafo(null);
-        config.setInheritanceTrafo(null);
         config.setOneGeomPerTable(true);
         Ili2db.run(config, null);
 
@@ -212,6 +206,7 @@ public abstract class ListOfBagOf24Test {
         setup.resetDb();
         File data = new File(TEST_OUT, "BagOfPrimTypes24.xtf");
         Config config = setup.initConfig(data.getPath(), data.getPath() + ".log");
+        Ili2db.setNoSmartMapping(config);
         config.setFunction(Config.FC_IMPORT);
         config.setDoImplicitSchemaImport(true);
         config.setCreateFk(Config.CREATE_FK_YES);
@@ -219,10 +214,6 @@ public abstract class ListOfBagOf24Test {
         config.setTidHandling(Config.TID_HANDLING_PROPERTY);
         config.setImportTid(true);
         config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
-        config.setCatalogueRefTrafo(null);
-        config.setMultiSurfaceTrafo(null);
-        config.setMultilingualTrafo(null);
-        config.setInheritanceTrafo(null);
         config.setDefaultSrsCode("2056");
         config.setOneGeomPerTable(true);
         setup.setXYParams(config);
@@ -255,6 +246,7 @@ public abstract class ListOfBagOf24Test {
         setup.resetDb();
         File data = new File(TEST_OUT, "ListOfPrimTypes24.xtf");
         Config config = setup.initConfig(data.getPath(), data.getPath() + ".log");
+        Ili2db.setNoSmartMapping(config);
         config.setFunction(Config.FC_IMPORT);
         config.setDoImplicitSchemaImport(true);
         config.setCreateFk(Config.CREATE_FK_YES);
@@ -262,10 +254,6 @@ public abstract class ListOfBagOf24Test {
         config.setTidHandling(Config.TID_HANDLING_PROPERTY);
         config.setImportTid(true);
         config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
-        config.setCatalogueRefTrafo(null);
-        config.setMultiSurfaceTrafo(null);
-        config.setMultilingualTrafo(null);
-        config.setInheritanceTrafo(null);
         config.setDefaultSrsCode("2056");
         config.setOneGeomPerTable(true);
         setup.setXYParams(config);
@@ -279,6 +267,7 @@ public abstract class ListOfBagOf24Test {
         setup.resetDb();
         File data = new File(TEST_OUT, "ListOfPrimTypes24.xtf");
         Config config = setup.initConfig(data.getPath(), data.getPath() + ".log");
+        Ili2db.setNoSmartMapping(config);
         config.setFunction(Config.FC_IMPORT);
         config.setDoImplicitSchemaImport(true);
         config.setCreateFk(Config.CREATE_FK_YES);
@@ -286,10 +275,6 @@ public abstract class ListOfBagOf24Test {
         config.setTidHandling(Config.TID_HANDLING_PROPERTY);
         config.setImportTid(true);
         config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
-        config.setCatalogueRefTrafo(null);
-        config.setMultiSurfaceTrafo(null);
-        config.setMultilingualTrafo(null);
-        config.setInheritanceTrafo(null);
         config.setDefaultSrsCode("2056");
         config.setOneGeomPerTable(true);
         setup.setXYParams(config);

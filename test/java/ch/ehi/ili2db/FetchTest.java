@@ -59,15 +59,12 @@ public abstract class FetchTest {
         setup.resetDb();
         File data = new File(TEST_OUT, "FetchSize.ili");
         Config config = setup.initConfig(data.getPath(), data.getPath() + ".log");
+        Ili2db.setNoSmartMapping(config);
         config.setFunction(Config.FC_SCHEMAIMPORT);
         config.setCreateFk(Config.CREATE_FK_YES);
         config.setCreateNumChecks(true);
         config.setTidHandling(Config.TID_HANDLING_PROPERTY);
-        config.setBasketHandling(null);
-        config.setCatalogueRefTrafo(null);
-        config.setMultiSurfaceTrafo(null);
-        config.setMultilingualTrafo(null);
-        config.setInheritanceTrafo(null);
+        config.setBasketHandling(Config.NULL);
         Ili2db.run(config, null);
     }
 

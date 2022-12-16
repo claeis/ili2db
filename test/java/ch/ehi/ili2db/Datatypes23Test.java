@@ -45,6 +45,7 @@ public abstract class Datatypes23Test {
 	private void doImportIli(Connection jdbcConnection,Statement stmt,boolean withMetadata) throws Exception{
         File data=new File(TEST_OUT+"Datatypes23.ili");
         Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+        Ili2db.setNoSmartMapping(config);
         config.setFunction(Config.FC_SCHEMAIMPORT);
         config.setCreateFk(Config.CREATE_FK_YES);
         config.setCreateTextChecks(true);
@@ -52,10 +53,6 @@ public abstract class Datatypes23Test {
         config.setCreateDateTimeChecks(true);
         config.setTidHandling(Config.TID_HANDLING_PROPERTY);
         config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
-        config.setCatalogueRefTrafo(null);
-        config.setMultiSurfaceTrafo(null);
-        config.setMultilingualTrafo(null);
-        config.setInheritanceTrafo(null);
         if(withMetadata) {
             config.setCreateMetaInfo(true);
         }
@@ -310,6 +307,7 @@ public abstract class Datatypes23Test {
 	        stmt=jdbcConnection.createStatement();
 			File data=new File(TEST_OUT+"Datatypes23Attr.xtf");
 			Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+	        Ili2db.setNoSmartMapping(config);
 			config.setFunction(Config.FC_IMPORT);
 	        config.setDoImplicitSchemaImport(true);
 			config.setCreateFk(Config.CREATE_FK_YES);
@@ -317,10 +315,6 @@ public abstract class Datatypes23Test {
 			config.setTidHandling(Config.TID_HANDLING_PROPERTY);
 			config.setImportTid(true);
 			config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
-			config.setCatalogueRefTrafo(null);
-			config.setMultiSurfaceTrafo(null);
-			config.setMultilingualTrafo(null);
-			config.setInheritanceTrafo(null);
 			//Ili2db.readSettingsFromDb(config);
             Ili2db.run(config,null);
 			String stmtTxt="SELECT * FROM "+setup.prefixName("classattr")+" ORDER BY t_id ASC";
@@ -402,6 +396,7 @@ public abstract class Datatypes23Test {
 			stmt=jdbcConnection.createStatement();
 			File data=new File(TEST_OUT+"Datatypes23Attr_invalidSimpleTypes.xtf");
 			Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+	        Ili2db.setNoSmartMapping(config);
 			config.setFunction(Config.FC_IMPORT);
 			config.setDoImplicitSchemaImport(true);
 			config.setCreateFk(Config.CREATE_FK_YES);
@@ -409,10 +404,6 @@ public abstract class Datatypes23Test {
 			config.setTidHandling(Config.TID_HANDLING_PROPERTY);
 			config.setImportTid(true);
 			config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
-			config.setCatalogueRefTrafo(null);
-			config.setMultiSurfaceTrafo(null);
-			config.setMultilingualTrafo(null);
-			config.setInheritanceTrafo(null);
 			config.setSqlColsAsText(Config.SQL_COLS_AS_TEXT_ENABLE);
 			config.setValidation(false);
 			//Ili2db.readSettingsFromDb(config);
@@ -497,6 +488,7 @@ public abstract class Datatypes23Test {
 	        stmt=jdbcConnection.createStatement();
 			File data=new File(TEST_OUT+"Datatypes23Line.xtf");
 			Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+            Ili2db.setNoSmartMapping(config);
 			config.setFunction(Config.FC_IMPORT);
 	        config.setDoImplicitSchemaImport(true);
 			config.setCreateFk(Config.CREATE_FK_YES);
@@ -504,10 +496,6 @@ public abstract class Datatypes23Test {
 			config.setTidHandling(Config.TID_HANDLING_PROPERTY);
             config.setImportTid(true);
 			config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
-			config.setCatalogueRefTrafo(null);
-			config.setMultiSurfaceTrafo(null);
-			config.setMultilingualTrafo(null);
-			config.setInheritanceTrafo(null);
 			//Ili2db.readSettingsFromDb(config);
             Ili2db.run(config,null);
 			// imported polyline
@@ -611,6 +599,7 @@ public abstract class Datatypes23Test {
 	        stmt=jdbcConnection.createStatement();
 			File data=new File(TEST_OUT+"Datatypes23Surface.xtf");
 			Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+            Ili2db.setNoSmartMapping(config);
 			config.setFunction(Config.FC_IMPORT);
 	        config.setDoImplicitSchemaImport(true);
 			config.setCreateFk(Config.CREATE_FK_YES);
@@ -618,10 +607,6 @@ public abstract class Datatypes23Test {
 			config.setTidHandling(Config.TID_HANDLING_PROPERTY);
             config.setImportTid(true);
 			config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
-			config.setCatalogueRefTrafo(null);
-			config.setMultiSurfaceTrafo(null);
-			config.setMultilingualTrafo(null);
-			config.setInheritanceTrafo(null);
 			//Ili2db.readSettingsFromDb(config);
             Ili2db.run(config,null);
 			// imported surface
@@ -717,16 +702,13 @@ public abstract class Datatypes23Test {
             stmt=jdbcConnection.createStatement();
             File data=new File(TEST_OUT+"Datatypes23Surface_asLines.xtf");
             Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+            Ili2db.setNoSmartMapping(config);
             config.setFunction(Config.FC_IMPORT);
             config.setDoImplicitSchemaImport(true);
             config.setValidation(false);
             config.setCreateFk(Config.CREATE_FK_YES);
             config.setTidHandling(Config.TID_HANDLING_PROPERTY);
             config.setImportTid(true);
-            config.setCatalogueRefTrafo(null);
-            config.setMultiSurfaceTrafo(null);
-            config.setMultilingualTrafo(null);
-            config.setInheritanceTrafo(null);
             Ili2db.setSkipPolygonBuilding(config);
             //Ili2db.readSettingsFromDb(config);
             Ili2db.run(config,null);
@@ -776,7 +758,6 @@ public abstract class Datatypes23Test {
 			config.setFunction(Config.FC_EXPORT);
 			config.setModels("Datatypes23");
 			config.setExportTid(true);
-			config.setBasketHandling(null);
 			Ili2db.readSettingsFromDb(config);
 			try{
 				Ili2db.run(config,null);
@@ -888,7 +869,6 @@ public abstract class Datatypes23Test {
 			config.setFunction(Config.FC_EXPORT);
 			config.setModels("Datatypes23");
 			config.setExportTid(true);
-			config.setBasketHandling(null);
 			config.setValidation(false);
 			Ili2db.readSettingsFromDb(config);
 			try{
@@ -999,7 +979,6 @@ public abstract class Datatypes23Test {
 			config.setFunction(Config.FC_EXPORT);
 			config.setExportTid(true);
 			config.setModels("Datatypes23");
-			config.setBasketHandling(null);
 			Ili2db.readSettingsFromDb(config);
 			try{
 				Ili2db.run(config,null);
@@ -1065,7 +1044,6 @@ public abstract class Datatypes23Test {
 			config.setFunction(Config.FC_EXPORT);
 			config.setExportTid(true);
 			config.setModels("Datatypes23");
-			config.setBasketHandling(null);
 			config.setValidation(false);
 			Ili2db.readSettingsFromDb(config);
 			try{
@@ -1131,7 +1109,6 @@ public abstract class Datatypes23Test {
             config.setFunction(Config.FC_EXPORT);
             config.setExportTid(true);
             config.setModels("Datatypes23");
-            config.setBasketHandling(null);
             config.setValidation(false);
             Ili2db.readSettingsFromDb(config);
             try{

@@ -47,18 +47,14 @@ public abstract class MultipointTest {
 
 			File data=new File(TEST_OUT,"MultiPoint2a.xtf");
 			Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+            Ili2db.setNoSmartMapping(config);
 			config.setFunction(Config.FC_IMPORT);
 	        config.setDoImplicitSchemaImport(true);
 			config.setCreateFk(Config.CREATE_FK_YES);
             config.setImportTid(true);
 			config.setTidHandling(Config.TID_HANDLING_PROPERTY);
 			config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
-			config.setCatalogueRefTrafo(null);
-			config.setMultiSurfaceTrafo(null);
-			config.setMultiLineTrafo(null);
 			config.setMultiPointTrafo(Config.MULTIPOINT_TRAFO_COALESCE);
-			config.setMultilingualTrafo(null);
-			config.setInheritanceTrafo(null);
 			Ili2db.readSettingsFromDb(config);
 			Ili2db.run(config,null);
 			// assertions

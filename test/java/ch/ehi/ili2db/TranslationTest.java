@@ -51,15 +51,12 @@ public abstract class TranslationTest {
 	        {       
 				File data=new File(TEST_OUT,"EnumOk.ili");
 				Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+                Ili2db.setNoSmartMapping(config);
 				config.setFunction(Config.FC_SCHEMAIMPORT);
 				config.setCreateFk(Config.CREATE_FK_YES);
 				config.setTidHandling(Config.TID_HANDLING_PROPERTY);
 				config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
 				config.setModels("EnumOkA;EnumOkB");
-				config.setCatalogueRefTrafo(null);
-				config.setMultiSurfaceTrafo(null);
-				config.setMultilingualTrafo(null);
-				config.setInheritanceTrafo(null);
 				config.setVer3_translation(false);
 				Ili2db.readSettingsFromDb(config);
 				Ili2db.run(config,null);
@@ -123,16 +120,13 @@ public abstract class TranslationTest {
             {       
                 File data=new File(TEST_OUT,"EnumOk.ili");
                 Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+                Ili2db.setNoSmartMapping(config);
                 config.setFunction(Config.FC_SCHEMAIMPORT);
                 config.setCreateFk(Config.CREATE_FK_YES);
                 config.setTidHandling(Config.TID_HANDLING_PROPERTY);
                 config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
                 config.setModels("BasisC;TranslatedBasisB;EnumOkX;EnumOkA;EnumOkB");
                 config.setNameLanguage("de;it");
-                config.setCatalogueRefTrafo(null);
-                config.setMultiSurfaceTrafo(null);
-                config.setMultilingualTrafo(null);
-                config.setInheritanceTrafo(null);
                 config.setVer3_translation(false);
                 Ili2db.readSettingsFromDb(config);
                 Ili2db.run(config,null);
@@ -199,14 +193,11 @@ public abstract class TranslationTest {
 	        {
 				File data=new File(TEST_OUT,"ModelBsimple10.ili");
 				Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+                Ili2db.setNoSmartMapping(config);
 				config.setFunction(Config.FC_SCHEMAIMPORT);
 				config.setCreateFk(Config.CREATE_FK_YES);
 				config.setTidHandling(Config.TID_HANDLING_PROPERTY);
 				config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
-				config.setCatalogueRefTrafo(null);
-				config.setMultiSurfaceTrafo(null);
-				config.setMultilingualTrafo(null);
-				config.setInheritanceTrafo(null);
 				config.setIli1Translation("ModelBsimple10=ModelAsimple10");
 	            config.setDefaultSrsAuthority("EPSG");
 	            config.setDefaultSrsCode("21781");
@@ -264,14 +255,11 @@ public abstract class TranslationTest {
             {
                 File data=new File(TEST_OUT,"ModelCsimple10.ili");
                 Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+                Ili2db.setNoSmartMapping(config);
                 config.setFunction(Config.FC_SCHEMAIMPORT);
                 config.setCreateFk(Config.CREATE_FK_YES);
                 config.setTidHandling(Config.TID_HANDLING_PROPERTY);
                 config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
-                config.setCatalogueRefTrafo(null);
-                config.setMultiSurfaceTrafo(null);
-                config.setMultilingualTrafo(null);
-                config.setInheritanceTrafo(null);
                 config.setIli1Translation("ModelBsimple10=ModelAsimple10;ModelCsimple10=ModelAsimple10");
                 config.setDefaultSrsAuthority("EPSG");
                 config.setDefaultSrsCode("21781");
@@ -330,14 +318,11 @@ public abstract class TranslationTest {
 	        {
 				File data=new File(TEST_OUT,"ModelBsimple10.ili");
 				Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+                Ili2db.setNoSmartMapping(config);
 				config.setFunction(Config.FC_SCHEMAIMPORT);
 				config.setCreateFk(Config.CREATE_FK_YES);
 				config.setTidHandling(Config.TID_HANDLING_PROPERTY);
 				config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
-				config.setCatalogueRefTrafo(null);
-				config.setMultiSurfaceTrafo(null);
-				config.setMultilingualTrafo(null);
-				config.setInheritanceTrafo(null);
                 Ili2db.setSkipPolygonBuilding(config);
 				config.setIli1Translation("ModelBsimple10=ModelAsimple10");
 	            config.setDefaultSrsAuthority("EPSG");
@@ -396,6 +381,7 @@ public abstract class TranslationTest {
 	        {
 	    		File data=new File(TEST_OUT,"EnumOka.xtf");
 	    		Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+	            Ili2db.setNoSmartMapping(config);
 	    		config.setFunction(Config.FC_IMPORT);
 	            config.setDoImplicitSchemaImport(true);
 	    		config.setCreateFk(Config.CREATE_FK_YES);
@@ -403,10 +389,6 @@ public abstract class TranslationTest {
                 config.setImportTid(true);
 	    		config.setTidHandling(Config.TID_HANDLING_PROPERTY);
 	    		config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
-	    		config.setCatalogueRefTrafo(null);
-	    		config.setMultiSurfaceTrafo(null);
-	    		config.setMultilingualTrafo(null);
-	    		config.setInheritanceTrafo(null);
 	    		config.setVer3_translation(false);
 	    		config.setDatasetName("EnumOka");
 	    		Ili2db.readSettingsFromDb(config);
@@ -1151,6 +1133,7 @@ public abstract class TranslationTest {
 	        {
 	    		File data=new File(TEST_OUT,"ModelAsimple10a.itf");
 	    		Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+                Ili2db.setNoSmartMapping(config);
 	    		config.setFunction(Config.FC_IMPORT);
 	            config.setDoImplicitSchemaImport(true);
 	    		config.setCreateFk(Config.CREATE_FK_YES);
@@ -1158,10 +1141,6 @@ public abstract class TranslationTest {
 	    		config.setImportTid(true);
 	    		config.setImportBid(true);
 	    		config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
-	    		config.setCatalogueRefTrafo(null);
-	    		config.setMultiSurfaceTrafo(null);
-	    		config.setMultilingualTrafo(null);
-	    		config.setInheritanceTrafo(null);
 	    		config.setIli1Translation("ModelBsimple10=ModelAsimple10");
 	    		config.setDatasetName("ModelAsimple10");
 	            config.setDefaultSrsAuthority("EPSG");
@@ -1216,6 +1195,7 @@ public abstract class TranslationTest {
             {
                 File data=new File(TEST_OUT,"ModelAsimple10a.itf");
                 Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+                Ili2db.setNoSmartMapping(config);
                 config.setFunction(Config.FC_IMPORT);
                 config.setDoImplicitSchemaImport(true);
                 config.setCreateFk(Config.CREATE_FK_YES);
@@ -1223,10 +1203,6 @@ public abstract class TranslationTest {
                 config.setImportTid(true);
                 config.setImportBid(true);
                 config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
-                config.setCatalogueRefTrafo(null);
-                config.setMultiSurfaceTrafo(null);
-                config.setMultilingualTrafo(null);
-                config.setInheritanceTrafo(null);
                 config.setIli1Translation("ModelBsimple10=ModelAsimple10;ModelCsimple10=ModelAsimple10");
                 config.setDatasetName("ModelAsimple10");
                 config.setDefaultSrsAuthority("EPSG");
@@ -1855,6 +1831,7 @@ public abstract class TranslationTest {
 	        {
 	    		File data=new File(TEST_OUT,"ModelAsimple10a.itf");
 	    		Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+                Ili2db.setNoSmartMapping(config);
 	    		config.setFunction(Config.FC_IMPORT);
 	            config.setDoImplicitSchemaImport(true);
 	    		config.setCreateFk(Config.CREATE_FK_YES);
@@ -1863,10 +1840,6 @@ public abstract class TranslationTest {
 	    		config.setTidHandling(Config.TID_HANDLING_PROPERTY);
 	    		config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
                 Ili2db.setSkipPolygonBuilding(config);
-	    		config.setCatalogueRefTrafo(null);
-	    		config.setMultiSurfaceTrafo(null);
-	    		config.setMultilingualTrafo(null);
-	    		config.setInheritanceTrafo(null);
 	    		config.setIli1Translation("ModelBsimple10=ModelAsimple10");
 	    		config.setDatasetName("ModelAsimple10");
 	            config.setDefaultSrsAuthority("EPSG");

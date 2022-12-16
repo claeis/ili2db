@@ -62,15 +62,12 @@ public class MultipleGeomAttrsTest {
 	    Class driverClass = Class.forName(FgdbDriver.class.getName());
 		File data=new File(TEST_OUT,"MultipleGeomAttrs1.ili");
 		Config config=initConfig(data.getPath(),data.getPath()+".log");
+        Ili2db.setNoSmartMapping(config);
 		config.setFunction(Config.FC_SCHEMAIMPORT);
 		config.setCreateFk(config.CREATE_FK_YES);
 		config.setCreateNumChecks(true);
 		config.setTidHandling(Config.TID_HANDLING_PROPERTY);
 		config.setBasketHandling(config.BASKET_HANDLING_READWRITE);
-		config.setCatalogueRefTrafo(null);
-		config.setMultiSurfaceTrafo(null);
-		config.setMultilingualTrafo(null);
-		config.setInheritanceTrafo(null);
 		//Ili2db.readSettingsFromDb(config);
 		Ili2db.run(config,null);
 	}
@@ -84,16 +81,13 @@ public class MultipleGeomAttrsTest {
 	    Class driverClass = Class.forName(FgdbDriver.class.getName());
 		File data=new File(TEST_OUT,"MultipleGeomAttrs1a.xtf");
 		Config config=initConfig(data.getPath(),data.getPath()+".log");
+        Ili2db.setNoSmartMapping(config);
 		config.setFunction(Config.FC_IMPORT);
         config.setDoImplicitSchemaImport(true);
 		config.setCreateFk(config.CREATE_FK_YES);
 		config.setCreateNumChecks(true);
 		config.setTidHandling(Config.TID_HANDLING_PROPERTY);
 		config.setBasketHandling(config.BASKET_HANDLING_READWRITE);
-		config.setCatalogueRefTrafo(null);
-		config.setMultiSurfaceTrafo(null);
-		config.setMultilingualTrafo(null);
-		config.setInheritanceTrafo(null);
 		//Ili2db.readSettingsFromDb(config);
         Ili2db.run(config,null);
 	}

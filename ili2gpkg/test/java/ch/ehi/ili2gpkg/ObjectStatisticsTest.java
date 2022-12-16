@@ -61,14 +61,12 @@ public class ObjectStatisticsTest {
                     EhiLogger.getInstance().addListener(logCollector);
                     File data = new File("test/data/Logging/Logging-a.xtf");
                     Config config = initConfig(data.getPath(), null, data.getPath() + ".log", gpkgFileName);
+                    Ili2db.setNoSmartMapping(config);
                     config.setDatasetName(DATASETNAME_A);
                     config.setFunction(Config.FC_IMPORT);
                     config.setDoImplicitSchemaImport(true);
                     config.setCreateFk(Config.CREATE_FK_YES);
                     config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
-                    config.setCatalogueRefTrafo(null);
-                    config.setMultiSurfaceTrafo(null);
-                    config.setMultilingualTrafo(null);
                     config.setImportBid(true);
                     config.setInheritanceTrafo(Config.INHERITANCE_TRAFO_SMART1);
                     config.setCreateImportTabs(true);
