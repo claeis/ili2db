@@ -63,16 +63,13 @@ public class Dataset10Test {
 	        { 
 				File data=new File(TEST_OUT,"Dataset10a.itf");
 				Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+                Ili2db.setNoSmartMapping(config);
 				config.setFunction(Config.FC_IMPORT);
 		        config.setDoImplicitSchemaImport(true);
 				config.setCreateFk(Config.CREATE_FK_YES);
 				config.setTidHandling(Config.TID_HANDLING_PROPERTY);
 				config.setImportTid(true);
 				config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
-				config.setCatalogueRefTrafo(null);
-				config.setMultiSurfaceTrafo(null);
-				config.setMultilingualTrafo(null);
-				config.setInheritanceTrafo(null);
 				config.setImportBid(true);
 				final String datasetName="ceis";
 				config.setDatasetName(datasetName);
@@ -173,6 +170,7 @@ public class Dataset10Test {
 	        {
 				File data=new File(TEST_OUT,"Dataset10b.itf");
 				Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+                Ili2db.setNoSmartMapping(config);
 				config.setFunction(Config.FC_IMPORT);
 		        config.setDoImplicitSchemaImport(true);
 				config.setCreateFk(Config.CREATE_FK_YES);
@@ -180,10 +178,6 @@ public class Dataset10Test {
 				config.setImportTid(true);
 				config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
 				config.setCreateDatasetCols(Config.CREATE_DATASET_COL);
-				config.setCatalogueRefTrafo(null);
-				config.setMultiSurfaceTrafo(null);
-				config.setMultilingualTrafo(null);
-				config.setInheritanceTrafo(null);
 				final String datasetName="ceis";
 				config.setDatasetName(datasetName);
 				Ili2db.readSettingsFromDb(config);

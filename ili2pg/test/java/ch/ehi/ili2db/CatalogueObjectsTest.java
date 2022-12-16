@@ -72,8 +72,6 @@ public class CatalogueObjectsTest {
 				Ili2db.setNoSmartMapping(config);
 				config.setFunction(Config.FC_SCHEMAIMPORT);
 				config.setCreateFk(Config.CREATE_FK_YES);
-                config.setInheritanceTrafo(null);
-                config.setCatalogueRefTrafo(null);
 				config.setDatasetName(DATASETNAME);
 				config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
 				config.setNameOptimization(Config.NAME_OPTIMIZATION_TOPIC);
@@ -146,10 +144,12 @@ public class CatalogueObjectsTest {
             {
                 File data=new File(TEST_OUT,"CatalogueObjects1.ili");
                 Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+                Ili2db.setNoSmartMapping(config);
                 config.setFunction(Config.FC_SCHEMAIMPORT);
                 config.setCreateFk(Config.CREATE_FK_YES);
                 config.setInheritanceTrafo(Config.INHERITANCE_TRAFO_SMART1);
                 config.setCatalogueRefTrafo(Config.CATALOGUE_REF_TRAFO_COALESCE);
+                config.setMultilingualTrafo(Config.MULTILINGUAL_TRAFO_EXPAND);
                 config.setDatasetName(DATASETNAME);
                 config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
                 config.setNameOptimization(Config.NAME_OPTIMIZATION_TOPIC);
@@ -228,10 +228,12 @@ public class CatalogueObjectsTest {
             {
                 File data=new File(TEST_OUT,"CatalogueObjects1.ili");
                 Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+                Ili2db.setNoSmartMapping(config);
                 config.setFunction(Config.FC_SCHEMAIMPORT);
                 config.setCreateFk(Config.CREATE_FK_YES);
                 config.setInheritanceTrafo(Config.INHERITANCE_TRAFO_SMART2);
                 config.setCatalogueRefTrafo(Config.CATALOGUE_REF_TRAFO_COALESCE);
+                config.setMultilingualTrafo(Config.MULTILINGUAL_TRAFO_EXPAND);
                 config.setDatasetName(DATASETNAME);
                 config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
                 config.setNameOptimization(Config.NAME_OPTIMIZATION_TOPIC);
@@ -356,12 +358,14 @@ public class CatalogueObjectsTest {
             {
                 File data=new File(TEST_OUT,"CatalogueObjects1a.xtf");
                 Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+                Ili2db.setNoSmartMapping(config);
                 config.setFunction(Config.FC_IMPORT);
                 config.setDoImplicitSchemaImport(true);
                 config.setCreateFk(Config.CREATE_FK_YES);
                 config.setDatasetName(DATASETNAME);
                 config.setInheritanceTrafo(Config.INHERITANCE_TRAFO_SMART1);
                 config.setCatalogueRefTrafo(Config.CATALOGUE_REF_TRAFO_COALESCE);
+                config.setMultilingualTrafo(Config.MULTILINGUAL_TRAFO_EXPAND);
                 config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
                 config.setNameOptimization(Config.NAME_OPTIMIZATION_TOPIC);
                 //config.setCreatescript(data.getPath()+".sql");
@@ -389,12 +393,14 @@ public class CatalogueObjectsTest {
             {
                 File data=new File(TEST_OUT,"CatalogueObjects1a.xtf");
                 Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+                Ili2db.setNoSmartMapping(config);
                 config.setFunction(Config.FC_IMPORT);
                 config.setDoImplicitSchemaImport(true);
                 config.setCreateFk(Config.CREATE_FK_YES);
                 config.setDatasetName(DATASETNAME);
                 config.setInheritanceTrafo(Config.INHERITANCE_TRAFO_SMART2);
                 config.setCatalogueRefTrafo(Config.CATALOGUE_REF_TRAFO_COALESCE);
+                config.setMultilingualTrafo(Config.MULTILINGUAL_TRAFO_EXPAND);
                 config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
                 config.setNameOptimization(Config.NAME_OPTIMIZATION_TOPIC);
                 //config.setCreatescript(data.getPath()+".sql");

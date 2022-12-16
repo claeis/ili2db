@@ -75,14 +75,12 @@ public class Naming1smart1Test {
 	        
 			File data=new File("test/data/Naming1smart1/Naming1a.xtf");
 			Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+            Ili2db.setNoSmartMapping(config);
 			config.setDatasetName(DATASETNAME);
 			config.setFunction(Config.FC_IMPORT);
 	        config.setDoImplicitSchemaImport(true);
 			config.setCreateFk(config.CREATE_FK_YES);
 			config.setBasketHandling(config.BASKET_HANDLING_READWRITE);
-			config.setCatalogueRefTrafo(null);
-			config.setMultiSurfaceTrafo(null);
-			config.setMultilingualTrafo(null);
 			config.setInheritanceTrafo(config.INHERITANCE_TRAFO_SMART1);
 			config.setNameOptimization(Config.NAME_OPTIMIZATION_TOPIC);
 			config.setTidHandling(config.TID_HANDLING_PROPERTY);

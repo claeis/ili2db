@@ -101,18 +101,14 @@ public class Array23Test {
 
 			File data=new File("test/data/Array/Array23a.xtf");
 			Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+	        Ili2db.setNoSmartMapping(config);
 			config.setFunction(Config.FC_IMPORT);
 	        config.setDoImplicitSchemaImport(true);
 			config.setCreateFk(Config.CREATE_FK_YES);
 			config.setTidHandling(Config.TID_HANDLING_PROPERTY);
 			config.setImportTid(true);
 			config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
-			config.setCatalogueRefTrafo(null);
-			config.setMultiSurfaceTrafo(null);
-			config.setMultiLineTrafo(null);
 			config.setArrayTrafo(Config.ARRAY_TRAFO_COALESCE);
-			config.setMultilingualTrafo(null);
-			config.setInheritanceTrafo(null);
 			Ili2db.readSettingsFromDb(config);
 			Ili2db.run(config,null);
 			// assertions
@@ -185,19 +181,15 @@ public class Array23Test {
 
             File data=new File("test/data/Array/Array23a.xtf");
             Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+            Ili2db.setNoSmartMapping(config);
             config.setFunction(Config.FC_IMPORT);
             config.setDoImplicitSchemaImport(true);
             config.setCreateFk(Config.CREATE_FK_YES);
             config.setTidHandling(Config.TID_HANDLING_PROPERTY);
             config.setImportTid(true);
             config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
-            config.setCatalogueRefTrafo(null);
-            config.setMultiSurfaceTrafo(null);
-            config.setMultiLineTrafo(null);
             config.setArrayTrafo(Config.ARRAY_TRAFO_COALESCE);
             config.setCreateEnumDefs(Config.CREATE_ENUM_DEFS_MULTI_WITH_ID);
-            config.setMultilingualTrafo(null);
-            config.setInheritanceTrafo(null);
             Ili2db.readSettingsFromDb(config);
             Ili2db.run(config,null);
             // assertions

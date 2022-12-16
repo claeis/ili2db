@@ -74,9 +74,9 @@ public class InheritanceTest {
 	        {
 		        File data=new File(TEST_DATA_DIR,"Inheritance1.ili");
 				Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+                Ili2db.setNoSmartMapping(config);
 				config.setFunction(Config.FC_SCHEMAIMPORT);
 				config.setCreateFk(Config.CREATE_FK_YES);
-				config.setInheritanceTrafo(null);
 				config.setTidHandling(Config.TID_HANDLING_PROPERTY);
 				config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
 				Ili2db.readSettingsFromDb(config);
@@ -101,6 +101,7 @@ public class InheritanceTest {
             {
                 File data=new File(TEST_DATA_DIR,"Inheritance1.ili");
                 Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+                Ili2db.setNoSmartMapping(config);
                 config.setFunction(Config.FC_SCHEMAIMPORT);
                 config.setCreateFk(Config.CREATE_FK_YES);
                 config.setInheritanceTrafo(Config.INHERITANCE_TRAFO_SMART1);
@@ -128,6 +129,7 @@ public class InheritanceTest {
             stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");
             File data=new File(TEST_DATA_DIR,"Inheritance2.ili");
             Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+            Ili2db.setNoSmartMapping(config);
             config.setFunction(Config.FC_SCHEMAIMPORT);
             config.setCreateFk(Config.CREATE_FK_YES);
             config.setInheritanceTrafo(Config.INHERITANCE_TRAFO_SMART2);
@@ -729,9 +731,9 @@ public class InheritanceTest {
 	        {
 				File data=new File(TEST_DATA_DIR,"StructAttr1.ili");
 				Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+                Ili2db.setNoSmartMapping(config);
 				config.setFunction(Config.FC_SCHEMAIMPORT);
 				config.setCreateFk(Config.CREATE_FK_YES);
-				config.setInheritanceTrafo(null);
 				config.setTidHandling(Config.TID_HANDLING_PROPERTY);
 				config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
 				config.setNameOptimization(Config.NAME_OPTIMIZATION_TOPIC);
@@ -797,6 +799,7 @@ public class InheritanceTest {
             {
                 File data=new File(TEST_DATA_DIR,"StructAttr1.ili");
                 Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+                Ili2db.setNoSmartMapping(config);
                 config.setFunction(Config.FC_SCHEMAIMPORT);
                 config.setCreateFk(Config.CREATE_FK_YES);
                 config.setInheritanceTrafo(Config.INHERITANCE_TRAFO_SMART1);
@@ -878,6 +881,7 @@ public class InheritanceTest {
             {
                 File data=new File(TEST_DATA_DIR,"StructAttr1.ili");
                 Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+                Ili2db.setNoSmartMapping(config);
                 config.setFunction(Config.FC_SCHEMAIMPORT);
                 config.setCreateFk(Config.CREATE_FK_YES);
                 config.setInheritanceTrafo(Config.INHERITANCE_TRAFO_SMART2);
@@ -1270,6 +1274,7 @@ public class InheritanceTest {
             {
                 File data=new File(TEST_DATA_DIR,"RefAttr1.ili");
                 Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+                Ili2db.setNoSmartMapping(config);
                 config.setFunction(Config.FC_SCHEMAIMPORT);
                 config.setCreateFk(Config.CREATE_FK_YES);
                 config.setInheritanceTrafo(Config.INHERITANCE_TRAFO_SMART1);
@@ -1413,6 +1418,7 @@ public class InheritanceTest {
             {
                 File data=new File(TEST_DATA_DIR,"SubtypeFK.ili");
                 Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+                Ili2db.setNoSmartMapping(config);
                 config.setFunction(Config.FC_SCHEMAIMPORT);
                 config.setCreateFk(Config.CREATE_FK_YES);
                 config.setInheritanceTrafo(Config.INHERITANCE_TRAFO_SMART1);

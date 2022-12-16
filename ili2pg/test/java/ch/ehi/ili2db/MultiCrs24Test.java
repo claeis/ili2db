@@ -79,16 +79,11 @@ public class MultiCrs24Test {
 
             File data=new File("test/data/Crs/MultiCrs24.ili");
             Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+            Ili2db.setNoSmartMapping(config);
             config.setFunction(Config.FC_SCHEMAIMPORT);
             config.setCreateFk(config.CREATE_FK_YES);
             config.setTidHandling(Config.TID_HANDLING_PROPERTY);
             config.setBasketHandling(config.BASKET_HANDLING_READWRITE);
-            config.setCatalogueRefTrafo(null);
-            config.setMultiSurfaceTrafo(null);
-            config.setMultiLineTrafo(null);
-            config.setMultiPointTrafo(null);
-            config.setMultilingualTrafo(null);
-            config.setInheritanceTrafo(null);
             config.setUseEpsgInNames(true);
             config.setValidation(false);
             Ili2db.readSettingsFromDb(config);
@@ -162,17 +157,12 @@ public class MultiCrs24Test {
 
 			File data=new File("test/data/Crs/MultiCrs24.xtf");
 			Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+            Ili2db.setNoSmartMapping(config);
             config.setDatasetName("Data");
 			config.setFunction(Config.FC_IMPORT);
 			config.setCreateFk(config.CREATE_FK_YES);
 			config.setTidHandling(Config.TID_HANDLING_PROPERTY);
 			config.setBasketHandling(config.BASKET_HANDLING_READWRITE);
-			config.setCatalogueRefTrafo(null);
-			config.setMultiSurfaceTrafo(null);
-			config.setMultiLineTrafo(null);
-			config.setMultiPointTrafo(null);
-			config.setMultilingualTrafo(null);
-			config.setInheritanceTrafo(null);
 			config.setUseEpsgInNames(true);
 			config.setValidation(false);
 			Ili2db.readSettingsFromDb(config);
