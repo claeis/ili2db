@@ -68,6 +68,7 @@ import ch.ehi.sqlgen.repository.DbColumn;
 import ch.ehi.sqlgen.repository.DbSchema;
 import ch.ehi.sqlgen.repository.DbTable;
 import ch.ehi.sqlgen.repository.DbTableName;
+import ch.interlis.ili2c.Ili2cException;
 import ch.interlis.ili2c.config.Configuration;
 import ch.interlis.ili2c.gui.UserSettings;
 import ch.interlis.ili2c.metamodel.Element;
@@ -333,9 +334,11 @@ public class Ili2db {
                         if(!visitedFiles.contains(metaConfigFilename)) {
                             visitedFiles.add(metaConfigFilename);
                             EhiLogger.traceState("metaConfigFile <"+metaConfigFilename+">");
-                            File metaConfigFile=IliManager.getLocalCopyOfReposFile(repositoryManager,metaConfigFilename);
-                            if(metaConfigFile==null) {
-                                throw new Ili2dbException("failed to get local copy of meta config file <"+metaConfigFilename+">");
+                            File metaConfigFile=null;
+                            try {
+                                metaConfigFile = IliManager.getLocalCopyOfReposFile(repositoryManager,metaConfigFilename);
+                            } catch (Ili2cException e1) {
+                                throw new Ili2dbException("failed to get local copy of meta config file <"+metaConfigFilename+">",e1);
                             }
                             OutParam<String> baseConfigs=new OutParam<String>();
                             Config newSettings=null;
@@ -366,30 +369,34 @@ public class Ili2db {
 			EhiLogger.traceState("modeldir <"+modeldir+">");
 
             // get local copies of remote files
-            getLocalCopiesOfRemoteFiles(repositoryManager,config);
             String inputs[]=null;
-            {
-                String inputs1[]=getDataFiles(config.getReferenceData());
-                String inputs2[]=getDataFiles(config.getXtffile());
-                inputs=new String[(inputs1!=null?inputs1.length:0)+(inputs2!=null?inputs2.length:0)];
-                int idx=0;
-                if(inputs1!=null) {
-                    for(int i=0;i<inputs1.length;i++){
-                        inputs[idx++]=inputs1[i];                        
+            try {
+                getLocalCopiesOfRemoteFiles(repositoryManager,config);
+                {
+                    String inputs1[]=getDataFiles(config.getReferenceData());
+                    String inputs2[]=getDataFiles(config.getXtffile());
+                    inputs=new String[(inputs1!=null?inputs1.length:0)+(inputs2!=null?inputs2.length:0)];
+                    int idx=0;
+                    if(inputs1!=null) {
+                        for(int i=0;i<inputs1.length;i++){
+                            inputs[idx++]=inputs1[i];                        
+                        }
+                    }
+                    if(inputs2!=null) {
+                        for(int i=0;i<inputs2.length;i++){
+                            inputs[idx++]=inputs2[i];
+                        }
+                    }
+                    for(idx=0;idx<inputs.length;idx++) {
+                        String dataFile=inputs[idx];
+                        if(dataFile!=null) {
+                            java.io.File localFile=IliManager.getLocalCopyOfReposFile(repositoryManager, dataFile);
+                            inputs[idx]=localFile.getPath();
+                        }
                     }
                 }
-                if(inputs2!=null) {
-                    for(int i=0;i<inputs2.length;i++){
-                        inputs[idx++]=inputs2[i];
-                    }
-                }
-                for(idx=0;idx<inputs.length;idx++) {
-                    String dataFile=inputs[idx];
-                    if(dataFile!=null) {
-                        java.io.File localFile=IliManager.getLocalCopyOfReposFile(repositoryManager, dataFile);
-                        inputs[idx]=localFile.getPath();
-                    }
-                }
+            } catch (Ili2cException e2) {
+                throw new Ili2dbException("failed to get local copy of remote files",e2);
             }
             if(function==Config.FC_DELETE){
                 if(config.getDatasetName()==null){
@@ -1183,10 +1190,12 @@ public class Ili2db {
 	                    if(!visitedFiles.contains(metaConfigFilename)) {
 	                        visitedFiles.add(metaConfigFilename);
 	                        EhiLogger.traceState("metaConfigFile <"+metaConfigFilename+">");
-	                        File metaConfigFile=IliManager.getLocalCopyOfReposFile(repositoryManager,metaConfigFilename);
-	                        if(metaConfigFile==null) {
-	                            throw new Ili2dbException("failed to get local copy of meta config file <"+metaConfigFilename+">");
-	                        }
+	                        File metaConfigFile=null;
+                            try {
+                                metaConfigFile = IliManager.getLocalCopyOfReposFile(repositoryManager,metaConfigFilename);
+                            } catch (Ili2cException e1) {
+                                throw new Ili2dbException("failed to get local copy of meta config file <"+metaConfigFilename+">");
+                            }
 	                        OutParam<String> baseConfigs=new OutParam<String>();
 	                        Config newSettings=null;
 	                        try {
@@ -1210,7 +1219,11 @@ public class Ili2db {
             MetaConfig.removeNullFromSettings(config);
 	        
 	        // get local copies of remote files
-	        getLocalCopiesOfRemoteFiles(repositoryManager,config);
+	        try {
+                getLocalCopiesOfRemoteFiles(repositoryManager,config);
+            } catch (Ili2cException e2) {
+                throw new Ili2dbException("failed to get local copy of remote files",e2);
+            }
 
 			Ili2dbLibraryInit ao=null;
             Connection conn=null;
@@ -1623,7 +1636,7 @@ public class Ili2db {
                 xtflog.logEvent(new StdLogEvent(LogEvent.ERROR,null,ex,null));
             }
 			throw ex;
-		}finally{
+        }finally{
             if(xtflog!=null){
                 EhiLogger.getInstance().removeListener(xtflog);
                 xtflog.close();
@@ -1641,7 +1654,7 @@ public class Ili2db {
 		}
 		
 }
-	private static void getLocalCopiesOfRemoteFiles(IliManager repoManager,Config config) {
+	private static void getLocalCopiesOfRemoteFiles(IliManager repoManager,Config config) throws Ili2cException {
 	    String dataFiles[]= {
 	            Config.TRANSIENT_STRING_PRESCRIPT,
 	            Config.TRANSIENT_STRING_POSTSCRIPT,
