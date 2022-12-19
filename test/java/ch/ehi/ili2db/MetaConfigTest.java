@@ -44,17 +44,89 @@ public abstract class MetaConfigTest {
         Ili2db.run(config,null);
 	}
 	
-    //@Test
-	public void importXtf() throws Exception
+    @Test
+	public void importXtf_ReferenceDataOnly() throws Exception
 	{
+        importIli();
 		//EhiLogger.getInstance().setTraceFilter(false);
-        setup.resetDb();
-		File data=new File(TEST_OUT,"Simple23a.xtf");
-		Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
-        Ili2db.setNoSmartMapping(config);
-		config.setFunction(Config.FC_IMPORT);
-		Ili2db.run(config,null);
+        Config config=setup.initConfig(null,TEST_OUT+"importIli.log");
+        config.setFunction(Config.FC_IMPORT);
+        config.setModeldir(TEST_OUT+"repos");
+        config.setMetaConfigFile("ilidata:163d16de-83df-4d84-8039-256f2261e226");
+        Ili2db.run(config,null);
+        // verify import
+        {
+            Connection jdbcConnection=null;
+            Statement stmt=null;
+            try{
+                jdbcConnection = setup.createConnection();
+                stmt=jdbcConnection.createStatement();
+                {
+                    HashSet<String> attraValues=new HashSet<String>();
+                    ResultSet rs=stmt.executeQuery("SELECT "+DbNames.T_ILI_TID_COL+" FROM "+setup.prefixName("classa1"));
+                    while(rs.next()) {
+                        attraValues.add(rs.getString(1));
+                    }
+                    Assert.assertEquals(1, attraValues.size());
+                    Assert.assertTrue(attraValues.contains("2f1774b2-8427-4d49-9810-27acb08a7839"));
+                }
+            }finally {
+                if(stmt!=null) {
+                    stmt.close();
+                }
+                if(jdbcConnection!=null) {
+                    jdbcConnection.close();
+                }
+            }
+        }
 	}
+    @Test
+    public void importXtf() throws Exception
+    {
+        importIli();
+        //EhiLogger.getInstance().setTraceFilter(false);
+        File data=new File(TEST_OUT,"ExtRef23a.xtf");
+        Config config=setup.initConfig(data.getPath(),TEST_OUT+"importIli.log");
+        config.setFunction(Config.FC_IMPORT);
+        config.setModeldir(TEST_OUT+"repos");
+        config.setMetaConfigFile("ilidata:163d16de-83df-4d84-8039-256f2261e226");
+        Ili2db.run(config,null);
+        // verify import
+        {
+            Connection jdbcConnection=null;
+            Statement stmt=null;
+            try{
+                jdbcConnection = setup.createConnection();
+                stmt=jdbcConnection.createStatement();
+                {
+                    HashSet<String> attraValues=new HashSet<String>();
+                    ResultSet rs=stmt.executeQuery("SELECT "+DbNames.T_ILI_TID_COL+" FROM "+setup.prefixName("classa1"));
+                    while(rs.next()) {
+                        attraValues.add(rs.getString(1));
+                    }
+                    Assert.assertEquals(1, attraValues.size());
+                    Assert.assertTrue(attraValues.contains("2f1774b2-8427-4d49-9810-27acb08a7839"));
+                }
+                {
+                    HashSet<String> attraValues=new HashSet<String>();
+                    ResultSet rs=stmt.executeQuery("SELECT attrB FROM "+setup.prefixName("classb1"));
+                    while(rs.next()) {
+                        attraValues.add(rs.getString(1));
+                    }
+                    Assert.assertEquals(1, attraValues.size());
+                    Assert.assertTrue(attraValues.contains("d3663025-735d-4d13-b0f3-fed3496820b7"));
+                }
+            }finally {
+                if(stmt!=null) {
+                    stmt.close();
+                }
+                if(jdbcConnection!=null) {
+                    jdbcConnection.close();
+                }
+            }
+        }
+            
+    }
 	
 	
 	//@Test

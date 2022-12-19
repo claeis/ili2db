@@ -16,6 +16,7 @@ MODEL ExtRef23
     DEPENDS ON ExtRef23.TestA;
     
     CLASS ClassB1 =
+    	attrB : MANDATORY TEXT*60;
     END ClassB1;
     
     ASSOCIATION a2b =

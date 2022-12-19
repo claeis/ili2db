@@ -125,7 +125,6 @@ public class TransferFromXtf {
     private boolean readIliBid=false;
 	private boolean createBasketCol=false;
 	private boolean createDatasetCol=false;
-	private String xtffilename=null;
 	private String attachmentKey=null;
 	private boolean doItfLineTables=false;
 	private boolean createItfLineTables=false;
@@ -196,7 +195,6 @@ public class TransferFromXtf {
 		}
 		createSqlExtRef=Config.SQL_EXTREF_ENABLE.equals(config.getSqlExtRefCols());
 		createImportTabs=config.isCreateImportTabs();
-		xtffilename=config.getXtffile();
         batchSize = config.getBatchSize();
         if(batchSize!=null) {
             doBatchInsert=true;
@@ -217,7 +215,7 @@ public class TransferFromXtf {
 	    }
 	}
 		
-	public void doit(IoxReader reader,Config config,Map<String,BasketStat> stat,CustomMapping customMapping1)
+	public void doit(String xtffilename,IoxReader reader,Config config,Map<String,BasketStat> stat,CustomMapping customMapping1)
 	throws IoxException, Ili2dbException
 	{
 		if(functionCode==Config.FC_UPDATE || functionCode==Config.FC_REPLACE){
