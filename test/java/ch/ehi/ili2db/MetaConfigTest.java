@@ -112,6 +112,15 @@ public abstract class MetaConfigTest {
                     Assert.assertTrue(attraValues.contains("2f1774b2-8427-4d49-9810-27acb08a7839"));
                     Assert.assertTrue(attraValues.contains("d3663025-735d-4d13-b0f3-fed3496820b7"));
                 }
+                {
+                    HashSet<String> attraValues=new HashSet<String>();
+                    ResultSet rs=stmt.executeQuery("SELECT "+DbNames.T_ILI_TID_COL+" FROM "+setup.prefixName("classa2"));
+                    while(rs.next()) {
+                        attraValues.add(rs.getString(1));
+                    }
+                    Assert.assertEquals(1, attraValues.size());
+                    Assert.assertTrue(attraValues.contains("644b3619-952a-4e03-8efa-f7e69bcadf3c"));
+                }
             }finally {
                 if(stmt!=null) {
                     stmt.close();
@@ -153,6 +162,15 @@ public abstract class MetaConfigTest {
                     Assert.assertTrue(attraValues.contains("d3663025-735d-4d13-b0f3-fed3496820b7"));
                     Assert.assertTrue(attraValues.contains("2f1774b2-8427-4d49-9810-27acb08a7839"));
                 }
+                {
+                    HashSet<String> attraValues=new HashSet<String>();
+                    ResultSet rs=stmt.executeQuery("SELECT "+DbNames.T_ILI_TID_COL+" FROM "+setup.prefixName("classa2"));
+                    while(rs.next()) {
+                        attraValues.add(rs.getString(1));
+                    }
+                    Assert.assertEquals(1, attraValues.size());
+                    Assert.assertTrue(attraValues.contains("644b3619-952a-4e03-8efa-f7e69bcadf3c"));
+                }
             }finally {
                 if(stmt!=null) {
                     stmt.close();
@@ -172,11 +190,28 @@ public abstract class MetaConfigTest {
 		{
 			importXtf();
 		}
+        {
+            Connection jdbcConnection=null;
+            Statement stmt=null;
+            try{
+                jdbcConnection = setup.createConnection();
+                stmt=jdbcConnection.createStatement();
+                stmt.execute("UPDATE "+setup.prefixName("classa2")+" SET attrA2 = NULL");
+            }finally {
+                if(stmt!=null) {
+                    stmt.close();
+                }
+                if(jdbcConnection!=null) {
+                    jdbcConnection.close();
+                }
+            }
+        }
 		//EhiLogger.getInstance().setTraceFilter(false);
 		File data=new File(TEST_OUT,"ExtRef23a-out.xtf");
 		Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
 		config.setFunction(Config.FC_EXPORT);
 		config.setDatasetName(DATASETNAME);
+        config.setMetaConfigFile(IliManager.FILE_URI_PREFIX+TEST_OUT+"ExtRef23-metaNoValidation.ini");
 		Ili2db.readSettingsFromDb(config);
         Ili2db.run(config,null);
         
@@ -198,7 +233,7 @@ public abstract class MetaConfigTest {
 	            }
                 event=reader.read();
 			}
-			assertEquals(2,objs.size());
+			assertEquals(3,objs.size());
 			{
 	            IomObject iomObj=objs.get("d3663025-735d-4d13-b0f3-fed3496820b7");
 	            assertEquals("ExtRef23.TestA.ClassA1",iomObj.getobjecttag());
@@ -207,60 +242,13 @@ public abstract class MetaConfigTest {
 	            IomObject iomObj=objs.get("2f1774b2-8427-4d49-9810-27acb08a7839");
 	            assertEquals("ExtRef23.TestA.ClassA1",iomObj.getobjecttag());
 			}
+            {
+                IomObject iomObj=objs.get("644b3619-952a-4e03-8efa-f7e69bcadf3c");
+                assertEquals("ExtRef23.TestA.ClassA2",iomObj.getobjecttag());
+                assertNull(iomObj.getattrvalue("attrA2"));
+            }
 		}finally {
 		    if(reader!=null)reader.close();
 		}
 	}
-    //@Test
-    public void validateXtf() throws Exception
-    {
-        {
-            importXtf();
-        }
-        //EhiLogger.getInstance().setTraceFilter(false);
-        LogCollector logCollector = new LogCollector();
-        EhiLogger.getInstance().addListener(logCollector);
-        File log=new File(TEST_OUT,"Simple23a-validate.log");
-        Config config=setup.initConfig(null,log.getPath());
-        config.setFunction(Config.FC_VALIDATE);
-        config.setModels("Simple23");
-        Ili2db.readSettingsFromDb(config);
-        Ili2db.run(config,null);
-    }
-    //@Test
-    public void validateXtfFail() throws Exception
-    {
-        {
-            importXtf();
-        }
-        // modify data in db so that validation fails
-        {
-            Connection jdbcConnection = setup.createConnection();
-            try{
-                java.sql.Statement stmt=jdbcConnection.createStatement();
-                stmt.executeUpdate("UPDATE "+setup.prefixName("classa1")+" SET attr1='text with newline\n'");
-                stmt.close();
-                stmt=null;
-            }finally {
-                jdbcConnection.close();
-                jdbcConnection=null;
-            }
-        }
-        //EhiLogger.getInstance().setTraceFilter(false);
-        LogCollector logCollector = new LogCollector();
-        EhiLogger.getInstance().addListener(logCollector);
-        File log=new File(TEST_OUT,"Simple23a-validate.log");
-        Config config=setup.initConfig(null,log.getPath());
-        config.setFunction(Config.FC_VALIDATE);
-        config.setModels("Simple23");
-        Ili2db.readSettingsFromDb(config);
-        try{
-            Ili2db.run(config,null);
-            fail();
-        }catch(Exception ex){
-            assertEquals(1,logCollector.getErrs().size());
-            assertEquals("Attribute attr1 must not contain control characters",logCollector.getErrs().get(0).getEventMsg());
-        }
-    }
-	
 }

@@ -1757,7 +1757,7 @@ public class Ili2db {
                 } else if (arg.equals("validConfig")) {
                     config.setValidConfigFile(value);
                 } else if (arg.equals("disableValidation")){
-                    config.setValidation(parseBooleanArgument(value));
+                    config.setValidation(!parseBooleanArgument(value));
                 } else if (arg.equals("disableAreaValidation")) {
                     config.setDisableAreaValidation(parseBooleanArgument(value));
                 } else if (arg.equals("disableRounding")) {
@@ -2053,8 +2053,6 @@ public class Ili2db {
         if(function==Config.FC_VALIDATE) {
             functionName="validate";
         }
-        initDefaultConfig(config);
-        MetaConfig.removeNullFromSettings(config);
 		ch.ehi.basics.logging.FileListener logfile=null;
 		ch.interlis.iox_j.logging.XtfErrorsLogger xtflog=null;
 		if(config.getLogfile()!=null){
@@ -2089,6 +2087,69 @@ public class Ili2db {
 	                throw new Ili2dbException("no xtf-file given");
 	            }
 			}
+			
+            // setup repos access
+            ch.interlis.ili2c.Main.setHttpProxySystemProperties(config);
+            ch.interlis.ilirepository.IliManager repositoryManager = (ch.interlis.ilirepository.IliManager)config
+                    .getTransientObject(UserSettings.CUSTOM_ILI_MANAGER);
+            {
+                if(repositoryManager==null) {
+                    repositoryManager=new ch.interlis.ilirepository.IliManager();
+                    config.setTransientObject(UserSettings.CUSTOM_ILI_MANAGER,repositoryManager);
+                }
+                java.util.Map<String,String> pathMap=getPathMap(xtffile,appHome);
+                java.util.List<String> modeldirv=ch.interlis.ili2c.Main.resolvePathMap(getModeldir(config),pathMap);
+                repositoryManager.setRepositories(modeldirv.toArray(new String[]{}));
+            }
+            
+            // read meta-config
+            {
+                String metaConfigFilename=config.getMetaConfigFile();
+                if(metaConfigFilename!=null) {
+                    List<String> metaConfigFiles=new ArrayList<String>();
+                    java.util.Set<String> visitedFiles=new HashSet<String>();
+                    metaConfigFiles.add(metaConfigFilename);
+                    Settings metaSettings=new Settings();
+                    while(!metaConfigFiles.isEmpty()) {
+                        metaConfigFilename=metaConfigFiles.remove(0);
+                        if(!visitedFiles.contains(metaConfigFilename)) {
+                            visitedFiles.add(metaConfigFilename);
+                            EhiLogger.traceState("metaConfigFile <"+metaConfigFilename+">");
+                            File metaConfigFile=null;
+                            try {
+                                metaConfigFile = IliManager.getLocalCopyOfReposFile(repositoryManager,metaConfigFilename);
+                            } catch (Ili2cException e1) {
+                                throw new Ili2dbException("failed to get local copy of meta config file <"+metaConfigFilename+">");
+                            }
+                            OutParam<String> baseConfigs=new OutParam<String>();
+                            Config newSettings=null;
+                            try {
+                                newSettings = readMetaConfig(metaConfigFile,baseConfigs);
+                                if(baseConfigs.value!=null) {
+                                    String[] baseConfigv = baseConfigs.value.split(";");
+                                    for(String baseConfig:baseConfigv){
+                                        metaConfigFiles.add(baseConfig);
+                                    }
+                                }
+                            } catch (Exception e) {
+                                throw new Ili2dbException("failed to read meta config file <"+metaConfigFile.getPath()+">", e);
+                            }
+                            MetaConfig.mergeSettings(newSettings,metaSettings);
+                        }
+                    }
+                    MetaConfig.mergeSettings(metaSettings,config);
+                }
+            }
+            initDefaultConfig(config);
+            MetaConfig.removeNullFromSettings(config);
+            
+            // get local copies of remote files
+            try {
+                getLocalCopiesOfRemoteFiles(repositoryManager,config);
+            } catch (Ili2cException e2) {
+                throw new Ili2dbException("failed to get local copy of remote files",e2);
+            }
+			
 			String modeldir=getModeldir(config);
 			if(modeldir==null){
 				throw new Ili2dbException("no modeldir given");

@@ -14,6 +14,10 @@ MODEL ExtRef23
       a (EXTERNAL) -- {0..1} ExtRef23.TestA.ClassA1;
       b -- {0..*} ClassA1;
     END a2b;
+
+    CLASS ClassA2 =
+      attrA2 : MANDATORY TEXT*60;
+    END ClassA2;
     
   END TestA;
   
