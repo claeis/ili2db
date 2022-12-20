@@ -333,6 +333,23 @@ indexiert (``--createGeomIdx``).
 
 **FileGDB:** Die Geometrien sind grundsätzlich immer indexiert.
 
+Fall 1.7
+~~~~~~~~
+
+Die Tabellen existieren nicht und sollen in der Datenbank angelegt
+werden (``--schemaimport``).
+Das Modell und die Abbildungsparameter ergeben sich aus der Meta-Konfiguration, die aus einem Repository bezogen wird.
+
+**PostGIS:** ``java -jar ili2pg.jar --schemaimport --metaConfig ilidata:metconfigId --dbdatabase
+mogis --dbusr julia --dbpwd romeo``
+
+**GeoPackage:** ``java -jar ili2gpkg.jar --schemaimport --metaConfig ilidata:metconfigId --dbfile
+mogis.gpkg``
+
+Das Modell wird in die Datenbank importiert. Es werden keine Daten importiert, sondern nur die leeren Tabellen
+angelegt.
+
+
 Import-Funktionen
 -----------------
 
@@ -394,6 +411,42 @@ d.h. der Import in die Datenbank ist ein einzelner Commit.
 **FileGDB:** Da die FileGDB keine Transaktionen unterstützt, werden die Daten 
 teilweise importiert, und die FileGDB befindet sich danach evtl. in einem 
 inkonsistenten Zustand.
+
+Fall 2.4
+~~~~~~~~
+
+Die Tabellen existieren bereits und der Inhalt einer Datei aus einem Repository (z.B. eine Katalog-Datei) soll importiert werden:
+
+**PostGIS:** ``java -jar ili2pg.jar --import --dbdatabase mogis --dbusr
+julia --dbpwd romeo ilidata:dataId``
+
+**GeoPackage:** ``java -jar ili2gpkg.jar --import --dbfile mogis.gpkg
+--metaConfig ilidata:dataId``
+
+**FileGDB:** ``java -jar ili2fgdb.jar --import --dbfile mogis.gdb
+--metaConfig ilidata:dataId``
+
+Die Daten mit der gegebenen ``dataId`` werden aus dem Repository bezogen und den bereits vorhanden
+Tabellen hinzugefügt. 
+
+Fall 2.5
+~~~~~~~~
+
+Die Tabellen existieren bereits und die Daten gemäss einer Meta-Konfiguration sollen importiert werden:
+
+**PostGIS:** ``java -jar ili2pg.jar --import --dbdatabase mogis --dbusr
+julia --dbpwd romeo --metaConfig ilidata:metconfigId``
+
+**GeoPackage:** ``java -jar ili2gpkg.jar --import --dbfile mogis.gpkg
+--metaConfig ilidata:metconfigId``
+
+**FileGDB:** ``java -jar ili2fgdb.jar --import --dbfile mogis.gdb
+--metaConfig ilidata:metconfigId``
+
+Die Meta-Konfiguration mit der gegebenen ``metconfigId`` wird aus dem Repository bezogen.
+Die Referenz-/Katalog-Daten ergeben sich aus der Meta-Konfiguration und werden den bereits vorhanden
+Tabellen hinzugefügt. 
+
 
 Export-Funktionen
 -----------------
@@ -593,6 +646,8 @@ Optionen:
 | --schemaimport                | Erstellt die Tabellenstruktur in der Datenbank (siehe Kapitel Abbildungsregeln).                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
 +-------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | --iliMetaAttrs filename       | Name der Konfigurationsdatei, die zusätzliche Interlis-Metaattribute enthält (Meta-Attribute, die in den ili-Dateien nicht enthalten sind).                                                                                                                                                                                                                                                                                                                                                                                                |
+|                               | ``filename`` kann auch die Form ``ilidata:DatesetId``  haben,                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+|                               | dann wird die entsprechende Datei aus den Repositories benutzt.                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
 |                               | Die Konfigurationsdatei ist Zeilenorientiert und besteht aus Abschnitten. Pro Modellelement gibt es einen Abschnitt. Der Abschnitt beginnt mit dem qualifizierten Elementnamen in eckigen Klammern. Innerhalb des Abschnitts sind die Metaattribute zu diesem Modellelement. Beispiel::                                                                                                                                                                                                                                                    |
 |                               |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
 |                               |   [Model1.Topic1.Structure1]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
@@ -601,7 +656,26 @@ Optionen:
 |                               |   [Model1.Topic1.ClassA.AttrB]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
 |                               |   MetaAttrN=AttrValueN                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 +-------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| ``--metaConfig  filename``    | Konfiguriert ili2db mit Hilfe einer INI-Datei.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+|                               | ``filename`` kann auch die Form ``ilidata:DatesetId``  haben,                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+|                               | dann wird die entsprechende Datei aus den Repositories benutzt.                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+|                               | Der Eintrag im ilidata.xml soll mit folgenden Kategorien markiert werden.                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+|                               |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+|                               |   .. code:: xml                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+|                               |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+|                               |      <categories>                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+|                               |        <DatasetIdx16.Code_>                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+|                               |          <value>http://codes.interlis.ch/type/metaconfig</value> <!-- Hinweis, dass es eine Meta-Config-Datei ist.  -->                                                                                                                                                                                                                                                                                                                                                                                                                    |
+|                               |        </DatasetIdx16.Code_>                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+|                               |        <DatasetIdx16.Code_>                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+|                               |          <value>http://codes.interlis.ch/model/Simple23</value> <!-- Hinweis auf des ili-Modell Simple23 -->                                                                                                                                                                                                                                                                                                                                                                                                                               |
+|                               |        </DatasetIdx16.Code_>                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+|                               |      </categories>                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+|                               |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
++-------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | --validConfig filename        | Name der Konfigurationsdatei, die für die Validierung verwendet werden soll.                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+|                               | ``filename`` kann auch die Form ``ilidata:DatesetId``  haben,                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+|                               | dann wird die entsprechende Datei aus den Repositories benutzt.                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
 +-------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | --disableValidation           | Schaltet die Validierung der Daten aus.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
 +-------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
@@ -678,8 +752,12 @@ Optionen:
 | --dropscript filename         | Erstellt ein SQL-Skript um die Tabellenstruktur unabhängig vom Programm löschen zu können.                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
 +-------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | --preScript filename          | SQL-Skript, das vor dem (Schema-)Import/Export ausgeführt wird.                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+|                               | ``filename`` kann auch die Form ``ilidata:DatesetId``  haben,                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+|                               | dann wird die entsprechende Datei aus den Repositories benutzt.                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
 +-------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | --postScript filename         | SQL-Skript, das nach dem (Schema-)Import/Export ausgeführt wird.                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+|                               | ``filename`` kann auch die Form ``ilidata:DatesetId``  haben,                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+|                               | dann wird die entsprechende Datei aus den Repositories benutzt.                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
 +-------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | --noSmartMapping              | Alle strukturellen Abbildungsoptimierungen werden ausgeschaltet. (s.a. --smart1Inheritance, --coalesceCatalogueRef, --coalesceMultiSurface, --coalesceMultiLine, --coalesceMultiPoint, --expandMultilingual, --expandLocalised, --coalesceArray)                                                                                                                                                                                                                                                                                           |
 +-------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
@@ -1476,6 +1554,145 @@ Ein Modell kann beliebige weitere Metaattribute enthalten; diese werden
 durch ili2db beim Schemaimpot in t\_ili2db\_meta\_attrs abgelegt.
 Mit Hilfe der Option ``--iliMetaAttrs`` können beliebige weitere Metaattribute
 definiert werden, ohne das Modell (die ili-Datei) zu ändern.
+
+Meta-Konfiguration
+~~~~~~~~~~~~~~~~~~
+
+In der Meta-Konfigurationsdatei werden die folgenden Parameter unterstützt (hier nicht aufgeführte Kommandozeilenargument werden in der Meta-Konfiguration nicht unterstützt).
+Im Aufruf evtl. vorhandene Kommandozeilenargumente übersteuern die Angaben in der Meta-Konfigurationsdatei.
+
++---------------------------------+----------------------------------------------------+-----------------------------------------------------------------------------------+
+| Konfiguration                   | Beispiel                                           | Beschreibung                                                                      |
++=================================+====================================================+===================================================================================+
+|                                 | .. code::                                          |                                                                                   |
+|                                 |                                                    |                                                                                   |
+| baseConfig                      |   [CONFIGURATION]                                  | Basis-Meta-Konfiguration, auf der die aktuelle Meta-Konfiguration aufbaut.        |
+|                                 |   baseConfig=ilidata:DatesetId                     | Statt ``ilidata:DatesetId`` kann auch die Form ``file:/localfile``                |  
+|                                 |                                                    | benutzt werden, dann wird die entsprechende lokale Datei benutzt.                 |
+|                                 |                                                    |                                                                                   |
+|                                 |                                                    | Mehrere Basiskonfigurationen werden mit einem Strichpunkt ";" getrennt.           |
+|                                 |                                                    |                                                                                   |
++---------------------------------+----------------------------------------------------+-----------------------------------------------------------------------------------+
+|                                 | .. code::                                          |                                                                                   |
+|                                 |                                                    |                                                                                   |
+| org.interlis2.validator.config  |   [CONFIGURATION]                                  | Validierungs-Konfiguration, die benutzt werden soll.                              |
+|                                 |   org.interlis2.validator.config=ilidata:DatesetId | Statt ``ilidata:DatesetId`` kann auch die Form ``file:/localfile``                |  
+|                                 |                                                    | benutzt werden, dann wird die entsprechende lokale Datei  benutzt.                |
+|                                 |                                                    |                                                                                   |
+|                                 |                                                    | Mehrere Validierungs-Konfigurationen werden mit einem Strichpunkt ";" getrennt.   |
+|                                 |                                                    |                                                                                   |
++---------------------------------+----------------------------------------------------+-----------------------------------------------------------------------------------+
+|                                 | .. code::                                          |                                                                                   |
+|                                 |                                                    |                                                                                   |
+| ch.interlis.referenceData       |   [CONFIGURATION]                                  | Basis-Daten (z.B. Kataloge), die benutzt werden sollen.                           |
+|                                 |   ch.interlis.referenceData=ilidata:DatesetId      | Statt ``ilidata:DatesetId`` kann auch die Form ``file:/localfile``                |  
+|                                 |                                                    | benutzt werden, dann wird die entsprechende lokale Datei  benutzt.                |
+|                                 |                                                    |                                                                                   |
+|                                 |                                                    | Mehrere Basis-Daten werden mit einem Strichpunkt ";" getrennt.                    |
+|                                 |                                                    |                                                                                   |
++---------------------------------+----------------------------------------------------+-----------------------------------------------------------------------------------+
+|                                 | .. code::                                          |                                                                                   |
+|                                 |                                                    |                                                                                   |
+| models                          |   [ch.ehi.ilivalidator]                            | Entspricht dem Kommandozeilenargument ``--models``.                               |
+|                                 |   models=Simple23                                  | Hier nicht aufgeführte Kommandozeilenargument werden in der Meta-Konfiguration    |  
+|                                 |                                                    | nicht unterstützt.                                                                |
+|                                 |                                                    | models                                                                            |
+|                                 |                                                    | exportModels                                                                      |
+|                                 |                                                    | exportCrsModels                                                                   |
+|                                 |                                                    | nameLang                                                                          |
+|                                 |                                                    | dataset                                                                           |
+|                                 |                                                    | baskets                                                                           |
+|                                 |                                                    | topics                                                                            |
+|                                 |                                                    | preScript                                                                         |
+|                                 |                                                    | postScript                                                                        |
+|                                 |                                                    | defaultSrsAuth                                                                    |
+|                                 |                                                    | defaultSrsCode                                                                    |
+|                                 |                                                    | modelSrsCode                                                                      |
+|                                 |                                                    | multiSrs                                                                          |
+|                                 |                                                    | domains                                                                           |
+|                                 |                                                    | altSrsModel                                                                       |
+|                                 |                                                    | validConfig                                                                       |
+|                                 |                                                    | disableValidation                                                                 |
+|                                 |                                                    | disableAreaValidation                                                             |
+|                                 |                                                    | disableRounding                                                                   |
+|                                 |                                                    | disableBoundaryRecoding                                                           |
+|                                 |                                                    | forceTypeValidation                                                               |
+|                                 |                                                    | createSingleEnumTab                                                               |
+|                                 |                                                    | createEnumTabs                                                                    |
+|                                 |                                                    | createEnumTabsWithId                                                              |
+|                                 |                                                    | createEnumTxtCol                                                                  |
+|                                 |                                                    | createEnumColAsItfCode                                                            |
+|                                 |                                                    | beautifyEnumDispName                                                              |
+|                                 |                                                    | noSmartMapping                                                                    |
+|                                 |                                                    | smart1Inheritance                                                                 |
+|                                 |                                                    | smart2Inheritance                                                                 |
+|                                 |                                                    | coalesceCatalogueRef                                                              |
+|                                 |                                                    | coalesceMultiSurface                                                              |
+|                                 |                                                    | coalesceMultiLine                                                                 |
+|                                 |                                                    | coalesceMultiPoint                                                                |
+|                                 |                                                    | coalesceArray                                                                     |
+|                                 |                                                    | coalesceJson                                                                      |
+|                                 |                                                    | expandMultilingual                                                                |
+|                                 |                                                    | expandLocalised                                                                   |
+|                                 |                                                    | createFk                                                                          |
+|                                 |                                                    | createFkIdx                                                                       |
+|                                 |                                                    | createUnique                                                                      |
+|                                 |                                                    | createNumChecks                                                                   |
+|                                 |                                                    | createTextChecks                                                                  |
+|                                 |                                                    | createDateTimeChecks                                                              |
+|                                 |                                                    | createMandatoryChecks                                                             |
+|                                 |                                                    | createImportTabs                                                                  |
+|                                 |                                                    | createStdCols                                                                     |
+|                                 |                                                    | t_id_Name                                                                         |
+|                                 |                                                    | idSeqMin                                                                          |
+|                                 |                                                    | idSeqMax                                                                          |
+|                                 |                                                    | createTypeDiscriminator                                                           |
+|                                 |                                                    | createGeomIdx                                                                     |
+|                                 |                                                    | disableNameOptimization                                                           |
+|                                 |                                                    | nameByTopic                                                                       |
+|                                 |                                                    | maxNameLength                                                                     |
+|                                 |                                                    | structWithGenericRef                                                              |
+|                                 |                                                    | sqlColsAsText                                                                     |
+|                                 |                                                    | sqlEnableNull                                                                     |
+|                                 |                                                    | sqlExtRefCols                                                                     |
+|                                 |                                                    | strokeArcs                                                                        |
+|                                 |                                                    | skipPolygonBuilding                                                               |
+|                                 |                                                    | skipReferenceErrors                                                               |
+|                                 |                                                    | skipGeometryErrors                                                                |
+|                                 |                                                    | keepAreaRef                                                                       |
+|                                 |                                                    | createTidCol                                                                      |
+|                                 |                                                    | importTid                                                                         |
+|                                 |                                                    | exportTid                                                                         |
+|                                 |                                                    | importBid                                                                         |
+|                                 |                                                    | exportFetchSize                                                                   |
+|                                 |                                                    | importBatchSize                                                                   |
+|                                 |                                                    | createBasketCol                                                                   |
+|                                 |                                                    | createDatasetCol                                                                  |
+|                                 |                                                    | ILIGML20                                                                          |
+|                                 |                                                    | ver3-translation                                                                  |
+|                                 |                                                    | translation                                                                       |
+|                                 |                                                    | createMetaInfo                                                                    |
+|                                 |                                                    | iliMetaAttrs                                                                      |
+|                                 |                                                    | createTypeConstraint                                                              |
+|                                 |                                                    |                                                                                   |
+|                                 |                                                    |                                                                                   |
+|                                 |                                                    |                                                                                   |
++---------------------------------+----------------------------------------------------+-----------------------------------------------------------------------------------+
+
+Beispiel für eine Meta-Konfigurationsdatei:
+
+.. code::
+	
+    [CONFIGURATION]
+    ch.interlis.referenceData=ilidata:63553eb4-a0dc-48eb-8596-ca1aa9bdbc0f
+    
+    [ch.ehi.ili2db]
+    models=Simple23
+    defaultSrsCode = 2056
+    smart2Inheritance = true
+    strokeArcs = false
+    createBasketCol = true
+
 
 Metadaten
 ~~~~~~~~~
