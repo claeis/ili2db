@@ -44,6 +44,35 @@
 				</baskets>
 			</DatasetIdx16.DataIndex.DatasetMetadata>
 			<DatasetIdx16.DataIndex.DatasetMetadata
+				TID="2b">
+				<id>72efad11-c6e3-48de-948a-e36032dde747</id>
+				<version>1</version>
+				<owner>mailto:ceis@localhost</owner>
+				<files>
+					<DatasetIdx16.DataFile>
+						<fileFormat>application/interlis+xml;version=2.3</fileFormat>
+						<file>
+							<DatasetIdx16.File>
+								<path>ExtRef23forward.xtf</path>
+								<!-- md5>c55e611e5896f50cace4d2a5db1c4d34</md5 -->
+							</DatasetIdx16.File>
+						</file>
+					</DatasetIdx16.DataFile>
+				</files>
+				<baskets>
+					<DatasetIdx16.DataIndex.BasketMetadata>
+						<id>8aa8bb13-1753-48f1-bdcb-17591c6fc1e8</id>
+						<version>1</version>
+						<model>
+							<DatasetIdx16.ModelLink>
+								<name>ExtRef23.TestA</name>
+							</DatasetIdx16.ModelLink>
+						</model>
+						<owner>mailto:ceis@localhost</owner>
+					</DatasetIdx16.DataIndex.BasketMetadata>
+				</baskets>
+			</DatasetIdx16.DataIndex.DatasetMetadata>
+			<DatasetIdx16.DataIndex.DatasetMetadata
 				TID="3a">
 				<id>70340b5a-248c-4216-86e4-32e6a540d629</id>
 				<version>1</version>

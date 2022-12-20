@@ -7,6 +7,7 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.HashMap;
 import java.util.HashSet;
 
 import org.junit.Assert;
@@ -17,6 +18,7 @@ import ch.ehi.ili2db.base.DbNames;
 import ch.ehi.ili2db.base.Ili2db;
 import ch.ehi.ili2db.gui.Config;
 import ch.ehi.sqlgen.DbUtility;
+import ch.interlis.ilirepository.IliManager;
 import ch.interlis.iom.IomObject;
 import ch.interlis.iom_j.xtf.XtfReader;
 import ch.interlis.iox.EndBasketEvent;
@@ -28,6 +30,7 @@ import ch.interlis.iox.StartTransferEvent;
 
 public abstract class MetaConfigTest {
 	
+    private static final String DATASETNAME="Test";
     protected static final String TEST_OUT="test/data/MetaConfig/";
     protected AbstractTestSetup setup=createTestSetup();
     protected abstract AbstractTestSetup createTestSetup() ;
@@ -90,6 +93,7 @@ public abstract class MetaConfigTest {
         config.setFunction(Config.FC_IMPORT);
         config.setModeldir(TEST_OUT+"repos");
         config.setMetaConfigFile("ilidata:163d16de-83df-4d84-8039-256f2261e226");
+        config.setDatasetName(DATASETNAME);
         Ili2db.run(config,null);
         // verify import
         {
@@ -104,17 +108,50 @@ public abstract class MetaConfigTest {
                     while(rs.next()) {
                         attraValues.add(rs.getString(1));
                     }
-                    Assert.assertEquals(1, attraValues.size());
+                    Assert.assertEquals(2, attraValues.size());
                     Assert.assertTrue(attraValues.contains("2f1774b2-8427-4d49-9810-27acb08a7839"));
+                    Assert.assertTrue(attraValues.contains("d3663025-735d-4d13-b0f3-fed3496820b7"));
                 }
+            }finally {
+                if(stmt!=null) {
+                    stmt.close();
+                }
+                if(jdbcConnection!=null) {
+                    jdbcConnection.close();
+                }
+            }
+        }
+            
+    }
+    @Test
+    public void importXtf_forwardRef() throws Exception
+    {
+        importIli();
+        //EhiLogger.getInstance().setTraceFilter(false);
+        File data=new File(TEST_OUT,"ExtRef23a.xtf");
+        Config config=setup.initConfig(data.getPath(),TEST_OUT+"importIli.log");
+        config.setFunction(Config.FC_IMPORT);
+        config.setModeldir(TEST_OUT+"repos");
+        config.setMetaConfigFile(IliManager.FILE_URI_PREFIX+TEST_OUT+"ExtRef23-metaForward.ini");
+        config.setDatasetName(DATASETNAME);
+        Ili2db.run(config,null);
+        // verify import
+        {
+            Connection jdbcConnection=null;
+            Statement stmt=null;
+            try{
+                jdbcConnection = setup.createConnection();
+                stmt=jdbcConnection.createStatement();
                 {
                     HashSet<String> attraValues=new HashSet<String>();
-                    ResultSet rs=stmt.executeQuery("SELECT attrB FROM "+setup.prefixName("classb1"));
+                    ResultSet rs=stmt.executeQuery("SELECT "+DbNames.T_ILI_TID_COL+" FROM "+setup.prefixName("classa1"));
                     while(rs.next()) {
                         attraValues.add(rs.getString(1));
                     }
-                    Assert.assertEquals(1, attraValues.size());
+                    Assert.assertEquals(3, attraValues.size());
+                    Assert.assertTrue(attraValues.contains("87c68171-79cf-4091-acd1-df21480342d2"));
                     Assert.assertTrue(attraValues.contains("d3663025-735d-4d13-b0f3-fed3496820b7"));
+                    Assert.assertTrue(attraValues.contains("2f1774b2-8427-4d49-9810-27acb08a7839"));
                 }
             }finally {
                 if(stmt!=null) {
@@ -129,37 +166,49 @@ public abstract class MetaConfigTest {
     }
 	
 	
-	//@Test
+	@Test
 	public void exportXtf() throws Exception
 	{
 		{
 			importXtf();
 		}
 		//EhiLogger.getInstance().setTraceFilter(false);
-		File data=new File(TEST_OUT,"Simple23a-out.xtf");
+		File data=new File(TEST_OUT,"ExtRef23a-out.xtf");
 		Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
 		config.setFunction(Config.FC_EXPORT);
-		config.setModels("Simple23");
+		config.setDatasetName(DATASETNAME);
 		Ili2db.readSettingsFromDb(config);
         Ili2db.run(config,null);
-		{
-			XtfReader reader=new XtfReader(data);
+        
+        XtfReader reader=null;
+		try{
+			reader=new XtfReader(data);
 			assertTrue(reader.read() instanceof StartTransferEvent);
 			assertTrue(reader.read() instanceof StartBasketEvent);
 			
+			HashMap<String,IomObject> objs=new HashMap<String,IomObject>();
 			IoxEvent event=reader.read();
-			assertTrue(event instanceof ObjectEvent);
-			IomObject iomObj=((ObjectEvent)event).getIomObject();
-			int attrCount=iomObj.getattrcount();
-			assertEquals(1,attrCount);
-			String attrtag=iomObj.getobjecttag();
-			assertEquals("Simple23.TestA.ClassA1",attrtag);
-			{
-				String attr=iomObj.getattrvalue("attr1");
-				assertEquals("gugus",attr);
+			while(event!=null){
+	            if(event instanceof ObjectEvent) {
+	                IomObject iomObj=((ObjectEvent)event).getIomObject();
+	                String oid=iomObj.getobjectoid();
+	                if(oid!=null) {
+	                    objs.put(oid,iomObj);
+	                }
+	            }
+                event=reader.read();
 			}
-			assertTrue(reader.read() instanceof EndBasketEvent);
-			assertTrue(reader.read() instanceof EndTransferEvent);
+			assertEquals(2,objs.size());
+			{
+	            IomObject iomObj=objs.get("d3663025-735d-4d13-b0f3-fed3496820b7");
+	            assertEquals("ExtRef23.TestA.ClassA1",iomObj.getobjecttag());
+			}
+			{
+	            IomObject iomObj=objs.get("2f1774b2-8427-4d49-9810-27acb08a7839");
+	            assertEquals("ExtRef23.TestA.ClassA1",iomObj.getobjecttag());
+			}
+		}finally {
+		    if(reader!=null)reader.close();
 		}
 	}
     //@Test

@@ -772,8 +772,30 @@ public class Ili2db {
 				EhiLogger.getInstance().addListener(errs);
 				
                 if(function==Config.FC_DELETE){
-                    transferFromXtf(conn,null,null,function,mapping,td,dbusr,geomConverter,idGen,config,stat,trafoConfig,class2wrapper,customMapping);
+                    TransferFromXtf trsfr=new TransferFromXtf(function,mapping,td,conn,dbusr,geomConverter,idGen,config,trafoConfig,class2wrapper);
+                    try{
+                        trsfr.doitStart(config,stat,customMapping,null);
+                        trsfr.doit(null,null,stat);
+                        trsfr.doitEnd(stat);
+                    }catch(ch.interlis.iox.IoxException ex){
+                        EhiLogger.logError("failed to delete data from db",ex);
+                    } catch (Ili2dbException ex) {
+                        EhiLogger.logError("failed to delete data from db",ex);
+                    }
                 }else {
+                    TransferFromXtf trsfr=new TransferFromXtf(function,mapping,td,conn,dbusr,geomConverter,idGen,config,trafoConfig,class2wrapper);
+                    for(String inputFilename:inputs) {
+                        if(isItfFilename(inputFilename)){
+                            config.setValue(ch.interlis.iox_j.validator.Validator.CONFIG_DO_ITF_OIDPERTABLE, ch.interlis.iox_j.validator.Validator.CONFIG_DO_ITF_OIDPERTABLE_DO);
+                        }
+                    }
+                    try{
+                        trsfr.doitStart(config,stat,customMapping,inputs[inputs.length-1]);
+                    }catch(ch.interlis.iox.IoxException ex){
+                        EhiLogger.logError("failed to transfer data from file to db",ex);
+                    } catch (Ili2dbException ex) {
+                        EhiLogger.logError("failed to transfer data from file to db",ex);
+                    }
                     for(String inputFilename:inputs) {
                         OutParam<java.util.zip.ZipEntry> zipXtfEntry=new OutParam<java.util.zip.ZipEntry>();
                         java.util.zip.ZipFile zipFile;
@@ -800,7 +822,13 @@ public class Ili2db {
                                 }else{
                                     ioxReader=new XtfReader(in);
                                 }
-                                transferFromXtf(conn,xtfFilename,ioxReader,function,mapping,td,dbusr,geomConverter,idGen,config,stat,trafoConfig,class2wrapper,customMapping);
+                                try{
+                                    trsfr.doit(xtfFilename,ioxReader,stat);
+                                }catch(ch.interlis.iox.IoxException ex){
+                                	EhiLogger.logError("failed to transfer data from file to db",ex);
+                                } catch (Ili2dbException ex) {
+                                	EhiLogger.logError("failed to transfer data from file to db",ex);
+                                }
                             } catch (IOException ex) {
                                 throw new Ili2dbException(ex);
                             } catch (IoxException ex) {
@@ -854,7 +882,6 @@ public class Ili2db {
                             try {
                                 EhiLogger.logState("data <"+inputFilename+">");
                                 if(isItfFilename(inputFilename)){
-                                    config.setValue(ch.interlis.iox_j.validator.Validator.CONFIG_DO_ITF_OIDPERTABLE, ch.interlis.iox_j.validator.Validator.CONFIG_DO_ITF_OIDPERTABLE_DO);
                                     if(config.getDoItfLineTables()){
                                         ioxReader=new ItfReader(new java.io.File(inputFilename));
                                         ((ItfReader)ioxReader).setModel(td);        
@@ -870,7 +897,13 @@ public class Ili2db {
                                         ((ch.interlis.iox_j.IoxIliReader) ioxReader).setModel(td);
                                     }
                                 }
-                                transferFromXtf(conn,inputFilename,ioxReader,function,mapping,td,dbusr,geomConverter,idGen,config,stat,trafoConfig,class2wrapper,customMapping);
+                                try{
+                                    trsfr.doit(inputFilename,ioxReader,stat);
+                                }catch(ch.interlis.iox.IoxException ex){
+                                	EhiLogger.logError("failed to transfer data from file to db",ex);
+                                } catch (Ili2dbException ex) {
+                                	EhiLogger.logError("failed to transfer data from file to db",ex);
+                                }
                             } catch (IoxException e) {
                                 throw new Ili2dbException(e);
                             }finally{
@@ -884,6 +917,13 @@ public class Ili2db {
                                 }
                             }
                         }
+                    }
+                    try{
+                        trsfr.doitEnd(stat);
+                    }catch(ch.interlis.iox.IoxException ex){
+                        EhiLogger.logError("failed to transfer data from file to db",ex);
+                    } catch (Ili2dbException ex) {
+                        EhiLogger.logError("failed to transfer data from file to db",ex);
                     }
                 }
 
@@ -929,7 +969,7 @@ public class Ili2db {
 					logStatistics(td.getIli1Format()!=null,stat);
 					EhiLogger.logState("..."+functionTxt+" done");
 				}
-			}finally{
+            }finally{
 				if(!connectionFromExtern){
 					if(conn!=null){
 						try{
@@ -2906,22 +2946,6 @@ public class Ili2db {
 		return modeldirv;
 	}
 
-	static private void transferFromXtf(Connection conn,String xtfFilename,IoxReader reader,int function,NameMapping ili2sqlName,TransferDescription td,
-			String dbusr,
-			SqlColumnConverter geomConv,
-			DbIdGen idGen,
-			Config config,
-			Map<String,BasketStat> stat,
-			TrafoConfig trafoConfig,Viewable2TableMapping class2wrapper,CustomMapping customMapping){	
-		try{
-			TransferFromXtf trsfr=new TransferFromXtf(function,ili2sqlName,td,conn,dbusr,geomConv,idGen,config,trafoConfig,class2wrapper);
-			trsfr.doit(xtfFilename,reader,config,stat,customMapping);
-		}catch(ch.interlis.iox.IoxException ex){
-			EhiLogger.logError("failed to transfer data from file to db",ex);
-		} catch (Ili2dbException ex) {
-			EhiLogger.logError("failed to transfer data from file to db",ex);
-		}
-	}
 	/** transfer data from database to xml file
 	*/
 	static private void transferToXtf(Connection conn,int function,String xtffile,CustomMapping customMapping,NameMapping ili2sqlName,TransferDescription td

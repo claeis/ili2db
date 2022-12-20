@@ -6,9 +6,9 @@
 		</MODELS>
 	</HEADERSECTION>
 	<DATASECTION>
-		<ExtRef23.TestA BID="658bcdde-7cef-4bdc-873d-09bb51ecbbe7">
-			<ExtRef23.TestA.ClassA1 TID="d3663025-735d-4d13-b0f3-fed3496820b7">
-			  <a REF="2f1774b2-8427-4d49-9810-27acb08a7839"/>
+		<ExtRef23.TestA BID="8aa8bb13-1753-48f1-bdcb-17591c6fc1e8">
+			<ExtRef23.TestA.ClassA1 TID="87c68171-79cf-4091-acd1-df21480342d2">
+			  <a REF="d3663025-735d-4d13-b0f3-fed3496820b7"/>
 			</ExtRef23.TestA.ClassA1>
 		</ExtRef23.TestA>
 	</DATASECTION>

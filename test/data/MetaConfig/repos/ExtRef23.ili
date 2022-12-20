@@ -10,21 +10,11 @@ MODEL ExtRef23
     CLASS ClassA1 =
     END ClassA1;
     
-  END TestA;
-
-  TOPIC TestB =
-    DEPENDS ON ExtRef23.TestA;
-    
-    CLASS ClassB1 =
-    	attrB : MANDATORY TEXT*60;
-    END ClassB1;
-    
     ASSOCIATION a2b =
-      a (EXTERNAL) -- {1} ExtRef23.TestA.ClassA1;
-      b -- {0..*} ClassB1;
+      a (EXTERNAL) -- {0..1} ExtRef23.TestA.ClassA1;
+      b -- {0..*} ClassA1;
     END a2b;
     
-  END TestB;
-  
+  END TestA;
   
 END ExtRef23.
