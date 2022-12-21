@@ -1,0 +1,58 @@
+INTERLIS 2.3;
+
+MODEL CatalogueObjects_V1 (en)
+  AT "http://www.geo.admin.ch" VERSION "2011-08-30" =
+
+  IMPORTS UNQUALIFIED INTERLIS;
+
+  TOPIC Catalogues (ABSTRACT) =
+
+    CLASS Item (ABSTRACT) =
+    END Item;
+
+    STRUCTURE CatalogueReference (ABSTRACT) =
+      Reference: REFERENCE TO (EXTERNAL) Item;
+    END CatalogueReference;
+ 
+    STRUCTURE MandatoryCatalogueReference (ABSTRACT) =
+      Reference: MANDATORY REFERENCE TO (EXTERNAL) Item;
+    END MandatoryCatalogueReference;
+
+  END Catalogues;
+
+END CatalogueObjects_V1.
+
+MODEL CatalogRef23
+  AT "mailto:ce@eisenhutinformatik.ch" VERSION "2016-12-21" =
+  
+  IMPORTS CatalogueObjects_V1;
+
+  TOPIC Katalog =
+
+    CLASS MaterialItem
+    EXTENDS CatalogueObjects_V1.Catalogues.Item =
+      Code : MANDATORY TEXT;
+      Bezeichnung : TEXT;
+    END MaterialItem;
+
+    STRUCTURE MaterialItemRef
+    EXTENDS CatalogueObjects_V1.Catalogues.MandatoryCatalogueReference =
+      Reference (EXTENDED) : MANDATORY REFERENCE TO (EXTERNAL) MaterialItem;
+    END MaterialItemRef;
+
+  END Katalog;
+
+  TOPIC Gebaeude =
+    DEPENDS ON Katalog;
+
+    CLASS Haus =
+    END Haus;
+
+    CLASS Wohnhaus EXTENDS Haus =
+      Name: TEXT;
+      Material : MANDATORY CatalogRef23.Katalog.MaterialItemRef;
+    END Wohnhaus;
+    
+  END Gebaeude;  
+  
+END CatalogRef23.

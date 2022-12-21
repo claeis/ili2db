@@ -834,10 +834,14 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
                         dbColExts.add(ret);
 				    }else {
 	                    ArrayList<ViewableWrapper> targetTables = getTargetTables(getCatalogueRefTarget(type));
+	                    List<String> fkColNames=new ArrayList<String>();
+	                    boolean catRefMandatory=isChbaseCatalogueRefMandatory(td,attr);
 	                    for(ViewableWrapper targetTable:targetTables)
 	                    {
 	                        DbColId ret=new DbColId();
-	                        ret.setName(ili2sqlName.mapIliAttributeDef(attr,dbTable.getName().getName(),targetTable.getSqlTablename(),targetTables.size()>1));
+	                        String colName=ili2sqlName.mapIliAttributeDef(attr,dbTable.getName().getName(),targetTable.getSqlTablename(),targetTables.size()>1);
+	                        ret.setName(colName);
+	                        fkColNames.add(colName);
 	                        ret.setNotNull(false);
 	                        ret.setPrimaryKey(false);
 	                        if(createFk){
@@ -848,6 +852,13 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 	                            ret.setIndex(true);
 	                        }
 	                        dbColExts.add(ret);
+	                    }
+	                    if(createMandatoryCheck && catRefMandatory) {
+	                        Viewable sourceClass=(Viewable)attr.getContainer();
+	                        List<Viewable> exts=getPotentialClassTypes(sourceClass);
+	                        String cnstrName="ili_"+getSqlAttrName(attr,null,dbTable.getName().getName(),null);
+	                        String cnstr = createReferenceAttrCheck(dbTypeCol!=null?exts:null,fkColNames);
+	                        dbTable.setNativeConstraint(cnstrName, cnstr);
 	                    }
 				    }
                     trafoConfig.setAttrConfig(attr, TrafoConfigNames.CATALOGUE_REF_TRAFO,TrafoConfigNames.CATALOGUE_REF_TRAFO_COALESCE);
@@ -1382,6 +1393,18 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 		}
 		return false;
 	}
+    private boolean isChbaseCatalogueRefMandatory(TransferDescription td,
+            AttributeDef attr) {
+        if(Ili2cUtility.isPureChbaseCatalogueRef(td, attr)){
+            CompositionType type=(CompositionType)attr.getDomain();
+            if(type.getCardinality().getMinimum()==0){
+                return false;
+            }
+            AttributeDef refAttr=(AttributeDef)type.getComponentType().getAttributesAndRoles2().next().obj;
+            return refAttr.getDomain().isMandatoryConsideringAliases();
+        }
+        return false;
+    }
 	private void addParentRef(Viewable parentTable,AttributeDef attr){
 		CompositionType type = (CompositionType)attr.getDomainResolvingAll();
 		Table structClass=type.getComponentType();

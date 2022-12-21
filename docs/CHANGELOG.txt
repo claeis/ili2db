@@ -17,6 +17,7 @@ LATEST
 - support --option NULL (#500)
 - implement --metaConfig (#392)
 - support ilidata:basketId as import file argument (#480)
+- create mandatory reference check with --coalesceCatalogueRef (#481)
 - iox-ili-1.21.15-SNAPSHOT
 - ili2c-5.3.2-SNAPSHOT
 
