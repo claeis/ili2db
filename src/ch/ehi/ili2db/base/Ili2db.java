@@ -1696,8 +1696,8 @@ public class Ili2db {
 }
 	private static void getLocalCopiesOfRemoteFiles(IliManager repoManager,Config config) throws Ili2cException {
 	    String dataFiles[]= {
-	            Config.TRANSIENT_STRING_PRESCRIPT,
-	            Config.TRANSIENT_STRING_POSTSCRIPT,
+	            // Config.TRANSIENT_STRING_PRESCRIPT, // no code from remote
+	            // Config.TRANSIENT_STRING_POSTSCRIPT,  // no code from remote
 	            Config.TRANSIENT_STRING_VALIDCONFIGFILENAME,
 	            // Config.TRANSIENT_STRING_REFERENCEDATA, requires special handling
 	            Config.TRANSIENT_STRING_ILIMETAATTRSFILE
@@ -1738,10 +1738,6 @@ public class Ili2db {
                     config.setBaskets(value);
                 } else if (arg.equals("topics")) {
                     config.setTopics(value);
-                } else if (arg.equals("preScript")) {
-                    config.setPreScript(value);
-                } else if (arg.equals("postScript")) {
-                    config.setPostScript(value);
                 } else if (arg.equals("defaultSrsAuth")) {
                     config.setDefaultSrsAuthority(value);
                 } else if (arg.equals("defaultSrsCode")) {
