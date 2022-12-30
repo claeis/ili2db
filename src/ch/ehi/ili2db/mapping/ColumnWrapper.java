@@ -9,7 +9,7 @@ public class ColumnWrapper {
     public ColumnWrapper(ViewableTransferElement transferProperty) {
         prop=transferProperty;
     }
-    public ColumnWrapper(ViewableTransferElement transferProperty, int epsgCode) {
+    public ColumnWrapper(ViewableTransferElement transferProperty, Integer epsgCode) {
         prop=transferProperty;
         this.epsgCode=epsgCode;
     }

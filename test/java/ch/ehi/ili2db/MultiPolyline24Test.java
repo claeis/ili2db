@@ -31,6 +31,7 @@ public abstract class MultiPolyline24Test {
         setup.resetDb();
         File data = new File(TEST_OUT, "MultiPolyline24.xtf");
         Config config = setup.initConfig(data.getPath(), data.getPath() + ".log");
+        Ili2db.setNoSmartMapping(config);
         config.setFunction(Config.FC_IMPORT);
         config.setDoImplicitSchemaImport(true);
         config.setCreateFk(Config.CREATE_FK_YES);
@@ -38,10 +39,6 @@ public abstract class MultiPolyline24Test {
         config.setTidHandling(Config.TID_HANDLING_PROPERTY);
         config.setImportTid(true);
         config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
-        config.setCatalogueRefTrafo(null);
-        config.setMultiSurfaceTrafo(null);
-        config.setMultilingualTrafo(null);
-        config.setInheritanceTrafo(null);
         config.setDefaultSrsCode("2056");
         setup.setXYParams(config);
         Ili2db.run(config, null);
@@ -160,6 +157,7 @@ public abstract class MultiPolyline24Test {
         setup.resetDb();
         File data = new File(TEST_OUT, "MultiPolyline24.ili");
         Config config = setup.initConfig(data.getPath(), data.getPath() + ".log");
+        Ili2db.setNoSmartMapping(config);
         config.setFunction(Config.FC_SCHEMAIMPORT);
         config.setCreateFk(Config.CREATE_FK_YES);
         config.setCreateTextChecks(true);
@@ -167,10 +165,6 @@ public abstract class MultiPolyline24Test {
         config.setCreateDateTimeChecks(true);
         config.setTidHandling(Config.TID_HANDLING_PROPERTY);
         config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
-        config.setCatalogueRefTrafo(null);
-        config.setMultiSurfaceTrafo(null);
-        config.setMultilingualTrafo(null);
-        config.setInheritanceTrafo(null);
         Ili2db.run(config, null);
 
         Connection jdbcConnection = null;

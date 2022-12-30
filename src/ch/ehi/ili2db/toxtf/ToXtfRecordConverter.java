@@ -3,7 +3,6 @@ package ch.ehi.ili2db.toxtf;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -42,7 +41,6 @@ import ch.interlis.ili2c.metamodel.BlackboxType;
 import ch.interlis.ili2c.metamodel.CompositionType;
 import ch.interlis.ili2c.metamodel.CoordType;
 import ch.interlis.ili2c.metamodel.EnumerationType;
-import ch.interlis.ili2c.metamodel.MultiAreaType;
 import ch.interlis.ili2c.metamodel.MultiCoordType;
 import ch.interlis.ili2c.metamodel.MultiSurfaceOrAreaType;
 import ch.interlis.ili2c.metamodel.MultiPolylineType;
@@ -606,7 +604,7 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 
 		return iomObj;
 	}
-	
+
 	final private int  LEN_LANG_PREFIX=DbNames.MULTILINGUAL_TXT_COL_PREFIX.length();
     private String dbSchema;
 
@@ -638,9 +636,9 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
                     valuei++;
                     if(!rs.wasNull()){
                         if(value){
-                            iomObj.setattrvalue(attrName,"true");
+                            iomObj.addattrvalue(attrName,"true");
                         }else{
-                            iomObj.setattrvalue(attrName,"false");
+                            iomObj.addattrvalue(attrName,"false");
                         }
                     }
 			    }
@@ -655,7 +653,7 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
                         GregorianCalendar date=new GregorianCalendar();
                         date.setGregorianChange(PURE_GREGORIAN_CALENDAR);
                         fmt.setCalendar(date);
-                        iomObj.setattrvalue(attrName,fmt.format(value));
+                        iomObj.addattrvalue(attrName,fmt.format(value));
                     }
                 }
 			}else if( tableAttr.isDomainIli2Date()) {
@@ -669,7 +667,7 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
                         GregorianCalendar date=new GregorianCalendar();
                         date.setGregorianChange(PURE_GREGORIAN_CALENDAR);
                         fmt.setCalendar(date);
-                        iomObj.setattrvalue(attrName,fmt.format(value));
+                        iomObj.addattrvalue(attrName,fmt.format(value));
                     }
                 }
 			}else if( tableAttr.isDomainIli2Time()) {
@@ -680,7 +678,7 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
                     valuei++;
                     if(!rs.wasNull()){
                         java.text.SimpleDateFormat fmt=new java.text.SimpleDateFormat("HH:mm:ss.SSS");
-                        iomObj.setattrvalue(attrName,fmt.format(value));
+                        iomObj.addattrvalue(attrName,fmt.format(value));
                     }
                 }
 			}else if( tableAttr.isDomainIli2DateTime()) {
@@ -694,7 +692,7 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
                         GregorianCalendar date=new GregorianCalendar();
                         date.setGregorianChange(PURE_GREGORIAN_CALENDAR);
                         fmt.setCalendar(date);
-                        iomObj.setattrvalue(attrName,fmt.format(value));
+                        iomObj.addattrvalue(attrName,fmt.format(value));
                     }
                 }
 			}else{
@@ -1125,7 +1123,7 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 	                        int value=rs.getInt(valuei);
 	                        valuei++;
 	                        if(!rs.wasNull()){
-	                            iomObj.setattrvalue(attrName,mapItfCode2XtfCode((EnumerationType)type, value));
+	                            iomObj.addattrvalue(attrName,mapItfCode2XtfCode((EnumerationType)type, value));
 	                        }
 		                }
 					}else{
@@ -1140,7 +1138,7 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
                                     if(xtfValue==null) {
                                         EhiLogger.logError("Object "+sqlid+": failed to map id "+value+" for enum attribute "+classAttr);
                                     }else {
-                                        iomObj.setattrvalue(attrName,xtfValue);
+                                        iomObj.addattrvalue(attrName,xtfValue);
                                     }
                                 }                           
                             }
@@ -1151,7 +1149,7 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 	                            String value=rs.getString(valuei);
 	                            valuei++;
 	                            if(!rs.wasNull()){
-	                                iomObj.setattrvalue(attrName,value);
+	                                iomObj.addattrvalue(attrName,value);
 	                            }
 			                    
 			                }
@@ -1205,7 +1203,7 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 	                            try {
 	                                String xml=geomConv.toIomXml(obj);
 	                                if(xml!=null) {
-	                                    iomObj.setattrvalue(attrName,xml);
+	                                    iomObj.addattrvalue(attrName,xml);
 	                                }
 	                            } catch (ConverterException ex) {
 	                                EhiLogger.logError("Object "+sqlid+": failed to convert blackbox xml",ex);
@@ -1222,7 +1220,7 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 	                            try {
 	                                String blob=geomConv.toIomBlob(obj);
 	                                if(blob!=null) {
-	                                    iomObj.setattrvalue(attrName,blob);
+	                                    iomObj.addattrvalue(attrName,blob);
 	                                }
 	                            } catch (ConverterException ex) {
 	                                EhiLogger.logError("Object "+sqlid+": failed to convert blackbox binary",ex);
@@ -1237,7 +1235,7 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 	                    String value=rs.getString(valuei);
 	                    valuei++;
 	                    if(!rs.wasNull()){
-	                        iomObj.setattrvalue(attrName,value);
+	                        iomObj.addattrvalue(attrName,value);
 	                    }
 	                }
 				}

@@ -38,15 +38,12 @@ public abstract class SimpleTest {
         setup.resetDb();
 		File data=new File(TEST_OUT,"Simple23.ili");
 		Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+        Ili2db.setNoSmartMapping(config);
 		config.setFunction(Config.FC_SCHEMAIMPORT);
 		config.setCreateFk(Config.CREATE_FK_YES);
 		config.setCreateNumChecks(true);
 		config.setTidHandling(Config.TID_HANDLING_PROPERTY);
 		config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
-		config.setCatalogueRefTrafo(null);
-		config.setMultiSurfaceTrafo(null);
-		config.setMultilingualTrafo(null);
-		config.setInheritanceTrafo(null);
         Ili2db.run(config,null);
 	}
     @Test
@@ -56,6 +53,7 @@ public abstract class SimpleTest {
         File outfile=new File(data.getPath()+"-out.sql");
         Config config=new Config();
         setup.initConfig(config);
+        Ili2db.setNoSmartMapping(config);
         config.setLogfile(data.getPath()+".log");
         config.setXtffile(data.getPath());
         config.setFunction(Config.FC_SCRIPT);
@@ -65,10 +63,6 @@ public abstract class SimpleTest {
         config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
         config.setCreateMetaInfo(true);
         config.setCreateEnumDefs(Config.CREATE_ENUM_DEFS_MULTI_WITH_ID);
-        config.setCatalogueRefTrafo(null);
-        config.setMultiSurfaceTrafo(null);
-        config.setMultilingualTrafo(null);
-        config.setInheritanceTrafo(null);
         config.setCreatescript(outfile.getPath());
         Ili2db.run(config,null);
         
@@ -104,15 +98,12 @@ public abstract class SimpleTest {
 	    setup.resetDb();
 		File data=new File(TEST_OUT,"SimpleStruct23.ili");
 		Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+        Ili2db.setNoSmartMapping(config);
 		config.setFunction(Config.FC_SCHEMAIMPORT);
 		config.setCreateFk(Config.CREATE_FK_YES);
 		config.setCreateNumChecks(true);
 		config.setTidHandling(Config.TID_HANDLING_PROPERTY);
 		config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
-		config.setCatalogueRefTrafo(null);
-		config.setMultiSurfaceTrafo(null);
-		config.setMultilingualTrafo(null);
-		config.setInheritanceTrafo(null);
 		Ili2db.run(config,null);
 	}
 	
@@ -122,15 +113,12 @@ public abstract class SimpleTest {
 	    setup.resetDb();
 		File data=new File(TEST_OUT,"SimpleInheritance23.ili");
 		Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+        Ili2db.setNoSmartMapping(config);
 		config.setFunction(Config.FC_SCHEMAIMPORT);
 		config.setCreateFk(Config.CREATE_FK_YES);
 		config.setCreateNumChecks(true);
 		config.setTidHandling(Config.TID_HANDLING_PROPERTY);
 		config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
-		config.setCatalogueRefTrafo(null);
-		config.setMultiSurfaceTrafo(null);
-		config.setMultilingualTrafo(null);
-		config.setInheritanceTrafo(null);
 		Ili2db.run(config,null);
 	}
 	
@@ -140,15 +128,12 @@ public abstract class SimpleTest {
 	    setup.resetDb();
 		File data=new File(TEST_OUT,"SimpleCoord23.ili");
 		Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+        Ili2db.setNoSmartMapping(config);
 		config.setFunction(Config.FC_SCHEMAIMPORT);
 		config.setCreateFk(Config.CREATE_FK_YES);
 		config.setCreateNumChecks(true);
 		config.setTidHandling(Config.TID_HANDLING_PROPERTY);
 		config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
-		config.setCatalogueRefTrafo(null);
-		config.setMultiSurfaceTrafo(null);
-		config.setMultilingualTrafo(null);
-		config.setInheritanceTrafo(null);
 		config.setDefaultSrsCode("2056");
 		setup.setXYParams(config);
 		Ili2db.run(config,null);
@@ -161,15 +146,12 @@ public abstract class SimpleTest {
         setup.resetDb();
 		File data=new File(TEST_OUT,"Simple23a.xtf");
 		Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+        Ili2db.setNoSmartMapping(config);
 		config.setFunction(Config.FC_IMPORT);
         config.setDoImplicitSchemaImport(true);
 		config.setCreateFk(Config.CREATE_FK_YES);
 		config.setCreateNumChecks(true);
 		config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
-		config.setCatalogueRefTrafo(null);
-		config.setMultiSurfaceTrafo(null);
-		config.setMultilingualTrafo(null);
-		config.setInheritanceTrafo(null);
 		Ili2db.run(config,null);
 	}
 	
@@ -186,6 +168,7 @@ public abstract class SimpleTest {
             {
                 File data=new File(TEST_OUT,"SimpleStruct23a.xtf");
                 Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+                Ili2db.setNoSmartMapping(config);
                 config.setFunction(Config.FC_IMPORT);
                 config.setDoImplicitSchemaImport(true);
                 config.setCreateFk(Config.CREATE_FK_YES);
@@ -194,10 +177,6 @@ public abstract class SimpleTest {
                 config.setImportTid(true);
                 config.setImportBid(true);
                 config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
-                config.setCatalogueRefTrafo(null);
-                config.setMultiSurfaceTrafo(null);
-                config.setMultilingualTrafo(null);
-                config.setInheritanceTrafo(null);
                 Ili2db.run(config,null);
                 
             }
@@ -306,16 +285,13 @@ public abstract class SimpleTest {
 	    setup.resetDb();
 		File data=new File(TEST_OUT,"SimpleInheritance23a.xtf");
 		Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+        Ili2db.setNoSmartMapping(config);
 		config.setFunction(Config.FC_IMPORT);
         config.setDoImplicitSchemaImport(true);
 		config.setCreateFk(Config.CREATE_FK_YES);
 		config.setCreateNumChecks(true);
 		config.setTidHandling(Config.TID_HANDLING_PROPERTY);
 		config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
-		config.setCatalogueRefTrafo(null);
-		config.setMultiSurfaceTrafo(null);
-		config.setMultilingualTrafo(null);
-		config.setInheritanceTrafo(null);
         Ili2db.run(config,null);
 	}
 	
@@ -326,15 +302,13 @@ public abstract class SimpleTest {
 	    setup.resetDb();
 		File data=new File(TEST_OUT,"SimpleInheritance23a.xtf");
 		Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+        Ili2db.setNoSmartMapping(config);
 		config.setFunction(Config.FC_IMPORT);
         config.setDoImplicitSchemaImport(true);
 		config.setCreateFk(Config.CREATE_FK_YES);
 		config.setCreateNumChecks(true);
 		config.setTidHandling(Config.TID_HANDLING_PROPERTY);
 		config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
-		config.setCatalogueRefTrafo(null);
-		config.setMultiSurfaceTrafo(null);
-		config.setMultilingualTrafo(null);
 		config.setInheritanceTrafo(Config.INHERITANCE_TRAFO_SMART1);
         Ili2db.run(config,null);
 	}
@@ -346,6 +320,7 @@ public abstract class SimpleTest {
 	    setup.resetDb();
 		File data=new File(TEST_OUT,"SimpleInheritance23a.xtf");
 		Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+        Ili2db.setNoSmartMapping(config);
 		config.setFunction(Config.FC_IMPORT);
         config.setDoImplicitSchemaImport(true);
 		config.setCreateFk(Config.CREATE_FK_YES);
@@ -353,9 +328,6 @@ public abstract class SimpleTest {
 		config.setTidHandling(Config.TID_HANDLING_PROPERTY);
 		config.setImportTid(true);
 		config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
-		config.setCatalogueRefTrafo(null);
-		config.setMultiSurfaceTrafo(null);
-		config.setMultilingualTrafo(null);
 		config.setInheritanceTrafo(Config.INHERITANCE_TRAFO_SMART2);
         Ili2db.run(config,null);
 	}
@@ -367,6 +339,7 @@ public abstract class SimpleTest {
 	    setup.resetDb();
 		File data=new File(TEST_OUT,"SimpleCoord23a.xtf");
 		Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+        Ili2db.setNoSmartMapping(config);
 		config.setFunction(Config.FC_IMPORT);
         config.setDoImplicitSchemaImport(true);
 		config.setCreateFk(Config.CREATE_FK_YES);
@@ -374,10 +347,6 @@ public abstract class SimpleTest {
 		config.setTidHandling(Config.TID_HANDLING_PROPERTY);
 		config.setImportTid(true);
 		config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
-		config.setCatalogueRefTrafo(null);
-		config.setMultiSurfaceTrafo(null);
-		config.setMultilingualTrafo(null);
-		config.setInheritanceTrafo(null);
 		config.setDefaultSrsCode("2056");
 		setup.setXYParams(config);
         Ili2db.run(config,null);
@@ -390,6 +359,7 @@ public abstract class SimpleTest {
 		//EhiLogger.getInstance().setTraceFilter(false);
 		File data=new File(TEST_OUT,"Simple23a.xtf");
 		Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+        Ili2db.setNoSmartMapping(config);
 		config.setFunction(Config.FC_IMPORT);
 		config.setDoImplicitSchemaImport(true);
 		config.setDatasetName("importXtfWithDelete");
@@ -398,10 +368,6 @@ public abstract class SimpleTest {
 		config.setTidHandling(Config.TID_HANDLING_PROPERTY);
 		config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
 		config.setDeleteMode(Config.DELETE_DATA);
-		config.setCatalogueRefTrafo(null);
-		config.setMultiSurfaceTrafo(null);
-		config.setMultilingualTrafo(null);
-		config.setInheritanceTrafo(null);
         Ili2db.run(config,null);
 	}
 	

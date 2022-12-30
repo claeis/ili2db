@@ -75,15 +75,12 @@ public class Enum23Test extends ch.ehi.ili2db.Enum23Test{
 			{
 				File data=new File("test/data/Enum23/Enum23.ili");
 				Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+                Ili2db.setNoSmartMapping(config);
 				config.setFunction(Config.FC_SCHEMAIMPORT);
 				config.setCreateFk(Config.CREATE_FK_YES);
 				config.setTidHandling(Config.TID_HANDLING_PROPERTY);
 				config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
 				config.setCreateEnumDefs(Config.CREATE_ENUM_DEFS_MULTI);
-				config.setCatalogueRefTrafo(null);
-				config.setMultiSurfaceTrafo(null);
-				config.setMultilingualTrafo(null);
-				config.setInheritanceTrafo(null);
 				Ili2db.readSettingsFromDb(config);
 				Ili2db.run(config,null);
 				{
@@ -121,16 +118,13 @@ public class Enum23Test extends ch.ehi.ili2db.Enum23Test{
 			{
 				File data=new File("test/data/Enum23/Enum23.ili");
 				Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+                Ili2db.setNoSmartMapping(config);
 				config.setFunction(Config.FC_SCHEMAIMPORT);
 				config.setCreateFk(Config.CREATE_FK_YES);
 				config.setTidHandling(Config.TID_HANDLING_PROPERTY);
 				config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
 				config.setCreateEnumDefs(Config.CREATE_ENUM_DEFS_MULTI);
 				config.setBeautifyEnumDispName(Config.BEAUTIFY_ENUM_DISPNAME_UNDERSCORE);
-				config.setCatalogueRefTrafo(null);
-				config.setMultiSurfaceTrafo(null);
-				config.setMultilingualTrafo(null);
-				config.setInheritanceTrafo(null);
 				Ili2db.readSettingsFromDb(config);
 				Ili2db.run(config,null);
 		
@@ -185,6 +179,7 @@ public class Enum23Test extends ch.ehi.ili2db.Enum23Test{
             {
                 File data=new File("test/data/Enum23/Enum23.ili");
                 Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+                Ili2db.setNoSmartMapping(config);
                 config.setFunction(Config.FC_SCHEMAIMPORT);
                 config.setCreateFk(Config.CREATE_FK_YES);
                 config.setTidHandling(Config.TID_HANDLING_PROPERTY);
@@ -192,10 +187,6 @@ public class Enum23Test extends ch.ehi.ili2db.Enum23Test{
                 config.setCreateEnumCols(Config.CREATE_ENUM_TXT_COL);
                 config.setCreateEnumDefs(Config.CREATE_ENUM_DEFS_MULTI);
                 config.setBeautifyEnumDispName(Config.BEAUTIFY_ENUM_DISPNAME_UNDERSCORE);
-                config.setCatalogueRefTrafo(null);
-                config.setMultiSurfaceTrafo(null);
-                config.setMultilingualTrafo(null);
-                config.setInheritanceTrafo(null);
                 Ili2db.readSettingsFromDb(config);
                 Ili2db.run(config,null);
         
@@ -261,6 +252,7 @@ public class Enum23Test extends ch.ehi.ili2db.Enum23Test{
             {
                 File data=new File("test/data/Enum23/Enum23.ili");
                 Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+                Ili2db.setNoSmartMapping(config);
                 config.setFunction(Config.FC_SCHEMAIMPORT);
                 config.setCreateFk(Config.CREATE_FK_YES);
                 config.setTidHandling(Config.TID_HANDLING_PROPERTY);
@@ -268,10 +260,6 @@ public class Enum23Test extends ch.ehi.ili2db.Enum23Test{
                 config.setCreateEnumCols(Config.CREATE_ENUM_TXT_COL);
                 config.setCreateEnumDefs(Config.CREATE_ENUM_DEFS_MULTI);
                 config.setBeautifyEnumDispName(Config.BEAUTIFY_ENUM_DISPNAME_UNDERSCORE);
-                config.setCatalogueRefTrafo(null);
-                config.setMultiSurfaceTrafo(null);
-                config.setMultilingualTrafo(null);
-                config.setInheritanceTrafo(null);
                 config.setNameLanguage("fr");
                 Ili2db.readSettingsFromDb(config);
                 Ili2db.run(config,null);
@@ -338,6 +326,7 @@ public class Enum23Test extends ch.ehi.ili2db.Enum23Test{
             {
                 File data=new File("test/data/Enum23/Enum23.ili");
                 Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+                Ili2db.setNoSmartMapping(config);
                 config.setFunction(Config.FC_SCHEMAIMPORT);
                 config.setCreateFk(Config.CREATE_FK_YES);
                 config.setTidHandling(Config.TID_HANDLING_PROPERTY);
@@ -345,10 +334,6 @@ public class Enum23Test extends ch.ehi.ili2db.Enum23Test{
                 config.setCreateEnumCols(Config.CREATE_ENUM_TXT_COL);
                 config.setCreateEnumDefs(null);
                 config.setBeautifyEnumDispName(Config.BEAUTIFY_ENUM_DISPNAME_UNDERSCORE);
-                config.setCatalogueRefTrafo(null);
-                config.setMultiSurfaceTrafo(null);
-                config.setMultilingualTrafo(null);
-                config.setInheritanceTrafo(null);
                 Ili2db.readSettingsFromDb(config);
                 Ili2db.run(config,null);
         
@@ -372,6 +357,7 @@ public class Enum23Test extends ch.ehi.ili2db.Enum23Test{
             {
                 File data=new File("test/data/Enum23/Enum23.ili");
                 Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+                Ili2db.setNoSmartMapping(config);
                 config.setFunction(Config.FC_SCHEMAIMPORT);
                 config.setCreateFk(Config.CREATE_FK_YES);
                 config.setTidHandling(Config.TID_HANDLING_PROPERTY);
@@ -379,10 +365,6 @@ public class Enum23Test extends ch.ehi.ili2db.Enum23Test{
                 config.setCreateEnumCols(Config.CREATE_ENUM_TXT_COL);
                 config.setCreateEnumDefs(null);
                 config.setBeautifyEnumDispName(Config.BEAUTIFY_ENUM_DISPNAME_UNDERSCORE);
-                config.setCatalogueRefTrafo(null);
-                config.setMultiSurfaceTrafo(null);
-                config.setMultilingualTrafo(null);
-                config.setInheritanceTrafo(null);
                 config.setNameLanguage("fr");
                 Ili2db.readSettingsFromDb(config);
                 Ili2db.run(config,null);
@@ -654,14 +636,12 @@ public class Enum23Test extends ch.ehi.ili2db.Enum23Test{
 			{
 				File data=new File("test/data/Enum23/Enum23c.ili");
 				Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+                Ili2db.setNoSmartMapping(config);
 				config.setFunction(Config.FC_SCHEMAIMPORT);
 				config.setCreateFk(Config.CREATE_FK_YES);
 				config.setTidHandling(Config.TID_HANDLING_PROPERTY);
 				config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
 				config.setCreateEnumDefs(Config.CREATE_ENUM_DEFS_MULTI);
-				config.setCatalogueRefTrafo(null);
-				config.setMultiSurfaceTrafo(null);
-				config.setMultilingualTrafo(null);
 				config.setInheritanceTrafo(Config.INHERITANCE_TRAFO_SMART1);
 				Ili2db.readSettingsFromDb(config);
 				Ili2db.run(config,null);
@@ -713,14 +693,11 @@ public class Enum23Test extends ch.ehi.ili2db.Enum23Test{
             {
                 File data=new File("test/data/Enum23/Enum23c.ili");
                 Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+                Ili2db.setNoSmartMapping(config);
                 config.setFunction(Config.FC_SCHEMAIMPORT);
                 config.setCreateFk(Config.CREATE_FK_YES);
                 config.setTidHandling(Config.TID_HANDLING_PROPERTY);
                 config.setCreateEnumDefs(Config.CREATE_ENUM_DEFS_MULTI_WITH_ID);
-                config.setCatalogueRefTrafo(null);
-                config.setMultiSurfaceTrafo(null);
-                config.setMultilingualTrafo(null);
-                config.setInheritanceTrafo(null);
                 Ili2db.readSettingsFromDb(config);
                 Ili2db.run(config,null);
                 {
@@ -779,13 +756,11 @@ public class Enum23Test extends ch.ehi.ili2db.Enum23Test{
             {
                 File data=new File("test/data/Enum23/Enum23c.ili");
                 Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+                Ili2db.setNoSmartMapping(config);
                 config.setFunction(Config.FC_SCHEMAIMPORT);
                 config.setCreateFk(Config.CREATE_FK_YES);
                 config.setTidHandling(Config.TID_HANDLING_PROPERTY);
                 config.setCreateEnumDefs(Config.CREATE_ENUM_DEFS_MULTI_WITH_ID);
-                config.setCatalogueRefTrafo(null);
-                config.setMultiSurfaceTrafo(null);
-                config.setMultilingualTrafo(null);
                 config.setInheritanceTrafo(Config.INHERITANCE_TRAFO_SMART1);
                 Ili2db.readSettingsFromDb(config);
                 Ili2db.run(config,null);
@@ -845,13 +820,11 @@ public class Enum23Test extends ch.ehi.ili2db.Enum23Test{
             {
                 File data=new File("test/data/Enum23/Enum23c.ili");
                 Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+                Ili2db.setNoSmartMapping(config);
                 config.setFunction(Config.FC_SCHEMAIMPORT);
                 config.setCreateFk(Config.CREATE_FK_YES);
                 config.setTidHandling(Config.TID_HANDLING_PROPERTY);
                 config.setCreateEnumDefs(Config.CREATE_ENUM_DEFS_MULTI_WITH_ID);
-                config.setCatalogueRefTrafo(null);
-                config.setMultiSurfaceTrafo(null);
-                config.setMultilingualTrafo(null);
                 config.setInheritanceTrafo(Config.INHERITANCE_TRAFO_SMART2);
                 Ili2db.readSettingsFromDb(config);
                 Ili2db.run(config,null);
@@ -912,6 +885,7 @@ public class Enum23Test extends ch.ehi.ili2db.Enum23Test{
             {
                 File data=new File("test/data/Enum23/Enum23c.xtf");
                 Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+                Ili2db.setNoSmartMapping(config);
                 config.setFunction(Config.FC_IMPORT);
                 config.setDoImplicitSchemaImport(true);
                 config.setCreateFk(Config.CREATE_FK_YES);
@@ -919,10 +893,6 @@ public class Enum23Test extends ch.ehi.ili2db.Enum23Test{
                 config.setImportTid(true);
                 config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
                 config.setCreateEnumDefs(Config.CREATE_ENUM_DEFS_MULTI_WITH_ID);
-                config.setCatalogueRefTrafo(null);
-                config.setMultiSurfaceTrafo(null);
-                config.setMultilingualTrafo(null);
-                config.setInheritanceTrafo(null);
                 Ili2db.readSettingsFromDb(config);
                 Ili2db.run(config,null);
                 {
@@ -981,6 +951,7 @@ public class Enum23Test extends ch.ehi.ili2db.Enum23Test{
             {
                 File data=new File("test/data/Enum23/Enum23c.xtf");
                 Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+                Ili2db.setNoSmartMapping(config);
                 config.setFunction(Config.FC_IMPORT);
                 config.setDoImplicitSchemaImport(true);
                 config.setCreateFk(Config.CREATE_FK_YES);
@@ -988,9 +959,6 @@ public class Enum23Test extends ch.ehi.ili2db.Enum23Test{
                 config.setImportTid(true);
                 config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
                 config.setCreateEnumDefs(Config.CREATE_ENUM_DEFS_MULTI_WITH_ID);
-                config.setCatalogueRefTrafo(null);
-                config.setMultiSurfaceTrafo(null);
-                config.setMultilingualTrafo(null);
                 config.setInheritanceTrafo(Config.INHERITANCE_TRAFO_SMART1);
                 Ili2db.readSettingsFromDb(config);
                 Ili2db.run(config,null);
@@ -1050,6 +1018,7 @@ public class Enum23Test extends ch.ehi.ili2db.Enum23Test{
             {
                 File data=new File("test/data/Enum23/Enum23c.xtf");
                 Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+                Ili2db.setNoSmartMapping(config);
                 config.setFunction(Config.FC_IMPORT);
                 config.setDoImplicitSchemaImport(true);
                 config.setCreateFk(Config.CREATE_FK_YES);
@@ -1057,9 +1026,6 @@ public class Enum23Test extends ch.ehi.ili2db.Enum23Test{
                 config.setImportTid(true);
                 config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
                 config.setCreateEnumDefs(Config.CREATE_ENUM_DEFS_MULTI_WITH_ID);
-                config.setCatalogueRefTrafo(null);
-                config.setMultiSurfaceTrafo(null);
-                config.setMultilingualTrafo(null);
                 config.setInheritanceTrafo(Config.INHERITANCE_TRAFO_SMART2);
                 Ili2db.readSettingsFromDb(config);
                 Ili2db.run(config,null);
@@ -1344,15 +1310,12 @@ public class Enum23Test extends ch.ehi.ili2db.Enum23Test{
 			{
 				File data=new File("test/data/Enum23/Enum23.ili");
 				Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+                Ili2db.setNoSmartMapping(config);
 				config.setFunction(Config.FC_SCHEMAIMPORT);
 				config.setCreateFk(Config.CREATE_FK_YES);
 				config.setTidHandling(Config.TID_HANDLING_PROPERTY);
 				config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
 				config.setCreateEnumDefs(Config.CREATE_ENUM_DEFS_SINGLE);
-				config.setCatalogueRefTrafo(null);
-				config.setMultiSurfaceTrafo(null);
-				config.setMultilingualTrafo(null);
-				config.setInheritanceTrafo(null);
 				Ili2db.readSettingsFromDb(config);
 				Ili2db.run(config,null);
 				{

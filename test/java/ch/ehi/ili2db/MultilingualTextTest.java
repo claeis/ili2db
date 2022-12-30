@@ -43,16 +43,14 @@ public abstract class MultilingualTextTest {
 
         File data=new File(TEST_OUT,"MultilingualText1.ili");
         Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+        Ili2db.setNoSmartMapping(config);
         config.setFunction(Config.FC_SCHEMAIMPORT);
         config.setCreateFk(Config.CREATE_FK_YES);
         config.setCreateTextChecks(true);
         config.setTidHandling(Config.TID_HANDLING_PROPERTY);
         config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
-        config.setCatalogueRefTrafo(null);
-        config.setMultiSurfaceTrafo(null);
         config.setMultilingualTrafo(Config.MULTILINGUAL_TRAFO_EXPAND);
         config.setLocalisedTrafo(Config.LOCALISED_TRAFO_EXPAND);
-        config.setInheritanceTrafo(null);
         Ili2db.readSettingsFromDb(config);
         Ili2db.run(config,null);
 
@@ -250,16 +248,14 @@ public abstract class MultilingualTextTest {
 
         File data=new File(TEST_OUT,"MultilingualTextCustom.ili");
         Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+        Ili2db.setNoSmartMapping(config);
         config.setFunction(Config.FC_SCHEMAIMPORT);
         config.setCreateFk(Config.CREATE_FK_YES);
         config.setCreateTextChecks(true);
         config.setTidHandling(Config.TID_HANDLING_PROPERTY);
         config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
-        config.setCatalogueRefTrafo(null);
-        config.setMultiSurfaceTrafo(null);
         config.setMultilingualTrafo(Config.MULTILINGUAL_TRAFO_EXPAND);
         config.setLocalisedTrafo(Config.LOCALISED_TRAFO_EXPAND);
-        config.setInheritanceTrafo(null);
         Ili2db.readSettingsFromDb(config);
         Ili2db.run(config,null);
 

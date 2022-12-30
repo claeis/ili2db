@@ -62,15 +62,12 @@ public class Datatypes10Test {
 	        {
 				File data=new File(TEST_OUT,"Datatypes10.ili");
 				Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+                Ili2db.setNoSmartMapping(config);
 				config.setFunction(Config.FC_SCHEMAIMPORT);
 				config.setCreateFk(Config.CREATE_FK_YES);
 				config.setCreateNumChecks(true);
 				config.setTidHandling(Config.TID_HANDLING_PROPERTY);
 				config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
-				config.setCatalogueRefTrafo(null);
-				config.setMultiSurfaceTrafo(null);
-				config.setMultilingualTrafo(null);
-				config.setInheritanceTrafo(null);
                 config.setDefaultSrsAuthority("EPSG");
                 config.setDefaultSrsCode("21781");
 				Ili2db.readSettingsFromDb(config);
@@ -148,16 +145,13 @@ public class Datatypes10Test {
 	        {     
 				File data=new File(TEST_OUT,"Datatypes10a.itf");
 				Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+                Ili2db.setNoSmartMapping(config);
 				config.setFunction(Config.FC_IMPORT);
 		        config.setDoImplicitSchemaImport(true);
 				config.setCreateFk(Config.CREATE_FK_YES);
 				config.setTidHandling(Config.TID_HANDLING_PROPERTY);
 				config.setImportTid(true);
 				config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
-				config.setCatalogueRefTrafo(null);
-				config.setMultiSurfaceTrafo(null);
-				config.setMultilingualTrafo(null);
-				config.setInheritanceTrafo(null);
 				config.setModels("Datatypes10");
                 config.setDefaultSrsAuthority("EPSG");
                 config.setDefaultSrsCode("21781");
@@ -257,6 +251,7 @@ public class Datatypes10Test {
 	        {    
 				File data=new File(TEST_OUT,"Datatypes10a.itf");
 				Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+                Ili2db.setNoSmartMapping(config);
 				config.setFunction(Config.FC_IMPORT);
 		        config.setDoImplicitSchemaImport(true);
 				config.setCreateFk(Config.CREATE_FK_YES);
@@ -264,10 +259,6 @@ public class Datatypes10Test {
 				config.setImportTid(true);
 				config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
 				Ili2db.setSkipPolygonBuilding(config);
-				config.setCatalogueRefTrafo(null);
-				config.setMultiSurfaceTrafo(null);
-				config.setMultilingualTrafo(null);
-				config.setInheritanceTrafo(null);
                 config.setDefaultSrsAuthority("EPSG");
                 config.setDefaultSrsCode("21781");
 				Ili2db.readSettingsFromDb(config);

@@ -4,15 +4,20 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 
 import org.junit.Assert;
 
 import ch.ehi.ili2db.base.DbNames;
+
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.junit.Assert.assertThat;
 
 public class Ili2dbAssert {
     
@@ -122,6 +127,30 @@ public class Ili2dbAssert {
     public static void assertAttrNameTableFromGpkg(Connection jdbcConnection, String[][] expectedValues) throws SQLException {
         assertAttrNameTable(jdbcConnection, expectedValues,null);
     }
+
+    public static void assertTableContainsValues(Connection jdbcConnection, String table, String[] columns, String[][] expectedValues, String filter) throws SQLException {
+        Statement statement = null;
+        try {
+            statement = jdbcConnection.createStatement();
+
+            String query = "SELECT " + join(",", columns) + " FROM " + table + (filter == null ? "" : " WHERE " + filter);
+            ResultSet resultSet = statement.executeQuery(query);
+            List<String[]> actualValues = new ArrayList<String[]>();
+            while (resultSet.next()) {
+                String[] values = new String[columns.length];
+                for (int i = 0; i < columns.length; i++) {
+                    values[i] = resultSet.getString(i + 1);
+                }
+                actualValues.add(values);
+            }
+
+            assertThat(actualValues, containsInAnyOrder(expectedValues));
+        } finally {
+            if (statement != null) {
+                statement.close();
+            }
+        }
+    }
     
     private static Set<String[]> getValuesFromTableTrafo(ResultSet resultSet) throws SQLException {
         Set<String[]> result = new HashSet<String[]>();
@@ -146,6 +175,27 @@ public class Ili2dbAssert {
             result.add(values);
         }
         return result;
+    }
+
+    /**
+     * see String.join introduced in Java 8.
+     *
+     * @deprecated replaced by String.join in Java 8
+     */
+    @Deprecated
+    private static String join(String delimiter, String[] elements) {
+        if (elements == null || elements.length == 0) {
+            return "";
+        }
+
+        StringBuilder sb = new StringBuilder();
+        sb.append(elements[0]);
+        for (int i = 1; i < elements.length; i++) {
+            sb.append(delimiter);
+            sb.append(elements[i]);
+        }
+
+        return sb.toString();
     }
 }
 

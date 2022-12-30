@@ -77,14 +77,11 @@ public class Oid23Test {
 			{
 				File data=new File(TEST_DATA_DIR,"Oid1.ili");
 				Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+                Ili2db.setNoSmartMapping(config);
 				config.setFunction(Config.FC_SCHEMAIMPORT);
 				config.setCreateFk(Config.CREATE_FK_YES);
 				config.setTidHandling(Config.TID_HANDLING_PROPERTY);
 				config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
-				config.setCatalogueRefTrafo(null);
-				config.setMultiSurfaceTrafo(null);
-				config.setMultilingualTrafo(null);
-				config.setInheritanceTrafo(null);
 				Ili2db.readSettingsFromDb(config);
 				Ili2db.run(config,null);
 				{
@@ -161,14 +158,11 @@ public class Oid23Test {
             {
                 File data=new File(TEST_DATA_DIR,"Oid6.ili");
                 Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+                Ili2db.setNoSmartMapping(config);
                 config.setFunction(Config.FC_SCHEMAIMPORT);
                 config.setCreateFk(Config.CREATE_FK_YES);
                 config.setTidHandling(Config.TID_HANDLING_PROPERTY);
                 config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
-                config.setCatalogueRefTrafo(null);
-                config.setMultiSurfaceTrafo(null);
-                config.setMultilingualTrafo(null);
-                config.setInheritanceTrafo(null);
                 Ili2db.readSettingsFromDb(config);
                 Ili2db.run(config,null);
                 {
@@ -378,13 +372,10 @@ public class Oid23Test {
             {
                 File data=new File(TEST_DATA_DIR,"Oid6.ili");
                 Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+                Ili2db.setNoSmartMapping(config);
                 config.setFunction(Config.FC_SCHEMAIMPORT);
                 config.setCreateFk(Config.CREATE_FK_YES);
                 config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
-                config.setCatalogueRefTrafo(null);
-                config.setMultiSurfaceTrafo(null);
-                config.setMultilingualTrafo(null);
-                config.setInheritanceTrafo(null);
                 Ili2db.readSettingsFromDb(config);
                 Ili2db.run(config,null);
                 {
@@ -593,12 +584,10 @@ public class Oid23Test {
             {
                 File data=new File(TEST_DATA_DIR,"Oid6.ili");
                 Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+                Ili2db.setNoSmartMapping(config);
                 config.setFunction(Config.FC_SCHEMAIMPORT);
                 config.setCreateFk(Config.CREATE_FK_YES);
                 config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
-                config.setCatalogueRefTrafo(null);
-                config.setMultiSurfaceTrafo(null);
-                config.setMultilingualTrafo(null);
                 config.setInheritanceTrafo(Config.INHERITANCE_TRAFO_SMART1);
                 Ili2db.readSettingsFromDb(config);
                 Ili2db.run(config,null);
@@ -809,13 +798,10 @@ public class Oid23Test {
             {
                 File data=new File(TEST_DATA_DIR,"Oid5.ili");
                 Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+                Ili2db.setNoSmartMapping(config);
                 config.setFunction(Config.FC_SCHEMAIMPORT);
                 config.setCreateFk(Config.CREATE_FK_YES);
                 config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
-                config.setCatalogueRefTrafo(null);
-                config.setMultiSurfaceTrafo(null);
-                config.setMultilingualTrafo(null);
-                config.setInheritanceTrafo(null);
                 Ili2db.readSettingsFromDb(config);
                 Ili2db.run(config,null);
                 {
@@ -946,14 +932,11 @@ public class Oid23Test {
             {
                 File data=new File(TEST_DATA_DIR,"Oid3.ili");
                 Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+                Ili2db.setNoSmartMapping(config);
                 config.setFunction(Config.FC_SCHEMAIMPORT);
                 config.setCreateFk(Config.CREATE_FK_YES);
                 //config.setTidHandling(Config.TID_HANDLING_PROPERTY);
                 config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
-                config.setCatalogueRefTrafo(null);
-                config.setMultiSurfaceTrafo(null);
-                config.setMultilingualTrafo(null);
-                config.setInheritanceTrafo(null);
                 config.setIliMetaAttrsFile(new File(TEST_DATA_DIR,"Oid3.ini").getPath());
                 config.setCreateMetaInfo(true);
                 Ili2db.readSettingsFromDb(config);
@@ -1147,29 +1130,23 @@ public class Oid23Test {
 				{
 					File data=new File(TEST_DATA_DIR,"Oid1a.xtf");
 		    		Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+	                Ili2db.setNoSmartMapping(config);
 		    		config.setFunction(Config.FC_IMPORT);
 		            config.setDoImplicitSchemaImport(true);
 		    		config.setCreateFk(Config.CREATE_FK_YES);
 		    		config.setTidHandling(Config.TID_HANDLING_PROPERTY);
 		    		config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
-		    		config.setCatalogueRefTrafo(null);
-		    		config.setMultiSurfaceTrafo(null);
-		    		config.setMultilingualTrafo(null);
-		    		config.setInheritanceTrafo(null);
 		    		Ili2db.readSettingsFromDb(config);
 		    		Ili2db.run(config,null);
 				}
 				{
 					File data=new File(TEST_DATA_DIR,"Oid1c.xtf");
 					Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+	                Ili2db.setNoSmartMapping(config);
 					config.setFunction(Config.FC_IMPORT);
 					config.setCreateFk(Config.CREATE_FK_YES);
 		    		config.setTidHandling(Config.TID_HANDLING_PROPERTY);
 		    		config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
-		    		config.setCatalogueRefTrafo(null);
-		    		config.setMultiSurfaceTrafo(null);
-		    		config.setMultilingualTrafo(null);
-		    		config.setInheritanceTrafo(null);
 					Ili2db.readSettingsFromDb(config);
 					Ili2db.run(config,null);
 				}
@@ -1272,13 +1249,11 @@ public class Oid23Test {
             {
                 File data=new File(TEST_DATA_DIR,"Oid2.ili");
                 Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+                Ili2db.setNoSmartMapping(config);
                 config.setFunction(Config.FC_SCHEMAIMPORT);
                 config.setCreateFk(Config.CREATE_FK_YES);
                 config.setTidHandling(null);
                 config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
-                config.setCatalogueRefTrafo(null);
-                config.setMultiSurfaceTrafo(null);
-                config.setMultilingualTrafo(null);
                 config.setInheritanceTrafo(Config.INHERITANCE_TRAFO_SMART1);
                 Ili2db.readSettingsFromDb(config);
                 Ili2db.run(config,null);
@@ -1333,13 +1308,11 @@ public class Oid23Test {
             {
                 File data=new File(TEST_DATA_DIR,"Oid2.ili");
                 Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+                Ili2db.setNoSmartMapping(config);
                 config.setFunction(Config.FC_SCHEMAIMPORT);
                 config.setCreateFk(Config.CREATE_FK_YES);
                 config.setTidHandling(null);
                 config.setBasketHandling(null);
-                config.setCatalogueRefTrafo(null);
-                config.setMultiSurfaceTrafo(null);
-                config.setMultilingualTrafo(null);
                 config.setInheritanceTrafo(Config.INHERITANCE_TRAFO_SMART1);
                 Ili2db.readSettingsFromDb(config);
                 Ili2db.run(config,null);
@@ -1366,13 +1339,11 @@ public class Oid23Test {
             {
                 File data=new File(TEST_DATA_DIR,"Bid5.ili");
                 Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+                Ili2db.setNoSmartMapping(config);
                 config.setFunction(Config.FC_SCHEMAIMPORT);
                 config.setCreateFk(Config.CREATE_FK_YES);
                 config.setTidHandling(null);
                 config.setBasketHandling(null);
-                config.setCatalogueRefTrafo(null);
-                config.setMultiSurfaceTrafo(null);
-                config.setMultilingualTrafo(null);
                 config.setInheritanceTrafo(Config.INHERITANCE_TRAFO_SMART1);
                 Ili2db.readSettingsFromDb(config);
                 Ili2db.run(config,null);

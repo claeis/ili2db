@@ -119,7 +119,7 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 	}
 	public void writeRecord(long basketSqlId, java.util.Map<String,String> genericDomains,IomObject iomObj,Viewable iomClass,
 			AbstractStructWrapper structEle0, ViewableWrapper aclass, String sqlType,
-			long sqlId, boolean updateObj, PreparedStatement ps,ArrayList<AbstractStructWrapper> structQueue,Viewable originalClass)
+			long sqlId, boolean updateObj, PreparedStatement ps,ArrayList<AbstractStructWrapper> structQueue,Viewable originalClass, int attrIndex, long parentSqlId)
 			throws SQLException, ConverterException {
 		int valuei=1;
 		
@@ -141,7 +141,18 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 			valuei++;
 		}
 		
-		if(!aclass.isSecondaryTable()){
+		if(aclass.isSecondaryTable()) {
+			AttributeDef attr = aclass.getPrimitiveCollectionAttr();
+			if (attr != null) {
+				// T_Seq
+				ps.setInt(valuei, attrIndex);
+				valuei++;
+
+				// reference to parent
+				ps.setLong(valuei, parentSqlId);
+				valuei++;
+			}
+		} else {
 			if(aclass.getExtending()==null){
 				if(createTypeDiscriminator || aclass.includesMultipleTypes()){
 					ps.setString(valuei, sqlType);
@@ -201,11 +212,11 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 					} else {
 						if (mapAsTextCol(((AttributeDef) attrs.get(rootAttr)))) {
 							valuei = addAttrValueTXT(iomObj, sqlType, sqlId, aclass.getSqlTablename(), ps,
-									valuei, attr, (AttributeDef) attrs.get(rootAttr), columnWrapper.getEpsgCode(), structQueue, genericDomains, originalClass);
+									valuei, attr, (AttributeDef) attrs.get(rootAttr), columnWrapper.getEpsgCode(), structQueue, genericDomains, originalClass, attrIndex);
 
 						} else {
 							valuei = addAttrValue(iomObj, sqlType, sqlId, aclass.getSqlTablename(), ps,
-									valuei, attr, (AttributeDef) attrs.get(rootAttr), columnWrapper.getEpsgCode(), structQueue, genericDomains, originalClass);
+									valuei, attr, (AttributeDef) attrs.get(rootAttr), columnWrapper.getEpsgCode(), structQueue, genericDomains, originalClass, attrIndex);
 						}
 					}
                 }
@@ -398,7 +409,31 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 			sep=",";
 		}
 		
-		if(!aclass.isSecondaryTable()){
+		if(aclass.isSecondaryTable()) {
+			AttributeDef attr = aclass.getPrimitiveCollectionAttr();
+			if (attr != null) {
+				// sequence column
+				ret.append(sep);
+				ret.append(DbNames.T_SEQ_COL);
+				if(isUpdate){
+					ret.append("=?");
+				}else{
+					values.append(",?");
+				}
+				sep=",";
+
+				// reference to parent
+				ret.append(sep);
+				ViewableWrapper parentTable = aclass.getMainTable();
+				ret.append(ili2sqlName.mapIliAttributeDefReverse(attr, aclass.getSqlTablename(), parentTable.getSqlTablename()));
+				if(isUpdate){
+					ret.append("=?");
+				}else{
+					values.append(",?");
+				}
+				sep=",";
+			}
+		} else {
 			// if root, add type
 			if(aclass.getExtending()==null){
 				if(createTypeDiscriminator || aclass.includesMultipleTypes()){
@@ -916,10 +951,10 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 	}
 
 	public int addAttrValueTXT(IomObject iomObj, String sqlType, long sqlId,
-							   String sqlTableName, PreparedStatement ps, int valuei, AttributeDef tableAttr, AttributeDef classAttr, Integer epsgCode, ArrayList<AbstractStructWrapper> structQueue, Map<String, String> genericDomains, Viewable originalClass)
+							   String sqlTableName, PreparedStatement ps, int valuei, AttributeDef tableAttr, AttributeDef classAttr, Integer epsgCode, ArrayList<AbstractStructWrapper> structQueue, Map<String, String> genericDomains, Viewable originalClass, int attrIndex)
 			throws SQLException, ConverterException {
 		String attrName=tableAttr.getName();
-		String value = classAttr == null ? null : iomObj.getattrvalue(attrName);
+		String value = classAttr == null ? null : iomObj.getattrprim(attrName, attrIndex);
 		if (value != null) {
 			ps.setString(valuei, value);
 		} else {
@@ -931,12 +966,12 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 	}
 
 	public int addAttrValue(IomObject iomObj, String sqlType, long sqlId,
-			String sqlTableName,PreparedStatement ps, int valuei, AttributeDef tableAttr,AttributeDef classAttr,Integer epsgCode,ArrayList<AbstractStructWrapper> structQueue,Map<String,String> genericDomains,Viewable originalClass)
+			String sqlTableName,PreparedStatement ps, int valuei, AttributeDef tableAttr,AttributeDef classAttr,Integer epsgCode,ArrayList<AbstractStructWrapper> structQueue,Map<String,String> genericDomains,Viewable originalClass, int attrIndex)
 			throws SQLException, ConverterException {
 		if(true) { // attr.getExtending()==null){
 			 String attrName=tableAttr.getName();
 			if( tableAttr.isDomainBoolean()) {
-					String value= classAttr==null ? null : iomObj.getattrvalue(attrName);
+					String value= classAttr==null ? null : iomObj.getattrprim(attrName, attrIndex);
 					if(value!=null){
 						if(value.equals("true")){
 							geomConv.setBoolean(ps,valuei,true);
@@ -956,7 +991,7 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
                         valuei++;
                     }
 			}else if(tableAttr.isDomainIliUuid()){
-				String value= classAttr==null ? null : iomObj.getattrvalue(attrName);
+				String value= classAttr==null ? null : iomObj.getattrprim(attrName, attrIndex);
 				if(value==null){
 					 geomConv.setUuidNull(ps, valuei);
 				}else{
@@ -965,7 +1000,7 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 				}
 				valuei++;
 			}else if( tableAttr.isDomainIli1Date()) {
-				String value= classAttr==null ? null : iomObj.getattrvalue(attrName);
+				String value= classAttr==null ? null : iomObj.getattrprim(attrName, attrIndex);
 				if(value!=null){
 					GregorianCalendar gdate=new GregorianCalendar(Integer.parseInt(value.substring(0,4)),Integer.parseInt(value.substring(4,6))-1,Integer.parseInt(value.substring(6,8)));
 					java.sql.Date date=new java.sql.Date(gdate.getTimeInMillis());
@@ -975,7 +1010,7 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 				}
 				valuei++;
 			}else if( tableAttr.isDomainIli2Date()) {
-				String value= classAttr==null ? null : iomObj.getattrvalue(attrName);
+				String value= classAttr==null ? null : iomObj.getattrprim(attrName, attrIndex);
 				if(value!=null){
 					XMLGregorianCalendar xmldate;
 					try {
@@ -990,7 +1025,7 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 				}
 				valuei++;
 			}else if( tableAttr.isDomainIli2Time()) {
-				String value= classAttr==null ? null : iomObj.getattrvalue(attrName);
+				String value= classAttr==null ? null : iomObj.getattrprim(attrName, attrIndex);
 				if(value!=null){
 					XMLGregorianCalendar xmldate;
 					try {
@@ -1005,7 +1040,7 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 				}
 				valuei++;
 			}else if( tableAttr.isDomainIli2DateTime()) {
-				String value= classAttr==null ? null : iomObj.getattrvalue(attrName);
+				String value= classAttr==null ? null : iomObj.getattrprim(attrName, attrIndex);
 				if(value!=null){
 					XMLGregorianCalendar xmldate;
 					try {
@@ -1195,7 +1230,7 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
                             ps.setNull(valuei,Types.VARCHAR);
                             valuei++;
                         }
-                        
+
 					}else{
 						 // enqueue struct values
 						 for(int structi=0;structi<structc;structi++){
@@ -1301,7 +1336,7 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
                     }
                     valuei++;
 				}else if(type instanceof NumericType){
-					String value= classAttr==null ? null : iomObj.getattrvalue(attrName);
+					String value= classAttr==null ? null : iomObj.getattrprim(attrName, attrIndex);
 					if(type.isAbstract()){
 					}else{
 						PrecisionDecimal min=((NumericType)type).getMinimum();
@@ -1331,7 +1366,7 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 						valuei++;
 					}
 				}else if(type instanceof AbstractEnumerationType){
-					String value= classAttr==null ? null : iomObj.getattrvalue(attrName);
+					String value= classAttr==null ? null : iomObj.getattrprim(attrName, attrIndex);
 					if(createEnumColAsItfCode){
 						if(value!=null){
 							int itfCode=mapXtfCode2ItfCode((EnumerationType)type, value);
@@ -1373,7 +1408,7 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 					setReferenceColumn(ps,((ReferenceType) type).getReferred(),refoid,valueiRef,createExtRef && ((ReferenceType) type).isExternal());
 					valuei=valueiRef.value;
 				}else if(type instanceof BlackboxType){
-					String value= classAttr==null ? null : iomObj.getattrvalue(attrName);
+					String value= classAttr==null ? null : iomObj.getattrprim(attrName, attrIndex);
 					if(((BlackboxType)type).getKind()==BlackboxType.eXML){
 						if(value==null){
 							 geomConv.setXmlNull(ps, valuei);
@@ -1392,7 +1427,7 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 						valuei++;
 					}
 				}else{
-					String value= classAttr==null ? null : iomObj.getattrvalue(attrName);
+					String value= classAttr==null ? null : iomObj.getattrprim(attrName, attrIndex);
 					if(value!=null){
 						ps.setString(valuei, value);
 					}else{

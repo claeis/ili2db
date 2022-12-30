@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TRANSFER
+	xmlns="http://www.interlis.ch/INTERLIS2.3">
+	<HEADERSECTION
+		SENDER="IOX"
+		VERSION="2.3">
+		<MODELS>
+			<MODEL
+				NAME="CatalogRef23"
+				VERSION="2016-03-07"
+				URI="mailto:ce@eisenhutinformatik.ch"></MODEL>
+		</MODELS>
+	</HEADERSECTION>
+	<DATASECTION>
+		<CatalogRef23.Katalog
+			BID="b1">
+			<CatalogRef23.Katalog.MaterialItem
+				TID="o1">
+				<Code>code</Code>
+			</CatalogRef23.Katalog.MaterialItem>
+		</CatalogRef23.Katalog>
+		<CatalogRef23.Gebaeude
+			BID="b2">
+			<CatalogRef23.Gebaeude.Haus
+				TID="o10">
+			</CatalogRef23.Gebaeude.Haus>
+			<CatalogRef23.Gebaeude.Wohnhaus
+				TID="o30">
+				<Material>
+					<CatalogRef23.Katalog.MaterialItemRef>
+						<Reference
+							REF="o1"/>
+					</CatalogRef23.Katalog.MaterialItemRef>
+				</Material>
+			</CatalogRef23.Gebaeude.Wohnhaus>
+		</CatalogRef23.Gebaeude>
+	</DATASECTION>
+</TRANSFER>

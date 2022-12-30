@@ -34,6 +34,7 @@ import ch.interlis.ili2c.metamodel.Type;
 import ch.interlis.ili2c.metamodel.Viewable;
 import ch.interlis.ili2c.metamodel.ViewableTransferElement;
 import ch.interlis.iom.IomObject;
+import ch.interlis.iom_j.Iom_jObject;
 import ch.interlis.iom_j.itf.ModelUtilities;
 import ch.interlis.iox.EndBasketEvent;
 import ch.interlis.iox.EndTransferEvent;
@@ -106,7 +107,7 @@ public class Rounder implements IoxFilter {
                 String attrValue=iomObj.getattrprim(srcAttrName,attri);
                 try {
                     BigDecimal value=roundNumber(attrValue,(NumericType)type);
-                    iomObj.setattrvalue(srcAttrName, value.toString());
+                    ((Iom_jObject)iomObj).setattrvalue(srcAttrName, attri, value.toString());
                 }catch(NumberFormatException ex) {
                     // ignore; keep value as it is
                 }

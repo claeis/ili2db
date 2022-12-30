@@ -69,16 +69,13 @@ public class MultisurfaceTest {
               
 			File data=new File("test/data/MultiSurface/MultiSurface1a.xtf");
 			Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+            Ili2db.setNoSmartMapping(config);
 			config.setFunction(Config.FC_IMPORT);
 	        config.setDoImplicitSchemaImport(true);
 			config.setCreateFk(Config.CREATE_FK_YES);
 			config.setTidHandling(Config.TID_HANDLING_PROPERTY);
 			config.setImportTid(true);
 			config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
-			config.setCatalogueRefTrafo(null);
-			config.setMultiSurfaceTrafo(null);
-			config.setMultilingualTrafo(null);
-			config.setInheritanceTrafo(null);
 			Ili2db.readSettingsFromDb(config);
 			Ili2db.run(config,null);
 			// FIXME test that geometry is imported to the structure table
@@ -162,16 +159,14 @@ public class MultisurfaceTest {
 
 			File data=new File("test/data/MultiSurface/MultiSurface1a.xtf");
 			Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+            Ili2db.setNoSmartMapping(config);
 			config.setFunction(Config.FC_IMPORT);
 	        config.setDoImplicitSchemaImport(true);
 			config.setCreateFk(Config.CREATE_FK_YES);
 			config.setTidHandling(Config.TID_HANDLING_PROPERTY);
 			config.setImportTid(true);
 			config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
-			config.setCatalogueRefTrafo(null);
 			config.setMultiSurfaceTrafo(Config.MULTISURFACE_TRAFO_COALESCE);
-			config.setMultilingualTrafo(null);
-			config.setInheritanceTrafo(null);
 			Ili2db.readSettingsFromDb(config);
 			Ili2db.run(config,null);
 			// imported attrValues of classa1
@@ -200,16 +195,14 @@ public class MultisurfaceTest {
 
             File data=new File("test/data/MultiSurface/MultiSurface1null.xtf");
             Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+            Ili2db.setNoSmartMapping(config);
             config.setFunction(Config.FC_IMPORT);
             config.setDoImplicitSchemaImport(true);
             config.setCreateFk(Config.CREATE_FK_YES);
             config.setTidHandling(Config.TID_HANDLING_PROPERTY);
             config.setImportTid(true);
             config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
-            config.setCatalogueRefTrafo(null);
             config.setMultiSurfaceTrafo(Config.MULTISURFACE_TRAFO_COALESCE);
-            config.setMultilingualTrafo(null);
-            config.setInheritanceTrafo(null);
             Ili2db.readSettingsFromDb(config);
             Ili2db.run(config,null);
             // imported attrValues of classa1
@@ -300,16 +293,14 @@ public class MultisurfaceTest {
 
 			File data=new File("test/data/MultiSurface/MultiSurface2a.xtf");
 			Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+            Ili2db.setNoSmartMapping(config);
 			config.setFunction(Config.FC_IMPORT);
 	        config.setDoImplicitSchemaImport(true);
 			config.setCreateFk(Config.CREATE_FK_YES);
 			config.setTidHandling(Config.TID_HANDLING_PROPERTY);
 			config.setImportTid(true);
 			config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
-			config.setCatalogueRefTrafo(null);
 			config.setMultiSurfaceTrafo(Config.MULTISURFACE_TRAFO_COALESCE);
-			config.setMultilingualTrafo(null);
-			config.setInheritanceTrafo(null);
 			Ili2db.readSettingsFromDb(config);
 			Ili2db.run(config,null);
 	
@@ -400,17 +391,15 @@ public class MultisurfaceTest {
 
 			File data=new File("test/data/MultiSurface/MultiSurface1a.xtf");
 			Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+            Ili2db.setNoSmartMapping(config);
 			config.setFunction(Config.FC_IMPORT);
 	        config.setDoImplicitSchemaImport(true);
 			config.setCreateFk(Config.CREATE_FK_YES);
 			config.setTidHandling(Config.TID_HANDLING_PROPERTY);
 			config.setImportTid(true);
 			config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
-			config.setCatalogueRefTrafo(null);
 			config.setMultiSurfaceTrafo(Config.MULTISURFACE_TRAFO_COALESCE);
 			config.setOneGeomPerTable(true);
-			config.setMultilingualTrafo(null);
-			config.setInheritanceTrafo(null);
 			Ili2db.readSettingsFromDb(config);
 			Ili2db.run(config,null);
 			

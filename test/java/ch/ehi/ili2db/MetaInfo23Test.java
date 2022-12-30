@@ -48,14 +48,12 @@ public abstract class MetaInfo23Test {
 			{
 				File data=new File(TEST_DATA_DIR,"MetaInfo23.ili");
 	            Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+                Ili2db.setNoSmartMapping(config);
 				config.setFunction(Config.FC_SCHEMAIMPORT);
 				config.setCreateFk(Config.CREATE_FK_YES);
 				config.setTidHandling(Config.TID_HANDLING_PROPERTY);
 				config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
 				config.setCreateEnumDefs(Config.CREATE_ENUM_DEFS_MULTI);
-				config.setCatalogueRefTrafo(null);
-				config.setMultiSurfaceTrafo(null);
-				config.setMultilingualTrafo(null);
 				config.setInheritanceTrafo(Config.INHERITANCE_TRAFO_SMART1);
 				config.setCreateMetaInfo(true);
 				Ili2db.readSettingsFromDb(config);
@@ -168,14 +166,12 @@ public abstract class MetaInfo23Test {
             {
                 File data=new File(TEST_DATA_DIR,"View23.ili");
                 Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+                Ili2db.setNoSmartMapping(config);
                 config.setFunction(Config.FC_SCHEMAIMPORT);
                 config.setCreateFk(Config.CREATE_FK_YES);
                 config.setTidHandling(Config.TID_HANDLING_PROPERTY);
                 config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
                 config.setCreateEnumDefs(Config.CREATE_ENUM_DEFS_MULTI);
-                config.setCatalogueRefTrafo(null);
-                config.setMultiSurfaceTrafo(null);
-                config.setMultilingualTrafo(null);
                 config.setInheritanceTrafo(Config.INHERITANCE_TRAFO_SMART1);
                 config.setCreateMetaInfo(true);
                 Ili2db.readSettingsFromDb(config);
@@ -200,6 +196,7 @@ public abstract class MetaInfo23Test {
             {
                 File data=new File(TEST_DATA_DIR,"Assoc23.ili");
                 Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+                Ili2db.setNoSmartMapping(config);
                 config.setFunction(Config.FC_SCHEMAIMPORT);
                 config.setCreateFk(Config.CREATE_FK_YES);
                 config.setInheritanceTrafo(Config.INHERITANCE_TRAFO_SMART1);
@@ -307,6 +304,7 @@ public abstract class MetaInfo23Test {
             {
                 File data=new File(TEST_DATA_DIR,"Bag23.ili");
                 Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+                Ili2db.setNoSmartMapping(config);
                 config.setFunction(Config.FC_SCHEMAIMPORT);
                 config.setCreateFk(Config.CREATE_FK_YES);
                 config.setInheritanceTrafo(Config.INHERITANCE_TRAFO_SMART1);
@@ -389,6 +387,7 @@ public abstract class MetaInfo23Test {
             {
                 File data=new File(TEST_DATA_DIR,"BidDomain23.ili");
                 Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+                Ili2db.setNoSmartMapping(config);
                 config.setFunction(Config.FC_SCHEMAIMPORT);
                 config.setCreateFk(Config.CREATE_FK_YES);
                 config.setInheritanceTrafo(Config.INHERITANCE_TRAFO_SMART1);
@@ -434,6 +433,7 @@ public abstract class MetaInfo23Test {
             {
                 File data=new File(TEST_DATA_DIR,"ClassesInTopics23.ili");
                 Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+                Ili2db.setNoSmartMapping(config);
                 config.setFunction(Config.FC_SCHEMAIMPORT);
                 config.setCreateFk(Config.CREATE_FK_YES);
                 config.setInheritanceTrafo(Config.INHERITANCE_TRAFO_SMART1);
@@ -483,15 +483,13 @@ public abstract class MetaInfo23Test {
                 File data=new File(TEST_DATA_DIR,"MetaInfo23a.xtf");
                 {
                     Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+                    Ili2db.setNoSmartMapping(config);
                     config.setFunction(Config.FC_IMPORT);
                     config.setDoImplicitSchemaImport(true);
                     config.setCreateFk(Config.CREATE_FK_YES);
                     config.setTidHandling(Config.TID_HANDLING_PROPERTY);
                     config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
                     config.setCreateEnumDefs(Config.CREATE_ENUM_DEFS_MULTI);
-                    config.setCatalogueRefTrafo(null);
-                    config.setMultiSurfaceTrafo(null);
-                    config.setMultilingualTrafo(null);
                     config.setInheritanceTrafo(Config.INHERITANCE_TRAFO_SMART1);
                     config.setCreateMetaInfo(true);
                     Ili2db.readSettingsFromDb(config);

@@ -35,9 +35,11 @@ public class PgTestSetup extends ch.ehi.ili2db.AbstractTestSetup {
         if(logfile!=null){
             config.setLogfile(logfile);
         }
-        config.setXtffile(xtfFilename);
-        if(xtfFilename!=null && Ili2db.isItfFilename(xtfFilename)){
-            config.setItfTransferfile(true);
+        if(xtfFilename!=null) {
+            config.setXtffile(xtfFilename);
+            if(xtfFilename!=null && Ili2db.isItfFilename(xtfFilename)){
+                config.setItfTransferfile(true);
+            }
         }
         return config;
     }

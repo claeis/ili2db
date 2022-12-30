@@ -6,15 +6,15 @@ import java.util.List;
 import java.util.Set;
 
 import ch.ehi.ili2db.base.Ili2cUtility;
-import ch.ehi.ili2db.fromili.TransferFromIli;
 import ch.ehi.sqlgen.repository.DbTableName;
 import ch.interlis.ili2c.metamodel.AbstractClassDef;
-import ch.interlis.ili2c.metamodel.AssociationDef;
+import ch.interlis.ili2c.metamodel.AbstractCoordType;
 import ch.interlis.ili2c.metamodel.AttributeDef;
+import ch.interlis.ili2c.metamodel.BaseType;
+import ch.interlis.ili2c.metamodel.Cardinality;
 import ch.interlis.ili2c.metamodel.Domain;
-import ch.interlis.ili2c.metamodel.OIDType;
 import ch.interlis.ili2c.metamodel.Table;
-import ch.interlis.ili2c.metamodel.TransferDescription;
+import ch.interlis.ili2c.metamodel.Type;
 import ch.interlis.ili2c.metamodel.Viewable;
 
 /** Wrapper around a Viewable to  
@@ -77,11 +77,27 @@ public class ViewableWrapper {
 			ViewableWrapper base=this;
 			while(base!=null){
 				allTablev.add(0,base);	// root (table with column t_type) must be first (because of query stmt)
-				allTablev.addAll(secondaryTables);
+
+				// omit secondary attribute tables with primitive type and cardinality greater than 1
+				for (ViewableWrapper secondary : secondaryTables) {
+					if (secondary.getPrimitiveCollectionAttr() == null) {
+						allTablev.add(secondary);
+					}
+				}
 				base=base.getExtending();
 			}
 		}
 		return allTablev;
+	}
+
+	public ArrayList<ViewableWrapper> getPrimitiveCollectionWrappers() {
+		ArrayList<ViewableWrapper> ret = new ArrayList<ViewableWrapper>();
+		for (ViewableWrapper secondary : secondaryTables) {
+			if (secondary.getPrimitiveCollectionAttr() != null) {
+				ret.add(secondary);
+			}
+		}
+		return ret;
 	}
 
 
@@ -95,6 +111,28 @@ public class ViewableWrapper {
 	}
 	public boolean isStructure() {
 		return (viewable instanceof Table) && !((Table)viewable).isIdentifiable();
+	}
+
+	/**
+	 * Get defining attribute definition for secondary collection table.
+	 *
+	 * @return Attribute definition of this secondary table, that has only a single attribute and a maximum cardinality
+	 * greater than one and a type of that attribute is primitive.
+	 * Null if this viewableWrapper does not represent a BAG / LIST OF primitive
+	 */
+	public AttributeDef getPrimitiveCollectionAttr() {
+		if (isSecondaryTable() && attrv.size() == 1) {
+			ColumnWrapper columnWrapper = attrv.get(0);
+			if (columnWrapper.getViewableTransferElement().obj instanceof AttributeDef) {
+				AttributeDef attr = (AttributeDef) columnWrapper.getViewableTransferElement().obj;
+				Cardinality cardinality = attr.getDomainOrDerivedDomain().getCardinality();
+				Type type = attr.getDomainResolvingAll();
+				if (cardinality.getMaximum() > 1 && (type instanceof BaseType && !(type instanceof AbstractCoordType))) {
+					return attr;
+				}
+			}
+		}
+		return null;
 	}
     public boolean hasOid() {
         if(isSecondaryTable()){

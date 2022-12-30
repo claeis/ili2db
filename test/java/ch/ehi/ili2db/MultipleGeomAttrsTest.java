@@ -44,15 +44,12 @@ public abstract class MultipleGeomAttrsTest {
 
 		File data=new File(TEST_OUT,"MultipleGeomAttrs1.ili");
 		Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+        Ili2db.setNoSmartMapping(config);
 		config.setFunction(Config.FC_SCHEMAIMPORT);
 		config.setCreateFk(Config.CREATE_FK_YES);
 		config.setCreateNumChecks(true);
 		config.setTidHandling(Config.TID_HANDLING_PROPERTY);
 		config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
-		config.setCatalogueRefTrafo(null);
-		config.setMultiSurfaceTrafo(null);
-		config.setMultilingualTrafo(null);
-		config.setInheritanceTrafo(null);
 		config.setOneGeomPerTable(false);
 		Ili2db.run(config,null);
 		
@@ -93,15 +90,12 @@ public abstract class MultipleGeomAttrsTest {
 
         File data=new File(TEST_OUT,"MultipleGeomAttrs1.ili");
         Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+        Ili2db.setNoSmartMapping(config);
         config.setFunction(Config.FC_SCHEMAIMPORT);
         config.setCreateFk(Config.CREATE_FK_YES);
         config.setCreateNumChecks(true);
         config.setTidHandling(Config.TID_HANDLING_PROPERTY);
         config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
-        config.setCatalogueRefTrafo(null);
-        config.setMultiSurfaceTrafo(null);
-        config.setMultilingualTrafo(null);
-        config.setInheritanceTrafo(null);
         config.setOneGeomPerTable(true);
         Ili2db.run(config,null);
         
@@ -144,14 +138,12 @@ public abstract class MultipleGeomAttrsTest {
         setup.resetDb();
         File data=new File(TEST_OUT,"MultipleGeomAttrsExtendedClass.ili");
         Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+        Ili2db.setNoSmartMapping(config);
         config.setFunction(Config.FC_SCHEMAIMPORT);
         //config.setCreateFk(config.CREATE_FK_YES);
         config.setCreateNumChecks(true);
         config.setTidHandling(Config.TID_HANDLING_PROPERTY);
         config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
-        config.setCatalogueRefTrafo(null);
-        config.setMultiSurfaceTrafo(null);
-        config.setMultilingualTrafo(null);
         config.setInheritanceTrafo(Config.INHERITANCE_TRAFO_SMART1);
         config.setOneGeomPerTable(false);
         Ili2db.run(config,null);
@@ -201,14 +193,12 @@ public abstract class MultipleGeomAttrsTest {
         setup.resetDb();
         File data=new File(TEST_OUT,"MultipleGeomAttrsExtendedClass.ili");
         Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+        Ili2db.setNoSmartMapping(config);
         config.setFunction(Config.FC_SCHEMAIMPORT);
         //config.setCreateFk(config.CREATE_FK_YES);
         config.setCreateNumChecks(true);
         config.setTidHandling(Config.TID_HANDLING_PROPERTY);
         config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
-        config.setCatalogueRefTrafo(null);
-        config.setMultiSurfaceTrafo(null);
-        config.setMultilingualTrafo(null);
         config.setInheritanceTrafo(Config.INHERITANCE_TRAFO_SMART1);
         config.setOneGeomPerTable(true);
         Ili2db.run(config,null);
@@ -261,14 +251,12 @@ public abstract class MultipleGeomAttrsTest {
         setup.resetDb();
         File data=new File(TEST_OUT,"MultipleGeomAttrsExtendedClass.ili");
         Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+        Ili2db.setNoSmartMapping(config);
         config.setFunction(Config.FC_SCHEMAIMPORT);
         //config.setCreateFk(config.CREATE_FK_YES);
         config.setCreateNumChecks(true);
         config.setTidHandling(Config.TID_HANDLING_PROPERTY);
         config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
-        config.setCatalogueRefTrafo(null);
-        config.setMultiSurfaceTrafo(null);
-        config.setMultilingualTrafo(null);
         config.setInheritanceTrafo(Config.INHERITANCE_TRAFO_SMART2);
         config.setOneGeomPerTable(false);
         Ili2db.run(config,null);
@@ -325,14 +313,12 @@ public abstract class MultipleGeomAttrsTest {
         setup.resetDb();
         File data=new File(TEST_OUT,"MultipleGeomAttrsExtendedClass.ili");
         Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+        Ili2db.setNoSmartMapping(config);
         config.setFunction(Config.FC_SCHEMAIMPORT);
         //config.setCreateFk(config.CREATE_FK_YES);
         config.setCreateNumChecks(true);
         config.setTidHandling(Config.TID_HANDLING_PROPERTY);
         config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
-        config.setCatalogueRefTrafo(null);
-        config.setMultiSurfaceTrafo(null);
-        config.setMultilingualTrafo(null);
         config.setInheritanceTrafo(Config.INHERITANCE_TRAFO_SMART2);
         config.setOneGeomPerTable(true);
         Ili2db.run(config,null);
@@ -398,16 +384,13 @@ public abstract class MultipleGeomAttrsTest {
         setup.resetDb();
 		File data=new File(TEST_OUT,"MultipleGeomAttrs1a.xtf");
 		Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+        Ili2db.setNoSmartMapping(config);
 		config.setFunction(Config.FC_IMPORT);
         config.setDoImplicitSchemaImport(true);
 		config.setCreateFk(Config.CREATE_FK_YES);
 		config.setCreateNumChecks(true);
 		config.setTidHandling(Config.TID_HANDLING_PROPERTY);
 		config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
-		config.setCatalogueRefTrafo(null);
-		config.setMultiSurfaceTrafo(null);
-		config.setMultilingualTrafo(null);
-		config.setInheritanceTrafo(null);
 		config.setOneGeomPerTable(true);
 		try{
 			Ili2db.run(config,null);
@@ -423,16 +406,13 @@ public abstract class MultipleGeomAttrsTest {
         setup.resetDb();
         File data=new File(TEST_OUT,"MultipleGeomAttrs1a.xtf");
         Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+        Ili2db.setNoSmartMapping(config);
         config.setFunction(Config.FC_IMPORT);
         config.setDoImplicitSchemaImport(true);
         config.setCreateFk(Config.CREATE_FK_YES);
         config.setCreateNumChecks(true);
         config.setTidHandling(Config.TID_HANDLING_PROPERTY);
         config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
-        config.setCatalogueRefTrafo(null);
-        config.setMultiSurfaceTrafo(null);
-        config.setMultilingualTrafo(null);
-        config.setInheritanceTrafo(null);
         config.setOneGeomPerTable(false);
         try{
             Ili2db.run(config,null);
@@ -449,6 +429,7 @@ public abstract class MultipleGeomAttrsTest {
         setup.resetDb();
         File data=new File(TEST_OUT,"MultipleGeomAttrsExtendedClass_a.xtf");
         Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+        Ili2db.setNoSmartMapping(config);
         config.setFunction(Config.FC_IMPORT);
         config.setDoImplicitSchemaImport(true);
 //        config.setCreateFk(config.CREATE_FK_YES);
@@ -456,9 +437,6 @@ public abstract class MultipleGeomAttrsTest {
         config.setTidHandling(Config.TID_HANDLING_PROPERTY);
         config.setImportTid(true);
         config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
-        config.setCatalogueRefTrafo(null);
-        config.setMultiSurfaceTrafo(null);
-        config.setMultilingualTrafo(null);
         config.setInheritanceTrafo(Config.INHERITANCE_TRAFO_SMART1);
         try{
             Ili2db.run(config,null);
@@ -474,6 +452,7 @@ public abstract class MultipleGeomAttrsTest {
         setup.resetDb();
         File data=new File(TEST_OUT,"MultipleGeomAttrsExtendedClass_a.xtf");
         Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+        Ili2db.setNoSmartMapping(config);
         config.setFunction(Config.FC_IMPORT);
         config.setDoImplicitSchemaImport(true);
 //        config.setCreateFk(config.CREATE_FK_YES);
@@ -481,9 +460,6 @@ public abstract class MultipleGeomAttrsTest {
         config.setTidHandling(Config.TID_HANDLING_PROPERTY);
         config.setImportTid(true);
         config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
-        config.setCatalogueRefTrafo(null);
-        config.setMultiSurfaceTrafo(null);
-        config.setMultilingualTrafo(null);
         config.setInheritanceTrafo(Config.INHERITANCE_TRAFO_SMART2);
         try{
             Ili2db.run(config,null);

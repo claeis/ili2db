@@ -68,14 +68,12 @@ public class Dataset23Smart1Test {
                 {
                     File data = new File("test/data/Dataset23Smart1/Dataset1a1.xtf");
                     Config config = initConfig(data.getPath(), null, data.getPath() + ".log");
+                    Ili2db.setNoSmartMapping(config);
                     config.setDatasetName(DATASETNAME_A);
                     config.setFunction(Config.FC_IMPORT);
                     config.setDoImplicitSchemaImport(true);
                     config.setCreateFk(config.CREATE_FK_YES);
                     config.setBasketHandling(config.BASKET_HANDLING_READWRITE);
-                    config.setCatalogueRefTrafo(null);
-                    config.setMultiSurfaceTrafo(null);
-                    config.setMultilingualTrafo(null);
                     config.setInheritanceTrafo(config.INHERITANCE_TRAFO_SMART1);
                     Ili2db.readSettingsFromDb(config);
                     Ili2db.run(config, null);
@@ -110,14 +108,12 @@ public class Dataset23Smart1Test {
                 {
                     File data = new File("test/data/Dataset23Smart1/Dataset1c1.xtf");
                     Config config = initConfig(data.getPath(), null, data.getPath() + ".log");
+                    Ili2db.setNoSmartMapping(config);
                     config.setDatasetName(DATASETNAME_A);
                     config.setFunction(Config.FC_IMPORT);
                     config.setDoImplicitSchemaImport(true);
                     config.setCreateFk(config.CREATE_FK_YES);
                     config.setBasketHandling(config.BASKET_HANDLING_READWRITE);
-                    config.setCatalogueRefTrafo(null);
-                    config.setMultiSurfaceTrafo(null);
-                    config.setMultilingualTrafo(null);
                     config.setInheritanceTrafo(config.INHERITANCE_TRAFO_SMART1);
                     Ili2db.readSettingsFromDb(config);
                     Ili2db.run(config, null);
@@ -220,14 +216,12 @@ public class Dataset23Smart1Test {
                 {
                     File data = new File("test/data/Dataset23Smart1/Dataset2a.xtf");
                     Config config = initConfig(data.getPath(), null, data.getPath() + ".log");
+                    Ili2db.setNoSmartMapping(config);
                     config.setDatasetName(DATASETNAME_A);
                     config.setFunction(Config.FC_IMPORT);
                     config.setDoImplicitSchemaImport(true);
                     config.setCreateFk(config.CREATE_FK_YES);
                     config.setBasketHandling(config.BASKET_HANDLING_READWRITE);
-                    config.setCatalogueRefTrafo(null);
-                    config.setMultiSurfaceTrafo(null);
-                    config.setMultilingualTrafo(null);
                     config.setInheritanceTrafo(config.INHERITANCE_TRAFO_SMART1);
                     Ili2db.readSettingsFromDb(config);
                     Ili2db.run(config, null);

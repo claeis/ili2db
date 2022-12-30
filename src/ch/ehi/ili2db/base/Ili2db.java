@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -31,12 +32,15 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 
 import ch.ehi.basics.logging.EhiLogger;
 import ch.ehi.basics.logging.LogEvent;
 import ch.ehi.basics.logging.StdListener;
 import ch.ehi.basics.logging.StdLogEvent;
 import ch.ehi.basics.settings.Settings;
+import ch.ehi.basics.types.OutParam;
 import ch.ehi.ili2db.converter.ConverterException;
 import ch.ehi.ili2db.converter.SqlColumnConverter;
 import ch.ehi.ili2db.dbmetainfo.DbExtMetaInfo;
@@ -64,6 +68,7 @@ import ch.ehi.sqlgen.repository.DbColumn;
 import ch.ehi.sqlgen.repository.DbSchema;
 import ch.ehi.sqlgen.repository.DbTable;
 import ch.ehi.sqlgen.repository.DbTableName;
+import ch.interlis.ili2c.Ili2cException;
 import ch.interlis.ili2c.config.Configuration;
 import ch.interlis.ili2c.gui.UserSettings;
 import ch.interlis.ili2c.metamodel.Element;
@@ -72,6 +77,7 @@ import ch.interlis.ili2c.metamodel.Model;
 import ch.interlis.ili2c.metamodel.Topic;
 import ch.interlis.ili2c.metamodel.TransferDescription;
 import ch.interlis.ilirepository.IliFiles;
+import ch.interlis.ilirepository.IliManager;
 import ch.interlis.iom_j.iligml.Iligml10Writer;
 import ch.interlis.iom_j.iligml.Iligml20Writer;
 //import ch.interlis.iom.swig.iom_javaConstants;
@@ -87,6 +93,9 @@ import ch.interlis.iox.IoxException;
 import ch.interlis.iox.IoxReader;
 import ch.interlis.iox.IoxWriter;
 import ch.interlis.iox_j.utility.IoxUtility;
+import ch.interlis.iox_j.validator.ValidationConfig;
+import ch.interlis.iox_j.inifile.IniFileReader;
+import ch.interlis.iox_j.inifile.MetaConfig;
 import ch.interlis.iox_j.logging.FileLogger;
 import ch.interlis.iox_j.logging.LogEventFactory;
 import ch.interlis.iox_j.logging.StdLogger;
@@ -204,6 +213,31 @@ public class Ili2db {
 		}
 		
 	}
+	private static final String DEFAULT_MODELDIR=Ili2db.ILI_FROM_DB+ch.interlis.ili2c.Main.ILIDIR_SEPARATOR+Ili2db.XTF_DIR+ch.interlis.ili2c.Main.ILIDIR_SEPARATOR+ch.interlis.ili2c.Main.ILI_REPOSITORY+ch.interlis.ili2c.Main.ILIDIR_SEPARATOR+Ili2db.JAR_DIR;
+    private static String getModeldir(Config config)
+    {
+        String modeldir=config.getModeldir();
+        if(modeldir==null)modeldir=DEFAULT_MODELDIR;
+        return modeldir;
+    }
+    private static void initDefaultConfig(Config config)
+    {
+        if(config.getModeldir()==null)config.setModeldir(DEFAULT_MODELDIR);
+        if(config.getModels()==null)config.setModels(Ili2db.XTF);
+        if(config.getDefaultSrsAuthority()==null)config.setDefaultSrsAuthority("EPSG");
+        if(config.getMaxSqlNameLength()==null)config.setMaxSqlNameLength(Integer.toString(NameMapping.DEFAULT_NAME_LENGTH));
+        if(config.getInheritanceTrafo()==null)config.setInheritanceTrafo(Config.INHERITANCE_TRAFO_SMART1);
+        if(config.getCatalogueRefTrafo()==null)config.setCatalogueRefTrafo(Config.CATALOGUE_REF_TRAFO_COALESCE);
+        if(config.getMultiSurfaceTrafo()==null)config.setMultiSurfaceTrafo(Config.MULTISURFACE_TRAFO_COALESCE);
+        if(config.getMultiLineTrafo()==null)config.setMultiLineTrafo(Config.MULTILINE_TRAFO_COALESCE);
+        if(config.getMultiPointTrafo()==null)config.setMultiPointTrafo(Config.MULTIPOINT_TRAFO_COALESCE);
+        if(config.getArrayTrafo()==null)config.setArrayTrafo(Config.ARRAY_TRAFO_COALESCE);
+        if(config.getJsonTrafo()==null)config.setJsonTrafo(Config.JSON_TRAFO_COALESCE);
+        if(config.getMultilingualTrafo()==null)config.setMultilingualTrafo(Config.MULTILINGUAL_TRAFO_EXPAND);
+        if(config.getLocalisedTrafo()==null)config.setLocalisedTrafo(Config.LOCALISED_TRAFO_EXPAND);
+        if(config.getTransientObject(Config.TRANSIENT_BOOLEAN_VALIDATION)==null)config.setValidation(true);
+        if(config.getTransientObject(Config.TRANSIENT_BOOLEAN_REPAIRTOUCHINGLINES)==null)config.setRepairTouchingLines(true);
+    }
 	public static void run(Config config,String appHome)
 	throws Ili2dbException
 	{
@@ -262,52 +296,125 @@ public class Ili2db {
 		try{
 			boolean connectionFromExtern=config.getJdbcConnection()!=null;
 			logGeneralInfo(config);
-			
-			//String zipfilename=null;
-			java.util.zip.ZipEntry zipXtfEntry=null;
-			java.util.zip.ZipFile zipFile=null;
-			String inputFilename=config.getXtffile();
-			if(function==Config.FC_DELETE){
-				if(config.getDatasetName()==null){
-					throw new Ili2dbException("no datasetName given");
-				}
-			}else if(function==Config.FC_VALIDATE){
+
+            // setup repos access
+            String XTF_DATA_FILE=null;
+            ch.interlis.ili2c.Main.setHttpProxySystemProperties(config);
+            ch.interlis.ilirepository.IliManager repositoryManager = (ch.interlis.ilirepository.IliManager)config
+                    .getTransientObject(UserSettings.CUSTOM_ILI_MANAGER);
+            {
+                if(repositoryManager==null) {
+                    repositoryManager=new ch.interlis.ilirepository.IliManager();
+                    config.setTransientObject(UserSettings.CUSTOM_ILI_MANAGER,repositoryManager);
+                }
+                String dataFiles[]=getDataFiles(config.getXtffile());
+                if(dataFiles!=null) {
+                    for(int i=dataFiles.length-1;i>=0;i--) {
+                        if(!dataFiles[i].startsWith(IliManager.ILIDATA_URI_PREFIX)) {
+                            XTF_DATA_FILE=dataFiles[i];
+                            break;
+                        }
+                    }
+                }
+                java.util.Map<String,String> pathMap=getPathMap(XTF_DATA_FILE,appHome);
+                java.util.List<String> modeldirv=ch.interlis.ili2c.Main.resolvePathMap(getModeldir(config),pathMap);
+                repositoryManager.setRepositories(modeldirv.toArray(new String[]{}));
+            }
+            
+            // read meta-config
+            {
+                String metaConfigFilename=config.getMetaConfigFile();
+                if(metaConfigFilename!=null) {
+                    List<String> metaConfigFiles=new ArrayList<String>();
+                    java.util.Set<String> visitedFiles=new HashSet<String>();
+                    metaConfigFiles.add(metaConfigFilename);
+                    Settings metaSettings=new Settings();
+                    while(!metaConfigFiles.isEmpty()) {
+                        metaConfigFilename=metaConfigFiles.remove(0);
+                        if(!visitedFiles.contains(metaConfigFilename)) {
+                            visitedFiles.add(metaConfigFilename);
+                            EhiLogger.traceState("metaConfigFile <"+metaConfigFilename+">");
+                            File metaConfigFile=null;
+                            try {
+                                metaConfigFile = IliManager.getLocalCopyOfReposFile(repositoryManager,metaConfigFilename);
+                            } catch (Ili2cException e1) {
+                                throw new Ili2dbException("failed to get local copy of meta config file <"+metaConfigFilename+">",e1);
+                            }
+                            OutParam<String> baseConfigs=new OutParam<String>();
+                            Config newSettings=null;
+                            try {
+                                newSettings = readMetaConfig(metaConfigFile,baseConfigs);
+                                if(baseConfigs.value!=null) {
+                                    String[] baseConfigv = baseConfigs.value.split(";");
+                                    for(String baseConfig:baseConfigv){
+                                        metaConfigFiles.add(baseConfig);
+                                    }
+                                }
+                            } catch (Exception e) {
+                                throw new Ili2dbException("failed to read meta config file <"+metaConfigFile.getPath()+">", e);
+                            }
+                            MetaConfig.mergeSettings(newSettings,metaSettings);
+                        }
+                    }
+                    MetaConfig.mergeSettings(metaSettings,config);
+                }
+            }
+            initDefaultConfig(config);
+            MetaConfig.removeNullFromSettings(config);
+            			
+			String modeldir=getModeldir(config);
+			if(modeldir==null){
+				throw new Ili2dbException("no modeldir given");
+			}
+			EhiLogger.traceState("modeldir <"+modeldir+">");
+
+            // get local copies of remote files
+            String inputs[]=null;
+            try {
+                getLocalCopiesOfRemoteFiles(repositoryManager,config);
+                {
+                    String inputs1[]=getDataFiles(config.getReferenceData());
+                    String inputs2[]=getDataFiles(config.getXtffile());
+                    inputs=new String[(inputs1!=null?inputs1.length:0)+(inputs2!=null?inputs2.length:0)];
+                    int idx=0;
+                    if(inputs1!=null) {
+                        for(int i=0;i<inputs1.length;i++){
+                            inputs[idx++]=inputs1[i];                        
+                        }
+                    }
+                    if(inputs2!=null) {
+                        for(int i=0;i<inputs2.length;i++){
+                            inputs[idx++]=inputs2[i];
+                        }
+                    }
+                    for(idx=0;idx<inputs.length;idx++) {
+                        String dataFile=inputs[idx];
+                        if(dataFile!=null) {
+                            java.io.File localFile=IliManager.getLocalCopyOfReposFile(repositoryManager, dataFile);
+                            inputs[idx]=localFile.getPath();
+                        }
+                    }
+                }
+            } catch (Ili2cException e2) {
+                throw new Ili2dbException("failed to get local copy of remote files",e2);
+            }
+            if(function==Config.FC_DELETE){
                 if(config.getDatasetName()==null){
                     throw new Ili2dbException("no datasetName given");
                 }
-			}else{
-				if(inputFilename==null){
-					throw new Ili2dbException("no xtf-file given");
-				}
-				if(ch.ehi.basics.view.GenericFileFilter.getFileExtension(inputFilename).toLowerCase().equals("zip")){
-					try {
-						zipFile=new java.util.zip.ZipFile(inputFilename);
-					} catch (IOException ex) {
-						throw new Ili2dbException(ex);
-					}
-					java.util.Enumeration filei=zipFile.entries();
-					while(filei.hasMoreElements()){
-						java.util.zip.ZipEntry zipEntry=(java.util.zip.ZipEntry)filei.nextElement();
-						String ext=ch.ehi.basics.view.GenericFileFilter.getFileExtension(zipEntry.getName()).toLowerCase();
-						if(ext!=null && (ext.equals("xml") || ext.equals("xtf") || ext.equals("itf"))){
-							zipXtfEntry=zipEntry;
-							break;
-						}
-					}
-					if(zipXtfEntry==null){
-						throw new Ili2dbException("no xtf/itf-file in zip-archive "+zipFile.getName());
-					}
-				}
-			}
-				String modeldir=config.getModeldir();
-				if(modeldir==null){
-					throw new Ili2dbException("no modeldir given");
-				}
-				EhiLogger.traceState("modeldir <"+modeldir+">");
-				
+            }else if(function==Config.FC_VALIDATE){
+                if(config.getDatasetName()==null){
+                    throw new Ili2dbException("no datasetName given");
+                }
+            }else{
+                if(inputs==null || inputs.length==0){
+                    throw new Ili2dbException("no xtf-file given");
+                }
+            }
+			
 			String iliVersion=null;
 			ch.interlis.ili2c.config.Configuration modelv=new ch.interlis.ili2c.config.Configuration();
-			if(function!=Config.FC_DELETE){
+            if(function!=Config.FC_DELETE){
 				String models=config.getModels();
 				if(models==null){
 					throw new Ili2dbException("no models given");
@@ -317,31 +424,41 @@ public class Ili2db {
 				for(int modeli=0;modeli<modelnames.length;modeli++){
 					String m=modelnames[modeli];
 					if(m.equals(XTF)){
-						// read modelname from xtf-file
-						if(zipXtfEntry!=null){
-							try{
-								java.io.InputStream in=zipFile.getInputStream(zipXtfEntry);
-								m=getModelFromXtf(in,zipXtfEntry.getName());
-			                    if(m!=null){
-			                        modelv.addFileEntry(new ch.interlis.ili2c.config.FileEntry(m,ch.interlis.ili2c.config.FileEntryKind.ILIMODELFILE));             
-			                    }
-							}catch(java.io.IOException ex){
-								throw new Ili2dbException(ex);
-							}
-						}else{
-							List<String> modelsFromXtf=null;
+						// read modelname from xtf-files
+		                for(String inputFilename:inputs) {
+		                    
+		                    OutParam<java.util.zip.ZipEntry> zipXtfEntry=new OutParam<java.util.zip.ZipEntry>();
+		                    java.util.zip.ZipFile zipFile=null;
                             try {
-                                modelsFromXtf = IoxUtility.getModels(new java.io.File(inputFilename));
-                                if(iliVersion==null) {
-                                    iliVersion=IoxUtility.getModelVersion(new String[] {inputFilename},new LogEventFactory());
-                                }
-                            } catch (IoxException e) {
-                                throw new Ili2dbException(e);
+                                zipFile = getZipFileEntry(inputFilename,zipXtfEntry);
+                            } catch (IOException e1) {
+                                throw new Ili2dbException(e1);
                             }
-		                    for(String modelFromXtf:modelsFromXtf){
-		                        modelv.addFileEntry(new ch.interlis.ili2c.config.FileEntry(modelFromXtf,ch.interlis.ili2c.config.FileEntryKind.ILIMODELFILE));             
-		                    }
-						}
+	                        if(zipXtfEntry.value!=null){
+	                            try{
+	                                java.io.InputStream in=zipFile.getInputStream(zipXtfEntry.value);
+	                                m=getModelFromXtf(in,zipXtfEntry.value.getName());
+	                                if(m!=null){
+	                                    modelv.addFileEntry(new ch.interlis.ili2c.config.FileEntry(m,ch.interlis.ili2c.config.FileEntryKind.ILIMODELFILE));             
+	                                }
+	                            }catch(java.io.IOException ex){
+	                                throw new Ili2dbException(ex);
+	                            }
+	                        }else{
+	                            List<String> modelsFromXtf=null;
+	                            try {
+	                                modelsFromXtf = IoxUtility.getModels(new java.io.File(inputFilename));
+	                                if(iliVersion==null) {
+	                                    iliVersion=IoxUtility.getModelVersion(new String[] {inputFilename},new LogEventFactory());
+	                                }
+	                            } catch (IoxException e) {
+	                                throw new Ili2dbException(e);
+	                            }
+	                            for(String modelFromXtf:modelsFromXtf){
+	                                modelv.addFileEntry(new ch.interlis.ili2c.config.FileEntry(modelFromXtf,ch.interlis.ili2c.config.FileEntryKind.ILIMODELFILE));             
+	                            }
+	                        }
+		                }
 					}else {
                         modelv.addFileEntry(new ch.interlis.ili2c.config.FileEntry(m,ch.interlis.ili2c.config.FileEntryKind.ILIMODELFILE));             
 					}
@@ -479,7 +596,7 @@ public class Ili2db {
 
 				
 				// compile required ili files
-				setupIli2cPathmap(config, appHome, inputFilename,conn,customMapping);
+                setupIli2cPathmap(config, appHome, XTF_DATA_FILE,conn,customMapping);
 			    Ili2cMetaAttrs ili2cMetaAttrs=new Ili2cMetaAttrs();
 			    ch.interlis.ili2c.config.Configuration ili2cConfig=null;
 				try {
@@ -653,109 +770,163 @@ public class Ili2db {
 				Map<String,BasketStat> stat=new HashMap<String,BasketStat>();
 				errs=new ch.ehi.basics.logging.ErrorTracker();
 				EhiLogger.getInstance().addListener(errs);
-				if(zipXtfEntry!=null){
-					IoxReader ioxReader=null;
-					java.io.InputStream in = null;
-					try {
-						  EhiLogger.logState("data <"+inputFilename+":"+zipXtfEntry.getName()+">");
-						in = zipFile.getInputStream(zipXtfEntry);
-						if(isItfFilename(zipXtfEntry.getName())){
-							if(config.getDoItfLineTables()){
-								ioxReader=new ItfReader(in);
-								((ItfReader)ioxReader).setModel(td);		
-							}else{
-								ioxReader=new ItfReader2(in,config.isSkipGeometryErrors());
-								((ItfReader2)ioxReader).setModel(td);		
-							}
-						}else{
-							ioxReader=new XtfReader(in);
-						}
-						transferFromXtf(conn,ioxReader,function,mapping,td,dbusr,geomConverter,idGen,config,stat,trafoConfig,class2wrapper,customMapping);
-					} catch (IOException ex) {
-						throw new Ili2dbException(ex);
-					} catch (IoxException ex) {
-						throw new Ili2dbException(ex);
-					}finally{
-						if(ioxReader!=null){
-							try {
-								ioxReader.close();
-							} catch (IoxException e) {
-								throw new Ili2dbException(e);
-							}
-							ioxReader=null;
-						}
-						if(in!=null){
-							try {
-								in.close();
-							} catch (IOException e) {
-								throw new Ili2dbException(e);
-							}
-							in=null;
-						}
-					}
-					// save attachments
-					String attachmentKey=config.getAttachmentKey();
-					String attachmentsBase=config.getAttachmentsPath();
-					if(attachmentsBase!=null){
-						java.io.File basePath=new java.io.File(attachmentsBase,attachmentKey);
-						java.util.Enumeration filei=zipFile.entries();
-						while(filei.hasMoreElements()){
-							java.util.zip.ZipEntry zipEntry=(java.util.zip.ZipEntry)filei.nextElement();
-							if(!zipXtfEntry.getName().equals(zipEntry.getName())){
-								// save file
-								java.io.File destFile=new java.io.File(basePath,zipEntry.getName());
-								java.io.File parent=destFile.getAbsoluteFile().getParentFile();
-								if(!parent.exists()){
-									if(!parent.mkdirs()){
-										throw new Ili2dbException("failed to create "+parent.getAbsolutePath());
-									}
-								}
-								try {
-									copyStream(destFile,zipFile.getInputStream(zipEntry));
-								} catch (IOException ex) {
-									throw new Ili2dbException("failed to save attachment "+zipEntry.getName(),ex);
-								}
-							}
-						}
-						
-					}
-				}else{
-					IoxReader ioxReader=null;
-					try {
-						if(function!=Config.FC_DELETE){
-							  EhiLogger.logState("data <"+inputFilename+">");
-								if(isItfFilename(inputFilename)){
-									config.setValue(ch.interlis.iox_j.validator.Validator.CONFIG_DO_ITF_OIDPERTABLE, ch.interlis.iox_j.validator.Validator.CONFIG_DO_ITF_OIDPERTABLE_DO);
-									if(config.getDoItfLineTables()){
-										ioxReader=new ItfReader(new java.io.File(inputFilename));
-										((ItfReader)ioxReader).setModel(td);		
-										((ItfReader)ioxReader).setBidPrefix(config.getDatasetName());		
-									}else{
-										ioxReader=new ItfReader2(new java.io.File(inputFilename),config.isSkipGeometryErrors());
-										((ItfReader2)ioxReader).setModel(td);		
-										((ItfReader2)ioxReader).setBidPrefix(config.getDatasetName());		
-									}
+				
+                if(function==Config.FC_DELETE){
+                    TransferFromXtf trsfr=new TransferFromXtf(function,mapping,td,conn,dbusr,geomConverter,idGen,config,trafoConfig,class2wrapper);
+                    try{
+                        trsfr.doitStart(config,stat,customMapping,null);
+                        trsfr.doit(null,null,stat);
+                        trsfr.doitEnd(stat);
+                    }catch(ch.interlis.iox.IoxException ex){
+                        EhiLogger.logError("failed to delete data from db",ex);
+                    } catch (Ili2dbException ex) {
+                        EhiLogger.logError("failed to delete data from db",ex);
+                    }
+                }else {
+                    TransferFromXtf trsfr=new TransferFromXtf(function,mapping,td,conn,dbusr,geomConverter,idGen,config,trafoConfig,class2wrapper);
+                    for(String inputFilename:inputs) {
+                        if(isItfFilename(inputFilename)){
+                            config.setValue(ch.interlis.iox_j.validator.Validator.CONFIG_DO_ITF_OIDPERTABLE, ch.interlis.iox_j.validator.Validator.CONFIG_DO_ITF_OIDPERTABLE_DO);
+                        }
+                    }
+                    try{
+                        trsfr.doitStart(config,stat,customMapping,inputs[inputs.length-1]);
+                    }catch(ch.interlis.iox.IoxException ex){
+                        EhiLogger.logError("failed to transfer data from file to db",ex);
+                    } catch (Ili2dbException ex) {
+                        EhiLogger.logError("failed to transfer data from file to db",ex);
+                    }
+                    for(String inputFilename:inputs) {
+                        OutParam<java.util.zip.ZipEntry> zipXtfEntry=new OutParam<java.util.zip.ZipEntry>();
+                        java.util.zip.ZipFile zipFile;
+                        try {
+                            zipFile = getZipFileEntry(inputFilename,zipXtfEntry);
+                        } catch (IOException e1) {
+                            throw new Ili2dbException(e1);
+                        }
+                        if(zipXtfEntry.value!=null){
+                            IoxReader ioxReader=null;
+                            java.io.InputStream in = null;
+                            try {
+                                String xtfFilename=zipXtfEntry.value.getName();
+                                  EhiLogger.logState("data <"+inputFilename+":"+xtfFilename+">");
+                                in = zipFile.getInputStream(zipXtfEntry.value);
+                                if(isItfFilename(xtfFilename)){
+                                    if(config.getDoItfLineTables()){
+                                        ioxReader=new ItfReader(in);
+                                        ((ItfReader)ioxReader).setModel(td);        
+                                    }else{
+                                        ioxReader=new ItfReader2(in,config.isSkipGeometryErrors());
+                                        ((ItfReader2)ioxReader).setModel(td);       
+                                    }
+                                }else{
+                                    ioxReader=new XtfReader(in);
+                                }
+                                try{
+                                    trsfr.doit(xtfFilename,ioxReader,stat);
+                                }catch(ch.interlis.iox.IoxException ex){
+                                	EhiLogger.logError("failed to transfer data from file to db",ex);
+                                } catch (Ili2dbException ex) {
+                                	EhiLogger.logError("failed to transfer data from file to db",ex);
+                                }
+                            } catch (IOException ex) {
+                                throw new Ili2dbException(ex);
+                            } catch (IoxException ex) {
+                                throw new Ili2dbException(ex);
+                            }finally{
+                                if(ioxReader!=null){
+                                    try {
+                                        ioxReader.close();
+                                    } catch (IoxException e) {
+                                        throw new Ili2dbException(e);
+                                    }
+                                    ioxReader=null;
+                                }
+                                if(in!=null){
+                                    try {
+                                        in.close();
+                                    } catch (IOException e) {
+                                        throw new Ili2dbException(e);
+                                    }
+                                    in=null;
+                                }
+                            }
+                            // save attachments
+                            String attachmentKey=config.getAttachmentKey();
+                            String attachmentsBase=config.getAttachmentsPath();
+                            if(attachmentsBase!=null){
+                                java.io.File basePath=new java.io.File(attachmentsBase,attachmentKey);
+                                java.util.Enumeration filei=zipFile.entries();
+                                while(filei.hasMoreElements()){
+                                    java.util.zip.ZipEntry zipEntry=(java.util.zip.ZipEntry)filei.nextElement();
+                                    if(!zipXtfEntry.value.getName().equals(zipEntry.getName())){
+                                        // save file
+                                        java.io.File destFile=new java.io.File(basePath,zipEntry.getName());
+                                        java.io.File parent=destFile.getAbsoluteFile().getParentFile();
+                                        if(!parent.exists()){
+                                            if(!parent.mkdirs()){
+                                                throw new Ili2dbException("failed to create "+parent.getAbsolutePath());
+                                            }
+                                        }
+                                        try {
+                                            copyStream(destFile,zipFile.getInputStream(zipEntry));
+                                        } catch (IOException ex) {
+                                            throw new Ili2dbException("failed to save attachment "+zipEntry.getName(),ex);
+                                        }
+                                    }
+                                }
+                                
+                            }
+                        }else{
+                            IoxReader ioxReader=null;
+                            try {
+                                EhiLogger.logState("data <"+inputFilename+">");
+                                if(isItfFilename(inputFilename)){
+                                    if(config.getDoItfLineTables()){
+                                        ioxReader=new ItfReader(new java.io.File(inputFilename));
+                                        ((ItfReader)ioxReader).setModel(td);        
+                                        ((ItfReader)ioxReader).setBidPrefix(config.getDatasetName());       
+                                    }else{
+                                        ioxReader=new ItfReader2(new java.io.File(inputFilename),config.isSkipGeometryErrors());
+                                        ((ItfReader2)ioxReader).setModel(td);       
+                                        ((ItfReader2)ioxReader).setBidPrefix(config.getDatasetName());      
+                                    }
                                 }else{
                                     ioxReader=Xtf24Reader.createReader(new java.io.File(inputFilename));
                                     if(ioxReader instanceof ch.interlis.iox_j.IoxIliReader) {
                                         ((ch.interlis.iox_j.IoxIliReader) ioxReader).setModel(td);
                                     }
-								}
-						}
-						transferFromXtf(conn,ioxReader,function,mapping,td,dbusr,geomConverter,idGen,config,stat,trafoConfig,class2wrapper,customMapping);
-					} catch (IoxException e) {
-						throw new Ili2dbException(e);
-					}finally{
-						if(ioxReader!=null){
-							try {
-								ioxReader.close();
-							} catch (IoxException e) {
-								throw new Ili2dbException(e);
-							}
-							ioxReader=null;
-						}
-					}
-				}
+                                }
+                                try{
+                                    trsfr.doit(inputFilename,ioxReader,stat);
+                                }catch(ch.interlis.iox.IoxException ex){
+                                	EhiLogger.logError("failed to transfer data from file to db",ex);
+                                } catch (Ili2dbException ex) {
+                                	EhiLogger.logError("failed to transfer data from file to db",ex);
+                                }
+                            } catch (IoxException e) {
+                                throw new Ili2dbException(e);
+                            }finally{
+                                if(ioxReader!=null){
+                                    try {
+                                        ioxReader.close();
+                                    } catch (IoxException e) {
+                                        throw new Ili2dbException(e);
+                                    }
+                                    ioxReader=null;
+                                }
+                            }
+                        }
+                    }
+                    try{
+                        trsfr.doitEnd(stat);
+                    }catch(ch.interlis.iox.IoxException ex){
+                        EhiLogger.logError("failed to transfer data from file to db",ex);
+                    } catch (Ili2dbException ex) {
+                        EhiLogger.logError("failed to transfer data from file to db",ex);
+                    }
+                }
+
 				// run post-script
 				if(config.getPostScript()!=null){
 					try {
@@ -798,7 +969,7 @@ public class Ili2db {
 					logStatistics(td.getIli1Format()!=null,stat);
 					EhiLogger.logState("..."+functionTxt+" done");
 				}
-			}finally{
+            }finally{
 				if(!connectionFromExtern){
 					if(conn!=null){
 						try{
@@ -851,7 +1022,28 @@ public class Ili2db {
 		
 
 	}
-	private static void addModellSrsCode(TransferDescription td, String modelSrsCodeTxt) {
+	private static ZipFile getZipFileEntry(String inputFilename, OutParam<ZipEntry> zipXtfEntry) throws IOException, Ili2dbException {
+        // verify that each .zip files contains an xtf/data-file
+	    ZipFile zipFile=null;
+        zipXtfEntry.value=null;
+        if(ch.ehi.basics.view.GenericFileFilter.getFileExtension(inputFilename).toLowerCase().equals("zip")){
+            zipFile=new java.util.zip.ZipFile(inputFilename);
+            java.util.Enumeration filei=zipFile.entries();
+            while(filei.hasMoreElements()){
+                java.util.zip.ZipEntry zipEntry=(java.util.zip.ZipEntry)filei.nextElement();
+                String ext=ch.ehi.basics.view.GenericFileFilter.getFileExtension(zipEntry.getName()).toLowerCase();
+                if(ext!=null && (ext.equals("xml") || ext.equals("xtf") || ext.equals("itf"))){
+                    zipXtfEntry.value=zipEntry;
+                    return zipFile;
+                }
+            }
+            if(zipXtfEntry==null){
+                throw new Ili2dbException("no xtf/itf-file in zip-archive "+zipFile.getName());
+            }
+        }
+        return null;
+    }
+    private static void addModellSrsCode(TransferDescription td, String modelSrsCodeTxt) {
         String modelNameSrsCodes[]=modelSrsCodeTxt.split(";");
         for(String modelNameSrsCode:modelNameSrsCodes) {
             String srsMapping[]=modelNameSrsCode.split("=");
@@ -976,8 +1168,9 @@ public class Ili2db {
 	{
 		ch.ehi.basics.logging.FileListener logfile=null;
         ch.interlis.iox_j.logging.XtfErrorsLogger xtflog=null;
-		if(config.getLogfile()!=null){
-			logfile=new FileLogger(new java.io.File(config.getLogfile()),config.isLogtime());
+		String logfileName = config.getLogfile();
+        if(logfileName!=null){
+			logfile=new FileLogger(new java.io.File(logfileName),config.isLogtime());
 			EhiLogger.getInstance().addListener(logfile);
 		}
         String xtflogFilename=config.getXtfLogfile();
@@ -985,7 +1178,8 @@ public class Ili2db {
             File f=new java.io.File(xtflogFilename);
             try {
                 if(isWriteable(f)) {
-                    xtflog=new ch.interlis.iox_j.logging.XtfErrorsLogger(f, config.getSender());
+                    String sender = config.getSender();
+                    xtflog=new ch.interlis.iox_j.logging.XtfErrorsLogger(f, sender);
                     EhiLogger.getInstance().addListener(xtflog);
                 }else {
                     throw new Ili2dbException("failed to write to logfile <"+f.getPath()+">");
@@ -994,7 +1188,7 @@ public class Ili2db {
                 throw new Ili2dbException("failed to write to logfile <"+f.getPath()+">",e);
             }
         }
-		StdLogger logStderr=new StdLogger(config.getLogfile());
+		StdLogger logStderr=new StdLogger(logfileName);
 		EhiLogger.getInstance().addListener(logStderr);
 		EhiLogger.getInstance().removeListener(StdListener.getInstance());
 		
@@ -1003,6 +1197,74 @@ public class Ili2db {
 			boolean connectionFromExtern=config.getJdbcConnection()!=null;
 			logGeneralInfo(config);
 			
+            String xtffile=config.getXtffile();
+            String ilifile=null;
+            if(xtffile!=null && xtffile.endsWith(".ili")){
+                ilifile=xtffile;
+            }
+			
+			// setup repos access
+	        ch.interlis.ili2c.Main.setHttpProxySystemProperties(config);
+	        ch.interlis.ilirepository.IliManager repositoryManager = (ch.interlis.ilirepository.IliManager)config
+	                .getTransientObject(UserSettings.CUSTOM_ILI_MANAGER);
+	        {
+	            if(repositoryManager==null) {
+	                repositoryManager=new ch.interlis.ilirepository.IliManager();
+	                config.setTransientObject(UserSettings.CUSTOM_ILI_MANAGER,repositoryManager);
+	            }
+	            java.util.Map<String,String> pathMap=getPathMap(ilifile,appHome);
+	            java.util.List<String> modeldirv=ch.interlis.ili2c.Main.resolvePathMap(getModeldir(config),pathMap);
+	            repositoryManager.setRepositories(modeldirv.toArray(new String[]{}));
+	        }
+			
+	        // read meta-config
+	        {
+	            String metaConfigFilename=config.getMetaConfigFile();
+	            if(metaConfigFilename!=null) {
+	                List<String> metaConfigFiles=new ArrayList<String>();
+	                java.util.Set<String> visitedFiles=new HashSet<String>();
+	                metaConfigFiles.add(metaConfigFilename);
+	                Settings metaSettings=new Settings();
+	                while(!metaConfigFiles.isEmpty()) {
+	                    metaConfigFilename=metaConfigFiles.remove(0);
+	                    if(!visitedFiles.contains(metaConfigFilename)) {
+	                        visitedFiles.add(metaConfigFilename);
+	                        EhiLogger.traceState("metaConfigFile <"+metaConfigFilename+">");
+	                        File metaConfigFile=null;
+                            try {
+                                metaConfigFile = IliManager.getLocalCopyOfReposFile(repositoryManager,metaConfigFilename);
+                            } catch (Ili2cException e1) {
+                                throw new Ili2dbException("failed to get local copy of meta config file <"+metaConfigFilename+">");
+                            }
+	                        OutParam<String> baseConfigs=new OutParam<String>();
+	                        Config newSettings=null;
+	                        try {
+	                            newSettings = readMetaConfig(metaConfigFile,baseConfigs);
+	                            if(baseConfigs.value!=null) {
+	                                String[] baseConfigv = baseConfigs.value.split(";");
+	                                for(String baseConfig:baseConfigv){
+	                                    metaConfigFiles.add(baseConfig);
+	                                }
+	                            }
+	                        } catch (Exception e) {
+	                            throw new Ili2dbException("failed to read meta config file <"+metaConfigFile.getPath()+">", e);
+	                        }
+	                        MetaConfig.mergeSettings(newSettings,metaSettings);
+	                    }
+	                }
+	                MetaConfig.mergeSettings(metaSettings,config);
+	            }
+	        }
+	        initDefaultConfig(config);
+            MetaConfig.removeNullFromSettings(config);
+	        
+	        // get local copies of remote files
+	        try {
+                getLocalCopiesOfRemoteFiles(repositoryManager,config);
+            } catch (Ili2cException e2) {
+                throw new Ili2dbException("failed to get local copy of remote files",e2);
+            }
+
 			Ili2dbLibraryInit ao=null;
             Connection conn=null;
 			try{
@@ -1010,10 +1272,7 @@ public class Ili2db {
 				ao.init();
 				
 			ch.interlis.ili2c.config.Configuration modelv=new ch.interlis.ili2c.config.Configuration();
-			String xtffile=config.getXtffile();
-			String ilifile=null;
-			if(xtffile!=null && xtffile.endsWith(".ili")){
-				ilifile=xtffile;
+			if(ilifile!=null){
 				modelv.addFileEntry(new ch.interlis.ili2c.config.FileEntry(ilifile,ch.interlis.ili2c.config.FileEntryKind.ILIMODELFILE));				
 			}
 			
@@ -1417,7 +1676,7 @@ public class Ili2db {
                 xtflog.logEvent(new StdLogEvent(LogEvent.ERROR,null,ex,null));
             }
 			throw ex;
-		}finally{
+        }finally{
             if(xtflog!=null){
                 EhiLogger.getInstance().removeListener(xtflog);
                 xtflog.close();
@@ -1435,7 +1694,236 @@ public class Ili2db {
 		}
 		
 }
-	private static void verifyIfBasketColRequired(List<Model> models, boolean createBasketCol) throws Ili2dbException {
+	private static void getLocalCopiesOfRemoteFiles(IliManager repoManager,Config config) throws Ili2cException {
+	    String dataFiles[]= {
+	            // Config.TRANSIENT_STRING_PRESCRIPT, // no code from remote
+	            // Config.TRANSIENT_STRING_POSTSCRIPT,  // no code from remote
+	            Config.TRANSIENT_STRING_VALIDCONFIGFILENAME,
+	            // Config.TRANSIENT_STRING_REFERENCEDATA, requires special handling
+	            Config.TRANSIENT_STRING_ILIMETAATTRSFILE
+	    };
+        for(int idx=0;idx<dataFiles.length;idx++){
+            String dataFile=config.getTransientValue(dataFiles[idx]);
+            if(dataFile!=null) {
+                java.io.File localFile=IliManager.getLocalCopyOfReposFile(repoManager, dataFile);
+                config.setTransientValue(dataFiles[idx],localFile.getPath());
+            }
+        }
+
+        
+    }
+    private static Config readMetaConfig(File metaConfigFile, OutParam<String> baseConfig) throws IOException, ParseException {
+	    Config config=new Config();
+        ValidationConfig metaConfig = IniFileReader.readFile(metaConfigFile);
+        baseConfig.value=metaConfig.getConfigValue(MetaConfig.CONFIGURATION, MetaConfig.CONFIG_BASE_CONFIG);
+        String referenceData=metaConfig.getConfigValue(MetaConfig.CONFIGURATION, MetaConfig.CONFIG_REFERENCE_DATA);
+        config.setReferenceData(referenceData);
+        String validConfig=metaConfig.getConfigValue(MetaConfig.CONFIGURATION, MetaConfig.CONFIG_VALIDATOR_CONFIG);
+        config.setValidConfigFile(validConfig);
+        java.util.Set<String> params=metaConfig.getConfigParams(Config.METACONFIG_ILI2DB);
+        if(params!=null) {
+            for(String arg:params) {
+                String value=metaConfig.getConfigValue(Config.METACONFIG_ILI2DB, arg);
+                if(arg.equals("models")){
+                    config.setModels(value);
+                } else if (arg.equals("exportModels")) {
+                    config.setExportModels(value);
+                } else if (arg.equals("exportCrsModels")) {
+                    config.setCrsExportModels(value);
+                } else if (arg.equals("nameLang")) {
+                    config.setNameLanguage(value);
+                } else if (arg.equals("dataset")) {
+                    config.setDatasetName(value);
+                } else if (arg.equals("baskets")) {
+                    config.setBaskets(value);
+                } else if (arg.equals("topics")) {
+                    config.setTopics(value);
+                } else if (arg.equals("defaultSrsAuth")) {
+                    config.setDefaultSrsAuthority(value);
+                } else if (arg.equals("defaultSrsCode")) {
+                    config.setDefaultSrsCode(value);
+                } else if (arg.equals("modelSrsCode")) {
+                    config.setModelSrsCode(value);
+                } else if (arg.equals("multiSrs")) {
+                    config.setUseEpsgInNames(parseBooleanArgument(value));
+                } else if (arg.equals("domains")) {
+                    config.setDomainAssignments(value);
+                } else if (arg.equals("altSrsModel")) {
+                    config.setSrsModelAssignment(value);
+                } else if (arg.equals("validConfig")) {
+                    config.setValidConfigFile(value);
+                } else if (arg.equals("disableValidation")){
+                    config.setValidation(!parseBooleanArgument(value));
+                } else if (arg.equals("disableAreaValidation")) {
+                    config.setDisableAreaValidation(parseBooleanArgument(value));
+                } else if (arg.equals("disableRounding")) {
+                    config.setDisableRounding(parseBooleanArgument(value));
+                } else if (arg.equals("disableBoundaryRecoding")) {
+                    config.setRepairTouchingLines(parseBooleanArgument(value));
+                } else if (arg.equals("forceTypeValidation")) {
+                    config.setOnlyMultiplicityReduction(parseBooleanArgument(value));
+                } else if (arg.equals("createSingleEnumTab")) {
+                    if (parseBooleanArgument(value))
+                        config.setCreateEnumDefs(Config.CREATE_ENUM_DEFS_SINGLE);
+                } else if (arg.equals("createEnumTabs")) {
+                    if (parseBooleanArgument(value))
+                        config.setCreateEnumDefs(Config.CREATE_ENUM_DEFS_MULTI);
+                } else if (arg.equals("createEnumTabsWithId")) {
+                    if (parseBooleanArgument(value))
+                        config.setCreateEnumDefs(Config.CREATE_ENUM_DEFS_MULTI_WITH_ID);
+                } else if (arg.equals("createEnumTxtCol")) {
+                    if (parseBooleanArgument(value))
+                        config.setCreateEnumCols(Config.CREATE_ENUM_TXT_COL);
+                } else if (arg.equals("createEnumColAsItfCode")) {
+                    if (parseBooleanArgument(value))
+                        config.setValue(Config.CREATE_ENUMCOL_AS_ITFCODE, Config.CREATE_ENUMCOL_AS_ITFCODE_YES);
+                } else if (arg.equals("beautifyEnumDispName")) {
+                    if (parseBooleanArgument(value))
+                        config.setBeautifyEnumDispName(Config.BEAUTIFY_ENUM_DISPNAME_UNDERSCORE);
+                } else if (arg.equals("noSmartMapping")) {
+                    if (parseBooleanArgument(value))
+                        Ili2db.setNoSmartMapping(config);
+                } else if (arg.equals("smart1Inheritance")) {
+                    if (parseBooleanArgument(value))
+                        config.setInheritanceTrafo(Config.INHERITANCE_TRAFO_SMART1);
+                } else if (arg.equals("smart2Inheritance")) {
+                    if (parseBooleanArgument(value))
+                        config.setInheritanceTrafo(Config.INHERITANCE_TRAFO_SMART2);
+                } else if (arg.equals("coalesceCatalogueRef")) {
+                    if (parseBooleanArgument(value))
+                        config.setCatalogueRefTrafo(Config.CATALOGUE_REF_TRAFO_COALESCE);
+                } else if (arg.equals("coalesceMultiSurface")) {
+                    if (parseBooleanArgument(value))
+                        config.setMultiSurfaceTrafo(Config.MULTISURFACE_TRAFO_COALESCE);
+                } else if (arg.equals("coalesceMultiLine")) {
+                    if (parseBooleanArgument(value))
+                        config.setMultiLineTrafo(Config.MULTILINE_TRAFO_COALESCE);
+                } else if (arg.equals("coalesceMultiPoint")) {
+                    if (parseBooleanArgument(value))
+                        config.setMultiPointTrafo(Config.MULTIPOINT_TRAFO_COALESCE);
+                } else if (arg.equals("coalesceArray")) {
+                    if (parseBooleanArgument(value))
+                        config.setArrayTrafo(Config.ARRAY_TRAFO_COALESCE);
+                } else if (arg.equals("coalesceJson")) {
+                    if (parseBooleanArgument(value))
+                        config.setJsonTrafo(Config.JSON_TRAFO_COALESCE);
+                } else if (arg.equals("expandMultilingual")) {
+                    if (parseBooleanArgument(value))
+                        config.setMultilingualTrafo(Config.MULTILINGUAL_TRAFO_EXPAND);
+                } else if (arg.equals("expandLocalised")) {
+                    if (parseBooleanArgument(value))
+                        config.setLocalisedTrafo(Config.LOCALISED_TRAFO_EXPAND);
+                } else if (arg.equals("createFk")) {
+                    if (parseBooleanArgument(value))
+                        config.setCreateFk(Config.CREATE_FK_YES);
+                } else if (arg.equals("createFkIdx")) {
+                    if (parseBooleanArgument(value))
+                        config.setCreateFkIdx(Config.CREATE_FKIDX_YES);
+                } else if (arg.equals("createUnique")) {
+                    config.setCreateUniqueConstraints(parseBooleanArgument(value));
+                } else if (arg.equals("createNumChecks")) {
+                    config.setCreateNumChecks(parseBooleanArgument(value));
+                } else if (arg.equals("createTextChecks")) {
+                    config.setCreateTextChecks(parseBooleanArgument(value));
+                } else if (arg.equals("createDateTimeChecks")) {
+                    config.setCreateDateTimeChecks(parseBooleanArgument(value));
+                } else if (arg.equals("createMandatoryChecks")) {
+                    config.setCreateMandatoryChecks(parseBooleanArgument(value));
+                } else if (arg.equals("createImportTabs")) {
+                    config.setCreateImportTabs(parseBooleanArgument(value));
+                } else if (arg.equals("createStdCols")) {
+                    if (parseBooleanArgument(value))
+                        config.setCreateStdCols(Config.CREATE_STD_COLS_ALL);
+                } else if (arg.equals("t_id_Name")) {
+                    config.setColT_ID(value);
+                } else if (arg.equals("idSeqMin")) {
+                    config.setMinIdSeqValue(Long.parseLong(value));
+                } else if (arg.equals("idSeqMax")) {
+                    config.setMaxIdSeqValue(Long.parseLong(value));
+                } else if (arg.equals("createTypeDiscriminator")) {
+                    if (parseBooleanArgument(value))
+                        config.setCreateTypeDiscriminator(Config.CREATE_TYPE_DISCRIMINATOR_ALWAYS);
+                } else if (arg.equals("createGeomIdx")) {
+                    if (parseBooleanArgument(value))
+                        config.setValue(Config.CREATE_GEOM_INDEX, Config.TRUE);
+                } else if (arg.equals("disableNameOptimization")) {
+                    if (parseBooleanArgument(value))
+                        config.setNameOptimization(Config.NAME_OPTIMIZATION_DISABLE);
+                } else if (arg.equals("nameByTopic")) {
+                    if (parseBooleanArgument(value))
+                        config.setNameOptimization(Config.NAME_OPTIMIZATION_TOPIC);
+                } else if (arg.equals("maxNameLength")) {
+                    config.setMaxSqlNameLength(value);
+                } else if (arg.equals("structWithGenericRef")) {
+                    if (parseBooleanArgument(value))
+                        config.setStructMapping(Config.STRUCT_MAPPING_GENERICREF);
+                } else if (arg.equals("sqlColsAsText")) {
+                    if (parseBooleanArgument(value))
+                        config.setSqlColsAsText(Config.SQL_COLS_AS_TEXT_ENABLE);
+                } else if (arg.equals("sqlEnableNull")) {
+                    if (parseBooleanArgument(value))
+                        config.setSqlNull(Config.SQL_NULL_ENABLE);
+                } else if (arg.equals("sqlExtRefCols")) {
+                    if (parseBooleanArgument(value))
+                        config.setSqlExtRefCols(Config.SQL_EXTREF_ENABLE);
+                } else if (arg.equals("strokeArcs")) {
+                    if (parseBooleanArgument(value))
+                        Config.setStrokeArcs(config, Config.STROKE_ARCS_ENABLE);
+                } else if (arg.equals("skipPolygonBuilding")) {
+                    if (parseBooleanArgument(value))
+                        Ili2db.setSkipPolygonBuilding(config);
+                } else if (arg.equals("skipReferenceErrors")) {
+                    config.setSkipReferenceErrors(parseBooleanArgument(value));
+                } else if (arg.equals("skipGeometryErrors")) {
+                    config.setSkipGeometryErrors(parseBooleanArgument(value));
+                } else if (arg.equals("keepAreaRef")) {
+                    if (parseBooleanArgument(value))
+                        config.setAreaRef(Config.AREA_REF_KEEP);
+                } else if (arg.equals("createTidCol")) {
+                    if (parseBooleanArgument(value))
+                        config.setTidHandling(Config.TID_HANDLING_PROPERTY);
+                } else if (arg.equals("importTid")) {
+                    config.setImportTid(parseBooleanArgument(value));
+                } else if (arg.equals("exportTid")) {
+                    config.setExportTid(parseBooleanArgument(value));
+                } else if (arg.equals("importBid")) {
+                    config.setImportBid(parseBooleanArgument(value));
+                } else if (arg.equals("exportFetchSize")) {
+                    config.setFetchSize(Integer.parseInt(value));
+                } else if (arg.equals("importBatchSize")) {
+                    config.setBatchSize(Integer.parseInt(value));
+                } else if (arg.equals("createBasketCol")) {
+                    if (parseBooleanArgument(value))
+                        config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
+                } else if (arg.equals("createDatasetCol")) {
+                    if (parseBooleanArgument(value))
+                        config.setCreateDatasetCols(Config.CREATE_DATASET_COL);
+                } else if (arg.equals("ILIGML20")) {
+                    if (parseBooleanArgument(value))
+                        config.setTransferFileFormat(Config.ILIGML20);
+                } else if (arg.equals("ver3-translation")) {
+                    config.setVer3_translation(parseBooleanArgument(value));
+                } else if (arg.equals("translation")) {
+                    config.setIli1Translation(value);
+                } else if (arg.equals("createMetaInfo")) {
+                    config.setCreateMetaInfo(parseBooleanArgument(value));
+                } else if (arg.equals("iliMetaAttrs")) {
+                    config.setIliMetaAttrsFile(value);
+                } else if (arg.equals("createTypeConstraint")) {
+                    config.setCreateTypeConstraint(parseBooleanArgument(value));
+                }else {
+                    EhiLogger.logAdaption("unknown parameter in metaconfig <"+arg+">");
+                }
+            }
+        }
+        return config;
+    }
+    protected static boolean parseBooleanArgument(String value) throws ParseException {
+        if (value.equalsIgnoreCase("true")) return true;
+        if (value.equalsIgnoreCase("false")) return false;
+        throw new ParseException("unknown boolean value <"+value+">",0);
+    }
+    private static void verifyIfBasketColRequired(List<Model> models, boolean createBasketCol) throws Ili2dbException {
         if(createBasketCol) {
             return;
         }
@@ -1509,16 +1997,21 @@ public class Ili2db {
 		EhiLogger.logState("maxMemory "+java.lang.Runtime.getRuntime().maxMemory()/1024L+" KB");
 		EhiLogger.logState("currentTime "+new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new java.util.Date()));
 	}
+    private static java.util.Map<String,String> getPathMap(String xtffile,String appHome)
+    {
+        java.util.HashMap<String,String> pathMap=new java.util.HashMap<String,String>();
+        if(xtffile!=null){
+            pathMap.put(Ili2db.XTF_DIR,new java.io.File(xtffile).getAbsoluteFile().getParent());
+        }else{
+            pathMap.put(Ili2db.XTF_DIR,null);
+        }
+        pathMap.put(Ili2db.JAR_DIR,appHome);
+        return pathMap;
+    }
 	private static void setupIli2cPathmap(Config config, String appHome,
 			String xtffile,java.sql.Connection conn, CustomMapping mapping) throws Ili2dbException {
-		config.setValue(ch.interlis.ili2c.gui.UserSettings.ILIDIRS,config.getModeldir());
-		java.util.HashMap pathMap=new java.util.HashMap();
-		if(xtffile!=null){
-			pathMap.put(Ili2db.XTF_DIR,new java.io.File(xtffile).getAbsoluteFile().getParent());
-		}else{
-			pathMap.put(Ili2db.XTF_DIR,null);
-		}
-		pathMap.put(Ili2db.JAR_DIR,appHome);
+		config.setValue(ch.interlis.ili2c.gui.UserSettings.ILIDIRS,getModeldir(config));
+		java.util.Map<String,String> pathMap=getPathMap(xtffile,appHome);
 		config.setTransientObject(ch.interlis.ili2c.gui.UserSettings.ILIDIRS_PATHMAP,pathMap);
 		
 	  	// if ilimodels exists in db
@@ -1590,7 +2083,70 @@ public class Ili2db {
 	                throw new Ili2dbException("no xtf-file given");
 	            }
 			}
-			String modeldir=config.getModeldir();
+			
+            // setup repos access
+            ch.interlis.ili2c.Main.setHttpProxySystemProperties(config);
+            ch.interlis.ilirepository.IliManager repositoryManager = (ch.interlis.ilirepository.IliManager)config
+                    .getTransientObject(UserSettings.CUSTOM_ILI_MANAGER);
+            {
+                if(repositoryManager==null) {
+                    repositoryManager=new ch.interlis.ilirepository.IliManager();
+                    config.setTransientObject(UserSettings.CUSTOM_ILI_MANAGER,repositoryManager);
+                }
+                java.util.Map<String,String> pathMap=getPathMap(xtffile,appHome);
+                java.util.List<String> modeldirv=ch.interlis.ili2c.Main.resolvePathMap(getModeldir(config),pathMap);
+                repositoryManager.setRepositories(modeldirv.toArray(new String[]{}));
+            }
+            
+            // read meta-config
+            {
+                String metaConfigFilename=config.getMetaConfigFile();
+                if(metaConfigFilename!=null) {
+                    List<String> metaConfigFiles=new ArrayList<String>();
+                    java.util.Set<String> visitedFiles=new HashSet<String>();
+                    metaConfigFiles.add(metaConfigFilename);
+                    Settings metaSettings=new Settings();
+                    while(!metaConfigFiles.isEmpty()) {
+                        metaConfigFilename=metaConfigFiles.remove(0);
+                        if(!visitedFiles.contains(metaConfigFilename)) {
+                            visitedFiles.add(metaConfigFilename);
+                            EhiLogger.traceState("metaConfigFile <"+metaConfigFilename+">");
+                            File metaConfigFile=null;
+                            try {
+                                metaConfigFile = IliManager.getLocalCopyOfReposFile(repositoryManager,metaConfigFilename);
+                            } catch (Ili2cException e1) {
+                                throw new Ili2dbException("failed to get local copy of meta config file <"+metaConfigFilename+">");
+                            }
+                            OutParam<String> baseConfigs=new OutParam<String>();
+                            Config newSettings=null;
+                            try {
+                                newSettings = readMetaConfig(metaConfigFile,baseConfigs);
+                                if(baseConfigs.value!=null) {
+                                    String[] baseConfigv = baseConfigs.value.split(";");
+                                    for(String baseConfig:baseConfigv){
+                                        metaConfigFiles.add(baseConfig);
+                                    }
+                                }
+                            } catch (Exception e) {
+                                throw new Ili2dbException("failed to read meta config file <"+metaConfigFile.getPath()+">", e);
+                            }
+                            MetaConfig.mergeSettings(newSettings,metaSettings);
+                        }
+                    }
+                    MetaConfig.mergeSettings(metaSettings,config);
+                }
+            }
+            initDefaultConfig(config);
+            MetaConfig.removeNullFromSettings(config);
+            
+            // get local copies of remote files
+            try {
+                getLocalCopiesOfRemoteFiles(repositoryManager,config);
+            } catch (Ili2cException e2) {
+                throw new Ili2dbException("failed to get local copy of remote files",e2);
+            }
+			
+			String modeldir=getModeldir(config);
 			if(modeldir==null){
 				throw new Ili2dbException("no modeldir given");
 			}
@@ -2447,22 +3003,6 @@ public class Ili2db {
 		return modeldirv;
 	}
 
-	static private void transferFromXtf(Connection conn,IoxReader reader,int function,NameMapping ili2sqlName,TransferDescription td,
-			String dbusr,
-			SqlColumnConverter geomConv,
-			DbIdGen idGen,
-			Config config,
-			Map<String,BasketStat> stat,
-			TrafoConfig trafoConfig,Viewable2TableMapping class2wrapper,CustomMapping customMapping){	
-		try{
-			TransferFromXtf trsfr=new TransferFromXtf(function,ili2sqlName,td,conn,dbusr,geomConv,idGen,config,trafoConfig,class2wrapper);
-			trsfr.doit(reader,config,stat,customMapping);
-		}catch(ch.interlis.iox.IoxException ex){
-			EhiLogger.logError("failed to transfer data from file to db",ex);
-		} catch (Ili2dbException ex) {
-			EhiLogger.logError("failed to transfer data from file to db",ex);
-		}
-	}
 	/** transfer data from database to xml file
 	*/
 	static private void transferToXtf(Connection conn,int function,String xtffile,CustomMapping customMapping,NameMapping ili2sqlName,TransferDescription td
@@ -2640,6 +3180,13 @@ public class Ili2db {
 		String modelnames[]=models.split(ch.interlis.ili2c.Main.MODELS_SEPARATOR);
 		return modelnames;
 	}
+    public static String[] getDataFiles(String dataFiles) {
+        if(dataFiles==null) {
+            return null;
+        }
+        String dataFilev[]=dataFiles.split(ch.interlis.ili2c.Main.MODELS_SEPARATOR);
+        return dataFilev;
+    }
 	static private void writeScript(String filename,Iterator linei)
 	throws java.io.IOException
 	{
@@ -2726,15 +3273,15 @@ public class Ili2db {
 		config.setAreaRef(Config.AREA_REF_KEEP);
 	}
 	public static void setNoSmartMapping(Config config) {
-		config.setCatalogueRefTrafo(null);
-		config.setMultiSurfaceTrafo(null);
-		config.setMultiLineTrafo(null);
-		config.setMultiPointTrafo(null);
-		config.setArrayTrafo(null);
-        config.setJsonTrafo(null);
-		config.setMultilingualTrafo(null);
-        config.setLocalisedTrafo(null);
-		config.setInheritanceTrafo(null);
+		config.setCatalogueRefTrafo(Config.NULL);
+		config.setMultiSurfaceTrafo(Config.NULL);
+		config.setMultiLineTrafo(Config.NULL);
+		config.setMultiPointTrafo(Config.NULL);
+		config.setArrayTrafo(Config.NULL);
+        config.setJsonTrafo(Config.NULL);
+		config.setMultilingualTrafo(Config.NULL);
+        config.setLocalisedTrafo(Config.NULL);
+		config.setInheritanceTrafo(Config.NULL);
 	}
 	public static List<Model> getModels(String modelNames, TransferDescription td) {
 		if(modelNames==null) {

@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ili:transfer xmlns:ili="http://www.interlis.ch/xtf/2.4/INTERLIS" xmlns:geom="http://www.interlis.ch/geometry/1.0"
+              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+              xmlns:ListOfPrimTypes24="http://www.interlis.ch/xtf/2.4/ListOfPrimTypes24">
+    <ili:headersection>
+        <ili:models>
+            <ili:model>ListOfPrimTypes24</ili:model>
+        </ili:models>
+        <ili:sender>ili2gpkg-4.5.1-SNAPSHOT-34a149ef943889acc815bc9c3ffdb39f6e4918d3</ili:sender>
+    </ili:headersection>
+    <ili:datasection>
+        <ListOfPrimTypes24:TestA ili:bid="ListOfPrimTypes24.TestA">
+
+            <ListOfPrimTypes24:ClassA1 ili:tid="1">
+                <ListOfPrimTypes24:Attr1>Blaa</ListOfPrimTypes24:Attr1>
+                <ListOfPrimTypes24:Attr1>Ftaa</ListOfPrimTypes24:Attr1>
+                <ListOfPrimTypes24:Attr1>Gluu</ListOfPrimTypes24:Attr1>
+                <ListOfPrimTypes24:Attr2>12</ListOfPrimTypes24:Attr2>
+                <ListOfPrimTypes24:Attr2>14.1234</ListOfPrimTypes24:Attr2>
+                <ListOfPrimTypes24:Attr3>E2</ListOfPrimTypes24:Attr3>
+                <ListOfPrimTypes24:Attr3>E1</ListOfPrimTypes24:Attr3>
+                <ListOfPrimTypes24:Attr4>prefix-019-postfix</ListOfPrimTypes24:Attr4>
+                <ListOfPrimTypes24:Attr4>prefix-199-postfix</ListOfPrimTypes24:Attr4>
+                <ListOfPrimTypes24:Attr5><MIDEPS/></ListOfPrimTypes24:Attr5>
+                <ListOfPrimTypes24:Attr5><WOROLF/></ListOfPrimTypes24:Attr5>
+                <ListOfPrimTypes24:Attr6>ORYSIT</ListOfPrimTypes24:Attr6>
+                <ListOfPrimTypes24:Attr7>1997-10-14</ListOfPrimTypes24:Attr7>
+                <ListOfPrimTypes24:Attr7>2008-01-29</ListOfPrimTypes24:Attr7>
+                <ListOfPrimTypes24:Attr8>
+                    <geom:coord>
+                        <geom:c1>480000</geom:c1>
+                        <geom:c2>70000</geom:c2>
+                    </geom:coord>
+                </ListOfPrimTypes24:Attr8>
+                <ListOfPrimTypes24:Attr8>
+                    <geom:coord>
+                        <geom:c1>490000</geom:c1>
+                        <geom:c2>71000</geom:c2>
+                    </geom:coord>
+                </ListOfPrimTypes24:Attr8>
+                <ListOfPrimTypes24:Attr9>
+                    <geom:coord>
+                        <geom:c1>500000</geom:c1>
+                        <geom:c2>72000</geom:c2>
+                    </geom:coord>
+                </ListOfPrimTypes24:Attr9>
+            </ListOfPrimTypes24:ClassA1>
+
+            <ListOfPrimTypes24:ClassA2 ili:tid="2">
+                <ListOfPrimTypes24:Attr1>
+                    <ListOfPrimTypes24:StructA2>
+                        <ListOfPrimTypes24:Attr1>HERSEN</ListOfPrimTypes24:Attr1>
+                        <ListOfPrimTypes24:Attr1>FLORIN</ListOfPrimTypes24:Attr1>
+                    </ListOfPrimTypes24:StructA2>
+                </ListOfPrimTypes24:Attr1>
+            </ListOfPrimTypes24:ClassA2>
+
+        </ListOfPrimTypes24:TestA>
+    </ili:datasection>
+</ili:transfer>

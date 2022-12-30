@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TRANSFER xmlns="http://www.interlis.ch/INTERLIS2.3">
+	<HEADERSECTION SENDER="ili2c-4.5.22-20160520" VERSION="2.3">
+		<MODELS>
+			<MODEL NAME="ExtRef23" VERSION="2011-12-22" URI="http://interlis.ch"></MODEL>
+		</MODELS>
+	</HEADERSECTION>
+	<DATASECTION>
+		<ExtRef23.TestA BID="c1105d5c-9ec3-49ed-9e4b-a7de0124138c">
+			<ExtRef23.TestA.ClassA1 TID="2f1774b2-8427-4d49-9810-27acb08a7839">
+			</ExtRef23.TestA.ClassA1>
+		</ExtRef23.TestA>
+	</DATASECTION>
+</TRANSFER>

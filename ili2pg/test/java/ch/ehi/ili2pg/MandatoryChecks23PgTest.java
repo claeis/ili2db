@@ -30,14 +30,11 @@ public class MandatoryChecks23PgTest {
         setup.resetDb();
         File data=new File(TEST_OUT,"RefAttr23.ili");
         Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+        Ili2db.setNoSmartMapping(config);
         config.setFunction(Config.FC_SCHEMAIMPORT);
         config.setCreateFk(Config.CREATE_FK_YES);
         config.setTidHandling(Config.TID_HANDLING_PROPERTY);
         config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
-        config.setCatalogueRefTrafo(null);
-        config.setMultiSurfaceTrafo(null);
-        config.setMultilingualTrafo(null);
-        config.setInheritanceTrafo(null);
         config.setCreateMandatoryChecks(true);
         Ili2db.run(config,null);
     }
@@ -57,19 +54,49 @@ public class MandatoryChecks23PgTest {
         Ili2db.run(config,null);
     }
     @Test
+    public void importIli_CatalogRef() throws Exception
+    {
+        EhiLogger.getInstance().setTraceFilter(false);
+        setup.resetDb();
+        File data=new File(TEST_OUT,"CatalogRef23.ili");
+        Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+        Ili2db.setNoSmartMapping(config);
+        config.setFunction(Config.FC_SCHEMAIMPORT);
+        config.setCreateFk(Config.CREATE_FK_YES);
+        config.setTidHandling(Config.TID_HANDLING_PROPERTY);
+        config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
+        config.setInheritanceTrafo(Config.INHERITANCE_TRAFO_SMART1);
+        config.setCatalogueRefTrafo(Config.CATALOGUE_REF_TRAFO_COALESCE);
+        config.setCreateMandatoryChecks(true);
+        Ili2db.run(config,null);
+    }
+    @Test
+    public void importXtf_CatalogRef() throws Exception
+    {
+        {
+            importIli_CatalogRef();
+        }
+        File data=new File(TEST_OUT,"CatalogRef23a.xtf");
+        Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+        config.setFunction(Config.FC_IMPORT);
+        config.setDoImplicitSchemaImport(false);
+        config.setImportTid(true);
+        config.setImportBid(true);
+        Ili2db.readSettingsFromDb(config);
+        Ili2db.run(config,null);
+    }
+    @Test
     public void importIli_RefAttr_Smart1() throws Exception
     {
         //EhiLogger.getInstance().setTraceFilter(false);
         setup.resetDb();
         File data=new File(TEST_OUT,"RefAttr23.ili");
         Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+        Ili2db.setNoSmartMapping(config);
         config.setFunction(Config.FC_SCHEMAIMPORT);
         config.setCreateFk(Config.CREATE_FK_YES);
         config.setTidHandling(Config.TID_HANDLING_PROPERTY);
         config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
-        config.setCatalogueRefTrafo(null);
-        config.setMultiSurfaceTrafo(null);
-        config.setMultilingualTrafo(null);
         config.setInheritanceTrafo(Config.INHERITANCE_TRAFO_SMART1);
         config.setCreateMandatoryChecks(true);
         Ili2db.run(config,null);
@@ -96,13 +123,11 @@ public class MandatoryChecks23PgTest {
         setup.resetDb();
         File data=new File(TEST_OUT,"RefAttr23.ili");
         Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+        Ili2db.setNoSmartMapping(config);
         config.setFunction(Config.FC_SCHEMAIMPORT);
         config.setCreateFk(Config.CREATE_FK_YES);
         config.setTidHandling(Config.TID_HANDLING_PROPERTY);
         config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
-        config.setCatalogueRefTrafo(null);
-        config.setMultiSurfaceTrafo(null);
-        config.setMultilingualTrafo(null);
         config.setInheritanceTrafo(Config.INHERITANCE_TRAFO_SMART2);
         config.setCreateMandatoryChecks(true);
         Ili2db.run(config,null);
@@ -129,14 +154,11 @@ public class MandatoryChecks23PgTest {
         setup.resetDb();
         File data=new File(TEST_OUT,"Assoc23.ili");
         Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+        Ili2db.setNoSmartMapping(config);
         config.setFunction(Config.FC_SCHEMAIMPORT);
         config.setCreateFk(Config.CREATE_FK_YES);
         config.setTidHandling(Config.TID_HANDLING_PROPERTY);
         config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
-        config.setCatalogueRefTrafo(null);
-        config.setMultiSurfaceTrafo(null);
-        config.setMultilingualTrafo(null);
-        config.setInheritanceTrafo(null);
         config.setCreateMandatoryChecks(true);
         Ili2db.run(config,null);
     }
@@ -162,13 +184,11 @@ public class MandatoryChecks23PgTest {
         setup.resetDb();
         File data=new File(TEST_OUT,"Assoc23.ili");
         Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+        Ili2db.setNoSmartMapping(config);
         config.setFunction(Config.FC_SCHEMAIMPORT);
         config.setCreateFk(Config.CREATE_FK_YES);
         config.setTidHandling(Config.TID_HANDLING_PROPERTY);
         config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
-        config.setCatalogueRefTrafo(null);
-        config.setMultiSurfaceTrafo(null);
-        config.setMultilingualTrafo(null);
         config.setInheritanceTrafo(Config.INHERITANCE_TRAFO_SMART1);
         config.setCreateMandatoryChecks(true);
         Ili2db.run(config,null);
@@ -195,13 +215,11 @@ public class MandatoryChecks23PgTest {
         setup.resetDb();
         File data=new File(TEST_OUT,"Assoc23.ili");
         Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+        Ili2db.setNoSmartMapping(config);
         config.setFunction(Config.FC_SCHEMAIMPORT);
         config.setCreateFk(Config.CREATE_FK_YES);
         config.setTidHandling(Config.TID_HANDLING_PROPERTY);
         config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
-        config.setCatalogueRefTrafo(null);
-        config.setMultiSurfaceTrafo(null);
-        config.setMultilingualTrafo(null);
         config.setInheritanceTrafo(Config.INHERITANCE_TRAFO_SMART2);
         config.setCreateMandatoryChecks(true);
         Ili2db.run(config,null);

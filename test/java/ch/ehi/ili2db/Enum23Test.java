@@ -26,6 +26,7 @@ public abstract class Enum23Test {
             File data=new File(TEST_OUT,"Enum23b.ili");
             File outfile=new File(data.getPath()+"-out.sql");
             Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+            Ili2db.setNoSmartMapping(config);
             config.setFunction(Config.FC_SCHEMAIMPORT);
             config.setCreateFk(Config.CREATE_FK_YES);
             config.setCreateNumChecks(true);
@@ -33,10 +34,6 @@ public abstract class Enum23Test {
             config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
             config.setCreateMetaInfo(true);
             config.setCreateEnumDefs(Config.CREATE_ENUM_DEFS_MULTI_WITH_ID);
-            config.setCatalogueRefTrafo(null);
-            config.setMultiSurfaceTrafo(null);
-            config.setMultilingualTrafo(null);
-            config.setInheritanceTrafo(null);
             config.setCreatescript(outfile.getPath());
             Ili2db.run(config,null);
             
@@ -98,6 +95,7 @@ public abstract class Enum23Test {
             File data=new File(TEST_OUT,"Enum23b.ili");
             File outfile=new File(data.getPath()+"-out.sql");
             Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+            Ili2db.setNoSmartMapping(config);
             config.setFunction(Config.FC_SCRIPT);
             config.setCreateFk(Config.CREATE_FK_YES);
             config.setCreateNumChecks(true);
@@ -105,10 +103,6 @@ public abstract class Enum23Test {
             config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
             config.setCreateMetaInfo(true);
             config.setCreateEnumDefs(Config.CREATE_ENUM_DEFS_MULTI_WITH_ID);
-            config.setCatalogueRefTrafo(null);
-            config.setMultiSurfaceTrafo(null);
-            config.setMultilingualTrafo(null);
-            config.setInheritanceTrafo(null);
             config.setCreatescript(outfile.getPath());
             Ili2db.run(config,null);
             
@@ -171,6 +165,7 @@ public abstract class Enum23Test {
             File data=new File(TEST_OUT,"Enum23b.ili");
             File outfile=new File(data.getPath()+"-out.sql");
             Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+            Ili2db.setNoSmartMapping(config);
             config.setFunction(Config.FC_SCHEMAIMPORT);
             config.setCreateFk(Config.CREATE_FK_YES);
             config.setCreateNumChecks(true);
@@ -178,10 +173,6 @@ public abstract class Enum23Test {
             config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
             config.setCreateMetaInfo(true);
             config.setCreateEnumDefs(Config.CREATE_ENUM_DEFS_SINGLE);
-            config.setCatalogueRefTrafo(null);
-            config.setMultiSurfaceTrafo(null);
-            config.setMultilingualTrafo(null);
-            config.setInheritanceTrafo(null);
             config.setCreatescript(outfile.getPath());
             Ili2db.run(config,null);
             
@@ -226,6 +217,7 @@ public abstract class Enum23Test {
             File data=new File(TEST_OUT,"Enum23b.ili");
             File outfile=new File(data.getPath()+"-out.sql");
             Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+            Ili2db.setNoSmartMapping(config);
             config.setFunction(Config.FC_SCRIPT);
             config.setCreateFk(Config.CREATE_FK_YES);
             config.setCreateNumChecks(true);
@@ -233,10 +225,6 @@ public abstract class Enum23Test {
             config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
             config.setCreateMetaInfo(true);
             config.setCreateEnumDefs(Config.CREATE_ENUM_DEFS_SINGLE);
-            config.setCatalogueRefTrafo(null);
-            config.setMultiSurfaceTrafo(null);
-            config.setMultilingualTrafo(null);
-            config.setInheritanceTrafo(null);
             config.setCreatescript(outfile.getPath());
             Ili2db.run(config,null);
             
@@ -282,6 +270,7 @@ public abstract class Enum23Test {
             File data=new File(TEST_OUT,"Enum23b.ili");
             File outfile=new File(data.getPath()+"-out.sql");
             Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+            Ili2db.setNoSmartMapping(config);
             config.setFunction(Config.FC_SCHEMAIMPORT);
             config.setCreateFk(Config.CREATE_FK_YES);
             config.setCreateNumChecks(true);
@@ -289,10 +278,6 @@ public abstract class Enum23Test {
             config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
             config.setCreateMetaInfo(true);
             config.setCreateEnumDefs(Config.CREATE_ENUM_DEFS_MULTI);
-            config.setCatalogueRefTrafo(null);
-            config.setMultiSurfaceTrafo(null);
-            config.setMultilingualTrafo(null);
-            config.setInheritanceTrafo(null);
             config.setCreatescript(outfile.getPath());
             Ili2db.run(config,null);
             
@@ -337,6 +322,7 @@ public abstract class Enum23Test {
             File data=new File(TEST_OUT,"Enum23b.ili");
             File outfile=new File(data.getPath()+"-out.sql");
             Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+            Ili2db.setNoSmartMapping(config);
             config.setFunction(Config.FC_SCRIPT);
             config.setCreateFk(Config.CREATE_FK_YES);
             config.setCreateNumChecks(true);
@@ -344,10 +330,6 @@ public abstract class Enum23Test {
             config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
             config.setCreateMetaInfo(true);
             config.setCreateEnumDefs(Config.CREATE_ENUM_DEFS_MULTI);
-            config.setCatalogueRefTrafo(null);
-            config.setMultiSurfaceTrafo(null);
-            config.setMultilingualTrafo(null);
-            config.setInheritanceTrafo(null);
             config.setCreatescript(outfile.getPath());
             Ili2db.run(config,null);
             

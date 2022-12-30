@@ -72,14 +72,11 @@ public class Assoc23Test {
             {
                 File data=new File(TEST_DATA_DIR,"Assoc4.ili");
                 Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+                Ili2db.setNoSmartMapping(config);
                 config.setFunction(Config.FC_SCHEMAIMPORT);
                 config.setCreateFk(Config.CREATE_FK_YES);
                 config.setTidHandling(Config.TID_HANDLING_PROPERTY);
                 config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
-                config.setCatalogueRefTrafo(null);
-                config.setMultiSurfaceTrafo(null);
-                config.setMultilingualTrafo(null);
-                config.setInheritanceTrafo(null);
                 Ili2db.readSettingsFromDb(config);
                 Ili2db.run(config,null);
             }
@@ -129,13 +126,11 @@ public class Assoc23Test {
             {
                 File data=new File(TEST_DATA_DIR,"Assoc4.ili");
                 Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+                Ili2db.setNoSmartMapping(config);
                 config.setFunction(Config.FC_SCHEMAIMPORT);
                 config.setCreateFk(Config.CREATE_FK_YES);
                 config.setTidHandling(Config.TID_HANDLING_PROPERTY);
                 config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
-                config.setCatalogueRefTrafo(null);
-                config.setMultiSurfaceTrafo(null);
-                config.setMultilingualTrafo(null);
                 config.setInheritanceTrafo(Config.INHERITANCE_TRAFO_SMART1);
                 Ili2db.readSettingsFromDb(config);
                 Ili2db.run(config,null);
@@ -186,13 +181,11 @@ public class Assoc23Test {
             {
                 File data=new File(TEST_DATA_DIR,"Assoc4.ili");
                 Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+                Ili2db.setNoSmartMapping(config);
                 config.setFunction(Config.FC_SCHEMAIMPORT);
                 config.setCreateFk(Config.CREATE_FK_YES);
                 config.setTidHandling(Config.TID_HANDLING_PROPERTY);
                 config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
-                config.setCatalogueRefTrafo(null);
-                config.setMultiSurfaceTrafo(null);
-                config.setMultilingualTrafo(null);
                 config.setInheritanceTrafo(Config.INHERITANCE_TRAFO_SMART2);
                 Ili2db.readSettingsFromDb(config);
                 Ili2db.run(config,null);
@@ -255,16 +248,13 @@ public class Assoc23Test {
             {
                 File data=new File(TEST_DATA_DIR,"Assoc4a.xtf");
                 Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+                Ili2db.setNoSmartMapping(config);
                 config.setFunction(Config.FC_IMPORT);
                 config.setDoImplicitSchemaImport(true);
                 config.setCreateFk(Config.CREATE_FK_YES);
                 config.setTidHandling(Config.TID_HANDLING_PROPERTY);
                 config.setImportTid(true);
                 config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
-                config.setCatalogueRefTrafo(null);
-                config.setMultiSurfaceTrafo(null);
-                config.setMultilingualTrafo(null);
-                config.setInheritanceTrafo(null);
                 Ili2db.readSettingsFromDb(config);
                 Ili2db.run(config,null);
             }
@@ -330,15 +320,13 @@ public class Assoc23Test {
             {
                 File data=new File(TEST_DATA_DIR,"Assoc4a.xtf");
                 Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+                Ili2db.setNoSmartMapping(config);
                 config.setFunction(Config.FC_IMPORT);
                 config.setDoImplicitSchemaImport(true);
                 config.setCreateFk(Config.CREATE_FK_YES);
                 config.setTidHandling(Config.TID_HANDLING_PROPERTY);
                 config.setImportTid(true);
                 config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
-                config.setCatalogueRefTrafo(null);
-                config.setMultiSurfaceTrafo(null);
-                config.setMultilingualTrafo(null);
                 config.setInheritanceTrafo(Config.INHERITANCE_TRAFO_SMART1);
                 Ili2db.readSettingsFromDb(config);
                 Ili2db.run(config,null);
@@ -402,15 +390,13 @@ public class Assoc23Test {
             {
                 File data=new File(TEST_DATA_DIR,"Assoc4a.xtf");
                 Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+                Ili2db.setNoSmartMapping(config);
                 config.setFunction(Config.FC_IMPORT);
                 config.setDoImplicitSchemaImport(true);
                 config.setCreateFk(Config.CREATE_FK_YES);
                 config.setTidHandling(Config.TID_HANDLING_PROPERTY);
                 config.setImportTid(true);
                 config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
-                config.setCatalogueRefTrafo(null);
-                config.setMultiSurfaceTrafo(null);
-                config.setMultilingualTrafo(null);
                 config.setInheritanceTrafo(Config.INHERITANCE_TRAFO_SMART2);
                 Ili2db.readSettingsFromDb(config);
                 Ili2db.run(config,null);
@@ -471,16 +457,13 @@ public class Assoc23Test {
 			{
 				File data=new File(TEST_DATA_DIR,"Assoc1a.xtf");
 	    		Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+	            Ili2db.setNoSmartMapping(config);
 	    		config.setFunction(Config.FC_IMPORT);
 	            config.setDoImplicitSchemaImport(true);
 	    		config.setCreateFk(Config.CREATE_FK_YES);
 	    		config.setTidHandling(Config.TID_HANDLING_PROPERTY);
 	    		config.setImportTid(true);
 	    		config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
-	    		config.setCatalogueRefTrafo(null);
-	    		config.setMultiSurfaceTrafo(null);
-	    		config.setMultilingualTrafo(null);
-	    		config.setInheritanceTrafo(null);
 	    		Ili2db.readSettingsFromDb(config);
 	    		Ili2db.run(config,null);
 			}
@@ -504,16 +487,13 @@ public class Assoc23Test {
 			{
 				File data=new File(TEST_DATA_DIR,"Assoc1b.xtf");
 	    		Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+	            Ili2db.setNoSmartMapping(config);
 	    		config.setFunction(Config.FC_IMPORT);
 	            config.setDoImplicitSchemaImport(true);
 	    		config.setCreateFk(Config.CREATE_FK_YES);
 	    		config.setTidHandling(Config.TID_HANDLING_PROPERTY);
 	    		config.setImportTid(true);
 	    		config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
-	    		config.setCatalogueRefTrafo(null);
-	    		config.setMultiSurfaceTrafo(null);
-	    		config.setMultilingualTrafo(null);
-	    		config.setInheritanceTrafo(null);
 	    		Ili2db.readSettingsFromDb(config);
 	    		Ili2db.run(config,null);
 			}
@@ -540,15 +520,12 @@ public class Assoc23Test {
 
 				File data=new File(TEST_DATA_DIR,"Assoc1z.xtf");
 	    		Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+	            Ili2db.setNoSmartMapping(config);
 	    		config.setFunction(Config.FC_IMPORT);
 	            config.setDoImplicitSchemaImport(true);
 	    		config.setCreateFk(Config.CREATE_FK_YES);
 	    		config.setTidHandling(Config.TID_HANDLING_PROPERTY);
 	    		config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
-	    		config.setCatalogueRefTrafo(null);
-	    		config.setMultiSurfaceTrafo(null);
-	    		config.setMultilingualTrafo(null);
-	    		config.setInheritanceTrafo(null);
 	    		config.setValidation(false);
 	    		Ili2db.readSettingsFromDb(config);
 	    		try{
@@ -591,15 +568,12 @@ public class Assoc23Test {
 
                 File data=new File(TEST_DATA_DIR,"Assoc1z.xtf");
                 Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+                Ili2db.setNoSmartMapping(config);
                 config.setFunction(Config.FC_IMPORT);
                 config.setDoImplicitSchemaImport(true);
                 config.setCreateFk(Config.CREATE_FK_YES);
                 config.setTidHandling(Config.TID_HANDLING_PROPERTY);
                 config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
-                config.setCatalogueRefTrafo(null);
-                config.setMultiSurfaceTrafo(null);
-                config.setMultilingualTrafo(null);
-                config.setInheritanceTrafo(null);
                 config.setValidation(false);
                 config.setSkipReferenceErrors(true);
                 config.setSqlNull(Config.SQL_NULL_ENABLE);
@@ -626,16 +600,13 @@ public class Assoc23Test {
 			{
 				File data=new File(TEST_DATA_DIR,"Assoc2a.xtf");
 	    		Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+                Ili2db.setNoSmartMapping(config);
 	    		config.setFunction(Config.FC_IMPORT);
 	            config.setDoImplicitSchemaImport(true);
 	    		config.setCreateFk(Config.CREATE_FK_YES);
 	    		config.setTidHandling(Config.TID_HANDLING_PROPERTY);
 	    		config.setImportTid(true);
 	    		config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
-	    		config.setCatalogueRefTrafo(null);
-	    		config.setMultiSurfaceTrafo(null);
-	    		config.setMultilingualTrafo(null);
-	    		config.setInheritanceTrafo(null);
 	    		Ili2db.readSettingsFromDb(config);
 	    		Ili2db.run(config,null);
 			}
@@ -660,14 +631,11 @@ public class Assoc23Test {
                 {
                     File data=new File(TEST_DATA_DIR,"Assoc2.ili");
                     Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+                    Ili2db.setNoSmartMapping(config);
                     config.setFunction(Config.FC_SCHEMAIMPORT);
                     config.setCreateFk(Config.CREATE_FK_YES);
                     config.setTidHandling(Config.TID_HANDLING_PROPERTY);
                     config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
-                    config.setCatalogueRefTrafo(null);
-                    config.setMultiSurfaceTrafo(null);
-                    config.setMultilingualTrafo(null);
-                    config.setInheritanceTrafo(null);
                     Ili2db.readSettingsFromDb(config);
                     Ili2db.run(config,null);
                 }
@@ -692,13 +660,11 @@ public class Assoc23Test {
                 {
                     File data=new File(TEST_DATA_DIR,"Assoc2.ili");
                     Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+                    Ili2db.setNoSmartMapping(config);
                     config.setFunction(Config.FC_SCHEMAIMPORT);
                     config.setCreateFk(Config.CREATE_FK_YES);
                     config.setTidHandling(Config.TID_HANDLING_PROPERTY);
                     config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
-                    config.setCatalogueRefTrafo(null);
-                    config.setMultiSurfaceTrafo(null);
-                    config.setMultilingualTrafo(null);
                     config.setInheritanceTrafo(Config.INHERITANCE_TRAFO_SMART1);
                     Ili2db.readSettingsFromDb(config);
                     Ili2db.run(config,null);
@@ -724,13 +690,11 @@ public class Assoc23Test {
                 {
                     File data=new File(TEST_DATA_DIR,"Assoc2.ili");
                     Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+                    Ili2db.setNoSmartMapping(config);
                     config.setFunction(Config.FC_SCHEMAIMPORT);
                     config.setCreateFk(Config.CREATE_FK_YES);
                     config.setTidHandling(Config.TID_HANDLING_PROPERTY);
                     config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
-                    config.setCatalogueRefTrafo(null);
-                    config.setMultiSurfaceTrafo(null);
-                    config.setMultilingualTrafo(null);
                     config.setInheritanceTrafo(Config.INHERITANCE_TRAFO_SMART2);
                     Ili2db.readSettingsFromDb(config);
                     Ili2db.run(config,null);
@@ -864,6 +828,7 @@ public class Assoc23Test {
 			{
 				File data=new File(TEST_DATA_DIR,"Assoc2c.xtf");
 	    		Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+                Ili2db.setNoSmartMapping(config);
 	    		config.setFunction(Config.FC_IMPORT);
 	            config.setDoImplicitSchemaImport(true);
 	    		config.setCreateFk(Config.CREATE_FK_YES);
@@ -871,10 +836,6 @@ public class Assoc23Test {
 	    		config.setImportTid(true);
                 config.setImportBid(true);
 	    		config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
-	    		config.setCatalogueRefTrafo(null);
-	    		config.setMultiSurfaceTrafo(null);
-	    		config.setMultilingualTrafo(null);
-	    		config.setInheritanceTrafo(null);
 	    		config.setDatasetName(EXTREFFORWARD);
 	    		Ili2db.readSettingsFromDb(config);
 	    		Ili2db.run(config,null);
@@ -1733,13 +1694,10 @@ public class Assoc23Test {
             {
                 File data=new File(TEST_DATA_DIR,"AssocUpdate1.ili");
                 Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+                Ili2db.setNoSmartMapping(config);
                 config.setFunction(Config.FC_SCHEMAIMPORT);
                 config.setCreateFk(Config.CREATE_FK_YES);
                 config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
-                config.setCatalogueRefTrafo(null);
-                config.setMultiSurfaceTrafo(null);
-                config.setMultilingualTrafo(null);
-                config.setInheritanceTrafo(null);
                 Ili2db.readSettingsFromDb(config);
                 Ili2db.run(config,null);
                 {

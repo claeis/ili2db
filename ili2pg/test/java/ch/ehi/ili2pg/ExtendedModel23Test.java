@@ -78,6 +78,7 @@ public class ExtendedModel23Test {
 				{
 					File data=new File("test/data/ExtendedModel/ExtendedModel1.xtf");
 		    		Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+	                Ili2db.setNoSmartMapping(config);
 		    		config.setFunction(Config.FC_IMPORT);
 		            config.setDoImplicitSchemaImport(true);
 					config.setModels("BaseModel;ExtendedModel");
@@ -86,9 +87,6 @@ public class ExtendedModel23Test {
                     config.setImportBid(true);
 		    		config.setTidHandling(Config.TID_HANDLING_PROPERTY);
 		    		config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
-		    		config.setCatalogueRefTrafo(null);
-		    		config.setMultiSurfaceTrafo(null);
-		    		config.setMultilingualTrafo(null);
 		    		config.setInheritanceTrafo(Config.INHERITANCE_TRAFO_SMART1);
 		    		Ili2db.readSettingsFromDb(config);
 		    		Ili2db.run(config,null);
@@ -266,6 +264,7 @@ public class ExtendedModel23Test {
                 {
                     File data=new File("test/data/ExtendedModel/ExtendedModel1.xtf");
                     Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+                    Ili2db.setNoSmartMapping(config);
                     config.setFunction(Config.FC_IMPORT);
                     config.setDoImplicitSchemaImport(true);
                     config.setModels("BaseModel;ExtendedModel");
@@ -274,9 +273,6 @@ public class ExtendedModel23Test {
                     config.setImportBid(true);
                     config.setTidHandling(Config.TID_HANDLING_PROPERTY);
                     config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
-                    config.setCatalogueRefTrafo(null);
-                    config.setMultiSurfaceTrafo(null);
-                    config.setMultilingualTrafo(null);
                     config.setInheritanceTrafo(Config.INHERITANCE_TRAFO_SMART2);
                     Ili2db.readSettingsFromDb(config);
                     Ili2db.run(config,null);
