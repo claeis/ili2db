@@ -14,7 +14,7 @@ ideas/open issues/questions
 LATEST
 ---------------------------
 
-ili2db 4.10.0 (2022-11-02)
+ili2db 4.10.0 (2022-12-30)
 ------------------------------
 - ili24: LIST/BAG mit primitiven Typen (nicht nur mit Strukturen) (#471) 
 - support --option NULL (#500)
