@@ -13,13 +13,16 @@ ideas/open issues/questions
 
 LATEST
 ---------------------------
+
+ili2db 4.10.0 (2022-11-02)
+------------------------------
 - ili24: LIST/BAG mit primitiven Typen (nicht nur mit Strukturen) (#471) 
 - support --option NULL (#500)
 - implement --metaConfig (#392)
 - support ilidata:basketId as import file argument (#480)
 - create mandatory reference check with --coalesceCatalogueRef (#481)
-- iox-ili-1.21.15-SNAPSHOT
-- ili2c-5.3.2-SNAPSHOT
+- iox-ili-1.21.15
+- ili2c-5.3.2
 
 ili2db 4.9.1 (2022-11-02)
 ------------------------------
