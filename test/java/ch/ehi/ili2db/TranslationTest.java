@@ -110,6 +110,54 @@ public abstract class TranslationTest {
 		}
 	}
     @Test
+    public void importIli23assocref() throws Exception
+    {
+        Connection jdbcConnection=null;
+        try{
+            setup.resetDb();
+            jdbcConnection = setup.createConnection();
+            Statement stmt=jdbcConnection.createStatement();
+            {       
+                File data=new File(TEST_OUT,"Translation23.ili");
+                Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+                Ili2db.setNoSmartMapping(config);
+                config.setFunction(Config.FC_SCHEMAIMPORT);
+                config.setCreateFk(Config.CREATE_FK_YES);
+                config.setTidHandling(Config.TID_HANDLING_PROPERTY);
+                config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
+                config.setModels("Translation23_de;Translation23_fr");
+                config.setVer3_translation(false);
+                Ili2db.readSettingsFromDb(config);
+                Ili2db.run(config,null);
+                {
+                    // t_ili2db_attrname
+                    String [][] expectedValues=new String[][] {
+                        {"Translation23_de.TestB_de.ClassB1_de.attrRef_de", "classb1_de_attrref_de",   "structb0_de", "classb1_de"},
+                        {"Translation23_de.TestA_de.ClassA1_de.attrA_de",   "attra_de",    "classa1_de",  null},
+                        {"Translation23_de.TestB_de.ClassB1_de.attrB_de",   "attrb_de",    "classb1_de",  null},
+                        {"Translation23_de.TestB_de.a2b_de.a_de",   "a_de",    "classb1_de",  "classa1_de"},
+                        {"Translation23_de.TestB_de.StructB0_de.refA_de",   "refa_de", "structb0_de", "classa1_de"},
+                    };
+                    Ili2dbAssert.assertAttrNameTable(jdbcConnection, expectedValues, setup.getSchema());
+                }
+                {
+                    // t_ili2db_trafo
+                    String [][] expectedValues=new String[][] {
+                        {"Translation23_de.TestA_de.ClassA1_de",    "ch.ehi.ili2db.inheritance",   "newClass"},
+                        {"Translation23_de.TestB_de.StructB0_de",   "ch.ehi.ili2db.inheritance",   "newClass"},
+                        {"Translation23_de.TestB_de.a2b_de",        "ch.ehi.ili2db.inheritance",   "embedded"},
+                        {"Translation23_de.TestB_de.ClassB1_de",    "ch.ehi.ili2db.inheritance",   "newClass"},
+                    };
+                    Ili2dbAssert.assertTrafoTable(jdbcConnection,expectedValues, setup.getSchema());
+                }
+            }
+        }finally{
+            if(jdbcConnection!=null){
+                jdbcConnection.close();
+            }
+        }
+    }
+    @Test
     public void importIli23schemaDE_IT() throws Exception
     {
         Connection jdbcConnection=null;
@@ -424,6 +472,214 @@ public abstract class TranslationTest {
 			}
 		}	
 	}
+    @Test
+    public void importXtf23assoc_root2root() throws Exception
+    {
+        {
+            importIli23assocref();
+        }
+        Connection jdbcConnection=null;
+        try{
+            jdbcConnection = setup.createConnection();
+            Statement stmt=jdbcConnection.createStatement();
+            {
+                File data=new File(TEST_OUT,"assoc_root2root_Ok.xtf");
+                Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+                config.setFunction(Config.FC_IMPORT);
+                config.setImportBid(true);
+                config.setImportTid(true);
+                config.setDatasetName("assoc");
+                Ili2db.readSettingsFromDb(config);
+                Ili2db.run(config,null);
+            }
+        }finally{
+            if(jdbcConnection!=null){
+                jdbcConnection.close();
+            }
+        }   
+    }
+    @Test
+    public void importXtf23assoc_root2translated() throws Exception
+    {
+        {
+            importIli23assocref();
+        }
+        Connection jdbcConnection=null;
+        try{
+            jdbcConnection = setup.createConnection();
+            Statement stmt=jdbcConnection.createStatement();
+            {
+                File data=new File(TEST_OUT,"assoc_root2translated_Ok.xtf");
+                Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+                config.setFunction(Config.FC_IMPORT);
+                config.setImportBid(true);
+                config.setImportTid(true);
+                config.setDatasetName("assoc");
+                Ili2db.readSettingsFromDb(config);
+                Ili2db.run(config,null);
+            }
+        }finally{
+            if(jdbcConnection!=null){
+                jdbcConnection.close();
+            }
+        }   
+    }
+    @Test
+    public void importXtf23assoc_translated2translated() throws Exception
+    {
+        {
+            importIli23assocref();
+        }
+        Connection jdbcConnection=null;
+        try{
+            jdbcConnection = setup.createConnection();
+            Statement stmt=jdbcConnection.createStatement();
+            {
+                File data=new File(TEST_OUT,"assoc_translated2translated_Ok.xtf");
+                Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+                config.setFunction(Config.FC_IMPORT);
+                config.setImportBid(true);
+                config.setImportTid(true);
+                config.setDatasetName("assoc");
+                Ili2db.readSettingsFromDb(config);
+                Ili2db.run(config,null);
+            }
+        }finally{
+            if(jdbcConnection!=null){
+                jdbcConnection.close();
+            }
+        }   
+    }
+    @Test
+    public void importXtf23assoc_translated2root() throws Exception
+    {
+        {
+            importIli23assocref();
+        }
+        Connection jdbcConnection=null;
+        try{
+            jdbcConnection = setup.createConnection();
+            Statement stmt=jdbcConnection.createStatement();
+            {
+                File data=new File(TEST_OUT,"assoc_translated2root_Ok.xtf");
+                Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+                config.setFunction(Config.FC_IMPORT);
+                config.setImportBid(true);
+                config.setImportTid(true);
+                config.setDatasetName("assoc");
+                Ili2db.readSettingsFromDb(config);
+                Ili2db.run(config,null);
+            }
+        }finally{
+            if(jdbcConnection!=null){
+                jdbcConnection.close();
+            }
+        }   
+    }
+    @Test
+    public void importXtf23refattr_root2root() throws Exception
+    {
+        {
+            importIli23assocref();
+        }
+        Connection jdbcConnection=null;
+        try{
+            jdbcConnection = setup.createConnection();
+            Statement stmt=jdbcConnection.createStatement();
+            {
+                File data=new File(TEST_OUT,"refattr_root2root_Ok.xtf");
+                Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+                config.setFunction(Config.FC_IMPORT);
+                config.setImportBid(true);
+                config.setImportTid(true);
+                config.setDatasetName("assoc");
+                Ili2db.readSettingsFromDb(config);
+                Ili2db.run(config,null);
+            }
+        }finally{
+            if(jdbcConnection!=null){
+                jdbcConnection.close();
+            }
+        }   
+    }
+    @Test
+    public void importXtf23refattr_root2translated() throws Exception
+    {
+        {
+            importIli23assocref();
+        }
+        Connection jdbcConnection=null;
+        try{
+            jdbcConnection = setup.createConnection();
+            Statement stmt=jdbcConnection.createStatement();
+            {
+                File data=new File(TEST_OUT,"refattr_root2translated_Ok.xtf");
+                Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+                config.setFunction(Config.FC_IMPORT);
+                config.setImportBid(true);
+                config.setImportTid(true);
+                config.setDatasetName("assoc");
+                Ili2db.readSettingsFromDb(config);
+                Ili2db.run(config,null);
+            }
+        }finally{
+            if(jdbcConnection!=null){
+                jdbcConnection.close();
+            }
+        }   
+    }
+    @Test
+    public void importXtf23refattr_translated2translated() throws Exception
+    {
+        {
+            importIli23assocref();
+        }
+        Connection jdbcConnection=null;
+        try{
+            jdbcConnection = setup.createConnection();
+            Statement stmt=jdbcConnection.createStatement();
+            {
+                File data=new File(TEST_OUT,"refattr_translated2translated_Ok.xtf");
+                Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+                config.setFunction(Config.FC_IMPORT);
+                config.setImportBid(true);
+                config.setImportTid(true);
+                config.setDatasetName("assoc");
+                Ili2db.readSettingsFromDb(config);
+                Ili2db.run(config,null);
+            }
+        }finally{
+            if(jdbcConnection!=null){
+                jdbcConnection.close();
+            }
+        }   
+    }
+    @Test
+    public void importXtf23refattr_translated2root() throws Exception
+    {
+        {
+            importIli23assocref();
+        }
+        Connection jdbcConnection=null;
+        try{
+            jdbcConnection = setup.createConnection();
+            Statement stmt=jdbcConnection.createStatement();
+            {
+                File data=new File(TEST_OUT,"refattr_translated2root_Ok.xtf");
+                Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+                config.setFunction(Config.FC_IMPORT);
+                config.setImportBid(true);
+                config.setImportTid(true);
+                config.setDatasetName("assoc");
+                Ili2db.readSettingsFromDb(config);
+                Ili2db.run(config,null);
+            }
+        }finally{
+            if(jdbcConnection!=null){
+                jdbcConnection.close();
+            }
+        }   
+    }
     @Test
     public void importXtf23schemaDE_IT() throws Exception
     {

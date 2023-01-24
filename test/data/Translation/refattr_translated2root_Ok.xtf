@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?><TRANSFER xmlns="http://www.interlis.ch/INTERLIS2.3">
+<HEADERSECTION SENDER="IOX" VERSION="2.3"><MODELS><MODEL NAME="Translation23_de" VERSION="2021-09-07" URI="mailto:noreply@localhost"></MODEL><MODEL NAME="Translation23_fr" VERSION="2021-09-07" URI="mailto:noreply@localhost"></MODEL></MODELS></HEADERSECTION>
+<DATASECTION>
+<Translation23_de.TestA_de BID="b1">
+<Translation23_de.TestA_de.ClassA1_de TID="f72512fe-6813-4f00-9564-8682cdc8d5e6"></Translation23_de.TestA_de.ClassA1_de>
+</Translation23_de.TestA_de>
+<Translation23_fr.TestB_fr BID="b2">
+<Translation23_fr.TestB_fr.ClassB1_fr TID="82e60911-1779-4a4e-bcd4-ce3f3573f410"><attrRef_fr><Translation23_fr.TestB_fr.StructB0_fr><refA_fr REF="f72512fe-6813-4f00-9564-8682cdc8d5e6"></refA_fr></Translation23_fr.TestB_fr.StructB0_fr></attrRef_fr></Translation23_fr.TestB_fr.ClassB1_fr>
+</Translation23_fr.TestB_fr>
+</DATASECTION>
+</TRANSFER>
