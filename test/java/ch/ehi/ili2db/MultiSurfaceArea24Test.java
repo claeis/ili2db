@@ -157,6 +157,7 @@ public abstract class MultiSurfaceArea24Test {
         IomObject multiSurfaceAreaAttr = iomObj.getattrobj("geomAttr1", 0);
         assertNotNull(multiSurfaceAreaAttr);
         for (int i = 0; i < 2; i++) {
+            String x=i==0?"480000":"490000";
             IomObject surface = multiSurfaceAreaAttr.getattrobj("surface", i);
 
             assertEquals(1, surface.getattrcount());
@@ -198,19 +199,19 @@ public abstract class MultiSurfaceArea24Test {
                 IomObject coord4 = outerSequence.getattrobj("segment", 3);
                 assertNotNull(coord4);
 
-                assertEquals("480000.111", coord1.getattrvalue("C1"));
+                assertEquals(x+".111", coord1.getattrvalue("C1"));
                 assertEquals("70000.111", coord1.getattrvalue("C2"));
                 assertEquals("5000.111", coord1.getattrvalue("C3"));
 
-                assertEquals("480000.222", coord2.getattrvalue("C1"));
-                assertEquals("70000.222", coord2.getattrvalue("C2"));
-                assertEquals("5000.222", coord2.getattrvalue("C3"));
+                assertEquals(x+".999", coord2.getattrvalue("C1"));
+                assertEquals("70000.111", coord2.getattrvalue("C2"));
+                assertEquals("5000.111", coord2.getattrvalue("C3"));
 
-                assertEquals("480000.333", coord3.getattrvalue("C1"));
-                assertEquals("70000.333", coord3.getattrvalue("C2"));
-                assertEquals("5000.333", coord3.getattrvalue("C3"));
+                assertEquals(x+".999", coord3.getattrvalue("C1"));
+                assertEquals("70000.999", coord3.getattrvalue("C2"));
+                assertEquals("5000.111", coord3.getattrvalue("C3"));
 
-                assertEquals("480000.111", coord4.getattrvalue("C1"));
+                assertEquals(x+".111", coord4.getattrvalue("C1"));
                 assertEquals("70000.111", coord4.getattrvalue("C2"));
                 assertEquals("5000.111", coord4.getattrvalue("C3"));
                 
@@ -228,21 +229,21 @@ public abstract class MultiSurfaceArea24Test {
                 IomObject coord7 = innerSequence.getattrobj("segment", 3);
                 assertNotNull(coord7);
 
-                assertEquals("480000.444", coord4.getattrvalue("C1"));
-                assertEquals("70000.444", coord4.getattrvalue("C2"));
-                assertEquals("5000.444", coord4.getattrvalue("C3"));
+                assertEquals(x+".555", coord4.getattrvalue("C1"));
+                assertEquals("70000.222", coord4.getattrvalue("C2"));
+                assertEquals("5000.111", coord4.getattrvalue("C3"));
 
-                assertEquals("480000.555", coord5.getattrvalue("C1"));
-                assertEquals("70000.555", coord5.getattrvalue("C2"));
-                assertEquals("5000.555", coord5.getattrvalue("C3"));
+                assertEquals(x+".666", coord5.getattrvalue("C1"));
+                assertEquals("70000.222", coord5.getattrvalue("C2"));
+                assertEquals("5000.111", coord5.getattrvalue("C3"));
 
-                assertEquals("480000.666", coord6.getattrvalue("C1"));
+                assertEquals(x+".666", coord6.getattrvalue("C1"));
                 assertEquals("70000.666", coord6.getattrvalue("C2"));
-                assertEquals("5000.666", coord6.getattrvalue("C3"));
+                assertEquals("5000.111", coord6.getattrvalue("C3"));
 
-                assertEquals("480000.444", coord7.getattrvalue("C1"));
-                assertEquals("70000.444", coord7.getattrvalue("C2"));
-                assertEquals("5000.444", coord7.getattrvalue("C3"));
+                assertEquals(x+".555", coord7.getattrvalue("C1"));
+                assertEquals("70000.222", coord7.getattrvalue("C2"));
+                assertEquals("5000.111", coord7.getattrvalue("C3"));
                 
             }
         }

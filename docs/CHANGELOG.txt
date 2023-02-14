@@ -13,7 +13,7 @@ ideas/open issues/questions
 
 ili2db 4.10.1 (LATEST)
 ---------------------------
-- iox-ili-1.21.16
+- iox-ili-1.21.17-SNAPSHOT
 
 ili2db 4.10.0 (2022-12-30)
 ------------------------------
