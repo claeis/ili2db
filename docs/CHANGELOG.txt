@@ -13,7 +13,8 @@ ideas/open issues/questions
 
 ili2db 4.10.1 (LATEST)
 ---------------------------
-- iox-ili-1.21.17-SNAPSHOT
+- fix Bug --delete Flag im mehrsprachigen DMAV01 Modell (#504)
+- iox-ili-1.21.17
 
 ili2db 4.10.0 (2022-12-30)
 ------------------------------

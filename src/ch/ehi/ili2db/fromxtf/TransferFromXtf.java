@@ -78,6 +78,7 @@ import ch.interlis.ili2c.metamodel.View;
 import ch.interlis.ili2c.metamodel.Viewable;
 import ch.interlis.ili2c.metamodel.ViewableTransferElement;
 import ch.interlis.iom.IomObject;
+import ch.interlis.iom_j.Iom_jObject;
 import ch.interlis.iom_j.itf.ItfReader;
 import ch.interlis.iom_j.itf.ItfReader2;
 import ch.interlis.iom_j.itf.ModelUtilities;
@@ -781,13 +782,16 @@ public class TransferFromXtf {
         }
     }
 
-    private void dropExistingStructEles(String topic, long basketSqlId) {
+    private void dropExistingStructEles(String topic, long basketSqlId) throws Ili2dbException {
 		// get all structs that are reachable from this topic
 		HashSet<AbstractClassDef> classv=getStructs(topic);
 		// delete all structeles
 		HashSet<ViewableWrapper> visitedTables=new HashSet<ViewableWrapper>();
 		for(AbstractClassDef aclass1:classv){
 
+            if(languageFilter!=null){
+                aclass1 = (AbstractClassDef)translateViewable(aclass1);
+            }
 			ViewableWrapper wrapper = class2wrapper.get(aclass1);
 			
 			 while(wrapper!=null){
@@ -1159,6 +1163,9 @@ public class TransferFromXtf {
 			  }else if (!TransferToXtf.suppressViewable ((Viewable)obj))
 			  {
 					Viewable aclass1 = (Viewable) obj;
+					if(languageFilter!=null){
+					    aclass1 = translateViewable(aclass1);
+					}
 					ViewableWrapper wrapper = class2wrapper.get(aclass1);
 					
 					 while(wrapper!=null){
@@ -1240,6 +1247,21 @@ public class TransferFromXtf {
 		}
 		
 	}
+
+    private Viewable translateViewable(Viewable aclass1) throws Ili2dbException {
+        IomObject iomObj=new Iom_jObject(aclass1.getScopedName(),"dummy");
+        IoxEvent event=new ObjectEvent(iomObj);
+        try {
+            event=languageFilter.filter(event);
+            iomObj=((ObjectEvent) event).getIomObject();
+        } catch (IoxException e) {
+            throw new Ili2dbException("failed to translate "+aclass1.getScopedName(),e);
+        }
+        if(!iomObj.getobjecttag().equals(aclass1.getScopedName())) {
+           aclass1=(Viewable)tag2class.get(iomObj.getobjecttag()); 
+        }
+        return aclass1;
+    }
 
 	private void doObject(String datasetName,long basketSqlId, Map<String,String> genericDomains,IomObject iomObj,Map<String, ClassStat> objStat) {
 		try{
