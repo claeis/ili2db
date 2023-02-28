@@ -1,0 +1,70 @@
+INTERLIS 2.3;
+
+MODEL Translation23_de (de)
+    AT "mailto:noreply@localhost" VERSION "2021-09-07" =
+
+    TOPIC TestA_de =
+			OID AS INTERLIS.UUIDOID;
+
+        CLASS ClassA1_de =
+          attrA_de : TEXT*60;
+        END ClassA1_de;
+
+    END TestA_de;
+
+    TOPIC TestB_de =
+			OID AS INTERLIS.UUIDOID;
+			DEPENDS ON TestA_de;
+			
+        STRUCTURE StructB0_de =
+          refA_de : MANDATORY REFERENCE TO (EXTERNAL) Translation23_de.TestA_de.ClassA1_de;
+        END StructB0_de;
+			
+        CLASS ClassB1_de =
+          attrB_de : TEXT*60;
+          attrRef_de : StructB0_de;
+        END ClassB1_de;
+        
+        ASSOCIATION a2b_de =
+        	a_de (EXTERNAL) -- {0..1} Translation23_de.TestA_de.ClassA1_de;
+        	b_de  -- {0..*} ClassB1_de;
+        END a2b_de;
+
+    END TestB_de;
+    
+END Translation23_de.
+
+MODEL Translation23_fr (fr)
+    AT "mailto:noreply@localhost" VERSION "2021-09-07"
+    TRANSLATION OF Translation23_de ["2021-09-07"]
+    =
+    TOPIC TestA_fr =
+			OID AS INTERLIS.UUIDOID;
+			
+        CLASS ClassA1_fr =
+          attrA_fr : TEXT*60;
+        END ClassA1_fr;
+
+    END TestA_fr;
+
+    TOPIC TestB_fr =
+			OID AS INTERLIS.UUIDOID;
+			DEPENDS ON TestA_fr;
+
+        STRUCTURE StructB0_fr =
+          refA_fr : MANDATORY REFERENCE TO (EXTERNAL) Translation23_fr.TestA_fr.ClassA1_fr;
+        END StructB0_fr;
+
+        CLASS ClassB1_fr =
+          attrB_fr : TEXT*60;
+          attrRef_fr : StructB0_fr;
+        END ClassB1_fr;
+
+        ASSOCIATION a2b_fr =
+        	a_fr (EXTERNAL) -- {0..1} Translation23_fr.TestA_fr.ClassA1_fr;
+        	b_fr  -- {0..*} ClassB1_fr;
+        END a2b_fr;
+        
+    END TestB_fr;
+    
+END Translation23_fr.

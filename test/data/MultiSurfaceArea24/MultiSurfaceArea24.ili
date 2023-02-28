@@ -7,7 +7,7 @@ MODEL MultiSurfaceArea24
         !!@CRS=EPSG:2056
         Hkoord = COORD 480000.000 .. 850000.000 [INTERLIS.m],
                         70000.000 .. 310000.000 [INTERLIS.m],
-                              0.000 .. 5000.000 [INTERLIS.m];
+                              0.000 .. 6000.000 [INTERLIS.m];
 
     TOPIC TestA =
 

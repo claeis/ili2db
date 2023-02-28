@@ -110,19 +110,19 @@ public abstract class MultiPolyline24Test {
         assertNotNull(coord1);
         assertEquals("480000.111", coord1.getattrvalue("C1"));
         assertEquals("70000.111", coord1.getattrvalue("C2"));
-        assertEquals("5000.111", coord1.getattrvalue("C3"));
+        assertEquals("4000.111", coord1.getattrvalue("C3"));
 
         IomObject coord2 = sequence1.getattrobj("segment", 1);
         assertNotNull(coord2);
         assertEquals("480000.222", coord2.getattrvalue("C1"));
         assertEquals("70000.222", coord2.getattrvalue("C2"));
-        assertEquals("5000.222", coord2.getattrvalue("C3"));
+        assertEquals("4000.222", coord2.getattrvalue("C3"));
 
         IomObject coord3 = sequence1.getattrobj("segment", 2);
         assertNotNull(coord3);
         assertEquals("480000.333", coord3.getattrvalue("C1"));
         assertEquals("70000.333", coord3.getattrvalue("C2"));
-        assertEquals("5000.333", coord3.getattrvalue("C3"));
+        assertEquals("4000.333", coord3.getattrvalue("C3"));
 
         IomObject polyline2 = multiPolylineAttr.getattrobj("polyline", 1);
         assertNotNull(polyline2);
@@ -134,19 +134,19 @@ public abstract class MultiPolyline24Test {
         assertNotNull(coord4);
         assertEquals("480000.444", coord4.getattrvalue("C1"));
         assertEquals("70000.444", coord4.getattrvalue("C2"));
-        assertEquals("5000.444", coord4.getattrvalue("C3"));
+        assertEquals("4000.444", coord4.getattrvalue("C3"));
 
         IomObject coord5 = sequence2.getattrobj("segment", 1);
         assertNotNull(coord5);
         assertEquals("480000.555", coord5.getattrvalue("C1"));
         assertEquals("70000.555", coord5.getattrvalue("C2"));
-        assertEquals("5000.555", coord5.getattrvalue("C3"));
+        assertEquals("4000.555", coord5.getattrvalue("C3"));
 
         IomObject coord6 = sequence2.getattrobj("segment", 2);
         assertNotNull(coord6);
         assertEquals("480000.666", coord6.getattrvalue("C1"));
         assertEquals("70000.666", coord6.getattrvalue("C2"));
-        assertEquals("5000.666", coord6.getattrvalue("C3"));
+        assertEquals("4000.666", coord6.getattrvalue("C3"));
 
         assertTrue(reader.read() instanceof EndBasketEvent);
         assertTrue(reader.read() instanceof EndTransferEvent);

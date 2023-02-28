@@ -110,6 +110,54 @@ public abstract class TranslationTest {
 		}
 	}
     @Test
+    public void importIli23assocref() throws Exception
+    {
+        Connection jdbcConnection=null;
+        try{
+            setup.resetDb();
+            jdbcConnection = setup.createConnection();
+            Statement stmt=jdbcConnection.createStatement();
+            {       
+                File data=new File(TEST_OUT,"Translation23.ili");
+                Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+                Ili2db.setNoSmartMapping(config);
+                config.setFunction(Config.FC_SCHEMAIMPORT);
+                config.setCreateFk(Config.CREATE_FK_YES);
+                config.setTidHandling(Config.TID_HANDLING_PROPERTY);
+                config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
+                config.setModels("Translation23_de;Translation23_fr");
+                config.setVer3_translation(false);
+                Ili2db.readSettingsFromDb(config);
+                Ili2db.run(config,null);
+                {
+                    // t_ili2db_attrname
+                    String [][] expectedValues=new String[][] {
+                        {"Translation23_de.TestB_de.ClassB1_de.attrRef_de", "classb1_de_attrref_de",   "structb0_de", "classb1_de"},
+                        {"Translation23_de.TestA_de.ClassA1_de.attrA_de",   "attra_de",    "classa1_de",  null},
+                        {"Translation23_de.TestB_de.ClassB1_de.attrB_de",   "attrb_de",    "classb1_de",  null},
+                        {"Translation23_de.TestB_de.a2b_de.a_de",   "a_de",    "classb1_de",  "classa1_de"},
+                        {"Translation23_de.TestB_de.StructB0_de.refA_de",   "refa_de", "structb0_de", "classa1_de"},
+                    };
+                    Ili2dbAssert.assertAttrNameTable(jdbcConnection, expectedValues, setup.getSchema());
+                }
+                {
+                    // t_ili2db_trafo
+                    String [][] expectedValues=new String[][] {
+                        {"Translation23_de.TestA_de.ClassA1_de",    "ch.ehi.ili2db.inheritance",   "newClass"},
+                        {"Translation23_de.TestB_de.StructB0_de",   "ch.ehi.ili2db.inheritance",   "newClass"},
+                        {"Translation23_de.TestB_de.a2b_de",        "ch.ehi.ili2db.inheritance",   "embedded"},
+                        {"Translation23_de.TestB_de.ClassB1_de",    "ch.ehi.ili2db.inheritance",   "newClass"},
+                    };
+                    Ili2dbAssert.assertTrafoTable(jdbcConnection,expectedValues, setup.getSchema());
+                }
+            }
+        }finally{
+            if(jdbcConnection!=null){
+                jdbcConnection.close();
+            }
+        }
+    }
+    @Test
     public void importIli23schemaDE_IT() throws Exception
     {
         Connection jdbcConnection=null;
@@ -393,6 +441,19 @@ public abstract class TranslationTest {
 	    		config.setDatasetName("EnumOka");
 	    		Ili2db.readSettingsFromDb(config);
 	    		Ili2db.run(config,null);
+	        }
+            {
+                File data=new File(TEST_OUT,"EnumOkb.xtf");
+                Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+                Ili2db.setNoSmartMapping(config);
+                config.setFunction(Config.FC_IMPORT);
+                config.setImportBid(true);
+                config.setImportTid(true);
+                config.setDatasetName("EnumOkb");
+                Ili2db.readSettingsFromDb(config);
+                Ili2db.run(config,null);
+            }
+	        {
 	    		// tid's of class[a]
 	    		HashSet<String> expectedTids= new HashSet<String>(Arrays.asList(new String[]{"o1","o2","x1","x2"}));
 				Assert.assertTrue(stmt.execute("SELECT t_id, t_ili_tid FROM "+setup.prefixName("classx")));
@@ -425,6 +486,214 @@ public abstract class TranslationTest {
 		}	
 	}
     @Test
+    public void importXtf23assoc_root2root() throws Exception
+    {
+        {
+            importIli23assocref();
+        }
+        Connection jdbcConnection=null;
+        try{
+            jdbcConnection = setup.createConnection();
+            Statement stmt=jdbcConnection.createStatement();
+            {
+                File data=new File(TEST_OUT,"assoc_root2root_Ok.xtf");
+                Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+                config.setFunction(Config.FC_IMPORT);
+                config.setImportBid(true);
+                config.setImportTid(true);
+                config.setDatasetName("assoc");
+                Ili2db.readSettingsFromDb(config);
+                Ili2db.run(config,null);
+            }
+        }finally{
+            if(jdbcConnection!=null){
+                jdbcConnection.close();
+            }
+        }   
+    }
+    @Test
+    public void importXtf23assoc_root2translated() throws Exception
+    {
+        {
+            importIli23assocref();
+        }
+        Connection jdbcConnection=null;
+        try{
+            jdbcConnection = setup.createConnection();
+            Statement stmt=jdbcConnection.createStatement();
+            {
+                File data=new File(TEST_OUT,"assoc_root2translated_Ok.xtf");
+                Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+                config.setFunction(Config.FC_IMPORT);
+                config.setImportBid(true);
+                config.setImportTid(true);
+                config.setDatasetName("assoc");
+                Ili2db.readSettingsFromDb(config);
+                Ili2db.run(config,null);
+            }
+        }finally{
+            if(jdbcConnection!=null){
+                jdbcConnection.close();
+            }
+        }   
+    }
+    @Test
+    public void importXtf23assoc_translated2translated() throws Exception
+    {
+        {
+            importIli23assocref();
+        }
+        Connection jdbcConnection=null;
+        try{
+            jdbcConnection = setup.createConnection();
+            Statement stmt=jdbcConnection.createStatement();
+            {
+                File data=new File(TEST_OUT,"assoc_translated2translated_Ok.xtf");
+                Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+                config.setFunction(Config.FC_IMPORT);
+                config.setImportBid(true);
+                config.setImportTid(true);
+                config.setDatasetName("assoc");
+                Ili2db.readSettingsFromDb(config);
+                Ili2db.run(config,null);
+            }
+        }finally{
+            if(jdbcConnection!=null){
+                jdbcConnection.close();
+            }
+        }   
+    }
+    @Test
+    public void importXtf23assoc_translated2root() throws Exception
+    {
+        {
+            importIli23assocref();
+        }
+        Connection jdbcConnection=null;
+        try{
+            jdbcConnection = setup.createConnection();
+            Statement stmt=jdbcConnection.createStatement();
+            {
+                File data=new File(TEST_OUT,"assoc_translated2root_Ok.xtf");
+                Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+                config.setFunction(Config.FC_IMPORT);
+                config.setImportBid(true);
+                config.setImportTid(true);
+                config.setDatasetName("assoc");
+                Ili2db.readSettingsFromDb(config);
+                Ili2db.run(config,null);
+            }
+        }finally{
+            if(jdbcConnection!=null){
+                jdbcConnection.close();
+            }
+        }   
+    }
+    @Test
+    public void importXtf23refattr_root2root() throws Exception
+    {
+        {
+            importIli23assocref();
+        }
+        Connection jdbcConnection=null;
+        try{
+            jdbcConnection = setup.createConnection();
+            Statement stmt=jdbcConnection.createStatement();
+            {
+                File data=new File(TEST_OUT,"refattr_root2root_Ok.xtf");
+                Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+                config.setFunction(Config.FC_IMPORT);
+                config.setImportBid(true);
+                config.setImportTid(true);
+                config.setDatasetName("assoc");
+                Ili2db.readSettingsFromDb(config);
+                Ili2db.run(config,null);
+            }
+        }finally{
+            if(jdbcConnection!=null){
+                jdbcConnection.close();
+            }
+        }   
+    }
+    @Test
+    public void importXtf23refattr_root2translated() throws Exception
+    {
+        {
+            importIli23assocref();
+        }
+        Connection jdbcConnection=null;
+        try{
+            jdbcConnection = setup.createConnection();
+            Statement stmt=jdbcConnection.createStatement();
+            {
+                File data=new File(TEST_OUT,"refattr_root2translated_Ok.xtf");
+                Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+                config.setFunction(Config.FC_IMPORT);
+                config.setImportBid(true);
+                config.setImportTid(true);
+                config.setDatasetName("assoc");
+                Ili2db.readSettingsFromDb(config);
+                Ili2db.run(config,null);
+            }
+        }finally{
+            if(jdbcConnection!=null){
+                jdbcConnection.close();
+            }
+        }   
+    }
+    @Test
+    public void importXtf23refattr_translated2translated() throws Exception
+    {
+        {
+            importIli23assocref();
+        }
+        Connection jdbcConnection=null;
+        try{
+            jdbcConnection = setup.createConnection();
+            Statement stmt=jdbcConnection.createStatement();
+            {
+                File data=new File(TEST_OUT,"refattr_translated2translated_Ok.xtf");
+                Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+                config.setFunction(Config.FC_IMPORT);
+                config.setImportBid(true);
+                config.setImportTid(true);
+                config.setDatasetName("assoc");
+                Ili2db.readSettingsFromDb(config);
+                Ili2db.run(config,null);
+            }
+        }finally{
+            if(jdbcConnection!=null){
+                jdbcConnection.close();
+            }
+        }   
+    }
+    @Test
+    public void importXtf23refattr_translated2root() throws Exception
+    {
+        {
+            importIli23assocref();
+        }
+        Connection jdbcConnection=null;
+        try{
+            jdbcConnection = setup.createConnection();
+            Statement stmt=jdbcConnection.createStatement();
+            {
+                File data=new File(TEST_OUT,"refattr_translated2root_Ok.xtf");
+                Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+                config.setFunction(Config.FC_IMPORT);
+                config.setImportBid(true);
+                config.setImportTid(true);
+                config.setDatasetName("assoc");
+                Ili2db.readSettingsFromDb(config);
+                Ili2db.run(config,null);
+            }
+        }finally{
+            if(jdbcConnection!=null){
+                jdbcConnection.close();
+            }
+        }   
+    }
+    @Test
     public void importXtf23schemaDE_IT() throws Exception
     {
         {
@@ -443,6 +712,18 @@ public abstract class TranslationTest {
                 config.setDatasetName("EnumOka");
                 Ili2db.readSettingsFromDb(config);
                 Ili2db.run(config,null);
+            }
+            {
+                File data=new File(TEST_OUT,"EnumOkb.xtf");
+                Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+                config.setFunction(Config.FC_IMPORT);
+                config.setImportBid(true);
+                config.setImportTid(true);
+                config.setDatasetName("EnumOkb");
+                Ili2db.readSettingsFromDb(config);
+                Ili2db.run(config,null);
+            }
+            {
                 // tid's of class[a]
                 HashSet<String> expectedTids= new HashSet<String>(Arrays.asList(new String[]{"o1","o2","x1","x2"}));
                 HashSet<String> expectedIds= new HashSet<String>();
@@ -505,7 +786,7 @@ public abstract class TranslationTest {
 			Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
 			config.setFunction(Config.FC_EXPORT);
 			config.setExportTid(true);
-			config.setDatasetName("EnumOka");
+            config.setBaskets("EnumOkA.Test1;EnumOkB.Test1");
 			Ili2db.readSettingsFromDb(config);
 			Ili2db.run(config,null);
 			
@@ -597,6 +878,89 @@ public abstract class TranslationTest {
 		}
 	}
     @Test
+    public void deleteXtf23BasketA() throws Exception
+    {
+        Connection jdbcConnection=null;
+        ResultSet rs=null;
+        {
+            importXtf23();
+        }
+        try{
+            jdbcConnection = setup.createConnection();
+            Statement stmt=jdbcConnection.createStatement();
+            
+            //EhiLogger.getInstance().setTraceFilter(false);
+            File data=new File(TEST_OUT,"EnumOka-out.xtf");
+            Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+            config.setFunction(Config.FC_DELETE);
+            config.setDatasetName("EnumOka");
+            Ili2db.readSettingsFromDb(config);
+            Ili2db.run(config,null);
+
+            // tid's of class[a]
+            HashSet<String> expectedTids= new HashSet<String>(Arrays.asList(new String[]{ //"o1","o2",
+                                                                                            "x1","x2"}));
+            Assert.assertTrue(stmt.execute("SELECT t_id, t_ili_tid FROM "+setup.prefixName("classx")));
+            {
+                rs=stmt.getResultSet();
+                while(!expectedTids.isEmpty()) {
+                    Assert.assertTrue(rs.next());
+                    String tid=rs.getString(2);
+                    assertTrue(expectedTids.remove(tid));
+                }
+                Assert.assertFalse(rs.next());
+                assertTrue(expectedTids.isEmpty());
+            }
+            
+        }finally{
+            if(jdbcConnection!=null){
+                jdbcConnection.close();
+            }
+        }
+    }
+    @Test
+    public void deleteXtf23BasketB() throws Exception
+    {
+        Connection jdbcConnection=null;
+        ResultSet rs=null;
+        {
+            importXtf23();
+        }
+        try{
+            jdbcConnection = setup.createConnection();
+            Statement stmt=jdbcConnection.createStatement();
+            
+            //EhiLogger.getInstance().setTraceFilter(false);
+            File data=new File(TEST_OUT,"EnumOka-out.xtf");
+            Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+            config.setFunction(Config.FC_DELETE);
+            config.setDatasetName("EnumOkb");
+            Ili2db.readSettingsFromDb(config);
+            Ili2db.run(config,null);
+
+            // tid's of class[a]
+            HashSet<String> expectedTids= new HashSet<String>(Arrays.asList(new String[]{ "o1","o2",
+                                                                                          //  "x1","x2"
+                    }));
+            Assert.assertTrue(stmt.execute("SELECT t_id, t_ili_tid FROM "+setup.prefixName("classx")));
+            {
+                rs=stmt.getResultSet();
+                while(!expectedTids.isEmpty()) {
+                    Assert.assertTrue(rs.next());
+                    String tid=rs.getString(2);
+                    assertTrue(expectedTids.remove(tid));
+                }
+                Assert.assertFalse(rs.next());
+                assertTrue(expectedTids.isEmpty());
+            }
+            
+        }finally{
+            if(jdbcConnection!=null){
+                jdbcConnection.close();
+            }
+        }
+    }
+    @Test
     public void exportXtf23schemaDE_IT_Original() throws Exception
     {
         Connection jdbcConnection=null;
@@ -612,7 +976,7 @@ public abstract class TranslationTest {
             Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
             config.setFunction(Config.FC_EXPORT);
             config.setExportTid(true);
-            config.setDatasetName("EnumOka");
+            config.setBaskets("EnumOkA.Test1;EnumOkB.Test1");
             Ili2db.readSettingsFromDb(config);
             Ili2db.run(config,null);
             
@@ -745,7 +1109,7 @@ public abstract class TranslationTest {
             Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
             config.setFunction(Config.FC_EXPORT);
             config.setExportTid(true);
-            config.setDatasetName("EnumOka");
+            config.setBaskets("EnumOkA.Test1;EnumOkB.Test1");
             config.setExportModels("EnumOkB");
             Ili2db.readSettingsFromDb(config);
             Ili2db.run(config,null);
@@ -847,7 +1211,7 @@ public abstract class TranslationTest {
             Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
             config.setFunction(Config.FC_EXPORT);
             config.setExportTid(true);
-            config.setDatasetName("EnumOka");
+            config.setBaskets("EnumOkA.Test1;EnumOkB.Test1");
             config.setExportModels("EnumOkB");
             Ili2db.readSettingsFromDb(config);
             Ili2db.run(config,null);
@@ -941,7 +1305,7 @@ public abstract class TranslationTest {
             Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
             config.setFunction(Config.FC_EXPORT);
             config.setExportTid(true);
-            config.setDatasetName("EnumOka");
+            config.setBaskets("EnumOkA.Test1;EnumOkB.Test1");
             config.setExportModels("EnumOkA");
             Ili2db.readSettingsFromDb(config);
             Ili2db.run(config,null);
@@ -1043,7 +1407,7 @@ public abstract class TranslationTest {
             Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
             config.setFunction(Config.FC_EXPORT);
             config.setExportTid(true);
-            config.setDatasetName("EnumOka");
+            config.setBaskets("EnumOkA.Test1;EnumOkB.Test1");
             config.setExportModels("EnumOkA");
             Ili2db.readSettingsFromDb(config);
             Ili2db.run(config,null);
@@ -1489,6 +1853,92 @@ public abstract class TranslationTest {
 			}
 		}
 	}
+    @Test
+    public void deleteItf10DatasetA() throws Exception
+    {
+        Connection jdbcConnection=null;
+        ResultSet rs=null;
+        Statement stmt=null;
+        {
+            importItf10();
+        }
+        try{
+            jdbcConnection = setup.createConnection();
+            stmt=jdbcConnection.createStatement();
+            {
+                {
+                    File data=new File(TEST_OUT,"ModelAsimple10a-out.itf");
+                    Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+                    config.setFunction(Config.FC_DELETE);
+                    config.setDatasetName("ModelAsimple10");
+                    Ili2db.readSettingsFromDb(config);
+                    Ili2db.run(config,null);
+                    
+                    
+                }
+                {
+                    rs=stmt.executeQuery("SELECT count(*) FROM "+setup.prefixName("classa")+" where classa.attra in ('o10','o11')");
+                    Assert.assertTrue(rs.next());
+                    Assert.assertEquals(0, rs.getLong(1));
+                    rs.close();
+                    rs=null;
+                }
+                {
+                    rs=stmt.executeQuery("SELECT count(*) FROM "+setup.prefixName("classa")+" where classa.attra in ('o20','o21')");
+                    Assert.assertTrue(rs.next());
+                    Assert.assertEquals(2, rs.getLong(1));
+                    rs.close();
+                    rs=null;
+                }
+            }
+        }finally{
+            if(jdbcConnection!=null){
+                jdbcConnection.close();
+            }
+        }
+    }
+    @Test
+    public void deleteItf10DatasetB() throws Exception
+    {
+        Connection jdbcConnection=null;
+        ResultSet rs=null;
+        Statement stmt=null;
+        {
+            importItf10();
+        }
+        try{
+            jdbcConnection = setup.createConnection();
+            stmt=jdbcConnection.createStatement();
+            {
+                {
+                    File data2=new File(TEST_OUT,"ModelBsimple10a-out.itf");
+                    Config config=setup.initConfig(data2.getPath(),data2.getPath()+".log");
+                    config.setFunction(Config.FC_DELETE);
+                    config.setDatasetName("ModelBsimple10");
+                    Ili2db.readSettingsFromDb(config);
+                    Ili2db.run(config,null);
+                }
+                {
+                    rs=stmt.executeQuery("SELECT count(*) FROM "+setup.prefixName("classa")+" where classa.attra in ('o10','o11')");
+                    Assert.assertTrue(rs.next());
+                    Assert.assertEquals(2, rs.getLong(1));
+                    rs.close();
+                    rs=null;
+                }
+                {
+                    rs=stmt.executeQuery("SELECT count(*) FROM "+setup.prefixName("classa")+" where classa.attra in ('o20','o21')");
+                    Assert.assertTrue(rs.next());
+                    Assert.assertEquals(0, rs.getLong(1));
+                    rs.close();
+                    rs=null;
+                }
+            }
+        }finally{
+            if(jdbcConnection!=null){
+                jdbcConnection.close();
+            }
+        }
+    }
     @Test
     public void exportItf10Multi() throws Exception
     {
