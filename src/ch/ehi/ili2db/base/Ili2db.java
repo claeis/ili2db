@@ -70,6 +70,7 @@ import ch.ehi.sqlgen.repository.DbTable;
 import ch.ehi.sqlgen.repository.DbTableName;
 import ch.interlis.ili2c.Ili2cException;
 import ch.interlis.ili2c.config.Configuration;
+import ch.interlis.ili2c.config.FileEntry;
 import ch.interlis.ili2c.gui.UserSettings;
 import ch.interlis.ili2c.metamodel.Element;
 import ch.interlis.ili2c.metamodel.Ili2cMetaAttrs;
@@ -2281,22 +2282,15 @@ public class Ili2db {
 					basketSqlIds=getBasketSqlIdsFromModel(modelnames,modelv,conn,config);
 				}else{
 					exportModelnames=getModelNames(models);
-					for(int modeli=0;modeli<exportModelnames.length;modeli++){
-						String m=exportModelnames[modeli];
-						if(m.equals(XTF)){
-							// TODO read modelname from db
-						}
-						modelv.addFileEntry(new ch.interlis.ili2c.config.FileEntry(m,ch.interlis.ili2c.config.FileEntryKind.ILIMODELFILE));				
-					}
 				}
 			}
+            addModelsToIli2cConfig(modelv,getModelFromValidationConfig(config.getValidConfigFile()));
+            addModelsToIli2cConfig(modelv,getModelNames(models));
 			if(modelv.getSizeFileEntry()==0){
 				throw new Ili2dbException("no models given");
 			}
 			if(config.getExportModels()!=null) {
-	            for(String modelName:getModelNames(config.getExportModels())) {
-	                modelv.addFileEntry(new ch.interlis.ili2c.config.FileEntry(modelName,ch.interlis.ili2c.config.FileEntryKind.ILIMODELFILE));             
-	            }
+			    addModelsToIli2cConfig(modelv,getModelNames(config.getExportModels()));
 			}
 			
 
@@ -2455,7 +2449,41 @@ public class Ili2db {
 			}
 		}
 	}
-	private static Connection connect(String url, String dbusr, String dbpwd,
+	private static String[] getModelFromValidationConfig(String validConfigFile) {
+	    if(validConfigFile==null) {
+	        return null;
+	    }
+        ValidationConfig modelConfig=new ValidationConfig();
+        try {
+            modelConfig.mergeConfigFile(new File(validConfigFile));
+        } catch (java.io.IOException e) {
+            EhiLogger.logError("failed to read validator config file <"+validConfigFile+">");
+        }
+        String models=modelConfig.getConfigValue(ValidationConfig.PARAMETER,ValidationConfig.ADDITIONAL_MODELS);
+        return getModelNames(models);
+    }
+    private static void addModelsToIli2cConfig(Configuration modelv, String[] modelNames) {
+        if(modelNames==null || modelNames.length==0) {
+            return;
+        }
+	    java.util.Set<String> models=new HashSet<String>();
+	    for(Iterator<FileEntry> ili2cFileIt=modelv.iteratorFileEntry();ili2cFileIt.hasNext();) {
+	        FileEntry ili2cFile=ili2cFileIt.next();
+	        if(ili2cFile.getKind()==ch.interlis.ili2c.config.FileEntryKind.ILIMODELFILE) {
+	            models.add(ili2cFile.getFilename());
+	        }
+	    }
+        for(int modeli=0;modeli<modelNames.length;modeli++){
+            String m=modelNames[modeli];
+            if(!m.equals(XTF)){
+                if(!models.contains(m)) {
+                    modelv.addFileEntry(new ch.interlis.ili2c.config.FileEntry(m,ch.interlis.ili2c.config.FileEntryKind.ILIMODELFILE));             
+                    models.add(m);
+                }
+            }
+        }
+    }
+    private static Connection connect(String url, String dbusr, String dbpwd,
 			Config config, CustomMapping customMapping) throws SQLException, IOException {
 		Connection conn;
 		EhiLogger.logState("dburl <" + url + ">");
@@ -3177,6 +3205,9 @@ public class Ili2db {
 		return ret;
 	}
 	public static String[] getModelNames(String models) {
+	    if(models==null) {
+	        return null;
+	    }
 		String modelnames[]=models.split(ch.interlis.ili2c.Main.MODELS_SEPARATOR);
 		return modelnames;
 	}

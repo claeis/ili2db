@@ -1,0 +1,21 @@
+INTERLIS 2.3;
+
+MODEL Simple23Zusatz
+  AT "mailto:ce@eisenhutinformatik.ch" VERSION "2016-12-21" =
+  IMPORTS Simple23;
+
+
+  VIEW TOPIC Simple23Zusatz =
+  DEPENDS ON Simple23.TestA;
+
+
+    VIEW ClassA1View
+    	PROJECTION OF Simple23.TestA.ClassA1;
+    =
+      ALL OF ClassA1;
+      MANDATORY CONSTRAINT INTERLIS.len(attr1)==2;
+    END ClassA1View;
+    
+  END Simple23Zusatz;
+    
+END Simple23Zusatz.
