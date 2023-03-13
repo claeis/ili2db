@@ -115,6 +115,7 @@ public class Config extends Settings {
     public static final String CLASSNAME_TAB_ILINAME_COLSIZE = PREFIX+".classnameTabIlinameColSize";
     public static final String INHERIT_TAB_THIS_COLSIZE = PREFIX+".inheritTabThisColSize";
 	public static final String CREATE_TYPE_CONSTRAINT=PREFIX+".createTypeConstraint";
+    public static final String METACONFIGFILENAME=PREFIX+".metaConfigFileName";
 
     public static final String METACONFIG_ILI2DB="ch.ehi.ili2db";
 	
@@ -151,7 +152,6 @@ public class Config extends Settings {
     public static final String TRANSIENT_STRING_XTFLOGFILE=PREFIX+".xtfLogfile";
     public static final String TRANSIENT_STRING_VALIDCONFIGFILENAME=PREFIX+".validConfigFileName";
     public static final String TRANSIENT_STRING_REFERENCEDATA=PREFIX+".referenceData";
-    public static final String TRANSIENT_STRING_METACONFIGFILENAME=PREFIX+".metaConfigFileName";
     public static final String TRANSIENT_STRING_ILIMETAATTRSFILE=PREFIX+".iliMetaAttrsFile";
     public static final String TRANSIENT_STRING_DOMAINASSIGNMENTS=PREFIX+".domainAssignments";
     public static final String TRANSIENT_STRING_TRANSFERFILEFORMAT=PREFIX+".transferFileFormat";
@@ -698,10 +698,10 @@ public class Config extends Settings {
         setTransientObject(TRANSIENT_BOOLEAN_ITFTRANSFERFILE,new Boolean(value));
 	}
     public String getMetaConfigFile() {
-        return getTransientValue(TRANSIENT_STRING_METACONFIGFILENAME);
+        return getValue(METACONFIGFILENAME);
     }
     public void setMetaConfigFile(String fileName) {
-        setTransientValue(TRANSIENT_STRING_METACONFIGFILENAME,fileName);
+        setValue(METACONFIGFILENAME,fileName);
     }
 	public String getValidConfigFile() {
 		return getTransientValue(TRANSIENT_STRING_VALIDCONFIGFILENAME);
