@@ -171,6 +171,31 @@ public class Dataset23Smart1Test {
             }
         }
     }
+    @Test
+    public void deleteXtfDatasetEmpty() throws Exception
+    {
+        {
+            importXtfDatasetEmpty();
+        }
+        Connection jdbcConnection=null;
+        try{
+            Class driverClass = Class.forName("org.postgresql.Driver");
+            {
+                {
+                    File data=new File("test/data/Dataset23Smart1/Dataset1c2.xtf");
+                    Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+                    config.setDatasetName(DATASETNAME_A);
+                    config.setFunction(Config.FC_DELETE);
+                    Ili2db.readSettingsFromDb(config);
+                    Ili2db.run(config,null);
+                }
+            }
+        }finally{
+            if(jdbcConnection!=null){
+                jdbcConnection.close();
+            }
+        }
+    }
 	@Test
 	public void importXtfNoDatasetName() throws Exception
 	{

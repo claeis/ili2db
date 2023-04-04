@@ -592,7 +592,11 @@ public class Ili2db {
 				}
 				
 				if(modelv.getSizeFileEntry()==0){
-					throw new Ili2dbException("no models given");
+				    if(function == Config.FC_DELETE) {
+				        ; // ok; create later an empty TransferDescription
+				    }else {
+	                    throw new Ili2dbException("no models given");
+				    }
 				}
 
 				
@@ -608,13 +612,19 @@ public class Ili2db {
 			    setupIli2cMetaAttrs(ili2cMetaAttrs,config,ili2cConfig);
 				
 				EhiLogger.logState("compile models...");
-				ili2cConfig.setAutoCompleteModelList(true);
-				ili2cConfig.setGenerateWarnings(false);
-				if(iliVersion!=null) {
-	                config.setValue(UserSettings.ILI_LANGUAGE_VERSION, iliVersion);
-				}
-				TransferDescription td = ch.interlis.ili2c.Main.runCompiler(ili2cConfig,
-						config,ili2cMetaAttrs);
+                TransferDescription td = null;
+                if(modelv.getSizeFileEntry()==0 && function == Config.FC_DELETE) {
+                    td = new TransferDescription();
+                }else {
+                    ili2cConfig.setAutoCompleteModelList(true);
+                    ili2cConfig.setGenerateWarnings(false);
+                    if(iliVersion!=null) {
+                        config.setValue(UserSettings.ILI_LANGUAGE_VERSION, iliVersion);
+                    }
+                    td = ch.interlis.ili2c.Main.runCompiler(ili2cConfig,
+                            config,ili2cMetaAttrs);
+                }
+				
 				if (td == null) {
 					throw new Ili2dbException("compiler failed");
 				}
