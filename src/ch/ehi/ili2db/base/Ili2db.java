@@ -3056,10 +3056,16 @@ public class Ili2db {
 	    if(function==Config.FC_VALIDATE) {
 	        try{
 	            TransferToXtf trsfr=new TransferToXtf(ili2sqlName,td,conn,geomConv,config,trafoConfig,class2wrapper);
-	            trsfr.doit(function,customMapping.shortenConnectUrl4Log(config.getDburl()),null,sender,exportParamModelnames,basketSqlIds,stat,customMapping);
+	            String url=config.getDburl();
+	            if(url==null) {
+	                url=conn.getMetaData().getURL();
+	            }
+	            trsfr.doit(function,customMapping.shortenConnectUrl4Log(url),null,sender,exportParamModelnames,basketSqlIds,stat,customMapping);
 	        }catch(ch.interlis.iox.IoxException ex){
 	            EhiLogger.logError("failed to validate data from db",ex);
 	        } catch (Ili2dbException ex) {
+                EhiLogger.logError("failed to validate data from db",ex);
+            } catch (SQLException ex) {
                 EhiLogger.logError("failed to validate data from db",ex);
             }
 	    }else {
