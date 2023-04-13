@@ -792,149 +792,155 @@ public class Ili2db {
                         EhiLogger.logError("failed to delete data from db",ex);
                     } catch (Ili2dbException ex) {
                         EhiLogger.logError("failed to delete data from db",ex);
+                    }finally {
+                        trsfr.doitFinally();
                     }
                 }else {
                     TransferFromXtf trsfr=new TransferFromXtf(function,mapping,td,conn,dbusr,geomConverter,idGen,config,trafoConfig,class2wrapper);
-                    for(String inputFilename:inputs) {
-                        if(isItfFilename(inputFilename)){
-                            config.setValue(ch.interlis.iox_j.validator.Validator.CONFIG_DO_ITF_OIDPERTABLE, ch.interlis.iox_j.validator.Validator.CONFIG_DO_ITF_OIDPERTABLE_DO);
-                        }
-                    }
-                    try{
-                        trsfr.doitStart(config,stat,customMapping,inputs[inputs.length-1]);
-                    }catch(ch.interlis.iox.IoxException ex){
-                        EhiLogger.logError("failed to transfer data from file to db",ex);
-                    } catch (Ili2dbException ex) {
-                        EhiLogger.logError("failed to transfer data from file to db",ex);
-                    }
-                    for(String inputFilename:inputs) {
-                        OutParam<java.util.zip.ZipEntry> zipXtfEntry=new OutParam<java.util.zip.ZipEntry>();
-                        java.util.zip.ZipFile zipFile;
-                        try {
-                            zipFile = getZipFileEntry(inputFilename,zipXtfEntry);
-                        } catch (IOException e1) {
-                            throw new Ili2dbException(e1);
-                        }
-                        if(zipXtfEntry.value!=null){
-                            IoxReader ioxReader=null;
-                            java.io.InputStream in = null;
-                            try {
-                                String xtfFilename=zipXtfEntry.value.getName();
-                                  EhiLogger.logState("data <"+inputFilename+":"+xtfFilename+">");
-                                in = zipFile.getInputStream(zipXtfEntry.value);
-                                if(isItfFilename(xtfFilename)){
-                                    if(config.getDoItfLineTables()){
-                                        ioxReader=new ItfReader(in);
-                                        ((ItfReader)ioxReader).setModel(td);        
-                                    }else{
-                                        ioxReader=new ItfReader2(in,config.isSkipGeometryErrors());
-                                        ((ItfReader2)ioxReader).setModel(td);       
-                                    }
-                                }else{
-                                    ioxReader=new XtfReader(in);
-                                }
-                                try{
-                                    trsfr.doit(xtfFilename,ioxReader,stat);
-                                }catch(ch.interlis.iox.IoxException ex){
-                                	EhiLogger.logError("failed to transfer data from file to db",ex);
-                                } catch (Ili2dbException ex) {
-                                	EhiLogger.logError("failed to transfer data from file to db",ex);
-                                }
-                            } catch (IOException ex) {
-                                throw new Ili2dbException(ex);
-                            } catch (IoxException ex) {
-                                throw new Ili2dbException(ex);
-                            }finally{
-                                if(ioxReader!=null){
-                                    try {
-                                        ioxReader.close();
-                                    } catch (IoxException e) {
-                                        throw new Ili2dbException(e);
-                                    }
-                                    ioxReader=null;
-                                }
-                                if(in!=null){
-                                    try {
-                                        in.close();
-                                    } catch (IOException e) {
-                                        throw new Ili2dbException(e);
-                                    }
-                                    in=null;
-                                }
+                    try {
+                        for(String inputFilename:inputs) {
+                            if(isItfFilename(inputFilename)){
+                                config.setValue(ch.interlis.iox_j.validator.Validator.CONFIG_DO_ITF_OIDPERTABLE, ch.interlis.iox_j.validator.Validator.CONFIG_DO_ITF_OIDPERTABLE_DO);
                             }
-                            // save attachments
-                            String attachmentKey=config.getAttachmentKey();
-                            String attachmentsBase=config.getAttachmentsPath();
-                            if(attachmentsBase!=null){
-                                java.io.File basePath=new java.io.File(attachmentsBase,attachmentKey);
-                                java.util.Enumeration filei=zipFile.entries();
-                                while(filei.hasMoreElements()){
-                                    java.util.zip.ZipEntry zipEntry=(java.util.zip.ZipEntry)filei.nextElement();
-                                    if(!zipXtfEntry.value.getName().equals(zipEntry.getName())){
-                                        // save file
-                                        java.io.File destFile=new java.io.File(basePath,zipEntry.getName());
-                                        java.io.File parent=destFile.getAbsoluteFile().getParentFile();
-                                        if(!parent.exists()){
-                                            if(!parent.mkdirs()){
-                                                throw new Ili2dbException("failed to create "+parent.getAbsolutePath());
+                        }
+                        try{
+                            trsfr.doitStart(config,stat,customMapping,inputs[inputs.length-1]);
+                        }catch(ch.interlis.iox.IoxException ex){
+                            EhiLogger.logError("failed to transfer data from file to db",ex);
+                        } catch (Ili2dbException ex) {
+                            EhiLogger.logError("failed to transfer data from file to db",ex);
+                        }
+                        for(String inputFilename:inputs) {
+                            OutParam<java.util.zip.ZipEntry> zipXtfEntry=new OutParam<java.util.zip.ZipEntry>();
+                            java.util.zip.ZipFile zipFile;
+                            try {
+                                zipFile = getZipFileEntry(inputFilename,zipXtfEntry);
+                            } catch (IOException e1) {
+                                throw new Ili2dbException(e1);
+                            }
+                            if(zipXtfEntry.value!=null){
+                                IoxReader ioxReader=null;
+                                java.io.InputStream in = null;
+                                try {
+                                    String xtfFilename=zipXtfEntry.value.getName();
+                                      EhiLogger.logState("data <"+inputFilename+":"+xtfFilename+">");
+                                    in = zipFile.getInputStream(zipXtfEntry.value);
+                                    if(isItfFilename(xtfFilename)){
+                                        if(config.getDoItfLineTables()){
+                                            ioxReader=new ItfReader(in);
+                                            ((ItfReader)ioxReader).setModel(td);        
+                                        }else{
+                                            ioxReader=new ItfReader2(in,config.isSkipGeometryErrors());
+                                            ((ItfReader2)ioxReader).setModel(td);       
+                                        }
+                                    }else{
+                                        ioxReader=new XtfReader(in);
+                                    }
+                                    try{
+                                        trsfr.doit(xtfFilename,ioxReader,stat);
+                                    }catch(ch.interlis.iox.IoxException ex){
+                                        EhiLogger.logError("failed to transfer data from file to db",ex);
+                                    } catch (Ili2dbException ex) {
+                                        EhiLogger.logError("failed to transfer data from file to db",ex);
+                                    }
+                                } catch (IOException ex) {
+                                    throw new Ili2dbException(ex);
+                                } catch (IoxException ex) {
+                                    throw new Ili2dbException(ex);
+                                }finally{
+                                    if(ioxReader!=null){
+                                        try {
+                                            ioxReader.close();
+                                        } catch (IoxException e) {
+                                            throw new Ili2dbException(e);
+                                        }
+                                        ioxReader=null;
+                                    }
+                                    if(in!=null){
+                                        try {
+                                            in.close();
+                                        } catch (IOException e) {
+                                            throw new Ili2dbException(e);
+                                        }
+                                        in=null;
+                                    }
+                                }
+                                // save attachments
+                                String attachmentKey=config.getAttachmentKey();
+                                String attachmentsBase=config.getAttachmentsPath();
+                                if(attachmentsBase!=null){
+                                    java.io.File basePath=new java.io.File(attachmentsBase,attachmentKey);
+                                    java.util.Enumeration filei=zipFile.entries();
+                                    while(filei.hasMoreElements()){
+                                        java.util.zip.ZipEntry zipEntry=(java.util.zip.ZipEntry)filei.nextElement();
+                                        if(!zipXtfEntry.value.getName().equals(zipEntry.getName())){
+                                            // save file
+                                            java.io.File destFile=new java.io.File(basePath,zipEntry.getName());
+                                            java.io.File parent=destFile.getAbsoluteFile().getParentFile();
+                                            if(!parent.exists()){
+                                                if(!parent.mkdirs()){
+                                                    throw new Ili2dbException("failed to create "+parent.getAbsolutePath());
+                                                }
+                                            }
+                                            try {
+                                                copyStream(destFile,zipFile.getInputStream(zipEntry));
+                                            } catch (IOException ex) {
+                                                throw new Ili2dbException("failed to save attachment "+zipEntry.getName(),ex);
                                             }
                                         }
-                                        try {
-                                            copyStream(destFile,zipFile.getInputStream(zipEntry));
-                                        } catch (IOException ex) {
-                                            throw new Ili2dbException("failed to save attachment "+zipEntry.getName(),ex);
+                                    }
+                                    
+                                }
+                            }else{
+                                IoxReader ioxReader=null;
+                                try {
+                                    EhiLogger.logState("data <"+inputFilename+">");
+                                    if(isItfFilename(inputFilename)){
+                                        if(config.getDoItfLineTables()){
+                                            ioxReader=new ItfReader(new java.io.File(inputFilename));
+                                            ((ItfReader)ioxReader).setModel(td);        
+                                            ((ItfReader)ioxReader).setBidPrefix(config.getDatasetName());       
+                                        }else{
+                                            ioxReader=new ItfReader2(new java.io.File(inputFilename),config.isSkipGeometryErrors());
+                                            ((ItfReader2)ioxReader).setModel(td);       
+                                            ((ItfReader2)ioxReader).setBidPrefix(config.getDatasetName());      
+                                        }
+                                    }else{
+                                        ioxReader=Xtf24Reader.createReader(new java.io.File(inputFilename));
+                                        if(ioxReader instanceof ch.interlis.iox_j.IoxIliReader) {
+                                            ((ch.interlis.iox_j.IoxIliReader) ioxReader).setModel(td);
                                         }
                                     }
-                                }
-                                
-                            }
-                        }else{
-                            IoxReader ioxReader=null;
-                            try {
-                                EhiLogger.logState("data <"+inputFilename+">");
-                                if(isItfFilename(inputFilename)){
-                                    if(config.getDoItfLineTables()){
-                                        ioxReader=new ItfReader(new java.io.File(inputFilename));
-                                        ((ItfReader)ioxReader).setModel(td);        
-                                        ((ItfReader)ioxReader).setBidPrefix(config.getDatasetName());       
-                                    }else{
-                                        ioxReader=new ItfReader2(new java.io.File(inputFilename),config.isSkipGeometryErrors());
-                                        ((ItfReader2)ioxReader).setModel(td);       
-                                        ((ItfReader2)ioxReader).setBidPrefix(config.getDatasetName());      
+                                    try{
+                                        trsfr.doit(inputFilename,ioxReader,stat);
+                                    }catch(ch.interlis.iox.IoxException ex){
+                                        EhiLogger.logError("failed to transfer data from file to db",ex);
+                                    } catch (Ili2dbException ex) {
+                                        EhiLogger.logError("failed to transfer data from file to db",ex);
                                     }
-                                }else{
-                                    ioxReader=Xtf24Reader.createReader(new java.io.File(inputFilename));
-                                    if(ioxReader instanceof ch.interlis.iox_j.IoxIliReader) {
-                                        ((ch.interlis.iox_j.IoxIliReader) ioxReader).setModel(td);
+                                } catch (IoxException e) {
+                                    throw new Ili2dbException(e);
+                                }finally{
+                                    if(ioxReader!=null){
+                                        try {
+                                            ioxReader.close();
+                                        } catch (IoxException e) {
+                                            throw new Ili2dbException(e);
+                                        }
+                                        ioxReader=null;
                                     }
-                                }
-                                try{
-                                    trsfr.doit(inputFilename,ioxReader,stat);
-                                }catch(ch.interlis.iox.IoxException ex){
-                                	EhiLogger.logError("failed to transfer data from file to db",ex);
-                                } catch (Ili2dbException ex) {
-                                	EhiLogger.logError("failed to transfer data from file to db",ex);
-                                }
-                            } catch (IoxException e) {
-                                throw new Ili2dbException(e);
-                            }finally{
-                                if(ioxReader!=null){
-                                    try {
-                                        ioxReader.close();
-                                    } catch (IoxException e) {
-                                        throw new Ili2dbException(e);
-                                    }
-                                    ioxReader=null;
                                 }
                             }
                         }
-                    }
-                    try{
-                        trsfr.doitEnd(stat);
-                    }catch(ch.interlis.iox.IoxException ex){
-                        EhiLogger.logError("failed to transfer data from file to db",ex);
-                    } catch (Ili2dbException ex) {
-                        EhiLogger.logError("failed to transfer data from file to db",ex);
+                        try{
+                            trsfr.doitEnd(stat);
+                        }catch(ch.interlis.iox.IoxException ex){
+                            EhiLogger.logError("failed to transfer data from file to db",ex);
+                        } catch (Ili2dbException ex) {
+                            EhiLogger.logError("failed to transfer data from file to db",ex);
+                        }
+                    }finally {
+                        trsfr.doitFinally();
                     }
                 }
 

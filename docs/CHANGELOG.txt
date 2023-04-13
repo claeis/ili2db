@@ -13,10 +13,12 @@ ideas/open issues/questions
 
 ili2db 4.11.0 (SNAPSHOT)
 ---------------------------
+- fix issues with duplicate coordinates (#510)
 - fix validate fails if external connection is used (#514)
 - fix delete empty dataset (#513)
 - fix additionalModel in the --validConfig on validation not found (#509)
 - Provide metaConfig info in the database (#508)
+- iox-ili-1.21.18+
 
 ili2db 4.10.1 (2023-02-28)
 ---------------------------

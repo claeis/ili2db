@@ -672,9 +672,9 @@ public abstract class Datatypes23Test {
 				while(rs.next()){
                     String geom=rs.getString(1);
                     if(setup.supportsCompoundGeometry()) {
-                        assertEquals("CURVEPOLYGON(COMPOUNDCURVE((2460005 1045005,2460010 1045010)),COMPOUNDCURVE((2460010 1045010,2460005 1045010)),COMPOUNDCURVE((2460005 1045010,2460005 1045005)))", geom);
+                        assertEquals("CURVEPOLYGON(COMPOUNDCURVE((2460005 1045005,2460010 1045010,2460005 1045010,2460005 1045005)))", geom);
                     }else {
-                        assertEquals("POLYGON ((2460005 1045005, 2460010 1045010, 2460010 1045010, 2460005 1045010, 2460005 1045010, 2460005 1045005))", geom);
+                        assertEquals("POLYGON ((2460005 1045005, 2460010 1045010, 2460005 1045010, 2460005 1045005))", geom);
                     }
 				}
 			}
@@ -720,7 +720,7 @@ public abstract class Datatypes23Test {
                 if(setup.supportsCompoundGeometry()) {
                     assertEquals("MULTICURVE(COMPOUNDCURVE((2460005 1045005,2460010 1045005,2460010 1045010,2460005 1045010,2460010 1045010)))", geom);
                 }else {
-                    assertEquals("MULTILINE(LINESTRING((2460005 1045005,2460010 1045005,2460010 1045010,2460005 1045010,2460010 1045010)))", geom);
+                    assertEquals("MULTILINESTRING ((2460005 1045005, 2460010 1045005, 2460010 1045010, 2460005 1045010, 2460010 1045010))", geom);
                 }
             }
         }catch(SQLException e) {

@@ -113,6 +113,7 @@ public class TransferFromXtf {
 	 */
 	private HashSet unknownTypev=null;
 	private TransferDescription td=null;
+	private XtfWriter debugLogger=null;
 	private Connection conn=null;
 	private CustomMapping customMapping=null;
 	private String schema=null; // name of dbschema or null
@@ -228,6 +229,10 @@ public class TransferFromXtf {
             if(readIliTid && !Config.TID_HANDLING_PROPERTY.equals(config.getTidHandling())) {
                 throw new Ili2dbException("TID import requires a "+DbNames.T_ILI_TID_COL+" column");
             }
+        }
+        debugLogger=null; //new XtfWriter(new File("debug.xtf"),td);
+        if(debugLogger!=null) {
+            debugLogger.write(new ch.interlis.iox_j.StartTransferEvent());
         }
         this.customMapping=customMapping1;
         globals=new Globals();
@@ -756,19 +761,24 @@ public class TransferFromXtf {
             }
             flushBatchedRecords();
         }
+        if(globals.validator!=null){
+            globals.validator.doSecondPass();
+        }
         {
             if(globals.referrs){
                 throw new IoxException("dangling references");
             }
             
         }
+    }
+    public void doitFinally()
+    {
         {
             if(rounder!=null) {
                 rounder.close();
                 rounder=null;
             }
             if(globals.validator!=null){
-                globals.validator.doSecondPass();
                 globals.validator.close();
                 globals.validator=null;
             }
@@ -776,6 +786,15 @@ public class TransferFromXtf {
                 languageFilter.close();
             }
             closePreparedStatements();
+            if(debugLogger!=null) {
+                try {
+                    debugLogger.write(new ch.interlis.iox_j.EndTransferEvent());
+                    debugLogger.close();
+                } catch (IoxException e) {
+                    EhiLogger.logError("failed to write to debugLogger",e);
+                }
+                debugLogger=null;
+            }
         }
         {
             recman.close();
@@ -1268,13 +1287,34 @@ public class TransferFromXtf {
 			//EhiLogger.debug(iomObj.toString());
 			writeObject(datasetName,basketSqlId,genericDomains,iomObj,null,objStat);
 		}catch(ConverterException ex){
-			EhiLogger.debug(iomObj.toString());
-			EhiLogger.logError("Object "+iomObj.getobjectoid()+" at (line "+iomObj.getobjectline()+",col "+iomObj.getobjectcol()+")",ex);
+            EhiLogger.traceState(iomObj.toString());
+            EhiLogger.logError("Object "+iomObj.getobjectoid()+" at (line "+iomObj.getobjectline()+",col "+iomObj.getobjectcol()+")",ex);
+		    if(debugLogger!=null) {
+                try {
+                    debugLogger.write(new ObjectEvent(iomObj));
+                } catch (IoxException e) {
+                    EhiLogger.logError("failed to write to debugLogger",ex);
+                }
+		    }
 		}catch(java.sql.SQLException ex){
-			EhiLogger.debug(iomObj.toString());
-			EhiLogger.logError("Object "+iomObj.getobjectoid()+" at (line "+iomObj.getobjectline()+",col "+iomObj.getobjectcol()+")",ex);
+            EhiLogger.traceState(iomObj.toString());
+            EhiLogger.logError("Object "+iomObj.getobjectoid()+" at (line "+iomObj.getobjectline()+",col "+iomObj.getobjectcol()+")",ex);
+            if(debugLogger!=null) {
+                try {
+                    debugLogger.write(new ObjectEvent(iomObj));
+                } catch (IoxException e) {
+                    EhiLogger.logError("failed to write to debugLogger",ex);
+                }
+            }
 		}catch(java.lang.RuntimeException ex){
-			EhiLogger.traceState(iomObj.toString());
+            EhiLogger.traceState(iomObj.toString());
+            if(debugLogger!=null) {
+                try {
+                    debugLogger.write(new ObjectEvent(iomObj));
+                } catch (IoxException e) {
+                    EhiLogger.logError("failed to write to debugLogger",ex);
+                }
+            }
 			throw ex;
 		}
 		while(!structQueue.isEmpty()){
