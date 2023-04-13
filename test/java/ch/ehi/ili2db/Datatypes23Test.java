@@ -299,6 +299,7 @@ public abstract class Datatypes23Test {
 	
 	@Test
 	public void importXtfAttr() throws Exception{
+	    //EhiLogger.getInstance().setTraceFilter(false);
         Connection jdbcConnection=null;
         Statement stmt=null;
 		try {
