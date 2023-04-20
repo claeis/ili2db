@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TRANSFER xmlns="http://www.interlis.ch/INTERLIS2.3">
+	<HEADERSECTION SENDER="ili2gpkg-developer-workspace" VERSION="2.3">
+		<MODELS>
+			<MODEL NAME="ExtRef1" VERSION="2015-12-03" URI="mailto:ce@eisenhutinformatik.ch"></MODEL>
+		</MODELS>
+	</HEADERSECTION>
+	<DATASECTION>
+		<ExtRef1.Topic1 BID="ExtRef1.Topic1">
+			<ExtRef1.Topic1.ClassB1b TID="9F580d78-1707-4955-9ea5-a67f22d53a41">
+			</ExtRef1.Topic1.ClassB1b>
+			<ExtRef1.Topic1.ClassA1 TID="d5539ded-b2fd-4398-8605-31890bec8525">
+				<a1_b REF="9f580d78-1707-4955-9ea5-a67f22d53a41"></a1_b>
+			</ExtRef1.Topic1.ClassA1>
+			<ExtRef1.Topic1.a2>
+				<a2_a REF="d5539ded-b2fd-4398-8605-31890bec8525"></a2_a>
+				<a2_b REF="9f580d78-1707-4955-9ea5-a67f22d53a41"></a2_b>
+			</ExtRef1.Topic1.a2>
+			<ExtRef1.Topic1.ClassA2 TID="21ea7f04-17bc-491e-abd4-de8b833939cc">
+			  <strB2>
+			    <ExtRef1.Topic1.StructA2>
+				  <refb3 REF="9f580d78-1707-4955-9ea5-a67f22d53a41"></refb3>
+			    </ExtRef1.Topic1.StructA2>
+			  </strB2>
+			</ExtRef1.Topic1.ClassA2>
+			<ExtRef1.Topic1.ClassC TID="1400a7b6-eac1-443a-a6dd-6aca8c265d71">
+				<progref>
+					<ExtRef1.TopicA.Katalog_ProgrammRef>
+						<Reference REF="5880375a-52cd-4b2d-af50-c3a6fc5c5352"/>
+					</ExtRef1.TopicA.Katalog_ProgrammRef>
+				</progref>
+			</ExtRef1.Topic1.ClassC>
+		</ExtRef1.Topic1>
+		<ExtRef1.TopicA BID="ExtRef1.TopicA.1">
+			<ExtRef1.TopicA.Katalog_ProgrammA TID="5880375A-52cd-4b2d-af50-c3a6fc5c5352">
+				<Code>Bio</Code>
+			</ExtRef1.TopicA.Katalog_ProgrammA>
+			</ExtRef1.TopicA>
+	</DATASECTION>
+</TRANSFER>

@@ -13,6 +13,7 @@ ideas/open issues/questions
 
 ili2db 4.11.0 (SNAPSHOT)
 ---------------------------
+- fix references with mixed case INTERLIS.UUIDOID (#507)
 - fix issues with duplicate coordinates (#510)
 - fix validate fails if external connection is used (#514)
 - fix delete empty dataset (#513)
