@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TRANSFER xmlns="http://www.interlis.ch/INTERLIS2.3">
+	<HEADERSECTION SENDER="ili2gpkg-developer-workspace" VERSION="2.3">
+		<MODELS>
+			<MODEL NAME="ExtRef1" VERSION="2015-12-03" URI="mailto:ce@eisenhutinformatik.ch"></MODEL>
+		</MODELS>
+	</HEADERSECTION>
+	<DATASECTION>
+		<ExtRef1.Topic1 BID="ExtRef1.Topic1.cat">
+			<ExtRef1.Topic1.ClassB1b TID="9F580d78-1707-4955-9ea5-a67f22d53a41">
+			</ExtRef1.Topic1.ClassB1b>
+		</ExtRef1.Topic1>
+		<ExtRef1.TopicA BID="ExtRef1.TopicA.cat">
+			<ExtRef1.TopicA.Katalog_ProgrammA TID="5880375A-52cd-4b2d-af50-c3a6fc5c5352">
+				<Code>Bio</Code>
+			</ExtRef1.TopicA.Katalog_ProgrammA>
+			</ExtRef1.TopicA>
+	</DATASECTION>
+</TRANSFER>

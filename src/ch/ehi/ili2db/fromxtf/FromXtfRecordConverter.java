@@ -165,11 +165,13 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 						if(iomClass instanceof Table && ((Table) iomClass).isIdentifiable()){ // concrete object has a tid
 							if((importTid && !(aclass.getViewable() instanceof AssociationDef)) || aclass.hasOid()){
 								// import TID from transfer file
+                                String oid=iomObj.getobjectoid();
 								if(isUuidOid(td,aclass.getOid())){
-									 Object toInsertUUID = geomConv.fromIomUuid(iomObj.getobjectoid());
+								    oid=Validator.normalizeUUID(oid);
+									 Object toInsertUUID = geomConv.fromIomUuid(oid);
 									 ps.setObject(valuei, toInsertUUID);
 								}else{
-									ps.setString(valuei, iomObj.getobjectoid());
+									ps.setString(valuei, oid);
 								}
 								valuei++;
 							}
