@@ -89,7 +89,13 @@ public class GeneratorH2gis extends GeneratorJdbc {
 			type="uuid";
 		}else if(column instanceof DbColNumber){
 			DbColNumber col=(DbColNumber)column;
-			type="integer";
+            if(col.getSize()>10 
+                    || (col.getMaxValue()!=null && col.getMaxValue()>(long)Integer.MAX_VALUE)
+                    || (col.getMinValue()!=null && col.getMinValue()<(long)Integer.MIN_VALUE)) {
+                type="bigint";
+            }else {
+                type="integer";
+            }
 		}else if(column instanceof DbColVarchar){
 			int colsize=((DbColVarchar)column).getSize();
 			if(colsize==DbColVarchar.UNLIMITED){

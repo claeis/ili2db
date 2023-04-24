@@ -98,6 +98,7 @@ import ch.interlis.iox_j.filter.Rounder;
 import ch.interlis.iox_j.filter.TranslateToOrigin;
 import ch.interlis.iox_j.logging.LogEventFactory;
 import ch.interlis.iox_j.validator.ValidationConfig;
+import ch.interlis.iox_j.validator.Validator;
 
 
 /**
@@ -113,6 +114,7 @@ public class TransferFromXtf {
 	 */
 	private HashSet unknownTypev=null;
 	private TransferDescription td=null;
+	private XtfWriter debugLogger=null;
 	private Connection conn=null;
 	private CustomMapping customMapping=null;
 	private String schema=null; // name of dbschema or null
@@ -228,6 +230,10 @@ public class TransferFromXtf {
             if(readIliTid && !Config.TID_HANDLING_PROPERTY.equals(config.getTidHandling())) {
                 throw new Ili2dbException("TID import requires a "+DbNames.T_ILI_TID_COL+" column");
             }
+        }
+        debugLogger=null; //new XtfWriter(new File("debug.xtf"),td);
+        if(debugLogger!=null) {
+            debugLogger.write(new ch.interlis.iox_j.StartTransferEvent());
         }
         this.customMapping=customMapping1;
         globals=new Globals();
@@ -611,6 +617,9 @@ public class TransferFromXtf {
 								for(IomObject ref:fixref.getRefs()){
 									String xtfid=ref.getobjectrefoid();
 									Viewable aclass=fixref.getTargetClass(ref);
+			                        if(aclass instanceof AbstractClassDef && AbstractRecordConverter.isUuidOid(td,((AbstractClassDef)aclass).getOid())) {
+			                            xtfid=Validator.normalizeUUID(xtfid);
+			                        }
 									String rootClassName=Ili2cUtility.getRootViewable(aclass).getScopedName(null);
 									if(oidPool.containsXtfid(rootClassName,xtfid)){
 										// reference now resolvable
@@ -724,6 +733,9 @@ public class TransferFromXtf {
                         String xtfid=ref.getobjectrefoid();
                         Viewable aclass=fixref.getTargetClass(ref);
                         String rootClassName=Ili2cUtility.getRootViewable(aclass).getScopedName(null);
+                        if(aclass instanceof AbstractClassDef && AbstractRecordConverter.isUuidOid(td,((AbstractClassDef)aclass).getOid())) {
+                            xtfid=Validator.normalizeUUID(xtfid);
+                        }
                         if(oidPool.containsXtfid(rootClassName,xtfid)){
                             // skip it; now resolvable
                         }else{
@@ -756,19 +768,24 @@ public class TransferFromXtf {
             }
             flushBatchedRecords();
         }
+        if(globals.validator!=null){
+            globals.validator.doSecondPass();
+        }
         {
             if(globals.referrs){
                 throw new IoxException("dangling references");
             }
             
         }
+    }
+    public void doitFinally()
+    {
         {
             if(rounder!=null) {
                 rounder.close();
                 rounder=null;
             }
             if(globals.validator!=null){
-                globals.validator.doSecondPass();
                 globals.validator.close();
                 globals.validator=null;
             }
@@ -776,6 +793,15 @@ public class TransferFromXtf {
                 languageFilter.close();
             }
             closePreparedStatements();
+            if(debugLogger!=null) {
+                try {
+                    debugLogger.write(new ch.interlis.iox_j.EndTransferEvent());
+                    debugLogger.close();
+                } catch (IoxException e) {
+                    EhiLogger.logError("failed to write to debugLogger",e);
+                }
+                debugLogger=null;
+            }
         }
         {
             recman.close();
@@ -1268,13 +1294,34 @@ public class TransferFromXtf {
 			//EhiLogger.debug(iomObj.toString());
 			writeObject(datasetName,basketSqlId,genericDomains,iomObj,null,objStat);
 		}catch(ConverterException ex){
-			EhiLogger.debug(iomObj.toString());
-			EhiLogger.logError("Object "+iomObj.getobjectoid()+" at (line "+iomObj.getobjectline()+",col "+iomObj.getobjectcol()+")",ex);
+            EhiLogger.traceState(iomObj.toString());
+            EhiLogger.logError("Object "+iomObj.getobjectoid()+" at (line "+iomObj.getobjectline()+",col "+iomObj.getobjectcol()+")",ex);
+		    if(debugLogger!=null) {
+                try {
+                    debugLogger.write(new ObjectEvent(iomObj));
+                } catch (IoxException e) {
+                    EhiLogger.logError("failed to write to debugLogger",ex);
+                }
+		    }
 		}catch(java.sql.SQLException ex){
-			EhiLogger.debug(iomObj.toString());
-			EhiLogger.logError("Object "+iomObj.getobjectoid()+" at (line "+iomObj.getobjectline()+",col "+iomObj.getobjectcol()+")",ex);
+            EhiLogger.traceState(iomObj.toString());
+            EhiLogger.logError("Object "+iomObj.getobjectoid()+" at (line "+iomObj.getobjectline()+",col "+iomObj.getobjectcol()+")",ex);
+            if(debugLogger!=null) {
+                try {
+                    debugLogger.write(new ObjectEvent(iomObj));
+                } catch (IoxException e) {
+                    EhiLogger.logError("failed to write to debugLogger",ex);
+                }
+            }
 		}catch(java.lang.RuntimeException ex){
-			EhiLogger.traceState(iomObj.toString());
+            EhiLogger.traceState(iomObj.toString());
+            if(debugLogger!=null) {
+                try {
+                    debugLogger.write(new ObjectEvent(iomObj));
+                } catch (IoxException e) {
+                    EhiLogger.logError("failed to write to debugLogger",ex);
+                }
+            }
 			throw ex;
 		}
 		while(!structQueue.isEmpty()){
@@ -1307,6 +1354,9 @@ public class TransferFromXtf {
 	 		tid = getAssociationId(iomObj,(AssociationDef)modelele);
 	 	}
 	 	if(tid!=null && tid.length()>0){
+            if(modelele instanceof AbstractClassDef && AbstractRecordConverter.isUuidOid(td,((AbstractClassDef)modelele).getOid())) {
+                tid=Validator.normalizeUUID(tid);
+            }
 			oidPool.createObjSqlId(Ili2cUtility.getRootViewable(getCrsMappedOrSame((Viewable) modelele)).getScopedName(null),tag,tid);
 	 	}
         objPool.put(tid,iomObj);
@@ -1386,6 +1436,9 @@ public class TransferFromXtf {
 									if(structvalue!=null){
 										String refoid=structvalue.getobjectrefoid();
 										Viewable targetClass=role.getDestination();
+					                    if(targetClass instanceof AbstractClassDef && AbstractRecordConverter.isUuidOid(td,((AbstractClassDef)targetClass).getOid())) {
+					                        refoid=Validator.normalizeUUID(refoid);
+					                    }
 										if(!oidPool.containsXtfid(Ili2cUtility.getRootViewable(getCrsMappedOrSame(targetClass)).getScopedName(null),refoid)){
 										    if(!createSqlExtRef || !role.isExternal()) {
 	                                            extref.addFix(structvalue, targetClass,role.isExternal());
@@ -1397,6 +1450,9 @@ public class TransferFromXtf {
 								 IomObject structvalue=iomObj.getattrobj(roleName,0);
 								 String refoid=structvalue.getobjectrefoid();
 									Viewable targetClass=role.getDestination();
+                                    if(targetClass instanceof AbstractClassDef && AbstractRecordConverter.isUuidOid(td,((AbstractClassDef)targetClass).getOid())) {
+                                        refoid=Validator.normalizeUUID(refoid);
+                                    }
 								if(!oidPool.containsXtfid(Ili2cUtility.getRootViewable(getCrsMappedOrSame(targetClass)).getScopedName(null),refoid)){
                                     if(!createSqlExtRef || !role.isExternal()) {
                                         extref.addFix(structvalue, targetClass,role.isExternal());
@@ -1440,6 +1496,9 @@ public class TransferFromXtf {
 				 if(refoid!=null){
 					 	ReferenceType refType = (ReferenceType)type;
                         Viewable targetClass=refType.getReferred(); 
+                        if(targetClass instanceof AbstractClassDef && AbstractRecordConverter.isUuidOid(td,((AbstractClassDef)targetClass).getOid())) {
+                            refoid=Validator.normalizeUUID(refoid);
+                        }
 						if(!oidPool.containsXtfid(Ili2cUtility.getRootViewable(getCrsMappedOrSame(targetClass)).getScopedName(null),refoid)){
                             if(!createSqlExtRef || !refType.isExternal()) {
                                 extref.addFix(structvalue, targetClass,refType.isExternal());
@@ -1646,6 +1705,9 @@ public class TransferFromXtf {
 				// map oid of transfer file to a sql id
 			 	String tid=iomObj.getobjectoid();
 			 	if(tid!=null && tid.length()>0){
+			 	    if(aclass1 instanceof AbstractClassDef && AbstractRecordConverter.isUuidOid(td,((AbstractClassDef)aclass1).getOid())) {
+			 	        tid=Validator.normalizeUUID(tid);
+			 	    }
 					sqlId=oidPool.getObjSqlId(Ili2cUtility.getRootViewable(aclass1).getScopedName(null),tid);
 			 		if(functionCode==Config.FC_UPDATE && existingObjectsContains(sqlType,sqlId)){
 			 			updateObj=true;

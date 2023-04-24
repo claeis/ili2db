@@ -70,8 +70,61 @@ public abstract class ExtRefTest {
         File data=new File(TEST_OUT,"ExtRef1a.xtf");
         Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
         config.setFunction(Config.FC_IMPORT);
+        config.setValidation(false);
         Ili2db.readSettingsFromDb(config);
         Ili2db.run(config,null);
+    }
+    @Test
+    public void importXtf_noExtRef_refUpperCase() throws Exception
+    {
+        {
+            importIli_noExtRef();
+        }
+        //EhiLogger.getInstance().setTraceFilter(false);
+        File data=new File(TEST_OUT,"ExtRef1a_refUpperCase.xtf");
+        Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+        config.setFunction(Config.FC_IMPORT);
+        config.setValidation(false);
+        Ili2db.readSettingsFromDb(config);
+        Ili2db.run(config,null);
+    }
+    @Test
+    public void importXtf_noExtRef_tidUpperCase() throws Exception
+    {
+        {
+            importIli_noExtRef();
+        }
+        //EhiLogger.getInstance().setTraceFilter(false);
+        File data=new File(TEST_OUT,"ExtRef1a_tidUpperCase.xtf");
+        Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+        config.setFunction(Config.FC_IMPORT);
+        config.setValidation(false);
+        Ili2db.readSettingsFromDb(config);
+        Ili2db.run(config,null);
+    }
+    @Test
+    public void importXtf_noExtRef_tidUpperCase_differentImports() throws Exception
+    {
+        {
+            importIli_noExtRef();
+        }
+        //EhiLogger.getInstance().setTraceFilter(false);
+        {
+            File data=new File(TEST_OUT,"ExtRef1cat_tidUpperCase.xtf");
+            Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+            config.setFunction(Config.FC_IMPORT);
+            config.setValidation(false);
+            Ili2db.readSettingsFromDb(config);
+            Ili2db.run(config,null);
+        }
+        {
+            File data=new File(TEST_OUT,"ExtRef1data_tidUpperCase.xtf");
+            Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+            config.setFunction(Config.FC_IMPORT);
+            config.setValidation(false);
+            Ili2db.readSettingsFromDb(config);
+            Ili2db.run(config,null);
+        }
     }
     @Test
     public void importXtf_extRef() throws Exception

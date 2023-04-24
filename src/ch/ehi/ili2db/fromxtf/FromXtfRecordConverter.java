@@ -67,6 +67,7 @@ import ch.interlis.ili2c.metamodel.ViewableTransferElement;
 import ch.interlis.iom.IomObject;
 import ch.interlis.iom_j.itf.ItfReader2;
 import ch.interlis.iox_j.jts.Iox2jtsException;
+import ch.interlis.iox_j.validator.Validator;
 import ch.interlis.iox_j.wkb.Wkb2iox;
 
 public class FromXtfRecordConverter extends AbstractRecordConverter {
@@ -164,11 +165,13 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 						if(iomClass instanceof Table && ((Table) iomClass).isIdentifiable()){ // concrete object has a tid
 							if((importTid && !(aclass.getViewable() instanceof AssociationDef)) || aclass.hasOid()){
 								// import TID from transfer file
+                                String oid=iomObj.getobjectoid();
 								if(isUuidOid(td,aclass.getOid())){
-									 Object toInsertUUID = geomConv.fromIomUuid(iomObj.getobjectoid());
+								    oid=Validator.normalizeUUID(oid);
+									 Object toInsertUUID = geomConv.fromIomUuid(oid);
 									 ps.setObject(valuei, toInsertUUID);
 								}else{
-									ps.setString(valuei, iomObj.getobjectoid());
+									ps.setString(valuei, oid);
 								}
 								valuei++;
 							}
@@ -323,6 +326,9 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 	        }
             valuei.value++;
 	    }else {
+	        if(isUuidOid(td, destination.getOid())) {
+	           refoid=Validator.normalizeUUID(refoid); 
+	        }
 	        String targetRootClassName=Ili2cUtility.getRootViewable(destination).getScopedName(null);
 	        ViewableWrapper targetObjTable=null;
 	        ArrayList<ViewableWrapper> targetTables = getTargetTables(destination);
@@ -995,7 +1001,7 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 				if(value==null){
 					 geomConv.setUuidNull(ps, valuei);
 				}else{
-					 Object toInsertUUID = geomConv.fromIomUuid(value);
+					 Object toInsertUUID = geomConv.fromIomUuid(Validator.normalizeUUID(value));
 					 ps.setObject(valuei, toInsertUUID);
 				}
 				valuei++;

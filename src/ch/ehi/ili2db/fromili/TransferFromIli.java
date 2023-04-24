@@ -706,6 +706,7 @@ public class TransferFromIli {
 						String tag=rs.getString(1);
 						String value=rs.getString(2);
 						if(tag.equals(Config.SENDER))continue;
+                        if(tag.equals(Config.METACONFIGFILENAME))continue;
 						settings.setValue(tag,value);
 						settingsExists=true;
 					}
