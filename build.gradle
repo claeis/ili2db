@@ -117,7 +117,7 @@ sourceSets {
     }
     resources {
     	srcDirs=['ili2gpkg/src']
-    	include '**/init.sql'
+    	include '**/init*.sql'
     }
     compileClasspath += sourceSets.main.output
   }
