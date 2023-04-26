@@ -13,14 +13,20 @@ public class GpkgTestSetup extends AbstractTestSetup {
     
     private String gpkgFilename;
     private String dburl;
+    private boolean doMultiGeomPerTable;
     public GpkgTestSetup(String gpkgFilename,String dburl) {
+        this(gpkgFilename,dburl,false);
+    }
+    public GpkgTestSetup(String gpkgFilename,String dburl,boolean doMultiGeomPerTable) {
         this.gpkgFilename=gpkgFilename;
         this.dburl=dburl;
+        this.doMultiGeomPerTable=doMultiGeomPerTable;
     }
     @Override
     public Config initConfig(String xtfFilename,String logfile) {
         Config config=new Config();
         new ch.ehi.ili2gpkg.GpkgMain().initConfig(config);
+        config.setOneGeomPerTable(!doMultiGeomPerTable);
         config.setDbfile(gpkgFilename);
         config.setDburl(dburl);
         if(logfile!=null){

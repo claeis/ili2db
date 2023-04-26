@@ -13,6 +13,8 @@ ideas/open issues/questions
 
 ili2db 4.11.1 (SNAPSHOT)
 ---------------------------
+- ili2gpkg: new option --gpkgMultiGeomPerTable to create multi geom col tables (#511)
+- ehisqlgen-1.16.0+
 
 ili2db 4.11.0 (2023-04-24)
 ---------------------------

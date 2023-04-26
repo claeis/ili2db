@@ -66,7 +66,12 @@ public class GpkgMapping extends AbstractJdbcMapping {
 			// exec init script
 			java.io.LineNumberReader reader=null;
 			try {
-				String filename = ch.ehi.basics.i18n.ResourceBundle.class2packagePath(getClass())+"/init.sql";
+			    String filename=null;
+			    if(config.isOneGeomPerTable()) {
+	                filename = ch.ehi.basics.i18n.ResourceBundle.class2packagePath(getClass())+"/init.sql";
+			    }else {
+	                filename = ch.ehi.basics.i18n.ResourceBundle.class2packagePath(getClass())+"/init-mg.sql";
+			    }
 				InputStream initsqlStream = getClass().getResourceAsStream(filename);
 				if(initsqlStream==null){
 					throw new IllegalStateException("Resource "+filename+" not found");
