@@ -23,6 +23,7 @@ import ch.interlis.iom_j.xtf.XtfReader;
 import ch.interlis.iox.EndBasketEvent;
 import ch.interlis.iox.EndTransferEvent;
 import ch.interlis.iox.IoxEvent;
+import ch.interlis.iox.IoxException;
 import ch.interlis.iox.ObjectEvent;
 import ch.interlis.iox.StartBasketEvent;
 import ch.interlis.iox.StartTransferEvent;
@@ -1698,4 +1699,468 @@ public abstract class Assoc23Test {
         }
     }
     
+    @Test
+    public void importIli_NtoN_Extended_Smart0() throws Exception
+    {
+        //EhiLogger.getInstance().setTraceFilter(false);
+        Connection jdbcConnection=null;
+        try{
+            setup.resetDb();
+            jdbcConnection = setup.createConnection();
+            {
+                File data=new File(TEST_DATA_DIR,"AssocNtoN_Extended.ili");
+                Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+                Ili2db.setNoSmartMapping(config);
+                config.setFunction(Config.FC_SCHEMAIMPORT);
+                config.setCreateFk(Config.CREATE_FK_YES);
+                config.setTidHandling(Config.TID_HANDLING_PROPERTY);
+                config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
+                Ili2db.readSettingsFromDb(config);
+                Ili2db.run(config,null);
+            }
+            {
+                // t_ili2db_attrname
+                String [][] expectedValues=new String[][] {
+                    {"AssocNtoN_Extended.Konstruktionen.BesitzerIn.Vorname",    "vorname", "besitzerin",  null},
+                    {"AssocNtoN_Extended.Konstruktionen.Gebaeude.Name", "aname",   "gebaeude",    null},
+                    {"AssocNtoN_Extended.Konstruktionen.Gebaeude_BesitzerIn.BesitzerIn",    "besitzerin",  "gebaeude_besitzerin", "besitzerin"},
+                    {"AssocNtoN_Extended.Konstruktionen.Gebaeude_BesitzerIn.Gebaeude",  "gebaeude",    "gebaeude_besitzerin", "gebaeude"},
+                };
+                Ili2dbAssert.assertAttrNameTable(jdbcConnection, expectedValues,setup.getSchema());
+            }
+            {
+                // t_ili2db_trafo
+                String [][] expectedValues=new String[][] {
+                    {"AssocNtoN_Extended.Konstruktionen.Gebaeude",  "ch.ehi.ili2db.inheritance",   "newClass"},
+                    {"AssocNtoN_Extended.Konstruktionen.BesitzerIn",    "ch.ehi.ili2db.inheritance",   "newClass"},
+                    {"AssocNtoN_Extended.ExtendedKonst.Gebaeude_BesitzerIn",    "ch.ehi.ili2db.inheritance",   "newClass"},
+                    {"AssocNtoN_Extended.Konstruktionen.Gebaeude_BesitzerIn",   "ch.ehi.ili2db.inheritance",   "newClass"},
+                 };
+                Ili2dbAssert.assertTrafoTable(jdbcConnection, expectedValues,setup.getSchema());
+            }
+        }finally{
+            if(jdbcConnection!=null){
+                jdbcConnection.close();
+            }
+        }
+    }
+    @Test
+    public void importIli_NtoN_Extended_Smart1() throws Exception
+    {
+        //EhiLogger.getInstance().setTraceFilter(false);
+        Connection jdbcConnection=null;
+        try{
+            setup.resetDb();
+            jdbcConnection = setup.createConnection();
+            {
+                File data=new File(TEST_DATA_DIR,"AssocNtoN_Extended.ili");
+                Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+                Ili2db.setNoSmartMapping(config);
+                config.setInheritanceTrafo(Config.INHERITANCE_TRAFO_SMART1);
+                config.setFunction(Config.FC_SCHEMAIMPORT);
+                config.setCreateFk(Config.CREATE_FK_YES);
+                config.setTidHandling(Config.TID_HANDLING_PROPERTY);
+                config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
+                Ili2db.readSettingsFromDb(config);
+                Ili2db.run(config,null);
+            }
+            {
+                // t_ili2db_attrname
+                String [][] expectedValues=new String[][] {
+                    {"AssocNtoN_Extended.Konstruktionen.BesitzerIn.Vorname",    "vorname", "besitzerin",  null},
+                    {"AssocNtoN_Extended.Konstruktionen.Gebaeude.Name", "aname",   "gebaeude",    null},
+                    {"AssocNtoN_Extended.Konstruktionen.Gebaeude_BesitzerIn.BesitzerIn",    "besitzerin",  "gebaeude_besitzerin", "besitzerin"},
+                    {"AssocNtoN_Extended.Konstruktionen.Gebaeude_BesitzerIn.Gebaeude",  "gebaeude",    "gebaeude_besitzerin", "gebaeude"},
+                };
+                Ili2dbAssert.assertAttrNameTable(jdbcConnection, expectedValues,setup.getSchema());
+            }
+            {
+                // t_ili2db_trafo
+                String [][] expectedValues=new String[][] {
+                    {"AssocNtoN_Extended.Konstruktionen.Gebaeude",  "ch.ehi.ili2db.inheritance",   "newClass"},
+                    {"AssocNtoN_Extended.Konstruktionen.BesitzerIn",    "ch.ehi.ili2db.inheritance",   "newClass"},
+                    {"AssocNtoN_Extended.ExtendedKonst.Gebaeude_BesitzerIn",    "ch.ehi.ili2db.inheritance",   "superClass"},
+                    {"AssocNtoN_Extended.Konstruktionen.Gebaeude_BesitzerIn",   "ch.ehi.ili2db.inheritance",   "newClass"},
+                 };
+                Ili2dbAssert.assertTrafoTable(jdbcConnection, expectedValues,setup.getSchema());
+            }
+        }finally{
+            if(jdbcConnection!=null){
+                jdbcConnection.close();
+            }
+        }
+    }
+    @Test
+    public void importIli_NtoN_Extended_Smart2() throws Exception
+    {
+        //EhiLogger.getInstance().setTraceFilter(false);
+        Connection jdbcConnection=null;
+        try{
+            setup.resetDb();
+            jdbcConnection = setup.createConnection();
+            {
+                File data=new File(TEST_DATA_DIR,"AssocNtoN_Extended.ili");
+                Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+                Ili2db.setNoSmartMapping(config);
+                config.setInheritanceTrafo(Config.INHERITANCE_TRAFO_SMART2);
+                config.setFunction(Config.FC_SCHEMAIMPORT);
+                config.setCreateFk(Config.CREATE_FK_YES);
+                config.setTidHandling(Config.TID_HANDLING_PROPERTY);
+                config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
+                Ili2db.readSettingsFromDb(config);
+                Ili2db.run(config,null);
+            }
+            {
+                // t_ili2db_attrname
+                String [][] expectedValues=new String[][] {
+                    {"AssocNtoN_Extended.Konstruktionen.BesitzerIn.Vorname",    "vorname", "besitzerin",  null},
+                    {"AssocNtoN_Extended.Konstruktionen.Gebaeude.Name", "aname",   "gebaeude",    null},
+                    {"AssocNtoN_Extended.Konstruktionen.Gebaeude_BesitzerIn.BesitzerIn",    "besitzerin",  "gebaeude_besitzerin", "besitzerin"},
+                    {"AssocNtoN_Extended.Konstruktionen.Gebaeude_BesitzerIn.Gebaeude",  "gebaeude",    "gebaeude_besitzerin", "gebaeude"},
+                    {"AssocNtoN_Extended.ExtendedKonst.Gebaeude_BesitzerIn.BesitzerIn",    "besitzerin",  "asscntn_xtndedextendedkonst_gebaeude_besitzerin", "besitzerin"},
+                    {"AssocNtoN_Extended.Konstruktionen.Gebaeude_BesitzerIn.Gebaeude",  "gebaeude",    "asscntn_xtndedextendedkonst_gebaeude_besitzerin", "gebaeude"},
+                };
+                Ili2dbAssert.assertAttrNameTable(jdbcConnection, expectedValues,setup.getSchema());
+            }
+            {
+                // t_ili2db_trafo
+                String [][] expectedValues=new String[][] {
+                    {"AssocNtoN_Extended.Konstruktionen.Gebaeude",  "ch.ehi.ili2db.inheritance",   "newAndSubClass"},
+                    {"AssocNtoN_Extended.Konstruktionen.BesitzerIn",    "ch.ehi.ili2db.inheritance",   "newAndSubClass"},
+                    {"AssocNtoN_Extended.ExtendedKonst.Gebaeude_BesitzerIn",    "ch.ehi.ili2db.inheritance",   "newAndSubClass"},
+                    {"AssocNtoN_Extended.Konstruktionen.Gebaeude_BesitzerIn",   "ch.ehi.ili2db.inheritance",   "newAndSubClass"},
+                 };
+                Ili2dbAssert.assertTrafoTable(jdbcConnection, expectedValues,setup.getSchema());
+            }
+        }finally{
+            if(jdbcConnection!=null){
+                jdbcConnection.close();
+            }
+        }
+    }
+    @Test
+    public void importXtf_NtoN_Extended_Smart0() throws Exception
+    {
+        {
+            importIli_NtoN_Extended_Smart0();
+        }
+        //EhiLogger.getInstance().setTraceFilter(false);
+        Connection jdbcConnection=null;
+        Statement stmt=null;
+        try{
+            jdbcConnection = setup.createConnection();
+            stmt=jdbcConnection.createStatement();
+            {
+                File data=new File(TEST_DATA_DIR,"AssocNtoN_Extended.xtf");
+                Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+                Ili2db.setNoSmartMapping(config);
+                config.setFunction(Config.FC_IMPORT);
+                config.setDoImplicitSchemaImport(false);
+                config.setImportTid(true);
+                config.setImportBid(true);
+                Ili2db.readSettingsFromDb(config);
+                Ili2db.run(config,null);
+            }
+            // verify db content
+            {
+                ResultSet rs=null;
+                {
+                    rs=stmt.executeQuery("SELECT t_id FROM "+setup.prefixName("gebaeude")+" WHERE t_ili_tid='g1'");
+                    assertTrue(rs.next());
+                    long g1_id=rs.getLong(1);
+                    
+                    rs=stmt.executeQuery("SELECT t_id FROM "+setup.prefixName("besitzerin")+" WHERE t_ili_tid='p1'");
+                    assertTrue(rs.next());
+                    long p1_id=rs.getLong(1);
+                    
+                    rs=stmt.executeQuery("SELECT besitzerin FROM "+setup.prefixName("gebaeude_besitzerin")+" WHERE gebaeude="+g1_id);
+                    assertTrue(rs.next());
+                    assertEquals(p1_id,rs.getLong(1));
+                }
+                {
+                    rs=stmt.executeQuery("SELECT t_id FROM "+setup.prefixName("gebaeude")+" WHERE t_ili_tid='g2'");
+                    assertTrue(rs.next());
+                    long g1_id=rs.getLong(1);
+                    
+                    rs=stmt.executeQuery("SELECT t_id FROM "+setup.prefixName("besitzerin")+" WHERE t_ili_tid='p2'");
+                    assertTrue(rs.next());
+                    long p1_id=rs.getLong(1);
+                    
+                    rs=stmt.executeQuery("SELECT besitzerin FROM "+setup.prefixName("gebaeude_besitzerin")+" WHERE gebaeude="+g1_id);
+                    assertTrue(rs.next());
+                    assertEquals(p1_id,rs.getLong(1));
+                }
+                
+                
+            }
+        }finally{
+            if(jdbcConnection!=null){
+                jdbcConnection.close();
+            }
+        }
+    }
+    @Test
+    public void importXtf_NtoN_Extended_Smart1() throws Exception
+    {
+        {
+            importIli_NtoN_Extended_Smart1();
+        }
+        //EhiLogger.getInstance().setTraceFilter(false);
+        Connection jdbcConnection=null;
+        Statement stmt=null;
+        try{
+            jdbcConnection = setup.createConnection();
+            stmt=jdbcConnection.createStatement();
+            {
+                File data=new File(TEST_DATA_DIR,"AssocNtoN_Extended.xtf");
+                Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+                Ili2db.setNoSmartMapping(config);
+                config.setFunction(Config.FC_IMPORT);
+                config.setDoImplicitSchemaImport(false);
+                config.setImportTid(true);
+                config.setImportBid(true);
+                Ili2db.readSettingsFromDb(config);
+                Ili2db.run(config,null);
+            }
+            // verify db content
+            {
+                ResultSet rs=null;
+                {
+                    rs=stmt.executeQuery("SELECT t_id FROM "+setup.prefixName("gebaeude")+" WHERE t_ili_tid='g1'");
+                    assertTrue(rs.next());
+                    long g1_id=rs.getLong(1);
+                    
+                    rs=stmt.executeQuery("SELECT t_id FROM "+setup.prefixName("besitzerin")+" WHERE t_ili_tid='p1'");
+                    assertTrue(rs.next());
+                    long p1_id=rs.getLong(1);
+                    
+                    rs=stmt.executeQuery("SELECT besitzerin FROM "+setup.prefixName("gebaeude_besitzerin")+" WHERE gebaeude="+g1_id);
+                    assertTrue(rs.next());
+                    assertEquals(p1_id,rs.getLong(1));
+                }
+                {
+                    rs=stmt.executeQuery("SELECT t_id FROM "+setup.prefixName("gebaeude")+" WHERE t_ili_tid='g2'");
+                    assertTrue(rs.next());
+                    long g1_id=rs.getLong(1);
+                    
+                    rs=stmt.executeQuery("SELECT t_id FROM "+setup.prefixName("besitzerin")+" WHERE t_ili_tid='p2'");
+                    assertTrue(rs.next());
+                    long p1_id=rs.getLong(1);
+                    
+                    rs=stmt.executeQuery("SELECT besitzerin FROM "+setup.prefixName("gebaeude_besitzerin")+" WHERE gebaeude="+g1_id);
+                    assertTrue(rs.next());
+                    assertEquals(p1_id,rs.getLong(1));
+                }
+                
+                
+            }
+        }finally{
+            if(jdbcConnection!=null){
+                jdbcConnection.close();
+            }
+        }
+    }
+    @Test
+    public void importXtf_NtoN_Extended_Smart2() throws Exception
+    {
+        {
+            importIli_NtoN_Extended_Smart2();
+        }
+        // EhiLogger.getInstance().setTraceFilter(false);
+        Connection jdbcConnection=null;
+        Statement stmt=null;
+        try{
+            jdbcConnection = setup.createConnection();
+            stmt=jdbcConnection.createStatement();
+            {
+                File data=new File(TEST_DATA_DIR,"AssocNtoN_Extended.xtf");
+                Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+                Ili2db.setNoSmartMapping(config);
+                config.setFunction(Config.FC_IMPORT);
+                config.setDoImplicitSchemaImport(false);
+                config.setImportTid(true);
+                config.setImportBid(true);
+                Ili2db.readSettingsFromDb(config);
+                Ili2db.run(config,null);
+            }
+            // verify db content
+            {
+                ResultSet rs=null;
+                {
+                    rs=stmt.executeQuery("SELECT t_id FROM "+setup.prefixName("gebaeude")+" WHERE t_ili_tid='g1'");
+                    assertTrue(rs.next());
+                    long g1_id=rs.getLong(1);
+                    
+                    rs=stmt.executeQuery("SELECT t_id FROM "+setup.prefixName("besitzerin")+" WHERE t_ili_tid='p1'");
+                    assertTrue(rs.next());
+                    long p1_id=rs.getLong(1);
+                    
+                    rs=stmt.executeQuery("SELECT besitzerin FROM "+setup.prefixName("gebaeude_besitzerin")+" WHERE gebaeude="+g1_id);
+                    assertTrue(rs.next());
+                    assertEquals(p1_id,rs.getLong(1));
+                }
+                {
+                    rs=stmt.executeQuery("SELECT t_id FROM "+setup.prefixName("gebaeude")+" WHERE t_ili_tid='g2'");
+                    assertTrue(rs.next());
+                    long g1_id=rs.getLong(1);
+                    
+                    rs=stmt.executeQuery("SELECT t_id FROM "+setup.prefixName("besitzerin")+" WHERE t_ili_tid='p2'");
+                    assertTrue(rs.next());
+                    long p1_id=rs.getLong(1);
+                    
+                    rs=stmt.executeQuery("SELECT besitzerin FROM "+setup.prefixName("asscntn_xtndedextendedkonst_gebaeude_besitzerin")+" WHERE gebaeude="+g1_id);
+                    assertTrue(rs.next());
+                    assertEquals(p1_id,rs.getLong(1));
+                }
+                
+                
+            }
+        }finally{
+            if(jdbcConnection!=null){
+                jdbcConnection.close();
+            }
+        }
+    }
+    private String getTid(IomObject obj)
+    {
+        String tid=obj.getobjectoid();
+        if(tid!=null) {
+            return tid;
+        }
+        IomObject refA0=obj.getattrobj("BesitzerIn",0);
+        String ref1=refA0.getobjectrefoid();
+        IomObject refA1=obj.getattrobj("Gebaeude",0);
+        String ref2=refA1.getobjectrefoid();
+        return ref1+ref2;
+    }
+    private void assertExportXtf_NtoN_Extended(File data) throws IoxException {
+        {
+            HashMap<String,IomObject> objs=new HashMap<String,IomObject>();
+            XtfReader reader=new XtfReader(data);
+            IoxEvent event=null;
+             do{
+                event=reader.read();
+                if(event instanceof StartTransferEvent){
+                }else if(event instanceof StartBasketEvent){
+                }else if(event instanceof ObjectEvent){
+                    IomObject iomObj=((ObjectEvent)event).getIomObject();
+                    objs.put(getTid(iomObj), iomObj);
+                }else if(event instanceof EndBasketEvent){
+                }else if(event instanceof EndTransferEvent){
+                }
+             }while(!(event instanceof EndTransferEvent));
+             reader.close();
+             {
+                 assertEquals(6,objs.size());
+                 {
+                     IomObject obj0 = objs.get("g1");
+                     Assert.assertNotNull(obj0);
+                     Assert.assertEquals("AssocNtoN_Extended.Konstruktionen.Gebaeude", obj0.getobjecttag());
+                 }
+                 {
+                     IomObject obj0 = objs.get("g2");
+                     Assert.assertNotNull(obj0);
+                     Assert.assertEquals("AssocNtoN_Extended.Konstruktionen.Gebaeude", obj0.getobjecttag());
+                 }
+                 {
+                     IomObject obj0 = objs.get("p1");
+                     Assert.assertNotNull(obj0);
+                     Assert.assertEquals("AssocNtoN_Extended.Konstruktionen.BesitzerIn", obj0.getobjecttag());
+                 }
+                 {
+                     IomObject obj0 = objs.get("p2");
+                     Assert.assertNotNull(obj0);
+                     Assert.assertEquals("AssocNtoN_Extended.Konstruktionen.BesitzerIn", obj0.getobjecttag());
+                 }
+                 {
+                     IomObject obj0 = objs.get("p1g1");
+                     Assert.assertNotNull(obj0);
+                     Assert.assertEquals("AssocNtoN_Extended.Konstruktionen.Gebaeude_BesitzerIn", obj0.getobjecttag());
+                 }
+                 {
+                     IomObject obj0 = objs.get("p2g2");
+                     Assert.assertNotNull(obj0);
+                     Assert.assertEquals("AssocNtoN_Extended.ExtendedKonst.Gebaeude_BesitzerIn", obj0.getobjecttag());
+                 }
+             }
+        }
+    }
+    @Test
+    public void exportXtf_NtoN_Extended_Smart0() throws Exception
+    {
+        {
+            importXtf_NtoN_Extended_Smart0();
+        }
+        File data=null;
+        //EhiLogger.getInstance().setTraceFilter(false);
+        Connection jdbcConnection=null;
+        try{
+            {
+                data=new File(TEST_DATA_DIR,"AssocNtoN_Extended-out.xtf");
+                Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+                config.setFunction(Config.FC_EXPORT);
+                config.setExportTid(true);
+                config.setModels("AssocNtoN_Extended");
+                Ili2db.readSettingsFromDb(config);
+                Ili2db.run(config,null);
+            }
+        }finally{
+            if(jdbcConnection!=null){
+                jdbcConnection.close();
+            }
+        }
+        assertExportXtf_NtoN_Extended(data);
+    }
+    @Test
+    public void exportXtf_NtoN_Extended_Smart1() throws Exception
+    {
+        {
+            importXtf_NtoN_Extended_Smart1();
+        }
+        File data=null;
+        //EhiLogger.getInstance().setTraceFilter(false);
+        Connection jdbcConnection=null;
+        try{
+            {
+                data=new File(TEST_DATA_DIR,"AssocNtoN_Extended-out.xtf");
+                Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+                config.setFunction(Config.FC_EXPORT);
+                config.setExportTid(true);
+                config.setModels("AssocNtoN_Extended");
+                Ili2db.readSettingsFromDb(config);
+                Ili2db.run(config,null);
+            }
+        }finally{
+            if(jdbcConnection!=null){
+                jdbcConnection.close();
+            }
+        }
+        assertExportXtf_NtoN_Extended(data);
+    }
+    @Test
+    public void exportXtf_NtoN_Extended_Smart2() throws Exception
+    {
+        {
+            importXtf_NtoN_Extended_Smart2();
+        }
+        File data=null;
+        //EhiLogger.getInstance().setTraceFilter(false);
+        Connection jdbcConnection=null;
+        try{
+            {
+                data=new File(TEST_DATA_DIR,"AssocNtoN_Extended-out.xtf");
+                Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+                config.setFunction(Config.FC_EXPORT);
+                config.setExportTid(true);
+                config.setModels("AssocNtoN_Extended");
+                Ili2db.readSettingsFromDb(config);
+                Ili2db.run(config,null);
+            }
+        }finally{
+            if(jdbcConnection!=null){
+                jdbcConnection.close();
+            }
+        }
+        assertExportXtf_NtoN_Extended(data);
+    }
 }

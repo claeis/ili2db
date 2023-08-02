@@ -352,7 +352,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 			  }
 			  if(columnWrapper.getViewableTransferElement().obj instanceof RoleDef){
 				  RoleDef role = (RoleDef) columnWrapper.getViewableTransferElement().obj;
-					if(role.getExtending()==null){
+					if(true){
 						// an embedded role and roledef defined in a lightweight association?
 						if (columnWrapper.getViewableTransferElement().embedded){
                             AssociationDef roleOwner = (AssociationDef) role.getContainer();

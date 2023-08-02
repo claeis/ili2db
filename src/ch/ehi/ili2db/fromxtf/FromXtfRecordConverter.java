@@ -228,7 +228,8 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 			if(obj.obj instanceof RoleDef){
 				RoleDef role = (RoleDef) obj.obj;
 				if(true) { // role.getExtending()==null){
-					if(!attrs.containsKey(role)){
+		            RoleDef rootRole=Ili2cUtility.getRootBaseRole(role);
+					if(!attrs.containsKey(rootRole)){
 					    ; // role is not a property of class of current object
 					}else {						
 						 String refoid=null;
