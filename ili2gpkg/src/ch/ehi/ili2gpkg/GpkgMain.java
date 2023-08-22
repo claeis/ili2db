@@ -89,6 +89,7 @@ public class GpkgMain extends ch.ehi.ili2db.AbstractMain {
 	@Override
 	protected void printSpecificOptions() {
 		System.err.println("--dbschema  schema     The name of the schema in the database. Defaults to not set.");
+        System.err.println("--gpkgMultiGeomPerTable Create more than one geometry per table, if required (no secondary table).");
 	}
 	@Override
 	protected int doArgs(String args[],int argi,Config config) throws ParseException
@@ -98,7 +99,10 @@ public class GpkgMain extends ch.ehi.ili2db.AbstractMain {
 			argi++;
 			config.setDbfile(args[argi]);
 			argi++;
+        }else if(isOption(arg, "--gpkgMultiGeomPerTable")){
+            config.setOneGeomPerTable(!parseBooleanArgument(arg));
+            argi++;
 		}
 		return argi;
-	}
+	}	
 }

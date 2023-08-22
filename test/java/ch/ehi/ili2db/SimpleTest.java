@@ -137,8 +137,13 @@ public abstract class SimpleTest {
 		config.setDefaultSrsCode("2056");
 		setup.setXYParams(config);
 		Ili2db.run(config,null);
+        validateImportIliCoord();
 	}
 	
+    protected void validateImportIliCoord() throws Exception {
+        
+    }
+
     @Test
 	public void importXtf() throws Exception
 	{
@@ -350,6 +355,7 @@ public abstract class SimpleTest {
 		config.setDefaultSrsCode("2056");
 		setup.setXYParams(config);
         Ili2db.run(config,null);
+        validateImportIliCoord();
 	}
 	
 	@Test

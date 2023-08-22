@@ -40,6 +40,7 @@ public abstract class MultipleGeomAttrsTest {
 	@Test
 	public void importIli() throws Exception
 	{
+	    //EhiLogger.getInstance().setTraceFilter(false);
         setup.resetDb();
 
 		File data=new File(TEST_OUT,"MultipleGeomAttrs1.ili");

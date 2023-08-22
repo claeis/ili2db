@@ -193,9 +193,11 @@ public class Viewable2TableMapper {
 
     private Iterator<ViewableTransferElement> getRoles(AssociationDef aclass) {
         ArrayList<ViewableTransferElement> roles=new ArrayList<ViewableTransferElement>();
-        for(Iterator<RoleDef> roleIt=((AssociationDef)aclass).getRolesIterator();roleIt.hasNext();) {
-            RoleDef role=roleIt.next();
-            roles.add(new ViewableTransferElement(role,false));
+        for(Iterator<ViewableTransferElement> roleIt=((AssociationDef)aclass).getAttributesAndRoles2();roleIt.hasNext();) {
+            ViewableTransferElement prop=roleIt.next();
+            if(prop.obj instanceof RoleDef && prop.embedded==false){
+                roles.add(new ViewableTransferElement(prop.obj,false));
+            }
         }
         return roles.iterator();
     }

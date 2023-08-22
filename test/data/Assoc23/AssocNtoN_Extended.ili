@@ -1,0 +1,29 @@
+INTERLIS 2.3;
+MODEL AssocNtoN_Extended (en) AT "https://modelbaker.ch/" VERSION "2023-03-29" =
+
+  TOPIC Konstruktionen =
+
+    CLASS Gebaeude  =
+      Name : MANDATORY TEXT*99;
+    END Gebaeude;
+
+    CLASS BesitzerIn =
+      Vorname : MANDATORY TEXT*99;
+    END BesitzerIn;
+
+    ASSOCIATION Gebaeude_BesitzerIn =
+      BesitzerIn -- {0..*} BesitzerIn;
+      Gebaeude -- {0..*} Gebaeude;
+    END Gebaeude_BesitzerIn;
+
+  END Konstruktionen;
+ 
+  TOPIC ExtendedKonst EXTENDS AssocNtoN_Extended.Konstruktionen =
+
+    ASSOCIATION Gebaeude_BesitzerIn (EXTENDED) =
+      BesitzerIn (EXTENDED) -- {1..*} BesitzerIn;
+    END Gebaeude_BesitzerIn;
+
+  END ExtendedKonst;
+
+END AssocNtoN_Extended.

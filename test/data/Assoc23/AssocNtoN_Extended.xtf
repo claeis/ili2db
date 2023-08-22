@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TRANSFER xmlns="http://www.interlis.ch/INTERLIS2.3">
+	<HEADERSECTION SENDER="ili2pg-2.2.0-20150910" VERSION="2.3">
+		<MODELS>
+			<MODEL NAME="AssocNtoN_Extended" VERSION="2015-09-23" URI="mailto:ce@eisenhutinformatik.ch"></MODEL>
+		</MODELS>
+	</HEADERSECTION>
+	<DATASECTION>
+		<AssocNtoN_Extended.Konstruktionen BID="AssocNtoN_Extended.Konstruktionen">
+			<AssocNtoN_Extended.Konstruktionen.Gebaeude TID="g1">
+				<Name>Rathaus</Name>
+			</AssocNtoN_Extended.Konstruktionen.Gebaeude>
+			<AssocNtoN_Extended.Konstruktionen.BesitzerIn TID="p1">
+				<Vorname>Martin</Vorname>
+			</AssocNtoN_Extended.Konstruktionen.BesitzerIn>
+			<AssocNtoN_Extended.Konstruktionen.Gebaeude_BesitzerIn>
+				<BesitzerIn REF="p1"/>
+				<Gebaeude REF="g1"/>
+			</AssocNtoN_Extended.Konstruktionen.Gebaeude_BesitzerIn>
+		</AssocNtoN_Extended.Konstruktionen>
+		<AssocNtoN_Extended.ExtendedKonst BID="AssocNtoN_Extended.ExtendedKonst">
+			<AssocNtoN_Extended.Konstruktionen.Gebaeude TID="g2">
+				<Name>Spital</Name>
+			</AssocNtoN_Extended.Konstruktionen.Gebaeude>
+			<AssocNtoN_Extended.Konstruktionen.BesitzerIn TID="p2">
+				<Vorname>Peter</Vorname>
+			</AssocNtoN_Extended.Konstruktionen.BesitzerIn>
+			<AssocNtoN_Extended.ExtendedKonst.Gebaeude_BesitzerIn>
+				<BesitzerIn REF="p2"/>
+				<Gebaeude REF="g2"/>
+			</AssocNtoN_Extended.ExtendedKonst.Gebaeude_BesitzerIn>
+		</AssocNtoN_Extended.ExtendedKonst>
+	</DATASECTION>
+</TRANSFER>
