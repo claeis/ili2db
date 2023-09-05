@@ -102,13 +102,7 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 		if(structWrapper0!=null){
 		    if(structWrapper0 instanceof StructWrapper) {
 		        StructWrapper structWrapper=(StructWrapper)structWrapper0;
-	            if(createGenericStructRef){
-	                ret.append(", r0."+DbNames.T_PARENT_ID_COL);
-	                ret.append(", r0."+DbNames.T_PARENT_TYPE_COL);
-	                ret.append(", r0."+DbNames.T_PARENT_ATTR_COL);
-	            }else{
-	                ret.append(", r0."+ili2sqlName.mapIliAttributeDefReverse(structWrapper.getParentAttr(),getSqlType(classWrapper.getViewable()).getName(),getSqlType(structWrapper.getParentTable().getViewable()).getName()));
-	            }
+                ret.append(", r0."+ili2sqlName.mapIliAttributeDefReverse(structWrapper.getParentAttr(),getSqlType(classWrapper.getViewable()).getName(),getSqlType(structWrapper.getParentTable().getViewable()).getName()));
 	            ret.append(", r0."+DbNames.T_SEQ_COL);
 		    }
 		}
@@ -215,11 +209,7 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 		if(structWrapper0!=null) {
 		    if(structWrapper0 instanceof StructWrapper){
 	            StructWrapper structWrapper=(StructWrapper)structWrapper0;
-	            if(createGenericStructRef){
-	                ret.append(sep+" r0."+DbNames.T_PARENT_ID_COL+"=? AND r0."+DbNames.T_PARENT_ATTR_COL+"=?");
-	            }else{
-	                ret.append(sep+" r0."+ili2sqlName.mapIliAttributeDefReverse(structWrapper.getParentAttr(),getSqlType(classWrapper.getViewable()).getName(),getSqlType(structWrapper.getParentTable().getViewable()).getName())+"=?");
-	            }
+                ret.append(sep+" r0."+ili2sqlName.mapIliAttributeDefReverse(structWrapper.getParentAttr(),getSqlType(classWrapper.getViewable()).getName(),getSqlType(structWrapper.getParentTable().getViewable()).getName())+"=?");
 	            sep=" AND";
 		    }else if(structWrapper0 instanceof EmbeddedLinkWrapper) {
 		        EmbeddedLinkWrapper structWrapper=(EmbeddedLinkWrapper)structWrapper0;
@@ -390,9 +380,6 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 		    if(structWrapper0 instanceof StructWrapper) {
 		        StructWrapper structWrapper=(StructWrapper) structWrapper0;
 	            dbstmt.setLong(paramIdx++,structWrapper.getParentSqlId());
-	            if(createGenericStructRef){
-	                dbstmt.setString(paramIdx++,ili2sqlName.mapIliAttributeDef(structWrapper.getParentAttr(),null,getSqlType(structWrapper.getParentTable().getViewable()).getName(),null));
-	            }
 		    }else if (structWrapper0 instanceof EmbeddedLinkWrapper){
 		        EmbeddedLinkWrapper structWrapper=(EmbeddedLinkWrapper) structWrapper0;
                 dbstmt.setLong(paramIdx++,structWrapper.getParentSqlId());
@@ -452,11 +439,7 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 		}else{
 		    if(structWrapper instanceof StructWrapper) {
 	            iomObj=(Iom_jObject)structelev.get(Long.toString(sqlid));
-	            if(createGenericStructRef){
-	                valuei+=4;
-	            }else{
-	                valuei+=2;
-	            }
+                valuei+=2;
 		    }else {
                 iomObj=(Iom_jObject)structelev.get(Long.toString(sqlid));
 		    }

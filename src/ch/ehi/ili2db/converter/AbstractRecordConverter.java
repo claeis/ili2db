@@ -62,7 +62,6 @@ public class AbstractRecordConverter {
 	protected boolean createEnumTxtCol=false;
 	protected boolean createEnumColAsItfCode=false;
 	protected boolean createTypeDiscriminator=false;
-	protected boolean createGenericStructRef=false;
 	protected boolean sqlEnableNull=true;
 	protected boolean strokeArcs=true;
 	protected boolean createBasketCol=false;
@@ -108,7 +107,6 @@ public class AbstractRecordConverter {
 		schemaName=config.getDbschema();
 
 		createTypeDiscriminator=Config.CREATE_TYPE_DISCRIMINATOR_ALWAYS.equals(config.getCreateTypeDiscriminator());
-		createGenericStructRef=Config.STRUCT_MAPPING_GENERICREF.equals(config.getStructMapping());
 		sqlEnableNull=Config.SQL_NULL_ENABLE.equals(config.getSqlNull());
 		strokeArcs=Config.STROKE_ARCS_ENABLE.equals(Config.getStrokeArcs(config));
 		

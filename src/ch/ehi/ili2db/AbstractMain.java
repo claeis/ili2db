@@ -374,10 +374,6 @@ public abstract class AbstractMain {
 					argi++;
 					config.setMaxSqlNameLength(args[argi]);
 					argi++;
-				} else if (isOption(arg, "--structWithGenericRef")) {
-					argi++;
-					if (parseBooleanArgument(arg))
-						config.setStructMapping(Config.STRUCT_MAPPING_GENERICREF);
                 } else if (isOption(arg, "--sqlColsAsText")) {
                     argi++;
                     if (parseBooleanArgument(arg))
@@ -554,7 +550,6 @@ public abstract class AbstractMain {
 					System.err.println("--idSeqMin minValue    sets the minimum value of the id sequence generator.");
 					System.err.println("--idSeqMax maxValue    sets the maximum value of the id sequence generator.");
 					System.err.println("--createTypeDiscriminator  generate always a type discriminator column.");
-					System.err.println("--structWithGenericRef  generate one generic reference to parent in struct tables.");
 					System.err.println("--disableNameOptimization disable use of unqualified class name as table name.");
 					System.err.println("--nameByTopic          use topic+class name as table name.");
 					System.err.println("--nameLang lang        use names of ili model in given language as table/column name.");

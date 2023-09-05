@@ -1871,9 +1871,6 @@ public class Ili2db {
                         config.setNameOptimization(Config.NAME_OPTIMIZATION_TOPIC);
                 } else if (arg.equals("maxNameLength")) {
                     config.setMaxSqlNameLength(value);
-                } else if (arg.equals("structWithGenericRef")) {
-                    if (parseBooleanArgument(value))
-                        config.setStructMapping(Config.STRUCT_MAPPING_GENERICREF);
                 } else if (arg.equals("sqlColsAsText")) {
                     if (parseBooleanArgument(value))
                         config.setSqlColsAsText(Config.SQL_COLS_AS_TEXT_ENABLE);
