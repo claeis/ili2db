@@ -154,7 +154,7 @@ Um solche Daten zu importieren (um sie danach zu flicken)::
 Laufzeitanforderungen
 ---------------------
 
-Das Programm setzt Java 1.6 voraus.
+Das Programm setzt Java 1.8 voraus.
 
 **PostGIS:** Als Datenbank muss mindestens PostgreSQL 8.3 und PostGIS
 1.5 vorhanden sein. Falls das Interlis Datenmodell INTERLIS.UUIDOID als 

@@ -95,7 +95,7 @@ por lo normal se emite desde antes.::
 Requisitos de sistema en tiempo de ejecución
 --------------------------------------------
 
-El programa requiere Java 1.6.
+El programa requiere Java 1.8.
 
 **PostGIS:** Se requiere por lo menos PostgreSQL 8.3 con PostGIS 1.5. En
 el caso de usar el modelo de datos Interlis INTERLIS.UUIDOID como OID,
