@@ -15,6 +15,7 @@ ili2db 5.0.0 (SNAPSHOT)
 ---------------------------
 - ili2pg: fix support of SCRAM authentification in PostgreSQL (#448)
 - ili2gpkg: Update sqlite lib (Apple M1) (#421)
+- remove ToXtfRecordConverter.isMsAccess (#303)
 - JRE 1.8
 - org.postgresql:postgresql:42.6.0
 - org.xerial:sqlite-jdbc:3.43.0.0

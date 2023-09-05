@@ -61,7 +61,6 @@ import ch.interlis.iom_j.itf.ItfWriter2;
 import ch.interlis.iox_j.wkb.Wkb2iox;
 
 public class ToXtfRecordConverter extends AbstractRecordConverter {
-	private boolean isMsAccess=false;
 	private Connection conn=null;
 	private SqlColumnConverter geomConv=null;
 	private SqlidPool sqlid2xtfid=null;
@@ -78,13 +77,6 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 		sqlid2xtfid=sqlidPool;
 		this.dbSchema=dbSchema;
 		exportTid=config.isExportTid();
-		try {
-			if(conn.getMetaData().getURL().startsWith("jdbc:odbc:DRIVER={Microsoft Access Driver (*.mdb)}")){
-				isMsAccess=true;
-			}
-		} catch (SQLException e) {
-			EhiLogger.logError(e);
-		}
         if(defaultCrsAuthority!=null && defaultCrsCode!=null) {
             defaultEpsgCode=TransferFromIli.parseEpsgCode(defaultCrsAuthority+":"+defaultCrsCode);
         }
@@ -206,20 +198,12 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 		tablev.addAll(classWrapper.getWrappers());
 		sep="";
 		int tablec=tablev.size();
-		if(isMsAccess){
-			for(int i=0;i<tablec;i++){
-				ret.append("(");
-			}
-		}
 		for(int i=0;i<tablec;i++){
 			ret.append(sep);
 			ret.append(tablev.get(i).getSqlTableQName());
 			ret.append(" r"+Integer.toString(i));
 			if(i>0){
 				ret.append(" ON r0."+colT_ID+"=r"+Integer.toString(i)+"."+colT_ID);
-			}
-			if(isMsAccess){
-				ret.append(")");
 			}
 			sep=" LEFT JOIN ";
 		}
