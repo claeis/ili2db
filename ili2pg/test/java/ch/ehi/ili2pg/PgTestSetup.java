@@ -32,6 +32,7 @@ public class PgTestSetup extends ch.ehi.ili2db.AbstractTestSetup {
         if(dbschema!=null){
             config.setDbschema(dbschema);
         }
+        config.setSetupPgExt(true);
         if(logfile!=null){
             config.setLogfile(logfile);
         }
@@ -50,6 +51,7 @@ public class PgTestSetup extends ch.ehi.ili2db.AbstractTestSetup {
         if(dbschema!=null) {
             config.setDbschema(dbschema);
         }
+        config.setSetupPgExt(true);
     }
     @Override
     public String prefixName(String name) {

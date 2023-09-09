@@ -95,7 +95,7 @@ por lo normal se emite desde antes.::
 Requisitos de sistema en tiempo de ejecución
 --------------------------------------------
 
-El programa requiere Java 1.6.
+El programa requiere Java 1.8.
 
 **PostGIS:** Se requiere por lo menos PostgreSQL 8.3 con PostGIS 1.5. En
 el caso de usar el modelo de datos Interlis INTERLIS.UUIDOID como OID,
@@ -537,8 +537,6 @@ Opciones:
 +-------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | --createTypeDiscriminator     | Crea una columna para el discriminador de tipo para cada tabla (incluso si el modelo no utiliza herencia). Para las clases con herencia, la columna siempre se crea. (véase el capítulo sobre reglas de mapeo/tablas).                                                                                                                                                                                                                                                                 |
 +-------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| --structWithGenericRef        | Genera columnas genéricas para la clave foránea en tablas que mapean estructuras de Interlis. Sin esta opción, se crea una columna para cada atributo de estructura (en la tabla que representa la estructura). (véase el capítulo sobre reglas de mapeo/estructuras).                                                                                                                                                                                                                 |
-+-------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | --disableNameOptimization     | Desactiva el uso de nombres de clase no calificados. Para todos los nombres de tabla, se utilizan nombres de clase Interlis calificados (Model.Topic.Class) (y mapeados en un nombre de tabla válido). (véase el capítulo sobre reglas de mapeo/convenciones de nomenclatura).                                                                                                                                                                                                         |
 +-------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | --nameByTopic                 | Para todos los nombres de tablas, se utilizan parcialmente nombres de clase Interlis (Title.Class) calificados (y se mapean en un nombre de tabla válido). (véase el capítulo sobre reglas de mapeo/convenciones de nomenclatura).                                                                                                                                                                                                                                                     |
@@ -872,26 +870,6 @@ un mapeo alternativo se utiliza en el caso de Smart-Mapping.
 |              |                        |                                      |                                                                                                                                                                                                                                    |
 |              |                        | );                                   |                                                                                                                                                                                                                                    |
 +--------------+------------------------+--------------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| 2            | STRUCTURE C =          | CREATE TABLE C (                     | La opción -structWithGenericRef crea sólo tres columnas estándar T\_ParentId, T\_ParentType, T\_ParentAttr en vez de una columna para cada atributo de estructura. Estas tres columnas juntas forman una clave foránea genérica.   |
-|              |                        |                                      |                                                                                                                                                                                                                                    |
-|              | END C;                 | T\_Id integer PRIMARY KEY,           | T\_ParentId es el t\_id del objeto que contiene el elemento estructural.                                                                                                                                                           |
-|              |                        |                                      |                                                                                                                                                                                                                                    |
-|              | CLASS D =              | T\_seq integer NOT NULL,             | T\_ParentType es la clase concreta (el nombre SQL del nombre calificado de clase INTERLIS [4]_) del objeto que contiene el elemento estructural.                                                                                   |
-|              |                        |                                      |                                                                                                                                                                                                                                    |
-|              | attr1 : LIST OF C;     | T\_ParentId integer NOT NULL         | T\_ParentAttr es el nombre del atributo de estructura (el nombre SQL del nombre no cualificado del atributo INTERLIS) en la clase del objeto que contiene el elemento estructural.                                                 |
-|              |                        |                                      |                                                                                                                                                                                                                                    |
-|              | END D;                 | T\_ParentType varchar(60) NOT NULL   |                                                                                                                                                                                                                                    |
-|              |                        |                                      |                                                                                                                                                                                                                                    |
-|              |                        | T\_ParentAttr varchar(60) NOT NULL   |                                                                                                                                                                                                                                    |
-|              |                        |                                      |                                                                                                                                                                                                                                    |
-|              |                        | );                                   |                                                                                                                                                                                                                                    |
-|              |                        |                                      |                                                                                                                                                                                                                                    |
-|              |                        | CREATE TABLE D (                     |                                                                                                                                                                                                                                    |
-|              |                        |                                      |                                                                                                                                                                                                                                    |
-|              |                        | T\_Id integer PRIMARY KEY            |                                                                                                                                                                                                                                    |
-|              |                        |                                      |                                                                                                                                                                                                                                    |
-|              |                        | );                                   |                                                                                                                                                                                                                                    |
-+--------------+------------------------+--------------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 
 Ejemplo XML::
 
@@ -930,27 +908,6 @@ Ejemplo de la alternativa de mapeo 1:
 | 6             | 2             |
 +---------------+---------------+
 
-Ejemplo de la alternativa de mapeo 1:
-
-+---------------+----------+---------------+-----------------+-----------------+
-|   Tabla C     |          |               |                 |                 |
-+===============+==========+===============+=================+=================+
-| t\_id         | t\_seq   | t\_parentid   | t\_parenttype   | t\_parentattr   |
-+---------------+----------+---------------+-----------------+-----------------+
-| 7             | 0        | 6             | D               | attr1           |
-+---------------+----------+---------------+-----------------+-----------------+
-| 8             | 1        | 6             | D               | attr1           |
-+---------------+----------+---------------+-----------------+-----------------+
-| 9             | 0        | 6             | D               | attr2           |
-+---------------+----------+---------------+-----------------+-----------------+
-
-+---------------+---------------+
-|   Tabla D     |               |
-+===============+===============+
-| t\_id         | T\_Ili\_Tid   |
-+---------------+---------------+
-| 6             | 2             |
-+---------------+---------------+
 
 En las siguientes estructuras, Smart-Mapping utiliza un mapeo
 alternativo para los atributos de estructura:

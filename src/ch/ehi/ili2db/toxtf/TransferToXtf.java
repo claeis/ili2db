@@ -104,7 +104,6 @@ public class TransferToXtf {
 	private String schema=null; // name of db schema or null
 	private String colT_ID=null;
 	private boolean createTypeDiscriminator=false;
-	private boolean createGenericStructRef=false;
 	private boolean writeIliTid=false;
 	private boolean hasIliTidCol=false;
 	private SqlColumnConverter geomConv=null;
@@ -149,7 +148,6 @@ public class TransferToXtf {
 		}
 		fetchSize=config.getFetchSize();
 		createTypeDiscriminator=Config.CREATE_TYPE_DISCRIMINATOR_ALWAYS.equals(config.getCreateTypeDiscriminator());
-		createGenericStructRef=Config.STRUCT_MAPPING_GENERICREF.equals(config.getStructMapping());
 		writeIliTid=config.isExportTid(); 
 		hasIliTidCol=Config.TID_HANDLING_PROPERTY.equals(config.getTidHandling());
 		this.geomConv=geomConv;
@@ -1608,12 +1606,7 @@ public class TransferToXtf {
 	            ret.append(recConv.getSqlType(root.getViewable()));
 	            ret.append(" "+tabalias);
 	            if(wrapper!=null){
-	                if(createGenericStructRef){
-	                    ret.append(" WHERE "+tabalias+"."+DbNames.T_PARENT_ID_COL+"="+wrapper.getParentSqlId()+" AND "+tabalias+"."+DbNames.T_PARENT_ATTR_COL+"='"
-	                            +ili2sqlName.mapIliAttributeDef(wrapper.getParentAttr(),null,recConv.getSqlType(wrapper.getParentTable().getViewable()).getName(),null));
-	                }else{
-	                    ret.append(" WHERE "+tabalias+"."+ili2sqlName.mapIliAttributeDefReverse(wrapper.getParentAttr(),recConv.getSqlType(root.getViewable()).getName(),recConv.getSqlType(wrapper.getParentTable().getViewable()).getName())+"="+wrapper.getParentSqlId());
-	                }
+                    ret.append(" WHERE "+tabalias+"."+ili2sqlName.mapIliAttributeDefReverse(wrapper.getParentAttr(),recConv.getSqlType(root.getViewable()).getName(),recConv.getSqlType(wrapper.getParentTable().getViewable()).getName())+"="+wrapper.getParentSqlId());
 	            }
 	            subSelectSep=" UNION ";
 		    }

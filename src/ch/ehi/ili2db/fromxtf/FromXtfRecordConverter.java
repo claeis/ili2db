@@ -183,13 +183,6 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 				    StructWrapper structEle=(StructWrapper)structEle0;
 					ps.setLong(valuei, structEle.getParentSqlId());
 					valuei++;
-					if(createGenericStructRef){
-						ps.setString(valuei, structEle.getParentSqlType());
-						valuei++;
-						// T_ParentAttr
-						ps.setString(valuei, structEle.getParentSqlAttr());
-						valuei++;
-					}
 					// T_Seq
 					ps.setInt(valuei, structEle.getStructi());
 					valuei++;
@@ -470,45 +463,17 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 						// struct is extended by a class and current object is an instance of the class
 					}else{
 						// current object is an instance of the structure
-						if(createGenericStructRef){
-							ret.append(sep);
-							ret.append(DbNames.T_PARENT_ID_COL);
-							if(isUpdate){
-								ret.append("=?");
-							}else{
-								values.append(",?");
-							}
-							sep=",";
-							ret.append(sep);
-							ret.append(DbNames.T_PARENT_TYPE_COL);
-							if(isUpdate){
-								ret.append("=?");
-							}else{
-								values.append(",?");
-							}
-							sep=",";
-							// attribute name in parent class
-							ret.append(sep);
-							ret.append(DbNames.T_PARENT_ATTR_COL);
-							if(isUpdate){
-								ret.append("=?");
-							}else{
-								values.append(",?");
-							}
-							sep=",";
-						}else{
-							ret.append(sep);
-							StructWrapper structEle=(StructWrapper)structEle0;
-							Viewable parentViewable=getViewable(structEle.getParentSqlType());
-							ViewableWrapper parentTable=getViewableWrapperOfAbstractClass((Viewable)structEle.getParentAttr().getContainer(),parentViewable);
-							ret.append(ili2sqlName.mapIliAttributeDefReverse(structEle.getParentAttr(),sqlTableName.getName(),parentTable.getSqlTablename()));
-							if(isUpdate){
-								ret.append("=?");
-							}else{
-								values.append(",?");
-							}
-							sep=",";
-						}
+                        ret.append(sep);
+                        StructWrapper structEle=(StructWrapper)structEle0;
+                        Viewable parentViewable=getViewable(structEle.getParentSqlType());
+                        ViewableWrapper parentTable=getViewableWrapperOfAbstractClass((Viewable)structEle.getParentAttr().getContainer(),parentViewable);
+                        ret.append(ili2sqlName.mapIliAttributeDefReverse(structEle.getParentAttr(),sqlTableName.getName(),parentTable.getSqlTablename()));
+                        if(isUpdate){
+                            ret.append("=?");
+                        }else{
+                            values.append(",?");
+                        }
+                        sep=",";
 						// seqeunce (not null if LIST)
 						ret.append(sep);
 						ret.append(DbNames.T_SEQ_COL);

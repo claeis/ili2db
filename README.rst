@@ -18,7 +18,7 @@ ili2db is in stable state.
  
 System Requirements
 ===================
-For the current version of ili2db, you will need a JRE (Java Runtime Environment) installed on your system, version 1.6 or later.
+For the current version of ili2db, you will need a JRE (Java Runtime Environment) installed on your system, version 1.8 or later.
 The JRE (Java Runtime Environment) can be downloaded for free from the Website <http://www.java.com/>.
 
 Download ili2db

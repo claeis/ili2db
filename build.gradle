@@ -1,5 +1,5 @@
 group 'ch.interlis'
-version '4.11.1'+System.getProperty('release','-SNAPSHOT')
+version '5.0.0'+System.getProperty('release','-SNAPSHOT')
 
 apply plugin: "java"
 apply plugin: "maven"
@@ -8,8 +8,8 @@ apply plugin: "maven"
 if(!JavaVersion.current().isJava8()){
   compileJava.options.compilerArgs.addAll(['--release', '6'])
 }else{
-  sourceCompatibility = JavaVersion.VERSION_1_6 
-  targetCompatibility = JavaVersion.VERSION_1_6
+  sourceCompatibility = JavaVersion.VERSION_1_8 
+  targetCompatibility = JavaVersion.VERSION_1_8
 }
 compileJava.options.encoding = 'US-ASCII'
 
@@ -335,12 +335,12 @@ dependencies {
     testImplementation 'org.xmlunit:xmlunit-matchers:2.8.2'
     testImplementation 'org.xmlunit:xmlunit-placeholders:2.8.2'
 	
-	ili2pgImplementation group: 'org.postgresql', name: 'postgresql', version: '42.2.18.jre6'
-	compileOnly group: 'org.postgresql', name: 'postgresql', version: '42.2.18.jre6' // add as compileOnly, so that eclipse sees it
+	ili2pgImplementation group: 'org.postgresql', name: 'postgresql', version: '42.6.0' 
+	compileOnly group: 'org.postgresql', name: 'postgresql', version: '42.6.0' // add as compileOnly, so that eclipse sees it
 	ili2pgImplementation group: 'com.github.waffle', name: 'waffle-jna', version: '1.9.1'
 	compileOnly group: 'com.github.waffle', name: 'waffle-jna', version: '1.9.1' // add as compileOnly, so that eclipse sees it
-	ili2gpkgImplementation group: 'org.xerial', name: 'sqlite-jdbc', version: '3.8.11.2'
-	compileOnly group: 'org.xerial', name: 'sqlite-jdbc', version: '3.8.11.2' // add as compileOnly, so that eclipse sees it
+	ili2gpkgImplementation group: 'org.xerial', name: 'sqlite-jdbc', version: '3.43.0.0'
+	compileOnly group: 'org.xerial', name: 'sqlite-jdbc', version: '3.43.0.0' // add as compileOnly, so that eclipse sees it
 	ili2mysqlImplementation group: 'mysql', name: 'mysql-connector-java', version: '5.1.49'
 	compileOnly group: 'mysql', name: 'mysql-connector-java', version: '5.1.49' // add as compileOnly, so that eclipse sees it
 	ili2h2gisImplementation group: 'org.orbisgis', name:'h2gis',version: '1.5.0'

@@ -46,6 +46,7 @@ public class CatalogueObjectsTest {
 		if(dbschema!=null){
 			config.setDbschema(dbschema);
 		}
+        config.setSetupPgExt(true);
 		if(logfile!=null){
 			config.setLogfile(logfile);
 		}

@@ -123,7 +123,6 @@ public class TransferFromXtf {
 	private SqlColumnConverter geomConv=null;
 	private boolean createStdCols=false;
 	private boolean createSqlExtRef=false;
-	private boolean createGenericStructRef=false;
 	private boolean readIliTid=false;
     private boolean readIliBid=false;
 	private boolean createBasketCol=false;
@@ -186,7 +185,6 @@ public class TransferFromXtf {
 	        defaultCrsCode=Integer.parseInt(config.getDefaultSrsCode());
 		}
         srsModelAssignment=config.getSrsModelAssignment();
-		createGenericStructRef=Config.STRUCT_MAPPING_GENERICREF.equals(config.getStructMapping());
 		readIliTid=config.isImportTid();
 		readIliBid=config.isImportBid();
 		createBasketCol=Config.BASKET_HANDLING_READWRITE.equals(config.getBasketHandling());
@@ -2326,11 +2324,11 @@ public class TransferFromXtf {
 	 */
 	private String getInsertStmt(boolean isUpdate,Viewable iomClass,ViewableWrapper sqltable,AbstractStructWrapper structEle, OutParam<String> stmtKey){
 		final String key;
-		if(!createGenericStructRef && structEle!=null && (structEle instanceof StructWrapper) && sqltable.getExtending()==null){
+		if(structEle!=null && (structEle instanceof StructWrapper) && sqltable.getExtending()==null){
 			ViewableWrapper parentTable=recConv.getViewableWrapper(((StructWrapper) structEle).getParentSqlType());
 			key=sqltable.getSqlTablename()+":"+iomClass.getScopedName(null)+":"+parentTable.getSqlTablename()+":"+((StructWrapper) structEle).getParentAttr();
 		}else{
-			key=sqltable.getSqlTablename()+":"+iomClass.getScopedName(null);
+            key=sqltable.getSqlTablename()+":"+iomClass.getScopedName(null);
 		}
 		if(stmtKey!=null) {
 		    stmtKey.value=key;

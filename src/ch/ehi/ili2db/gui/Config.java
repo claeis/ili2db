@@ -44,8 +44,6 @@ public class Config extends Settings {
 	public static final String CREATE_STD_COLS_ALL="all";
 	private static final String CREATE_TYPE_DISCRIMINATOR=PREFIX+".typeDiscriminator";
 	public static final String CREATE_TYPE_DISCRIMINATOR_ALWAYS="always";
-	private static final String STRUCT_MAPPING=PREFIX+".structMapping";
-	public static final String STRUCT_MAPPING_GENERICREF="genericRef";
 	public static final String INHERITANCE_TRAFO=PREFIX+".inheritanceTrafo";
 	public static final String INHERITANCE_TRAFO_SMART1="smart1";
 	public static final String INHERITANCE_TRAFO_SMART2="smart2";
@@ -446,12 +444,6 @@ public class Config extends Settings {
 	}
 	public void setCreateTypeDiscriminator(String value) {
 		setValue(CREATE_TYPE_DISCRIMINATOR,value);
-	}
-	public String getStructMapping() {
-		return getValue(STRUCT_MAPPING);
-	}
-	public void setStructMapping(String value) {
-		setValue(STRUCT_MAPPING,value);
 	}
 	public String getInheritanceTrafo() {
 		return getValue(INHERITANCE_TRAFO);

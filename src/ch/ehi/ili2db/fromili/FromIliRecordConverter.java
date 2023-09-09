@@ -278,22 +278,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 		              
 		          // if STRUCTURE, add ref to parent
 		          if(def.isStructure()){
-		              if(createGenericStructRef){
-		                  // add parentid
-		                    DbColId dbParentId=new DbColId();
-		                    dbParentId.setName(DbNames.T_PARENT_ID_COL);
-		                    dbParentId.setNotNull(true);
-		                    dbParentId.setPrimaryKey(false);
-		                    dbTable.addColumn(dbParentId);
-		                      // add parent_type
-		                    DbColumn dbCol=createSqlTypeCol(DbNames.T_PARENT_TYPE_COL);
-		                    dbTable.addColumn(dbCol);
-		                    // add parent_attr
-		                    dbCol=createSqlTypeCol(DbNames.T_PARENT_ATTR_COL);
-		                    dbTable.addColumn(dbCol);
-		              }else{
-		                  // add reference to parent for each structAttr when generating structAttr
-		              }
+                    // add reference to parent for each structAttr when generating structAttr
 		            // add sequence attr
 		            DbColId dbSeq=new DbColId();
 		            dbSeq.setName(DbNames.T_SEQ_COL);
@@ -818,159 +803,154 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 			dbCol.value = ret;
             typeKind=DbExtMetaInfo.TAG_COL_TYPEKIND_MULTICOORD;                        
 		}else if (type instanceof CompositionType){
-			// skip it
-			if(!createGenericStructRef){
-				if(isChbaseCatalogueRef(td, attr) && (coalesceCatalogueRef 
-						|| TrafoConfigNames.CATALOGUE_REF_TRAFO_COALESCE.equals(trafoConfig.getAttrConfig(attr,TrafoConfigNames.CATALOGUE_REF_TRAFO)))){
-				    if(createExtRef) {
-                        DbColVarchar ret=new DbColVarchar();
-                        ret.setSize(255);
-                        ret.setName(ili2sqlName.mapIliAttributeDef(attr,dbTable.getName().getName(),getSqlType(getCatalogueRefTarget(type)).getName(),false));
+            if(isChbaseCatalogueRef(td, attr) && (coalesceCatalogueRef 
+                    || TrafoConfigNames.CATALOGUE_REF_TRAFO_COALESCE.equals(trafoConfig.getAttrConfig(attr,TrafoConfigNames.CATALOGUE_REF_TRAFO)))){
+                if(createExtRef) {
+                    DbColVarchar ret=new DbColVarchar();
+                    ret.setSize(255);
+                    ret.setName(ili2sqlName.mapIliAttributeDef(attr,dbTable.getName().getName(),getSqlType(getCatalogueRefTarget(type)).getName(),false));
+                    ret.setNotNull(false);
+                    ret.setPrimaryKey(false);
+                    if(createFkIdx){
+                        ret.setIndex(true);
+                    }
+                    dbColExts.add(ret);
+                }else {
+                    ArrayList<ViewableWrapper> targetTables = getTargetTables(getCatalogueRefTarget(type));
+                    List<String> fkColNames=new ArrayList<String>();
+                    boolean catRefMandatory=isChbaseCatalogueRefMandatory(td,attr);
+                    for(ViewableWrapper targetTable:targetTables)
+                    {
+                        DbColId ret=new DbColId();
+                        String colName=ili2sqlName.mapIliAttributeDef(attr,dbTable.getName().getName(),targetTable.getSqlTablename(),targetTables.size()>1);
+                        ret.setName(colName);
+                        fkColNames.add(colName);
                         ret.setNotNull(false);
                         ret.setPrimaryKey(false);
+                        if(createFk){
+                            ret.setReferencedTable(targetTable.getSqlTable());
+                        }
+                        metaInfo.setColumnInfo(dbTable.getName().getName(), null, ret.getName(), DbExtMetaInfo.TAG_COL_FOREIGNKEY, targetTable.getSqlTablename());
                         if(createFkIdx){
                             ret.setIndex(true);
                         }
                         dbColExts.add(ret);
-				    }else {
-	                    ArrayList<ViewableWrapper> targetTables = getTargetTables(getCatalogueRefTarget(type));
-	                    List<String> fkColNames=new ArrayList<String>();
-	                    boolean catRefMandatory=isChbaseCatalogueRefMandatory(td,attr);
-	                    for(ViewableWrapper targetTable:targetTables)
-	                    {
-	                        DbColId ret=new DbColId();
-	                        String colName=ili2sqlName.mapIliAttributeDef(attr,dbTable.getName().getName(),targetTable.getSqlTablename(),targetTables.size()>1);
-	                        ret.setName(colName);
-	                        fkColNames.add(colName);
-	                        ret.setNotNull(false);
-	                        ret.setPrimaryKey(false);
-	                        if(createFk){
-	                            ret.setReferencedTable(targetTable.getSqlTable());
-	                        }
-	                        metaInfo.setColumnInfo(dbTable.getName().getName(), null, ret.getName(), DbExtMetaInfo.TAG_COL_FOREIGNKEY, targetTable.getSqlTablename());
-	                        if(createFkIdx){
-	                            ret.setIndex(true);
-	                        }
-	                        dbColExts.add(ret);
-	                    }
-	                    if(createMandatoryCheck && catRefMandatory) {
-	                        Viewable sourceClass=(Viewable)attr.getContainer();
-	                        List<Viewable> exts=getPotentialClassTypes(sourceClass);
-	                        String cnstrName="ili_"+getSqlAttrName(attr,null,dbTable.getName().getName(),null);
-	                        String cnstr = createReferenceAttrCheck(dbTypeCol!=null?exts:null,fkColNames);
-	                        dbTable.setNativeConstraint(cnstrName, cnstr);
-	                    }
-				    }
-                    trafoConfig.setAttrConfig(attr, TrafoConfigNames.CATALOGUE_REF_TRAFO,TrafoConfigNames.CATALOGUE_REF_TRAFO_COALESCE);
-				}else if(Ili2cUtility.isMultiSurfaceAttr(td, attr) && (coalesceMultiSurface 
-						|| TrafoConfigNames.MULTISURFACE_TRAFO_COALESCE.equals(trafoConfig.getAttrConfig(attr,TrafoConfigNames.MULTISURFACE_TRAFO)))){
-					multiSurfaceAttrs.addMultiSurfaceAttr(attr);
-					DbColGeometry ret=new DbColGeometry();
-					boolean curvePolygon=false;
-					if(!strokeArcs){
-						curvePolygon=true;
-					}
-					ret.setType(curvePolygon ? DbColGeometry.MULTISURFACE : DbColGeometry.MULTIPOLYGON);
-					// get crs from ili
-					AttributeDef surfaceAttr = multiSurfaceAttrs.getSurfaceAttr(attr);
-					setCrs(ret,epsgCode);
-					SurfaceType surface=((SurfaceType) surfaceAttr.getDomainResolvingAliases());
-					CoordType coord=(CoordType)surface.getControlPointDomain().getType();
-					ret.setDimension(coord.getDimensions().length);
-					setBB(ret, coord,attr.getContainer().getScopedName(null)+"."+attr.getName());
-					dbCol.value=ret;
-					trafoConfig.setAttrConfig(attr, TrafoConfigNames.MULTISURFACE_TRAFO,TrafoConfigNames.MULTISURFACE_TRAFO_COALESCE);
-		            typeKind=DbExtMetaInfo.TAG_COL_TYPEKIND_MULTISURFACE;                        
-				}else if(Ili2cUtility.isMultiLineAttr(td, attr) && (coalesceMultiLine 
-						|| TrafoConfigNames.MULTILINE_TRAFO_COALESCE.equals(trafoConfig.getAttrConfig(attr,TrafoConfigNames.MULTILINE_TRAFO)))){
-					multiLineAttrs.addMultiLineAttr(attr);
-					DbColGeometry ret=new DbColGeometry();
-					boolean curvePolyline=false;
-					if(!strokeArcs){
-						curvePolyline=true;
-					}
-					ret.setType(curvePolyline ? DbColGeometry.MULTICURVE : DbColGeometry.MULTILINESTRING);
-					// get crs from ili
-					AttributeDef polylineAttr = multiLineAttrs.getPolylineAttr(attr);
-					setCrs(ret,epsgCode);
-					PolylineType polylineType=((PolylineType) polylineAttr.getDomainResolvingAliases());
-					CoordType coord=(CoordType)polylineType.getControlPointDomain().getType();
-					ret.setDimension(coord.getDimensions().length);
-					setBB(ret, coord,attr.getContainer().getScopedName(null)+"."+attr.getName());
-					dbCol.value=ret;
-					trafoConfig.setAttrConfig(attr, TrafoConfigNames.MULTILINE_TRAFO,TrafoConfigNames.MULTILINE_TRAFO_COALESCE);
-                    typeKind=DbExtMetaInfo.TAG_COL_TYPEKIND_MULTIPOLYLINE;                       
-				}else if(Ili2cUtility.isMultiPointAttr(td, attr) && (coalesceMultiPoint 
-						|| TrafoConfigNames.MULTIPOINT_TRAFO_COALESCE.equals(trafoConfig.getAttrConfig(attr,TrafoConfigNames.MULTIPOINT_TRAFO)))){
-					multiPointAttrs.addMultiPointAttr(attr);
-					DbColGeometry ret=new DbColGeometry();
-					ret.setType(DbColGeometry.MULTIPOINT);
-					// get crs from ili
-					AttributeDef coordAttr = multiPointAttrs.getCoordAttr(attr);
-					setCrs(ret,epsgCode);
-					CoordType coord=(CoordType) ( coordAttr.getDomainResolvingAliases());
-					ret.setDimension(coord.getDimensions().length);
-					setBB(ret, coord,attr.getContainer().getScopedName(null)+"."+attr.getName());
-					dbCol.value=ret;
-					trafoConfig.setAttrConfig(attr, TrafoConfigNames.MULTIPOINT_TRAFO,TrafoConfigNames.MULTIPOINT_TRAFO_COALESCE);
-                    typeKind=DbExtMetaInfo.TAG_COL_TYPEKIND_MULTICOORD;                       
-				}else if(Ili2cUtility.isArrayAttr(td, attr) && (coalesceArray 
-						|| TrafoConfigNames.ARRAY_TRAFO_COALESCE.equals(trafoConfig.getAttrConfig(attr,TrafoConfigNames.ARRAY_TRAFO)))){
-					arrayAttrs.addArrayAttr(attr);
-					ArrayMapping attrMapping=arrayAttrs.getMapping(attr);
-					AttributeDef localAttr=attrMapping.getValueAttr();
-					Type localType = localAttr.getDomainResolvingAll();
-					if(!createSimpleDbCol(dbTable, aclass, localAttr, localType, dbCol, simpleTypeKind,unitDef, mText, dbColExts)) {
-						  throw new IllegalStateException("unexpected attr type "+localAttr.getScopedName());
-					}
-					dbCol.value.setArraySize(DbColumn.UNLIMITED_ARRAY);		
-					trafoConfig.setAttrConfig(attr, TrafoConfigNames.ARRAY_TRAFO,TrafoConfigNames.ARRAY_TRAFO_COALESCE);
-                }else if(Ili2cUtility.isJsonAttr(td, attr) && (coalesceJson 
-                        || TrafoConfigNames.JSON_TRAFO_COALESCE.equals(trafoConfig.getAttrConfig(attr,TrafoConfigNames.JSON_TRAFO)))){
-                    DbColJson ret=new DbColJson();
-                    dbCol.value=ret;
-                    trafoConfig.setAttrConfig(attr, TrafoConfigNames.JSON_TRAFO,TrafoConfigNames.JSON_TRAFO_COALESCE);
-                    typeKind=DbExtMetaInfo.TAG_COL_TYPEKIND_STRUCTURE;
-				}else if(isMultilingualTextAttr(td, attr) && (expandMultilingual 
-							|| TrafoConfigNames.MULTILINGUAL_TRAFO_EXPAND.equals(trafoConfig.getAttrConfig(attr,TrafoConfigNames.MULTILINGUAL_TRAFO)))){
-					for(String sfx:DbNames.MULTILINGUAL_TXT_COL_SUFFIXS){
-						DbColVarchar ret=new DbColVarchar();
-						ret.setName(getSqlAttrName(attr,null,dbTable.getName().getName(),null)+sfx);
-						ret.setSize(DbColVarchar.UNLIMITED);
-						if(createTextCheck) {
-						    ret.setMinLength(1);
-						}
-						ret.setNotNull(false);
-						ret.setPrimaryKey(false);
-						dbColExts.add(ret);
-					}
-					trafoConfig.setAttrConfig(attr, TrafoConfigNames.MULTILINGUAL_TRAFO,TrafoConfigNames.MULTILINGUAL_TRAFO_EXPAND);
-                }else if(isLocalisedTextAttr(td, attr) && (expandLocalised 
-                        || TrafoConfigNames.LOCALISED_TRAFO_EXPAND.equals(trafoConfig.getAttrConfig(attr,TrafoConfigNames.LOCALISED_TRAFO)))){
-                    
+                    }
+                    if(createMandatoryCheck && catRefMandatory) {
+                        Viewable sourceClass=(Viewable)attr.getContainer();
+                        List<Viewable> exts=getPotentialClassTypes(sourceClass);
+                        String cnstrName="ili_"+getSqlAttrName(attr,null,dbTable.getName().getName(),null);
+                        String cnstr = createReferenceAttrCheck(dbTypeCol!=null?exts:null,fkColNames);
+                        dbTable.setNativeConstraint(cnstrName, cnstr);
+                    }
+                }
+                trafoConfig.setAttrConfig(attr, TrafoConfigNames.CATALOGUE_REF_TRAFO,TrafoConfigNames.CATALOGUE_REF_TRAFO_COALESCE);
+            }else if(Ili2cUtility.isMultiSurfaceAttr(td, attr) && (coalesceMultiSurface 
+                    || TrafoConfigNames.MULTISURFACE_TRAFO_COALESCE.equals(trafoConfig.getAttrConfig(attr,TrafoConfigNames.MULTISURFACE_TRAFO)))){
+                multiSurfaceAttrs.addMultiSurfaceAttr(attr);
+                DbColGeometry ret=new DbColGeometry();
+                boolean curvePolygon=false;
+                if(!strokeArcs){
+                    curvePolygon=true;
+                }
+                ret.setType(curvePolygon ? DbColGeometry.MULTISURFACE : DbColGeometry.MULTIPOLYGON);
+                // get crs from ili
+                AttributeDef surfaceAttr = multiSurfaceAttrs.getSurfaceAttr(attr);
+                setCrs(ret,epsgCode);
+                SurfaceType surface=((SurfaceType) surfaceAttr.getDomainResolvingAliases());
+                CoordType coord=(CoordType)surface.getControlPointDomain().getType();
+                ret.setDimension(coord.getDimensions().length);
+                setBB(ret, coord,attr.getContainer().getScopedName(null)+"."+attr.getName());
+                dbCol.value=ret;
+                trafoConfig.setAttrConfig(attr, TrafoConfigNames.MULTISURFACE_TRAFO,TrafoConfigNames.MULTISURFACE_TRAFO_COALESCE);
+                typeKind=DbExtMetaInfo.TAG_COL_TYPEKIND_MULTISURFACE;                        
+            }else if(Ili2cUtility.isMultiLineAttr(td, attr) && (coalesceMultiLine 
+                    || TrafoConfigNames.MULTILINE_TRAFO_COALESCE.equals(trafoConfig.getAttrConfig(attr,TrafoConfigNames.MULTILINE_TRAFO)))){
+                multiLineAttrs.addMultiLineAttr(attr);
+                DbColGeometry ret=new DbColGeometry();
+                boolean curvePolyline=false;
+                if(!strokeArcs){
+                    curvePolyline=true;
+                }
+                ret.setType(curvePolyline ? DbColGeometry.MULTICURVE : DbColGeometry.MULTILINESTRING);
+                // get crs from ili
+                AttributeDef polylineAttr = multiLineAttrs.getPolylineAttr(attr);
+                setCrs(ret,epsgCode);
+                PolylineType polylineType=((PolylineType) polylineAttr.getDomainResolvingAliases());
+                CoordType coord=(CoordType)polylineType.getControlPointDomain().getType();
+                ret.setDimension(coord.getDimensions().length);
+                setBB(ret, coord,attr.getContainer().getScopedName(null)+"."+attr.getName());
+                dbCol.value=ret;
+                trafoConfig.setAttrConfig(attr, TrafoConfigNames.MULTILINE_TRAFO,TrafoConfigNames.MULTILINE_TRAFO_COALESCE);
+                typeKind=DbExtMetaInfo.TAG_COL_TYPEKIND_MULTIPOLYLINE;                       
+            }else if(Ili2cUtility.isMultiPointAttr(td, attr) && (coalesceMultiPoint 
+                    || TrafoConfigNames.MULTIPOINT_TRAFO_COALESCE.equals(trafoConfig.getAttrConfig(attr,TrafoConfigNames.MULTIPOINT_TRAFO)))){
+                multiPointAttrs.addMultiPointAttr(attr);
+                DbColGeometry ret=new DbColGeometry();
+                ret.setType(DbColGeometry.MULTIPOINT);
+                // get crs from ili
+                AttributeDef coordAttr = multiPointAttrs.getCoordAttr(attr);
+                setCrs(ret,epsgCode);
+                CoordType coord=(CoordType) ( coordAttr.getDomainResolvingAliases());
+                ret.setDimension(coord.getDimensions().length);
+                setBB(ret, coord,attr.getContainer().getScopedName(null)+"."+attr.getName());
+                dbCol.value=ret;
+                trafoConfig.setAttrConfig(attr, TrafoConfigNames.MULTIPOINT_TRAFO,TrafoConfigNames.MULTIPOINT_TRAFO_COALESCE);
+                typeKind=DbExtMetaInfo.TAG_COL_TYPEKIND_MULTICOORD;                       
+            }else if(Ili2cUtility.isArrayAttr(td, attr) && (coalesceArray 
+                    || TrafoConfigNames.ARRAY_TRAFO_COALESCE.equals(trafoConfig.getAttrConfig(attr,TrafoConfigNames.ARRAY_TRAFO)))){
+                arrayAttrs.addArrayAttr(attr);
+                ArrayMapping attrMapping=arrayAttrs.getMapping(attr);
+                AttributeDef localAttr=attrMapping.getValueAttr();
+                Type localType = localAttr.getDomainResolvingAll();
+                if(!createSimpleDbCol(dbTable, aclass, localAttr, localType, dbCol, simpleTypeKind,unitDef, mText, dbColExts)) {
+                      throw new IllegalStateException("unexpected attr type "+localAttr.getScopedName());
+                }
+                dbCol.value.setArraySize(DbColumn.UNLIMITED_ARRAY);     
+                trafoConfig.setAttrConfig(attr, TrafoConfigNames.ARRAY_TRAFO,TrafoConfigNames.ARRAY_TRAFO_COALESCE);
+            }else if(Ili2cUtility.isJsonAttr(td, attr) && (coalesceJson 
+                    || TrafoConfigNames.JSON_TRAFO_COALESCE.equals(trafoConfig.getAttrConfig(attr,TrafoConfigNames.JSON_TRAFO)))){
+                DbColJson ret=new DbColJson();
+                dbCol.value=ret;
+                trafoConfig.setAttrConfig(attr, TrafoConfigNames.JSON_TRAFO,TrafoConfigNames.JSON_TRAFO_COALESCE);
+                typeKind=DbExtMetaInfo.TAG_COL_TYPEKIND_STRUCTURE;
+            }else if(isMultilingualTextAttr(td, attr) && (expandMultilingual 
+                        || TrafoConfigNames.MULTILINGUAL_TRAFO_EXPAND.equals(trafoConfig.getAttrConfig(attr,TrafoConfigNames.MULTILINGUAL_TRAFO)))){
+                for(String sfx:DbNames.MULTILINGUAL_TXT_COL_SUFFIXS){
                     DbColVarchar ret=new DbColVarchar();
-                    ret.setName(getSqlAttrName(attr,null,dbTable.getName().getName(),null));
+                    ret.setName(getSqlAttrName(attr,null,dbTable.getName().getName(),null)+sfx);
                     ret.setSize(DbColVarchar.UNLIMITED);
+                    if(createTextCheck) {
+                        ret.setMinLength(1);
+                    }
                     ret.setNotNull(false);
-                    ret.setPrimaryKey(false);
-                    
-                    dbCol.value=ret;
-                    ret=new DbColVarchar();
-                    ret.setName(getSqlAttrName(attr,null,dbTable.getName().getName(),null)+DbNames.LOCALISED_TXT_COL_SUFFIX);
-                    ret.setSize(2);
-                    ret.setNotNull(false);
-                    
                     ret.setPrimaryKey(false);
                     dbColExts.add(ret);
-                    trafoConfig.setAttrConfig(attr, TrafoConfigNames.LOCALISED_TRAFO,TrafoConfigNames.LOCALISED_TRAFO_EXPAND);
-				}else{
-					// add reference col from struct ele to parent obj to struct table
-					addParentRef(aclass,attr);
-					dbCol.value=null;
-				}
-			}else{
-				dbCol.value=null;
-			}
+                }
+                trafoConfig.setAttrConfig(attr, TrafoConfigNames.MULTILINGUAL_TRAFO,TrafoConfigNames.MULTILINGUAL_TRAFO_EXPAND);
+            }else if(isLocalisedTextAttr(td, attr) && (expandLocalised 
+                    || TrafoConfigNames.LOCALISED_TRAFO_EXPAND.equals(trafoConfig.getAttrConfig(attr,TrafoConfigNames.LOCALISED_TRAFO)))){
+                
+                DbColVarchar ret=new DbColVarchar();
+                ret.setName(getSqlAttrName(attr,null,dbTable.getName().getName(),null));
+                ret.setSize(DbColVarchar.UNLIMITED);
+                ret.setNotNull(false);
+                ret.setPrimaryKey(false);
+                
+                dbCol.value=ret;
+                ret=new DbColVarchar();
+                ret.setName(getSqlAttrName(attr,null,dbTable.getName().getName(),null)+DbNames.LOCALISED_TXT_COL_SUFFIX);
+                ret.setSize(2);
+                ret.setNotNull(false);
+                
+                ret.setPrimaryKey(false);
+                dbColExts.add(ret);
+                trafoConfig.setAttrConfig(attr, TrafoConfigNames.LOCALISED_TRAFO,TrafoConfigNames.LOCALISED_TRAFO_EXPAND);
+            }else{
+                // add reference col from struct ele to parent obj to struct table
+                addParentRef(aclass,attr);
+                dbCol.value=null;
+            }
 		}else if (type instanceof ReferenceType){
             if(createExtRef && ((ReferenceType)type).isExternal()) {
                 DbColVarchar ret=new DbColVarchar();
