@@ -83,6 +83,7 @@ sourceSets {
     	srcDirs=['ili2pg/src']
     }
     compileClasspath += sourceSets.main.output
+    runtimeClasspath += sourceSets.main.output
   }
   ili2pgTest {
     java {
@@ -120,6 +121,7 @@ sourceSets {
     	include '**/init*.sql'
     }
     compileClasspath += sourceSets.main.output
+    runtimeClasspath += sourceSets.main.output
   }
   ili2gpkgTest {
     java {
@@ -137,6 +139,7 @@ sourceSets {
     	srcDirs=['ili2mysql/src']
     }
     compileClasspath += sourceSets.main.output
+    runtimeClasspath += sourceSets.main.output
   }
   ili2mysqlTest {
     java {
@@ -154,6 +157,7 @@ sourceSets {
     	srcDirs=['ili2h2gis/src']
     }
     compileClasspath += sourceSets.main.output
+    runtimeClasspath += sourceSets.main.output
   }
   ili2h2gisTest {
     java {
@@ -171,6 +175,7 @@ sourceSets {
     	srcDirs=['ili2fgdb/src']
     }
     compileClasspath += sourceSets.main.output
+    runtimeClasspath += sourceSets.main.output
   }
   ili2fgdbTest {
     java {
@@ -188,6 +193,7 @@ sourceSets {
     	srcDirs=['ili2mssql/src']
     }
     compileClasspath += sourceSets.main.output
+    runtimeClasspath += sourceSets.main.output
   }
   ili2mssqlTest {
     java {
@@ -205,6 +211,7 @@ sourceSets {
     	srcDirs=['ili2ora/src']
     }
     compileClasspath += sourceSets.main.output
+    runtimeClasspath += sourceSets.main.output
   }
   ili2oraTest {
     java {
