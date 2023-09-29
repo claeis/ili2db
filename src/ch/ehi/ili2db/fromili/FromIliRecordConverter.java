@@ -557,49 +557,55 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 					}
 			  }
 		}
-		  if(createStdCols){
-				addStdCol(dbTable);
-		  }
-		  if(createUnique && !def.isStructure()){
-			  // check if UNIQUE mappable
-			  Viewable aclass=def.getViewable();
-			  Iterator it=aclass.iterator();
-			  while(it.hasNext()){
-				  Object cnstro=it.next();
-				  if(cnstro instanceof UniquenessConstraint){
-					  UniquenessConstraint cnstr=(UniquenessConstraint)cnstro;
-					  for(int epsgCode:getEpsgCodes(def.getAttrv())) {
-	                      HashSet attrs=getUniqueAttrs(cnstr,def.getAttrv(),epsgCode);
-	                      // mappable?
-	                      if(attrs!=null){
-	                          DbIndex dbIndex=new DbIndex();
-	                          dbIndex.setPrimary(false);
-	                          dbIndex.setUnique(true);
-	                          for(Object attro:attrs){
-	                              String attrSqlName=null;
-	                              if(attro instanceof AttributeDef){
-	                                      Type attrType=((AttributeDef) attro).getDomainResolvingAliases();
-	                                    if(attrType instanceof CoordType || attrType instanceof LineType) {
-	                                        attrSqlName=ili2sqlName.mapIliAttributeDef((AttributeDef) attro,epsgCode,def.getSqlTablename(),null);
-	                                    }else {
-	                                        attrSqlName=ili2sqlName.mapIliAttributeDef((AttributeDef) attro,null,def.getSqlTablename(),null);
-	                                    }
-	                              }else if(attro instanceof RoleDef){
-	                                  RoleDef role=(RoleDef) attro;
-	                                  DbTableName targetSqlTableName=getSqlType(role.getDestination());
-	                                  attrSqlName=ili2sqlName.mapIliRoleDef(role,def.getSqlTablename(),targetSqlTableName.getName());
-	                              }else{
-	                                  throw new IllegalStateException("unexpected attr "+attro);
-	                              }
-	                              DbColumn idxCol=dbTable.getColumn(attrSqlName);
-	                              dbIndex.addAttr(idxCol);
-	                          }
-	                          dbTable.addIndex(dbIndex);
-	                      }
-					  }
-				  }
-			  }
-			  
+        if(createStdCols){
+            addStdCol(dbTable);
+        }
+        if(createUnique && !def.isStructure()){
+              // check if UNIQUE mappable
+              Viewable aclass = def.getViewable();
+              Iterator it = aclass.iterator();
+              while (it.hasNext()) {
+                  Object cnstro = it.next();
+                  if (cnstro instanceof UniquenessConstraint) {
+                      UniquenessConstraint cnstr = (UniquenessConstraint) cnstro;
+                      //TODO: Fix case for unique attributes without epgsCode
+                      for (int epsgCode : getEpsgCodes(def.getAttrv())) {
+                          HashSet attrs = getUniqueAttrs(cnstr, def.getAttrv(), epsgCode);
+                          // mappable?
+                          if (attrs != null) {
+                              DbIndex dbIndex = new DbIndex();
+                              dbIndex.setPrimary(false);
+                              dbIndex.setUnique(true);
+                              for (Object attro : attrs) {
+                                  String attrSqlName = null;
+                                  if (attro instanceof AttributeDef) {
+                                      Type attrType = ((AttributeDef) attro).getDomainResolvingAliases();
+                                      if (attrType instanceof CoordType || attrType instanceof LineType) {
+                                          attrSqlName = ili2sqlName.mapIliAttributeDef((AttributeDef) attro, epsgCode, def.getSqlTablename(), null);
+                                      } else {
+                                          attrSqlName = ili2sqlName.mapIliAttributeDef((AttributeDef) attro, null, def.getSqlTablename(), null);
+                                      }
+                                  } else if (attro instanceof RoleDef) {
+                                      RoleDef role = (RoleDef) attro;
+                                      DbTableName targetSqlTableName = getSqlType(role.getDestination());
+                                      attrSqlName = ili2sqlName.mapIliRoleDef(role, def.getSqlTablename(), targetSqlTableName.getName());
+                                  } else {
+                                      throw new IllegalStateException("unexpected attr " + attro);
+                                  }
+                                  DbColumn idxCol = dbTable.getColumn(attrSqlName);
+                                  dbIndex.addAttr(idxCol);
+                              }
+
+                              if (cnstr.getBasket() && createBasketCol) {
+                                  dbIndex.addAttr(DbNames.T_BASKET_COL);
+                                  dbTable.addIndex(dbIndex);
+                              } else if (!cnstr.getBasket()) {
+                                  dbTable.addIndex(dbIndex);
+                              }
+                          }
+                      }
+                  }
+              }
 		  }
 		  if(!def.isSecondaryTable()){
 			  customMapping.fixupViewable(dbTable,def.getViewable());
