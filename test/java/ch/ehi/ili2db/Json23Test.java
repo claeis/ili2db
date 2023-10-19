@@ -100,7 +100,6 @@ public abstract class Json23Test {
     public void importXtf() throws Exception
     {
         //EhiLogger.getInstance().setTraceFilter(false);
-        Class driverClass = Class.forName("org.postgresql.Driver");
         setup.resetDb();
         
         File data=new File(TEST_OUT,"Json23a.xtf");
@@ -137,22 +136,7 @@ public abstract class Json23Test {
     }
 
     protected void importXtf_doAsserts(java.sql.Statement stmt) throws SQLException {
-        java.sql.ResultSet rs=null;
-        try {
-            rs=stmt.executeQuery("SELECT farben->0->>'@type',farben->0->'r' FROM "+setup.prefixName("auto")+" WHERE t_ili_tid='1'");
-            assertTrue(rs.next());
-            assertEquals("Json23.TestA.Farbe",rs.getString(1));
-            assertEquals(10,rs.getInt(2));
-            rs=stmt.executeQuery("SELECT cast(farben as text) FROM "+setup.prefixName("auto")+" WHERE t_ili_tid='2'");
-            assertTrue(rs.next());
-            rs.getString(1);
-            assertEquals(true,rs.wasNull());
-        }finally {
-            if(rs!=null) {
-                rs.close();
-                rs=null;
-            }
-        }
+        
     }
     @Test
     public void exportXtf() throws Exception

@@ -47,5 +47,29 @@ public class Json23Test extends ch.ehi.ili2db.Json23Test {
         String dbpwd=System.getProperty("dbpwd"); 
         return new PgTestSetup(dburl,dbuser,dbpwd,DBSCHEMA);
     }
-	
+	@Override
+    protected void importXtf_doAsserts(java.sql.Statement stmt) throws SQLException {
+        java.sql.ResultSet rs=null;
+        try {
+            rs=stmt.executeQuery("SELECT farben->0->>'@type',farben->0->'r' FROM "+setup.prefixName("auto")+" WHERE t_ili_tid='1'");
+            assertTrue(rs.next());
+            assertEquals("Json23.TestA.Farbe",rs.getString(1));
+            assertEquals(10,rs.getInt(2));
+            rs=stmt.executeQuery("SELECT cast(farben as text) FROM "+setup.prefixName("auto")+" WHERE t_ili_tid='2'");
+            assertTrue(rs.next());
+            rs.getString(1);
+            assertEquals(true,rs.wasNull());
+
+            rs=stmt.executeQuery("SELECT jsonb_typeof(farben),jsonb_typeof(farbe) FROM "+setup.prefixName("auto")+" WHERE t_ili_tid='3'");
+            assertTrue(rs.next());
+            assertEquals("array",rs.getString(1));
+            assertEquals("object",rs.getString(2));
+            
+        }finally {
+            if(rs!=null) {
+                rs.close();
+                rs=null;
+            }
+        }
+    }
 }
