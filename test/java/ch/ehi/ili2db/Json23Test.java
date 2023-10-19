@@ -43,11 +43,9 @@ public abstract class Json23Test {
     @Test
     public void importIli() throws Exception
     {
-        Class driverClass = Class.forName("org.postgresql.Driver");
         Connection jdbcConnection=null;
         try {
             setup.resetDb();
-            jdbcConnection=setup.createConnection();
             
             File data=new File(TEST_OUT,"Json23.ili");
             Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
@@ -60,6 +58,7 @@ public abstract class Json23Test {
             config.setJsonTrafo(Config.JSON_TRAFO_COALESCE);
             Ili2db.run(config,null);
             
+            jdbcConnection=setup.createConnection();
             // asserts
             {
                 {
