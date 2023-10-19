@@ -1937,9 +1937,10 @@ public class TransferFromXtf {
 
 			IomObject value = iomObj.getattrobj(geomAttrName, 0);
 			if (value != null) {
+				Model model = (Model) attrDef.getContainer(Model.class);
 				boolean is3D=((CoordType)(type).getControlPointDomain().getType()).getDimensions().length==3;
 				ps.setObject(valuei,
-						geomConv.fromIomPolyline(value, epsgCode, is3D,recConv.getP(type)));
+						geomConv.fromIomPolyline(value, epsgCode, is3D,recConv.getP(type, model)));
 			} else {
 				geomConv.setPolylineNull(ps, valuei);
 			}

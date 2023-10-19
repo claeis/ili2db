@@ -13,6 +13,7 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 
+import ch.interlis.ili2c.metamodel.Model;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerator;
 
@@ -704,6 +705,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 		OutParam<Unit> unitDef=new OutParam<Unit>();unitDef.value=null;
 		OutParam<Boolean> mText=new OutParam<Boolean>();mText.value=false;
         OutParam<String> simpleTypeKind=new OutParam<String>();simpleTypeKind.value=null;
+        Model model = (Model) attr.getContainer(Model.class);
 
 		ArrayList<DbColumn> dbColExts=new ArrayList<DbColumn>();
 		Type type = attr.getDomainResolvingAll();
@@ -751,7 +753,11 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
                 }
 				// get crs from ili
 				setCrs(ret,epsgCode);
-				CoordType coord=(CoordType)((AbstractSurfaceOrAreaType)type).getControlPointDomain().getType();
+				Domain coordDomain = ((AbstractSurfaceOrAreaType)type).getControlPointDomain();
+				CoordType coord = (CoordType) coordDomain.getType();
+				if (coord.isGeneric()) {
+					coord = (CoordType) Ili2cUtility.resolveGenericCoordDomain(model, coordDomain).getType();
+				}
 				ret.setDimension(coord.getDimensions().length);
 				setBB(ret, coord,attr.getContainer().getScopedName(null)+"."+attr.getName());
 				dbCol.value=ret;
@@ -766,21 +772,25 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 					// get crs from ili
 					setCrs(ret,epsgCode);
 					ret.setDimension(2); // always 2 (even if defined as 3d in ili)
-					CoordType coord=(CoordType)((AbstractSurfaceOrAreaType)type).getControlPointDomain().getType();
+					Domain coordDomain = ((AbstractSurfaceOrAreaType)type).getControlPointDomain();
+					CoordType coord = (CoordType) coordDomain.getType();
+					if (coord.isGeneric()) {
+						coord = (CoordType) Ili2cUtility.resolveGenericCoordDomain(model, coordDomain).getType();
+					}
 					setBB(ret, coord,attr.getContainer().getScopedName(null)+"."+attr.getName());
 					dbColExts.add(ret);
 				}
 			}
 		}else if (type instanceof PolylineType){
 			String attrName=attr.getContainer().getScopedName(null)+"."+attr.getName();
-			DbColGeometry ret = generatePolylineType((PolylineType)type, attrName);
+			DbColGeometry ret = generatePolylineType(model, (PolylineType)type, attrName);
 			setCrs(ret,epsgCode);
 			dbCol.value=ret;
             typeKind=DbExtMetaInfo.TAG_COL_TYPEKIND_POLYLINE;                        
 		}
 		else if (type instanceof MultiPolylineType){
             String attrName = attr.getContainer().getScopedName(null) + "." + attr.getName();
-            DbColGeometry ret = generateMultiPolylineType((MultiPolylineType) type, attrName);
+            DbColGeometry ret = generateMultiPolylineType(model, (MultiPolylineType) type, attrName);
             setCrs(ret, epsgCode);
             dbCol.value = ret;
             typeKind=DbExtMetaInfo.TAG_COL_TYPEKIND_MULTIPOLYLINE;                        
@@ -788,16 +798,22 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 			DbColGeometry ret=new DbColGeometry();
 			ret.setType(DbColGeometry.POINT);
 			setCrs(ret,epsgCode);
-			CoordType coord=(CoordType)type;
+			CoordType coord = (CoordType) type;
+			if (coord.isGeneric()) {
+				coord = (CoordType) Ili2cUtility.resolveGenericCoordDomain(attr).getType();
+			}
 			ret.setDimension(coord.getDimensions().length);
 			setBB(ret, coord,attr.getContainer().getScopedName(null)+"."+attr.getName());
 			dbCol.value=ret;
-            typeKind=DbExtMetaInfo.TAG_COL_TYPEKIND_COORD;                        
+			typeKind=DbExtMetaInfo.TAG_COL_TYPEKIND_COORD;
 		} else if (type instanceof MultiCoordType) {
 			DbColGeometry ret = new DbColGeometry();
 			ret.setType(DbColGeometry.MULTIPOINT);
 			setCrs(ret,epsgCode);
 			MultiCoordType coord = (MultiCoordType) type;
+			if (coord.isGeneric()) {
+				coord = (MultiCoordType) Ili2cUtility.resolveGenericCoordDomain(attr).getType();
+			}
 			ret.setDimension(coord.getDimensions().length);
 			setBB(ret, coord,attr.getContainer().getScopedName(null) + "." + attr.getName());
 			dbCol.value = ret;

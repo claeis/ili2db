@@ -39,6 +39,7 @@ import ch.interlis.ili2c.metamodel.Domain;
 import ch.interlis.ili2c.metamodel.EnumerationType;
 import ch.interlis.ili2c.metamodel.ExtendableContainer;
 import ch.interlis.ili2c.metamodel.LineType;
+import ch.interlis.ili2c.metamodel.Model;
 import ch.interlis.ili2c.metamodel.NumericType;
 import ch.interlis.ili2c.metamodel.NumericalType;
 import ch.interlis.ili2c.metamodel.ObjectType;
@@ -121,7 +122,7 @@ public class AbstractRecordConverter {
 		sqlColsAsText=Config.SQL_COLS_AS_TEXT_ENABLE.equals(config.getSqlColsAsText());
 
 	}
-	public DbColGeometry generatePolylineType(LineType type, String attrName) {
+	public DbColGeometry generatePolylineType(Model model, LineType type, String attrName) {
 		DbColGeometry ret=new DbColGeometry();
 		boolean compoundCurve=false;
 		if(!strokeArcs){
@@ -131,13 +132,16 @@ public class AbstractRecordConverter {
 		Domain coordDomain=type.getControlPointDomain();
 		if(coordDomain!=null){
 			CoordType coord=(CoordType)coordDomain.getType();
+			if (coord.isGeneric()) {
+				coord = (CoordType) Ili2cUtility.resolveGenericCoordDomain(model, coordDomain).getType();
+			}
 			ret.setDimension(coord.getDimensions().length);
 			setBB(ret, coord,attrName);
 		}
 		return ret;
 	}
 
-	public DbColGeometry generateMultiPolylineType(LineType type, String attrName) {
+	public DbColGeometry generateMultiPolylineType(Model model, LineType type, String attrName) {
 		DbColGeometry ret=new DbColGeometry();
 		boolean curvePolyline=false;
 		if(!strokeArcs){
@@ -147,6 +151,9 @@ public class AbstractRecordConverter {
 		Domain coordDomain=type.getControlPointDomain();
 		if(coordDomain!=null){
 			CoordType coord=(CoordType)coordDomain.getType();
+			if (coord.isGeneric()) {
+				coord = (CoordType) Ili2cUtility.resolveGenericCoordDomain(model, coordDomain).getType();
+			}
 			ret.setDimension(coord.getDimensions().length);
 			setBB(ret, coord,attrName);
 		}

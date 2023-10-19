@@ -3,9 +3,11 @@ package ch.ehi.ili2db.base;
 import ch.ehi.basics.logging.EhiLogger;
 import ch.ehi.ili2db.metaattr.IliMetaAttrNames;
 import ch.interlis.ili2c.metamodel.AbstractClassDef;
+import ch.interlis.ili2c.metamodel.AbstractCoordType;
 import ch.interlis.ili2c.metamodel.AttributeDef;
 import ch.interlis.ili2c.metamodel.CompositionType;
 import ch.interlis.ili2c.metamodel.Domain;
+import ch.interlis.ili2c.metamodel.Model;
 import ch.interlis.ili2c.metamodel.OIDType;
 import ch.interlis.ili2c.metamodel.RoleDef;
 import ch.interlis.ili2c.metamodel.Table;
@@ -13,6 +15,8 @@ import ch.interlis.ili2c.metamodel.TransferDescription;
 import ch.interlis.ili2c.metamodel.Type;
 import ch.interlis.ili2c.metamodel.TypeAlias;
 import ch.interlis.ili2c.metamodel.Viewable;
+
+import java.util.Map;
 
 /** functions that should be moved to ili2c.
  */
@@ -452,4 +456,45 @@ public class Ili2cUtility {
         return null;
     }
 
+    public static Domain resolveGenericCoordDomain(AttributeDef attribute) {
+        return resolveGenericCoordDomain(attribute, null);
+    }
+
+    public static Domain resolveGenericCoordDomain(AttributeDef attribute, Map<String, String> genericDomains) {
+        Type attrType = attribute.getDomain();
+        if (!(attrType instanceof TypeAlias)) {
+            throw new IllegalArgumentException("Tried to resolve generic domain for a type instead of a domain");
+        }
+
+        Model model = (Model) attribute.getContainer(Model.class);
+        Domain coordDomain = ((TypeAlias) attrType).getAliasing();
+        return resolveGenericCoordDomain(model, coordDomain, genericDomains);
+    }
+
+    public static Domain resolveGenericCoordDomain(Model model, Domain coordDomain) {
+        return resolveGenericCoordDomain(model, coordDomain, null);
+    }
+
+    public static Domain resolveGenericCoordDomain(Model model, Domain coordDomain, Map<String, String> genericDomains) {
+        Type type = coordDomain.getType();
+        if (!(type instanceof AbstractCoordType)) {
+            throw new IllegalArgumentException("Generic domains can only be resolved for coord types");
+        }
+
+        AbstractCoordType coord = (AbstractCoordType) type;
+        if (!coord.isGeneric()) {
+            throw new IllegalArgumentException("Tried to resolve generic domain for non-generic coord type");
+        }
+
+        Domain[] resolved = model.resolveGenericDomain(coordDomain);
+        if (resolved.length == 1) {
+            return resolved[0];
+        } else if (resolved.length == 0) {
+            throw new IllegalStateException("Could not find a concrete domain for generic " + coordDomain + ".");
+        } else if (genericDomains == null) {
+            throw new IllegalStateException("Could not choose between multiple concrete domains for generic " + coordDomain + ".");
+        } else {
+            return model.mapGenericDomain(coordDomain, genericDomains);
+        }
+    }
 }

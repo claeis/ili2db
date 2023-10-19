@@ -9,11 +9,13 @@ import java.util.List;
 import java.util.Map;
 
 import ch.ehi.basics.settings.Settings;
+import ch.ehi.ili2db.base.Ili2cUtility;
 import ch.interlis.ili2c.metamodel.AbstractClassDef;
 import ch.interlis.ili2c.metamodel.AttributeDef;
 import ch.interlis.ili2c.metamodel.CompositionType;
 import ch.interlis.ili2c.metamodel.Container;
 import ch.interlis.ili2c.metamodel.CoordType;
+import ch.interlis.ili2c.metamodel.Domain;
 import ch.interlis.ili2c.metamodel.Element;
 import ch.interlis.ili2c.metamodel.Enumeration;
 import ch.interlis.ili2c.metamodel.EnumerationType;
@@ -102,6 +104,7 @@ public class Rounder implements IoxFilter {
 			return;
 		}
 		Type type=srcAttr.getDomainResolvingAll();
+		Model model = (Model) srcAttr.getContainer(Model.class);
 		for(int attri=0;attri<attrc;attri++){
             if(type instanceof NumericType){
                 String attrValue=iomObj.getattrprim(srcAttrName,attri);
@@ -113,13 +116,17 @@ public class Rounder implements IoxFilter {
                 }
             }else if(type instanceof CoordType) {
                 IomObject attrValue=iomObj.getattrobj(srcAttrName,attri);
-                roundSegment(attrValue,(CoordType)type);
+                CoordType coordType = (CoordType) type;
+                if (coordType.isGeneric()) {
+                    coordType = (CoordType) Ili2cUtility.resolveGenericCoordDomain(srcAttr).getType();
+                }
+                roundSegment(attrValue, coordType);
             }else if(type instanceof PolylineType) {
                 IomObject attrValue=iomObj.getattrobj(srcAttrName,attri);
-                roundLine(attrValue,(PolylineType)type);
+                roundLine(attrValue,(PolylineType)type, model);
             }else if(type instanceof SurfaceOrAreaType) {
                 IomObject attrValue=iomObj.getattrobj(srcAttrName,attri);
-                roundPolygon(attrValue,(SurfaceOrAreaType)type);
+                roundPolygon(attrValue,(SurfaceOrAreaType)type, model);
             }else if(srcAttr.getDomain() instanceof CompositionType){
                 IomObject attrValue=iomObj.getattrobj(srcAttrName,attri);
                 roundObject(attrValue);
@@ -127,7 +134,7 @@ public class Rounder implements IoxFilter {
 		}
 	}
 
-	private void roundPolygon(IomObject surfaceValue, SurfaceOrAreaType type) {
+	private void roundPolygon(IomObject surfaceValue, SurfaceOrAreaType type, Model model) {
 	    int surfacec=surfaceValue.getattrvaluecount("surface");
 	    for(int surfacei=0;surfacei<surfacec;surfacei++) {
 	        IomObject surface= surfaceValue.getattrobj("surface",surfacei);
@@ -137,13 +144,17 @@ public class Rounder implements IoxFilter {
 	            int polylinec=boundary.getattrvaluecount("polyline");
 	            for(int polylinei=0;polylinei<polylinec;polylinei++) {
 	                IomObject polyline=boundary.getattrobj("polyline",polylinei);
-	                roundLine(polyline,type);
+	                roundLine(polyline, type, model);
 	            }
 	        }
 	    }
     }
-    private void roundLine(IomObject polylineValue, LineType type) {
-        final CoordType coordType = (CoordType) type.getControlPointDomain().getType();
+    private void roundLine(IomObject polylineValue, LineType type, Model model) {
+        Domain coordDomain = type.getControlPointDomain();
+        CoordType coordType = (CoordType) coordDomain.getType();
+        if (coordType.isGeneric()) {
+            coordType = (CoordType) Ili2cUtility.resolveGenericCoordDomain(model, coordDomain).getType();
+        }
         int sequencec=polylineValue.getattrvaluecount("sequence");
         for(int sequencei=0;sequencei<sequencec;sequencei++) {
             IomObject sequence=polylineValue.getattrobj("sequence",sequencei);
