@@ -1159,7 +1159,7 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
                                 iomValues[i]=iomObj.getattrobj(attrName, i);
                             }
                             Object geomObj = null;
-                            if(false && createJsonArray) {
+                            if(createJsonArray) {
                                 geomObj = geomConv.fromIomStructureToJsonArray(tableAttr,iomValues);
                             }else {
                                 geomObj = geomConv.fromIomStructureToJson(tableAttr,iomValues);
