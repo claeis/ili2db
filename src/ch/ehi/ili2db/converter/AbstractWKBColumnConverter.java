@@ -474,6 +474,27 @@ public abstract class AbstractWKBColumnConverter implements SqlColumnConverter {
         return out.toString();
     }
     @Override
+    public Object fromIomStructureToJsonArray(AttributeDef iliEleAttr, IomObject[] iomObjects)
+            throws SQLException, ConverterException {
+        JsonFactory jsonF = new JsonFactory();
+        java.io.StringWriter out=new java.io.StringWriter();
+        JsonGenerator jg=null;
+        
+        try {
+            if(td==null) {
+                td=(TransferDescription) iliEleAttr.getContainer(TransferDescription.class);
+            }
+            jg = jsonF.createJsonGenerator(out);
+            Iox2jsonUtility.writeArray(jg, iomObjects,td);
+            jg.flush();
+            jg.close();
+            jg=null;
+        } catch (IOException e) {
+            throw new ConverterException(e);
+        }
+        return out.toString();
+    }
+    @Override
     public IomObject[] toIomStructureFromJson(AttributeDef iliEleAttr, Object sqlArray)
             throws SQLException, ConverterException {
         JsonFactory jsonF = new JsonFactory();

@@ -27,6 +27,26 @@
 			</Json23.TestA.Auto>
 			<Json23.TestA.Auto TID="2">
 			</Json23.TestA.Auto>
+			<Json23.TestA.Auto TID="3">
+				<Farben>
+					<Json23.TestA.Farbe>
+						<r>10</r>
+						<g>11</g>
+						<b>12</b>
+						<name>f1</name>
+						<active>false</active>
+					</Json23.TestA.Farbe>
+				</Farben>
+				<Farbe>
+					<Json23.TestA.Farbe>
+						<r>20</r>
+						<g>21</g>
+						<b>22</b>
+						<name>f2</name>
+						<active>false</active>
+					</Json23.TestA.Farbe>
+				</Farbe>
+			</Json23.TestA.Auto>
 		</Json23.TestA>
 	</DATASECTION>
 </TRANSFER>

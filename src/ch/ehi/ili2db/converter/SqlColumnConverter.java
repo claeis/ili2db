@@ -144,6 +144,8 @@ public interface SqlColumnConverter {
     public String getSelectValueWrapperJson(String sqlColName);
     public Object fromIomStructureToJson(AttributeDef iliEleAttr, IomObject[] iomValues)
             throws SQLException, ConverterException;
+    public Object fromIomStructureToJsonArray(AttributeDef iliEleAttr, IomObject[] iomValues)
+            throws SQLException, ConverterException;
     public IomObject[] toIomStructureFromJson(AttributeDef iliEleAttr, Object sqlArray)
             throws SQLException, ConverterException;
 }
