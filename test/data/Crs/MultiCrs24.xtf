@@ -8,7 +8,7 @@
 	</ili:headersection>
 	<ili:datasection>
 		<MultiCrs24:TestA ili:bid="3" ili:domains="MultiCrs24.Coord=MultiCrs24.Coord_LV95">
-			<MultiCrs24:ClassA1 ili:tid="4">
+			<MultiCrs24:ClassA1 ili:tid="Test_LV95">
 				<MultiCrs24:attr1>1</MultiCrs24:attr1>
 				<MultiCrs24:attr2>
 					<geom:coord>
@@ -55,7 +55,7 @@
 			</MultiCrs24:ClassA1>
 		</MultiCrs24:TestA>
 		<MultiCrs24:TestA ili:bid="7" ili:domains="MultiCrs24.Coord=MultiCrs24.Coord_LV03">
-			<MultiCrs24:ClassA1 ili:tid="8">
+			<MultiCrs24:ClassA1 ili:tid="Test_LV03">
 				<MultiCrs24:attr1>2</MultiCrs24:attr1>
 				<MultiCrs24:attr2>
 					<geom:coord>
