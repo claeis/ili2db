@@ -756,7 +756,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 				Domain coordDomain = ((AbstractSurfaceOrAreaType)type).getControlPointDomain();
 				CoordType coord = (CoordType) coordDomain.getType();
 				if (coord.isGeneric()) {
-					coord = (CoordType) Ili2cUtility.resolveGenericCoordDomain(model, coordDomain).getType();
+					coord = (CoordType) Ili2cUtility.resolveGenericCoordDomain(model, coordDomain, epsgCode).getType();
 				}
 				ret.setDimension(coord.getDimensions().length);
 				setBB(ret, coord,attr.getContainer().getScopedName(null)+"."+attr.getName());
@@ -775,7 +775,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 					Domain coordDomain = ((AbstractSurfaceOrAreaType)type).getControlPointDomain();
 					CoordType coord = (CoordType) coordDomain.getType();
 					if (coord.isGeneric()) {
-						coord = (CoordType) Ili2cUtility.resolveGenericCoordDomain(model, coordDomain).getType();
+						coord = (CoordType) Ili2cUtility.resolveGenericCoordDomain(model, coordDomain, epsgCode).getType();
 					}
 					setBB(ret, coord,attr.getContainer().getScopedName(null)+"."+attr.getName());
 					dbColExts.add(ret);
@@ -783,14 +783,14 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 			}
 		}else if (type instanceof PolylineType){
 			String attrName=attr.getContainer().getScopedName(null)+"."+attr.getName();
-			DbColGeometry ret = generatePolylineType(model, (PolylineType)type, attrName);
+			DbColGeometry ret = generatePolylineType(model, (PolylineType)type, attrName, epsgCode);
 			setCrs(ret,epsgCode);
 			dbCol.value=ret;
             typeKind=DbExtMetaInfo.TAG_COL_TYPEKIND_POLYLINE;                        
 		}
 		else if (type instanceof MultiPolylineType){
             String attrName = attr.getContainer().getScopedName(null) + "." + attr.getName();
-            DbColGeometry ret = generateMultiPolylineType(model, (MultiPolylineType) type, attrName);
+            DbColGeometry ret = generateMultiPolylineType(model, (MultiPolylineType) type, attrName, epsgCode);
             setCrs(ret, epsgCode);
             dbCol.value = ret;
             typeKind=DbExtMetaInfo.TAG_COL_TYPEKIND_MULTIPOLYLINE;                        
@@ -800,7 +800,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 			setCrs(ret,epsgCode);
 			CoordType coord = (CoordType) type;
 			if (coord.isGeneric()) {
-				coord = (CoordType) Ili2cUtility.resolveGenericCoordDomain(attr).getType();
+				coord = (CoordType) Ili2cUtility.resolveGenericCoordDomain(attr, epsgCode).getType();
 			}
 			ret.setDimension(coord.getDimensions().length);
 			setBB(ret, coord,attr.getContainer().getScopedName(null)+"."+attr.getName());
@@ -812,7 +812,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 			setCrs(ret,epsgCode);
 			MultiCoordType coord = (MultiCoordType) type;
 			if (coord.isGeneric()) {
-				coord = (MultiCoordType) Ili2cUtility.resolveGenericCoordDomain(attr).getType();
+				coord = (MultiCoordType) Ili2cUtility.resolveGenericCoordDomain(attr, epsgCode).getType();
 			}
 			ret.setDimension(coord.getDimensions().length);
 			setBB(ret, coord,attr.getContainer().getScopedName(null) + "." + attr.getName());

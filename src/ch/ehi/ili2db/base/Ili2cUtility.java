@@ -1,6 +1,7 @@
 package ch.ehi.ili2db.base;
 
 import ch.ehi.basics.logging.EhiLogger;
+import ch.ehi.ili2db.fromili.TransferFromIli;
 import ch.ehi.ili2db.metaattr.IliMetaAttrNames;
 import ch.interlis.ili2c.metamodel.AbstractClassDef;
 import ch.interlis.ili2c.metamodel.AbstractCoordType;
@@ -456,11 +457,11 @@ public class Ili2cUtility {
         return null;
     }
 
-    public static Domain resolveGenericCoordDomain(AttributeDef attribute) {
-        return resolveGenericCoordDomain(attribute, null);
+    public static Domain resolveGenericCoordDomain(AttributeDef attribute, Integer epsgCode) {
+        return resolveGenericCoordDomain(attribute, epsgCode, null);
     }
 
-    public static Domain resolveGenericCoordDomain(AttributeDef attribute, Map<String, String> genericDomains) {
+    public static Domain resolveGenericCoordDomain(AttributeDef attribute, Integer epsgCode, Map<String, String> genericDomains) {
         Type attrType = attribute.getDomain();
         if (!(attrType instanceof TypeAlias)) {
             throw new IllegalArgumentException("Tried to resolve generic domain for a type instead of a domain");
@@ -468,14 +469,14 @@ public class Ili2cUtility {
 
         Model model = (Model) attribute.getContainer(Model.class);
         Domain coordDomain = ((TypeAlias) attrType).getAliasing();
-        return resolveGenericCoordDomain(model, coordDomain, genericDomains);
+        return resolveGenericCoordDomain(model, coordDomain, epsgCode, genericDomains);
     }
 
-    public static Domain resolveGenericCoordDomain(Model model, Domain coordDomain) {
-        return resolveGenericCoordDomain(model, coordDomain, null);
+    public static Domain resolveGenericCoordDomain(Model model, Domain coordDomain, Integer epsgCode) {
+        return resolveGenericCoordDomain(model, coordDomain, epsgCode, null);
     }
 
-    public static Domain resolveGenericCoordDomain(Model model, Domain coordDomain, Map<String, String> genericDomains) {
+    public static Domain resolveGenericCoordDomain(Model model, Domain coordDomain, Integer epsgCode, Map<String, String> genericDomains) {
         Type type = coordDomain.getType();
         if (!(type instanceof AbstractCoordType)) {
             throw new IllegalArgumentException("Generic domains can only be resolved for coord types");
@@ -491,10 +492,37 @@ public class Ili2cUtility {
             return resolved[0];
         } else if (resolved.length == 0) {
             throw new IllegalStateException("Could not find a concrete domain for generic " + coordDomain + ".");
-        } else if (genericDomains == null) {
-            throw new IllegalStateException("Could not choose between multiple concrete domains for generic " + coordDomain + ".");
-        } else {
+        } else if (genericDomains != null) {
             return model.mapGenericDomain(coordDomain, genericDomains);
+        } else if (epsgCode != null) {
+            return findDomainWithEpsgCode(coordDomain, resolved, epsgCode);
+        } else {
+            throw new IllegalStateException("Could not choose between multiple concrete domains for generic " + coordDomain + ".");
         }
+    }
+
+    private static Domain findDomainWithEpsgCode(Domain genericDomain, Domain[] resolved, int epsgCode) {
+        Domain found = null;
+        for (Domain domain : resolved) {
+            Type type = domain.getType();
+            if (type instanceof TypeAlias) {
+                type = ((TypeAlias) type).getAliasing().getType();
+            }
+
+            if (type instanceof AbstractCoordType) {
+                String crs = ((AbstractCoordType) type).getCrs(domain);
+                int domainEpsgCode = TransferFromIli.parseEpsgCode(crs);
+                if (domainEpsgCode == epsgCode) {
+                    if (found != null) {
+                        throw new IllegalStateException("Multiple domains with EPSG code " + epsgCode + " found for " + genericDomain.getName());
+                    }
+                    found = domain;
+                }
+            }
+        }
+        if (found == null) {
+            throw new IllegalStateException("No concrete domain with EPSG code " + epsgCode + " found for " + genericDomain.getName());
+        }
+        return found;
     }
 }

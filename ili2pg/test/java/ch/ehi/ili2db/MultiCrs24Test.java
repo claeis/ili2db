@@ -39,7 +39,6 @@ import ch.interlis.iox.StartBasketEvent;
 import ch.interlis.iox.StartTransferEvent;
 
 //-Ddburl=jdbc:postgresql:dbname -Ddbusr=usrname -Ddbpwd=1234
-@Ignore
 public class MultiCrs24Test {
 	private static final String DBSCHEMA = "MultiCrs24";
 	String dburl=System.getProperty("dburl"); 
@@ -117,9 +116,13 @@ public class MultiCrs24Test {
             {
                 // t_ili2db_attrname
                 String [][] expectedValues=new String[][] {
-                    {"MultiCrs24.TestA.ClassA1.attr2:2056", "attr2_2056", "classa1", null},   
+                    {"MultiCrs24.TestA.ClassA1.attr4:2056", "attr4_2056", "classa1", null},
+                    {"MultiCrs24.TestA.ClassA1.attr4:21781", "attr4_21781", "classa1", null},
+                    {"MultiCrs24.TestA.ClassA1.attr3:2056", "attr3_2056", "classa1", null},
+                    {"MultiCrs24.TestA.ClassA1.attr3:21781", "attr3_21781", "classa1", null},
+                    {"MultiCrs24.TestA.ClassA1.attr2:2056", "attr2_2056", "classa1", null},
                     {"MultiCrs24.TestA.ClassA1.attr2:21781", "attr2_21781", "classa1", null},
-                    {"MultiCrs24.TestA.ClassA1.attr1", "attr1", "classa1", null}   
+                    {"MultiCrs24.TestA.ClassA1.attr1", "attr1", "classa1", null}
                 };
                 Ili2dbAssert.assertAttrNameTable(jdbcConnection, expectedValues, DBSCHEMA);
             }
@@ -160,6 +163,7 @@ public class MultiCrs24Test {
             Ili2db.setNoSmartMapping(config);
             config.setDatasetName("Data");
 			config.setFunction(Config.FC_IMPORT);
+			config.setDoImplicitSchemaImport(true);
 			config.setCreateFk(config.CREATE_FK_YES);
 			config.setTidHandling(Config.TID_HANDLING_PROPERTY);
 			config.setBasketHandling(config.BASKET_HANDLING_READWRITE);
@@ -168,14 +172,22 @@ public class MultiCrs24Test {
 			Ili2db.readSettingsFromDb(config);
 			Ili2db.run(config,null);
 			// assertions
-			ResultSet rs = stmt.executeQuery("SELECT st_asewkt(attr2_2056),st_asewkt(attr2_21781) FROM "+DBSCHEMA+".classa1 ORDER BY t_id ASC;");
+			ResultSet rs = stmt.executeQuery("SELECT st_asewkt(attr2_2056),st_asewkt(attr2_21781),st_asewkt(attr3_2056),st_asewkt(attr3_21781),st_asewkt(attr4_2056),st_asewkt(attr4_21781) FROM "+DBSCHEMA+".classa1 ORDER BY t_id ASC;");
 			ResultSetMetaData rsmd=rs.getMetaData();
 			assertTrue(rs.next());
 			assertEquals("SRID=2056;POINT(2460001 1045001)", rs.getObject(1));
-            assertEquals(null, rs.getObject(2));
+			assertNull(rs.getObject(2));
+			assertEquals("SRID=2056;COMPOUNDCURVE((2480000 1070000,2490000 1080000))", rs.getObject(3));
+			assertNull(rs.getObject(4));
+			assertEquals("SRID=2056;MULTICURVE(COMPOUNDCURVE((2480000 1070000,2490000 1080000)),COMPOUNDCURVE((2480000 1070000,2490000 1080000)))", rs.getObject(5));
+			assertNull(rs.getObject(6));
             assertTrue(rs.next());
-            assertEquals(null, rs.getObject(1));
+            assertNull(rs.getObject(1));
             assertEquals("SRID=21781;POINT(460002 45002)", rs.getObject(2));
+			assertNull(rs.getObject(3));
+			assertEquals("SRID=21781;COMPOUNDCURVE((480000 70000,490000 80000))", rs.getObject(4));
+			assertNull(rs.getObject(5));
+			assertEquals("SRID=21781;MULTICURVE(COMPOUNDCURVE((480000 70000,490000 80000)),COMPOUNDCURVE((480000 70000,490000 80000)))", rs.getObject(6));
 		}catch(Exception e) {
 			throw new IoxException(e);
 		}finally{
@@ -229,14 +241,18 @@ public class MultiCrs24Test {
 		        }
 			 }while(!(event instanceof EndTransferEvent));
 			 {
-				 IomObject obj0 = objs.get("4");
+				 IomObject obj0 = objs.get("3");
 				 Assert.assertNotNull(obj0);
-                 Assert.assertEquals("COORD {C1 2460001.0, C2 1045001.0}", obj0.getattrobj("attr2", 0).toString());
+				 Assert.assertEquals("COORD {C1 2460001.000, C2 1045001.000}", obj0.getattrobj("attr2", 0).toString());
+				 Assert.assertEquals("POLYLINE {sequence SEGMENTS {segment [COORD {C1 2480000.000, C2 1070000.000}, COORD {C1 2490000.000, C2 1080000.000}]}}", obj0.getattrobj("attr3", 0).toString());
+				 Assert.assertEquals("MULTIPOLYLINE {polyline [POLYLINE {sequence SEGMENTS {segment [COORD {C1 2480000.0, C2 1070000.0}, COORD {C1 2490000.0, C2 1080000.0}]}}, POLYLINE {sequence SEGMENTS {segment [COORD {C1 2480000.0, C2 1070000.0}, COORD {C1 2490000.0, C2 1080000.0}]}}]}", obj0.getattrobj("attr4", 0).toString());
 			 }
 			 {
-				 IomObject obj0 = objs.get("8");
+				 IomObject obj0 = objs.get("5");
 				 Assert.assertNotNull(obj0);
-				 Assert.assertEquals("COORD {C1 460002.0, C2 45002.0}", obj0.getattrobj("attr2", 0).toString());
+				 Assert.assertEquals("COORD {C1 460002.000, C2 45002.000}", obj0.getattrobj("attr2", 0).toString());
+				 Assert.assertEquals("POLYLINE {sequence SEGMENTS {segment [COORD {C1 480000.000, C2 70000.000}, COORD {C1 490000.000, C2 80000.000}]}}", obj0.getattrobj("attr3", 0).toString());
+				 Assert.assertEquals("MULTIPOLYLINE {polyline [POLYLINE {sequence SEGMENTS {segment [COORD {C1 480000.0, C2 70000.0}, COORD {C1 490000.0, C2 80000.0}]}}, POLYLINE {sequence SEGMENTS {segment [COORD {C1 480000.0, C2 70000.0}, COORD {C1 490000.0, C2 80000.0}]}}]}", obj0.getattrobj("attr4", 0).toString());
 			 }
 		}catch(Exception e) {
 			throw new IoxException(e);

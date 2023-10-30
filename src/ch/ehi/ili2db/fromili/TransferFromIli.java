@@ -315,7 +315,7 @@ public class TransferFromIli {
 			SurfaceOrAreaType type = (SurfaceOrAreaType)attr.getDomainResolvingAll();
 
 			Model model = (Model) attr.getContainer(Model.class);
-			DbColGeometry dbCol = recConv.generatePolylineType(model, type, attr.getContainer().getScopedName(null)+"."+attr.getName());
+			DbColGeometry dbCol = recConv.generatePolylineType(model, type, attr.getContainer().getScopedName(null)+"."+attr.getName(), epsgCode);
 			  recConv.setCrs(dbCol, epsgCode);
 			  dbCol.setName(ili2sqlName.getSqlColNameItfLineTableGeomAttr(attr,sqlName.getName()));
 			  dbCol.setNotNull(true);
@@ -1992,7 +1992,8 @@ public class TransferFromIli {
             throw new IllegalArgumentException(attr.getScopedName()+" is not a geometry attribute");
         }
         if(coord.isGeneric()) {
-            Domain concreteCoordDomain = Ili2cUtility.resolveGenericCoordDomain(attr, genericDomains);
+            Model model = (Model) attr.getContainer(Model.class);
+            Domain concreteCoordDomain = Ili2cUtility.resolveGenericCoordDomain(model, coordDomain, null, genericDomains);
             String crs=((AbstractCoordType)concreteCoordDomain.getType()).getCrs(concreteCoordDomain);
             if(crs==null) {
                 

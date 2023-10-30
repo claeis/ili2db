@@ -53,6 +53,7 @@ public class Rounder implements IoxFilter {
 
 	private IoxLogging loggingHandler=null;
 	private TransferDescription td=null;
+	private Map<String, String> genericDomains = null;
 	
 	public Rounder(TransferDescription td,Settings config)
 	{
@@ -65,6 +66,10 @@ public class Rounder implements IoxFilter {
             roundObject(iomObj);
 		}
 		return event;
+	}
+
+	public void setGenericDomains(Map<String, String> genericDomains) {
+		this.genericDomains = genericDomains;
 	}
 
 	private void roundObject(IomObject iomObj) {
@@ -118,7 +123,7 @@ public class Rounder implements IoxFilter {
                 IomObject attrValue=iomObj.getattrobj(srcAttrName,attri);
                 CoordType coordType = (CoordType) type;
                 if (coordType.isGeneric()) {
-                    coordType = (CoordType) Ili2cUtility.resolveGenericCoordDomain(srcAttr).getType();
+                    coordType = (CoordType) Ili2cUtility.resolveGenericCoordDomain(srcAttr, null, genericDomains).getType();
                 }
                 roundSegment(attrValue, coordType);
             }else if(type instanceof PolylineType) {
@@ -153,7 +158,7 @@ public class Rounder implements IoxFilter {
         Domain coordDomain = type.getControlPointDomain();
         CoordType coordType = (CoordType) coordDomain.getType();
         if (coordType.isGeneric()) {
-            coordType = (CoordType) Ili2cUtility.resolveGenericCoordDomain(model, coordDomain).getType();
+            coordType = (CoordType) Ili2cUtility.resolveGenericCoordDomain(model, coordDomain, null, genericDomains).getType();
         }
         int sequencec=polylineValue.getattrvaluecount("sequence");
         for(int sequencei=0;sequencei<sequencec;sequencei++) {

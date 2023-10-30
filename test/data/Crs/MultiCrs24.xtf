@@ -16,6 +16,42 @@
 						<geom:c2>1045001.0</geom:c2>
 					</geom:coord>
 				</MultiCrs24:attr2>
+				<MultiCrs24:attr3>
+					<geom:polyline>
+						<geom:coord>
+							<geom:c1>2480000</geom:c1>
+							<geom:c2>1070000</geom:c2>
+						</geom:coord>
+						<geom:coord>
+							<geom:c1>2490000</geom:c1>
+							<geom:c2>1080000</geom:c2>
+						</geom:coord>
+					</geom:polyline>
+				</MultiCrs24:attr3>
+				<MultiCrs24:attr4>
+					<geom:multipolyline>
+						<geom:polyline>
+							<geom:coord>
+								<geom:c1>2480000</geom:c1>
+								<geom:c2>1070000</geom:c2>
+							</geom:coord>
+							<geom:coord>
+								<geom:c1>2490000</geom:c1>
+								<geom:c2>1080000</geom:c2>
+							</geom:coord>
+						</geom:polyline>
+						<geom:polyline>
+							<geom:coord>
+								<geom:c1>2480000</geom:c1>
+								<geom:c2>1070000</geom:c2>
+							</geom:coord>
+							<geom:coord>
+								<geom:c1>2490000</geom:c1>
+								<geom:c2>1080000</geom:c2>
+							</geom:coord>
+						</geom:polyline>
+					</geom:multipolyline>
+				</MultiCrs24:attr4>
 			</MultiCrs24:ClassA1>
 		</MultiCrs24:TestA>
 		<MultiCrs24:TestA ili:bid="7" ili:domains="MultiCrs24.Coord=MultiCrs24.Coord_LV03">
@@ -27,6 +63,42 @@
 						<geom:c2>45002.0</geom:c2>
 					</geom:coord>
 				</MultiCrs24:attr2>
+				<MultiCrs24:attr3>
+					<geom:polyline>
+						<geom:coord>
+							<geom:c1>480000</geom:c1>
+							<geom:c2>70000</geom:c2>
+						</geom:coord>
+						<geom:coord>
+							<geom:c1>490000</geom:c1>
+							<geom:c2>80000</geom:c2>
+						</geom:coord>
+					</geom:polyline>
+				</MultiCrs24:attr3>
+				<MultiCrs24:attr4>
+					<geom:multipolyline>
+						<geom:polyline>
+							<geom:coord>
+								<geom:c1>480000</geom:c1>
+								<geom:c2>70000</geom:c2>
+							</geom:coord>
+							<geom:coord>
+								<geom:c1>490000</geom:c1>
+								<geom:c2>80000</geom:c2>
+							</geom:coord>
+						</geom:polyline>
+						<geom:polyline>
+							<geom:coord>
+								<geom:c1>480000</geom:c1>
+								<geom:c2>70000</geom:c2>
+							</geom:coord>
+							<geom:coord>
+								<geom:c1>490000</geom:c1>
+								<geom:c2>80000</geom:c2>
+							</geom:coord>
+						</geom:polyline>
+					</geom:multipolyline>
+				</MultiCrs24:attr4>
 			</MultiCrs24:ClassA1>
 		</MultiCrs24:TestA>
 	</ili:datasection>

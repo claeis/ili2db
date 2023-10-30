@@ -122,7 +122,7 @@ public class AbstractRecordConverter {
 		sqlColsAsText=Config.SQL_COLS_AS_TEXT_ENABLE.equals(config.getSqlColsAsText());
 
 	}
-	public DbColGeometry generatePolylineType(Model model, LineType type, String attrName) {
+	public DbColGeometry generatePolylineType(Model model, LineType type, String attrName, Integer epsgCode) {
 		DbColGeometry ret=new DbColGeometry();
 		boolean compoundCurve=false;
 		if(!strokeArcs){
@@ -133,7 +133,7 @@ public class AbstractRecordConverter {
 		if(coordDomain!=null){
 			CoordType coord=(CoordType)coordDomain.getType();
 			if (coord.isGeneric()) {
-				coord = (CoordType) Ili2cUtility.resolveGenericCoordDomain(model, coordDomain).getType();
+				coord = (CoordType) Ili2cUtility.resolveGenericCoordDomain(model, coordDomain, epsgCode).getType();
 			}
 			ret.setDimension(coord.getDimensions().length);
 			setBB(ret, coord,attrName);
@@ -141,7 +141,7 @@ public class AbstractRecordConverter {
 		return ret;
 	}
 
-	public DbColGeometry generateMultiPolylineType(Model model, LineType type, String attrName) {
+	public DbColGeometry generateMultiPolylineType(Model model, LineType type, String attrName, Integer epsgCode) {
 		DbColGeometry ret=new DbColGeometry();
 		boolean curvePolyline=false;
 		if(!strokeArcs){
@@ -152,7 +152,7 @@ public class AbstractRecordConverter {
 		if(coordDomain!=null){
 			CoordType coord=(CoordType)coordDomain.getType();
 			if (coord.isGeneric()) {
-				coord = (CoordType) Ili2cUtility.resolveGenericCoordDomain(model, coordDomain).getType();
+				coord = (CoordType) Ili2cUtility.resolveGenericCoordDomain(model, coordDomain, epsgCode).getType();
 			}
 			ret.setDimension(coord.getDimensions().length);
 			setBB(ret, coord,attrName);
