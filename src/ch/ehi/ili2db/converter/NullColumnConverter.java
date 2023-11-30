@@ -263,6 +263,11 @@ public class NullColumnConverter implements SqlColumnConverter {
         return null;
     }
     @Override
+    public Object fromIomStructureToJsonArray(AttributeDef iliEleAttr, IomObject[] iomValues)
+            throws SQLException, ConverterException {
+        return null;
+    }
+    @Override
     public IomObject[] toIomStructureFromJson(AttributeDef iliEleAttr, Object sqlArray)
             throws SQLException, ConverterException {
         return null;

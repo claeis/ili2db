@@ -420,6 +420,11 @@ public abstract class AbstractWKTColumnConverter implements SqlColumnConverter {
         throw new UnsupportedOperationException();
     }
     @Override
+    public Object fromIomStructureToJsonArray(AttributeDef iliEleAttr, IomObject[] iomValues)
+            throws SQLException, ConverterException {
+        throw new UnsupportedOperationException();
+    }
+    @Override
     public IomObject[] toIomStructureFromJson(AttributeDef iliEleAttr, Object sqlArray)
             throws SQLException, ConverterException {
         throw new UnsupportedOperationException();

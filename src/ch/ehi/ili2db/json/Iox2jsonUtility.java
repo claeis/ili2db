@@ -51,6 +51,14 @@ public class Iox2jsonUtility {
             jg.writeEndArray();
         }
     }
+    public static void writeArray(JsonGenerator jg,ch.interlis.iom.IomObject objs[],TransferDescription td) throws IOException
+    {
+        jg.writeStartArray();
+        for(IomObject obj:objs) {
+            writeRaw(jg,obj,td);
+        }
+        jg.writeEndArray();
+    }
     public static void writeRaw(JsonGenerator jg,ch.interlis.iom.IomObject objs[]) throws IOException
     {
         if(objs.length==1) {

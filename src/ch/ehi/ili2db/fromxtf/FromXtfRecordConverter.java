@@ -1153,13 +1153,19 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 						 }
 						 valuei++;
                     }else if(TrafoConfigNames.JSON_TRAFO_COALESCE.equals(trafoConfig.getAttrConfig(tableAttr, TrafoConfigNames.JSON_TRAFO))){
+                        boolean createJsonArray=type.getCardinality().getMaximum()>1;
                         int valuec= classAttr==null ? 0 : iomObj.getattrvaluecount(attrName);
-                        IomObject iomValue[]=new IomObject[valuec];
-                        if(iomValue.length>0){
+                        IomObject iomValues[]=new IomObject[valuec];
+                        if(iomValues.length>0){
                             for(int i=0;i<valuec;i++) {
-                                iomValue[i]=iomObj.getattrobj(attrName, i);
+                                iomValues[i]=iomObj.getattrobj(attrName, i);
                             }
-                            Object geomObj = geomConv.fromIomStructureToJson(tableAttr,iomValue);
+                            Object geomObj = null;
+                            if(createJsonArray) {
+                                geomObj = geomConv.fromIomStructureToJsonArray(tableAttr,iomValues);
+                            }else {
+                                geomObj = geomConv.fromIomStructureToJson(tableAttr,iomValues);
+                            }
                            ps.setObject(valuei,geomObj);
                         }else{
                            geomConv.setJsonNull(ps,valuei);
