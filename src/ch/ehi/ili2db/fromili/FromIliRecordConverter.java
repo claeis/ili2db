@@ -597,10 +597,10 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
                                   dbIndex.addAttr(idxCol);
                               }
 
-                              if (cnstr.getBasket() && createBasketCol) {
+                              if (cnstr.perBasket() && createBasketCol) {
                                   dbIndex.addAttr(DbNames.T_BASKET_COL);
                                   dbTable.addIndex(dbIndex);
-                              } else if (!cnstr.getBasket()) {
+                              } else if (!cnstr.perBasket()) {
                                   dbTable.addIndex(dbIndex);
                               }
                           }
