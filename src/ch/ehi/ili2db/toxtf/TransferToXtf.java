@@ -507,9 +507,6 @@ public class TransferToXtf {
 		Model model=(Model) topic.getContainer();
 		boolean referrs=false;
 		StartBasketEvent iomBasket=null;
-		if (rounder != null) {
-			rounder.setGenericDomains(genericDomains);
-		}
 		if(delayedObjects!=null) {
 		    delayedObjects.close();
 		}
@@ -678,9 +675,6 @@ public class TransferToXtf {
 	            iomFile.write(endBasket);
 			}
             saveObjStat(iomBasket.getBid(),basketSqlId,datasource,iomBasket.getType());
-		}
-		if (rounder != null) {
-			rounder.setGenericDomains(null);
 		}
 		return referrs;
 	}

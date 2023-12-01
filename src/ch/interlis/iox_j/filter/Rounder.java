@@ -59,18 +59,19 @@ public class Rounder implements IoxFilter {
 	{
 		this.td=td;
 	}
-	@Override
-	public IoxEvent filter(IoxEvent event) throws IoxException {
-		if(event instanceof ObjectEvent){
+
+    @Override
+    public IoxEvent filter(IoxEvent event) throws IoxException {
+        if (event instanceof StartBasketEvent) {
+            genericDomains = ((ch.interlis.iox_j.StartBasketEvent) event).getDomains();
+        } else if (event instanceof EndBasketEvent) {
+            genericDomains = null;
+        } else if (event instanceof ObjectEvent) {
             IomObject iomObj = ((ObjectEvent) event).getIomObject();
             roundObject(iomObj);
-		}
-		return event;
-	}
-
-	public void setGenericDomains(Map<String, String> genericDomains) {
-		this.genericDomains = genericDomains;
-	}
+        }
+        return event;
+    }
 
 	private void roundObject(IomObject iomObj) {
 		Element modelElement = td.getElement(iomObj.getobjecttag());

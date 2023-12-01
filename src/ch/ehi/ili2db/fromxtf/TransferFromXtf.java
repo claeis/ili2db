@@ -583,9 +583,6 @@ public class TransferFromXtf {
                             }
                             // save it for later output to log
                             stat.put(Long.toString(globals.basketSqlId),new BasketStat(filename,basket.getType(),basket.getBid(),globals.objStat));
-                            if (rounder != null) {
-                                rounder.setGenericDomains(basket.getDomains());
-                            }
 						}
 					}else if(event instanceof EndBasketEvent){
 						if(reader instanceof ItfReader2){
@@ -658,9 +655,6 @@ public class TransferFromXtf {
 							} catch (ConverterException ex) {
 								EhiLogger.logError("Basket "+basket.getType()+"(oid "+basket.getBid()+")",ex);
 							}
-                            if (rounder != null) {
-                                rounder.setGenericDomains(null);
-                            }
 						}
 						
 						skipBasket=false;
