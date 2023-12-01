@@ -117,6 +117,7 @@ public class TransferFromIli {
 	private Integer defaultCrsCode=null;
 	private String srsModelAssignment=null;
 	private Integer batchSize = null;
+	private boolean useEpsgInNames=false;
 	public DbSchema doit(TransferDescription td1,java.util.List<Element> modelEles,ch.ehi.ili2db.mapping.NameMapping ili2sqlName,ch.ehi.ili2db.gui.Config config,DbIdGen idGen,TrafoConfig trafoConfig,Viewable2TableMapping class2wrapper1,CustomMapping customMapping1)
 	throws Ili2dbException
 	{
@@ -137,6 +138,7 @@ public class TransferFromIli {
 	        defaultCrsCode=Integer.parseInt(config.getDefaultSrsCode());
 		}
         srsModelAssignment=config.getSrsModelAssignment();
+        useEpsgInNames=config.useEpsgInNames();
 
 		customMapping=customMapping1;
 		customMapping.fromIliInit(config);
@@ -173,7 +175,10 @@ public class TransferFromIli {
 				Model model=(Model)modelo;
 				//generateModel(model);
 			}else if (modelo instanceof Topic){
-				//generateTopic((Topic)modelo);
+				Topic topic = (Topic) modelo;
+				if (topic.getDefferedGenerics().length > 0 && !useEpsgInNames) {
+					throw new Ili2dbException("Mapping of Topic " + topic.getScopedName(null) + " requires the '--multiSrs' option because it declares deferred generics.");
+				}
 			}else if (modelo instanceof Domain){
 				if(pass==2){
 					generateDomain((Domain)modelo);
