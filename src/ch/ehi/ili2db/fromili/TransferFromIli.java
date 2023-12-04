@@ -117,6 +117,7 @@ public class TransferFromIli {
 	private Integer defaultCrsCode=null;
 	private String srsModelAssignment=null;
 	private Integer batchSize = null;
+	private boolean useEpsgInNames=false;
 	public DbSchema doit(TransferDescription td1,java.util.List<Element> modelEles,ch.ehi.ili2db.mapping.NameMapping ili2sqlName,ch.ehi.ili2db.gui.Config config,DbIdGen idGen,TrafoConfig trafoConfig,Viewable2TableMapping class2wrapper1,CustomMapping customMapping1)
 	throws Ili2dbException
 	{
@@ -137,6 +138,7 @@ public class TransferFromIli {
 	        defaultCrsCode=Integer.parseInt(config.getDefaultSrsCode());
 		}
         srsModelAssignment=config.getSrsModelAssignment();
+        useEpsgInNames=config.useEpsgInNames();
 
 		customMapping=customMapping1;
 		customMapping.fromIliInit(config);
@@ -173,7 +175,10 @@ public class TransferFromIli {
 				Model model=(Model)modelo;
 				//generateModel(model);
 			}else if (modelo instanceof Topic){
-				//generateTopic((Topic)modelo);
+				Topic topic = (Topic) modelo;
+				if (topic.getDefferedGenerics().length > 0 && !useEpsgInNames) {
+					throw new Ili2dbException("Mapping of Topic " + topic.getScopedName(null) + " requires the '--multiSrs' option because it declares deferred generics.");
+				}
 			}else if (modelo instanceof Domain){
 				if(pass==2){
 					generateDomain((Domain)modelo);
@@ -313,8 +318,9 @@ public class TransferFromIli {
 				dbTable.addColumn(t_dsName);
 		  }
 			SurfaceOrAreaType type = (SurfaceOrAreaType)attr.getDomainResolvingAll();
-			
-			DbColGeometry dbCol = recConv.generatePolylineType(type, attr.getContainer().getScopedName(null)+"."+attr.getName());
+
+			Model model = (Model) attr.getContainer(Model.class);
+			DbColGeometry dbCol = recConv.generatePolylineType(model, type, attr.getContainer().getScopedName(null)+"."+attr.getName(), epsgCode);
 			  recConv.setCrs(dbCol, epsgCode);
 			  dbCol.setName(ili2sqlName.getSqlColNameItfLineTableGeomAttr(attr,sqlName.getName()));
 			  dbCol.setNotNull(true);
@@ -1973,7 +1979,7 @@ public class TransferFromIli {
         if(attrType instanceof ch.interlis.ili2c.metamodel.TypeAlias) {
             attrOrDomainDef=((ch.interlis.ili2c.metamodel.TypeAlias)attrType).getAliasing();
             attrType=((Domain) attrOrDomainDef).getType();
-            if(attrType instanceof CoordType) {
+            if (attrType instanceof AbstractCoordType) {
                 coordDomain=(Domain) attrOrDomainDef;
             }
         }
@@ -1991,7 +1997,8 @@ public class TransferFromIli {
             throw new IllegalArgumentException(attr.getScopedName()+" is not a geometry attribute");
         }
         if(coord.isGeneric()) {
-            Domain concreteCoordDomain=((Model) attr.getContainer(Model.class)).mapGenericDomain(coordDomain,genericDomains);
+            Model model = (Model) attr.getContainer(Model.class);
+            Domain concreteCoordDomain = Ili2cUtility.resolveGenericCoordDomain(model, coordDomain, null, genericDomains);
             String crs=((AbstractCoordType)concreteCoordDomain.getType()).getCrs(concreteCoordDomain);
             if(crs==null) {
                 

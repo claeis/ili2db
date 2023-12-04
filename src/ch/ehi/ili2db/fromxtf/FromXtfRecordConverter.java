@@ -46,6 +46,7 @@ import ch.interlis.ili2c.metamodel.CoordType;
 import ch.interlis.ili2c.metamodel.Domain;
 import ch.interlis.ili2c.metamodel.EnumerationType;
 import ch.interlis.ili2c.metamodel.LineType;
+import ch.interlis.ili2c.metamodel.Model;
 import ch.interlis.ili2c.metamodel.MultiAreaType;
 import ch.interlis.ili2c.metamodel.MultiCoordType;
 import ch.interlis.ili2c.metamodel.MultiSurfaceOrAreaType;
@@ -1028,6 +1029,7 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 				valuei++;
 			}else{
 				Type type = tableAttr.getDomainResolvingAliases();
+				Model model = (Model) tableAttr.getContainer(Model.class);
 			 
 				if (type instanceof CompositionType){
 					 int structc= classAttr==null ? 0 : iomObj.getattrvaluecount(attrName);
@@ -1067,7 +1069,7 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 								SurfaceType surface=((SurfaceType) surfaceAttr.getDomainResolvingAliases());
 								CoordType coord=(CoordType)surface.getControlPointDomain().getType();
 							 boolean is3D=coord.getDimensions().length==3;
-							 Object geomObj = geomConv.fromIomMultiSurface(iomMultisurface,epsgCode,surface.getLineAttributeStructure()!=null,is3D,getP(surface));
+							 Object geomObj = geomConv.fromIomMultiSurface(iomMultisurface,epsgCode,surface.getLineAttributeStructure()!=null,is3D,getP(surface, model, epsgCode));
 							ps.setObject(valuei,geomObj);
 						 }else{
 							geomConv.setSurfaceNull(ps,valuei);
@@ -1094,7 +1096,7 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 								PolylineType line=((PolylineType) polylineAttr.getDomainResolvingAliases());
 								CoordType coord=(CoordType)line.getControlPointDomain().getType();
 							 boolean is3D=coord.getDimensions().length==3;
-							 Object geomObj = geomConv.fromIomMultiPolyline(iomMultiline,epsgCode,is3D,getP(line));
+							 Object geomObj = geomConv.fromIomMultiPolyline(iomMultiline,epsgCode,is3D,getP(line, model, epsgCode));
 							ps.setObject(valuei,geomObj);
 						 }else{
 							geomConv.setPolylineNull(ps,valuei);
@@ -1219,18 +1221,20 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 					}
 				}else if (type instanceof PolylineType){
 					 IomObject value= classAttr==null ? null : iomObj.getattrobj(attrName,0);
-					 if(value!=null){
+					int actualEpsgCode = TransferFromIli.getEpsgCode(originalClass, tableAttr, genericDomains, defaultEpsgCode);
+					if (value != null && actualEpsgCode == epsgCode) {
 						boolean is3D=((CoordType)((PolylineType)type).getControlPointDomain().getType()).getDimensions().length==3;
-						ps.setObject(valuei,geomConv.fromIomPolyline(value,epsgCode,is3D,getP((PolylineType)type)));
+						ps.setObject(valuei,geomConv.fromIomPolyline(value,epsgCode,is3D,getP((PolylineType)type, model, epsgCode)));
 					 }else{
 						geomConv.setPolylineNull(ps,valuei);
 					 }
 					 valuei++;
 				 }else if (type instanceof MultiPolylineType){
 					IomObject value= classAttr==null ? null : iomObj.getattrobj(attrName,0);
-					if(value!=null){
+					int actualEpsgCode = TransferFromIli.getEpsgCode(originalClass, tableAttr, genericDomains, defaultEpsgCode);
+					if (value != null && actualEpsgCode == epsgCode) {
 						boolean is3D=((CoordType)((MultiPolylineType)type).getControlPointDomain().getType()).getDimensions().length==3;
-						ps.setObject(valuei,geomConv.fromIomMultiPolyline(value,epsgCode,is3D,getP((MultiPolylineType)type)));
+						ps.setObject(valuei,geomConv.fromIomMultiPolyline(value,epsgCode,is3D,getP((MultiPolylineType)type, model, epsgCode)));
 					}else{
 						geomConv.setPolylineNull(ps,valuei);
 					}
@@ -1240,13 +1244,14 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 					 }else if(createXtfLineTables){
                          IomObject value= classAttr==null ? null : iomObj.getattrobj(attrName,0);
                          IomObject iomMultiline=null;
-                         if(value!=null){
+						 int actualEpsgCode = TransferFromIli.getEpsgCode(originalClass, tableAttr, genericDomains, defaultEpsgCode);
+						 if (value != null && actualEpsgCode == epsgCode) {
                              iomMultiline=mapSurface2MultiPolyline(value);
                          }
                          if(iomMultiline!=null){
                              boolean is3D=((CoordType)((SurfaceOrAreaType)type).getControlPointDomain().getType()).getDimensions().length==3;
                              // map polygon to list of poylines
-                             Object geomObj = geomConv.fromIomMultiPolyline(iomMultiline,epsgCode,is3D,getP((SurfaceOrAreaType)type));
+                             Object geomObj = geomConv.fromIomMultiPolyline(iomMultiline,epsgCode,is3D,getP((SurfaceOrAreaType)type, model, epsgCode));
                              ps.setObject(valuei,geomObj);
                          }else{
                              geomConv.setSurfaceNull(ps,valuei);
@@ -1254,13 +1259,14 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
                          valuei++;
 					 }else{
 						 IomObject value= classAttr==null ? null : iomObj.getattrobj(attrName,0);
-						 if(value!=null){
+						 int actualEpsgCode = TransferFromIli.getEpsgCode(originalClass, tableAttr, genericDomains, defaultEpsgCode);
+						 if (value != null && actualEpsgCode == epsgCode) {
 							 boolean is3D=((CoordType)((AbstractSurfaceOrAreaType)type).getControlPointDomain().getType()).getDimensions().length==3;
 							 if(type instanceof SurfaceOrAreaType){
-								 Object geomObj = geomConv.fromIomSurface(value,epsgCode,((SurfaceOrAreaType)type).getLineAttributeStructure()!=null,is3D,getP((SurfaceOrAreaType)type));
+								 Object geomObj = geomConv.fromIomSurface(value,epsgCode,((SurfaceOrAreaType)type).getLineAttributeStructure()!=null,is3D,getP((SurfaceOrAreaType)type, model, epsgCode));
 								 ps.setObject(valuei,geomObj);
 							 } else if (type instanceof MultiSurfaceOrAreaType) {
-								 Object geomObj = geomConv.fromIomMultiSurface(value,epsgCode,((MultiSurfaceOrAreaType)type).getLineAttributeStructure()!=null,is3D,getP((MultiSurfaceOrAreaType)type));
+								 Object geomObj = geomConv.fromIomMultiSurface(value,epsgCode,((MultiSurfaceOrAreaType)type).getLineAttributeStructure()!=null,is3D,getP((MultiSurfaceOrAreaType)type, model, epsgCode));
 								ps.setObject(valuei,geomObj);
 							 }
 						 }else{
@@ -1276,7 +1282,8 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 							 }else{
 								 value= classAttr==null ? null : iomObj.getattrobj(ItfReader2.SAVED_GEOREF_PREFIX+attrName,0);
 							 }
-							 if(value!=null){
+							 int actualEpsgCode = TransferFromIli.getEpsgCode(originalClass, tableAttr, genericDomains, defaultEpsgCode);
+							 if (value != null && actualEpsgCode == epsgCode) {
 								boolean is3D=((CoordType)((AbstractSurfaceOrAreaType)type).getControlPointDomain().getType()).getDimensions().length==3;
 								ps.setObject(valuei,geomConv.fromIomCoord(value,epsgCode,is3D));
 							 }else{
@@ -1554,13 +1561,17 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 		return srsid;
 	}
 	private HashMap<LineType,Double> typeCache=new HashMap<LineType,Double>();
-	public double getP(LineType type)
+	public double getP(LineType type, Model model, Integer epsgCode)
 	{
 		if(typeCache.containsKey(type)){
 			return ((Double)typeCache.get(type)).doubleValue();
 		}
 		double p;
-		CoordType coordType=(CoordType)type.getControlPointDomain().getType();
+		Domain coordDomain = type.getControlPointDomain();
+		CoordType coordType = (CoordType) coordDomain.getType();
+		if (coordType.isGeneric()) {
+			coordType = (CoordType) Ili2cUtility.resolveGenericCoordDomain(model, coordDomain, epsgCode).getType();
+		}
 		NumericalType dimv[]=coordType.getDimensions();
 		int accuracy=((NumericType)dimv[0]).getMaximum().getAccuracy();
 		if(accuracy==0){
