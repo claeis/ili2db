@@ -26,7 +26,7 @@ install: true
 
 before_script:
     - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
-    - docker run --name=mssql-test -e 'ACCEPT_EULA=Y' -e 'MSSQL_PID=Developer' -e 'MSSQL_SA_PASSWORD=MsInst2019x' -p 1433:1433 -d mcr.microsoft.com/mssql/server:2022-latest
+    - docker run --name=mssql-test -e 'ACCEPT_EULA=Y' -e 'MSSQL_PID=Developer' -e 'MSSQL_SA_PASSWORD=MsInst2019x' -p 1433:1433 -d mcr.microsoft.com/mssql/rhel/server:2022-latest
     - # localhost is "-S ."
     - sleep 30; docker ps -a; docker logs --tail=50 mssql-test; docker exec -it mssql-test  /opt/mssql-tools/bin/sqlcmd -S . -U sa -P MsInst2019x -Q 'SELECT @@VERSION;'
     - docker exec -it mssql-test  /opt/mssql-tools/bin/sqlcmd -S . -U sa -P MsInst2019x -Q 'create database ili2db;'
