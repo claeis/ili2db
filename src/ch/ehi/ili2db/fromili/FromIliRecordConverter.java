@@ -569,9 +569,14 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
                   Object cnstro = it.next();
                   if (cnstro instanceof UniquenessConstraint) {
                       UniquenessConstraint cnstr = (UniquenessConstraint) cnstro;
-                      //TODO: Fix case for unique attributes without epgsCode
-                      for (int epsgCode : getEpsgCodes(def.getAttrv())) {
-                          HashSet attrs = getUniqueAttrs(cnstr, def.getAttrv(), epsgCode);
+                      Integer[] epsgCodes = getEpsgCodes(cnstr,def.getAttrv());
+                      if(epsgCodes.length==0) {
+                          // unique attributes without epgsCode
+                          epsgCodes=new Integer[1];
+                          epsgCodes[0]=null;
+                      }
+                    for (Integer epsgCode : epsgCodes) {
+                          Set<ch.interlis.ili2c.metamodel.Element> attrs = getUniqueAttrs(cnstr, def.getAttrv(), epsgCode);
                           // mappable?
                           if (attrs != null) {
                               DbIndex dbIndex = new DbIndex();
@@ -642,33 +647,74 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
         }
     }
 
-	private Integer[] getEpsgCodes(List<ColumnWrapper> attrv) {
+	private Integer[] getEpsgCodes(List<ColumnWrapper> colv) {
 	    HashSet<Integer> epsgCodes=new HashSet<Integer>();
-	    for(ColumnWrapper col:attrv) {
+	    for(ColumnWrapper col:colv) {
 	        if(col.getEpsgCode()!=null) {
 	            epsgCodes.add(col.getEpsgCode());
 	        }
 	    }
         return epsgCodes.toArray(new Integer[epsgCodes.size()]);
     }
-
-	private HashSet getUniqueAttrs(UniquenessConstraint cnstr, List<ColumnWrapper> colv,int epsgCode) {
+    private Integer[] getEpsgCodes(UniquenessConstraint cnstr,List<ColumnWrapper> colv) {
+        HashSet<Integer> epsgCodes=new HashSet<Integer>();
+        for(ColumnWrapper col:colv) {
+            if(col.getEpsgCode()!=null) {
+                if(isUniqueAttr(cnstr,(ch.interlis.ili2c.metamodel.Element)col.getViewableTransferElement().obj)) {
+                    epsgCodes.add(col.getEpsgCode());
+                }
+            }
+        }
+        return epsgCodes.toArray(new Integer[epsgCodes.size()]);
+    }
+    private boolean isUniqueAttr(UniquenessConstraint cnstr,ch.interlis.ili2c.metamodel.Element col) {
+        UniqueEl attribs=cnstr.getElements();
+        Iterator attri=attribs.iteratorAttribute();
+      for (; attri.hasNext();)
+      {
+            ObjectPath path=(ObjectPath)attri.next();
+            PathEl pathEles[]=path.getPathElements();
+            if(pathEles.length!=1){
+                return false;
+            }
+            PathEl pathEle=pathEles[0];
+            if(pathEle instanceof AttributeRef){
+                AttributeDef attr=((AttributeRef) pathEle).getAttr();
+                while(attr.getExtending()!=null){
+                    attr=(AttributeDef) attr.getExtending();
+                }
+                if(col==attr){
+                    return true;
+                }
+            }else if(pathEle instanceof PathElAssocRole){
+                RoleDef role=((PathElAssocRole) pathEle).getRole();
+                while(role.getExtending()!=null){
+                    role=(RoleDef) role.getExtending();
+                }
+                if(col==role){
+                    return true;
+                }
+            }
+      }
+        return false;
+    }
+	private Set<ch.interlis.ili2c.metamodel.Element> getUniqueAttrs(UniquenessConstraint cnstr, List<ColumnWrapper> colv,Integer epsgCode) {
 		  if(cnstr.getLocal()){
 			  return null;
 		  }
-		  HashSet wrapperCols=new HashSet();
+		  Set<ch.interlis.ili2c.metamodel.Element> wrapperCols=new HashSet<ch.interlis.ili2c.metamodel.Element>();
 		  {
 		      for(ColumnWrapper col:colv) {
 		          if(col.getEpsgCode()!=null) {
-		              if(col.getEpsgCode()==epsgCode) {
-	                      wrapperCols.add(col.getViewableTransferElement().obj);
+		              if(col.getEpsgCode().equals(epsgCode)) {
+	                      wrapperCols.add((ch.interlis.ili2c.metamodel.Element)col.getViewableTransferElement().obj);
 		              }
 		          }else {
-		              wrapperCols.add(col.getViewableTransferElement().obj);
+		              wrapperCols.add((ch.interlis.ili2c.metamodel.Element)col.getViewableTransferElement().obj);
 		          }
 		      }
 		  }
-			HashSet ret=new HashSet();
+		Set<ch.interlis.ili2c.metamodel.Element> ret=new HashSet<ch.interlis.ili2c.metamodel.Element>();
 		  UniqueEl attribs=cnstr.getElements();
         	Iterator attri=attribs.iteratorAttribute();
           for (; attri.hasNext();)

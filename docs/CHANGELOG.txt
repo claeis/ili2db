@@ -13,7 +13,10 @@ ideas/open issues/questions
 
 ili2db 5.1.0 (2023-10-xx)
 ---------------------------
-- JSON-Mapping of Bag of Structure (#477) 
+- JSON-Mapping of Bag of Structure (#477)
+- Unique constraints are not generated (#493)
+- ILI2.4: Resolve generic domain from context or transfer (#472)
+- ILI2.4: Eindeutigkeitsbedingungen auf den einzelnen Transfer (#518)
 - ili2c-5.4.0
 - iox-ili-1.22.0
  

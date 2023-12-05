@@ -1,0 +1,25 @@
+TRANSFER Ili1FmtTest;
+MODEL UniqueIndex10
+	DOMAIN Lkoord = COORD2 480000.000 70000.000 850000.000 310000.000;
+	TOPIC Topic=	
+		TABLE ClassA =
+			attr1 : OPTIONAL TEXT*10;
+			attr2 : OPTIONAL Lkoord;
+			IDENT attr1; 
+		END ClassA;
+		TABLE ClassB =	
+			attr1 : OPTIONAL TEXT*10;
+			attr2 : OPTIONAL Lkoord;
+		    IDENT attr2;
+		END ClassB;
+		TABLE ClassC =	
+			attr1 : OPTIONAL TEXT*10;
+			attr2 : OPTIONAL Lkoord;
+			IDENT attr1,attr2;
+		END ClassC;
+	END Topic.
+END UniqueIndex10.
+FORMAT FREE;
+CODE BLANK = DEFAULT, UNDEFINED = DEFAULT, CONTINUE = DEFAULT;
+TID = ANY;
+END.
