@@ -55,6 +55,10 @@ public class PgMain extends ch.ehi.ili2db.AbstractMain {
 							return "jdbc:postgresql://"+config.getDbhost()+":"+config.getDbport()+"/"+config.getDbdatabase();
 						}
 						return "jdbc:postgresql://"+config.getDbhost()+"/"+config.getDbdatabase();
+					}else {
+					    if(config.getDbport()!=null) {
+                            return "jdbc:postgresql://localhost:"+config.getDbport()+"/"+config.getDbdatabase();
+					    }
 					}
 					return "jdbc:postgresql:"+config.getDbdatabase();
 				}
