@@ -12,6 +12,9 @@ MODEL MultiCrs24
 			460000.000 .. 870000.000,
 			45000.000 .. 310000.000,
 			ROTATION 2 -> 1 REFSYS "EPSG:21781";
+		Line = POLYLINE WITH (STRAIGHTS) VERTEX Coord;
+		MultiLine = MULTIPOLYLINE WITH (STRAIGHTS) VERTEX Coord;
+
 	CONTEXT default =
 		Coord = Coord_LV03 OR Coord_LV95;
 		
@@ -20,6 +23,8 @@ MODEL MultiCrs24
 		CLASS ClassA1 =
 			attr1 : TEXT*60;
 			attr2 : Coord;
+			attr3 : Line;
+			attr4 : MultiLine;
 		END ClassA1;
 	END TestA;
 END MultiCrs24.

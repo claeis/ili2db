@@ -13,6 +13,7 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 
+import ch.interlis.ili2c.metamodel.Model;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerator;
 
@@ -557,49 +558,60 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 					}
 			  }
 		}
-		  if(createStdCols){
-				addStdCol(dbTable);
-		  }
-		  if(createUnique && !def.isStructure()){
-			  // check if UNIQUE mappable
-			  Viewable aclass=def.getViewable();
-			  Iterator it=aclass.iterator();
-			  while(it.hasNext()){
-				  Object cnstro=it.next();
-				  if(cnstro instanceof UniquenessConstraint){
-					  UniquenessConstraint cnstr=(UniquenessConstraint)cnstro;
-					  for(int epsgCode:getEpsgCodes(def.getAttrv())) {
-	                      HashSet attrs=getUniqueAttrs(cnstr,def.getAttrv(),epsgCode);
-	                      // mappable?
-	                      if(attrs!=null){
-	                          DbIndex dbIndex=new DbIndex();
-	                          dbIndex.setPrimary(false);
-	                          dbIndex.setUnique(true);
-	                          for(Object attro:attrs){
-	                              String attrSqlName=null;
-	                              if(attro instanceof AttributeDef){
-	                                      Type attrType=((AttributeDef) attro).getDomainResolvingAliases();
-	                                    if(attrType instanceof CoordType || attrType instanceof LineType) {
-	                                        attrSqlName=ili2sqlName.mapIliAttributeDef((AttributeDef) attro,epsgCode,def.getSqlTablename(),null);
-	                                    }else {
-	                                        attrSqlName=ili2sqlName.mapIliAttributeDef((AttributeDef) attro,null,def.getSqlTablename(),null);
-	                                    }
-	                              }else if(attro instanceof RoleDef){
-	                                  RoleDef role=(RoleDef) attro;
-	                                  DbTableName targetSqlTableName=getSqlType(role.getDestination());
-	                                  attrSqlName=ili2sqlName.mapIliRoleDef(role,def.getSqlTablename(),targetSqlTableName.getName());
-	                              }else{
-	                                  throw new IllegalStateException("unexpected attr "+attro);
-	                              }
-	                              DbColumn idxCol=dbTable.getColumn(attrSqlName);
-	                              dbIndex.addAttr(idxCol);
-	                          }
-	                          dbTable.addIndex(dbIndex);
-	                      }
-					  }
-				  }
-			  }
-			  
+        if(createStdCols){
+            addStdCol(dbTable);
+        }
+        if(createUnique && !def.isStructure()){
+              // check if UNIQUE mappable
+              Viewable aclass = def.getViewable();
+              Iterator it = aclass.iterator();
+              while (it.hasNext()) {
+                  Object cnstro = it.next();
+                  if (cnstro instanceof UniquenessConstraint) {
+                      UniquenessConstraint cnstr = (UniquenessConstraint) cnstro;
+                      Integer[] epsgCodes = getEpsgCodes(cnstr,def.getAttrv());
+                      if(epsgCodes.length==0) {
+                          // unique attributes without epgsCode
+                          epsgCodes=new Integer[1];
+                          epsgCodes[0]=null;
+                      }
+                    for (Integer epsgCode : epsgCodes) {
+                          Set<ch.interlis.ili2c.metamodel.Element> attrs = getUniqueAttrs(cnstr, def.getAttrv(), epsgCode);
+                          // mappable?
+                          if (attrs != null) {
+                              DbIndex dbIndex = new DbIndex();
+                              dbIndex.setPrimary(false);
+                              dbIndex.setUnique(true);
+                              for (Object attro : attrs) {
+                                  String attrSqlName = null;
+                                  if (attro instanceof AttributeDef) {
+                                      Type attrType = ((AttributeDef) attro).getDomainResolvingAliases();
+                                      if (attrType instanceof CoordType || attrType instanceof LineType) {
+                                          attrSqlName = ili2sqlName.mapIliAttributeDef((AttributeDef) attro, epsgCode, def.getSqlTablename(), null);
+                                      } else {
+                                          attrSqlName = ili2sqlName.mapIliAttributeDef((AttributeDef) attro, null, def.getSqlTablename(), null);
+                                      }
+                                  } else if (attro instanceof RoleDef) {
+                                      RoleDef role = (RoleDef) attro;
+                                      DbTableName targetSqlTableName = getSqlType(role.getDestination());
+                                      attrSqlName = ili2sqlName.mapIliRoleDef(role, def.getSqlTablename(), targetSqlTableName.getName());
+                                  } else {
+                                      throw new IllegalStateException("unexpected attr " + attro);
+                                  }
+                                  DbColumn idxCol = dbTable.getColumn(attrSqlName);
+                                  dbIndex.addAttr(idxCol);
+                              }
+
+                              if (cnstr.perBasket() && createBasketCol) {
+                                  dbIndex.addAttr(DbNames.T_BASKET_COL);
+                                  dbTable.addIndex(dbIndex);
+                              } else if (!cnstr.perBasket()) {
+                                  dbTable.addIndex(dbIndex);
+                              }
+                          }
+                      }
+                  }
+              }
 		  }
 		  if(!def.isSecondaryTable()){
 			  customMapping.fixupViewable(dbTable,def.getViewable());
@@ -635,33 +647,74 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
         }
     }
 
-	private Integer[] getEpsgCodes(List<ColumnWrapper> attrv) {
+	private Integer[] getEpsgCodes(List<ColumnWrapper> colv) {
 	    HashSet<Integer> epsgCodes=new HashSet<Integer>();
-	    for(ColumnWrapper col:attrv) {
+	    for(ColumnWrapper col:colv) {
 	        if(col.getEpsgCode()!=null) {
 	            epsgCodes.add(col.getEpsgCode());
 	        }
 	    }
         return epsgCodes.toArray(new Integer[epsgCodes.size()]);
     }
-
-	private HashSet getUniqueAttrs(UniquenessConstraint cnstr, List<ColumnWrapper> colv,int epsgCode) {
+    private Integer[] getEpsgCodes(UniquenessConstraint cnstr,List<ColumnWrapper> colv) {
+        HashSet<Integer> epsgCodes=new HashSet<Integer>();
+        for(ColumnWrapper col:colv) {
+            if(col.getEpsgCode()!=null) {
+                if(isUniqueAttr(cnstr,(ch.interlis.ili2c.metamodel.Element)col.getViewableTransferElement().obj)) {
+                    epsgCodes.add(col.getEpsgCode());
+                }
+            }
+        }
+        return epsgCodes.toArray(new Integer[epsgCodes.size()]);
+    }
+    private boolean isUniqueAttr(UniquenessConstraint cnstr,ch.interlis.ili2c.metamodel.Element col) {
+        UniqueEl attribs=cnstr.getElements();
+        Iterator attri=attribs.iteratorAttribute();
+      for (; attri.hasNext();)
+      {
+            ObjectPath path=(ObjectPath)attri.next();
+            PathEl pathEles[]=path.getPathElements();
+            if(pathEles.length!=1){
+                return false;
+            }
+            PathEl pathEle=pathEles[0];
+            if(pathEle instanceof AttributeRef){
+                AttributeDef attr=((AttributeRef) pathEle).getAttr();
+                while(attr.getExtending()!=null){
+                    attr=(AttributeDef) attr.getExtending();
+                }
+                if(col==attr){
+                    return true;
+                }
+            }else if(pathEle instanceof PathElAssocRole){
+                RoleDef role=((PathElAssocRole) pathEle).getRole();
+                while(role.getExtending()!=null){
+                    role=(RoleDef) role.getExtending();
+                }
+                if(col==role){
+                    return true;
+                }
+            }
+      }
+        return false;
+    }
+	private Set<ch.interlis.ili2c.metamodel.Element> getUniqueAttrs(UniquenessConstraint cnstr, List<ColumnWrapper> colv,Integer epsgCode) {
 		  if(cnstr.getLocal()){
 			  return null;
 		  }
-		  HashSet wrapperCols=new HashSet();
+		  Set<ch.interlis.ili2c.metamodel.Element> wrapperCols=new HashSet<ch.interlis.ili2c.metamodel.Element>();
 		  {
 		      for(ColumnWrapper col:colv) {
 		          if(col.getEpsgCode()!=null) {
-		              if(col.getEpsgCode()==epsgCode) {
-	                      wrapperCols.add(col.getViewableTransferElement().obj);
+		              if(col.getEpsgCode().equals(epsgCode)) {
+	                      wrapperCols.add((ch.interlis.ili2c.metamodel.Element)col.getViewableTransferElement().obj);
 		              }
 		          }else {
-		              wrapperCols.add(col.getViewableTransferElement().obj);
+		              wrapperCols.add((ch.interlis.ili2c.metamodel.Element)col.getViewableTransferElement().obj);
 		          }
 		      }
 		  }
-			HashSet ret=new HashSet();
+		Set<ch.interlis.ili2c.metamodel.Element> ret=new HashSet<ch.interlis.ili2c.metamodel.Element>();
 		  UniqueEl attribs=cnstr.getElements();
         	Iterator attri=attribs.iteratorAttribute();
           for (; attri.hasNext();)
@@ -704,6 +757,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 		OutParam<Unit> unitDef=new OutParam<Unit>();unitDef.value=null;
 		OutParam<Boolean> mText=new OutParam<Boolean>();mText.value=false;
         OutParam<String> simpleTypeKind=new OutParam<String>();simpleTypeKind.value=null;
+        Model model = (Model) attr.getContainer(Model.class);
 
 		ArrayList<DbColumn> dbColExts=new ArrayList<DbColumn>();
 		Type type = attr.getDomainResolvingAll();
@@ -751,7 +805,11 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
                 }
 				// get crs from ili
 				setCrs(ret,epsgCode);
-				CoordType coord=(CoordType)((AbstractSurfaceOrAreaType)type).getControlPointDomain().getType();
+				Domain coordDomain = ((AbstractSurfaceOrAreaType)type).getControlPointDomain();
+				CoordType coord = (CoordType) coordDomain.getType();
+				if (coord.isGeneric()) {
+					coord = (CoordType) Ili2cUtility.resolveGenericCoordDomain(model, coordDomain, epsgCode).getType();
+				}
 				ret.setDimension(coord.getDimensions().length);
 				setBB(ret, coord,attr.getContainer().getScopedName(null)+"."+attr.getName());
 				dbCol.value=ret;
@@ -766,21 +824,25 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 					// get crs from ili
 					setCrs(ret,epsgCode);
 					ret.setDimension(2); // always 2 (even if defined as 3d in ili)
-					CoordType coord=(CoordType)((AbstractSurfaceOrAreaType)type).getControlPointDomain().getType();
+					Domain coordDomain = ((AbstractSurfaceOrAreaType)type).getControlPointDomain();
+					CoordType coord = (CoordType) coordDomain.getType();
+					if (coord.isGeneric()) {
+						coord = (CoordType) Ili2cUtility.resolveGenericCoordDomain(model, coordDomain, epsgCode).getType();
+					}
 					setBB(ret, coord,attr.getContainer().getScopedName(null)+"."+attr.getName());
 					dbColExts.add(ret);
 				}
 			}
 		}else if (type instanceof PolylineType){
 			String attrName=attr.getContainer().getScopedName(null)+"."+attr.getName();
-			DbColGeometry ret = generatePolylineType((PolylineType)type, attrName);
+			DbColGeometry ret = generatePolylineType(model, (PolylineType)type, attrName, epsgCode);
 			setCrs(ret,epsgCode);
 			dbCol.value=ret;
             typeKind=DbExtMetaInfo.TAG_COL_TYPEKIND_POLYLINE;                        
 		}
 		else if (type instanceof MultiPolylineType){
             String attrName = attr.getContainer().getScopedName(null) + "." + attr.getName();
-            DbColGeometry ret = generateMultiPolylineType((MultiPolylineType) type, attrName);
+            DbColGeometry ret = generateMultiPolylineType(model, (MultiPolylineType) type, attrName, epsgCode);
             setCrs(ret, epsgCode);
             dbCol.value = ret;
             typeKind=DbExtMetaInfo.TAG_COL_TYPEKIND_MULTIPOLYLINE;                        
@@ -788,16 +850,22 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 			DbColGeometry ret=new DbColGeometry();
 			ret.setType(DbColGeometry.POINT);
 			setCrs(ret,epsgCode);
-			CoordType coord=(CoordType)type;
+			CoordType coord = (CoordType) type;
+			if (coord.isGeneric()) {
+				coord = (CoordType) Ili2cUtility.resolveGenericCoordDomain(attr, epsgCode).getType();
+			}
 			ret.setDimension(coord.getDimensions().length);
 			setBB(ret, coord,attr.getContainer().getScopedName(null)+"."+attr.getName());
 			dbCol.value=ret;
-            typeKind=DbExtMetaInfo.TAG_COL_TYPEKIND_COORD;                        
+			typeKind=DbExtMetaInfo.TAG_COL_TYPEKIND_COORD;
 		} else if (type instanceof MultiCoordType) {
 			DbColGeometry ret = new DbColGeometry();
 			ret.setType(DbColGeometry.MULTIPOINT);
 			setCrs(ret,epsgCode);
 			MultiCoordType coord = (MultiCoordType) type;
+			if (coord.isGeneric()) {
+				coord = (MultiCoordType) Ili2cUtility.resolveGenericCoordDomain(attr, epsgCode).getType();
+			}
 			ret.setDimension(coord.getDimensions().length);
 			setBB(ret, coord,attr.getContainer().getScopedName(null) + "." + attr.getName());
 			dbCol.value = ret;
