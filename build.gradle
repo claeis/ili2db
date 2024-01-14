@@ -166,6 +166,23 @@ sourceSets {
     runtimeClasspath += sourceSets.test.output
     runtimeClasspath += sourceSets.ili2h2gis.output
   }
+  ili2duckdb {
+    java {
+      srcDirs=['ili2duckdb/src']
+    }
+    compileClasspath += sourceSets.main.output
+  }
+  ili2duckdbTest {
+    java {
+      srcDirs=['ili2duckdb/test/java']
+    }
+    compileClasspath += sourceSets.main.output
+    compileClasspath += sourceSets.test.output
+    compileClasspath += sourceSets.ili2duckdb.output
+    runtimeClasspath += sourceSets.main.output
+    runtimeClasspath += sourceSets.test.output
+    runtimeClasspath += sourceSets.ili2duckdb.output
+  }
   ili2fgdb {
     java {
     	srcDirs=['ili2fgdb/src']
@@ -280,6 +297,20 @@ configurations {
 		extendsFrom ili2h2gisImplementation
 	}
 	
+  ili2duckdbImplementation {
+    extendsFrom implementation
+  }
+  ili2duckdbRuntimeOnly {
+    extendsFrom runtimeOnly
+  }
+  ili2duckdbTestRuntimeOnly {
+    extendsFrom ili2duckdbRuntimeOnly
+  }
+  ili2duckdbTestImplementation {
+    extendsFrom testImplementation
+    extendsFrom ili2duckdbImplementation
+  }
+	
 	ili2fgdbImplementation {
 		extendsFrom implementation
 	}
@@ -351,6 +382,8 @@ dependencies {
 	//ili2h2gisImplementation group: 'org.locationtech.jts', name: 'jts-core', version: '1.17.0'
 	//compileOnly group: 'org.locationtech.jts', name: 'jts-core', version: '1.17.0'
 	
+	ili2duckdbImplementation group: 'org.duckdb', name:'duckdb_jdbc',version: '0.9.2'
+	compileOnly group: 'org.duckdb', name:'duckdb_jdbc',version: '0.9.2' // add as compileOnly, so that eclipse sees it
 	ili2fgdbImplementation group: 'ch.ehi', name: 'fgdb4j', version: "1.1.1"
 	ili2fgdbImplementation "antlr:antlr:2.7.7" 	
 	compileOnly group: 'ch.ehi', name: 'fgdb4j', version: "1.1.1" // add as compileOnly, so that eclipse sees it
@@ -518,6 +551,35 @@ task ili2h2gisTest(type: Test) {
 	systemProperty 'dburl', myurl
 	systemProperty 'dbusr', myusr
 	systemProperty 'dbpwd', mypwd
+}
+
+task ili2duckdbJar(dependsOn: jar,type: Jar) {
+  baseName = 'ili2duckdb'
+    from sourceSets.ili2duckdb.output
+  manifest {
+    attributes(
+      "Main-Class": "ch.ehi.ili2duckdb.DuckDBMain",
+      "Class-Path": 'libs/'+jar.archiveName+' '+configurations.ili2duckdbRuntimeClasspath.collect { 'libs/'+it.getName() }.join(' '))
+  }   
+}
+task ili2duckdbBindist(dependsOn:[usrdoc,ili2duckdbJar], type: Zip){
+  baseName = 'ili2duckdb'
+  destinationDir = file('dist')
+  from ili2duckdbJar
+  into('docs'){
+    from files(fileTree("docs").include("LICENSE.*"),"docs/README.txt","docs/CHANGELOG.txt","build/docs/ili2db.html")
+  }
+  into('libs'){
+    from configurations.ili2duckdbRuntimeClasspath
+    from jar
+  }
+}
+task ili2duckdbTest(type: Test) {
+  maxParallelForks = 1
+  forkEvery = 1
+  classpath = sourceSets.ili2duckdbTest.runtimeClasspath
+  testClassesDirs = sourceSets.ili2duckdbTest.output.classesDirs
+  testLogging.exceptionFormat = 'full'
 }
 
 task ili2fgdbJar(dependsOn: jar,type: Jar) {
