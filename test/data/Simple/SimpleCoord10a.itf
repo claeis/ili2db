@@ -1,0 +1,13 @@
+
+SCNT
+Beispiel Transfer-File
+////
+MTID SimpleCoord10
+MODL SimpleCoord10
+TOPI TestA
+TABL ClassA1
+OBJE 55 @ 2460000.001 1045000.001
+ETAB
+ETOP
+EMOD
+ENDE
