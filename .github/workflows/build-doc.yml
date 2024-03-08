@@ -1,0 +1,25 @@
+name: Build ili2db documentation
+run-name: ${{ github.repository }} is built and deployed
+on: workflow_dispatch
+
+jobs:
+  Jekyll:
+    name: Build ili2db documentation
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Branch is ${{ github.ref }} in repository ${{ github.repository }}."
+      
+      - name: Check out repository code
+        uses: actions/checkout@v4
+
+      - name: Install docutils
+        run: sudo apt-get install -y python3-docutils
+
+      - name: Convert ili2db rst to html
+        run: |
+          cd ./docs/; rst2html5 ili2db.rst > ili2db.html
+
+      - name: Auto-commit HTML documentation
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: Auto commit ili2db html documentation
