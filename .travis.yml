@@ -42,7 +42,8 @@ before_script:
     - # virtualenv my_py3 --python=/usr/bin/python3
     - virtualenv -p python3 my_py3
     - source my_py3/bin/activate # to activate the python3 environemt    
-    - python -m pip install docutils # use my_py3
+    - python -m pip --trusted-host pypi.org --trusted-host pypi.python.org --trusted-host files.pythonhosted.org install docutils
+    - python -m pip --trusted-host pypi.org --trusted-host pypi.python.org --trusted-host files.pythonhosted.org install Pygments
     - python -m pip freeze
     - 
 script: 
