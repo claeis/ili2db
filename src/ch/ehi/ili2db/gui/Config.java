@@ -77,6 +77,7 @@ public class Config extends Settings {
     public static final String IMPORT_TABS_CREATE="simple";
 	public static final String GEOMATTR_PER_TABLE=PREFIX+".geomAttrPerTable";
 	public static final String GEOMATTR_PER_TABLE_ONE="oneGeomAttrPerTable";
+    public static final String GEOMATTR_PER_TABLE_MULTIPLE="multipleGeomAttrPerTable";
 	private static final String NAME_OPTIMIZATION=PREFIX+".nameOptimization";
 	public static final String NAME_OPTIMIZATION_DISABLE="disable";
 	public static final String NAME_OPTIMIZATION_TOPIC="topic";
@@ -575,7 +576,7 @@ public class Config extends Settings {
     }
 
 	public void setOneGeomPerTable(boolean onlyOne) {
-		setValue(GEOMATTR_PER_TABLE,onlyOne?GEOMATTR_PER_TABLE_ONE:null);
+		setValue(GEOMATTR_PER_TABLE,onlyOne?GEOMATTR_PER_TABLE_ONE:GEOMATTR_PER_TABLE_MULTIPLE);
 	}
 	public boolean isOneGeomPerTable() {
 		return GEOMATTR_PER_TABLE_ONE.equals(getValue(GEOMATTR_PER_TABLE));
