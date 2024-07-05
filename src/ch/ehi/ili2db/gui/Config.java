@@ -176,6 +176,7 @@ public class Config extends Settings {
     public static final String TRANSIENT_LONG_MINIDSEQVALUE=PREFIX+".minIdSeqValue";
     public static final String TRANSIENT_LONG_MAXIDSEQVALUE=PREFIX+".maxIdSeqValue";
     public static final String TRANSIENT_PROPERTIES_DBPROPS=PREFIX+".dbprops";
+    public static final String TRANSIENT_STRING_PLUGINFOLDER=PREFIX+".pluginfolder";
     
 	final static public String ILIGML20="ILIGML20"; 
 	
@@ -916,4 +917,12 @@ public class Config extends Settings {
 	public boolean isVerbose() {
 		return ValidationConfig.TRUE.equals(getTransientValue(Validator.CONFIG_VERBOSE));
 	}
+
+    public String getPluginsFolder() {
+        return getTransientValue(TRANSIENT_STRING_PLUGINFOLDER);
+    }
+
+    public void setPluginsFolder(String path) {
+        setTransientValue(TRANSIENT_STRING_PLUGINFOLDER, path);
+    }
 }
