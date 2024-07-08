@@ -66,9 +66,6 @@ import ch.interlis.ili2c.metamodel.Container;
 import ch.interlis.ili2c.metamodel.CoordType;
 import ch.interlis.ili2c.metamodel.Domain;
 import ch.interlis.ili2c.metamodel.Element;
-import ch.interlis.ili2c.metamodel.EnumTreeValueType;
-import ch.interlis.ili2c.metamodel.Enumeration;
-import ch.interlis.ili2c.metamodel.EnumerationType;
 import ch.interlis.ili2c.metamodel.Evaluable;
 import ch.interlis.ili2c.metamodel.ExtendableContainer;
 import ch.interlis.ili2c.metamodel.LineType;
@@ -82,6 +79,7 @@ import ch.interlis.ili2c.metamodel.Table;
 import ch.interlis.ili2c.metamodel.Topic;
 import ch.interlis.ili2c.metamodel.TransferDescription;
 import ch.interlis.ili2c.metamodel.Type;
+import ch.interlis.ili2c.metamodel.TypeAlias;
 import ch.interlis.ili2c.metamodel.View;
 import ch.interlis.ili2c.metamodel.Viewable;
 import ch.interlis.ili2c.metamodel.ViewableTransferElement;
@@ -1055,7 +1053,7 @@ public class TransferFromIli {
 					}
 				}else if(entro instanceof Domain){
 					Domain domain=(Domain)entro;
-					if(domain==td.INTERLIS.BOOLEAN){
+					if(isBooleanDomain(domain)){
 						continue;
 					}
 					thisSqlName=getSqlTableName(domain);
@@ -1119,7 +1117,7 @@ public class TransferFromIli {
                     }
                 }else if(entro instanceof Domain){
                     Domain domain=(Domain)entro;
-                    if(domain==td.INTERLIS.BOOLEAN){
+                    if(isBooleanDomain(domain)){
                         continue;
                     }
                     domain=Ili2cUtility.getRootBaseDomain(domain);
@@ -1345,7 +1343,7 @@ public class TransferFromIli {
 	                        updateEnumEntries(null,exstEntries,sqlName, insPrepStmt,EnumValueMap.createEnumValueMap(attr, ili2sqlName), type.isOrdered(),thisClass, baseClass);
 	                    }else if(entro instanceof Domain){
 	                        Domain domain=(Domain)entro;
-	                        if(domain==td.INTERLIS.BOOLEAN){
+	                        if(isBooleanDomain(domain)){
 	                            continue;
 	                        }
 	                        AbstractEnumerationType type=(AbstractEnumerationType)domain.getType();
@@ -1392,7 +1390,7 @@ public class TransferFromIli {
                         updateEnumEntries(gen,exstEntries,sqlName,null, EnumValueMap.createEnumValueMap(attr, ili2sqlName), type.isOrdered(),thisClass, baseClass);
                     }else if(entro instanceof Domain){
                         Domain domain=(Domain)entro;
-                        if(domain==td.INTERLIS.BOOLEAN){
+                        if(isBooleanDomain(domain)){
                             continue;
                         }
                         AbstractEnumerationType type=(AbstractEnumerationType)domain.getType();
@@ -1460,7 +1458,7 @@ public class TransferFromIli {
 				
 			}else if(entro instanceof Domain){
 				Domain domain=(Domain)entro;
-				if(domain==td.INTERLIS.BOOLEAN){
+				if(isBooleanDomain(domain)){
 					continue;
 				}
 				AbstractEnumerationType type=(AbstractEnumerationType)domain.getType();
@@ -1551,7 +1549,7 @@ public class TransferFromIli {
                 
             }else if(entro instanceof Domain){
                 Domain domain=(Domain)entro;
-                if(domain==td.INTERLIS.BOOLEAN){
+                if(isBooleanDomain(domain)){
                     continue;
                 }
                 AbstractEnumerationType type=(AbstractEnumerationType)domain.getType();
@@ -2027,5 +2025,22 @@ public class TransferFromIli {
             }
         }
         return null;
+    }
+
+    /**
+     * Checks whether the {@code domain} is equal to or derives from {@code INTERLIS.BOOLEAN}.
+     */
+    private boolean isBooleanDomain(Domain domain) {
+        if (domain == td.INTERLIS.BOOLEAN) {
+            return true;
+        }
+
+        Type type = domain.getType();
+        if (type instanceof TypeAlias) {
+            Domain aliasedDomain = ((TypeAlias) type).getAliasing();
+            return isBooleanDomain(aliasedDomain);
+        }
+
+        return false;
     }
 }
