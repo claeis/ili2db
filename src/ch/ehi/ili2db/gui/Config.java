@@ -77,6 +77,7 @@ public class Config extends Settings {
     public static final String IMPORT_TABS_CREATE="simple";
 	public static final String GEOMATTR_PER_TABLE=PREFIX+".geomAttrPerTable";
 	public static final String GEOMATTR_PER_TABLE_ONE="oneGeomAttrPerTable";
+    public static final String GEOMATTR_PER_TABLE_MULTIPLE="multipleGeomAttrPerTable";
 	private static final String NAME_OPTIMIZATION=PREFIX+".nameOptimization";
 	public static final String NAME_OPTIMIZATION_DISABLE="disable";
 	public static final String NAME_OPTIMIZATION_TOPIC="topic";
@@ -175,6 +176,7 @@ public class Config extends Settings {
     public static final String TRANSIENT_LONG_MINIDSEQVALUE=PREFIX+".minIdSeqValue";
     public static final String TRANSIENT_LONG_MAXIDSEQVALUE=PREFIX+".maxIdSeqValue";
     public static final String TRANSIENT_PROPERTIES_DBPROPS=PREFIX+".dbprops";
+    public static final String TRANSIENT_STRING_PLUGINFOLDER=PREFIX+".pluginfolder";
     
 	final static public String ILIGML20="ILIGML20"; 
 	
@@ -575,7 +577,7 @@ public class Config extends Settings {
     }
 
 	public void setOneGeomPerTable(boolean onlyOne) {
-		setValue(GEOMATTR_PER_TABLE,onlyOne?GEOMATTR_PER_TABLE_ONE:null);
+		setValue(GEOMATTR_PER_TABLE,onlyOne?GEOMATTR_PER_TABLE_ONE:GEOMATTR_PER_TABLE_MULTIPLE);
 	}
 	public boolean isOneGeomPerTable() {
 		return GEOMATTR_PER_TABLE_ONE.equals(getValue(GEOMATTR_PER_TABLE));
@@ -915,4 +917,12 @@ public class Config extends Settings {
 	public boolean isVerbose() {
 		return ValidationConfig.TRUE.equals(getTransientValue(Validator.CONFIG_VERBOSE));
 	}
+
+    public String getPluginsFolder() {
+        return getTransientValue(TRANSIENT_STRING_PLUGINFOLDER);
+    }
+
+    public void setPluginsFolder(String path) {
+        setTransientValue(TRANSIENT_STRING_PLUGINFOLDER, path);
+    }
 }
