@@ -323,9 +323,9 @@ configurations {
     ftpAntTask
 }
 dependencies {
-    implementation group: 'ch.interlis', name: 'iox-ili', version: '1.22.0'
-    implementation group: 'ch.interlis', name: 'ili2c-tool', version: "5.4.0"
-    implementation group: 'ch.interlis', name: 'ili2c-core', version: "5.4.0"
+    implementation group: 'ch.interlis', name: 'iox-ili', version: '1.23.1'
+    implementation group: 'ch.interlis', name: 'ili2c-tool', version: "5.5.4"
+    implementation group: 'ch.interlis', name: 'ili2c-core', version: "5.5.4"
     implementation group: 'ch.ehi', name: 'ehisqlgen', version: "1.16.0"
     implementation group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: '2.9.7'
 	implementation group: 'net.iharder', name: 'base64', version: '2.3.9'
