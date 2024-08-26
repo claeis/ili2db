@@ -14,6 +14,7 @@ ideas/open issues/questions
 ili2db 5.1.1 (2024-08-26)
 ---------------------------
 - fix --gpkgMultiGeomPerTable needed on export/import/validate (#542)
+- Add --plugins option (#235)
 - ili2c-5.5.4
 - iox-ili-1.23.1
 
