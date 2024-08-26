@@ -21,6 +21,7 @@ import ch.ehi.basics.logging.EhiLogger;
 import ch.ehi.ili2db.base.DbNames;
 import ch.ehi.ili2db.base.DbUrlConverter;
 import ch.ehi.ili2db.base.Ili2db;
+import ch.ehi.ili2db.base.Ili2dbException;
 import ch.ehi.ili2db.gui.AbstractDbPanelDescriptor;
 import ch.ehi.ili2db.gui.Config;
 import ch.ehi.ili2db.mapping.NameMapping;
@@ -638,10 +639,15 @@ public abstract class AbstractMain {
 			runGUI(config);
 			Ili2db.writeAppSettings(settings);
 		}else{
-		    if(config.getFunction()!=Config.FC_SCRIPT) {
-	            config.setDburl(getDbUrlConverter().makeUrl(config));
-		    }
 			try {
+	            if(config.getFunction()!=Config.FC_SCRIPT) {
+	                final String dbUrl = getDbUrlConverter().makeUrl(config);
+	                config.setDburl(dbUrl);
+	                if(dbUrl==null) {
+	                    printConnectOptions();
+	                    throw new Ili2dbException("incomplete DB connect options given");
+	                }
+	            }
 	            if(config.getFunction()!=Config.FC_SCRIPT) {
 	                Ili2db.readSettingsFromDb(config);
 	            }
