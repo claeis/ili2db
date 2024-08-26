@@ -1,28 +1,34 @@
-ili2ora - INTERLIS 2-loader for oracle
+ili2db - imports/exports interlis transfer files to a sql db
 
 Features
-Translates INTERLIS 2 data model definitions to an oracle schema. 
-Loads INTERLIS 2 data into an oracle database. 
-Unloads INTERLIS 2 data from an oracle database. 
+Translates INTERLIS 1+2 data model definitions to a SQL schema.
+Loads INTERLIS 1+2 data into a SQL database.
+Extracts INTERLIS 1+2 data from a SQL database.
 
 License
-ili2ora is licensed under the LGPL (Lesser GNU Public License).
+ili2db is licensed under the LGPL (Lesser GNU Public License).
 
 Status
-ili2ora is in beta/transition state.
+ili2db is in stable state.
 
 System Requirements
-For the current version of ili2ora, you will need a JRE (Java Runtime Environment) installed on your system, version 1.8 or later.
-The JRE (Java Runtime Environment) can be downloaded for free from the Website http://www.java.com/ .
-ili2ora was tested with Oracle 9.
+For the current version of ili2db, you will need a JRE (Java Runtime Environment) installed on your system, version 1.8 or later.
+The JRE (Java Runtime Environment) can be downloaded for free from the Website <http://www.java.com/>.
 
-Installing ili2ora
-To install ili2ora, choose a directory and extract the distribution file there. 
+Download ili2db
+<https://downloads.interlis.ch/>
 
-Running ili2ora
-ili2ora can be started with
+Installing ili2db
+To install ili2db, choose a directory and extract the distribution file there.
 
-java -jar ili2ora.jar [options] file.xtf
+Running ili2db
+ili2db can be started with
 
-Comments/Suggestions
-Please send comments to ce@eisenhutinformatik.ch.
+PostGIS: 
+java -jar ili2pg.jar --schemaimport --dbdatabase mogis --dbusr julia --dbpwd romeo path/to/dm01av.ili
+
+GeoPackage: 
+java -jar ili2gpkg.jar --schemaimport --dbfile mogis.gpkg path/to/dm01av.ili
+
+Documentation
+User documentation <https://docs.interlis.ch/>
