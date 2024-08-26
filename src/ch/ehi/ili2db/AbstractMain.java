@@ -487,6 +487,10 @@ public abstract class AbstractMain {
 				} else if (arg.equals("--verbose")) {
 					argi++;
 					config.setVerbose(parseBooleanArgument(arg));
+				}else if(arg.equals("--plugins")) {
+					argi++;
+					config.setPluginsFolder(args[argi]);
+					argi++;
 				} else if (arg.equals("--help")) {
 					printVersion();
 					System.err.println();
@@ -589,6 +593,7 @@ public abstract class AbstractMain {
 					System.err.println("--createMetaInfo       Create aditional ili-model information.");
 					System.err.println("--iliMetaAttrs file    Import meta-attributes from a .toml file (Requires --createMetaInfo)");
 					System.err.println("--createTypeConstraints   Create CHECK constraint on t_type columns.");
+					System.err.println("--plugins folder       directory with jar files that contain user defined functions.");
 					printSpecificOptions();
 					System.err.println("--proxy host           proxy server to access model repositories.");
 					System.err.println("--proxyPort port       proxy port to access model repositories.");
