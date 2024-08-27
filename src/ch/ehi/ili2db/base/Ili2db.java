@@ -2043,7 +2043,7 @@ public class Ili2db {
         throw new ParseException("unknown boolean value <"+value+">",0);
     }
     protected static String writeBooleanArgument(boolean value) {
-        return value?Config.TRUE:Config.FALSE;
+        return value?Config.TRUE.toLowerCase():Config.FALSE.toLowerCase(); // lowercase for TOML file compatibility
     }
     protected static String writeLongArgument(Long value) {
         return value!=null?value.toString():null;

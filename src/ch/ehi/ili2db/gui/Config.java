@@ -10,8 +10,8 @@ import ch.interlis.iox_j.validator.ValidationConfig;
 import ch.interlis.iox_j.validator.Validator;
 
 public class Config extends Settings {
-	public static final String FALSE = "false"; // TOML file compatibility
-	public static final String TRUE = "true"; // TOML file compatibility
+	public static final String FALSE = "False"; // mixedcase for backward compatibility
+	public static final String TRUE = "True"; // mixedcase for backward compatibility
 	/** use only as a special value for cmdline options or config file settings to explicitly unset a setting. Do not use internally.
 	 */
     public static final String NULL = MetaConfig.NULL;

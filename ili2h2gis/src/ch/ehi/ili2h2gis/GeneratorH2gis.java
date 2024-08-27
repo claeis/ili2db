@@ -54,7 +54,7 @@ public class GeneratorH2gis extends GeneratorJdbc {
 	public void visitSchemaBegin(Settings config, DbSchema schema)
 			throws IOException {
 		super.visitSchemaBegin(config, schema);
-		if("True".equals(config.getValue(SqlConfiguration.CREATE_GEOM_INDEX))){
+		if(Config.TRUE.equals(config.getValue(SqlConfiguration.CREATE_GEOM_INDEX))){
 			createGeomIdx=true;
 		}
 	}

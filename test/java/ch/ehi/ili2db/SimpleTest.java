@@ -754,15 +754,15 @@ public abstract class SimpleTest {
         {
             ValidationConfig ini = IniFileReader.readFile(metaConfigFile);
             assertNotNull(ini.getConfigParams(Ili2dbMetaConfig.SECTION_ILI2DB));
-            assertEquals(Config.TRUE, ini.getConfigValue(Ili2dbMetaConfig.SECTION_ILI2DB, Ili2dbMetaConfig.NO_SMART_MAPPING));
+            assertEquals(Config.TRUE.toLowerCase(), ini.getConfigValue(Ili2dbMetaConfig.SECTION_ILI2DB, Ili2dbMetaConfig.NO_SMART_MAPPING));
             assertNull(ini.getConfigValue(Ili2dbMetaConfig.SECTION_ILI2DB, Ili2dbMetaConfig.COALESCE_CATALOGUE_REF)); // not set, if no smart mapping
             
-            assertEquals(Config.TRUE, ini.getConfigValue(Ili2dbMetaConfig.SECTION_ILI2DB, Ili2dbMetaConfig.CREATE_FK));
-            assertEquals(Config.TRUE, ini.getConfigValue(Ili2dbMetaConfig.SECTION_ILI2DB, Ili2dbMetaConfig.CREATE_NUM_CHECKS));
-            assertEquals(Config.TRUE, ini.getConfigValue(Ili2dbMetaConfig.SECTION_ILI2DB, Ili2dbMetaConfig.CREATE_TID_COL));
-            assertEquals(Config.TRUE, ini.getConfigValue(Ili2dbMetaConfig.SECTION_ILI2DB, Ili2dbMetaConfig.CREATE_BASKET_COL));
+            assertEquals(Config.TRUE.toLowerCase(), ini.getConfigValue(Ili2dbMetaConfig.SECTION_ILI2DB, Ili2dbMetaConfig.CREATE_FK));
+            assertEquals(Config.TRUE.toLowerCase(), ini.getConfigValue(Ili2dbMetaConfig.SECTION_ILI2DB, Ili2dbMetaConfig.CREATE_NUM_CHECKS));
+            assertEquals(Config.TRUE.toLowerCase(), ini.getConfigValue(Ili2dbMetaConfig.SECTION_ILI2DB, Ili2dbMetaConfig.CREATE_TID_COL));
+            assertEquals(Config.TRUE.toLowerCase(), ini.getConfigValue(Ili2dbMetaConfig.SECTION_ILI2DB, Ili2dbMetaConfig.CREATE_BASKET_COL));
 
-            assertEquals(Config.FALSE,ini.getConfigValue(Ili2dbMetaConfig.SECTION_ILI2DB, Ili2dbMetaConfig.CREATE_GEOM_IDX));
+            assertEquals(Config.FALSE.toLowerCase(),ini.getConfigValue(Ili2dbMetaConfig.SECTION_ILI2DB, Ili2dbMetaConfig.CREATE_GEOM_IDX));
             
             
         }
