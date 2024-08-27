@@ -21,6 +21,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -96,6 +97,7 @@ import ch.interlis.iox.IoxWriter;
 import ch.interlis.iox_j.utility.IoxUtility;
 import ch.interlis.iox_j.validator.ValidationConfig;
 import ch.interlis.iox_j.inifile.IniFileReader;
+import ch.interlis.iox_j.inifile.IniFileWriter;
 import ch.interlis.iox_j.inifile.MetaConfig;
 import ch.interlis.iox_j.logging.FileLogger;
 import ch.interlis.iox_j.logging.LogEventFactory;
@@ -106,7 +108,7 @@ import ch.interlis.iox_j.logging.StdLogger;
  * @version $Revision: 1.0 $ $Date: 07.02.2005 $
  */
 public class Ili2db {
-	public static final String XTF="%XTF";
+    public static final String XTF="%XTF";
 	public static final String XTF_DIR="%XTF_DIR";
 	public static final String JAR_DIR="%JAR_DIR";
 	public static final String ILI_FROM_DB="%ILI_FROM_DB";
@@ -212,7 +214,6 @@ public class Ili2db {
 				}
 			}
 		}
-		
 	}
 	private static final String DEFAULT_MODELDIR=Ili2db.ILI_FROM_DB+ch.interlis.ili2c.Main.ILIDIR_SEPARATOR+Ili2db.XTF_DIR+ch.interlis.ili2c.Main.ILIDIR_SEPARATOR+ch.interlis.ili2c.Main.ILI_REPOSITORY+ch.interlis.ili2c.Main.ILIDIR_SEPARATOR+Ili2db.JAR_DIR;
     private static String getModeldir(Config config)
@@ -254,6 +255,8 @@ public class Ili2db {
 			runUpdate(config,appHome,Config.FC_DELETE);
 		}else if(config.getFunction()==Config.FC_EXPORT){
 			runExport(config,appHome,Config.FC_EXPORT);
+        }else if(config.getFunction()==Config.FC_EXPORT_METACONFIG){
+            runExportMetaConfig(config,appHome);
 		}else if(config.getFunction()==Config.FC_SCHEMAIMPORT || config.getFunction()==Config.FC_SCRIPT){
 			runSchemaImport(config,appHome);
 		}else{
@@ -344,7 +347,7 @@ public class Ili2db {
                             OutParam<String> baseConfigs=new OutParam<String>();
                             Config newSettings=null;
                             try {
-                                newSettings = readMetaConfig(metaConfigFile,baseConfigs);
+                                newSettings = readMetaConfigFile(metaConfigFile,baseConfigs);
                                 if(baseConfigs.value!=null) {
                                     String[] baseConfigv = baseConfigs.value.split(";");
                                     for(String baseConfig:baseConfigv){
@@ -1256,7 +1259,7 @@ public class Ili2db {
 	                        OutParam<String> baseConfigs=new OutParam<String>();
 	                        Config newSettings=null;
 	                        try {
-	                            newSettings = readMetaConfig(metaConfigFile,baseConfigs);
+	                            newSettings = readMetaConfigFile(metaConfigFile,baseConfigs);
 	                            if(baseConfigs.value!=null) {
 	                                String[] baseConfigv = baseConfigs.value.split(";");
 	                                for(String baseConfig:baseConfigv){
@@ -1729,7 +1732,7 @@ public class Ili2db {
 
         
     }
-    private static Config readMetaConfig(File metaConfigFile, OutParam<String> baseConfig) throws IOException, ParseException {
+    private static Config readMetaConfigFile(File metaConfigFile, OutParam<String> baseConfig) throws IOException, ParseException {
 	    Config config=new Config();
         ValidationConfig metaConfig = IniFileReader.readFile(metaConfigFile);
         baseConfig.value=metaConfig.getConfigValue(MetaConfig.CONFIGURATION, MetaConfig.CONFIG_BASE_CONFIG);
@@ -1737,193 +1740,193 @@ public class Ili2db {
         config.setReferenceData(referenceData);
         String validConfig=metaConfig.getConfigValue(MetaConfig.CONFIGURATION, MetaConfig.CONFIG_VALIDATOR_CONFIG);
         config.setValidConfigFile(validConfig);
-        java.util.Set<String> params=metaConfig.getConfigParams(Config.METACONFIG_ILI2DB);
+        java.util.Set<String> params=metaConfig.getConfigParams(Ili2dbMetaConfig.SECTION_ILI2DB);
         if(params!=null) {
             for(String arg:params) {
-                String value=metaConfig.getConfigValue(Config.METACONFIG_ILI2DB, arg);
-                if(arg.equals("models")){
+                String value=metaConfig.getConfigValue(Ili2dbMetaConfig.SECTION_ILI2DB, arg);
+                if(arg.equals(Ili2dbMetaConfig.MODELS)){
                     config.setModels(value);
-                } else if (arg.equals("exportModels")) {
+                } else if (arg.equals(Ili2dbMetaConfig.EXPORT_MODELS)) {
                     config.setExportModels(value);
-                } else if (arg.equals("exportCrsModels")) {
+                } else if (arg.equals(Ili2dbMetaConfig.EXPORT_CRS_MODELS)) {
                     config.setCrsExportModels(value);
-                } else if (arg.equals("nameLang")) {
+                } else if (arg.equals(Ili2dbMetaConfig.NAME_LANG)) {
                     config.setNameLanguage(value);
-                } else if (arg.equals("dataset")) {
+                } else if (arg.equals(Ili2dbMetaConfig.DATASET)) {
                     config.setDatasetName(value);
-                } else if (arg.equals("baskets")) {
+                } else if (arg.equals(Ili2dbMetaConfig.BASKETS)) {
                     config.setBaskets(value);
-                } else if (arg.equals("topics")) {
+                } else if (arg.equals(Ili2dbMetaConfig.TOPICS)) {
                     config.setTopics(value);
-                } else if (arg.equals("defaultSrsAuth")) {
+                } else if (arg.equals(Ili2dbMetaConfig.DEFAULT_SRS_AUTH)) {
                     config.setDefaultSrsAuthority(value);
-                } else if (arg.equals("defaultSrsCode")) {
+                } else if (arg.equals(Ili2dbMetaConfig.DEFAULT_SRS_CODE)) {
                     config.setDefaultSrsCode(value);
-                } else if (arg.equals("modelSrsCode")) {
+                } else if (arg.equals(Ili2dbMetaConfig.MODEL_SRS_CODE)) {
                     config.setModelSrsCode(value);
-                } else if (arg.equals("multiSrs")) {
+                } else if (arg.equals(Ili2dbMetaConfig.MULTI_SRS)) {
                     config.setUseEpsgInNames(parseBooleanArgument(value));
-                } else if (arg.equals("domains")) {
+                } else if (arg.equals(Ili2dbMetaConfig.DOMAINS)) {
                     config.setDomainAssignments(value);
-                } else if (arg.equals("altSrsModel")) {
+                } else if (arg.equals(Ili2dbMetaConfig.ALT_SRS_MODEL)) {
                     config.setSrsModelAssignment(value);
-                } else if (arg.equals("validConfig")) {
+                } else if (arg.equals(Ili2dbMetaConfig.VALID_CONFIG)) {
                     config.setValidConfigFile(value);
-                } else if (arg.equals("disableValidation")){
+                } else if (arg.equals(Ili2dbMetaConfig.DISABLE_VALIDATION)){
                     config.setValidation(!parseBooleanArgument(value));
-                } else if (arg.equals("disableAreaValidation")) {
+                } else if (arg.equals(Ili2dbMetaConfig.DISABLE_AREA_VALIDATION)) {
                     config.setDisableAreaValidation(parseBooleanArgument(value));
-                } else if (arg.equals("disableRounding")) {
+                } else if (arg.equals(Ili2dbMetaConfig.DISABLE_ROUNDING)) {
                     config.setDisableRounding(parseBooleanArgument(value));
-                } else if (arg.equals("disableBoundaryRecoding")) {
+                } else if (arg.equals(Ili2dbMetaConfig.DISABLE_BOUNDARY_RECODING)) {
                     config.setRepairTouchingLines(parseBooleanArgument(value));
-                } else if (arg.equals("forceTypeValidation")) {
+                } else if (arg.equals(Ili2dbMetaConfig.FORCE_TYPE_VALIDATION)) {
                     config.setOnlyMultiplicityReduction(parseBooleanArgument(value));
-                } else if (arg.equals("createSingleEnumTab")) {
+                } else if (arg.equals(Ili2dbMetaConfig.CREATE_SINGLE_ENUM_TAB)) {
                     if (parseBooleanArgument(value))
                         config.setCreateEnumDefs(Config.CREATE_ENUM_DEFS_SINGLE);
-                } else if (arg.equals("createEnumTabs")) {
+                } else if (arg.equals(Ili2dbMetaConfig.CREATE_ENUM_TABS)) {
                     if (parseBooleanArgument(value))
                         config.setCreateEnumDefs(Config.CREATE_ENUM_DEFS_MULTI);
-                } else if (arg.equals("createEnumTabsWithId")) {
+                } else if (arg.equals(Ili2dbMetaConfig.CREATE_ENUM_TABS_WITH_ID)) {
                     if (parseBooleanArgument(value))
                         config.setCreateEnumDefs(Config.CREATE_ENUM_DEFS_MULTI_WITH_ID);
-                } else if (arg.equals("createEnumTxtCol")) {
+                } else if (arg.equals(Ili2dbMetaConfig.CREATE_ENUM_TXT_COL)) {
                     if (parseBooleanArgument(value))
                         config.setCreateEnumCols(Config.CREATE_ENUM_TXT_COL);
-                } else if (arg.equals("createEnumColAsItfCode")) {
+                } else if (arg.equals(Ili2dbMetaConfig.CREATE_ENUM_COL_AS_ITF_CODE)) {
                     if (parseBooleanArgument(value))
                         config.setValue(Config.CREATE_ENUMCOL_AS_ITFCODE, Config.CREATE_ENUMCOL_AS_ITFCODE_YES);
-                } else if (arg.equals("beautifyEnumDispName")) {
+                } else if (arg.equals(Ili2dbMetaConfig.BEAUTIFY_ENUM_DISP_NAME)) {
                     if (parseBooleanArgument(value))
                         config.setBeautifyEnumDispName(Config.BEAUTIFY_ENUM_DISPNAME_UNDERSCORE);
-                } else if (arg.equals("noSmartMapping")) {
+                } else if (arg.equals(Ili2dbMetaConfig.NO_SMART_MAPPING)) {
                     if (parseBooleanArgument(value))
                         Ili2db.setNoSmartMapping(config);
-                } else if (arg.equals("smart1Inheritance")) {
+                } else if (arg.equals(Ili2dbMetaConfig.SMART1_INHERITANCE)) {
                     if (parseBooleanArgument(value))
                         config.setInheritanceTrafo(Config.INHERITANCE_TRAFO_SMART1);
-                } else if (arg.equals("smart2Inheritance")) {
+                } else if (arg.equals(Ili2dbMetaConfig.SMART2_INHERITANCE)) {
                     if (parseBooleanArgument(value))
                         config.setInheritanceTrafo(Config.INHERITANCE_TRAFO_SMART2);
-                } else if (arg.equals("coalesceCatalogueRef")) {
+                } else if (arg.equals(Ili2dbMetaConfig.COALESCE_CATALOGUE_REF)) {
                     if (parseBooleanArgument(value))
                         config.setCatalogueRefTrafo(Config.CATALOGUE_REF_TRAFO_COALESCE);
-                } else if (arg.equals("coalesceMultiSurface")) {
+                } else if (arg.equals(Ili2dbMetaConfig.COALESCE_MULTI_SURFACE)) {
                     if (parseBooleanArgument(value))
                         config.setMultiSurfaceTrafo(Config.MULTISURFACE_TRAFO_COALESCE);
-                } else if (arg.equals("coalesceMultiLine")) {
+                } else if (arg.equals(Ili2dbMetaConfig.COALESCE_MULTI_LINE)) {
                     if (parseBooleanArgument(value))
                         config.setMultiLineTrafo(Config.MULTILINE_TRAFO_COALESCE);
-                } else if (arg.equals("coalesceMultiPoint")) {
+                } else if (arg.equals(Ili2dbMetaConfig.COALESCE_MULTI_POINT)) {
                     if (parseBooleanArgument(value))
                         config.setMultiPointTrafo(Config.MULTIPOINT_TRAFO_COALESCE);
-                } else if (arg.equals("coalesceArray")) {
+                } else if (arg.equals(Ili2dbMetaConfig.COALESCE_ARRAY)) {
                     if (parseBooleanArgument(value))
                         config.setArrayTrafo(Config.ARRAY_TRAFO_COALESCE);
-                } else if (arg.equals("coalesceJson")) {
+                } else if (arg.equals(Ili2dbMetaConfig.COALESCE_JSON)) {
                     if (parseBooleanArgument(value))
                         config.setJsonTrafo(Config.JSON_TRAFO_COALESCE);
-                } else if (arg.equals("expandMultilingual")) {
+                } else if (arg.equals(Ili2dbMetaConfig.EXPAND_MULTILINGUAL)) {
                     if (parseBooleanArgument(value))
                         config.setMultilingualTrafo(Config.MULTILINGUAL_TRAFO_EXPAND);
-                } else if (arg.equals("expandLocalised")) {
+                } else if (arg.equals(Ili2dbMetaConfig.EXPAND_LOCALISED)) {
                     if (parseBooleanArgument(value))
                         config.setLocalisedTrafo(Config.LOCALISED_TRAFO_EXPAND);
-                } else if (arg.equals("createFk")) {
+                } else if (arg.equals(Ili2dbMetaConfig.CREATE_FK)) {
                     if (parseBooleanArgument(value))
                         config.setCreateFk(Config.CREATE_FK_YES);
-                } else if (arg.equals("createFkIdx")) {
+                } else if (arg.equals(Ili2dbMetaConfig.CREATE_FK_IDX)) {
                     if (parseBooleanArgument(value))
                         config.setCreateFkIdx(Config.CREATE_FKIDX_YES);
-                } else if (arg.equals("createUnique")) {
+                } else if (arg.equals(Ili2dbMetaConfig.CREATE_UNIQUE)) {
                     config.setCreateUniqueConstraints(parseBooleanArgument(value));
-                } else if (arg.equals("createNumChecks")) {
+                } else if (arg.equals(Ili2dbMetaConfig.CREATE_NUM_CHECKS)) {
                     config.setCreateNumChecks(parseBooleanArgument(value));
-                } else if (arg.equals("createTextChecks")) {
+                } else if (arg.equals(Ili2dbMetaConfig.CREATE_TEXT_CHECKS)) {
                     config.setCreateTextChecks(parseBooleanArgument(value));
-                } else if (arg.equals("createDateTimeChecks")) {
+                } else if (arg.equals(Ili2dbMetaConfig.CREATE_DATE_TIME_CHECKS)) {
                     config.setCreateDateTimeChecks(parseBooleanArgument(value));
-                } else if (arg.equals("createMandatoryChecks")) {
+                } else if (arg.equals(Ili2dbMetaConfig.CREATE_MANDATORY_CHECKS)) {
                     config.setCreateMandatoryChecks(parseBooleanArgument(value));
-                } else if (arg.equals("createImportTabs")) {
+                } else if (arg.equals(Ili2dbMetaConfig.CREATE_IMPORT_TABS)) {
                     config.setCreateImportTabs(parseBooleanArgument(value));
-                } else if (arg.equals("createStdCols")) {
+                } else if (arg.equals(Ili2dbMetaConfig.CREATE_STD_COLS)) {
                     if (parseBooleanArgument(value))
                         config.setCreateStdCols(Config.CREATE_STD_COLS_ALL);
-                } else if (arg.equals("t_id_Name")) {
+                } else if (arg.equals(Ili2dbMetaConfig.T_ID_NAME)) {
                     config.setColT_ID(value);
-                } else if (arg.equals("idSeqMin")) {
+                } else if (arg.equals(Ili2dbMetaConfig.ID_SEQ_MIN)) {
                     config.setMinIdSeqValue(Long.parseLong(value));
-                } else if (arg.equals("idSeqMax")) {
+                } else if (arg.equals(Ili2dbMetaConfig.ID_SEQ_MAX)) {
                     config.setMaxIdSeqValue(Long.parseLong(value));
-                } else if (arg.equals("createTypeDiscriminator")) {
+                } else if (arg.equals(Ili2dbMetaConfig.CREATE_TYPE_DISCRIMINATOR)) {
                     if (parseBooleanArgument(value))
                         config.setCreateTypeDiscriminator(Config.CREATE_TYPE_DISCRIMINATOR_ALWAYS);
-                } else if (arg.equals("createGeomIdx")) {
+                } else if (arg.equals(Ili2dbMetaConfig.CREATE_GEOM_IDX)) {
                     if (parseBooleanArgument(value))
                         config.setValue(Config.CREATE_GEOM_INDEX, Config.TRUE);
-                } else if (arg.equals("disableNameOptimization")) {
+                } else if (arg.equals(Ili2dbMetaConfig.DISABLE_NAME_OPTIMIZATION)) {
                     if (parseBooleanArgument(value))
                         config.setNameOptimization(Config.NAME_OPTIMIZATION_DISABLE);
-                } else if (arg.equals("nameByTopic")) {
+                } else if (arg.equals(Ili2dbMetaConfig.NAME_BY_TOPIC)) {
                     if (parseBooleanArgument(value))
                         config.setNameOptimization(Config.NAME_OPTIMIZATION_TOPIC);
-                } else if (arg.equals("maxNameLength")) {
+                } else if (arg.equals(Ili2dbMetaConfig.MAX_NAME_LENGTH)) {
                     config.setMaxSqlNameLength(value);
-                } else if (arg.equals("sqlColsAsText")) {
+                } else if (arg.equals(Ili2dbMetaConfig.SQL_COLS_AS_TEXT)) {
                     if (parseBooleanArgument(value))
                         config.setSqlColsAsText(Config.SQL_COLS_AS_TEXT_ENABLE);
-                } else if (arg.equals("sqlEnableNull")) {
+                } else if (arg.equals(Ili2dbMetaConfig.SQL_ENABLE_NULL)) {
                     if (parseBooleanArgument(value))
                         config.setSqlNull(Config.SQL_NULL_ENABLE);
-                } else if (arg.equals("sqlExtRefCols")) {
+                } else if (arg.equals(Ili2dbMetaConfig.SQL_EXT_REF_COLS)) {
                     if (parseBooleanArgument(value))
                         config.setSqlExtRefCols(Config.SQL_EXTREF_ENABLE);
-                } else if (arg.equals("strokeArcs")) {
+                } else if (arg.equals(Ili2dbMetaConfig.STROKE_ARCS)) {
                     if (parseBooleanArgument(value))
                         Config.setStrokeArcs(config, Config.STROKE_ARCS_ENABLE);
-                } else if (arg.equals("skipPolygonBuilding")) {
+                } else if (arg.equals(Ili2dbMetaConfig.SKIP_POLYGON_BUILDING)) {
                     if (parseBooleanArgument(value))
                         Ili2db.setSkipPolygonBuilding(config);
-                } else if (arg.equals("skipReferenceErrors")) {
+                } else if (arg.equals(Ili2dbMetaConfig.SKIP_REFERENCE_ERRORS)) {
                     config.setSkipReferenceErrors(parseBooleanArgument(value));
-                } else if (arg.equals("skipGeometryErrors")) {
+                } else if (arg.equals(Ili2dbMetaConfig.SKIP_GEOMETRY_ERRORS)) {
                     config.setSkipGeometryErrors(parseBooleanArgument(value));
-                } else if (arg.equals("keepAreaRef")) {
+                } else if (arg.equals(Ili2dbMetaConfig.KEEP_AREA_REF)) {
                     if (parseBooleanArgument(value))
                         config.setAreaRef(Config.AREA_REF_KEEP);
-                } else if (arg.equals("createTidCol")) {
+                } else if (arg.equals(Ili2dbMetaConfig.CREATE_TID_COL)) {
                     if (parseBooleanArgument(value))
                         config.setTidHandling(Config.TID_HANDLING_PROPERTY);
-                } else if (arg.equals("importTid")) {
+                } else if (arg.equals(Ili2dbMetaConfig.IMPORT_TID)) {
                     config.setImportTid(parseBooleanArgument(value));
-                } else if (arg.equals("exportTid")) {
+                } else if (arg.equals(Ili2dbMetaConfig.EXPORT_TID)) {
                     config.setExportTid(parseBooleanArgument(value));
-                } else if (arg.equals("importBid")) {
+                } else if (arg.equals(Ili2dbMetaConfig.IMPORT_BID)) {
                     config.setImportBid(parseBooleanArgument(value));
-                } else if (arg.equals("exportFetchSize")) {
+                } else if (arg.equals(Ili2dbMetaConfig.EXPORT_FETCH_SIZE)) {
                     config.setFetchSize(Integer.parseInt(value));
-                } else if (arg.equals("importBatchSize")) {
+                } else if (arg.equals(Ili2dbMetaConfig.IMPORT_BATCH_SIZE)) {
                     config.setBatchSize(Integer.parseInt(value));
-                } else if (arg.equals("createBasketCol")) {
+                } else if (arg.equals(Ili2dbMetaConfig.CREATE_BASKET_COL)) {
                     if (parseBooleanArgument(value))
                         config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
-                } else if (arg.equals("createDatasetCol")) {
+                } else if (arg.equals(Ili2dbMetaConfig.CREATE_DATASET_COL)) {
                     if (parseBooleanArgument(value))
                         config.setCreateDatasetCols(Config.CREATE_DATASET_COL);
-                } else if (arg.equals("ILIGML20")) {
+                } else if (arg.equals(Ili2dbMetaConfig.ILIGML20)) {
                     if (parseBooleanArgument(value))
                         config.setTransferFileFormat(Config.ILIGML20);
-                } else if (arg.equals("ver3-translation")) {
+                } else if (arg.equals(Ili2dbMetaConfig.VER3_TRANSLATION)) {
                     config.setVer3_translation(parseBooleanArgument(value));
-                } else if (arg.equals("translation")) {
+                } else if (arg.equals(Ili2dbMetaConfig.TRANSLATION)) {
                     config.setIli1Translation(value);
-                } else if (arg.equals("createMetaInfo")) {
+                } else if (arg.equals(Ili2dbMetaConfig.CREATE_META_INFO)) {
                     config.setCreateMetaInfo(parseBooleanArgument(value));
-                } else if (arg.equals("iliMetaAttrs")) {
+                } else if (arg.equals(Ili2dbMetaConfig.ILI_META_ATTRS)) {
                     config.setIliMetaAttrsFile(value);
-                } else if (arg.equals("createTypeConstraint")) {
+                } else if (arg.equals(Ili2dbMetaConfig.CREATE_TYPE_CONSTRAINT)) {
                     config.setCreateTypeConstraint(parseBooleanArgument(value));
                 }else {
                     EhiLogger.logAdaption("unknown parameter in metaconfig <"+arg+">");
@@ -1932,10 +1935,121 @@ public class Ili2db {
         }
         return config;
     }
+    private static void writeMetaConfigFile(File metaConfigFile, Config config) throws IOException {
+        ValidationConfig metaConfig = new ValidationConfig();
+        
+        metaConfig.setConfigValue(MetaConfig.CONFIGURATION, MetaConfig.CONFIG_REFERENCE_DATA,config.getReferenceData());
+        metaConfig.setConfigValue(MetaConfig.CONFIGURATION, MetaConfig.CONFIG_VALIDATOR_CONFIG,config.getValidConfigFile());
+        
+        metaConfig.setConfigValue(Ili2dbMetaConfig.SECTION_ILI2DB, Ili2dbMetaConfig.MODELS,config.getModels());
+        metaConfig.setConfigValue(Ili2dbMetaConfig.SECTION_ILI2DB, Ili2dbMetaConfig.EXPORT_MODELS,config.getExportModels());
+        metaConfig.setConfigValue(Ili2dbMetaConfig.SECTION_ILI2DB, Ili2dbMetaConfig.EXPORT_CRS_MODELS,config.getCrsExportModels());
+        metaConfig.setConfigValue(Ili2dbMetaConfig.SECTION_ILI2DB, Ili2dbMetaConfig.NAME_LANG,config.getNameLanguage());
+        metaConfig.setConfigValue(Ili2dbMetaConfig.SECTION_ILI2DB, Ili2dbMetaConfig.DATASET,config.getDatasetName());
+        metaConfig.setConfigValue(Ili2dbMetaConfig.SECTION_ILI2DB, Ili2dbMetaConfig.BASKETS,config.getBaskets());
+        metaConfig.setConfigValue(Ili2dbMetaConfig.SECTION_ILI2DB, Ili2dbMetaConfig.TOPICS,config.getTopics());
+        metaConfig.setConfigValue(Ili2dbMetaConfig.SECTION_ILI2DB, Ili2dbMetaConfig.DEFAULT_SRS_AUTH,config.getDefaultSrsAuthority());
+        metaConfig.setConfigValue(Ili2dbMetaConfig.SECTION_ILI2DB, Ili2dbMetaConfig.DEFAULT_SRS_CODE,config.getDefaultSrsCode());
+        metaConfig.setConfigValue(Ili2dbMetaConfig.SECTION_ILI2DB, Ili2dbMetaConfig.MODEL_SRS_CODE,config.getModelSrsCode());
+        metaConfig.setConfigValue(Ili2dbMetaConfig.SECTION_ILI2DB, Ili2dbMetaConfig.MULTI_SRS,writeBooleanArgument(config.useEpsgInNames()));
+        metaConfig.setConfigValue(Ili2dbMetaConfig.SECTION_ILI2DB, Ili2dbMetaConfig.DOMAINS,config.getDomainAssignments());
+        metaConfig.setConfigValue(Ili2dbMetaConfig.SECTION_ILI2DB, Ili2dbMetaConfig.ALT_SRS_MODEL,config.getSrsModelAssignment());
+        metaConfig.setConfigValue(Ili2dbMetaConfig.SECTION_ILI2DB, Ili2dbMetaConfig.DISABLE_VALIDATION,writeBooleanArgument(!config.isValidation()));
+        metaConfig.setConfigValue(Ili2dbMetaConfig.SECTION_ILI2DB, Ili2dbMetaConfig.DISABLE_AREA_VALIDATION,writeBooleanArgument(config.isDisableAreaValidation()));
+        metaConfig.setConfigValue(Ili2dbMetaConfig.SECTION_ILI2DB, Ili2dbMetaConfig.DISABLE_ROUNDING,writeBooleanArgument(config.isDisableRounding()));
+        metaConfig.setConfigValue(Ili2dbMetaConfig.SECTION_ILI2DB, Ili2dbMetaConfig.DISABLE_BOUNDARY_RECODING,writeBooleanArgument(config.getRepairTouchingLines()));
+        metaConfig.setConfigValue(Ili2dbMetaConfig.SECTION_ILI2DB, Ili2dbMetaConfig.FORCE_TYPE_VALIDATION,writeBooleanArgument(config.isOnlyMultiplicityReduction()));
+        String createEnumDefs=config.getCreateEnumDefs();
+        if(createEnumDefs!=null) {
+            if(createEnumDefs.equals(Config.CREATE_ENUM_DEFS_SINGLE)) {
+                metaConfig.setConfigValue(Ili2dbMetaConfig.SECTION_ILI2DB, Ili2dbMetaConfig.CREATE_SINGLE_ENUM_TAB,writeBooleanArgument(true));
+            }else if(createEnumDefs.equals(Config.CREATE_ENUM_DEFS_MULTI)) {
+                metaConfig.setConfigValue(Ili2dbMetaConfig.SECTION_ILI2DB, Ili2dbMetaConfig.CREATE_ENUM_TABS,writeBooleanArgument(true));
+            }else if(createEnumDefs.equals(Config.CREATE_ENUM_DEFS_MULTI_WITH_ID)) {
+                metaConfig.setConfigValue(Ili2dbMetaConfig.SECTION_ILI2DB, Ili2dbMetaConfig.CREATE_ENUM_TABS_WITH_ID,writeBooleanArgument(true));
+            }
+        }
+        metaConfig.setConfigValue(Ili2dbMetaConfig.SECTION_ILI2DB, Ili2dbMetaConfig.CREATE_ENUM_TXT_COL,writeBooleanArgument(Config.CREATE_ENUM_TXT_COL.equals(config.getCreateEnumCols())));
+        metaConfig.setConfigValue(Ili2dbMetaConfig.SECTION_ILI2DB, Ili2dbMetaConfig.CREATE_ENUM_COL_AS_ITF_CODE,writeBooleanArgument(Config.CREATE_ENUMCOL_AS_ITFCODE_YES.equals(config.getValue(Config.CREATE_ENUMCOL_AS_ITFCODE))));
+        metaConfig.setConfigValue(Ili2dbMetaConfig.SECTION_ILI2DB, Ili2dbMetaConfig.BEAUTIFY_ENUM_DISP_NAME,writeBooleanArgument(Config.BEAUTIFY_ENUM_DISPNAME_UNDERSCORE.equals(config.getBeautifyEnumDispName())));
+        if(Ili2db.isNoSmartMapping(config)) {
+            metaConfig.setConfigValue(Ili2dbMetaConfig.SECTION_ILI2DB, Ili2dbMetaConfig.NO_SMART_MAPPING,writeBooleanArgument(true));
+        }else {
+            metaConfig.setConfigValue(Ili2dbMetaConfig.SECTION_ILI2DB, Ili2dbMetaConfig.COALESCE_CATALOGUE_REF,writeBooleanArgument(Config.CATALOGUE_REF_TRAFO_COALESCE.equals(config.getCatalogueRefTrafo())));
+            metaConfig.setConfigValue(Ili2dbMetaConfig.SECTION_ILI2DB, Ili2dbMetaConfig.COALESCE_MULTI_SURFACE,writeBooleanArgument(Config.MULTISURFACE_TRAFO_COALESCE.equals(config.getMultiSurfaceTrafo())));
+            metaConfig.setConfigValue(Ili2dbMetaConfig.SECTION_ILI2DB, Ili2dbMetaConfig.COALESCE_MULTI_LINE,writeBooleanArgument(Config.MULTILINE_TRAFO_COALESCE.equals(config.getMultiLineTrafo())));
+            metaConfig.setConfigValue(Ili2dbMetaConfig.SECTION_ILI2DB, Ili2dbMetaConfig.COALESCE_MULTI_POINT,writeBooleanArgument(Config.MULTIPOINT_TRAFO_COALESCE.equals(config.getMultiPointTrafo())));
+            metaConfig.setConfigValue(Ili2dbMetaConfig.SECTION_ILI2DB, Ili2dbMetaConfig.COALESCE_ARRAY,writeBooleanArgument(Config.ARRAY_TRAFO_COALESCE.equals(config.getArrayTrafo())));
+            metaConfig.setConfigValue(Ili2dbMetaConfig.SECTION_ILI2DB, Ili2dbMetaConfig.COALESCE_JSON,writeBooleanArgument(Config.JSON_TRAFO_COALESCE.equals(config.getJsonTrafo())));
+            metaConfig.setConfigValue(Ili2dbMetaConfig.SECTION_ILI2DB, Ili2dbMetaConfig.EXPAND_MULTILINGUAL,writeBooleanArgument(Config.MULTILINGUAL_TRAFO_EXPAND.equals(config.getMultilingualTrafo())));
+            metaConfig.setConfigValue(Ili2dbMetaConfig.SECTION_ILI2DB, Ili2dbMetaConfig.EXPAND_LOCALISED,writeBooleanArgument(Config.LOCALISED_TRAFO_EXPAND.equals(config.getLocalisedTrafo())));
+            String inheritanceTrafo=config.getInheritanceTrafo();
+            if(inheritanceTrafo!=null) {
+                if(inheritanceTrafo.equals(Config.INHERITANCE_TRAFO_SMART1)) {
+                    metaConfig.setConfigValue(Ili2dbMetaConfig.SECTION_ILI2DB, Ili2dbMetaConfig.SMART1_INHERITANCE,writeBooleanArgument(true));
+                }else if(inheritanceTrafo.equals(Config.INHERITANCE_TRAFO_SMART2)) {
+                    metaConfig.setConfigValue(Ili2dbMetaConfig.SECTION_ILI2DB, Ili2dbMetaConfig.SMART2_INHERITANCE,writeBooleanArgument(true));
+                }
+            }
+        }
+        metaConfig.setConfigValue(Ili2dbMetaConfig.SECTION_ILI2DB, Ili2dbMetaConfig.CREATE_FK,writeBooleanArgument(Config.CREATE_FK_YES.equals(config.getCreateFk())));
+        metaConfig.setConfigValue(Ili2dbMetaConfig.SECTION_ILI2DB, Ili2dbMetaConfig.CREATE_FK_IDX,writeBooleanArgument(Config.CREATE_FKIDX_YES.equals(config.getCreateFkIdx())));
+        metaConfig.setConfigValue(Ili2dbMetaConfig.SECTION_ILI2DB, Ili2dbMetaConfig.CREATE_UNIQUE,writeBooleanArgument(config.isCreateUniqueConstraints()));
+        metaConfig.setConfigValue(Ili2dbMetaConfig.SECTION_ILI2DB, Ili2dbMetaConfig.CREATE_NUM_CHECKS,writeBooleanArgument(config.isCreateCreateNumChecks()));
+        metaConfig.setConfigValue(Ili2dbMetaConfig.SECTION_ILI2DB, Ili2dbMetaConfig.CREATE_TEXT_CHECKS,writeBooleanArgument(config.isCreateCreateTextChecks()));
+        metaConfig.setConfigValue(Ili2dbMetaConfig.SECTION_ILI2DB, Ili2dbMetaConfig.CREATE_DATE_TIME_CHECKS,writeBooleanArgument(config.isCreateCreateDateTimeChecks()));
+        metaConfig.setConfigValue(Ili2dbMetaConfig.SECTION_ILI2DB, Ili2dbMetaConfig.CREATE_MANDATORY_CHECKS,writeBooleanArgument(config.isCreateMandatoryChecks()));
+        metaConfig.setConfigValue(Ili2dbMetaConfig.SECTION_ILI2DB, Ili2dbMetaConfig.CREATE_IMPORT_TABS,writeBooleanArgument(config.isCreateImportTabs()));
+        metaConfig.setConfigValue(Ili2dbMetaConfig.SECTION_ILI2DB, Ili2dbMetaConfig.CREATE_STD_COLS,writeBooleanArgument(Config.CREATE_STD_COLS_ALL.equals(config.getCreateStdCols())));
+        metaConfig.setConfigValue(Ili2dbMetaConfig.SECTION_ILI2DB, Ili2dbMetaConfig.T_ID_NAME,config.getColT_ID());
+        metaConfig.setConfigValue(Ili2dbMetaConfig.SECTION_ILI2DB, Ili2dbMetaConfig.ID_SEQ_MIN,writeLongArgument(config.getMinIdSeqValue()));
+        metaConfig.setConfigValue(Ili2dbMetaConfig.SECTION_ILI2DB, Ili2dbMetaConfig.ID_SEQ_MAX,writeLongArgument(config.getMaxIdSeqValue()));
+        metaConfig.setConfigValue(Ili2dbMetaConfig.SECTION_ILI2DB, Ili2dbMetaConfig.CREATE_TYPE_DISCRIMINATOR,writeBooleanArgument(Config.CREATE_TYPE_DISCRIMINATOR_ALWAYS.equals(config.getCreateTypeDiscriminator())));
+        metaConfig.setConfigValue(Ili2dbMetaConfig.SECTION_ILI2DB, Ili2dbMetaConfig.CREATE_GEOM_IDX,writeBooleanArgument(Config.TRUE.equals(config.getValue(Config.CREATE_GEOM_INDEX))));
+        metaConfig.setConfigValue(Ili2dbMetaConfig.SECTION_ILI2DB, Ili2dbMetaConfig.DISABLE_NAME_OPTIMIZATION,writeBooleanArgument(Config.NAME_OPTIMIZATION_DISABLE.equals(config.getNameOptimization())));
+        metaConfig.setConfigValue(Ili2dbMetaConfig.SECTION_ILI2DB, Ili2dbMetaConfig.NAME_BY_TOPIC,writeBooleanArgument(Config.NAME_OPTIMIZATION_TOPIC.equals(config.getNameOptimization())));
+        metaConfig.setConfigValue(Ili2dbMetaConfig.SECTION_ILI2DB, Ili2dbMetaConfig.MAX_NAME_LENGTH,config.getMaxSqlNameLength());
+        metaConfig.setConfigValue(Ili2dbMetaConfig.SECTION_ILI2DB, Ili2dbMetaConfig.SQL_COLS_AS_TEXT,writeBooleanArgument(Config.SQL_COLS_AS_TEXT_ENABLE.equals(config.getSqlColsAsText())));
+        metaConfig.setConfigValue(Ili2dbMetaConfig.SECTION_ILI2DB, Ili2dbMetaConfig.SQL_ENABLE_NULL,writeBooleanArgument(Config.SQL_NULL_ENABLE.equals(config.getSqlNull())));
+        metaConfig.setConfigValue(Ili2dbMetaConfig.SECTION_ILI2DB, Ili2dbMetaConfig.SQL_EXT_REF_COLS,writeBooleanArgument(Config.SQL_EXTREF_ENABLE.equals(config.getSqlExtRefCols())));
+        metaConfig.setConfigValue(Ili2dbMetaConfig.SECTION_ILI2DB, Ili2dbMetaConfig.STROKE_ARCS,writeBooleanArgument(Config.STROKE_ARCS_ENABLE.equals(config.getStrokeArcs())));
+        if(Ili2db.isSkipPolygonBuilding(config)) {
+            metaConfig.setConfigValue(Ili2dbMetaConfig.SECTION_ILI2DB, Ili2dbMetaConfig.SKIP_POLYGON_BUILDING,writeBooleanArgument(true));
+        }else{
+            metaConfig.setConfigValue(Ili2dbMetaConfig.SECTION_ILI2DB, Ili2dbMetaConfig.KEEP_AREA_REF,writeBooleanArgument(Config.AREA_REF_KEEP.equals(config.getAreaRef())));
+        }
+        metaConfig.setConfigValue(Ili2dbMetaConfig.SECTION_ILI2DB, Ili2dbMetaConfig.SKIP_REFERENCE_ERRORS,writeBooleanArgument(config.isSkipReferenceErrors()));
+        metaConfig.setConfigValue(Ili2dbMetaConfig.SECTION_ILI2DB, Ili2dbMetaConfig.SKIP_GEOMETRY_ERRORS,writeBooleanArgument(config.isSkipGeometryErrors()));
+        metaConfig.setConfigValue(Ili2dbMetaConfig.SECTION_ILI2DB, Ili2dbMetaConfig.CREATE_TID_COL,writeBooleanArgument(Config.TID_HANDLING_PROPERTY.equals(config.getTidHandling())));
+        metaConfig.setConfigValue(Ili2dbMetaConfig.SECTION_ILI2DB, Ili2dbMetaConfig.IMPORT_TID,writeBooleanArgument(config.isImportTid()));
+        metaConfig.setConfigValue(Ili2dbMetaConfig.SECTION_ILI2DB, Ili2dbMetaConfig.EXPORT_TID,writeBooleanArgument(config.isExportTid()));
+        metaConfig.setConfigValue(Ili2dbMetaConfig.SECTION_ILI2DB, Ili2dbMetaConfig.IMPORT_BID,writeBooleanArgument(config.isImportBid()));
+        metaConfig.setConfigValue(Ili2dbMetaConfig.SECTION_ILI2DB, Ili2dbMetaConfig.EXPORT_FETCH_SIZE,writeIntegerArgument(config.getFetchSize()));
+        metaConfig.setConfigValue(Ili2dbMetaConfig.SECTION_ILI2DB, Ili2dbMetaConfig.IMPORT_BATCH_SIZE,writeIntegerArgument(config.getBatchSize()));
+        metaConfig.setConfigValue(Ili2dbMetaConfig.SECTION_ILI2DB, Ili2dbMetaConfig.CREATE_BASKET_COL,writeBooleanArgument(Config.BASKET_HANDLING_READWRITE.equals(config.getBasketHandling())));
+        metaConfig.setConfigValue(Ili2dbMetaConfig.SECTION_ILI2DB, Ili2dbMetaConfig.CREATE_DATASET_COL,writeBooleanArgument(Config.CREATE_DATASET_COL.equals(config.getCreateDatasetCols())));
+        metaConfig.setConfigValue(Ili2dbMetaConfig.SECTION_ILI2DB, Ili2dbMetaConfig.ILIGML20,writeBooleanArgument(Config.ILIGML20.equals(config.getTransferFileFormat())));
+        metaConfig.setConfigValue(Ili2dbMetaConfig.SECTION_ILI2DB, Ili2dbMetaConfig.VER3_TRANSLATION,writeBooleanArgument(config.isVer3_translation()));
+        metaConfig.setConfigValue(Ili2dbMetaConfig.SECTION_ILI2DB, Ili2dbMetaConfig.TRANSLATION,config.getIli1Translation());
+        metaConfig.setConfigValue(Ili2dbMetaConfig.SECTION_ILI2DB, Ili2dbMetaConfig.CREATE_META_INFO,writeBooleanArgument(config.getCreateMetaInfo()));
+        metaConfig.setConfigValue(Ili2dbMetaConfig.SECTION_ILI2DB, Ili2dbMetaConfig.ILI_META_ATTRS,config.getIliMetaAttrsFile());
+        metaConfig.setConfigValue(Ili2dbMetaConfig.SECTION_ILI2DB, Ili2dbMetaConfig.CREATE_TYPE_CONSTRAINT,writeBooleanArgument(config.getCreateTypeConstraint()));
+        
+        IniFileWriter.writeIniFile(metaConfigFile,metaConfig);
+    }
     protected static boolean parseBooleanArgument(String value) throws ParseException {
-        if (value.equalsIgnoreCase("true")) return true;
-        if (value.equalsIgnoreCase("false")) return false;
+        if (Config.TRUE.equalsIgnoreCase(value)) return true;
+        if (Config.FALSE.equalsIgnoreCase(value)) return false;
         throw new ParseException("unknown boolean value <"+value+">",0);
+    }
+    protected static String writeBooleanArgument(boolean value) {
+        return value?Config.TRUE:Config.FALSE;
+    }
+    protected static String writeLongArgument(Long value) {
+        return value!=null?value.toString():null;
+    }
+    protected static String writeIntegerArgument(Integer value) {
+        return value!=null?value.toString():null;
     }
     private static void verifyIfBasketColRequired(List<Model> models, boolean createBasketCol) throws Ili2dbException {
         if(createBasketCol) {
@@ -2134,7 +2248,7 @@ public class Ili2db {
                             OutParam<String> baseConfigs=new OutParam<String>();
                             Config newSettings=null;
                             try {
-                                newSettings = readMetaConfig(metaConfigFile,baseConfigs);
+                                newSettings = readMetaConfigFile(metaConfigFile,baseConfigs);
                                 if(baseConfigs.value!=null) {
                                     String[] baseConfigv = baseConfigs.value.split(";");
                                     for(String baseConfig:baseConfigv){
@@ -2462,6 +2576,215 @@ public class Ili2db {
 			}
 		}
 	}
+    public static void runExportMetaConfig(Config config,String appHome)
+    throws Ili2dbException
+    {
+        String functionName="exportMetaConfig";
+        ch.ehi.basics.logging.FileListener logfile=null;
+        ch.interlis.iox_j.logging.XtfErrorsLogger xtflog=null;
+        if(config.getLogfile()!=null){
+            logfile=new FileLogger(new java.io.File(config.getLogfile()),config.isLogtime());
+            EhiLogger.getInstance().addListener(logfile);
+        }
+        String xtflogFilename=config.getXtfLogfile();
+        if(xtflogFilename!=null){
+            File f=new java.io.File(xtflogFilename);
+            try {
+                if(isWriteable(f)) {
+                    xtflog=new ch.interlis.iox_j.logging.XtfErrorsLogger(f, config.getSender());
+                    EhiLogger.getInstance().addListener(xtflog);
+                }else {
+                    throw new Ili2dbException("failed to write to logfile <"+f.getPath()+">");
+                }
+            } catch (IOException e) {
+                throw new Ili2dbException("failed to write to logfile <"+f.getPath()+">",e);
+            }
+        }
+        StdLogger logStderr=new StdLogger(config.getLogfile());
+        EhiLogger.getInstance().addListener(logStderr);
+        EhiLogger.getInstance().removeListener(StdListener.getInstance());
+        
+        try{
+            boolean connectionFromExtern=config.getJdbcConnection()!=null;
+            logGeneralInfo(config);
+            
+            String metaConfigFile=config.getMetaConfigFile();
+            if(metaConfigFile==null){
+                throw new Ili2dbException("no Meta-Config file given");
+            }
+            
+            
+            MetaConfig.removeNullFromSettings(config);
+            
+            String dburl=config.getDburl();
+            String dbusr=config.getDbusr();
+            String dbpwd=config.getDbpwd();
+            if(!connectionFromExtern && dburl==null){
+                throw new Ili2dbException("no dburl given");
+            }
+            if(dbusr==null){
+                //EhiLogger.logError("no dbusr given");
+                //return;
+                dbusr="";
+            }
+            if(dbpwd==null){
+                //EhiLogger.logError("no dbpwd given");
+                //return;
+                dbpwd="";
+            }
+            String dbschema=config.getDbschema();
+            if(dbschema!=null){
+                EhiLogger.logState("dbschema <"+dbschema+">");
+            }
+            String geometryConverter=config.getGeometryConverter();
+            if(geometryConverter==null){
+                throw new Ili2dbException("no geoemtry converter given");
+            }
+            if(!connectionFromExtern){
+                String jdbcDriver=config.getJdbcDriver();
+                if(jdbcDriver==null){
+                    throw new Ili2dbException("no JDBC driver given");
+                }
+                // open db connection
+                try{
+                    Class.forName(jdbcDriver);
+                }catch(Exception ex){
+                    throw new Ili2dbException("failed to load JDBC driver",ex);
+                }
+            }
+            
+            CustomMapping customMapping=getCustomMappingStrategy(config);
+            
+            Connection conn=null;
+            String url = dburl;
+            try{
+              //DriverManager.registerDriver(new oracle.jdbc.OracleDriver());
+              try {
+                  if(connectionFromExtern){
+                      conn=config.getJdbcConnection();
+                  }else{
+                        conn = connect(url, dbusr, dbpwd, config, customMapping);
+                  }
+                    customMapping.postConnect(conn, config);
+            } catch (SQLException e) {
+                throw new Ili2dbException("failed to get db connection",e);
+            } catch (IOException e) {
+                throw new Ili2dbException("failed to get db connection",e);
+            }
+            logDBVersion(conn);
+              
+            // run DB specific pre-processing
+            customMapping.prePreScript(conn, config);
+              
+            // run pre-script 
+            if(config.getPreScript()!=null){
+                try {
+                    EhiLogger.logState("run "+functionName+" pre-script...");
+                    DbUtility.executeSqlScript(conn, new java.io.FileReader(config.getPreScript()));
+                } catch (FileNotFoundException e) {
+                    throw new Ili2dbException(functionName+" pre-script statements failed",e);
+                }
+            }
+              
+
+            String adapterClassName=config.getGeometryConverter();
+            if(adapterClassName==null){
+                throw new Ili2dbException("no adapter given");
+            }
+            
+
+            SqlColumnConverter geomConverter=null;
+            try{
+                geomConverter=(SqlColumnConverter)Class.forName(geometryConverter).newInstance();
+            }catch(Exception ex){
+                throw new Ili2dbException("failed to load/create geometry converter",ex);
+            }
+            
+
+              
+              geomConverter.setup(conn, config);
+              
+
+              // process config
+              EhiLogger.logState("process config...");
+                  EhiLogger.logState("Meta-Config <"+metaConfigFile+">");
+                ch.ehi.basics.logging.ErrorTracker errs=new ch.ehi.basics.logging.ErrorTracker();
+                EhiLogger.getInstance().addListener(errs);
+                
+                
+                try {
+                    writeMetaConfigFile(new File(metaConfigFile),config);
+                } catch (IOException e1) {
+                    EhiLogger.logError(e1);
+                }
+                
+                if (errs.hasSeenErrors()) {
+                    throw new Ili2dbException("..."+functionName+" failed");
+                } else {
+                    EhiLogger.logState("..."+functionName+" done");
+                }
+              EhiLogger.getInstance().removeListener(errs);
+              
+                // run post-script
+                if(config.getPostScript()!=null){
+                    try {
+                        DbUtility.executeSqlScript(conn, new java.io.FileReader(config.getPostScript()));
+                        EhiLogger.logState("run "+functionName+" post-script...");
+                    } catch (FileNotFoundException e) {
+                        throw new Ili2dbException(functionName+" post-script statements failed",e);
+                    }
+                }
+                
+                // run DB specific post processing
+                customMapping.postPostScript(conn, config);
+                
+            //}catch(Exception ex){
+                //EhiLogger.logError(ex);
+            }finally{
+                if(!connectionFromExtern){
+                    try{
+                        conn.close();
+                    }catch(java.sql.SQLException ex){
+                        EhiLogger.logError(ex);
+                    }finally{
+                        conn=null;
+                        config.setJdbcConnection(null);
+                    }
+                }
+            }           
+        }catch(Ili2dbException ex){
+            if(logfile!=null){
+                logfile.logEvent(new StdLogEvent(LogEvent.ERROR,null,ex,null));
+            }
+            if(xtflog!=null){
+                xtflog.logEvent(new StdLogEvent(LogEvent.ERROR,null,ex,null));
+            }
+            throw ex;
+        }catch(java.lang.RuntimeException ex){
+            if(logfile!=null){
+                logfile.logEvent(new StdLogEvent(LogEvent.ERROR,null,ex,null));
+            }
+            if(xtflog!=null){
+                xtflog.logEvent(new StdLogEvent(LogEvent.ERROR,null,ex,null));
+            }
+            throw ex;
+        }finally{
+            if(xtflog!=null){
+                EhiLogger.getInstance().removeListener(xtflog);
+                xtflog.close();
+                xtflog=null;
+            }
+            if(logfile!=null){
+                EhiLogger.getInstance().removeListener(logfile);
+                logfile.close();
+                logfile=null;
+            }
+            if(logStderr!=null){
+                EhiLogger.getInstance().addListener(StdListener.getInstance());
+                EhiLogger.getInstance().removeListener(logStderr);
+            }
+        }
+    }
 	private static String[] getModelFromValidationConfig(String validConfigFile) {
 	    if(validConfigFile==null) {
 	        return null;
@@ -3322,6 +3645,11 @@ public class Ili2db {
 		config.setDoItfLineTables(true);
 		config.setAreaRef(Config.AREA_REF_KEEP);
 	}
+    public static boolean isSkipPolygonBuilding(Config config) {
+        return config.getDoXtfLineTables()==true
+        && config.getDoItfLineTables()==true
+        && Config.AREA_REF_KEEP.equals(config.getAreaRef());
+    }
 	public static void setNoSmartMapping(Config config) {
 		config.setCatalogueRefTrafo(Config.NULL);
 		config.setMultiSurfaceTrafo(Config.NULL);
@@ -3333,6 +3661,17 @@ public class Ili2db {
         config.setLocalisedTrafo(Config.NULL);
 		config.setInheritanceTrafo(Config.NULL);
 	}
+    public static boolean isNoSmartMapping(Config config) {
+        return Config.isNull(config.getCatalogueRefTrafo())
+        && Config.isNull(config.getMultiSurfaceTrafo())
+        && Config.isNull(config.getMultiLineTrafo())
+        && Config.isNull(config.getMultiPointTrafo())
+        && Config.isNull(config.getArrayTrafo())
+        && Config.isNull(config.getJsonTrafo())
+        && Config.isNull(config.getMultilingualTrafo())
+        && Config.isNull(config.getLocalisedTrafo())
+        && Config.isNull(config.getInheritanceTrafo());
+    }
 	public static List<Model> getModels(String modelNames, TransferDescription td) {
 		if(modelNames==null) {
 			return new ArrayList<Model>();

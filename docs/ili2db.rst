@@ -581,6 +581,36 @@ der Ili- und Itf-Datei, sämtliche Namen der importierten Tabellen inkl.
 Anzahl der importierten Elemente pro Tabelle. Allfällige Fehlermeldungen
 (bei Importabbruch) werden auch in die Logdatei geschrieben.
 
+Meta-Konfig-Funktionen
+----------------------
+
+Fall 6.1
+~~~~~~~~
+
+Die Konfiguration mit der die Datenbank erstellt wurde, wird als INI-Datei exportiert (``--exportMetaConfig``):
+
+**PostGIS:** ``java -jar ili2pg.jar --exportMetaConfig --dbhost
+ofaioi4531 --dbport 5432 --dbdatabase mogis --dbusr julia --dbpwd romeo --metaConfig  config.ini``
+
+**GeoPackage:** ``java -jar ili2gpkg.jar --exportMetaConfig --dbfile
+mogis.gpkg --metaConfig  config.ini``
+
+**FileGDB:** ``java -jar ili2fgdb.jar --exportMetaConfig --dbfile
+mogis.gdb --metaConfig  config.ini``
+
+Die erstellte INI-Datei ist nicht ganz vollständig. iliMetaAttrs, pre- und postScript werden nicht berücksichtigt.
+
+Mit Hilfe der INI-Datei kann danach die Datenbank neu erstellt werden:
+
+**PostGIS:** ``java -jar ili2pg.jar --schemaimport --dbhost
+ofaioi4531 --dbport 5432 --dbdatabase mogisNeu --dbusr julia --dbpwd romeo --metaConfig  config.ini``
+
+**GeoPackage:** ``java -jar ili2gpkg.jar --schemaimport --dbfile
+mogisNeu.gpkg --metaConfig  config.ini``
+
+**FileGDB:** ``java -jar ili2fgdb.jar --schemaimport --dbfile
+mogisNeu.gdb --metaConfig  config.ini``
+
 Referenz
 ========
 
@@ -644,6 +674,11 @@ Optionen:
 |                               | Die Optionen --topics und --baskets bedingen, dass das Datenbankschema mit der Option --createBasketCol erstellt wurde.                                                                                                                                                                                                                                                                                                                                                                                                                    |
 +-------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | --schemaimport                | Erstellt die Tabellenstruktur in der Datenbank (siehe Kapitel Abbildungsregeln).                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
++-------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| --exportMetaConfig            | Die Konfiguration mit der die Datenbank erstellt wurde, wird als INI-Datei exportiert.                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+|                               |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+|                               | Mit dem Parameter --metaConfig wird die Ziel-Datei definiert.                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+|                               | Die erstellte INI-Datei ist nicht ganz vollständig. iliMetaAttrs, pre- und postScript werden nicht berücksichtigt.                                                                                                                                                                                                                                                                                                                                                                                                                         |
 +-------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | --iliMetaAttrs filename       | Name der Konfigurationsdatei, die zusätzliche Interlis-Metaattribute enthält (Meta-Attribute, die in den ili-Dateien nicht enthalten sind).                                                                                                                                                                                                                                                                                                                                                                                                |
 |                               | ``filename`` kann auch die Form ``ilidata:DatesetId``  haben,                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |

@@ -114,7 +114,7 @@ public class GpkgMapping extends AbstractJdbcMapping {
 			}
 		}
 
-		if(Config.TRUE.equals(config.getValue(Config.CREATE_GEOM_INDEX))) {
+		if(Config.TRUE.equalsIgnoreCase(config.getValue(Config.CREATE_GEOM_INDEX))) {
 			try {
 
 				final byte MASK_GEOMETRY_EMPTY=0x10;

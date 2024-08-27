@@ -143,6 +143,11 @@ public abstract class AbstractMain {
 					if (parseBooleanArgument(arg))
 						config.setFunction(Config.FC_EXPORT);
 					argi++;
+                } else if (isOption(arg, "--exportMetaConfig")) {
+                    if (parseBooleanArgument(arg)) {
+                        config.setFunction(Config.FC_EXPORT_METACONFIG);
+                    }
+                    argi++;
 				} else if (arg.equals("--export3")) {
 					if (parseBooleanArgument(arg)) {
 						config.setFunction(Config.FC_EXPORT);
@@ -506,7 +511,9 @@ public abstract class AbstractMain {
 					System.err.println("--replace              do a replace.");
 					System.err.println("--delete               do a delete.");
 					System.err.println("--export               do an export.");
-					System.err.println("--schemaimport         do an schema import.");
+                    System.err.println("--validate             validates the data in the db (without export).");
+					System.err.println("--schemaimport         do a schema import.");
+					System.err.println("--exportMetaConfig     exports a Meta-Config file of an existing db.");
 					System.err.println("--preScript file       before running a function, run a script.");
 					System.err.println("--postScript file      after running a function, run a script.");
 					System.err.println("--dbparams file        config file with connection parameters.");

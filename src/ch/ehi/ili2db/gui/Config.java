@@ -3,14 +3,15 @@ package ch.ehi.ili2db.gui;
 import java.util.Properties;
 
 import ch.ehi.basics.settings.Settings;
+import ch.ehi.ili2db.base.Ili2dbMetaConfig;
 import ch.ehi.sqlgen.generator.SqlConfiguration;
 import ch.interlis.iox_j.inifile.MetaConfig;
 import ch.interlis.iox_j.validator.ValidationConfig;
 import ch.interlis.iox_j.validator.Validator;
 
 public class Config extends Settings {
-	public static final String FALSE = "False";
-	public static final String TRUE = "True";
+	public static final String FALSE = "false"; // TOML file compatibility
+	public static final String TRUE = "true"; // TOML file compatibility
 	/** use only as a special value for cmdline options or config file settings to explicitly unset a setting. Do not use internally.
 	 */
     public static final String NULL = MetaConfig.NULL;
@@ -116,7 +117,10 @@ public class Config extends Settings {
 	public static final String CREATE_TYPE_CONSTRAINT=PREFIX+".createTypeConstraint";
     public static final String METACONFIGFILENAME=PREFIX+".metaConfigFileName";
 
-    public static final String METACONFIG_ILI2DB="ch.ehi.ili2db";
+    /**
+     * @deprecated Use {@link Ili2dbMetaConfig#SECTION_ILI2DB} instead
+     */
+    public static final String METACONFIG_ILI2DB=Ili2dbMetaConfig.SECTION_ILI2DB;
 	
     public static final String TRANSIENT_STRING_DBURL=PREFIX+".dburl";
     public static final String TRANSIENT_STRING_DBUSR=PREFIX+".dbusr";
@@ -189,6 +193,7 @@ public class Config extends Settings {
 	static public final int FC_REPLACE=6;
     static public final int FC_SCRIPT=7;
     static public final int FC_VALIDATE=8;
+    static public final int FC_EXPORT_METACONFIG=9;
 	public String getIdGenerator() {
 		return getTransientValue(TRANSIENT_STRING_IDGENERATOR);
 	}
@@ -528,13 +533,13 @@ public class Config extends Settings {
 		config.setValue(STROKE_ARCS,value);
 	}
 	public boolean getDoItfLineTables() {
-		return TRUE.equals(getValue(DO_ITF_LINE_TABLES));
+		return TRUE.equalsIgnoreCase(getValue(DO_ITF_LINE_TABLES));
 	}
 	public void setDoItfLineTables(boolean value) {
 		setValue(DO_ITF_LINE_TABLES,value?TRUE:FALSE);
 	}
     public boolean getDoXtfLineTables() {
-        return TRUE.equals(getValue(DO_XTF_LINE_TABLES));
+        return TRUE.equalsIgnoreCase(getValue(DO_XTF_LINE_TABLES));
     }
     public void setDoXtfLineTables(boolean value) {
         setValue(DO_XTF_LINE_TABLES,value?TRUE:FALSE);
@@ -771,7 +776,7 @@ public class Config extends Settings {
 		setValue(VER3_TRANSLATION,b?TRUE:FALSE);
 	}
 	public boolean isVer3_translation() {
-		return TRUE.equals(getValue(VER3_TRANSLATION))?true:false;
+		return TRUE.equalsIgnoreCase(getValue(VER3_TRANSLATION))?true:false;
 	}
 	public void setIli1Translation(String modelMapping) {
 		setValue(ILI1TRANSLATION,modelMapping);
@@ -803,7 +808,7 @@ public class Config extends Settings {
 		setValue(CREATE_META_INFO,value?TRUE:FALSE);
 	}
 	public boolean getCreateMetaInfo() {
-		return TRUE.equals(getValue(CREATE_META_INFO))?true:false;
+		return TRUE.equalsIgnoreCase(getValue(CREATE_META_INFO))?true:false;
 	}
 	public String getIliMetaAttrsFile() {
 		return getTransientValue(TRANSIENT_STRING_ILIMETAATTRSFILE);
@@ -843,7 +848,7 @@ public class Config extends Settings {
         setValue(USE_EPGS_IN_NAMES,value?TRUE:FALSE);
     }
     public boolean useEpsgInNames() {
-        return TRUE.equals(getValue(USE_EPGS_IN_NAMES))?true:false;
+        return TRUE.equalsIgnoreCase(getValue(USE_EPGS_IN_NAMES))?true:false;
     }
     public String getDomainAssignments() {
         return getTransientValue(TRANSIENT_STRING_DOMAINASSIGNMENTS);
@@ -861,7 +866,7 @@ public class Config extends Settings {
 		setValue(CREATE_TYPE_CONSTRAINT,value?TRUE:FALSE);
 	}
 	public boolean getCreateTypeConstraint() {
-		return TRUE.equals(getValue(CREATE_TYPE_CONSTRAINT))?true:false;
+		return TRUE.equalsIgnoreCase(getValue(CREATE_TYPE_CONSTRAINT))?true:false;
 	}
     public boolean isVer3_export() {
         Boolean ver3_export=(Boolean)getTransientObject(TRANSIENT_BOOLEAN_VER3_EXPORT);
@@ -924,5 +929,8 @@ public class Config extends Settings {
 
     public void setPluginsFolder(String path) {
         setTransientValue(TRANSIENT_STRING_PLUGINFOLDER, path);
+    }
+    public static boolean isNull(String value) {
+        return value==null || value.equals(Config.NULL);
     }
 }
