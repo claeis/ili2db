@@ -219,14 +219,14 @@ public class Ili2cUtility {
             CompositionType type=(CompositionType)typeo;
             Table struct=type.getComponentType();
             Table base=null;
-            if(struct.getContainer().getScopedName(null).equals(IliNames.CHBASE1_LOCALISATIONCH)){
+            if(isLocalisationCH(struct.getContainer().getScopedName(null))){
                 base=struct;
             }else{
                 base=(Table) struct.getExtending();
                 if(base==null){
                     base=struct;
                 }
-                while(base!=null && !base.getContainer().getScopedName(null).equals(IliNames.CHBASE1_LOCALISATIONCH)){
+                while(base!=null && !isLocalisationCH(base.getContainer().getScopedName(null))){
                     base=(Table) base.getExtending();
                 }
                 
@@ -299,14 +299,14 @@ public class Ili2cUtility {
 			CompositionType type=(CompositionType)typeo;
 			Table struct=type.getComponentType();
 			Table base=null;
-			if(struct.getContainer().getScopedName(null).equals(IliNames.CHBASE1_LOCALISATIONCH)){
+			if(isLocalisationCH(struct.getContainer().getScopedName(null))){
 				base=struct;
 			}else{
 				base=(Table) struct.getExtending();
 				if(base==null){
 					base=struct;
 				}
-				while(base!=null && !base.getContainer().getScopedName(null).equals(IliNames.CHBASE1_LOCALISATIONCH)){
+				while(base!=null && !isLocalisationCH(base.getContainer().getScopedName(null))){
 					base=(Table) base.getExtending();
 				}
 				
@@ -330,6 +330,11 @@ public class Ili2cUtility {
 		}
 		return false;
 	}
+
+    private static boolean isLocalisationCH(String containerName) {
+        return containerName.equals(IliNames.CHBASE1_LOCALISATIONCH)
+                || containerName.equals(IliNames.CHBASE2_LOCALISATIONCH);
+    }
 
 	public static boolean isMultiSurfaceAttr(TransferDescription td,
 			AttributeDef attr) {

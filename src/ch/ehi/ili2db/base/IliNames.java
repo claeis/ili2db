@@ -35,6 +35,7 @@ public class IliNames {
 	public static final String CHBASE1_LOCALISEDTEXT_LANG_IT = "it";
 	public static final String CHBASE1_LOCALISEDTEXT_LANG_RM = "rm";
 	public static final String CHBASE1_LOCALISEDTEXT_LANG_EN = "en";
+	public static final String CHBASE2_LOCALISATIONCH = "LocalisationCH_V2";
 
 	private IliNames() {
 	};
