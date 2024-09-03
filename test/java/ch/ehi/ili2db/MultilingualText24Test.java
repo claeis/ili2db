@@ -1,5 +1,6 @@
 package ch.ehi.ili2db;
 
+import ch.ehi.ili2db.base.DbNames;
 import ch.ehi.ili2db.base.Ili2db;
 import ch.ehi.ili2db.gui.Config;
 import ch.interlis.ili2c.Main;
@@ -23,6 +24,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.HashMap;
 
+import static ch.ehi.ili2db.Ili2dbAssert.assertTableContainsValues;
 import static org.junit.Assert.assertNotNull;
 
 public abstract class MultilingualText24Test {
@@ -69,18 +71,39 @@ public abstract class MultilingualText24Test {
         Ili2db.run(config, null);
 
         Connection jdbcConnection = null;
-        Statement stmt = null;
         try {
             jdbcConnection = setup.createConnection();
-            stmt = jdbcConnection.createStatement();
+
+            assertTrafoEntries(jdbcConnection);
         } finally {
-            if (stmt != null) {
-                stmt.close();
-            }
             if (jdbcConnection != null) {
                 jdbcConnection.close();
             }
         }
+    }
+
+    private void assertTrafoEntries(Connection connection) throws SQLException {
+        assertTableContainsValues(
+                connection,
+                qualifyTableName(DbNames.TRAFO_TAB),
+                new String[] {
+                        DbNames.TRAFO_TAB_ILINAME_COL,
+                        DbNames.TRAFO_TAB_TAG_COL,
+                        DbNames.TRAFO_TAB_SETTING_COL,
+                }, new String[][] {
+                        {"MultilingualText_V2.TestA.ClassA1.atext", "ch.ehi.ili2db.multilingualTrafo", "expand"},
+                        {"MultilingualText_V2.TestA.ClassA1.btext", "ch.ehi.ili2db.localisedTrafo", "expand"},
+                        {"MultilingualText_V2.TestA.ClassA1.ctext", "ch.ehi.ili2db.multilingualTrafo", "expand"},
+                        {"MultilingualText_V2.TestA.ClassA1.dtext", "ch.ehi.ili2db.localisedTrafo", "expand"},
+                        {"MultilingualText_V2.TestA.ClassB1.atext", "ch.ehi.ili2db.multilingualTrafo", "expand"},
+                        {"MultilingualText_V2.TestA.ClassB1.btext", "ch.ehi.ili2db.localisedTrafo", "expand"},
+                        {"MultilingualText_V2.TestA.ClassB1.ctext", "ch.ehi.ili2db.multilingualTrafo", "expand"},
+                        {"MultilingualText_V2.TestA.ClassB1.dtext", "ch.ehi.ili2db.localisedTrafo", "expand"},
+                        {"MultilingualText_V2.TestA.ClassUri.localised", "ch.ehi.ili2db.localisedTrafo", "expand"},
+                        {"MultilingualText_V2.TestA.ClassUri.multilingual", "ch.ehi.ili2db.multilingualTrafo", "expand"},
+                },
+                "tag = 'ch.ehi.ili2db.multilingualTrafo' OR tag = 'ch.ehi.ili2db.localisedTrafo'"
+        );
     }
 
     @Test
