@@ -22,6 +22,11 @@ MODEL MultilingualText_V2
       dtext : MANDATORY LocalisationCH_V2.LocalisedMText;
     END ClassB1;
 
+    CLASS ClassUri =
+      multilingual : LocalisationCH_V2.MultilingualUri;
+      localised : LocalisationCH_V2.LocalisedUri;
+    END ClassUri;
+
   END TestA;
 
 END MultilingualText_V2.

@@ -11,4 +11,9 @@ public class MultilingualText24PgTest extends ch.ehi.ili2db.MultilingualText24Te
 
         return new PgTestSetup(dburl, dbuser, dbpwd, DBSCHEMA);
     }
+
+    @Override
+    protected String qualifyTableName(String tableName) {
+        return DBSCHEMA + "." + tableName;
+    }
 }

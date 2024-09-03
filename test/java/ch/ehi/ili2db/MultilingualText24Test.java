@@ -42,9 +42,14 @@ public abstract class MultilingualText24Test {
             null, "b1.1-de", null, null, null, null,
             "b1.1-fr", "fr",
     };
+    protected static final String[] ENTRY_URI = {
+            null, "http://localhost/uri1.1-de", "http://localhost/uri1.1-fr", null, null, null,
+            "http://localhost/uri1.1-en", "en",
+    };
 
     protected AbstractTestSetup setup = createTestSetup();
     protected abstract AbstractTestSetup createTestSetup();
+    protected abstract String qualifyTableName(String tableName);
 
     @Test
     public void importIliSmartChbaseV2() throws Exception {
@@ -95,9 +100,11 @@ public abstract class MultilingualText24Test {
             connection = setup.createConnection();
             stmt = connection.createStatement();
 
-            assertRow(stmt, "classa1", "a1.1", ENTRY_A1_1);
-            assertRow(stmt, "classa1", "a1.2", ENTRY_A1_2);
-            assertRow(stmt, "classb1", "b1.1", ENTRY_B1_1);
+            assertTextRow(stmt, "classa1", "a1.1", ENTRY_A1_1);
+            assertTextRow(stmt, "classa1", "a1.2", ENTRY_A1_2);
+            assertTextRow(stmt, "classb1", "b1.1", ENTRY_B1_1);
+
+            assertUriRow(stmt, "classuri", "uri1.1", ENTRY_URI);
         } finally {
             if (stmt != null) {
                 stmt.close();
@@ -108,13 +115,27 @@ public abstract class MultilingualText24Test {
         }
     }
 
-    private static void assertRow(Statement stmt, String tableName, String tid, String[] values) throws SQLException {
+    private void assertTextRow(Statement stmt, String tableName, String tid, String[] values) throws SQLException {
         Assert.assertTrue(stmt.execute("SELECT"
                 + " atext,atext_de,atext_fr,atext_it,atext_rm,atext_en"
                 + ",btext,btext_lang"
                 + ",ctext,ctext_de,ctext_fr,ctext_it,ctext_rm,ctext_en"
                 + ",dtext,dtext_lang"
-                + " FROM " + DBSCHEMA + "." + tableName + " WHERE t_ili_tid = '" + tid + "'"));
+                + " FROM " + qualifyTableName(tableName) + " WHERE t_ili_tid = '" + tid + "'"));
+
+        ResultSet rs = stmt.getResultSet();
+        Assert.assertTrue(rs.next());
+
+        for (int i = 0; i < values.length; i++) {
+            Assert.assertEquals(values[i], rs.getString(i + 1));
+        }
+    }
+
+    private void assertUriRow(Statement stmt, String tableName, String tid, String[] values) throws SQLException {
+        Assert.assertTrue(stmt.execute("SELECT"
+                + " multilingual,multilingual_de,multilingual_fr,multilingual_it,multilingual_rm,multilingual_en"
+                + ",localised,localised_lang"
+                + " FROM " + qualifyTableName(tableName) + " WHERE t_ili_tid = '" + tid + "'"));
 
         ResultSet rs = stmt.getResultSet();
         Assert.assertTrue(rs.next());
@@ -170,5 +191,10 @@ public abstract class MultilingualText24Test {
         assertNotNull(objB11);
         Assert.assertEquals("MultilingualText_V2.TestA.ClassB1 oid b1.1 {atext LocalisationCH_V2.MultilingualText {LocalisedText LocalisationCH_V2.LocalisedText {Language de, Text b1.1-de}}, btext LocalisationCH_V2.LocalisedText {Language fr, Text b1.1-fr}, ctext LocalisationCH_V2.MultilingualMText {LocalisedText LocalisationCH_V2.LocalisedMText {Language de, Text b1.1-de}}, dtext LocalisationCH_V2.LocalisedMText {Language fr, Text b1.1-fr}}"
                 , objB11.toString());
+
+        IomObject objUri = objects.get("uri1.1");
+        assertNotNull(objUri);
+        Assert.assertEquals("MultilingualText_V2.TestA.ClassUri oid uri1.1 {localised LocalisationCH_V2.LocalisedUri {Language en, Text http://localhost/uri1.1-en}, multilingual LocalisationCH_V2.MultilingualUri {LocalisedText [LocalisationCH_V2.LocalisedUri {Language de, Text http://localhost/uri1.1-de}, LocalisationCH_V2.LocalisedUri {Language fr, Text http://localhost/uri1.1-fr}]}}"
+                , objUri.toString());
     }
 }

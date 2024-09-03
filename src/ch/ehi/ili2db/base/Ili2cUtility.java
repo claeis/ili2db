@@ -170,34 +170,15 @@ public class Ili2cUtility {
 		return false;
 	}
 
-    public static boolean isLocalisedMTextAttr(TransferDescription td,
-            AttributeDef attr) {
-        Type typeo=attr.getDomain();
-        if(typeo instanceof CompositionType){
-            CompositionType type=(CompositionType)attr.getDomain();
-            if(type.getCardinality().getMaximum()==1){
-                if(isPureChbaseLocalisedMText(td, attr)){
-                    return true;
-                }
-                Table struct=type.getComponentType();
-                if(IliMetaAttrNames.METAATTR_MAPPING_LOCALISED.equals(struct.getMetaValue(IliMetaAttrNames.METAATTR_MAPPING))){
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-    public static boolean isPureChbaseLocalisedMText(TransferDescription td,
-            AttributeDef attr) {
-        return isPureChbaseLocalisedText(td, attr, IliNames.CHBASE1_LOCALISEDMTEXT);
-    }
     public static boolean isLocalisedTextAttr(TransferDescription td,
             AttributeDef attr) {
         Type typeo=attr.getDomain();
         if(typeo instanceof CompositionType){
             CompositionType type=(CompositionType)attr.getDomain();
             if(type.getCardinality().getMaximum()==1){
-                if(isPureChbaseLocalisedText(td, attr)){
+                if(isPureChbaseLocalisedText(td, attr)
+                        || isPureChbaseLocalisedMText(td, attr)
+                        || isPureChbaseLocalisedUri(td, attr)){
                     return true;
                 }
                 Table struct=type.getComponentType();
@@ -208,9 +189,14 @@ public class Ili2cUtility {
         }
         return false;
     }
-    public static boolean isPureChbaseLocalisedText(TransferDescription td,
-                AttributeDef attr) {
+    public static boolean isPureChbaseLocalisedText(TransferDescription td, AttributeDef attr) {
         return isPureChbaseLocalisedText(td, attr, IliNames.CHBASE1_LOCALISEDTEXT);
+    }
+    public static boolean isPureChbaseLocalisedMText(TransferDescription td, AttributeDef attr) {
+        return isPureChbaseLocalisedText(td, attr, IliNames.CHBASE1_LOCALISEDMTEXT);
+    }
+    public static boolean isPureChbaseLocalisedUri(TransferDescription td, AttributeDef attr) {
+        return isPureChbaseLocalisedText(td, attr, IliNames.CHBASE2_LOCALISEDURI);
     }
     private static boolean isPureChbaseLocalisedText(TransferDescription td,
             AttributeDef attr,String textType) {
@@ -256,7 +242,9 @@ public class Ili2cUtility {
         if(typeo instanceof CompositionType){
             CompositionType type=(CompositionType)attr.getDomain();
             if(type.getCardinality().getMaximum()==1){
-                if(isPureChbaseMultilingualText(td, attr)){
+                if(isPureChbaseMultilingualText(td, attr)
+                        || isPureChbaseMultilingualMText(td, attr)
+                        || isPureChbaseMultilingualUri(td, attr)){
                     return true;
                 }
                 Table struct=type.getComponentType();
@@ -267,30 +255,14 @@ public class Ili2cUtility {
         }
         return false;
     }
-	public static boolean isPureChbaseMultilingualText(TransferDescription td,
-				AttributeDef attr) {
+	public static boolean isPureChbaseMultilingualText(TransferDescription td, AttributeDef attr) {
 		return isPureChbaseMultilingualText(td, attr, IliNames.CHBASE1_MULTILINGUALTEXT);
 	}
-    public static boolean isMultilingualMTextAttr(TransferDescription td,
-            AttributeDef attr) {
-        Type typeo=attr.getDomain();
-        if(typeo instanceof CompositionType){
-            CompositionType type=(CompositionType)attr.getDomain();
-            if(type.getCardinality().getMaximum()==1){
-                if(isPureChbaseMultilingualMText(td, attr)){
-                    return true;
-                }
-                Table struct=type.getComponentType();
-                if(IliMetaAttrNames.METAATTR_MAPPING_MULTILINGUAL.equals(struct.getMetaValue(IliMetaAttrNames.METAATTR_MAPPING))){
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-    public static boolean isPureChbaseMultilingualMText(TransferDescription td,
-            AttributeDef attr) {
+    public static boolean isPureChbaseMultilingualMText(TransferDescription td, AttributeDef attr) {
         return isPureChbaseMultilingualText(td, attr, IliNames.CHBASE1_MULTILINGUALMTEXT);
+    }
+    public static boolean isPureChbaseMultilingualUri(TransferDescription td, AttributeDef attr) {
+        return isPureChbaseMultilingualText(td, attr, IliNames.CHBASE2_MULTILINGUALURI);
     }
 	private static boolean isPureChbaseMultilingualText(TransferDescription td,
 			AttributeDef attr,String textType) {
