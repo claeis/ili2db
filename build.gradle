@@ -6,7 +6,7 @@ apply plugin: "maven"
 
 
 if(!JavaVersion.current().isJava8()){
-  compileJava.options.compilerArgs.addAll(['--release', '6'])
+  compileJava.options.compilerArgs.addAll(['--release', '8'])
 }else{
   sourceCompatibility = JavaVersion.VERSION_1_8 
   targetCompatibility = JavaVersion.VERSION_1_8
