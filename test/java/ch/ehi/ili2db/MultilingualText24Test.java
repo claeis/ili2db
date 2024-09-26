@@ -51,7 +51,6 @@ public abstract class MultilingualText24Test {
 
     protected AbstractTestSetup setup = createTestSetup();
     protected abstract AbstractTestSetup createTestSetup();
-    protected abstract String qualifyTableName(String tableName);
 
     @Test
     public void importIliSmartChbaseV2() throws Exception {
@@ -85,7 +84,7 @@ public abstract class MultilingualText24Test {
     private void assertTrafoEntries(Connection connection) throws SQLException {
         assertTableContainsValues(
                 connection,
-                qualifyTableName(DbNames.TRAFO_TAB),
+                setup.prefixName(DbNames.TRAFO_TAB),
                 new String[] {
                         DbNames.TRAFO_TAB_ILINAME_COL,
                         DbNames.TRAFO_TAB_TAG_COL,
@@ -144,7 +143,7 @@ public abstract class MultilingualText24Test {
                 + ",btext,btext_lang"
                 + ",ctext,ctext_de,ctext_fr,ctext_it,ctext_rm,ctext_en"
                 + ",dtext,dtext_lang"
-                + " FROM " + qualifyTableName(tableName) + " WHERE t_ili_tid = '" + tid + "'"));
+                + " FROM " + setup.prefixName(tableName) + " WHERE t_ili_tid = '" + tid + "'"));
 
         ResultSet rs = stmt.getResultSet();
         Assert.assertTrue(rs.next());
@@ -158,7 +157,7 @@ public abstract class MultilingualText24Test {
         Assert.assertTrue(stmt.execute("SELECT"
                 + " multilingual,multilingual_de,multilingual_fr,multilingual_it,multilingual_rm,multilingual_en"
                 + ",localised,localised_lang"
-                + " FROM " + qualifyTableName(tableName) + " WHERE t_ili_tid = '" + tid + "'"));
+                + " FROM " + setup.prefixName(tableName) + " WHERE t_ili_tid = '" + tid + "'"));
 
         ResultSet rs = stmt.getResultSet();
         Assert.assertTrue(rs.next());

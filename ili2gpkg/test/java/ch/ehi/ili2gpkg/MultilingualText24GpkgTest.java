@@ -10,9 +10,4 @@ public class MultilingualText24GpkgTest extends ch.ehi.ili2db.MultilingualText24
     protected AbstractTestSetup createTestSetup() {
         return new GpkgTestSetup(GPKG_FILENAME, DB_URL);
     }
-
-    @Override
-    protected String qualifyTableName(String tableName) {
-        return tableName;
-    }
 }
