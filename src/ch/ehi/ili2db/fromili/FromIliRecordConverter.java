@@ -1412,7 +1412,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 
     private boolean isMultilingualTextAttr(TransferDescription td,
 			AttributeDef attr) {
-		if(Ili2cUtility.isMultilingualTextAttr(td, attr) || Ili2cUtility.isMultilingualMTextAttr(td, attr)){
+		if(Ili2cUtility.isMultilingualTextAttr(td, attr)){
 			CompositionType type=(CompositionType)attr.getDomain();
 			if(type.getCardinality().getMaximum()==1){
 				return true;
@@ -1422,7 +1422,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 	}
     private boolean isLocalisedTextAttr(TransferDescription td,
             AttributeDef attr) {
-        if(Ili2cUtility.isLocalisedTextAttr(td, attr) || Ili2cUtility.isLocalisedMTextAttr(td, attr)){
+        if(Ili2cUtility.isLocalisedTextAttr(td, attr)){
             CompositionType type=(CompositionType)attr.getDomain();
             if(type.getCardinality().getMaximum()==1){
                 return true;
