@@ -79,7 +79,6 @@ import ch.interlis.ili2c.metamodel.Table;
 import ch.interlis.ili2c.metamodel.Topic;
 import ch.interlis.ili2c.metamodel.TransferDescription;
 import ch.interlis.ili2c.metamodel.Type;
-import ch.interlis.ili2c.metamodel.TypeAlias;
 import ch.interlis.ili2c.metamodel.View;
 import ch.interlis.ili2c.metamodel.Viewable;
 import ch.interlis.ili2c.metamodel.ViewableTransferElement;
@@ -1053,7 +1052,7 @@ public class TransferFromIli {
 					}
 				}else if(entro instanceof Domain){
 					Domain domain=(Domain)entro;
-					if(isBooleanDomain(domain)){
+					if(Ili2cUtility.isBoolean(td, domain.getType())){
 						continue;
 					}
 					thisSqlName=getSqlTableName(domain);
@@ -1117,7 +1116,7 @@ public class TransferFromIli {
                     }
                 }else if(entro instanceof Domain){
                     Domain domain=(Domain)entro;
-                    if(isBooleanDomain(domain)){
+                    if(Ili2cUtility.isBoolean(td, domain.getType())){
                         continue;
                     }
                     domain=Ili2cUtility.getRootBaseDomain(domain);
@@ -1343,7 +1342,7 @@ public class TransferFromIli {
 	                        updateEnumEntries(null,exstEntries,sqlName, insPrepStmt,EnumValueMap.createEnumValueMap(attr, ili2sqlName), type.isOrdered(),thisClass, baseClass);
 	                    }else if(entro instanceof Domain){
 	                        Domain domain=(Domain)entro;
-	                        if(isBooleanDomain(domain)){
+	                        if(Ili2cUtility.isBoolean(td, domain.getType())){
 	                            continue;
 	                        }
 	                        AbstractEnumerationType type=(AbstractEnumerationType)domain.getType();
@@ -1390,7 +1389,7 @@ public class TransferFromIli {
                         updateEnumEntries(gen,exstEntries,sqlName,null, EnumValueMap.createEnumValueMap(attr, ili2sqlName), type.isOrdered(),thisClass, baseClass);
                     }else if(entro instanceof Domain){
                         Domain domain=(Domain)entro;
-                        if(isBooleanDomain(domain)){
+                        if(Ili2cUtility.isBoolean(td, domain.getType())){
                             continue;
                         }
                         AbstractEnumerationType type=(AbstractEnumerationType)domain.getType();
@@ -1458,7 +1457,7 @@ public class TransferFromIli {
 				
 			}else if(entro instanceof Domain){
 				Domain domain=(Domain)entro;
-				if(isBooleanDomain(domain)){
+				if(Ili2cUtility.isBoolean(td, domain.getType())){
 					continue;
 				}
 				AbstractEnumerationType type=(AbstractEnumerationType)domain.getType();
@@ -1549,7 +1548,7 @@ public class TransferFromIli {
                 
             }else if(entro instanceof Domain){
                 Domain domain=(Domain)entro;
-                if(isBooleanDomain(domain)){
+                if(Ili2cUtility.isBoolean(td, domain.getType())){
                     continue;
                 }
                 AbstractEnumerationType type=(AbstractEnumerationType)domain.getType();
@@ -2025,22 +2024,5 @@ public class TransferFromIli {
             }
         }
         return null;
-    }
-
-    /**
-     * Checks whether the {@code domain} is equal to or derives from {@code INTERLIS.BOOLEAN}.
-     */
-    private boolean isBooleanDomain(Domain domain) {
-        if (domain == td.INTERLIS.BOOLEAN) {
-            return true;
-        }
-
-        Type type = domain.getType();
-        if (type instanceof TypeAlias) {
-            Domain aliasedDomain = ((TypeAlias) type).getAliasing();
-            return isBooleanDomain(aliasedDomain);
-        }
-
-        return false;
     }
 }
