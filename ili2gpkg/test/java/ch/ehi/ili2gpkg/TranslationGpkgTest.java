@@ -4,7 +4,6 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 import ch.ehi.ili2db.AbstractTestSetup;
-import ch.ehi.ili2pg.PgTestSetup;
 
 public class TranslationGpkgTest extends ch.ehi.ili2db.TranslationTest {
     

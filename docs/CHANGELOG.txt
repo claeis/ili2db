@@ -16,6 +16,7 @@ ili2db 5.2.0 (2024-08-xx)
 - fixed "no dburl given" but dburl is not mentioned in the documentation (#539)
 - readme.txt in ili2gpkg-download (#531)
 - new function --exportMetaConfig (#516)
+- new function --createNlsTab (#350)
 - ili2c-5.6.0+
 - iox-ili-1.23.2+
 
