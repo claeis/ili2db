@@ -7,6 +7,8 @@ MODEL Enum23
     Enum1 = (Test1, Test2_ele, Test3 (ele1, ele_2),
             !!@ili2db.dispName=testelevier
             Test4_ele);
+
+    BooleanDomain = BOOLEAN;
     
   TOPIC TestA =
     
@@ -17,6 +19,7 @@ MODEL Enum23
     	    !!@ili2db.dispName=Attr3_elevier
              Test4_ele);
 	attr4 : BOOLEAN;
+        attr5 : BooleanDomain;
     END ClassA1;
     
   END TestA;
@@ -33,6 +36,8 @@ MODEL Enum23_fr (fr)
     Enum1_fr = (Test1_fr, Test2_ele_fr, Test3_fr (ele1_fr, ele_2_fr),
             !!@ili2db.dispName_fr=testelevier_fr
             Test4_ele_fr);
+
+    BooleanDomain_fr = BOOLEAN;
     
   TOPIC TestA_fr =
     
@@ -43,6 +48,7 @@ MODEL Enum23_fr (fr)
     	    !!@ili2db.dispName=Attr3_elevier_fr
              Test4_ele_fr);
 	attr4_fr : BOOLEAN;
+        attr5_fr : BooleanDomain_fr;
     END ClassA1_fr;
     
   END TestA_fr;
