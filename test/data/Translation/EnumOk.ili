@@ -104,6 +104,9 @@ TRANSLATION OF EnumOkX [ "1"]
 	
 	TOPIC TopicA =
 
+		/** ilidoc Class A
+		 */
+		 !!@ ili2db.dispName_de="Class A"
 		CLASS ClassA =
 			attrA : (a1,a2(a21,a22));
 			attrA2 : Basis.Struct;

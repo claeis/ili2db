@@ -4,6 +4,7 @@ public class Ili2dbMetaConfig {
     public static final String CREATE_TYPE_CONSTRAINT = "createTypeConstraint";
     public static final String ILI_META_ATTRS = "iliMetaAttrs";
     public static final String CREATE_META_INFO = "createMetaInfo";
+    public static final String CREATE_NLS_TAB = "createNlsTab";
     public static final String TRANSLATION = "translation";
     public static final String VER3_TRANSLATION = "ver3-translation";
     public static final String ILIGML20 = "ILIGML20";

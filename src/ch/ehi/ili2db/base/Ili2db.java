@@ -60,6 +60,7 @@ import ch.ehi.ili2db.mapping.Viewable2TableMapper;
 import ch.ehi.ili2db.mapping.Viewable2TableMapping;
 import ch.ehi.ili2db.toxtf.TransferToXtf;
 import ch.ehi.ili2db.metaattr.MetaAttrUtility;
+import ch.ehi.ili2db.nls.NlsUtility;
 import ch.ehi.sqlgen.DbUtility;
 import ch.ehi.sqlgen.generator.Generator;
 import ch.ehi.sqlgen.generator.GeneratorDriver;
@@ -739,6 +740,9 @@ public class Ili2db {
 						if(config.getCreateMetaInfo()){
 							MetaAttrUtility.addMetaAttributesTable(schema);
 						}
+	                    if(config.getCreateNlsTab()){
+	                        NlsUtility.addNlsTable(schema);
+	                    }
 						
 						GeneratorDriver drv=new GeneratorDriver(gen);
 						drv.visitSchema(config,schema);
@@ -762,6 +766,10 @@ public class Ili2db {
                                 MetaAttrUtility.updateMetaAttributesTable(insertCollector,conn, config.getDbschema(), td,mapping);
                                 // set elements' meta-attributes
                                 MetaAttrUtility.addMetaAttrsFromDb(td, conn, config.getDbschema());
+                            }
+                            if(config.getCreateNlsTab()){
+                                // update NLS table
+                                NlsUtility.updateNlsTable(insertCollector,conn, config.getDbschema(), td,mapping);
                             }
 						}
 	                        // create script requested by user?
@@ -1575,6 +1583,10 @@ public class Ili2db {
 					if(config.getCreateMetaInfo()){
 						MetaAttrUtility.addMetaAttributesTable(schema);
 					}
+					
+                    if(config.getCreateNlsTab()){
+                        NlsUtility.addNlsTable(schema);
+                    }
 				}
 				
 				// TODO create geodb domains
@@ -1612,6 +1624,10 @@ public class Ili2db {
                         if(conn!=null) {
                             MetaAttrUtility.addMetaAttrsFromDb(td, conn, config.getDbschema());
                         }
+                    }
+                    if(config.getCreateNlsTab()){
+                        // update NLS table
+                        NlsUtility.updateNlsTable(insertCollector,conn, config.getDbschema(), td,mapping);
                     }
                 }
 				
@@ -1924,6 +1940,8 @@ public class Ili2db {
                     config.setIli1Translation(value);
                 } else if (arg.equals(Ili2dbMetaConfig.CREATE_META_INFO)) {
                     config.setCreateMetaInfo(parseBooleanArgument(value));
+                } else if (arg.equals(Ili2dbMetaConfig.CREATE_NLS_TAB)) {
+                    config.setCreateNlsTab(parseBooleanArgument(value));
                 } else if (arg.equals(Ili2dbMetaConfig.ILI_META_ATTRS)) {
                     config.setIliMetaAttrsFile(value);
                 } else if (arg.equals(Ili2dbMetaConfig.CREATE_TYPE_CONSTRAINT)) {
@@ -2032,6 +2050,7 @@ public class Ili2db {
         metaConfig.setConfigValue(Ili2dbMetaConfig.SECTION_ILI2DB, Ili2dbMetaConfig.VER3_TRANSLATION,writeBooleanArgument(config.isVer3_translation()));
         metaConfig.setConfigValue(Ili2dbMetaConfig.SECTION_ILI2DB, Ili2dbMetaConfig.TRANSLATION,config.getIli1Translation());
         metaConfig.setConfigValue(Ili2dbMetaConfig.SECTION_ILI2DB, Ili2dbMetaConfig.CREATE_META_INFO,writeBooleanArgument(config.getCreateMetaInfo()));
+        metaConfig.setConfigValue(Ili2dbMetaConfig.SECTION_ILI2DB, Ili2dbMetaConfig.CREATE_NLS_TAB,writeBooleanArgument(config.getCreateNlsTab()));
         metaConfig.setConfigValue(Ili2dbMetaConfig.SECTION_ILI2DB, Ili2dbMetaConfig.ILI_META_ATTRS,config.getIliMetaAttrsFile());
         metaConfig.setConfigValue(Ili2dbMetaConfig.SECTION_ILI2DB, Ili2dbMetaConfig.CREATE_TYPE_CONSTRAINT,writeBooleanArgument(config.getCreateTypeConstraint()));
         

@@ -107,6 +107,7 @@ public class Config extends Settings {
 	public static final String ILI1TRANSLATION=PREFIX+".ili1translation";
 	public static final String DELETE_DATA="data";
 	public static final String CREATE_META_INFO=PREFIX+".createMetaInfo";
+    public static final String CREATE_NLS_TAB=PREFIX+".createNlsTab";
 	public static final String USE_EPGS_IN_NAMES=PREFIX+".useEpsgInNames";
 	public static final String SRS_MODEL_ASSIGNMENT=PREFIX+".srsModelAssignment";
 	public static final String MODELS_TAB_MODELNAME_COLSIZE = PREFIX+".modelsTabModelnameColSize";
@@ -810,6 +811,12 @@ public class Config extends Settings {
 	public boolean getCreateMetaInfo() {
 		return TRUE.equalsIgnoreCase(getValue(CREATE_META_INFO))?true:false;
 	}
+    public void setCreateNlsTab(boolean value) {
+        setValue(CREATE_NLS_TAB,value?TRUE:FALSE);
+    }
+    public boolean getCreateNlsTab() {
+        return TRUE.equalsIgnoreCase(getValue(CREATE_NLS_TAB))?true:false;
+    }
 	public String getIliMetaAttrsFile() {
 		return getTransientValue(TRANSIENT_STRING_ILIMETAATTRSFILE);
 	}
