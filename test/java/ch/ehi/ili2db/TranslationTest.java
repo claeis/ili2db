@@ -61,6 +61,7 @@ public abstract class TranslationTest {
 				config.setModels("EnumOkA;EnumOkB");
 				config.setVer3_translation(false);
 				config.setCreateNlsTab(true);
+                config.setCreateMetaInfo(true);
 				Ili2db.readSettingsFromDb(config);
 				Ili2db.run(config,null);
 				// class[a] is imported
