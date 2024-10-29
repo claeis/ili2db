@@ -77,12 +77,28 @@ public abstract class TranslationTest {
 					ResultSet rs=stmt.getResultSet();
 					Assert.assertFalse(rs.next());
 				}
-                Assert.assertTrue(stmt.execute("SELECT t_ili2db_nls."+DbNames.NLS_TAB_LABEL_COL+", t_ili2db_nls."+DbNames.NLS_TAB_DESCRIPTION_COL+" FROM "+setup.prefixName("t_ili2db_nls")+" WHERE t_ili2db_nls."+DbNames.NLS_TAB_ILIELEMENT_COL+" = 'EnumOkX.TopicX.ClassX' AND t_ili2db_nls."+DbNames.NLS_TAB_LANG_COL+" = 'de'"));
+                Assert.assertTrue(stmt.execute("SELECT "+DbNames.NLS_TAB+"."+DbNames.NLS_TAB_LABEL_COL+", "+DbNames.NLS_TAB+"."+DbNames.NLS_TAB_DESCRIPTION_COL+" FROM "+setup.prefixName(DbNames.NLS_TAB)+" WHERE "+DbNames.NLS_TAB+"."+DbNames.NLS_TAB_ILIELEMENT_COL+" = 'EnumOkX.TopicX.ClassX' AND "+DbNames.NLS_TAB+"."+DbNames.NLS_TAB_LANG_COL+" = 'de'"));
                 {
                     ResultSet rs=stmt.getResultSet();
                     Assert.assertTrue(rs.next());
                     Assert.assertEquals("Class A",rs.getString(1));
                     Assert.assertEquals("ilidoc Class A",rs.getString(2));
+                }
+                // Domain Enum
+                Assert.assertTrue(stmt.execute("SELECT "+DbNames.NLS_TAB+"."+DbNames.NLS_TAB_LABEL_COL+", "+DbNames.NLS_TAB+"."+DbNames.NLS_TAB_DESCRIPTION_COL+" FROM "+setup.prefixName(DbNames.NLS_TAB)+" WHERE "+DbNames.NLS_TAB+"."+DbNames.NLS_TAB_ILIELEMENT_COL+" = 'EnumOkX.TopicX.ClassX.attrX.x1' AND "+DbNames.NLS_TAB+"."+DbNames.NLS_TAB_LANG_COL+" = 'de'"));
+                {
+                    ResultSet rs=stmt.getResultSet();
+                    Assert.assertTrue(rs.next());
+                    Assert.assertEquals("a1",rs.getString(1));
+                    Assert.assertEquals(null,rs.getString(2));
+                }
+                // Attr Enum
+                Assert.assertTrue(stmt.execute("SELECT "+DbNames.NLS_TAB+"."+DbNames.NLS_TAB_LABEL_COL+", "+DbNames.NLS_TAB+"."+DbNames.NLS_TAB_DESCRIPTION_COL+" FROM "+setup.prefixName(DbNames.NLS_TAB)+" WHERE "+DbNames.NLS_TAB+"."+DbNames.NLS_TAB_ILIELEMENT_COL+" = 'EnumOkX.DomainX.x1' AND "+DbNames.NLS_TAB+"."+DbNames.NLS_TAB_LANG_COL+" = 'de'"));
+                {
+                    ResultSet rs=stmt.getResultSet();
+                    Assert.assertTrue(rs.next());
+                    Assert.assertEquals("a1",rs.getString(1));
+                    Assert.assertEquals(null,rs.getString(2));
                 }
                 {
                     // t_ili2db_attrname
