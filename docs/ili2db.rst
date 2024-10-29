@@ -1719,6 +1719,8 @@ Metadaten
 +-----------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | t\_ili2db\_column_prop      | Weitere Angaben zu den DB-Spalten aus dem Interlis Modell (z.B. ob es MTEXT ist). Wird nur erstellt mit Option --createMetaInfo.                                                                                                     |
 +-----------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| t\_ili2db\_nls              | Mehrsprechige Daten je Modell-Element; z.B. der Name . Wird nur erstellt mit der Option --createNlsTab.                                                                                                                              |
++-----------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | t\_ili2db\_meta\_attrs      | Interlis-Meta-Attribute (auch für Modell-Elemente, denen kein DB-Element entspricht; z.B. die einem FK gegenüberliegende Rolle). Wird nur erstellt mit der Option --createMetaInfo.                                                  |
 +-----------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | t\_key\_object              | Hilfstabelle für den ID-Generator. Wird beim Export nicht benötigt.                                                                                                                                                                  |
@@ -1813,6 +1815,21 @@ sie beliebige (auch zukünftige) Werte/Zusatzangaben aufnehmen kann.
 |                                    | OID-Wertebereichs (z.B. INTERLIS.UUIDOID)                     |
 +------------------------------------+---------------------------------------------------------------+
 
+t\_ili2db\_nls
+......................
+Mehrsprechige Daten je Modell-Element. 
+Wird nur erstellt mit der Option ``--createNlsTab``.
+
+- ilielement Qualifizierter Name des betroffenen Interlis-Elements in der Wurzel-Original-Sprache (dem Modell, das keine Übersetzung ist)
+- lang Sprachcode
+- uivariant Code für unterschiedliche Benutzer-Schnittstellen  (z.B. kleiner/grosser Bildschirm) (``ili`` für Einträge die durch den Modellimport erzeugt werden)
+- label Name des Elementes (oder Meta-Attrubut ili2db.dispName (bzw. ili2db.dispName_{LANG}) falls vorhanden)
+- mnemonic Tastenkürzel oder Kurzname des Elementes
+- tooltip kurze Beschreibung des Elementes
+- descr längere Beschreibung des Elementes
+- symbol Symbol des Elementes(z.B. für Werkzeugleiste)
+
+
 t\_ili2db\_table_prop
 ......................
 Weitere Angaben zu den DB-Tabellen aus dem Interlis Modell (z.B. ob es 
@@ -1860,6 +1877,11 @@ Meta-Attribute generiert:
 +------------------------------------+---------------------------------------------------------------+
 | Tag                                | Beschreibung                                                  |
 +====================================+===============================================================+
+| ``ili2db.ili.lang``                | Sprache der Namen der Modellelemente (gemäss INTERLIS-Modell).|
++------------------------------------+---------------------------------------------------------------+
+| ``ili2db.ili.translationOf ``      | Names des Modells in der Ursprungssprache, falls es           |
+|                                    | übersetzt ist (``TRANLSLATION OF``)                           |
++------------------------------------+---------------------------------------------------------------+
 | ``ili2db.ili.topicClasses``        | Lister der in einem Behälter möglichen Objekte                |
 |                                    | (als Leerzeichen getrennte Liste der SQL-Namen der Klassen)   |
 +------------------------------------+---------------------------------------------------------------+
