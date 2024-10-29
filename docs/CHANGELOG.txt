@@ -17,6 +17,8 @@ ili2db 5.2.0 (2024-08-xx)
 - readme.txt in ili2gpkg-download (#531)
 - new function --exportMetaConfig (#516)
 - new function --createNlsTab (#350)
+- fix BOOLEAN with --createEnumTabs (#543)
+- support CHBase V2 Localisation smart mapping (#547)
 - ili2c-5.6.0+
 - iox-ili-1.23.2+
 
