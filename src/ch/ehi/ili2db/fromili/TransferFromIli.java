@@ -883,18 +883,18 @@ public class TransferFromIli {
 			
 			recConv.addKeyCol(tab);
 			
-			DbColId dbColBasket=new DbColId();
-			dbColBasket.setName(DbNames.IMPORTS_TAB_DATASET_COL);
-			dbColBasket.setNotNull(true);
-			dbColBasket.setScriptComment("REFERENCES "+DbNames.DATASETS_TAB);
+			DbColId dbColDataset=new DbColId();
+			dbColDataset.setName(DbNames.IMPORTS_TAB_DATASET_COL);
+			dbColDataset.setNotNull(true);
+			dbColDataset.setScriptComment("REFERENCES "+DbNames.DATASETS_TAB);
 			if(false && createFk){
 				// do not create ref so that entry in dataset table can be deleted without deleting import stat
-				dbColBasket.setReferencedTable(new DbTableName(schema.getName(),DbNames.DATASETS_TAB));
+				dbColDataset.setReferencedTable(new DbTableName(schema.getName(),DbNames.DATASETS_TAB));
 			}
 			if(createFkIdx){
-				dbColBasket.setIndex(true);
+				dbColDataset.setIndex(true);
 			}
-			tab.addColumn(dbColBasket);
+			tab.addColumn(dbColDataset);
 			
 			DbColDateTime dbColImpDate=new DbColDateTime();
 			dbColImpDate.setName(DbNames.IMPORTS_TAB_IMPORTDATE_COL);
@@ -937,7 +937,8 @@ public class TransferFromIli {
 			dbColBasket.setName(DbNames.IMPORTS_BASKETS_TAB_BASKET_COL);
 			dbColBasket.setNotNull(true);
 			dbColBasket.setScriptComment("REFERENCES "+DbNames.BASKETS_TAB);
-			if(createFk){
+			if(false && createFk){
+                // do not create ref so that entry in dataset table can be deleted without deleting import stat
 				dbColBasket.setReferencedTable(new DbTableName(schema.getName(),DbNames.BASKETS_TAB));
 			}
 			if(createFkIdx){
