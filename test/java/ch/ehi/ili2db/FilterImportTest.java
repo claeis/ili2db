@@ -8,6 +8,8 @@ import java.sql.Statement;
 import java.util.HashMap;
 import org.junit.Assert;
 import org.junit.Test;
+
+import ch.ehi.ili2db.base.DbNames;
 import ch.ehi.ili2db.base.Ili2db;
 import ch.ehi.ili2db.gui.Config;
 import ch.interlis.iom.IomObject;
@@ -19,49 +21,23 @@ import ch.interlis.iox.ObjectEvent;
 import ch.interlis.iox.StartBasketEvent;
 import ch.interlis.iox.StartTransferEvent;
 
-//-Ddburl=jdbc:postgresql:dbname -Ddbusr=usrname -Ddbpwd=1234
-public class FilterImportTest {
+public abstract class FilterImportTest {
 	
-	private static final String DBSCHEMA = "FilterImport";
-	private static final String TEST_OUT = "test/data/FilterImport/";
-	Connection jdbcConnection=null;
-	Statement stmt=null;
+	protected static final String TEST_OUT = "test/data/FilterImport/";
 	
-	String dburl=System.getProperty("dburl"); 
-	String dbuser=System.getProperty("dbusr");
-	String dbpwd=System.getProperty("dbpwd"); 
+    protected AbstractTestSetup setup=createTestSetup();
+    protected abstract AbstractTestSetup createTestSetup() ;
 	
-	public Config initConfig(String xtfFilename,String dbschema,String logfile) {
-		Config config=new Config();
-		new ch.ehi.ili2pg.PgMain().initConfig(config);
-		config.setDburl(dburl);
-		config.setDbusr(dbuser);
-		config.setDbpwd(dbpwd);
-		if(dbschema!=null){
-			config.setDbschema(dbschema);
-		}
-		if(logfile!=null){
-			config.setLogfile(logfile);
-		}
-		config.setXtffile(xtfFilename);
-		if(xtfFilename!=null && Ili2db.isItfFilename(xtfFilename)){
-			config.setItfTransferfile(true);
-		}
-		return config;
-	}
 	
 	@Test
 	public void importXtfByBID() throws Exception
 	{
 		Connection jdbcConnection=null;
 		try{
-		    Class driverClass = Class.forName("org.postgresql.Driver");
-	        jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
-	        stmt=jdbcConnection.createStatement();
-			stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");
+		    setup.resetDb();
 			{
 				File data=new File(TEST_OUT,"FilterImport1a.xtf");
-				Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+				Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
 		        Ili2db.setNoSmartMapping(config);
 				config.setFunction(Config.FC_IMPORT);
 		        config.setDoImplicitSchemaImport(true);
@@ -74,9 +50,13 @@ public class FilterImportTest {
 				Ili2db.readSettingsFromDb(config);
 				Ili2db.run(config,null);
 
+	            jdbcConnection=setup.createConnection();
+	            Statement stmt=null;
+	            stmt=jdbcConnection.createStatement();
+	            
 				// check that only one of the two classa1 object was imported
 				{
-					String stmtTxt="SELECT count(*) FROM "+DBSCHEMA+".classa1";
+					String stmtTxt="SELECT count(*) FROM "+setup.prefixName("classa1");
 					Assert.assertTrue(stmt.execute(stmtTxt));
 					ResultSet rs=stmt.getResultSet();
 					Assert.assertTrue(rs.next());
@@ -84,7 +64,7 @@ public class FilterImportTest {
 				}
 				// check that no classb1 object was imported
 				{
-					String stmtTxt="SELECT count(*) FROM "+DBSCHEMA+".classb1";
+					String stmtTxt="SELECT count(*) FROM "+setup.prefixName("classb1");
 					Assert.assertTrue(stmt.execute(stmtTxt));
 					ResultSet rs=stmt.getResultSet();
 					Assert.assertTrue(rs.next());
@@ -104,14 +84,10 @@ public class FilterImportTest {
 		{
 			importXtfByBID();
 		}
-		Connection jdbcConnection=null;
 		try{
-		    Class driverClass = Class.forName("org.postgresql.Driver");
-	        jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
-	        stmt=jdbcConnection.createStatement();
 			{
 				File data=new File(TEST_OUT,"FilterImport1a-out.xtf");
-				Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+				Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
 				config.setFunction(Config.FC_EXPORT);
 				config.setExportTid(true);
 				config.setBaskets("TestA1");
@@ -147,9 +123,6 @@ public class FilterImportTest {
 				 }
 	        }
 		}finally{
-			if(jdbcConnection!=null){
-				jdbcConnection.close();
-			}
 		}
 	}
 	
@@ -158,14 +131,10 @@ public class FilterImportTest {
 	{
 		Connection jdbcConnection=null;
 		try{
-		    Class driverClass = Class.forName("org.postgresql.Driver");
-	        jdbcConnection = DriverManager.getConnection(
-	        		dburl, dbuser, dbpwd);
-	        stmt=jdbcConnection.createStatement();
-			stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");
+            setup.resetDb();
 			{
 				File data=new File(TEST_OUT,"FilterImport1a.xtf");
-				Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+				Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
                 Ili2db.setNoSmartMapping(config);
 				config.setFunction(Config.FC_IMPORT);
 		        config.setDoImplicitSchemaImport(true);
@@ -177,9 +146,13 @@ public class FilterImportTest {
 				Ili2db.readSettingsFromDb(config);
 				Ili2db.run(config,null);
 		
+                jdbcConnection=setup.createConnection();
+                Statement stmt=null;
+                stmt=jdbcConnection.createStatement();
+                
 				// check that the classa1 objects from both baskets were imported
 				{
-					String stmtTxt="SELECT count(*) FROM "+DBSCHEMA+".classa1";
+					String stmtTxt="SELECT count(*) FROM "+setup.prefixName("classa1");
 					Assert.assertTrue(stmt.execute(stmtTxt));
 					ResultSet rs=stmt.getResultSet();
 					Assert.assertTrue(rs.next());
@@ -187,7 +160,7 @@ public class FilterImportTest {
 				}
 				// check that no classb1 object was imported
 				{
-					String stmtTxt="SELECT count(*) FROM "+DBSCHEMA+".classb1";
+					String stmtTxt="SELECT count(*) FROM "+setup.prefixName("classb1");
 					Assert.assertTrue(stmt.execute(stmtTxt));
 					ResultSet rs=stmt.getResultSet();
 					Assert.assertTrue(rs.next());
@@ -207,14 +180,10 @@ public class FilterImportTest {
 		{
 			importXtfByTopic();
 		}
-		Connection jdbcConnection=null;
 		try{
-		    Class driverClass = Class.forName("org.postgresql.Driver");
-	        jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
-	        stmt=jdbcConnection.createStatement();
 			{
 				File data=new File(TEST_OUT,"FilterImport1a-out.xtf");
-				Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+				Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
 				config.setFunction(Config.FC_EXPORT);
 				config.setExportTid(true);
 				config.setTopics("FilterImport.TestA");
@@ -251,9 +220,47 @@ public class FilterImportTest {
 				 }
 	        }
 		}finally{
-			if(jdbcConnection!=null){
-				jdbcConnection.close();
-			}
 		}
 	}
+    @Test
+    public void importXtf24SkipBasket() throws Exception
+    {
+        Connection jdbcConnection=null;
+        try{
+            setup.resetDb();
+            {
+                File data=new File(TEST_OUT,"SkipBasket.xtf");
+                Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+                Ili2db.setNoSmartMapping(config);
+                config.setFunction(Config.FC_IMPORT);
+                config.setDoImplicitSchemaImport(true);
+                config.setCreateFk(Config.CREATE_FK_YES);
+                config.setTidHandling(Config.TID_HANDLING_PROPERTY);
+                config.setImportTid(true);
+                config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
+                config.setModels("SkipBasket");
+                config.setTopics("SkipBasket.TopicA");
+                config.setImportBid(true);
+                Ili2db.readSettingsFromDb(config);
+                Ili2db.run(config,null);
+
+                jdbcConnection=setup.createConnection();
+                Statement stmt=null;
+                stmt=jdbcConnection.createStatement();
+                
+                // check that only one basket was imported
+                {
+                    String stmtTxt="SELECT count(*) FROM "+setup.prefixName(DbNames.BASKETS_TAB);
+                    Assert.assertTrue(stmt.execute(stmtTxt));
+                    ResultSet rs=stmt.getResultSet();
+                    Assert.assertTrue(rs.next());
+                    Assert.assertEquals(1,rs.getInt(1));
+                }
+            }
+        }finally{
+            if(jdbcConnection!=null){
+                jdbcConnection.close();
+            }
+        }
+    }
 }

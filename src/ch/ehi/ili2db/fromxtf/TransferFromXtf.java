@@ -90,6 +90,7 @@ import ch.interlis.iox.IoxException;
 import ch.interlis.iox.IoxLogging;
 import ch.interlis.iox.IoxReader;
 import ch.interlis.iox.StartTransferEvent;
+import ch.interlis.iox_j.IoxIliReader;
 import ch.interlis.iox_j.IoxInvalidDataException;
 import ch.interlis.iox_j.ObjectEvent;
 import ch.interlis.iox_j.PipelinePool;
@@ -466,6 +467,14 @@ public class TransferFromXtf {
 				((ItfReader)reader).setBidPrefix(globals.datasetName);		
 			}else if(reader instanceof ItfReader2) {
 				((ItfReader2)reader).setBidPrefix(globals.datasetName);		
+			}
+			if(globals.limitedToTopics!=null && globals.limitedToTopics.size()>0 && reader instanceof IoxIliReader) {
+			    String topics[]=new String[globals.limitedToTopics.size()];
+			    int idx=0;
+			    for(String topic:globals.limitedToTopics) {
+			        topics[idx++]=topic;
+			    }
+			    ((IoxIliReader)reader).setTopicFilter(topics);
 			}
 
 			if(globals.validator!=null){

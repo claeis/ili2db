@@ -21,6 +21,7 @@ ili2db 5.2.0 (2024-08-xx)
 - support CHBase V2 Localisation smart mapping (#547)
 - new meta-attrs ili2db.ili.lang, ili2db.ili.translationOf
 - function --deleteData does not work with --createFk (#548)
+- fix filtering import of baskets from different models (#546)
 - ili2c-5.6.0+
 - iox-ili-1.23.2+
 
