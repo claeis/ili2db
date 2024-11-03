@@ -581,6 +581,36 @@ der Ili- und Itf-Datei, sämtliche Namen der importierten Tabellen inkl.
 Anzahl der importierten Elemente pro Tabelle. Allfällige Fehlermeldungen
 (bei Importabbruch) werden auch in die Logdatei geschrieben.
 
+Meta-Konfig-Funktionen
+----------------------
+
+Fall 6.1
+~~~~~~~~
+
+Die Konfiguration mit der die Datenbank erstellt wurde, wird als INI-Datei exportiert (``--exportMetaConfig``):
+
+**PostGIS:** ``java -jar ili2pg.jar --exportMetaConfig --dbhost
+ofaioi4531 --dbport 5432 --dbdatabase mogis --dbusr julia --dbpwd romeo --metaConfig  config.ini``
+
+**GeoPackage:** ``java -jar ili2gpkg.jar --exportMetaConfig --dbfile
+mogis.gpkg --metaConfig  config.ini``
+
+**FileGDB:** ``java -jar ili2fgdb.jar --exportMetaConfig --dbfile
+mogis.gdb --metaConfig  config.ini``
+
+Die erstellte INI-Datei ist nicht ganz vollständig. iliMetaAttrs, pre- und postScript werden nicht berücksichtigt.
+
+Mit Hilfe der INI-Datei kann danach die Datenbank neu erstellt werden:
+
+**PostGIS:** ``java -jar ili2pg.jar --schemaimport --dbhost
+ofaioi4531 --dbport 5432 --dbdatabase mogisNeu --dbusr julia --dbpwd romeo --metaConfig  config.ini``
+
+**GeoPackage:** ``java -jar ili2gpkg.jar --schemaimport --dbfile
+mogisNeu.gpkg --metaConfig  config.ini``
+
+**FileGDB:** ``java -jar ili2fgdb.jar --schemaimport --dbfile
+mogisNeu.gdb --metaConfig  config.ini``
+
 Referenz
 ========
 
@@ -644,6 +674,11 @@ Optionen:
 |                               | Die Optionen --topics und --baskets bedingen, dass das Datenbankschema mit der Option --createBasketCol erstellt wurde.                                                                                                                                                                                                                                                                                                                                                                                                                    |
 +-------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | --schemaimport                | Erstellt die Tabellenstruktur in der Datenbank (siehe Kapitel Abbildungsregeln).                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
++-------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| --exportMetaConfig            | Die Konfiguration mit der die Datenbank erstellt wurde, wird als INI-Datei exportiert.                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+|                               |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+|                               | Mit dem Parameter --metaConfig wird die Ziel-Datei definiert.                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+|                               | Die erstellte INI-Datei ist nicht ganz vollständig. iliMetaAttrs, pre- und postScript werden nicht berücksichtigt.                                                                                                                                                                                                                                                                                                                                                                                                                         |
 +-------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | --iliMetaAttrs filename       | Name der Konfigurationsdatei, die zusätzliche Interlis-Metaattribute enthält (Meta-Attribute, die in den ili-Dateien nicht enthalten sind).                                                                                                                                                                                                                                                                                                                                                                                                |
 |                               | ``filename`` kann auch die Form ``ilidata:DatesetId``  haben,                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
@@ -792,6 +827,8 @@ Optionen:
 +-------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | --createMetaInfo              | Erstellt zusätzliche Meta-Tabellen T_ILI2DB_TABLE_PROP, T_ILI2DB_COLUMN_PROP, T_ILI2DB_META_ATTRS mit weiteren Angaben aus dem Interlis Modell. (siehe Kapitel Metadaten)                                                                                                                                                                                                                                                                                                                                                                  |
 +-------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| --createNlsTab                | Erstellt eine zusätzliche Meta-Tabelle T_ILI2DB_NLS mit weiteren Angaben aus dem Interlis Modell für mehrsprachige Anwendungen.                                                                                                                                                                                                                                                                                                                                                                                                            |
++-------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | --beautifyEnumDispName        | Verschönert den Anzeigetext für das Aufzählelement. Beim Import wird die Spalte mit dem XTF-Code ohne Untersstriche befüllt ("Strasse befestigt" statt "Strasse_befestigt") (siehe Kapitel Abbildungsregeln/Aufzählungen)                                                                                                                                                                                                                                                                                                                  |
 +-------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | --createStdCols               | Erstellt in jeder Tabelle zusätzliche Metadatenspalten T\_User, T\_CreateDate, T\_LastChange. (siehe Kapitel Abbildungsregeln/Tabellen)                                                                                                                                                                                                                                                                                                                                                                                                    |
@@ -892,7 +929,7 @@ Optionen:
 | --logtime                     | Ergänzt die log-Meldungen in der Log-Datei mit Zeitstempeln.                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
 +-------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | --xtflog result.xtf           | Schreibt die log-Meldungen in eine INTERLIS 2-Datei.  Die Datei result.xtf entspricht dem Modell IliVErrors.                                                                                                                                                                                                                                                                                                                                                                                                                               |
-+---------------------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
++-------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | --proxy host                  | Definiert den Name des Hosts der als Proxy für den Zugriff auf Modell-Repositories benutzt werden soll.                                                                                                                                                                                                                                                                                                                                                                                                                                    |
 +-------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | --proxyPort port              | Port auf dem Proxy.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
@@ -1682,6 +1719,8 @@ Metadaten
 +-----------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | t\_ili2db\_column_prop      | Weitere Angaben zu den DB-Spalten aus dem Interlis Modell (z.B. ob es MTEXT ist). Wird nur erstellt mit Option --createMetaInfo.                                                                                                     |
 +-----------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| t\_ili2db\_nls              | Mehrsprechige Daten je Modell-Element; z.B. der Name . Wird nur erstellt mit der Option --createNlsTab.                                                                                                                              |
++-----------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | t\_ili2db\_meta\_attrs      | Interlis-Meta-Attribute (auch für Modell-Elemente, denen kein DB-Element entspricht; z.B. die einem FK gegenüberliegende Rolle). Wird nur erstellt mit der Option --createMetaInfo.                                                  |
 +-----------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | t\_key\_object              | Hilfstabelle für den ID-Generator. Wird beim Export nicht benötigt.                                                                                                                                                                  |
@@ -1776,6 +1815,21 @@ sie beliebige (auch zukünftige) Werte/Zusatzangaben aufnehmen kann.
 |                                    | OID-Wertebereichs (z.B. INTERLIS.UUIDOID)                     |
 +------------------------------------+---------------------------------------------------------------+
 
+t\_ili2db\_nls
+......................
+Mehrsprechige Daten je Modell-Element. 
+Wird nur erstellt mit der Option ``--createNlsTab``.
+
+- ilielement Qualifizierter Name des betroffenen Interlis-Elements in der Wurzel-Original-Sprache (dem Modell, das keine Übersetzung ist)
+- lang Sprachcode
+- uivariant Code für unterschiedliche Benutzer-Schnittstellen  (z.B. kleiner/grosser Bildschirm) (``ili`` für Einträge die durch den Modellimport erzeugt werden)
+- label Name des Elementes (oder Meta-Attrubut ili2db.dispName (bzw. ili2db.dispName_{LANG}) falls vorhanden)
+- mnemonic Tastenkürzel oder Kurzname des Elementes
+- tooltip kurze Beschreibung des Elementes
+- descr längere Beschreibung des Elementes
+- symbol Symbol des Elementes(z.B. für Werkzeugleiste)
+
+
 t\_ili2db\_table_prop
 ......................
 Weitere Angaben zu den DB-Tabellen aus dem Interlis Modell (z.B. ob es 
@@ -1823,6 +1877,11 @@ Meta-Attribute generiert:
 +------------------------------------+---------------------------------------------------------------+
 | Tag                                | Beschreibung                                                  |
 +====================================+===============================================================+
+| ``ili2db.ili.lang``                | Sprache der Namen der Modellelemente (gemäss INTERLIS-Modell).|
++------------------------------------+---------------------------------------------------------------+
+| ``ili2db.ili.translationOf ``      | Names des Modells in der Ursprungssprache, falls es           |
+|                                    | übersetzt ist (``TRANLSLATION OF``)                           |
++------------------------------------+---------------------------------------------------------------+
 | ``ili2db.ili.topicClasses``        | Lister der in einem Behälter möglichen Objekte                |
 |                                    | (als Leerzeichen getrennte Liste der SQL-Namen der Klassen)   |
 +------------------------------------+---------------------------------------------------------------+

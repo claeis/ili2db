@@ -69,7 +69,7 @@ public class GeneratorMysql extends GeneratorJdbc {
 	public void visitSchemaBegin(Settings config, DbSchema schema)
 			throws IOException {
 		super.visitSchemaBegin(config, schema);
-		if("True".equals(config.getValue(SqlConfiguration.CREATE_GEOM_INDEX))){
+		if("True".equalsIgnoreCase(config.getValue(SqlConfiguration.CREATE_GEOM_INDEX))){
 			createGeomIdx=true;
 		}
 	}

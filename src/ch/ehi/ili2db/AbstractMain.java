@@ -21,6 +21,7 @@ import ch.ehi.basics.logging.EhiLogger;
 import ch.ehi.ili2db.base.DbNames;
 import ch.ehi.ili2db.base.DbUrlConverter;
 import ch.ehi.ili2db.base.Ili2db;
+import ch.ehi.ili2db.base.Ili2dbException;
 import ch.ehi.ili2db.gui.AbstractDbPanelDescriptor;
 import ch.ehi.ili2db.gui.Config;
 import ch.ehi.ili2db.mapping.NameMapping;
@@ -142,6 +143,11 @@ public abstract class AbstractMain {
 					if (parseBooleanArgument(arg))
 						config.setFunction(Config.FC_EXPORT);
 					argi++;
+                } else if (isOption(arg, "--exportMetaConfig")) {
+                    if (parseBooleanArgument(arg)) {
+                        config.setFunction(Config.FC_EXPORT_METACONFIG);
+                    }
+                    argi++;
 				} else if (arg.equals("--export3")) {
 					if (parseBooleanArgument(arg)) {
 						config.setFunction(Config.FC_EXPORT);
@@ -474,6 +480,9 @@ public abstract class AbstractMain {
 				} else if (isOption(arg, "--createMetaInfo")) {
 					argi++;
 					config.setCreateMetaInfo(parseBooleanArgument(arg));
+                } else if (isOption(arg, "--createNlsTab")) {
+                    argi++;
+                    config.setCreateNlsTab(parseBooleanArgument(arg));
 				} else if (arg.equals("--version")) {
 					printVersion();
 					return;
@@ -505,7 +514,9 @@ public abstract class AbstractMain {
 					System.err.println("--replace              do a replace.");
 					System.err.println("--delete               do a delete.");
 					System.err.println("--export               do an export.");
-					System.err.println("--schemaimport         do an schema import.");
+                    System.err.println("--validate             validates the data in the db (without export).");
+					System.err.println("--schemaimport         do a schema import.");
+					System.err.println("--exportMetaConfig     exports a Meta-Config file of an existing db.");
 					System.err.println("--preScript file       before running a function, run a script.");
 					System.err.println("--postScript file      after running a function, run a script.");
 					System.err.println("--dbparams file        config file with connection parameters.");
@@ -591,6 +602,7 @@ public abstract class AbstractMain {
 					System.err.println("--ver3-translation     supports TRANSLATION OF in ili2db 3.x mode (incompatible with ili2db 4.x versions).");
 					System.err.println("--translation translatedModel=originModel assigns a translated model to its orginal language equivalent.");
 					System.err.println("--createMetaInfo       Create aditional ili-model information.");
+                    System.err.println("--createNlsTab         Create a helper table with multilingual data about model elements.");
 					System.err.println("--iliMetaAttrs file    Import meta-attributes from a .toml file (Requires --createMetaInfo)");
 					System.err.println("--createTypeConstraints   Create CHECK constraint on t_type columns.");
 					System.err.println("--plugins folder       directory with jar files that contain user defined functions.");
@@ -638,10 +650,15 @@ public abstract class AbstractMain {
 			runGUI(config);
 			Ili2db.writeAppSettings(settings);
 		}else{
-		    if(config.getFunction()!=Config.FC_SCRIPT) {
-	            config.setDburl(getDbUrlConverter().makeUrl(config));
-		    }
 			try {
+	            if(config.getFunction()!=Config.FC_SCRIPT) {
+	                final String dbUrl = getDbUrlConverter().makeUrl(config);
+	                config.setDburl(dbUrl);
+	                if(dbUrl==null) {
+	                    printConnectOptions();
+	                    throw new Ili2dbException("incomplete DB connect options given");
+	                }
+	            }
 	            if(config.getFunction()!=Config.FC_SCRIPT) {
 	                Ili2db.readSettingsFromDb(config);
 	            }

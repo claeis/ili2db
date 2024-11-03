@@ -1,12 +1,12 @@
 group 'ch.interlis'
-version '5.1.1'+System.getProperty('release','-SNAPSHOT')
+version '5.2.0'+System.getProperty('release','-SNAPSHOT')
 
 apply plugin: "java"
 apply plugin: "maven"
 
 
 if(!JavaVersion.current().isJava8()){
-  compileJava.options.compilerArgs.addAll(['--release', '6'])
+  compileJava.options.compilerArgs.addAll(['--release', '8'])
 }else{
   sourceCompatibility = JavaVersion.VERSION_1_8 
   targetCompatibility = JavaVersion.VERSION_1_8
@@ -49,6 +49,8 @@ def myusr = System.getProperty('myusr',properties.get('myusr'))
 def mypwd = System.getProperty('mypwd',properties.get('mypwd'))
 def python= System.getProperty('python',properties.get('python','python'))
 def rst2html= System.getProperty('rst2html',properties.get('rst2html','rst2html'))
+def docs_pwd = System.getProperty('docs_pwd',properties.get('docs_pwd','docs_pwd'))
+def docs_usr = System.getProperty('docs_usr',properties.get('docs_usr','docs_usr'))
     
 def generatedResources = "$buildDir/generated-resources/main"
 
@@ -323,9 +325,9 @@ configurations {
     ftpAntTask
 }
 dependencies {
-    implementation group: 'ch.interlis', name: 'iox-ili', version: '1.23.1'
-    implementation group: 'ch.interlis', name: 'ili2c-tool', version: "5.5.4"
-    implementation group: 'ch.interlis', name: 'ili2c-core', version: "5.5.4"
+    implementation group: 'ch.interlis', name: 'iox-ili', version: '1.23.2'
+    implementation group: 'ch.interlis', name: 'ili2c-tool', version: "5.6.0"
+    implementation group: 'ch.interlis', name: 'ili2c-core', version: "5.6.0"
     implementation group: 'ch.ehi', name: 'ehisqlgen', version: "1.16.0"
     implementation group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: '2.9.7'
 	implementation group: 'net.iharder', name: 'base64', version: '2.3.9'
@@ -913,5 +915,23 @@ task uploadBin(dependsOn: [ili2pgBindist,ili2gpkgBindist,ili2mysqlBindist,ili2h2
 		uploadFile('ili2fgdb',ili2fgdbBindist.archiveFile.get().asFile)
 		uploadFile('ili2mssql',ili2mssqlBindist.archiveFile.get().asFile)
 		uploadFile('ili2ora',ili2oraBindist.archiveFile.get().asFile)
+	}
+}
+
+task uploadDoc(){  // dependsOn: [usrdoc,ilidoc]) {
+	doLast {
+		ant.taskdef(name: 'ftp',
+					classname: 'org.apache.tools.ant.taskdefs.optional.net.FTP',
+					classpath: configurations.ftpAntTask.asPath)
+		def remoteDir="/ili2db/"+project.version
+		ant.ftp(action:"mkdir", server: "jql.ftp.infomaniak.com", userid: docs_usr, password: docs_pwd, 
+			remoteDir: remoteDir, passive:"yes") {
+		}
+		ant.ftp(server: "jql.ftp.infomaniak.com", userid: docs_usr, password: docs_pwd, 
+			remoteDir: remoteDir, passive:"yes") {
+				fileset(dir:  "build/docs") {
+					include(name: "ili2db.html")
+				}
+		}
 	}
 }

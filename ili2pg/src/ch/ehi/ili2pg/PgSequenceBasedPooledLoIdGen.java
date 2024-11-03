@@ -56,8 +56,8 @@ public class PgSequenceBasedPooledLoIdGen implements DbIdGen {
 	}
 
 	/** tests if a table with the given name exists
-	 * @deprecated
 	 */
+	@Deprecated
 	public boolean sequenceExists(DbTableName tableName)
 	throws IOException
 	{

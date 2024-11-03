@@ -387,7 +387,7 @@ public class NameMapping {
 		}
 		return sqlname;
 	}
-	private Set<String> kws=null;
+	private static Set<String> kws=null;
 	private String makeValidSqlName(String name)
 	{
 		initReservedWordList();
@@ -398,23 +398,28 @@ public class NameMapping {
 		}
 		return name;
 	}
-    public boolean isValidSqlName(String name)
+    public static boolean isValidSqlName(String name)
     {
         initReservedWordList();
         String ucname=name.toUpperCase();
         return !kws.contains(ucname);
     }
-    private void initReservedWordList() {
+    private static void initReservedWordList() {
         if(kws==null){
-			kws=Sql2003kw.getKeywords();			
-			kws.addAll(PostgresqlKw.getKeywords());
-			kws.addAll(SqliteKw.getKeywords());
-			kws.addAll(MssqlKw.getKeywords());
-            kws.addAll(MysqlKw.getKeywords());
-            kws.addAll(OracleKw.getKeywords());
-			kws.add("TEXT");
-			kws.add("OBJECTID"); // ili2fgdb / common primary key column name in ESRI world
+			kws=getSqlKeywords();
 		}
+    }
+    public static Set<String> getSqlKeywords() {
+        Set<String> ret=new HashSet<String>();
+        ret.addAll(Sql2003kw.getKeywords());			
+        ret.addAll(PostgresqlKw.getKeywords());
+        ret.addAll(SqliteKw.getKeywords());
+        ret.addAll(MssqlKw.getKeywords());
+        ret.addAll(MysqlKw.getKeywords());
+        ret.addAll(OracleKw.getKeywords());
+        ret.add("TEXT");
+        ret.add("OBJECTID"); // ili2fgdb / common primary key column name in ESRI world
+        return ret;
     }
 	private static String shortcutName(String aname, int maxlen)
 	{

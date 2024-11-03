@@ -110,5 +110,15 @@ public class DbNames {
 	public static final String META_ATTRIBUTES_TAB_ATTRNAME_COL="attr_name";
 	public static final String META_ATTRIBUTES_TAB_ATTRVALUE_COL="attr_value";
 
+    public static final String NLS_TAB="T_ILI2DB_NLS"; // National Language Support
+    public static final String NLS_TAB_ILIELEMENT_COL="ilielement"; // qualified name of Interlis model element (table, attr, role, enumele, ...) in root original language
+    public static final String NLS_TAB_LANG_COL="lang"; // language code
+    public static final String NLS_TAB_UIVARIANT_COL="uivariant"; // to distinguish between differen ui flavours (e.g. small/large screens)
+    public static final String NLS_TAB_LABEL_COL="label"; // name of element
+    public static final String NLS_TAB_MNEMONIC_COL="mnemonic"; // short cut letter of element
+    public static final String NLS_TAB_TOOLTIP_COL="tooltip"; // short description
+    public static final String NLS_TAB_DESCRIPTION_COL="descr"; // longer description
+    public static final String NLS_TAB_SYMBOL_COL="symbol"; // icon (e.g. for use in toolbars)
+
 	private DbNames(){}
 }

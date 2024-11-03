@@ -15,6 +15,7 @@ import java.sql.SQLException;
 import ch.interlis.ili2c.metamodel.Element;
 import ch.interlis.ili2c.metamodel.Evaluable;
 import ch.interlis.ili2c.metamodel.LocalAttribute;
+import ch.interlis.ili2c.metamodel.Model;
 import ch.interlis.ili2c.metamodel.ObjectPath;
 import ch.interlis.ili2c.metamodel.RoleDef;
 import ch.interlis.ili2c.metamodel.Topic;
@@ -29,6 +30,7 @@ import ch.interlis.ili2c.metamodel.Container;
 import ch.interlis.ili2c.metamodel.Domain;
 import ch.ehi.basics.logging.EhiLogger;
 import ch.ehi.basics.settings.Settings;
+import ch.ehi.basics.tools.StringUtility;
 import ch.ehi.ili2db.base.DbNames;
 import ch.ehi.ili2db.base.Ili2db;
 import ch.ehi.ili2db.base.Ili2dbException;
@@ -54,6 +56,8 @@ public class MetaAttrUtility{
     public static final String ILI2DB_ILI_ASSOC_KIND = ILI2DB_ILI_PREFIX+"assocKind";
     public static final String ILI2DB_ILI_TOPIC_CLASSES = ILI2DB_ILI_PREFIX+"topicClasses";
     public static final String ILI2DB_ILI_TOPIC_BIDDOMAIN = ILI2DB_ILI_PREFIX+"bidDomain";
+    private static final String ILI2DB_ILI_MODEL_LANG = ILI2DB_ILI_PREFIX+"lang";
+    private static final String ILI2DB_ILI_MODEL_TRANSLATION_OF = ILI2DB_ILI_PREFIX+"translationOf";
     /** Read meta-attributes from a toml file and add them to the ili2c metamodel.
 	 * @param td ili-model as read by the ili compiler
 	 * @param tomlFile
@@ -244,6 +248,19 @@ public class MetaAttrUtility{
                 if(bidDomain!=null) {
                     exstValues.put(ILI2DB_ILI_TOPIC_BIDDOMAIN, bidDomain.getScopedName());
                 }
+            }
+            if(el instanceof Model){
+                Model model=(Model)el;
+                HashMap<String,String> exstValues=getMetaValues(entries,el);
+                String lang=StringUtility.purge(model.getLanguage());
+                if(lang!=null) {
+                    exstValues.put(ILI2DB_ILI_MODEL_LANG, lang);
+                }
+                Model translationOf=(Model)model.getTranslationOf();
+                if(translationOf!=null) {
+                    exstValues.put(ILI2DB_ILI_MODEL_TRANSLATION_OF, translationOf.getName());
+                }
+                
             }
 		}catch(RuntimeException e) {
 		    EhiLogger.traceUnusualState(el.getScopedName()+": "+e.getMessage());
