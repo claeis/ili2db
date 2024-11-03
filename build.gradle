@@ -1,5 +1,5 @@
 group 'ch.interlis'
-version '5.2.0'+System.getProperty('release','-SNAPSHOT')
+version '5.2.1'+System.getProperty('release','-SNAPSHOT')
 
 apply plugin: "java"
 apply plugin: "maven"
