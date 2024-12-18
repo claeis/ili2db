@@ -15,16 +15,23 @@ import org.junit.Test;
 import ch.ehi.basics.logging.EhiLogger;
 import ch.ehi.ili2db.base.DbNames;
 import ch.ehi.ili2db.base.Ili2db;
+import ch.ehi.ili2db.base.Ili2dbMetaConfig;
 import ch.ehi.ili2db.gui.Config;
 import ch.ehi.sqlgen.DbUtility;
+import ch.interlis.ili2c.metamodel.TransferDescription;
 import ch.interlis.iom.IomObject;
+import ch.interlis.iom_j.itf.ItfReader2;
 import ch.interlis.iom_j.xtf.XtfReader;
 import ch.interlis.iox.EndBasketEvent;
 import ch.interlis.iox.EndTransferEvent;
 import ch.interlis.iox.IoxEvent;
+import ch.interlis.iox.IoxReader;
 import ch.interlis.iox.ObjectEvent;
 import ch.interlis.iox.StartBasketEvent;
 import ch.interlis.iox.StartTransferEvent;
+import ch.interlis.iox_j.IoxIliReader;
+import ch.interlis.iox_j.inifile.IniFileReader;
+import ch.interlis.iox_j.validator.ValidationConfig;
 
 public abstract class SimpleTest {
 	
@@ -139,6 +146,23 @@ public abstract class SimpleTest {
 		Ili2db.run(config,null);
         validateImportIliCoord();
 	}
+    @Test
+    public void importIli10Coord() throws Exception
+    {
+        setup.resetDb();
+        File data=new File(TEST_OUT,"SimpleCoord10.ili");
+        Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+        Ili2db.setNoSmartMapping(config);
+        config.setFunction(Config.FC_SCHEMAIMPORT);
+        config.setCreateFk(Config.CREATE_FK_YES);
+        config.setCreateNumChecks(true);
+        config.setTidHandling(Config.TID_HANDLING_PROPERTY);
+        config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
+        config.setDefaultSrsCode("2056");
+        setup.setXYParams(config);
+        Ili2db.run(config,null);
+        validateImportIliCoord();
+    }
 	
     protected void validateImportIliCoord() throws Exception {
         
@@ -357,6 +381,26 @@ public abstract class SimpleTest {
         Ili2db.run(config,null);
         validateImportIliCoord();
 	}
+    @Test
+    public void importItfCoord() throws Exception
+    {
+        //EhiLogger.getInstance().setTraceFilter(false);
+        setup.resetDb();
+        File data=new File(TEST_OUT,"SimpleCoord10a.itf");
+        Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+        Ili2db.setNoSmartMapping(config);
+        config.setFunction(Config.FC_IMPORT);
+        config.setDoImplicitSchemaImport(true);
+        config.setCreateFk(Config.CREATE_FK_YES);
+        config.setCreateNumChecks(true);
+        config.setTidHandling(Config.TID_HANDLING_PROPERTY);
+        config.setImportTid(true);
+        config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
+        config.setDefaultSrsCode("2056");
+        setup.setXYParams(config);
+        Ili2db.run(config,null);
+        validateImportIliCoord();
+    }
 	
 	@Test
 	public void importXtfWithDelete() throws Exception
@@ -635,4 +679,93 @@ public abstract class SimpleTest {
 			assertTrue(reader.read() instanceof EndTransferEvent);
 		}
 	}
+    @Test
+    public void exportItfCoord() throws Exception
+    {
+        {
+            importItfCoord();
+        }
+        //EhiLogger.getInstance().setTraceFilter(false);
+        File data=new File(TEST_OUT,"SimpleCoord10a-out.itf");
+        Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+        config.setFunction(Config.FC_EXPORT);
+        config.setExportTid(true);
+        config.setModels("SimpleCoord10");
+        Ili2db.readSettingsFromDb(config);
+        Ili2db.run(config,null);
+        {
+            TransferDescription td=null;
+            ch.interlis.ili2c.config.Configuration ili2cConfig=new ch.interlis.ili2c.config.Configuration();
+            ili2cConfig.addFileEntry(new ch.interlis.ili2c.config.FileEntry(TEST_OUT+"SimpleCoord10.ili",ch.interlis.ili2c.config.FileEntryKind.ILIMODELFILE));
+            td=ch.interlis.ili2c.Main.runCompiler(ili2cConfig);
+            assertNotNull(td);
+            IoxReader reader=new ItfReader2(data,true);
+            ((IoxIliReader) reader).setModel(td);
+            assertTrue(reader.read() instanceof StartTransferEvent);
+            assertTrue(reader.read() instanceof StartBasketEvent);
+            IoxEvent event=reader.read();
+            assertTrue(event instanceof ObjectEvent);
+            IomObject iomObj=((ObjectEvent)event).getIomObject();
+            {
+                String oid=iomObj.getobjectoid();
+                assertEquals("55", oid);
+                String attrtag=iomObj.getobjecttag();
+                assertEquals("SimpleCoord10.TestA.ClassA1", attrtag);
+                {
+                    {
+                        IomObject coord=iomObj.getattrobj("attr2", 0);
+                        assertEquals("2460000.001",coord.getattrvalue("C1"));
+                        assertEquals("1045000.001",coord.getattrvalue("C2"));
+                    }
+                }
+            }
+            assertTrue(reader.read() instanceof EndBasketEvent);
+            assertTrue(reader.read() instanceof EndTransferEvent);
+        }
+    }
+    
+    @Test
+    public void exportMetaConfig() throws Exception
+    {
+        setup.resetDb();
+        
+        // schema import
+        {
+            File data=new File(TEST_OUT,"Simple23.ili");
+            Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+            Ili2db.setNoSmartMapping(config);
+            config.setFunction(Config.FC_SCHEMAIMPORT);
+            config.setCreateFk(Config.CREATE_FK_YES);
+            config.setCreateNumChecks(true);
+            config.setTidHandling(Config.TID_HANDLING_PROPERTY);
+            config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
+            Ili2db.run(config,null);
+        }
+        
+        // export Meta-Config
+        File metaConfigFile=new File(TEST_OUT,"exportMetaConfig.ini");
+        {
+            Config config=setup.initConfig(metaConfigFile.getPath(),metaConfigFile.getPath()+".log");
+            config.setFunction(Config.FC_EXPORT_METACONFIG);
+            config.setMetaConfigFile(metaConfigFile.getPath());
+            Ili2db.readSettingsFromDb(config);
+            Ili2db.run(config,null);
+        }
+        {
+            ValidationConfig ini = IniFileReader.readFile(metaConfigFile);
+            assertNotNull(ini.getConfigParams(Ili2dbMetaConfig.SECTION_ILI2DB));
+            assertEquals(Config.TRUE.toLowerCase(), ini.getConfigValue(Ili2dbMetaConfig.SECTION_ILI2DB, Ili2dbMetaConfig.NO_SMART_MAPPING));
+            assertNull(ini.getConfigValue(Ili2dbMetaConfig.SECTION_ILI2DB, Ili2dbMetaConfig.COALESCE_CATALOGUE_REF)); // not set, if no smart mapping
+            
+            assertEquals(Config.TRUE.toLowerCase(), ini.getConfigValue(Ili2dbMetaConfig.SECTION_ILI2DB, Ili2dbMetaConfig.CREATE_FK));
+            assertEquals(Config.TRUE.toLowerCase(), ini.getConfigValue(Ili2dbMetaConfig.SECTION_ILI2DB, Ili2dbMetaConfig.CREATE_NUM_CHECKS));
+            assertEquals(Config.TRUE.toLowerCase(), ini.getConfigValue(Ili2dbMetaConfig.SECTION_ILI2DB, Ili2dbMetaConfig.CREATE_TID_COL));
+            assertEquals(Config.TRUE.toLowerCase(), ini.getConfigValue(Ili2dbMetaConfig.SECTION_ILI2DB, Ili2dbMetaConfig.CREATE_BASKET_COL));
+
+            assertEquals(Config.FALSE.toLowerCase(),ini.getConfigValue(Ili2dbMetaConfig.SECTION_ILI2DB, Ili2dbMetaConfig.CREATE_GEOM_IDX));
+            
+            
+        }
+    }
+    
 }

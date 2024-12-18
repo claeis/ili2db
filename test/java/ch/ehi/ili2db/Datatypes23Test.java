@@ -38,6 +38,9 @@ import ch.interlis.iox.StartTransferEvent;
 import net.iharder.Base64;
 
 public abstract class Datatypes23Test {
+    private static final String EXPECTED_XMLBOX = "<x xmlns=\"http://www.interlis.ch/INTERLIS2.3\">\n" + 
+    "                           <a></a>\n" + 
+    "                       </x>";
     protected static final String TEST_OUT = "test/data/Datatypes23/";
     protected AbstractTestSetup setup=createTestSetup();
     protected abstract AbstractTestSetup createTestSetup() ;
@@ -332,9 +335,7 @@ public abstract class Datatypes23Test {
 	                 Assert.assertEquals("mailto:ceis@localhost", rs.getString("uritext"));
 	                 Assert.assertEquals("5", rs.getString("numericInt"));
 	                String xmlbox = rs.getString("xmlbox");
-	                String expectedXmlbox = "<x>\n" + 
-	                "                           <a></a>\n" + 
-	                "                       </x>";
+	                String expectedXmlbox = EXPECTED_XMLBOX;
 	                Diff xmlboxDiff = DiffBuilder.compare(Input.fromString(expectedXmlbox)).withTest(Input.fromString(xmlbox))
 	                        .checkForSimilar().normalizeWhitespace().build();
 	                                
@@ -424,9 +425,7 @@ public abstract class Datatypes23Test {
 					Assert.assertEquals("im not an int", rs.getString("numericInt"));
 					Assert.assertEquals("im not a BIG int", rs.getString("numericBigInt"));
 					String xmlbox = rs.getString("xmlbox");
-					String expectedXmlbox = "<x>\n" +
-							"                           <a></a>\n" +
-							"                       </x>";
+					String expectedXmlbox = EXPECTED_XMLBOX;
 					Diff xmlboxDiff = DiffBuilder.compare(Input.fromString(expectedXmlbox)).withTest(Input.fromString(xmlbox))
 							.checkForSimilar().normalizeWhitespace().build();
 
@@ -800,9 +799,7 @@ public abstract class Datatypes23Test {
                      Assert.assertEquals("9223372036854775800", obj1.getattrvalue("numericBigInt"));
 	                 
 	                 // do xml comparison
-	                 String expectedXmlValue="<?xml version=\"1.0\" encoding=\"UTF-8\"?><x>\n" + 
-	                            "                           <a></a>\n" + 
-	                            "                       </x>";
+	                 String expectedXmlValue=EXPECTED_XMLBOX;
 	                 String actualXmlValue=obj1.getattrvalue("xmlbox");
 	                 {
 	                     DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
@@ -912,9 +909,7 @@ public abstract class Datatypes23Test {
 					Assert.assertEquals("im not a BIG int", obj1.getattrvalue("numericBigInt"));
 
 					// do xml comparison
-					String expectedXmlValue="<?xml version=\"1.0\" encoding=\"UTF-8\"?><x>\n" +
-							"                           <a></a>\n" +
-							"                       </x>";
+					String expectedXmlValue=EXPECTED_XMLBOX;
 					String actualXmlValue=obj1.getattrvalue("xmlbox");
 					{
 						DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();

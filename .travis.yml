@@ -14,6 +14,8 @@ services:
   
 addons:
   postgresql: "9.6"
+  ssh_known_hosts:
+  - ftp.interlis.ch
   apt:
     packages:
     - libmaven-ant-tasks-java
@@ -42,7 +44,8 @@ before_script:
     - # virtualenv my_py3 --python=/usr/bin/python3
     - virtualenv -p python3 my_py3
     - source my_py3/bin/activate # to activate the python3 environemt    
-    - python -m pip install docutils # use my_py3
+    - python -m pip --trusted-host pypi.org --trusted-host pypi.python.org --trusted-host files.pythonhosted.org install docutils
+    - python -m pip --trusted-host pypi.org --trusted-host pypi.python.org --trusted-host files.pythonhosted.org install Pygments
     - python -m pip freeze
     - 
 script: 
@@ -60,12 +63,12 @@ after_failure:
 deploy:
   - provider: script
     skip_cleanup: true
-    script: ssh-keyscan -H ftp.interlis.ch >> ~/.ssh/known_hosts;./gradlew -Drst2html=`which rst2html.py` -Drepos_pwd=${repos_pwd} -Drepos_usr=jql_jars-INTE uploadArchives
+    script: ./gradlew -Drst2html=`which rst2html.py` -Drepos_pwd=${repos_pwd} -Drepos_usr=jql_jars-INTE uploadArchives
     on:
       branch: master
   - provider: script
     skip_cleanup: true
-    script: ssh-keyscan -H ftp.interlis.ch >> ~/.ssh/known_hosts;./gradlew -Drst2html=`which rst2html.py` -Drepos_pwd=${repos_pwd} -Drepos_usr=jql_jars-INTE '-Drelease=' -Ddownloads_pwd=${downloads_pwd} -Ddownloads_usr=jql_downloads uploadArchives uploadBin
+    script: ./gradlew -Drst2html=`which rst2html.py` -Drepos_pwd=${repos_pwd} -Drepos_usr=jql_jars-INTE '-Drelease=' -Ddownloads_pwd=${downloads_pwd} -Ddownloads_usr=jql_downloads -Ddocs_pwd=${docs_pwd} -Ddocs_usr=jql_docs uploadArchives uploadBin uploadDoc
     on:
       branch: stable
 notifications:

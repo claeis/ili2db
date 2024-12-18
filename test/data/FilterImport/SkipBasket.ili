@@ -1,0 +1,10 @@
+INTERLIS 2.4;
+
+MODEL SkipBasket (de) AT "mailto:ceis@localhost" VERSION "20170703" =
+
+	TOPIC TopicA =
+		CLASS ClassA =
+		END ClassA;
+	END TopicA;
+		
+END SkipBasket.

@@ -6,6 +6,7 @@ import static org.junit.Assert.assertTrue;
 import java.io.File;
 import java.sql.Connection;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -17,6 +18,7 @@ import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.CoordinateList;
 
 import ch.ehi.basics.logging.EhiLogger;
+import ch.ehi.ili2db.base.DbNames;
 import ch.ehi.ili2db.base.Ili2db;
 import ch.ehi.ili2db.gui.Config;
 import ch.interlis.ili2c.config.Configuration;
@@ -36,7 +38,7 @@ import ch.interlis.iox_j.jts.Iox2jts;
 
 //-Ddburl=jdbc:postgresql:dbname -Ddbusr=usrname -Ddbpwd=1234
 public abstract class TranslationTest {
-	private static final String TEST_OUT = "test/data/Translation/";
+	protected static final String TEST_OUT = "test/data/Translation/";
     protected AbstractTestSetup setup=createTestSetup();
     protected abstract AbstractTestSetup createTestSetup() ;
 	
@@ -58,6 +60,8 @@ public abstract class TranslationTest {
 				config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
 				config.setModels("EnumOkA;EnumOkB");
 				config.setVer3_translation(false);
+				config.setCreateNlsTab(true);
+                config.setCreateMetaInfo(true);
 				Ili2db.readSettingsFromDb(config);
 				Ili2db.run(config,null);
 				// class[a] is imported
@@ -73,6 +77,29 @@ public abstract class TranslationTest {
 					ResultSet rs=stmt.getResultSet();
 					Assert.assertFalse(rs.next());
 				}
+                Assert.assertTrue(stmt.execute("SELECT "+DbNames.NLS_TAB+"."+DbNames.NLS_TAB_LABEL_COL+", "+DbNames.NLS_TAB+"."+DbNames.NLS_TAB_DESCRIPTION_COL+" FROM "+setup.prefixName(DbNames.NLS_TAB)+" WHERE "+DbNames.NLS_TAB+"."+DbNames.NLS_TAB_ILIELEMENT_COL+" = 'EnumOkX.TopicX.ClassX' AND "+DbNames.NLS_TAB+"."+DbNames.NLS_TAB_LANG_COL+" = 'de'"));
+                {
+                    ResultSet rs=stmt.getResultSet();
+                    Assert.assertTrue(rs.next());
+                    Assert.assertEquals("Class A",rs.getString(1));
+                    Assert.assertEquals("ilidoc Class A",rs.getString(2));
+                }
+                // Domain Enum
+                Assert.assertTrue(stmt.execute("SELECT "+DbNames.NLS_TAB+"."+DbNames.NLS_TAB_LABEL_COL+", "+DbNames.NLS_TAB+"."+DbNames.NLS_TAB_DESCRIPTION_COL+" FROM "+setup.prefixName(DbNames.NLS_TAB)+" WHERE "+DbNames.NLS_TAB+"."+DbNames.NLS_TAB_ILIELEMENT_COL+" = 'EnumOkX.TopicX.ClassX.attrX.x1' AND "+DbNames.NLS_TAB+"."+DbNames.NLS_TAB_LANG_COL+" = 'de'"));
+                {
+                    ResultSet rs=stmt.getResultSet();
+                    Assert.assertTrue(rs.next());
+                    Assert.assertEquals("a1",rs.getString(1));
+                    Assert.assertEquals(null,rs.getString(2));
+                }
+                // Attr Enum
+                Assert.assertTrue(stmt.execute("SELECT "+DbNames.NLS_TAB+"."+DbNames.NLS_TAB_LABEL_COL+", "+DbNames.NLS_TAB+"."+DbNames.NLS_TAB_DESCRIPTION_COL+" FROM "+setup.prefixName(DbNames.NLS_TAB)+" WHERE "+DbNames.NLS_TAB+"."+DbNames.NLS_TAB_ILIELEMENT_COL+" = 'EnumOkX.DomainX.x1' AND "+DbNames.NLS_TAB+"."+DbNames.NLS_TAB_LANG_COL+" = 'de'"));
+                {
+                    ResultSet rs=stmt.getResultSet();
+                    Assert.assertTrue(rs.next());
+                    Assert.assertEquals("a1",rs.getString(1));
+                    Assert.assertEquals(null,rs.getString(2));
+                }
                 {
                     // t_ili2db_attrname
                     String [][] expectedValues=new String[][] {
@@ -236,8 +263,6 @@ public abstract class TranslationTest {
 		Connection jdbcConnection=null;
 		try{
             setup.resetDb();
-            jdbcConnection = setup.createConnection();
-            Statement stmt=jdbcConnection.createStatement();
 	        {
 				File data=new File(TEST_OUT,"ModelBsimple10.ili");
 				Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
@@ -251,6 +276,10 @@ public abstract class TranslationTest {
 	            config.setDefaultSrsCode("21781");
 				Ili2db.readSettingsFromDb(config);
 				Ili2db.run(config,null);
+				
+	            jdbcConnection = setup.createConnection();
+	            Statement stmt=jdbcConnection.createStatement();
+
 				
 				// class[a] is imported
 				Assert.assertTrue(stmt.execute("SELECT t_ili2db_classname.iliname, t_ili2db_classname.sqlname FROM "+setup.prefixName("t_ili2db_classname")+" WHERE t_ili2db_classname.iliname = 'ModelAsimple10.TopicA.ClassA'"));
@@ -298,8 +327,6 @@ public abstract class TranslationTest {
         Connection jdbcConnection=null;
         try{
             setup.resetDb();
-            jdbcConnection = setup.createConnection();
-            Statement stmt=jdbcConnection.createStatement();
             {
                 File data=new File(TEST_OUT,"ModelCsimple10.ili");
                 Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
@@ -314,6 +341,8 @@ public abstract class TranslationTest {
                 Ili2db.readSettingsFromDb(config);
                 Ili2db.run(config,null);
                 
+                jdbcConnection = setup.createConnection();
+                Statement stmt=jdbcConnection.createStatement();
                 // class[a] is imported
                 Assert.assertTrue(stmt.execute("SELECT t_ili2db_classname.iliname, t_ili2db_classname.sqlname FROM "+setup.prefixName("t_ili2db_classname")+" WHERE t_ili2db_classname.iliname = 'ModelAsimple10.TopicA.ClassA'"));
                 {
@@ -361,8 +390,6 @@ public abstract class TranslationTest {
 		Connection jdbcConnection=null;
 		try{
             setup.resetDb();
-            jdbcConnection = setup.createConnection();
-            Statement stmt=jdbcConnection.createStatement();
 	        {
 				File data=new File(TEST_OUT,"ModelBsimple10.ili");
 				Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
@@ -377,6 +404,9 @@ public abstract class TranslationTest {
 	            config.setDefaultSrsCode("21781");
 				Ili2db.readSettingsFromDb(config);
 				Ili2db.run(config,null);
+				
+	            jdbcConnection = setup.createConnection();
+	            Statement stmt=jdbcConnection.createStatement();
 				// class[a2] is imported
 				Assert.assertTrue(stmt.execute("SELECT t_ili2db_classname.iliname, t_ili2db_classname.sqlname FROM "+setup.prefixName("t_ili2db_classname")+" WHERE t_ili2db_classname.iliname = 'ModelAsimple10.TopicA.ClassA2'"));
 				{
@@ -1492,8 +1522,6 @@ public abstract class TranslationTest {
 		Connection jdbcConnection=null;
 		try{
             setup.resetDb();
-            jdbcConnection = setup.createConnection();
-            Statement stmt=jdbcConnection.createStatement();
 	        {
 	    		File data=new File(TEST_OUT,"ModelAsimple10a.itf");
 	    		Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
@@ -1522,8 +1550,10 @@ public abstract class TranslationTest {
 	    		Ili2db.readSettingsFromDb(config);
 	    		Ili2db.run(config,null);
 	        }
+            jdbcConnection = setup.createConnection();
+            Statement stmt=jdbcConnection.createStatement();
     		// tid's of class[a]
-			Assert.assertTrue(stmt.execute("SELECT classa.attra FROM translation.classa"));
+			Assert.assertTrue(stmt.execute("SELECT classa.attra FROM "+setup.prefixName("classa")));
 			{
 				ResultSet rs=stmt.getResultSet();
 				Assert.assertTrue(rs.next());
@@ -1554,8 +1584,6 @@ public abstract class TranslationTest {
         Connection jdbcConnection=null;
         try{
             setup.resetDb();
-            jdbcConnection = setup.createConnection();
-            Statement stmt=jdbcConnection.createStatement();
             {
                 File data=new File(TEST_OUT,"ModelAsimple10a.itf");
                 Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
@@ -1594,8 +1622,10 @@ public abstract class TranslationTest {
                 Ili2db.readSettingsFromDb(config);
                 Ili2db.run(config,null);
             }
+            jdbcConnection = setup.createConnection();
+            Statement stmt=jdbcConnection.createStatement();
             // tid's of class[a]
-            Assert.assertTrue(stmt.execute("SELECT classa.attra FROM translation.classa"));
+            Assert.assertTrue(stmt.execute("SELECT classa.attra FROM "+setup.prefixName("classa")));
             {
                 ResultSet rs=stmt.getResultSet();
                 Assert.assertTrue(rs.next());
@@ -1630,13 +1660,10 @@ public abstract class TranslationTest {
 	@Test
 	public void exportItf10() throws Exception
 	{
-		Connection jdbcConnection=null;
 		{
 			importItf10();
 		}
 		try{
-            jdbcConnection = setup.createConnection();
-	        Statement stmt=jdbcConnection.createStatement();
 	        {
 	        	{
 		    		File data=new File(TEST_OUT,"ModelAsimple10a-out.itf");
@@ -1848,9 +1875,6 @@ public abstract class TranslationTest {
 		        }
 	        }
 		}finally{
-			if(jdbcConnection!=null){
-				jdbcConnection.close();
-			}
 		}
 	}
     @Test
@@ -2276,8 +2300,6 @@ public abstract class TranslationTest {
 		Connection jdbcConnection=null;
 		try{
             setup.resetDb();
-            jdbcConnection = setup.createConnection();
-            Statement stmt=jdbcConnection.createStatement();
 	        {
 	    		File data=new File(TEST_OUT,"ModelAsimple10a.itf");
 	    		Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
@@ -2307,18 +2329,9 @@ public abstract class TranslationTest {
 	    		Ili2db.readSettingsFromDb(config);
 	    		Ili2db.run(config,null);
 	        }
- 			Assert.assertTrue(stmt.execute("SELECT st_asewkt(classa2_geoma._geom) FROM "+setup.prefixName("classa2_geoma")));
- 			{
- 				ResultSet rs=stmt.getResultSet();
- 				Assert.assertTrue(rs.next());
- 				Assert.assertEquals("SRID=21781;COMPOUNDCURVE((480000 70000,480010 70000,480010 70010,480000 70010,480000 70000))",rs.getString(1));
- 			}
- 			Assert.assertTrue(stmt.execute("SELECT st_asewkt(classa3_geoma._geom) FROM "+setup.prefixName("classa3_geoma")));
- 			{
- 				ResultSet rs=stmt.getResultSet();
- 				Assert.assertTrue(rs.next());
- 				Assert.assertEquals("SRID=21781;COMPOUNDCURVE((480000 70000,480010 70000,480010 70010,480000 70010,480000 70000))",rs.getString(1));
- 			}
+            jdbcConnection = setup.createConnection();
+            Statement stmt=jdbcConnection.createStatement();
+ 			validateImportItf10lineTable_Geom(stmt);
  			// bid's of classa and classb are created
  			Assert.assertTrue(stmt.execute("SELECT t_ili2db_basket.t_id, t_ili2db_basket.topic FROM "+setup.prefixName("t_ili2db_basket")+" WHERE t_ili2db_basket.t_ili_tid = 'ModelAsimple10.TopicA'"));
  			{
@@ -2338,6 +2351,21 @@ public abstract class TranslationTest {
 			}
 		}
 	}
+
+    protected void validateImportItf10lineTable_Geom(Statement stmt) throws SQLException {
+        Assert.assertTrue(stmt.execute("SELECT st_asewkt(classa2_geoma._geom) FROM "+setup.prefixName("classa2_geoma")));
+        {
+        	ResultSet rs=stmt.getResultSet();
+        	Assert.assertTrue(rs.next());
+        	Assert.assertEquals("SRID=21781;COMPOUNDCURVE((480000 70000,480010 70000,480010 70010,480000 70010,480000 70000))",rs.getString(1));
+        }
+        Assert.assertTrue(stmt.execute("SELECT st_asewkt(classa3_geoma._geom) FROM "+setup.prefixName("classa3_geoma")));
+        {
+        	ResultSet rs=stmt.getResultSet();
+        	Assert.assertTrue(rs.next());
+        	Assert.assertEquals("SRID=21781;COMPOUNDCURVE((480000 70000,480010 70000,480010 70010,480000 70010,480000 70000))",rs.getString(1));
+        }
+    }
     
 	@Test
 	public void exportItf10lineTable() throws Exception

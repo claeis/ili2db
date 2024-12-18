@@ -1,0 +1,32 @@
+INTERLIS 2.4;
+
+MODEL MultilingualText_V2
+  AT "mailto:noreply@localhost" VERSION "2024-08-29" =
+  IMPORTS LocalisationCH_V2;
+
+  TOPIC TestA =
+
+    CLASS ClassA1 =
+      attr : TEXT*20;
+      atext : LocalisationCH_V2.MultilingualText;
+      btext : LocalisationCH_V2.LocalisedText;
+      ctext : LocalisationCH_V2.MultilingualMText;
+      dtext : LocalisationCH_V2.LocalisedMText;
+    END ClassA1;
+
+    CLASS ClassB1 =
+      attr : TEXT*20;
+      atext : MANDATORY LocalisationCH_V2.MultilingualText;
+      btext : MANDATORY LocalisationCH_V2.LocalisedText;
+      ctext : MANDATORY LocalisationCH_V2.MultilingualMText;
+      dtext : MANDATORY LocalisationCH_V2.LocalisedMText;
+    END ClassB1;
+
+    CLASS ClassUri =
+      multilingual : LocalisationCH_V2.MultilingualUri;
+      localised : LocalisationCH_V2.LocalisedUri;
+    END ClassUri;
+
+  END TestA;
+
+END MultilingualText_V2.

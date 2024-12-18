@@ -90,7 +90,9 @@ import ch.interlis.iox_j.filter.ReduceToBaseModel;
 import ch.interlis.iox_j.filter.Rounder;
 import ch.interlis.iox_j.filter.TranslateToTranslation;
 import ch.interlis.iox_j.logging.LogEventFactory;
+import ch.interlis.iox_j.plugins.PluginLoader;
 import ch.interlis.iox_j.validator.ValidationConfig;
+import ch.interlis.iox_j.validator.Validator;
 
 
 /**
@@ -222,6 +224,7 @@ public class TransferToXtf {
 				}
 			}
 			PipelinePool pipelinePool=new PipelinePool();
+			AddFunctionsFromPluginFolder(config, config.getPluginsFolder());
 			validator=new ch.interlis.iox_j.validator.Validator(td,modelConfig, errHandler, errFactory, pipelinePool,config);
 			
 		}
@@ -1695,4 +1698,22 @@ public class TransferToXtf {
 		objStat=new HashMap<String, ClassStat>();
 	}
 
+    /**
+     * Append the custom functions the {@link PluginLoader} finds to the {@value ch.interlis.iox_j.validator.Validator#CONFIG_CUSTOM_FUNCTIONS} config.
+     */
+    private static void AddFunctionsFromPluginFolder(Config config, String pluginFolder) {
+        PluginLoader loader = new PluginLoader();
+        loader.loadPlugins();
+        if (pluginFolder != null) {
+            EhiLogger.logState("pluginFolder <" + pluginFolder + ">");
+            loader.loadPlugins(new File(pluginFolder));
+        }
+        Map<String, Class> userFunctions = new HashMap<>(PluginLoader.getInterlisFunctions(loader.getAllPlugins()));
+        Map<String, Class> definedFunctions = (Map<String, Class>) config.getTransientObject(Validator.CONFIG_CUSTOM_FUNCTIONS);
+        if (definedFunctions != null) {
+            userFunctions.putAll(definedFunctions);
+        }
+
+        config.setTransientObject(Validator.CONFIG_CUSTOM_FUNCTIONS, userFunctions);
+    }
 }
