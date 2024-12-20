@@ -35,7 +35,6 @@ public class DuckDBMapping extends AbstractJdbcMapping {
                     EhiLogger.traceBackendCmd(line);
                     dbstmt.execute(line);
                     line="LOAD spatial;";
-                    dbstmt = conn.createStatement();
                     EhiLogger.traceBackendCmd(line);
                     dbstmt.execute(line);
                 }finally{
