@@ -540,26 +540,17 @@ public class DuckDBColumnConverter extends AbstractWKBColumnConverter {
     @Override
     public void setTimestamp(PreparedStatement ps, int valuei,
             Timestamp datetime) throws SQLException {
-        java.text.DateFormat dfm = new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
-        // TODO
-        //dfm.setTimeZone(java.util.TimeZone.getTimeZone("GMT+0"));
-        // TODO
-        String stmp=dfm.format(datetime);//+"Z"; // add timesone indicator (Z)
-        ps.setString(valuei, stmp);
+        ps.setTimestamp(valuei, datetime);
     }
     @Override
     public void setDate(PreparedStatement ps, int valuei, Date date)
             throws SQLException {
-        java.text.DateFormat dfm = new java.text.SimpleDateFormat("yyyy-MM-dd");
-        String stmp=dfm.format(date);
-        ps.setString(valuei, stmp);
+        ps.setDate(valuei, date);
     }
     @Override
     public void setTime(PreparedStatement ps, int valuei, Time time)
             throws SQLException {
-        java.text.DateFormat dfm = new java.text.SimpleDateFormat("HH:mm:ss.SSS");
-        String stmp=dfm.format(time);
-        ps.setString(valuei, stmp);
+        ps.setTime(valuei, time);
     }	
 	@Override
 	public String[] toIomArray(ch.interlis.ili2c.metamodel.AttributeDef attr,Object sqlArray,boolean isEnumInt) throws SQLException, ConverterException {
