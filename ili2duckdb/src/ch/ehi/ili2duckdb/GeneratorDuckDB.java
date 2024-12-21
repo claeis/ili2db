@@ -52,25 +52,7 @@ public class GeneratorDuckDB extends GeneratorJdbc {
 	public void visitSchemaBegin(Settings config, DbSchema schema)
 			throws IOException {
 		super.visitSchemaBegin(config, schema);
-		
-		// The spatial extension has to be loaded since the connection was closed after installing the extension (see DuckDBMapping.postConnect()).
-        Statement dbstmt = null;
-        try {
-            try {
-                String line="LOAD spatial;";
-                dbstmt = conn.createStatement();
-                EhiLogger.traceBackendCmd(line);
-                dbstmt.execute(line);
-            } finally {
-                if(dbstmt != null) {
-                    dbstmt.close();
-                    dbstmt = null;
-                }
-            }
-        } catch(SQLException ex) {
-            throw new IllegalStateException(ex);
-        }
-        
+
         // TODO
 		// DuckDB does not support a geometry index at the moment.
 		createGeomIdx = false;
