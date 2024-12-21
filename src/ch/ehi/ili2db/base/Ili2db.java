@@ -25,6 +25,7 @@ import java.nio.charset.Charset;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -1456,6 +1457,13 @@ public class Ili2db {
                 if(importToDb) {
                     if(!DbUtility.schemaExists(conn, config.getDbschema())){
                         DbUtility.createSchema(conn, config.getDbschema());
+//                        try {
+//                            Statement dbstmt = conn.createStatement();
+//                            dbstmt.execute("CREATE SCHEMA " + config.getDbschema());
+//                            dbstmt.close();
+//                        } catch (SQLException e) {
+//                            e.printStackTrace();
+//                        }
                     }
                 }else {
                     if(gen instanceof GeneratorJdbc){
@@ -1466,6 +1474,7 @@ public class Ili2db {
                     }
                 }
             }
+                    
 			DbIdGen idGen=null;
 			try{
 				idGen=(DbIdGen)Class.forName(idGenerator).newInstance();
@@ -1670,7 +1679,8 @@ public class Ili2db {
                     }
                 }
 				
-			}catch(java.io.IOException ex){
+			}
+                catch(java.io.IOException ex){
 				throw new Ili2dbException(ex);
 			}
 			
