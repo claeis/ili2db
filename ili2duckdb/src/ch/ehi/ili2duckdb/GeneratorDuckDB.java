@@ -51,11 +51,11 @@ public class GeneratorDuckDB extends GeneratorJdbc {
 	@Override
 	public void visitSchemaBegin(Settings config, DbSchema schema)
 			throws IOException {
-		super.visitSchemaBegin(config, schema);
+	    super.visitSchemaBegin(config, schema);
 
-        // TODO
-		// DuckDB does not support a geometry index at the moment.
-		createGeomIdx = false;
+        if ("True".equalsIgnoreCase(config.getValue(SqlConfiguration.CREATE_GEOM_INDEX))) {
+            createGeomIdx = true;
+        }
 	}
 
 	@Override
@@ -126,10 +126,8 @@ public class GeneratorDuckDB extends GeneratorJdbc {
             String isNull=sep+(column.isNotNull()?"NOT NULL":"NULL");
             if(column.isPrimaryKey()){
                 isNull=sep+"PRIMARY KEY";
-            }
-            // TODO
-            // Geometry index not yet supported.
-            if(column.isIndex() /*|| (createGeomIdx && column instanceof DbColGeometry)*/){
+            }            
+            if(column.isIndex() || (createGeomIdx && column instanceof DbColGeometry)){
                 // just collect it; process it later
                 indexColumns.add(column);
             }
@@ -171,12 +169,12 @@ public class GeneratorDuckDB extends GeneratorJdbc {
 			String sep="";
 			for(Iterator attri=idx.iteratorAttr();attri.hasNext();){
 				DbColumn attr=(DbColumn)attri.next();
-				
+
 				if (attr instanceof DbColGeometry) {
 					if (((DbColGeometry) attr).getType() == DbColGeometry.POINT) {
 						// only for points?
-					}
-					out.write(sep+"ST_AsWKB("+attr.getName()+")");
+					}			
+					//out.write(sep+"ST_AsWKB("+attr.getName()+")");
 				} else {
 					out.write(sep+attr.getName());
 				}				
@@ -275,11 +273,10 @@ public class GeneratorDuckDB extends GeneratorJdbc {
 		}
 		
 		for(DbColumn idxcol:indexColumns){
-			
 			String idxstmt=null;
 			String idxName=createConstraintName(tab,"idx",idxcol.getName().toLowerCase());
 			if(idxcol instanceof DbColGeometry){
-				idxstmt="CREATE SPATIAL INDEX "+idxName+" ON "+sqlTabName.toLowerCase()+" ( "+idxcol.getName().toLowerCase()+" )";
+				idxstmt="CREATE INDEX "+idxName+" ON "+sqlTabName.toLowerCase()+" USING RTREE ( "+idxcol.getName().toLowerCase()+" )";
 			}else{
 				idxstmt="CREATE INDEX "+idxName+" ON "+sqlTabName.toLowerCase()+" ( "+idxcol.getName().toLowerCase()+" )";
 			}
@@ -291,7 +288,7 @@ public class GeneratorDuckDB extends GeneratorJdbc {
                     try{
                         try{
                             dbstmt = conn.createStatement();
-                            EhiLogger.traceBackendCmd(idxstmt);
+                            EhiLogger.traceBackendCmd(idxstmt);                            
                             dbstmt.execute(idxstmt);
                         }finally{
                             dbstmt.close();
@@ -319,27 +316,6 @@ public class GeneratorDuckDB extends GeneratorJdbc {
 		}
 		return ret.toString();
 	}
-//	static public String getH2gisType(int type)
-//	{
-//		 switch(type){
-//			case DbColGeometry.POINT:
-//				return "POINT";
-//			case DbColGeometry.LINESTRING:
-//				return "LINESTRING";
-//			case DbColGeometry.POLYGON:
-//				return "POLYGON";
-//			case DbColGeometry.MULTIPOINT:
-//				return "MULTIPOINT";
-//			case DbColGeometry.MULTILINESTRING:
-//				return "MULTILINESTRING";
-//			case DbColGeometry.MULTIPOLYGON:
-//				return "MULTIPOLYGON";
-//			case DbColGeometry.GEOMETRYCOLLECTION:
-//				return "GEOMETRYCOLLECTION";
-//			default:
-//				throw new IllegalArgumentException();
-//		 }
-//	}
 
 	@Override
 	public void visitTableBeginConstraint(DbTable dbTab) throws IOException {
