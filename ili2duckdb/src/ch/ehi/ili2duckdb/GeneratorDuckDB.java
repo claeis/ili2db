@@ -111,19 +111,10 @@ public class GeneratorDuckDB extends GeneratorJdbc {
 		}else{
 			type="VARCHAR";
 		}
-        // TODO
-		// Comments are not yet supported in DuckDB.
-//        String cmt=column.getComment();
-//        if(cmt!=null){
-//            cmt=" COMMENT '"+escapeString(cmt)+"'";
-//        }else {
-//            cmt="";
-//        }
         if(column.getArraySize()!=DbColumn.NOT_AN_ARRAY && !(column instanceof DbColJson)) {
             String isNull=column.isNotNull()?"NOT NULL":"NULL";
             type="TEXT";
             String name=column.getName();
-            //out.write(getIndent()+colSep+name+" "+type+" "+isNull+cmt+newline());
             out.write(getIndent()+colSep+name+" "+type+" "+isNull+newline());
             colSep=",";
         }else {
@@ -144,7 +135,6 @@ public class GeneratorDuckDB extends GeneratorJdbc {
             }
             if(createColNow){
                 String name=column.getName();
-                //out.write(getIndent()+colSep+name+" "+type+defaultValue+isNull+cmt+newline());
                 out.write(getIndent()+colSep+name+" "+type+defaultValue+isNull+newline());
                 colSep=",";
             }
@@ -232,31 +222,58 @@ public class GeneratorDuckDB extends GeneratorJdbc {
 		{
 	        String cmt = tab.getComment();
 	        if (cmt != null) {
-	            // TODO
-	            // Comments are not yet supported.
-//	            String cmtstmt="COMMENT ON TABLE " +sqlTabName+" IS '" + escapeString(cmt) + "';";
-//	            addCreateLine(new Stmt(cmtstmt));
-//	            
-//	            if(conn!=null) {
-//	                if(!tableExists){
-//	                    Statement dbstmt = null;
-//	                    try{
-//	                        try{
-//	                            dbstmt = conn.createStatement();
-//	                            EhiLogger.traceBackendCmd(cmtstmt);
-//	                            dbstmt.execute(cmtstmt);
-//	                        }finally{
-//	                            dbstmt.close();
-//	                        }
-//	                    }catch(SQLException ex){
-//	                        IOException iox=new IOException("failed to add comment on table "+tab.getName());
-//	                        iox.initCause(ex);
-//	                        throw iox;
-//	                    }
-//	                }
-//	            }
+	            String cmtstmt="COMMENT ON TABLE " +sqlTabName+" IS '" + escapeString(cmt) + "';";
+	            addCreateLine(new Stmt(cmtstmt));
+	            
+	            if(conn!=null) {
+	                if(!tableExists){
+	                    Statement dbstmt = null;
+	                    try{
+	                        try{
+	                            dbstmt = conn.createStatement();
+	                            EhiLogger.traceBackendCmd(cmtstmt);
+	                            dbstmt.execute(cmtstmt);
+	                        }finally{
+	                            dbstmt.close();
+	                        }
+	                    }catch(SQLException ex){
+	                        IOException iox=new IOException("failed to add comment on table "+tab.getName());
+	                        iox.initCause(ex);
+	                        throw iox;
+	                    }
+	                }
+	            }
 	        }
+	        
+            Iterator<DbColumn> coli = tab.iteratorColumn();
+            while (coli.hasNext()) {
+                DbColumn col = (DbColumn) coli.next();
+                cmt = col.getComment();
+                if (cmt != null) {
+                    cmt = "COMMENT ON COLUMN " + sqlTabName + "." + col.getName() + " IS '" + escapeString(cmt) + "'";
+                    addCreateLine(new Stmt(cmt));
+                    if (conn != null) {
+                        if (!tableExists) {
+                            Statement dbstmt = null;
+                            try {
+                                try {
+                                    dbstmt = conn.createStatement();
+                                    EhiLogger.traceBackendCmd(cmt);
+                                    dbstmt.execute(cmt);
+                                } finally {
+                                    dbstmt.close();
+                                }
+                            } catch (SQLException ex) {
+                                IOException iox = new IOException("failed to add comment to table " + tab.getName());
+                                iox.initCause(ex);
+                                throw iox;
+                            }
+                        }
+                    }
+                }
+            }
 		}
+		
 		for(DbColumn idxcol:indexColumns){
 			
 			String idxstmt=null;
