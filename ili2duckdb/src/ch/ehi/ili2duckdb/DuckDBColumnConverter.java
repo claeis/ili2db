@@ -83,17 +83,13 @@ public class DuckDBColumnConverter extends AbstractWKBColumnConverter {
 	@Override
 	public void setup(Connection conn, Settings config) {
         super.setup(conn,config);
-        // TODO
-        // Verstehe es nicht, ohne --strokeArcs erscheint die Meldung nicht.
-        // Dann sollte sie doch kommen?
+
         if(!Config.STROKE_ARCS_ENABLE.equals(Config.getStrokeArcs(config))){
             throw new IllegalArgumentException("DuckDB supports only straights");
         }
         repairTouchingLines = ((Config)config).getRepairTouchingLines();
 	}
 	
-	// TODO
-	// Wozu braucht es das? Wie kann ich sicherstellen, dass srid ignoriert wird? Reicht es bei den getInsert-Methoden?
     @Override
     public Integer getSrsid(String crsAuthority, String crsCode, Connection conn)
             throws ConverterException {
