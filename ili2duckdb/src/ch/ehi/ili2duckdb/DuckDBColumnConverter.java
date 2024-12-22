@@ -99,34 +99,27 @@ public class DuckDBColumnConverter extends AbstractWKBColumnConverter {
 
 	@Override
 	public String getInsertValueWrapperCoord(String wkfValue,int srid) {
-        //return "ST_GeomFromWKB("+wkfValue+(srid==-1?"":","+srid)+")";
-        //return "ST_GeomFromWKB("+wkfValue+")";
-        return "ST_GeomFromHEXWKB("+wkfValue+")";
+        return "ST_GeomFromWKB("+wkfValue+")";
 	}
 	@Override
 	public String getInsertValueWrapperMultiCoord(String wkfValue,int srid) {
-		//return "ST_GeomFromWKB("+wkfValue+(srid==-1?"":","+srid)+")";
-        return "ST_GeomFromHEXWKB("+wkfValue+")";
+        return "ST_GeomFromWKB("+wkfValue+")";
 	}
 	@Override
 	public String getInsertValueWrapperPolyline(String wkfValue,int srid) {
-		//return "ST_GeomFromWKB("+wkfValue+(srid==-1?"":","+srid)+")";
-        return "ST_GeomFromHEXWKB("+wkfValue+")";
+        return "ST_GeomFromWKB("+wkfValue+")";
 	}
 	@Override
 	public String getInsertValueWrapperMultiPolyline(String wkfValue,int srid) {
-		//return "ST_GeomFromWKB("+wkfValue+(srid==-1?"":","+srid)+")";
-        return "ST_GeomFromHEXWKB("+wkfValue+")";
+        return "ST_GeomFromWKB("+wkfValue+")";
 	}
 	@Override
 	public String getInsertValueWrapperSurface(String wkfValue,int srid) {
-		//return "ST_GeomFromWKB("+wkfValue+(srid==-1?"":","+srid)+")";
-        return "ST_GeomFromHEXWKB("+wkfValue+")";
+        return "ST_GeomFromWKB("+wkfValue+")";
 	}
 	@Override
 	public String getInsertValueWrapperMultiSurface(String wkfValue,int srid) {
-		//return "ST_GeomFromWKB("+wkfValue+(srid==-1?"":","+srid)+")";
-        return "ST_GeomFromHEXWKB("+wkfValue+")";
+        return "ST_GeomFromWKB("+wkfValue+")";
 	}
 	@Override
 	public String getInsertValueWrapperArray(String sqlColName) {
@@ -194,14 +187,9 @@ public class DuckDBColumnConverter extends AbstractWKBColumnConverter {
 			boolean is3D,double p)
 			throws SQLException, ConverterException {
 				if(value!=null){
-	                // TODO siehe oben
-	                // Iox2wkb conv=new Iox2wkb(is3D?3:2);
 	                Iox2wkb conv=new Iox2wkb(2, java.nio.ByteOrder.BIG_ENDIAN, false);              
 	                try {
-	                    //return conv.multiline2wkb(value,!strokeArcs,p);
-	                    byte[] wkbGeom = conv.surface2wkb(value, false, p, repairTouchingLines);
-	                    String hexGeom = WKBWriter.toHex(wkbGeom);
-	                    return hexGeom;
+	                    return conv.multiline2wkb(value,!strokeArcs,p);
 	                } catch (Iox2wkbException ex) {
 	                    throw new ConverterException(ex);
 	                }
@@ -216,15 +204,10 @@ public class DuckDBColumnConverter extends AbstractWKBColumnConverter {
 			boolean is3D,double p)
 			throws SQLException, ConverterException {
 				if(value!=null){
-                    // TODO siehe oben
-                    // Iox2wkb conv=new Iox2wkb(is3D?3:2);
                     Iox2wkb conv=new Iox2wkb(2, java.nio.ByteOrder.BIG_ENDIAN, false);              
 					//EhiLogger.debug("conv "+conv); // select st_asewkt(form) from tablea
 					try {
-						//return conv.multisurface2wkb(value,!strokeArcs,p,repairTouchingLines);
-                        byte[] wkbGeom = conv.multisurface2wkb(value, false, p, repairTouchingLines);
-                        String hexGeom = WKBWriter.toHex(wkbGeom);
-                        return hexGeom;
+						return conv.multisurface2wkb(value,!strokeArcs,p,repairTouchingLines);
 					} catch (Iox2wkbException ex) {
 						throw new ConverterException(ex);
 					}
@@ -235,14 +218,9 @@ public class DuckDBColumnConverter extends AbstractWKBColumnConverter {
 		public java.lang.Object fromIomCoord(IomObject value, int srid,boolean is3D)
 			throws SQLException, ConverterException {
 			if(value!=null){
-			    // TODO
-			    // DuckDB does not yet support Z values.
-				//Iox2wkb conv=new Iox2wkb(is3D?3:2);
 			    Iox2wkb conv=new Iox2wkb(2, java.nio.ByteOrder.BIG_ENDIAN, false);				
 				try {
-				    byte[] wkbGeom = conv.coord2wkb(value);
-				    String hexGeom = WKBWriter.toHex(wkbGeom);
-				    return hexGeom;
+                    return conv.coord2wkb(value);
 				} catch (Iox2wkbException ex) {
 					throw new ConverterException(ex);
 				}
@@ -253,13 +231,9 @@ public class DuckDBColumnConverter extends AbstractWKBColumnConverter {
 		public java.lang.Object fromIomMultiCoord(IomObject value, int srid,boolean is3D)
 			throws SQLException, ConverterException {
 			if(value!=null){
-				// TODO siehe oben
-			    // Iox2wkb conv=new Iox2wkb(is3D?3:2);
                 Iox2wkb conv=new Iox2wkb(2, java.nio.ByteOrder.BIG_ENDIAN, false);              
 				try {
-                    byte[] wkbGeom = conv.multicoord2wkb(value);
-                    String hexGeom = WKBWriter.toHex(wkbGeom);
-                    return hexGeom;
+                    return conv.multicoord2wkb(value);
 				} catch (Iox2wkbException ex) {
 					throw new ConverterException(ex);
 				}
@@ -274,10 +248,7 @@ public class DuckDBColumnConverter extends AbstractWKBColumnConverter {
                 // Iox2wkb conv=new Iox2wkb(is3D?3:2);
                 Iox2wkb conv=new Iox2wkb(2, java.nio.ByteOrder.BIG_ENDIAN, false);              
 				try {
-					// return conv.polyline2wkb(value,false,!strokeArcs,p);
-                    byte[] wkbGeom = conv.polyline2wkb(value, false, false, p);
-                    String hexGeom = WKBWriter.toHex(wkbGeom);
-                    return hexGeom;
+					return conv.polyline2wkb(value,false,!strokeArcs,p);
 				} catch (Iox2wkbException ex) {
 					throw new ConverterException(ex);
 				}
@@ -288,14 +259,9 @@ public class DuckDBColumnConverter extends AbstractWKBColumnConverter {
 		public java.lang.Object fromIomMultiPolyline(IomObject value, int srid,boolean is3D,double p)
 			throws SQLException, ConverterException {
 			if(value!=null){
-                // TODO siehe oben
-                // Iox2wkb conv=new Iox2wkb(is3D?3:2);
                 Iox2wkb conv=new Iox2wkb(2, java.nio.ByteOrder.BIG_ENDIAN, false);              
 				try {
-					//return conv.multiline2wkb(value,!strokeArcs,p);
-                    byte[] wkbGeom = conv.multiline2wkb(value, false, p);
-                    String hexGeom = WKBWriter.toHex(wkbGeom);
-                    return hexGeom;
+					return conv.multiline2wkb(value,!strokeArcs,p);
 				} catch (Iox2wkbException ex) {
 					throw new ConverterException(ex);
 				}
