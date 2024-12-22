@@ -37,6 +37,7 @@ public class DuckDBMain extends ch.ehi.ili2db.AbstractMain {
 		config.setJdbcDriver("org.duckdb.DuckDBDriver");
 		config.setIdGenerator(ch.ehi.ili2duckdb.DuckDBIdGen.class.getName());
 		config.setIli2dbCustomStrategy(ch.ehi.ili2duckdb.DuckDBMapping.class.getName());
+		config.setUuidDefaultValue("uuid()");
 	}
 	@Override
     public DbUrlConverter getDbUrlConverter() {
