@@ -127,7 +127,7 @@ public class DuckDBColumnConverter extends AbstractWKBColumnConverter {
 		return sqlColName;
 	}
 
-	// ST_AsWKB returns wkt string for clients to don't know how to handle
+	// ST_AsWKB returns wkt string for clients that don't know how to handle
 	// it natively: https://github.com/duckdb/duckdb-spatial/issues/469
 	// We force to return a blob which will transformed into a byte array
 	// later.
