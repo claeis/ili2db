@@ -79,7 +79,7 @@ public class DuckDBTestSetup extends AbstractTestSetup {
         {
             // test.duckdb
             // test.duckdb.wal
-            for (String ext : new String[] { ".duckdb", ".duckdb.wal" }) {
+            for (String ext : new String[] { "", ".wal" }) {
                 File dbfile = new File(duckdbFilename + ext);
                 if (dbfile.exists()) {
                     File file = new File(dbfile.getAbsolutePath());
