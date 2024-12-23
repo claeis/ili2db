@@ -43,6 +43,7 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Time;
 import java.sql.Timestamp;
+import java.sql.Blob;
 import java.sql.Connection;
 import java.sql.Date;
 import java.sql.Types;
@@ -126,29 +127,33 @@ public class DuckDBColumnConverter extends AbstractWKBColumnConverter {
 		return sqlColName;
 	}
 
+	// ST_AsWKB returns wkt string for clients to don't know how to handle
+	// it natively: https://github.com/duckdb/duckdb-spatial/issues/469
+	// We force to return a blob which will transformed into a byte array
+	// later.
 	@Override
 	public String getSelectValueWrapperCoord(String dbNativeValue) {
-		return "ST_AsHEXWKB("+dbNativeValue+")";
+		return "ST_AsWKB("+dbNativeValue+")::blob";
 	}
 	@Override
 	public String getSelectValueWrapperMultiCoord(String dbNativeValue) {
-		return "ST_AsHEXWKB("+dbNativeValue+")";
+		return "ST_AsWKB("+dbNativeValue+")::blob";
 	}
 	@Override
 	public String getSelectValueWrapperPolyline(String dbNativeValue) {
-		return "ST_AsHEXWKB("+dbNativeValue+")";
+		return "ST_AsWKB("+dbNativeValue+")::blob";
 	}
 	@Override
 	public String getSelectValueWrapperMultiPolyline(String dbNativeValue) {
-		return "ST_AsHEXWKB("+dbNativeValue+")";
+		return "ST_AsWKB("+dbNativeValue+")::blob";
 	}
 	@Override
 	public String getSelectValueWrapperSurface(String dbNativeValue) {
-		return "ST_AsHEXWKB("+dbNativeValue+")";
+		return "ST_AsWKB("+dbNativeValue+")::blob";
 	}
 	@Override
 	public String getSelectValueWrapperMultiSurface(String dbNativeValue) {
-		return "ST_AsHEXWKB("+dbNativeValue+")";
+		return "ST_AsWKB("+dbNativeValue+")::blob";
 	}
 	@Override
 	public String getSelectValueWrapperArray(String dbColName) {
@@ -401,7 +406,10 @@ public class DuckDBColumnConverter extends AbstractWKBColumnConverter {
 				String sqlAttrName,
 				boolean is3D)
 				throws SQLException, ConverterException {
-		        byte bv[] = WKBReader.hexToBytes(geomobj.toString());
+                Blob blob = (Blob) geomobj;
+                int blobLength = (int) blob.length();  
+                byte bv[] = blob.getBytes(1, blobLength);
+		        //byte bv[] = WKBReader.hexToBytes(geomobj.toString());
 				//byte bv[]=(byte [])geomobj;
 				Wkb2iox conv=new Wkb2iox();
 				try {
@@ -416,7 +424,10 @@ public class DuckDBColumnConverter extends AbstractWKBColumnConverter {
 				String sqlAttrName,
 				boolean is3D)
 				throws SQLException, ConverterException {
-                byte bv[] = WKBReader.hexToBytes(geomobj.toString());
+                Blob blob = (Blob) geomobj;
+                int blobLength = (int) blob.length();  
+                byte bv[] = blob.getBytes(1, blobLength);
+		        //byte bv[] = WKBReader.hexToBytes(geomobj.toString());
 				//byte bv[]=(byte [])geomobj;
 				Wkb2iox conv=new Wkb2iox();
 				try {
@@ -431,7 +442,10 @@ public class DuckDBColumnConverter extends AbstractWKBColumnConverter {
 				String sqlAttrName,
 				boolean is3D)
 				throws SQLException, ConverterException {
-                byte bv[] = WKBReader.hexToBytes(geomobj.toString());
+                Blob blob = (Blob) geomobj;
+                int blobLength = (int) blob.length();  
+                byte bv[] = blob.getBytes(1, blobLength);
+                //byte bv[] = WKBReader.hexToBytes(geomobj.toString());
 				//byte bv[]=(byte [])geomobj;
 				Wkb2iox conv=new Wkb2iox();
 				try {
@@ -446,7 +460,10 @@ public class DuckDBColumnConverter extends AbstractWKBColumnConverter {
 			String sqlAttrName,
 			boolean is3D)
 			throws SQLException, ConverterException {
-            byte bv[] = WKBReader.hexToBytes(geomobj.toString());
+		    Blob blob = (Blob) geomobj;
+            int blobLength = (int) blob.length();  
+            byte bv[] = blob.getBytes(1, blobLength);
+            //byte bv[] = WKBReader.hexToBytes(geomobj.toString());
 			//byte bv[]=(byte [])geomobj;
 			Wkb2iox conv=new Wkb2iox();
 			try {
@@ -461,7 +478,10 @@ public class DuckDBColumnConverter extends AbstractWKBColumnConverter {
 				String sqlAttrName,
 				boolean is3D)
 				throws SQLException, ConverterException {
-                byte bv[] = WKBReader.hexToBytes(geomobj.toString());
+                Blob blob = (Blob) geomobj;
+                int blobLength = (int) blob.length();  
+                byte bv[] = blob.getBytes(1, blobLength);
+                //byte bv[] = WKBReader.hexToBytes(geomobj.toString());
 				//byte bv[]=(byte [])geomobj;
 				Wkb2iox conv=new Wkb2iox();
 				try {
@@ -476,7 +496,10 @@ public class DuckDBColumnConverter extends AbstractWKBColumnConverter {
 			String sqlAttrName,
 			boolean is3D)
 			throws SQLException, ConverterException {
-            byte bv[] = WKBReader.hexToBytes(geomobj.toString());
+            Blob blob = (Blob) geomobj;
+            int blobLength = (int) blob.length();  
+            byte bv[] = blob.getBytes(1, blobLength);
+            //byte bv[] = WKBReader.hexToBytes(geomobj.toString());
 			//byte bv[]=(byte [])geomobj;
 			Wkb2iox conv=new Wkb2iox();
 			try {
