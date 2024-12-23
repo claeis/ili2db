@@ -100,27 +100,27 @@ public class DuckDBColumnConverter extends AbstractWKBColumnConverter {
 
 	@Override
 	public String getInsertValueWrapperCoord(String wkfValue,int srid) {
-        return "ST_GeomFromWKB("+wkfValue+")";
+        return "ST_GeomFromWKB("+wkfValue+"::blob)";
 	}
 	@Override
 	public String getInsertValueWrapperMultiCoord(String wkfValue,int srid) {
-        return "ST_GeomFromWKB("+wkfValue+")";
+        return "ST_GeomFromWKB("+wkfValue+"::blob)";
 	}
 	@Override
 	public String getInsertValueWrapperPolyline(String wkfValue,int srid) {
-        return "ST_GeomFromWKB("+wkfValue+")";
+        return "ST_GeomFromWKB("+wkfValue+"::blob)";
 	}
 	@Override
 	public String getInsertValueWrapperMultiPolyline(String wkfValue,int srid) {
-        return "ST_GeomFromWKB("+wkfValue+")";
+        return "ST_GeomFromWKB("+wkfValue+"::blob)";
 	}
 	@Override
 	public String getInsertValueWrapperSurface(String wkfValue,int srid) {
-        return "ST_GeomFromWKB("+wkfValue+")";
+        return "ST_GeomFromWKB("+wkfValue+"::blob)";
 	}
 	@Override
 	public String getInsertValueWrapperMultiSurface(String wkfValue,int srid) {
-        return "ST_GeomFromWKB("+wkfValue+")";
+        return "ST_GeomFromWKB("+wkfValue+"::blob)";
 	}
 	@Override
 	public String getInsertValueWrapperArray(String sqlColName) {
