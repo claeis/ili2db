@@ -128,13 +128,13 @@ public abstract class Json23Test {
                 stmt=jdbcConnection.createStatement();
                 importXtf_doAsserts(stmt);
             }finally {
-                if(jdbcConnection!=null) {
-                    jdbcConnection.close();
-                    jdbcConnection=null;
-                }
                 if (stmt!=null) {
                     stmt.close();
                     stmt = null;
+                }
+                if(jdbcConnection!=null) {
+                    jdbcConnection.close();
+                    jdbcConnection=null;
                 }
             }
         }
