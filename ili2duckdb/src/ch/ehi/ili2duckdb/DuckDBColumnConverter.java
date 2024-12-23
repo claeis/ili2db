@@ -523,6 +523,22 @@ public class DuckDBColumnConverter extends AbstractWKBColumnConverter {
 	}
 	
     @Override
+    public IomObject[] toIomStructureFromJson(AttributeDef iliEleAttr, Object sqlArray)
+            throws SQLException, ConverterException {
+        JsonFactory jsonF = new JsonFactory();
+        java.io.StringReader in=new java.io.StringReader(sqlArray.toString());
+        IomObject iomObj[]=null;
+        try {
+            JsonParser jg = jsonF.createJsonParser(in);
+            
+            iomObj=Iox2jsonUtility.read(jg);
+        }catch(IOException ex) {
+            throw new ConverterException(ex);
+        }
+        return iomObj;
+    }
+	
+    @Override
     public void setTimestamp(PreparedStatement ps, int valuei,
             Timestamp datetime) throws SQLException {
         ps.setTimestamp(valuei, datetime);

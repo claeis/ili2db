@@ -107,7 +107,7 @@ public class GeneratorDuckDB extends GeneratorJdbc {
 		}else if(column instanceof DbColXml){
 			type="VARCHAR";
         }else if(column instanceof DbColJson){
-            type="VARCHAR";
+            type="JSON";
 		}else{
 			type="VARCHAR";
 		}
