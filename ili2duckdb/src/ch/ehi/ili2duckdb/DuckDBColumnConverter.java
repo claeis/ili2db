@@ -47,6 +47,7 @@ import java.sql.Blob;
 import java.sql.Connection;
 import java.sql.Date;
 import java.sql.Types;
+import java.time.LocalTime;
 import java.util.GregorianCalendar;
 
 import javax.xml.datatype.DatatypeConfigurationException;
@@ -115,7 +116,7 @@ public class DuckDBColumnConverter extends AbstractWKBColumnConverter {
         return "ST_GeomFromWKB("+wkfValue+"::blob)";
 	}
 	@Override
-	public String getInsertValueWrapperSurface(String wkfValue,int srid) {
+	public String getInsertValueWrapperSurface(String wkfValue,int srid) {	    
         return "ST_GeomFromWKB("+wkfValue+"::blob)";
 	}
 	@Override
@@ -192,9 +193,9 @@ public class DuckDBColumnConverter extends AbstractWKBColumnConverter {
 			boolean is3D,double p)
 			throws SQLException, ConverterException {
 				if(value!=null){
-	                Iox2wkb conv=new Iox2wkb(2, java.nio.ByteOrder.BIG_ENDIAN, false);              
+	                Iox2wkb conv=new Iox2wkb(2, java.nio.ByteOrder.BIG_ENDIAN, false); 	                
 	                try {
-	                    return conv.multiline2wkb(value,!strokeArcs,p);
+	                    return conv.surface2wkb(value,!strokeArcs,p,repairTouchingLines);
 	                } catch (Iox2wkbException ex) {
 	                    throw new ConverterException(ex);
 	                }
@@ -511,14 +512,17 @@ public class DuckDBColumnConverter extends AbstractWKBColumnConverter {
 
 	@Override
 	public String toIomXml(Object obj) throws java.sql.SQLException,
-			ConverterException {
-		return ((java.sql.SQLXML)obj).getString();
+			ConverterException {	    
+		return obj.toString();
 	}
 
 	@Override
 	public String toIomBlob(Object obj) throws java.sql.SQLException,
 			ConverterException {
-	    String s = Base64.encodeBytes((byte[])obj);
+        Blob blob = (Blob) obj;
+        int blobLength = (int) blob.length();  
+        byte[] bytes = blob.getBytes(1, blobLength);
+	    String s = Base64.encodeBytes(bytes);
 	    return s;
 	}
 	
@@ -551,7 +555,7 @@ public class DuckDBColumnConverter extends AbstractWKBColumnConverter {
     @Override
     public void setTime(PreparedStatement ps, int valuei, Time time)
             throws SQLException {
-        ps.setTime(valuei, time);
+        ps.setObject(valuei, time.toString());
     }	
 	@Override
 	public String[] toIomArray(ch.interlis.ili2c.metamodel.AttributeDef attr,Object sqlArray,boolean isEnumInt) throws SQLException, ConverterException {

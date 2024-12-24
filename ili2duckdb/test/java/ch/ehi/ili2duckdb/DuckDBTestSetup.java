@@ -61,21 +61,21 @@ public class DuckDBTestSetup extends AbstractTestSetup {
     
     @Override
     public void resetDb() throws SQLException {
-        if (dbschema != null) {
-            Connection jdbcConnection = createConnection();
-            try {
-                Statement stmt = jdbcConnection.createStatement();
-                try {
-                    stmt.execute("DROP SCHEMA IF EXISTS " + dbschema + " CASCADE");
-                } finally {
-                    stmt.close();
-                    stmt = null;
-                }
-            } finally {
-                jdbcConnection.close();
-                jdbcConnection = null;
-            }
-        }
+//        if (dbschema != null) {
+//            Connection jdbcConnection = createConnection();
+//            try {
+//                Statement stmt = jdbcConnection.createStatement();
+//                try {
+//                    stmt.execute("DROP SCHEMA IF EXISTS " + dbschema + " CASCADE");
+//                } finally {
+//                    stmt.close();
+//                    stmt = null;
+//                }
+//            } finally {
+//                jdbcConnection.close();
+//                jdbcConnection = null;
+//            }
+//        }
         {
             // test.duckdb
             // test.duckdb.wal
