@@ -1457,13 +1457,6 @@ public class Ili2db {
                 if(importToDb) {
                     if(!DbUtility.schemaExists(conn, config.getDbschema())){
                         DbUtility.createSchema(conn, config.getDbschema());
-//                        try {
-//                            Statement dbstmt = conn.createStatement();
-//                            dbstmt.execute("CREATE SCHEMA " + config.getDbschema());
-//                            dbstmt.close();
-//                        } catch (SQLException e) {
-//                            e.printStackTrace();
-//                        }
                     }
                 }else {
                     if(gen instanceof GeneratorJdbc){
