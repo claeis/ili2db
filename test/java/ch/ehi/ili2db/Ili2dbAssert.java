@@ -25,98 +25,110 @@ public class Ili2dbAssert {
     
     public static void assertAttrNameTable(Connection jdbcConnection, String[][] expectedValues, String dbschema) throws SQLException {
         Statement stmt = jdbcConnection.createStatement();
-        String tabname=DbNames.ATTRNAME_TAB;
-        if(dbschema!=null) {
-            tabname=dbschema+"."+DbNames.ATTRNAME_TAB;
-        }
-        String query = "SELECT "+DbNames.ATTRNAME_TAB+"."+DbNames.ATTRNAME_TAB_ILINAME_COL+", "+DbNames.ATTRNAME_TAB+"."+DbNames.ATTRNAME_TAB_SQLNAME_COL+", "+DbNames.ATTRNAME_TAB+"."+DbNames.ATTRNAME_TAB_COLOWNER_COL+", "+DbNames.ATTRNAME_TAB+"."+DbNames.ATTRNAME_TAB_TARGET_COL+" FROM "+tabname;
-        
-        Assert.assertTrue(stmt.execute(query));
-        Set<String[]> foundValues = getValuesFromTableAttrName(stmt.getResultSet());
-        if (foundValues.size() != expectedValues.length) {
-            String message = "Anzahl Records stimmen nicht ueberein.";
-            throw new org.junit.ComparisonFailure(message, Integer.toString(expectedValues.length), Integer.toString(foundValues.size()));  
-        }
-        
-        //Sort the array expectedValues
-        Arrays.sort(expectedValues, new ColumnComparator());
-        
-        //Convert FoundedValues to 2d Array
-        String[][] foundValues2DArray = new String[foundValues.size()][];
-        
-        int index = 0;
-        for (Iterator<String[]> foundIterator = foundValues.iterator(); foundIterator.hasNext();) {  
-            String row[] = foundIterator.next(); 
-            foundValues2DArray[index] = row;
-            index++;
-        }
-        
-        //Sort the array foundValues
-        Arrays.sort(foundValues2DArray, new ColumnComparator());
-        
-        for (int j = 0; j < foundValues2DArray.length; j++) {
-            String[] foundValue = foundValues2DArray[j];
-            String[] expectedValue = expectedValues[j];
-            if (foundValue.length != expectedValue.length) {
-                String message = "Anzahl Werte stimmen nicht ueberein fuer " + expectedValue[0];
-                throw new org.junit.ComparisonFailure(message, Integer.toString(expectedValue.length), Integer.toString(foundValue.length));                
+        try {
+            String tabname=DbNames.ATTRNAME_TAB;
+            if(dbschema!=null) {
+                tabname=dbschema+"."+DbNames.ATTRNAME_TAB;
             }
-            for (int i = 0; i < foundValue.length; i++) {
-                if ((foundValue[i] == null && expectedValue[i] == null) 
-                        || ((foundValue[i] != null && expectedValue[i] != null) && foundValue[i].equals(expectedValue[i]))) {
-                }else {
-                    String message = "Werte stimmen nicht ueberein fuer: " + expectedValue[0];
-                    throw new org.junit.ComparisonFailure(message, expectedValue[i], foundValue[i]);                    
+            String query = "SELECT "+DbNames.ATTRNAME_TAB+"."+DbNames.ATTRNAME_TAB_ILINAME_COL+", "+DbNames.ATTRNAME_TAB+"."+DbNames.ATTRNAME_TAB_SQLNAME_COL+", "+DbNames.ATTRNAME_TAB+"."+DbNames.ATTRNAME_TAB_COLOWNER_COL+", "+DbNames.ATTRNAME_TAB+"."+DbNames.ATTRNAME_TAB_TARGET_COL+" FROM "+tabname;
+            
+            Assert.assertTrue(stmt.execute(query));
+            Set<String[]> foundValues = getValuesFromTableAttrName(stmt.getResultSet());
+            if (foundValues.size() != expectedValues.length) {
+                String message = "Anzahl Records stimmen nicht ueberein.";
+                throw new org.junit.ComparisonFailure(message, Integer.toString(expectedValues.length), Integer.toString(foundValues.size()));  
+            }
+            
+            //Sort the array expectedValues
+            Arrays.sort(expectedValues, new ColumnComparator());
+            
+            //Convert FoundedValues to 2d Array
+            String[][] foundValues2DArray = new String[foundValues.size()][];
+            
+            int index = 0;
+            for (Iterator<String[]> foundIterator = foundValues.iterator(); foundIterator.hasNext();) {  
+                String row[] = foundIterator.next(); 
+                foundValues2DArray[index] = row;
+                index++;
+            }
+            
+            //Sort the array foundValues
+            Arrays.sort(foundValues2DArray, new ColumnComparator());
+            
+            for (int j = 0; j < foundValues2DArray.length; j++) {
+                String[] foundValue = foundValues2DArray[j];
+                String[] expectedValue = expectedValues[j];
+                if (foundValue.length != expectedValue.length) {
+                    String message = "Anzahl Werte stimmen nicht ueberein fuer " + expectedValue[0];
+                    throw new org.junit.ComparisonFailure(message, Integer.toString(expectedValue.length), Integer.toString(foundValue.length));                
                 }
-            }            
+                for (int i = 0; i < foundValue.length; i++) {
+                    if ((foundValue[i] == null && expectedValue[i] == null) 
+                            || ((foundValue[i] != null && expectedValue[i] != null) && foundValue[i].equals(expectedValue[i]))) {
+                    }else {
+                        String message = "Werte stimmen nicht ueberein fuer: " + expectedValue[0];
+                        throw new org.junit.ComparisonFailure(message, expectedValue[i], foundValue[i]);                    
+                    }
+                }            
+            }
+        } finally {
+            if (stmt != null) {
+                stmt.close();
+            }
         }
     }
 
     public static void assertTrafoTable(Connection jdbcConnection, String[][] expectedValues, String dbschema) throws SQLException {
         Statement stmt = jdbcConnection.createStatement();
-        String tabname = DbNames.TRAFO_TAB;
-        if(dbschema!=null) {
-            tabname = dbschema+"."+DbNames.TRAFO_TAB;
-        }
-        String query = "SELECT "+DbNames.TRAFO_TAB+"."+DbNames.TRAFO_TAB_ILINAME_COL+", "+DbNames.TRAFO_TAB+"."+DbNames.TRAFO_TAB_TAG_COL+", "+DbNames.TRAFO_TAB+"."+DbNames.TRAFO_TAB_SETTING_COL+" FROM "+tabname;
-        Assert.assertTrue(stmt.execute(query));
-        Set<String[]> foundValues = getValuesFromTableTrafo(stmt.getResultSet());
-        if (foundValues.size() != expectedValues.length) {
-            String message = "Anzahl Eintraege stimmen nicht ueberein: ";
-            throw new org.junit.ComparisonFailure(message, Integer.toString(expectedValues.length),Integer.toString(foundValues.size()) );  
-        }
-        
-        //Sort the array expectedValues
-        Arrays.sort(expectedValues, new ColumnComparator());
-        
-        //Convert FoundedValues to 2d Array
-        String[][] foundValues2DArray = new String[foundValues.size()][];
-        
-        int index = 0;
-        for (Iterator<String[]> foundIterator = foundValues.iterator(); foundIterator.hasNext();) {  
-            String row[] = foundIterator.next(); 
-            foundValues2DArray[index] = row;
-            index++;
-        }
-        
-        //Sort the array foundValues
-        Arrays.sort(foundValues2DArray, new ColumnComparator());
-        
-        for (int j = 0; j < foundValues2DArray.length; j++) {
-            String[] foundValue = foundValues2DArray[j];
-            String[] expectedValue = expectedValues[j];
-            if (foundValue.length != expectedValue.length) {
-                String message = "Anzahl Werte stimmen nicht ueberein fuer " + expectedValue[0];
-                throw new org.junit.ComparisonFailure(message, Integer.toString(expectedValue.length), Integer.toString(foundValue.length));                
+        try {
+            String tabname = DbNames.TRAFO_TAB;
+            if(dbschema!=null) {
+                tabname = dbschema+"."+DbNames.TRAFO_TAB;
             }
-            for (int i = 0; i < foundValue.length; i++) {
-                if ((foundValue[i] == null && expectedValue[i] == null) 
-                        || ((foundValue[i] != null && expectedValue[i] != null) && foundValue[i].equals(expectedValue[i]))) {
-                }else {
-                    String message = "Werte stimmen nicht ueberein fuer: " + expectedValue[0];
-                    throw new org.junit.ComparisonFailure(message, expectedValue[i], foundValue[i]);                    
+            String query = "SELECT "+DbNames.TRAFO_TAB+"."+DbNames.TRAFO_TAB_ILINAME_COL+", "+DbNames.TRAFO_TAB+"."+DbNames.TRAFO_TAB_TAG_COL+", "+DbNames.TRAFO_TAB+"."+DbNames.TRAFO_TAB_SETTING_COL+" FROM "+tabname;
+            Assert.assertTrue(stmt.execute(query));
+            Set<String[]> foundValues = getValuesFromTableTrafo(stmt.getResultSet());
+            if (foundValues.size() != expectedValues.length) {
+                String message = "Anzahl Eintraege stimmen nicht ueberein: ";
+                throw new org.junit.ComparisonFailure(message, Integer.toString(expectedValues.length),Integer.toString(foundValues.size()) );  
+            }
+            
+            //Sort the array expectedValues
+            Arrays.sort(expectedValues, new ColumnComparator());
+            
+            //Convert FoundedValues to 2d Array
+            String[][] foundValues2DArray = new String[foundValues.size()][];
+            
+            int index = 0;
+            for (Iterator<String[]> foundIterator = foundValues.iterator(); foundIterator.hasNext();) {  
+                String row[] = foundIterator.next(); 
+                foundValues2DArray[index] = row;
+                index++;
+            }
+            
+            //Sort the array foundValues
+            Arrays.sort(foundValues2DArray, new ColumnComparator());
+            
+            for (int j = 0; j < foundValues2DArray.length; j++) {
+                String[] foundValue = foundValues2DArray[j];
+                String[] expectedValue = expectedValues[j];
+                if (foundValue.length != expectedValue.length) {
+                    String message = "Anzahl Werte stimmen nicht ueberein fuer " + expectedValue[0];
+                    throw new org.junit.ComparisonFailure(message, Integer.toString(expectedValue.length), Integer.toString(foundValue.length));                
                 }
-            }            
+                for (int i = 0; i < foundValue.length; i++) {
+                    if ((foundValue[i] == null && expectedValue[i] == null) 
+                            || ((foundValue[i] != null && expectedValue[i] != null) && foundValue[i].equals(expectedValue[i]))) {
+                    }else {
+                        String message = "Werte stimmen nicht ueberein fuer: " + expectedValue[0];
+                        throw new org.junit.ComparisonFailure(message, expectedValue[i], foundValue[i]);                    
+                    }
+                }            
+            }
+        } finally {
+            if (stmt != null) {
+                stmt.close();
+            }
         }
     }
     

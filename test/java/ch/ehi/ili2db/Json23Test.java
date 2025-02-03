@@ -122,11 +122,16 @@ public abstract class Json23Test {
         }
         {
             Connection jdbcConnection=null;
+            Statement stmt=null;
             try{
                 jdbcConnection=setup.createConnection();
-                java.sql.Statement stmt=jdbcConnection.createStatement();
+                stmt=jdbcConnection.createStatement();
                 importXtf_doAsserts(stmt);
             }finally {
+                if (stmt!=null) {
+                    stmt.close();
+                    stmt = null;
+                }
                 if(jdbcConnection!=null) {
                     jdbcConnection.close();
                     jdbcConnection=null;
