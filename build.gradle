@@ -91,7 +91,7 @@ sourceSets {
     	srcDirs=['ili2pg/test/java']
     }
     
-    // compileClasspath — FileCollection
+    // compileClasspath ï¿½ FileCollection
     //   Default value: ${name}CompileClasspath configuration
     //   The classpath to use when compiling the source files of this source set.
     // The classpath used to compile this source.
@@ -102,7 +102,7 @@ sourceSets {
     compileClasspath += sourceSets.test.output
     compileClasspath += sourceSets.ili2pg.output
     
-    // runtimeClasspath — FileCollection
+    // runtimeClasspath ï¿½ FileCollection
     //   Default value: $output, ${name}RuntimeClasspath configuration
     //   The classpath to use when executing the classes of this source set.
     // The classpath used to execute this source.
@@ -754,6 +754,14 @@ artifacts {
     archives(ili2h2gisJar.archivePath){
     	builtBy ili2h2gisJar
     }
+	archives(ili2duckdbBindist.archivePath) {
+        type 'zip'
+        classifier 'bindist'
+        builtBy ili2duckdbBindist
+    }
+    archives(ili2duckdbJar.archivePath){
+    	builtBy ili2duckdbJar
+    }
 	archives(ili2gpkgBindist.archivePath) {
         type 'zip'
         classifier 'bindist'
@@ -803,6 +811,9 @@ install {
             addFilter('ili2h2gis') {artifact, file ->
                 artifact.name == 'ili2h2gis'
             }            
+            addFilter('ili2duckdb') {artifact, file ->
+                artifact.name == 'ili2duckdb'
+            }            
             addFilter('ili2gpkg') {artifact, file ->
                 artifact.name == 'ili2gpkg'
             }            
@@ -836,6 +847,12 @@ install {
             pom('ili2h2gis').scopeMappings.with {
                 mappings.clear()
                 addMapping(300, configurations.ili2h2gisCompileClasspath, 'runtime')
+                addMapping(300, configurations.ili2db, 'compile')
+            }
+            pom('ili2duckdb').artifactId = 'ili2duckdb'
+            pom('ili2duckdb').scopeMappings.with {
+                mappings.clear()
+                addMapping(300, configurations.ili2duckdbCompileClasspath, 'runtime')
                 addMapping(300, configurations.ili2db, 'compile')
             }
             pom('ili2gpkg').artifactId = 'ili2gpkg'
@@ -885,6 +902,9 @@ uploadArchives {
             addFilter('ili2h2gis') {artifact, file ->
                 artifact.name == 'ili2h2gis'
             }            
+            addFilter('ili2duckdb') {artifact, file ->
+                artifact.name == 'ili2duckdb'
+            }            
             addFilter('ili2gpkg') {artifact, file ->
                 artifact.name == 'ili2gpkg'
             }            
@@ -918,6 +938,12 @@ uploadArchives {
             pom('ili2h2gis').scopeMappings.with {
                 mappings.clear()
                 addMapping(300, configurations.ili2h2gisCompileClasspath, 'runtime')
+                addMapping(300, configurations.ili2db, 'compile')
+            }
+            pom('ili2duckdb').artifactId = 'ili2duckdb'
+            pom('ili2duckdb').scopeMappings.with {
+                mappings.clear()
+                addMapping(300, configurations.ili2duckdbCompileClasspath, 'runtime')
                 addMapping(300, configurations.ili2db, 'compile')
             }
             pom('ili2gpkg').artifactId = 'ili2gpkg'
@@ -965,7 +991,7 @@ void uploadFile(String programName, File archiveFile) {
 
 }
 
-task uploadBin(dependsOn: [ili2pgBindist,ili2gpkgBindist,ili2mysqlBindist,ili2h2gisBindist,ili2fgdbBindist,ili2mssqlBindist,ili2oraBindist]) {
+task uploadBin(dependsOn: [ili2pgBindist,ili2gpkgBindist,ili2mysqlBindist,ili2h2gisBindist,ili2duckdbBindist,ili2fgdbBindist,ili2mssqlBindist,ili2oraBindist]) {
 	doLast {
 		ant.taskdef(name: 'ftp',
 					classname: 'org.apache.tools.ant.taskdefs.optional.net.FTP',
@@ -974,6 +1000,7 @@ task uploadBin(dependsOn: [ili2pgBindist,ili2gpkgBindist,ili2mysqlBindist,ili2h2
 		uploadFile('ili2gpkg',ili2gpkgBindist.archiveFile.get().asFile)
 		uploadFile('ili2mysql',ili2mysqlBindist.archiveFile.get().asFile)
 		uploadFile('ili2h2gis',ili2h2gisBindist.archiveFile.get().asFile)
+		uploadFile('ili2duckdb',ili2duckdbBindist.archiveFile.get().asFile)
 		uploadFile('ili2fgdb',ili2fgdbBindist.archiveFile.get().asFile)
 		uploadFile('ili2mssql',ili2mssqlBindist.archiveFile.get().asFile)
 		uploadFile('ili2ora',ili2oraBindist.archiveFile.get().asFile)
