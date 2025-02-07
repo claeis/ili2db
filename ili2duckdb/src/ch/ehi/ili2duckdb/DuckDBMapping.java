@@ -26,7 +26,7 @@ public class DuckDBMapping extends AbstractJdbcMapping {
     }
     @Override
     public void postConnect(Connection conn, Config config) {
-        if(isNewFile!=null && isNewFile){
+        if(isNewFile!=null) {
             Statement dbstmt = null;
             try{
                 try{
@@ -45,24 +45,7 @@ public class DuckDBMapping extends AbstractJdbcMapping {
                 }
             }catch(SQLException ex){
                 throw new IllegalStateException(ex);
-            }
-        } else if (isNewFile != null && !isNewFile) {
-            Statement dbstmt = null;
-            try{
-                try{
-                    String line="LOAD spatial;";
-                    dbstmt = conn.createStatement();
-                    EhiLogger.traceBackendCmd(line);
-                    dbstmt.execute(line);
-                }finally{
-                    if(dbstmt!=null) {
-                        dbstmt.close();
-                        dbstmt=null;
-                    }
-                }
-            }catch(SQLException ex){
-                throw new IllegalStateException(ex);
-            }
+            }    
         }
     }
     @Override
