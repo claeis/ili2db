@@ -7,6 +7,8 @@ MODEL Enum23b
     Enum1 = (Test1, Test2, Test3 (Test3a, Test3b));
     Enum1a EXTENDS Enum1 = (Test2 (Test2a, Test2b));
     Enum1b EXTENDS Enum1 = (Test2 (Test2a, Test2b));
+
+    Enum2ordered = (Test1, Test2, Test3 (Test3a, Test3b)) ORDERED;
     
      BBArt = (
         Gebaeude,
