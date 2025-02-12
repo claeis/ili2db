@@ -401,6 +401,9 @@ public class AbstractRecordConverter {
         }else if(attributeDef.getDomainResolvingAliases() instanceof CompositionType){
             return false;
         }
+        if(attributeDef.getCardinality().getMaximum()>1) {
+            return false;
+        }
 		return true;
 	}
 	

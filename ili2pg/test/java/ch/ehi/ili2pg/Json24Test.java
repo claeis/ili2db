@@ -36,8 +36,8 @@ import ch.interlis.iox.StartBasketEvent;
 import ch.interlis.iox.StartTransferEvent;
 
 //-Ddburl=jdbc:postgresql:dbname -Ddbusr=usrname -Ddbpwd=1234
-public class Json23Test extends ch.ehi.ili2db.Json23Test {
-	private static final String DBSCHEMA = "Json23";
+public class Json24Test extends ch.ehi.ili2db.Json24Test {
+	private static final String DBSCHEMA = "Json24";
 	
 	
     @Override
@@ -53,7 +53,7 @@ public class Json23Test extends ch.ehi.ili2db.Json23Test {
         try {
             rs=stmt.executeQuery("SELECT farben->0->>'@type',farben->0->'r' FROM "+setup.prefixName("auto")+" WHERE t_ili_tid='1'");
             assertTrue(rs.next());
-            assertEquals("Json23.TestA.Farbe",rs.getString(1));
+            assertEquals("Json24.TestA.Farbe",rs.getString(1));
             assertEquals(10,rs.getInt(2));
             rs=stmt.executeQuery("SELECT cast(farben as text) FROM "+setup.prefixName("auto")+" WHERE t_ili_tid='2'");
             assertTrue(rs.next());

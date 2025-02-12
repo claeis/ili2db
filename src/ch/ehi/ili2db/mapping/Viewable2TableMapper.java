@@ -393,7 +393,7 @@ public class Viewable2TableMapper {
                                     addColumn(viewable,existingAttrs,newProp);
                                 }
                             }
-                        } else if (cardinality.getMaximum() > 1 && type instanceof BaseType) {
+                        } else if (cardinality.getMaximum() > 1 && type instanceof BaseType && !Ili2cUtility.isJsonAttr(td,attr)) {
                             // create a new secondary table for attribute with cardinality greater than one
                             sqlname=nameMapping.mapAttributeAsTable(iliclass, attr, epsgCode);
                             ViewableWrapper attrWrapper = viewable.createSecondaryTable(sqlname);

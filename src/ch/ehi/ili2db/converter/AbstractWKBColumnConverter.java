@@ -495,6 +495,24 @@ public abstract class AbstractWKBColumnConverter implements SqlColumnConverter {
         return out.toString();
     }
     @Override
+    public Object fromIomValueArrayToJson(AttributeDef iliEleAttr, String[] iomValues, boolean isEnumInt)
+            throws SQLException, ConverterException {
+        JsonFactory jsonF = new JsonFactory();
+        JsonGenerator jg=null;
+        java.io.StringWriter out=new java.io.StringWriter();
+        
+        try {
+            jg = jsonF.createJsonGenerator(out);
+            Iox2jsonUtility.writeArray(jg, iomValues,iliEleAttr,isEnumInt);
+            jg.flush();
+            jg.close();
+            jg=null;
+        } catch (IOException e) {
+            throw new ConverterException(e);
+        }
+        return out.toString();
+    }
+    @Override
     public IomObject[] toIomStructureFromJson(AttributeDef iliEleAttr, Object sqlArray)
             throws SQLException, ConverterException {
         JsonFactory jsonF = new JsonFactory();
@@ -508,6 +526,21 @@ public abstract class AbstractWKBColumnConverter implements SqlColumnConverter {
             throw new ConverterException(ex);
         }
         return iomObj;
+    }
+    @Override
+    public String[] toIomValueArrayFromJson(AttributeDef iliEleAttr, Object sqlArray, boolean isEnumInt)
+            throws SQLException, ConverterException {
+        JsonFactory jsonF = new JsonFactory();
+        java.io.StringReader in=new java.io.StringReader((String)sqlArray);
+        String values[]=null;
+        try {
+            JsonParser jg = jsonF.createJsonParser(in);
+            
+            values=Iox2jsonUtility.readArray(jg);
+        }catch(IOException ex) {
+            throw new ConverterException(ex);
+        }
+        return values;
     }
 
 }

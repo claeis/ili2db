@@ -8,6 +8,7 @@ import ch.interlis.ili2c.metamodel.AbstractCoordType;
 import ch.interlis.ili2c.metamodel.AttributeDef;
 import ch.interlis.ili2c.metamodel.CompositionType;
 import ch.interlis.ili2c.metamodel.Domain;
+import ch.interlis.ili2c.metamodel.LineType;
 import ch.interlis.ili2c.metamodel.Model;
 import ch.interlis.ili2c.metamodel.OIDType;
 import ch.interlis.ili2c.metamodel.RoleDef;
@@ -368,13 +369,17 @@ public class Ili2cUtility {
 	}
     public static boolean isJsonAttr(TransferDescription td,
             AttributeDef attr) {
-        Type typeo=attr.getDomain();
-        if(typeo instanceof CompositionType){
-            if(IliMetaAttrNames.METAATTR_MAPPING_JSON.equals(attr.getMetaValue(IliMetaAttrNames.METAATTR_MAPPING))){
-                return true;
-            }
+        if(IliMetaAttrNames.METAATTR_MAPPING_JSON.equals(attr.getMetaValue(IliMetaAttrNames.METAATTR_MAPPING))){
+            return true;
         }
         return false;
+    }
+    public static boolean isSimpleType(TransferDescription td,AttributeDef attr) {
+        Type type=attr.getDomainResolvingAll();
+        if(type instanceof CompositionType || type instanceof AbstractCoordType || type instanceof LineType) {
+            return false;
+        }
+        return true;
     }
 
     public static Domain getRootBaseDomain(Domain domain) {

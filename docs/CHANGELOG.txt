@@ -15,6 +15,7 @@ ili2db 5.2.2 (2025-02-xx)
 ---------------------------
 - fix wrong seq values in enum tabs (#526)
 - add support for DuckDB (#528)
+- ILI2.4: JSON-Mapping of simple data types is not working (#557)
 
 ili2db 5.2.1 (2024-12-04)
 ---------------------------

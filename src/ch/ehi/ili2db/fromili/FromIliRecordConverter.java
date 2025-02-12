@@ -766,6 +766,12 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 				: createSimpleDbCol(dbTable, aclass, attr, type, dbCol, simpleTypeKind,unitDef, mText, dbColExts);
 		if(result) {
 		    typeKind=simpleTypeKind.value;
+        }else if(Ili2cUtility.isJsonAttr(td, attr) && (coalesceJson 
+                || TrafoConfigNames.JSON_TRAFO_COALESCE.equals(trafoConfig.getAttrConfig(attr,TrafoConfigNames.JSON_TRAFO)))){
+            DbColJson ret=new DbColJson();
+            dbCol.value=ret;
+            trafoConfig.setAttrConfig(attr, TrafoConfigNames.JSON_TRAFO,TrafoConfigNames.JSON_TRAFO_COALESCE);
+            typeKind=DbExtMetaInfo.TAG_COL_TYPEKIND_STRUCTURE;
 		}else if (type instanceof AbstractSurfaceOrAreaType){
 			if(createItfLineTables){
 				dbCol.value=null;
@@ -976,12 +982,6 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
                 }
                 dbCol.value.setArraySize(DbColumn.UNLIMITED_ARRAY);     
                 trafoConfig.setAttrConfig(attr, TrafoConfigNames.ARRAY_TRAFO,TrafoConfigNames.ARRAY_TRAFO_COALESCE);
-            }else if(Ili2cUtility.isJsonAttr(td, attr) && (coalesceJson 
-                    || TrafoConfigNames.JSON_TRAFO_COALESCE.equals(trafoConfig.getAttrConfig(attr,TrafoConfigNames.JSON_TRAFO)))){
-                DbColJson ret=new DbColJson();
-                dbCol.value=ret;
-                trafoConfig.setAttrConfig(attr, TrafoConfigNames.JSON_TRAFO,TrafoConfigNames.JSON_TRAFO_COALESCE);
-                typeKind=DbExtMetaInfo.TAG_COL_TYPEKIND_STRUCTURE;
             }else if(isMultilingualTextAttr(td, attr) && (expandMultilingual 
                         || TrafoConfigNames.MULTILINGUAL_TRAFO_EXPAND.equals(trafoConfig.getAttrConfig(attr,TrafoConfigNames.MULTILINGUAL_TRAFO)))){
                 for(String sfx:DbNames.MULTILINGUAL_TXT_COL_SUFFIXS){
@@ -1218,6 +1218,9 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 
 	private boolean createSimpleDbColTXT(DbTable dbTable, Viewable aclass, AttributeDef attr, Type type,
 										 OutParam<DbColumn> dbCol, OutParam<Unit> unitDef, OutParam<Boolean> mText, ArrayList<DbColumn> dbColExts) {
+	    if(attr.getCardinality().getMaximum()>1) {
+	        return false;
+	    }
 		DbColVarchar ret = new DbColVarchar();
 		ret.setSize(DbColVarchar.UNLIMITED);
 		dbCol.value = ret;
@@ -1226,6 +1229,9 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 
 	private boolean createSimpleDbCol(DbTable dbTable, Viewable aclass, AttributeDef attr, Type type,
 			OutParam<DbColumn> dbCol, OutParam<String> typeKind,OutParam<Unit> unitDef, OutParam<Boolean> mText, ArrayList<DbColumn> dbColExts) {
+        if(attr.getCardinality().getMaximum()>1) {
+            return false;
+        }
 		if (attr.isDomainBoolean()) {
 			dbCol.value= new DbColBoolean();
 			typeKind.value=DbExtMetaInfo.TAG_COL_TYPEKIND_BOOLEAN;

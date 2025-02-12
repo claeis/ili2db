@@ -272,4 +272,14 @@ public class NullColumnConverter implements SqlColumnConverter {
             throws SQLException, ConverterException {
         return null;
     }
+    @Override
+    public Object fromIomValueArrayToJson(AttributeDef iliEleAttr, String[] iomValues, boolean isEnumInt)
+            throws SQLException, ConverterException {
+        return null;
+    }
+    @Override
+    public String[] toIomValueArrayFromJson(AttributeDef iliEleAttr, Object sqlArray, boolean isEnumInt)
+            throws SQLException, ConverterException {
+        return null;
+    }
 }

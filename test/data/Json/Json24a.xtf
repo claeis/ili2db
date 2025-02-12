@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ili:transfer xmlns:ili="http://www.interlis.ch/xtf/2.4/INTERLIS" xmlns:geom="http://www.interlis.ch/geometry/1.0"
+              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+              xmlns="http://www.interlis.ch/xtf/2.4/Json24">
+    <ili:headersection>
+        <ili:models>
+            <ili:model>Json24</ili:model>
+        </ili:models>
+        <ili:sender>ili2gpkg-4.5.1-SNAPSHOT-34a149ef943889acc815bc9c3ffdb39f6e4918d3</ili:sender>
+    </ili:headersection>
+    <ili:datasection>
+		<TestA ili:bid="Json24.TestA">
+			<Auto ili:tid="1">
+				<Farben>
+					<Farbe>
+						<r>10</r>
+						<g>11</g>
+						<b>12</b>
+						<name>f1</name>
+						<active>false</active>
+					</Farbe>
+					<Farbe>
+						<r>20</r>
+						<g>21</g>
+						<b>22</b>
+						<name>f2</name>
+						<active>false</active>
+					</Farbe>
+				</Farben>
+				<Nummer>10</Nummer>
+				<Nummer>12</Nummer>
+			</Auto>
+			<Auto ili:tid="2">
+			</Auto>
+			<Auto ili:tid="3">
+				<Farben>
+					<Farbe>
+						<r>10</r>
+						<g>11</g>
+						<b>12</b>
+						<name>f1</name>
+						<active>false</active>
+					</Farbe>
+				</Farben>
+				<Farbe>
+					<Farbe>
+						<r>20</r>
+						<g>21</g>
+						<b>22</b>
+						<name>f2</name>
+						<active>false</active>
+					</Farbe>
+				</Farbe>
+				<Nummer>1</Nummer>
+			</Auto>
+		</TestA>
+	</ili:datasection>
+</ili:transfer>
