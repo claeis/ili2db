@@ -602,7 +602,7 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
                      Object dbValue=rs.getObject(valuei);
                      valuei++;
                      if(!rs.wasNull()){
-                         if(Ili2cUtility.isSimpleType(td,tableAttr)) {
+                         if(Ili2cUtility.isIomObjectPrimType(td,tableAttr)) {
                              try{
                                  String iomArray[]=geomConv.toIomValueArrayFromJson(tableAttr, dbValue,false);
                                  if(iomArray!=null) {

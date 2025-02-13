@@ -459,10 +459,9 @@ public abstract class Datatypes23Test {
 				Assert.assertTrue(stmt.execute(stmtT));
 				ResultSet rs=stmt.getResultSet();
 				Assert.assertTrue(rs.next());
-				byte[] bytes=(byte[])rs.getObject("binbox");
+				String bytes=rs.getString("binbox");
 				Assert.assertFalse(rs.wasNull());
-				String wkbText=Base64.encodeBytes(bytes);
-				Assert.assertEquals("AAAA", wkbText);
+				Assert.assertEquals("AAAA", bytes);
 			}
 		}catch(SQLException e) {
 			throw new IoxException(e);
