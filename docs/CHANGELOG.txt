@@ -18,6 +18,7 @@ ili2db 5.2.2 (2025-02-xx)
 - ILI2.4: JSON-Mapping of simple data types is not working (#557)
 - ehisqlgen-1.16.1
 - iox-ili-1.23.4
+- ili2c-5.6.3
 
 ili2db 5.2.1 (2024-12-04)
 ---------------------------
