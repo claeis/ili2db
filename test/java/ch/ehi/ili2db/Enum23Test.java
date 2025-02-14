@@ -2,6 +2,7 @@ package ch.ehi.ili2db;
 
 import java.io.File;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
 
@@ -290,6 +291,31 @@ public abstract class Enum23Test {
                 DbUtility.executeSqlScript(jdbcConnection, new java.io.FileReader(outfile));
 
                 jdbcConnection.commit();
+                
+                {
+                    PreparedStatement stmt=null;
+                    String stmtTxt="select seq from "+setup.prefixName("enum2ordered")+" where iliCode=?";
+                    try{
+                        stmt=jdbcConnection.prepareStatement(stmtTxt);
+                        stmt.setString(1,"Test1");
+                         ResultSet rs=stmt.executeQuery();
+                         {
+                             Assert.assertTrue(rs.next());
+                             Assert.assertEquals(0, rs.getInt(1));
+                         }
+                         stmt.setString(1,"Test3.Test3b");
+                         rs=stmt.executeQuery();
+                         {
+                             Assert.assertTrue(rs.next());
+                             Assert.assertEquals(3, rs.getInt(1));
+                         }
+                    }finally {
+                        if(stmt!=null) {
+                            stmt.close();
+                        }
+                    }
+                }
+                
                 jdbcConnection.close();
                 jdbcConnection=null;
                 

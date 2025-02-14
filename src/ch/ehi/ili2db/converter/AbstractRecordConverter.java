@@ -392,16 +392,7 @@ public class AbstractRecordConverter {
 		if(!sqlColsAsText){
 			return false;
 		}
-        if(attributeDef.getDomainResolvingAliases() instanceof BlackboxType){
-            return false;
-        }else if(attributeDef.getDomainResolvingAliases() instanceof AbstractCoordType){
-            return false;
-        }else if(attributeDef.getDomainResolvingAliases() instanceof LineType){
-            return false;
-        }else if(attributeDef.getDomainResolvingAliases() instanceof CompositionType){
-            return false;
-        }
-		return true;
+		return Ili2cUtility.isIomObjectPrimType(td,attributeDef);
 	}
 	
 }

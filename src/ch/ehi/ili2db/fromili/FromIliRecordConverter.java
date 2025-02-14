@@ -762,10 +762,24 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 		ArrayList<DbColumn> dbColExts=new ArrayList<DbColumn>();
 		Type type = attr.getDomainResolvingAll();
 		String typeKind=null;
-		boolean result = mapAsTextCol(attr) ? createSimpleDbColTXT(dbTable, aclass, attr, type, dbCol, unitDef, mText, dbColExts)
-				: createSimpleDbCol(dbTable, aclass, attr, type, dbCol, simpleTypeKind,unitDef, mText, dbColExts);
-		if(result) {
-		    typeKind=simpleTypeKind.value;
+        if((Ili2cUtility.isJsonMapping(attr) && coalesceJson) 
+                || TrafoConfigNames.JSON_TRAFO_COALESCE.equals(trafoConfig.getAttrConfig(attr,TrafoConfigNames.JSON_TRAFO))){
+            DbColJson ret=new DbColJson();
+            dbCol.value=ret;
+            trafoConfig.setAttrConfig(attr, TrafoConfigNames.JSON_TRAFO,TrafoConfigNames.JSON_TRAFO_COALESCE);
+            typeKind=DbExtMetaInfo.TAG_COL_TYPEKIND_STRUCTURE;
+        }else if(Ili2cUtility.isIomObjectPrimType(td,attr)) {
+            boolean result;
+            if(sqlColsAsText){
+                result = createSimpleDbColTXT(dbTable, aclass, attr, type, dbCol, unitDef, mText, dbColExts);
+            }else {
+                result = createSimpleDbCol(dbTable, aclass, attr, type, dbCol, simpleTypeKind,unitDef, mText, dbColExts);
+            }
+            if(result) {
+                typeKind=simpleTypeKind.value;
+            }else {
+                throw new IllegalStateException("failed to map attribute "+ attr.getScopedName());
+            }
 		}else if (type instanceof AbstractSurfaceOrAreaType){
 			if(createItfLineTables){
 				dbCol.value=null;
@@ -976,12 +990,6 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
                 }
                 dbCol.value.setArraySize(DbColumn.UNLIMITED_ARRAY);     
                 trafoConfig.setAttrConfig(attr, TrafoConfigNames.ARRAY_TRAFO,TrafoConfigNames.ARRAY_TRAFO_COALESCE);
-            }else if(Ili2cUtility.isJsonAttr(td, attr) && (coalesceJson 
-                    || TrafoConfigNames.JSON_TRAFO_COALESCE.equals(trafoConfig.getAttrConfig(attr,TrafoConfigNames.JSON_TRAFO)))){
-                DbColJson ret=new DbColJson();
-                dbCol.value=ret;
-                trafoConfig.setAttrConfig(attr, TrafoConfigNames.JSON_TRAFO,TrafoConfigNames.JSON_TRAFO_COALESCE);
-                typeKind=DbExtMetaInfo.TAG_COL_TYPEKIND_STRUCTURE;
             }else if(isMultilingualTextAttr(td, attr) && (expandMultilingual 
                         || TrafoConfigNames.MULTILINGUAL_TRAFO_EXPAND.equals(trafoConfig.getAttrConfig(attr,TrafoConfigNames.MULTILINGUAL_TRAFO)))){
                 for(String sfx:DbNames.MULTILINGUAL_TXT_COL_SUFFIXS){

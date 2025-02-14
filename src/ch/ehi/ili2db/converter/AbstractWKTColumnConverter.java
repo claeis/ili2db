@@ -429,5 +429,15 @@ public abstract class AbstractWKTColumnConverter implements SqlColumnConverter {
             throws SQLException, ConverterException {
         throw new UnsupportedOperationException();
     }
+    @Override
+    public Object fromIomValueArrayToJson(AttributeDef iliEleAttr, String[] iomValues, boolean isEnumInt)
+            throws SQLException, ConverterException {
+        throw new UnsupportedOperationException();
+    }
+    @Override
+    public String[] toIomValueArrayFromJson(AttributeDef iliEleAttr, Object sqlArray, boolean isEnumInt)
+            throws SQLException, ConverterException {
+        throw new UnsupportedOperationException();
+    }
 
 }

@@ -669,7 +669,16 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 		if(true) { // attr.getExtending()==null){
 			Type type = attr.getDomainResolvingAliases();
 			String attrSqlName=ili2sqlName.mapIliAttributeDef(attr,epsgCode,sqlTableName,null);
-			if (attr.isDomainBoolean()) {
+			if(TrafoConfigNames.JSON_TRAFO_COALESCE.equals(trafoConfig.getAttrConfig(attr, TrafoConfigNames.JSON_TRAFO))){
+                ret.append(sep);
+                ret.append(attrSqlName);
+                   if(isUpdate){
+                       ret.append("="+geomConv.getInsertValueWrapperJson("?"));
+                   }else{
+                       values.append(","+geomConv.getInsertValueWrapperJson("?"));
+                   }
+                   sep=",";
+			}else if (attr.isDomainBoolean()) {
 					ret.append(sep);
 					ret.append(attrSqlName);
 					if(isUpdate){
@@ -755,15 +764,6 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 							values.append(","+geomConv.getInsertValueWrapperArray("?"));
 						}
 						sep=",";
-                }else if(TrafoConfigNames.JSON_TRAFO_COALESCE.equals(trafoConfig.getAttrConfig(attr, TrafoConfigNames.JSON_TRAFO))){
-                    ret.append(sep);
-                    ret.append(attrSqlName);
-                       if(isUpdate){
-                           ret.append("="+geomConv.getInsertValueWrapperJson("?"));
-                       }else{
-                           values.append(","+geomConv.getInsertValueWrapperJson("?"));
-                       }
-                       sep=",";
 				}else if(TrafoConfigNames.MULTILINGUAL_TRAFO_EXPAND.equals(trafoConfig.getAttrConfig(attr, TrafoConfigNames.MULTILINGUAL_TRAFO))){
 					for(String sfx:DbNames.MULTILINGUAL_TXT_COL_SUFFIXS){
 						ret.append(sep);
@@ -943,7 +943,36 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 			throws SQLException, ConverterException {
 		if(true) { // attr.getExtending()==null){
 			 String attrName=tableAttr.getName();
-			if( tableAttr.isDomainBoolean()) {
+			 if(TrafoConfigNames.JSON_TRAFO_COALESCE.equals(trafoConfig.getAttrConfig(tableAttr, TrafoConfigNames.JSON_TRAFO))){
+                Type type = tableAttr.getDomainResolvingAliases();
+                boolean createJsonArray=type.getCardinality().getMaximum()>1;
+                int valuec= classAttr==null ? 0 : iomObj.getattrvaluecount(attrName);
+                if(valuec>0){
+                    Object geomObj = null;
+                    String simpleVal=iomObj.getattrprim(attrName, 0);
+                    if(simpleVal!=null) {
+                        String iomValues[]=new String[valuec];
+                        for(int i=0;i<valuec;i++) {
+                            iomValues[i]=iomObj.getattrprim(attrName, i);
+                        }
+                        geomObj = geomConv.fromIomValueArrayToJson(tableAttr,iomValues,false);
+                    }else {
+                        IomObject iomValues[]=new IomObject[valuec];
+                        for(int i=0;i<valuec;i++) {
+                            iomValues[i]=iomObj.getattrobj(attrName, i);
+                        }
+                        if(createJsonArray) {
+                            geomObj = geomConv.fromIomStructureToJsonArray(tableAttr,iomValues);
+                        }else {
+                            geomObj = geomConv.fromIomStructureToJson(tableAttr,iomValues);
+                        }
+                    }
+                   ps.setObject(valuei,geomObj);
+                }else{
+                   geomConv.setJsonNull(ps,valuei);
+                }
+                valuei++;
+			}else if( tableAttr.isDomainBoolean()) {
 					String value= classAttr==null ? null : iomObj.getattrprim(attrName, attrIndex);
 					if(value!=null){
 						if(value.equals("true")){
@@ -1152,25 +1181,6 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 							geomConv.setArrayNull(ps,valuei);
 						 }
 						 valuei++;
-                    }else if(TrafoConfigNames.JSON_TRAFO_COALESCE.equals(trafoConfig.getAttrConfig(tableAttr, TrafoConfigNames.JSON_TRAFO))){
-                        boolean createJsonArray=type.getCardinality().getMaximum()>1;
-                        int valuec= classAttr==null ? 0 : iomObj.getattrvaluecount(attrName);
-                        IomObject iomValues[]=new IomObject[valuec];
-                        if(iomValues.length>0){
-                            for(int i=0;i<valuec;i++) {
-                                iomValues[i]=iomObj.getattrobj(attrName, i);
-                            }
-                            Object geomObj = null;
-                            if(createJsonArray) {
-                                geomObj = geomConv.fromIomStructureToJsonArray(tableAttr,iomValues);
-                            }else {
-                                geomObj = geomConv.fromIomStructureToJson(tableAttr,iomValues);
-                            }
-                           ps.setObject(valuei,geomObj);
-                        }else{
-                           geomConv.setJsonNull(ps,valuei);
-                        }
-                        valuei++;
 					}else if(TrafoConfigNames.MULTILINGUAL_TRAFO_EXPAND.equals(trafoConfig.getAttrConfig(tableAttr, TrafoConfigNames.MULTILINGUAL_TRAFO))){
 						 IomObject iomMulti= classAttr==null ? null : iomObj.getattrobj(attrName,0);
 						for(String sfx:DbNames.MULTILINGUAL_TXT_COL_SUFFIXS){

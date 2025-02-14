@@ -148,4 +148,8 @@ public interface SqlColumnConverter {
             throws SQLException, ConverterException;
     public IomObject[] toIomStructureFromJson(AttributeDef iliEleAttr, Object sqlArray)
             throws SQLException, ConverterException;
+    public Object fromIomValueArrayToJson(AttributeDef iliEleAttr, String[] iomValues, boolean isEnumInt)
+            throws SQLException, ConverterException;
+    public String[] toIomValueArrayFromJson(AttributeDef iliEleAttr, Object sqlArray, boolean isEnumInt)
+            throws SQLException, ConverterException;
 }

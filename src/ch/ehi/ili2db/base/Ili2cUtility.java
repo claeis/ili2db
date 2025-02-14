@@ -8,8 +8,10 @@ import ch.interlis.ili2c.metamodel.AbstractCoordType;
 import ch.interlis.ili2c.metamodel.AttributeDef;
 import ch.interlis.ili2c.metamodel.CompositionType;
 import ch.interlis.ili2c.metamodel.Domain;
+import ch.interlis.ili2c.metamodel.LineType;
 import ch.interlis.ili2c.metamodel.Model;
 import ch.interlis.ili2c.metamodel.OIDType;
+import ch.interlis.ili2c.metamodel.ReferenceType;
 import ch.interlis.ili2c.metamodel.RoleDef;
 import ch.interlis.ili2c.metamodel.Table;
 import ch.interlis.ili2c.metamodel.TransferDescription;
@@ -366,15 +368,22 @@ public class Ili2cUtility {
 		}
 		return false;
 	}
-    public static boolean isJsonAttr(TransferDescription td,
-            AttributeDef attr) {
-        Type typeo=attr.getDomain();
-        if(typeo instanceof CompositionType){
-            if(IliMetaAttrNames.METAATTR_MAPPING_JSON.equals(attr.getMetaValue(IliMetaAttrNames.METAATTR_MAPPING))){
-                return true;
-            }
+    public static boolean isJsonMapping(AttributeDef attr) {
+        if(IliMetaAttrNames.METAATTR_MAPPING_JSON.equals(attr.getMetaValue(IliMetaAttrNames.METAATTR_MAPPING))){
+            return true;
         }
         return false;
+    }
+    public static boolean isIomObjectPrimType(TransferDescription td,AttributeDef attr) {
+        Type type=attr.getDomainResolvingAll();
+        if(type instanceof CompositionType 
+                || type instanceof AbstractCoordType 
+                || type instanceof LineType
+                || type instanceof ReferenceType
+                ) {
+            return false;
+        }
+        return true;
     }
 
     public static Domain getRootBaseDomain(Domain domain) {

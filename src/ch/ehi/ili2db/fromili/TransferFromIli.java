@@ -1597,7 +1597,6 @@ public class TransferFromIli {
 	private void updateEnumEntries(GeneratorJdbc gen, java.util.Set<String> exstEntries,String sqlTableName,java.sql.PreparedStatement ps, EnumValueMap type, boolean isOrdered,String thisClass, String baseClass) 
 	throws SQLException 
 	{
-		int seq=0;
 		Iterator<String> evi=type.getXtfCodes().iterator();
 		while(evi.hasNext()){
 			String eleName=evi.next();
@@ -1608,6 +1607,7 @@ public class TransferFromIli {
                 if(!exstEntries.contains(eleName)){
                     // insert only non-existing entries
                     if(isOrdered){
+                        int seq=type.mapXtfValueToSeq(eleName);
                         ps.setInt(1, seq);
                     }else{
                         ps.setNull(1,java.sql.Types.NUMERIC);
@@ -1649,6 +1649,7 @@ public class TransferFromIli {
                 insStmt.append(") VALUES (");
                 // insert only non-existing entries
                 if(isOrdered){
+                    int seq=type.mapXtfValueToSeq(eleName);
                     insStmt.append(seq);
                 }else{
                     insStmt.append("NULL");
@@ -1674,7 +1675,6 @@ public class TransferFromIli {
                 insStmt=insStmt.append(")");
                 gen.addCreateLine(gen.new Stmt(insStmt.toString()));
             }
-			seq++;
 		}
 	}
 	static public void addTableMappingTable(ch.ehi.sqlgen.repository.DbSchema schema,Config config)

@@ -192,8 +192,6 @@ public abstract class SimpleTest {
         try{
             //EhiLogger.getInstance().setTraceFilter(false);
             setup.resetDb();
-            jdbcConnection = setup.createConnection();
-            stmt=jdbcConnection.createStatement();
             {
                 File data=new File(TEST_OUT,"SimpleStruct23a.xtf");
                 Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
@@ -209,6 +207,8 @@ public abstract class SimpleTest {
                 Ili2db.run(config,null);
                 
             }
+            jdbcConnection = setup.createConnection();
+            stmt=jdbcConnection.createStatement();
             // verify
             {
                 {
@@ -252,8 +252,6 @@ public abstract class SimpleTest {
         Connection jdbcConnection=null;
         Statement stmt=null;
         try{
-            jdbcConnection = setup.createConnection();
-            stmt=jdbcConnection.createStatement();
             {
                 //EhiLogger.getInstance().setTraceFilter(false);
                 File data=new File(TEST_OUT,"SimpleStruct23b.xtf");
@@ -265,6 +263,8 @@ public abstract class SimpleTest {
                 Ili2db.readSettingsFromDb(config);
                 Ili2db.run(config,null);
             }
+            jdbcConnection = setup.createConnection();
+            stmt=jdbcConnection.createStatement();
             // verify
             {
                 {

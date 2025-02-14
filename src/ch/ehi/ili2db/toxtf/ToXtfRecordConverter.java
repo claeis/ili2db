@@ -237,7 +237,11 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 		if(true) { // attr.getExtending()==null){
 			Type type = attr.getDomainResolvingAll();
 			 String attrSqlName=ili2sqlName.mapIliAttributeDef(attr,epsgCode,sqlTableName,null);
-			if( attr.isDomainIli1Date()) {
+			 if(TrafoConfigNames.JSON_TRAFO_COALESCE.equals(trafoConfig.getAttrConfig(attr, TrafoConfigNames.JSON_TRAFO))){
+                ret.append(sep);
+                sep=",";
+                ret.append(geomConv.getSelectValueWrapperJson(makeColumnRef(tableAlias,attrSqlName)));
+			}else if( attr.isDomainIli1Date()) {
 				 ret.append(sep);
 				 sep=",";
 				 ret.append(geomConv.getSelectValueWrapperDate(makeColumnRef(tableAlias,attrSqlName)));
@@ -290,10 +294,6 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 					 sep=",";
 					 ret.append(geomConv.getSelectValueWrapperArray(makeColumnRef(tableAlias,attrSqlName)));
 					 arrayAttrs.addArrayAttr(attr);
-                }else if(TrafoConfigNames.JSON_TRAFO_COALESCE.equals(trafoConfig.getAttrConfig(attr, TrafoConfigNames.JSON_TRAFO))){
-                    ret.append(sep);
-                    sep=",";
-                    ret.append(geomConv.getSelectValueWrapperJson(makeColumnRef(tableAlias,attrSqlName)));
 				}else if(TrafoConfigNames.MULTILINGUAL_TRAFO_EXPAND.equals(trafoConfig.getAttrConfig(attr, TrafoConfigNames.MULTILINGUAL_TRAFO))){
 					for(String sfx:DbNames.MULTILINGUAL_TXT_COL_SUFFIXS){
 						 ret.append(sep);
@@ -595,7 +595,39 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 		if(true) { // attr.getExtending()==null){
 			String attrName=tableAttr.getName();
 			String sqlAttrName=ili2sqlName.mapIliAttributeDef(tableAttr,epsgCode,table.getSqlTablename(),null);
-			if( tableAttr.isDomainBoolean()) {
+            if(TrafoConfigNames.JSON_TRAFO_COALESCE.equals(trafoConfig.getAttrConfig(tableAttr, TrafoConfigNames.JSON_TRAFO))){
+                if(classAttr==null) {
+                    valuei++;
+                }else {
+                     Object dbValue=rs.getObject(valuei);
+                     valuei++;
+                     if(!rs.wasNull()){
+                         if(Ili2cUtility.isIomObjectPrimType(td,tableAttr)) {
+                             try{
+                                 String iomArray[]=geomConv.toIomValueArrayFromJson(tableAttr, dbValue,false);
+                                 if(iomArray!=null) {
+                                     for(int elei=0;elei<iomArray.length;elei++){
+                                         iomObj.addattrvalue(attrName, iomArray[elei]);
+                                     }
+                                 }
+                             }catch(ConverterException ex){
+                                 EhiLogger.logError("Object "+sqlid+": failed to convert JSON",ex);
+                             }   
+                         }else {
+                             try{
+                                 IomObject iomArray[]=geomConv.toIomStructureFromJson(tableAttr, dbValue);
+                                 if(iomArray!=null) {
+                                     for(int elei=0;elei<iomArray.length;elei++){
+                                         iomObj.addattrobj(attrName, iomArray[elei]);
+                                     }
+                                 }
+                             }catch(ConverterException ex){
+                                 EhiLogger.logError("Object "+sqlid+": failed to convert JSON",ex);
+                             }   
+                         }
+                     }
+                }
+			}else if( tableAttr.isDomainBoolean()) {
 			    if(classAttr==null) {
                     valuei++;
 			    }else {
@@ -852,25 +884,6 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 	                             }   
 	                         }
 		                }
-                    }else if(TrafoConfigNames.JSON_TRAFO_COALESCE.equals(trafoConfig.getAttrConfig(tableAttr, TrafoConfigNames.JSON_TRAFO))){
-                        if(classAttr==null) {
-                            valuei++;
-                        }else {
-                             Object dbValue=rs.getObject(valuei);
-                             valuei++;
-                             if(!rs.wasNull()){
-                                 try{
-                                     IomObject iomArray[]=geomConv.toIomStructureFromJson(tableAttr, dbValue);
-                                     if(iomArray!=null) {
-                                         for(int elei=0;elei<iomArray.length;elei++){
-                                             iomObj.addattrobj(attrName, iomArray[elei]);
-                                         }
-                                     }
-                                 }catch(ConverterException ex){
-                                     EhiLogger.logError("Object "+sqlid+": failed to convert JSON",ex);
-                                 }   
-                             }
-                        }
 					}else if(TrafoConfigNames.MULTILINGUAL_TRAFO_EXPAND.equals(trafoConfig.getAttrConfig(tableAttr, TrafoConfigNames.MULTILINGUAL_TRAFO))){
 						IomObject iomMulti=null;
 						Table multilingualTextType = ((CompositionType) type).getComponentType();
@@ -1210,7 +1223,7 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 			}
 		return valuei;
 	}
-	private IomObject mapMultiline2Surface(IomObject multiline) {
+    private IomObject mapMultiline2Surface(IomObject multiline) {
 	    IomObject ret=null;
 	    IomObject boundary=null;
         int linec=multiline.getattrvaluecount(Wkb2iox.ATTR_POLYLINE);

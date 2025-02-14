@@ -33,6 +33,7 @@ public class EnumValueMap {
     private HashMap<Long,String> id2xtf=new HashMap<Long,String>();
     private HashMap<String,Long> xtf2id=new HashMap<String,Long>();
     private HashMap<String,Integer> xtf2itfCode=new HashMap<String,Integer>();
+    private HashMap<String,Integer> xtf2seq=new HashMap<String,Integer>();
     private HashMap<String,String> xtf2displayName=new HashMap<String,String>();
     private HashMap<String,String> xtf2doc=new HashMap<String,String>();
     public long mapXtfValue(String xtfvalue) {
@@ -46,6 +47,9 @@ public class EnumValueMap {
     }
     public int mapXtfValueToItfCode(String xtfvalue) {
         return xtf2itfCode.get(xtfvalue);
+    }
+    public int mapXtfValueToSeq(String xtfvalue) {
+        return xtf2seq.get(xtfvalue);
     }
     public String mapXtfValueToDoc(String xtfvalue) {
         return xtf2doc.get(xtfvalue);
@@ -87,6 +91,7 @@ public class EnumValueMap {
                 exstPrepStmt = conn.prepareStatement(exstStmt);
     			rs=exstPrepStmt.executeQuery();
                 Long id=0L;
+                int seq=0;
     			while(rs.next()){
     			    int col=1;
     				String iliCode=rs.getString(col++);
@@ -98,7 +103,7 @@ public class EnumValueMap {
                     String displayName=rs.getString(col++);
                     String desc=rs.getString(col++);
                     int itfCode=rs.getInt(col++);
-    				ret.addValue(id,iliCode,itfCode,displayName,desc);
+    				ret.addValue(id,iliCode,itfCode,displayName,desc,seq++);
     			}
     		}finally{
     		    if(rs!=null) {
@@ -113,11 +118,12 @@ public class EnumValueMap {
     	return ret;
     }
 
-    void addValue(long id, String xtfCode, int itfCode,String displayName,String doc) {
+    void addValue(long id, String xtfCode, int itfCode,String displayName,String doc,int seq) {
         id2xtf.put(id,xtfCode);
         xtf2id.put(xtfCode,id);
         xtf2displayName.put(xtfCode, displayName);
         xtf2itfCode.put(xtfCode, itfCode);
+        xtf2seq.put(xtfCode, seq);
         xtf2doc.put(xtfCode, doc);
     }
     public static EnumValueMap createEnumValueMap(Element attrOrDomain,ch.ehi.ili2db.mapping.NameMapping ili2sqlName) {
@@ -173,7 +179,7 @@ public class EnumValueMap {
             if(doc==null) {
                 doc=eleElement.getDocumentation();
             }
-            ret.addValue(seq,eleName,itfCode,dispName,doc);
+            ret.addValue(seq,eleName,itfCode,dispName,doc,seq);
             itfCode++;
             seq++;
             
