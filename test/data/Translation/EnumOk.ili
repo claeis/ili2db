@@ -108,6 +108,7 @@ TRANSLATION OF EnumOkX [ "1"]
 		 */
 		 !!@ ili2db.dispName_de="Class A"
 		CLASS ClassA =
+		 	!!@ ili2db.dispName_de="Aus sprachwissenschaftlicher Sicht sind Texte die sprachliche Form einer kommunikativen Handlung."
 			attrA : (a1,a2(a21,a22));
 			attrA2 : Basis.Struct;
 			attrA3 : TranslatedBasisA.TrStructA;

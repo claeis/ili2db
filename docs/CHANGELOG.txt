@@ -13,7 +13,8 @@ ideas/open issues/questions
 
 ili2db 5.2.3 (2025-03-xx)
 ---------------------------
-- ili2gpkg: create gpkg_contents entry for attributes tables (ili2db#560)
+- fix dispName>70 chars fails on import (#554)
+- ili2gpkg: create gpkg_contents entry for attributes tables (#560)
 - ehisqlgen-1.16.2+
 
 ili2db 5.2.2 (2025-02-14)

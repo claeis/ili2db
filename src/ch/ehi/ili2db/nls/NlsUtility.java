@@ -35,6 +35,7 @@ import ch.interlis.ili2c.metamodel.Container;
 import ch.interlis.ili2c.metamodel.Domain;
 import ch.ehi.basics.logging.EhiLogger;
 import ch.ehi.basics.settings.Settings;
+import ch.ehi.basics.tools.NameUtility;
 import ch.ehi.basics.tools.StringUtility;
 import ch.ehi.ili2db.base.DbNames;
 import ch.ehi.ili2db.base.Ili2db;
@@ -82,7 +83,7 @@ public class NlsUtility{
         DbColVarchar labelCol=new DbColVarchar();
         labelCol.setName(DbNames.NLS_TAB_LABEL_COL);
         labelCol.setNotNull(false);
-        labelCol.setSize(70);
+        labelCol.setSize(DbNames.NLS_TAB_LABEL_COL_SIZE);
         tab.addColumn(labelCol);
 		}
 		{
@@ -182,6 +183,9 @@ public class NlsUtility{
                 String dispName=getDispName(modelEle,entry.langCol);
                 if(dispName!=null) {
                     entry.labelCol=dispName;
+                }
+                if(entry.labelCol!=null && entry.labelCol.length()>DbNames.NLS_TAB_LABEL_COL_SIZE) {
+                    entry.labelCol=NameUtility.shortcutName(entry.labelCol,DbNames.NLS_TAB_LABEL_COL_SIZE);
                 }
                 entry.mnemonicCol=null;
                 entry.tooltipCol=null;
