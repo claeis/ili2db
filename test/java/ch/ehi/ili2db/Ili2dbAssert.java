@@ -23,6 +23,19 @@ public class Ili2dbAssert {
     
     public Ili2dbAssert() { }
     
+    public static void assertAttrNameTable(AbstractTestSetup setup, String[][] expectedValues) throws SQLException {
+        Connection jdbcConnection=null;
+        try {
+            jdbcConnection=setup.createConnection();
+            String dbschema=setup.getSchema();
+            assertAttrNameTable(jdbcConnection,expectedValues,dbschema);
+        } finally {
+            if (jdbcConnection != null) {
+                jdbcConnection.close();
+            }
+        }
+    }
+    @Deprecated
     public static void assertAttrNameTable(Connection jdbcConnection, String[][] expectedValues, String dbschema) throws SQLException {
         Statement stmt = jdbcConnection.createStatement();
         try {
@@ -78,6 +91,19 @@ public class Ili2dbAssert {
         }
     }
 
+    public static void assertTrafoTable(AbstractTestSetup setup, String[][] expectedValues) throws SQLException {
+        Connection jdbcConnection=null;
+        try {
+            jdbcConnection=setup.createConnection();
+            String dbschema=setup.getSchema();
+            assertTrafoTable(jdbcConnection,expectedValues,dbschema);
+        } finally {
+            if (jdbcConnection != null) {
+                jdbcConnection.close();
+            }
+        }
+    }
+    @Deprecated
     public static void assertTrafoTable(Connection jdbcConnection, String[][] expectedValues, String dbschema) throws SQLException {
         Statement stmt = jdbcConnection.createStatement();
         try {
@@ -131,11 +157,11 @@ public class Ili2dbAssert {
             }
         }
     }
-    
+    @Deprecated
     public static void assertTrafoTableFromGpkg(Connection jdbcConnection, String[][] expectedValues) throws SQLException {
         assertTrafoTable(jdbcConnection, expectedValues,null);
     }
-    
+    @Deprecated
     public static void assertAttrNameTableFromGpkg(Connection jdbcConnection, String[][] expectedValues) throws SQLException {
         assertAttrNameTable(jdbcConnection, expectedValues,null);
     }

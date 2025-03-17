@@ -9,10 +9,11 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 import ch.ehi.ili2db.AbstractTestSetup;
+import ch.ehi.ili2db.Array24Test;
 
 //-Ddburl=jdbc:postgresql:dbname -Ddbusr=usrname -Ddbpwd=1234
-public class Array23Test extends ch.ehi.ili2db.Array23Test {
-    private static final String DBSCHEMA = "Array23";
+public class Array24PgTest extends Array24Test {
+    private static final String DBSCHEMA = "Array24";
     String dburl;
     String dbuser;
     String dbpwd; 
