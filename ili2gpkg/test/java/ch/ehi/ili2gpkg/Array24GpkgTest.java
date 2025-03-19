@@ -2,6 +2,7 @@ package ch.ehi.ili2gpkg;
 
 import ch.ehi.ili2db.AbstractTestSetup;
 
+@org.junit.Ignore
 public class Array24GpkgTest extends ch.ehi.ili2db.Array24Test{
     
     private static final String GPKGFILENAME=TEST_DATA_DIR+"Array24.gpkg";

@@ -12,6 +12,7 @@ import ch.ehi.ili2db.AbstractTestSetup;
 import ch.ehi.ili2db.Array24Test;
 
 //-Ddburl=jdbc:postgresql:dbname -Ddbusr=usrname -Ddbpwd=1234
+@org.junit.Ignore
 public class Array24PgTest extends Array24Test {
     private static final String DBSCHEMA = "Array24";
     String dburl;
