@@ -17,26 +17,15 @@
  */
 package ch.ehi.ili2pg.converter;
 
-import ch.ehi.basics.logging.EhiLogger;
 import ch.ehi.basics.settings.Settings;
 import ch.ehi.ili2db.converter.AbstractWKBColumnConverter;
 import ch.ehi.ili2db.converter.ConverterException;
 import ch.ehi.ili2db.gui.Config;
 import ch.ehi.ili2db.json.Iox2jsonUtility;
 import ch.ehi.ili2db.toxtf.ToXtfRecordConverter;
-import ch.ehi.sqlgen.repository.DbColBlob;
-import ch.ehi.sqlgen.repository.DbColBoolean;
-import ch.ehi.sqlgen.repository.DbColDate;
-import ch.ehi.sqlgen.repository.DbColDateTime;
-import ch.ehi.sqlgen.repository.DbColDecimal;
-import ch.ehi.sqlgen.repository.DbColGeometry;
+import ch.ehi.sqlgen.repository.DbColumn;
 import ch.ehi.sqlgen.repository.DbColId;
 import ch.ehi.sqlgen.repository.DbColNumber;
-import ch.ehi.sqlgen.repository.DbColTime;
-import ch.ehi.sqlgen.repository.DbColUuid;
-import ch.ehi.sqlgen.repository.DbColVarchar;
-import ch.ehi.sqlgen.repository.DbColXml;
-
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.sql.PreparedStatement;
@@ -52,20 +41,15 @@ import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
 import com.vividsolutions.jts.io.ParseException;
-import com.vividsolutions.jts.io.WKBReader;
-
 import ch.interlis.ili2c.metamodel.AttributeDef;
-import ch.interlis.ili2c.metamodel.BasketType;
 import ch.interlis.ili2c.metamodel.BlackboxType;
 import ch.interlis.ili2c.metamodel.EnumerationType;
 import ch.interlis.ili2c.metamodel.NumericType;
-import ch.interlis.ili2c.metamodel.PolylineType;
 import ch.interlis.ili2c.metamodel.PrecisionDecimal;
+import ch.interlis.ili2c.metamodel.ReferenceType;
 import ch.interlis.ili2c.metamodel.TextType;
 import ch.interlis.ili2c.metamodel.TransferDescription;
 import ch.interlis.iom.IomObject;
-import ch.interlis.iom_j.itf.EnumCodeMapper;
-import ch.interlis.iox_j.jts.Iox2jtsException;
 import ch.interlis.iox_j.wkb.Iox2wkb;
 import ch.interlis.iox_j.wkb.Iox2wkbException;
 import ch.interlis.iox_j.wkb.Wkb2iox;
@@ -270,7 +254,7 @@ public class PostgisColumnConverter extends AbstractWKBColumnConverter {
 			return null;
 		}
 		@Override
-		public Object fromIomArray(ch.interlis.ili2c.metamodel.AttributeDef attr,String[] iomValues,boolean isEnumInt) throws SQLException, ConverterException {
+		public Object fromIomArray(ch.interlis.ili2c.metamodel.AttributeDef attr,String[] iomValues,Class<? extends DbColumn> dbColHint) throws SQLException, ConverterException {
 			java.sql.Array array=null;
 			ch.interlis.ili2c.metamodel.Type type=attr.getDomainResolvingAliases();
 			if (attr.isDomainBoolean()) {
@@ -338,7 +322,7 @@ public class PostgisColumnConverter extends AbstractWKBColumnConverter {
 				}
 				array=conn.createArrayOf("TIME", values);
 			}else if(type instanceof EnumerationType){
-				if(isEnumInt){
+				if(DbColNumber.class.equals(dbColHint)){
 					Long values[]=new Long[iomValues.length];
 					for(int i=0;i<values.length;i++) {
 						String iomValue=iomValues[i];
@@ -390,6 +374,18 @@ public class PostgisColumnConverter extends AbstractWKBColumnConverter {
 					}
 					array=conn.createArrayOf("bytea", values);
 				}
+            }else if(type instanceof ReferenceType){
+                if(DbColId.class.equals(dbColHint)){
+                    Long values[]=new Long[iomValues.length];
+                    for(int i=0;i<values.length;i++) {
+                        String iomValue=iomValues[i];
+                        long itfCode=Long.parseLong(iomValue);
+                        values[i]=itfCode;
+                    }
+                    array=conn.createArrayOf("BIGINT", values);
+                }else {
+                    array=conn.createArrayOf("VARCHAR", iomValues);
+                }
 			}else{
 				throw new IllegalArgumentException(attr.getScopedName());
 			}
@@ -498,7 +494,7 @@ public class PostgisColumnConverter extends AbstractWKBColumnConverter {
 	    return s;
 	}
 	@Override
-	public String[] toIomArray(ch.interlis.ili2c.metamodel.AttributeDef attr,Object sqlArray,boolean isEnumInt) throws SQLException, ConverterException {
+	public String[] toIomArray(ch.interlis.ili2c.metamodel.AttributeDef attr,Object sqlArray,Class<? extends DbColumn> dbColHint) throws SQLException, ConverterException {
 		java.sql.Array array=(java.sql.Array)sqlArray;
 		String[] ret=null;
 		ch.interlis.ili2c.metamodel.Type type=attr.getDomainResolvingAliases();
@@ -556,7 +552,7 @@ public class PostgisColumnConverter extends AbstractWKBColumnConverter {
 				ret[i]=fmt.format(values[i]);
 			}
 		}else if(type instanceof EnumerationType){
-			if(isEnumInt){
+			if(DbColNumber.class.equals(dbColHint)){
 				Long values[]=(Long[])array.getArray();
 				ret=new String[values.length];
 				for(int i=0;i<values.length;i++) {
@@ -599,6 +595,16 @@ public class PostgisColumnConverter extends AbstractWKBColumnConverter {
 					ret[i]=toIomBlob(values[i]);
 				}
 			}
+        }else if(type instanceof ReferenceType){
+            if(DbColId.class.equals(dbColHint)){
+                Long values[]=(Long[])array.getArray();
+                ret=new String[values.length];
+                for(int i=0;i<values.length;i++) {
+                    ret[i]=values[i].toString();
+                }
+            }else {
+                ret=((String[])array.getArray());           
+            }
 		}else{
 			throw new IllegalArgumentException(attr.getScopedName());
 		}

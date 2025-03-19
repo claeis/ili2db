@@ -34,6 +34,9 @@ import com.vividsolutions.jts.io.ParseException;
 import ch.ehi.basics.settings.Settings;
 import ch.ehi.ili2db.gui.Config;
 import ch.ehi.ili2db.json.Iox2jsonUtility;
+import ch.ehi.sqlgen.repository.DbColId;
+import ch.ehi.sqlgen.repository.DbColNumber;
+import ch.ehi.sqlgen.repository.DbColumn;
 import ch.interlis.ili2c.metamodel.AttributeDef;
 import ch.interlis.ili2c.metamodel.TransferDescription;
 import ch.interlis.iom.IomObject;
@@ -407,7 +410,7 @@ public abstract class AbstractWKBColumnConverter implements SqlColumnConverter {
         stmt.setNull(parameterIndex, Types.VARCHAR);
     }
     @Override
-    public Object fromIomArray(AttributeDef iliEleAttr, String[] iomValues, boolean isEnumInt)
+    public Object fromIomArray(AttributeDef iliEleAttr, String[] iomValues, Class<? extends DbColumn> dbColHint)
             throws SQLException, ConverterException {
         JsonFactory jsonF = new JsonFactory();
         JsonGenerator jg=null;
@@ -415,7 +418,11 @@ public abstract class AbstractWKBColumnConverter implements SqlColumnConverter {
         
         try {
             jg = jsonF.createJsonGenerator(out);
-            Iox2jsonUtility.writeArray(jg, iomValues,iliEleAttr,isEnumInt);
+            boolean isInt=false;
+            if(dbColHint!=null && (dbColHint.equals(DbColId.class) || dbColHint.equals(DbColNumber.class))) {
+                isInt=true;
+            }
+            Iox2jsonUtility.writeArray(jg, iomValues,iliEleAttr,isInt);
             jg.flush();
             jg.close();
             jg=null;
@@ -425,7 +432,7 @@ public abstract class AbstractWKBColumnConverter implements SqlColumnConverter {
         return out.toString();
     }
     @Override
-    public String[] toIomArray(AttributeDef iliEleAttr, Object sqlArray, boolean isEnumInt)
+    public String[] toIomArray(AttributeDef iliEleAttr, Object sqlArray, Class<? extends DbColumn> dbColHint)
             throws SQLException, ConverterException {
         JsonFactory jsonF = new JsonFactory();
         java.io.StringReader in=new java.io.StringReader((String)sqlArray);

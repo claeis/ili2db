@@ -24,6 +24,7 @@ import ch.ehi.ili2db.converter.ConverterException;
 import ch.ehi.ili2db.gui.Config;
 import ch.ehi.ili2db.json.Iox2jsonUtility;
 import ch.ehi.ili2db.toxtf.ToXtfRecordConverter;
+import ch.ehi.sqlgen.repository.DbColumn;
 import ch.ehi.sqlgen.repository.DbColBlob;
 import ch.ehi.sqlgen.repository.DbColBoolean;
 import ch.ehi.sqlgen.repository.DbColDate;
@@ -67,6 +68,7 @@ import ch.interlis.ili2c.metamodel.EnumerationType;
 import ch.interlis.ili2c.metamodel.NumericType;
 import ch.interlis.ili2c.metamodel.PolylineType;
 import ch.interlis.ili2c.metamodel.PrecisionDecimal;
+import ch.interlis.ili2c.metamodel.ReferenceType;
 import ch.interlis.ili2c.metamodel.TextType;
 import ch.interlis.ili2c.metamodel.TransferDescription;
 import ch.interlis.iom.IomObject;
@@ -275,7 +277,7 @@ public class DuckDBColumnConverter extends AbstractWKBColumnConverter {
 			return null;
 		}
 		@Override
-		public Object fromIomArray(ch.interlis.ili2c.metamodel.AttributeDef attr,String[] iomValues,boolean isEnumInt) throws SQLException, ConverterException {
+		public Object fromIomArray(ch.interlis.ili2c.metamodel.AttributeDef attr,String[] iomValues,Class<? extends DbColumn> dbColHint) throws SQLException, ConverterException {
 			java.sql.Array array=null;
 			ch.interlis.ili2c.metamodel.Type type=attr.getDomainResolvingAliases();
 			if (attr.isDomainBoolean()) {
@@ -343,7 +345,7 @@ public class DuckDBColumnConverter extends AbstractWKBColumnConverter {
 				}
 				array=conn.createArrayOf("TIME", values);
 			}else if(type instanceof EnumerationType){
-				if(isEnumInt){
+				if(DbColNumber.class.equals(dbColHint)){
 					Long values[]=new Long[iomValues.length];
 					for(int i=0;i<values.length;i++) {
 						String iomValue=iomValues[i];
@@ -395,6 +397,18 @@ public class DuckDBColumnConverter extends AbstractWKBColumnConverter {
 					}
 					array=conn.createArrayOf("BLOB", values);
 				}
+            }else if(type instanceof ReferenceType){
+                if(DbColId.class.equals(dbColHint)){
+                    Long values[]=new Long[iomValues.length];
+                    for(int i=0;i<values.length;i++) {
+                        String iomValue=iomValues[i];
+                        long itfCode=Long.parseLong(iomValue);
+                        values[i]=itfCode;
+                    }
+                    array=conn.createArrayOf("BIGINT", values);
+                }else {
+                    array=conn.createArrayOf("VARCHAR", iomValues);
+                }
 			}else{
 				throw new IllegalArgumentException(attr.getScopedName());
 			}
@@ -558,7 +572,7 @@ public class DuckDBColumnConverter extends AbstractWKBColumnConverter {
         ps.setObject(valuei, time.toString());
     }	
 	@Override
-	public String[] toIomArray(ch.interlis.ili2c.metamodel.AttributeDef attr,Object sqlArray,boolean isEnumInt) throws SQLException, ConverterException {
+	public String[] toIomArray(ch.interlis.ili2c.metamodel.AttributeDef attr,Object sqlArray,Class<? extends DbColumn> dbColHint) throws SQLException, ConverterException {
 		java.sql.Array array=(java.sql.Array)sqlArray;
 		String[] ret=null;
 		ch.interlis.ili2c.metamodel.Type type=attr.getDomainResolvingAliases();
@@ -616,7 +630,7 @@ public class DuckDBColumnConverter extends AbstractWKBColumnConverter {
 				ret[i]=fmt.format(values[i]);
 			}
 		}else if(type instanceof EnumerationType){
-			if(isEnumInt){
+			if(DbColNumber.class.equals(dbColHint)){
 				Long values[]=(Long[])array.getArray();
 				ret=new String[values.length];
 				for(int i=0;i<values.length;i++) {
@@ -659,6 +673,16 @@ public class DuckDBColumnConverter extends AbstractWKBColumnConverter {
 					ret[i]=toIomBlob(values[i]);
 				}
 			}
+        }else if(type instanceof ReferenceType){
+            if(DbColId.class.equals(dbColHint)){
+                Long values[]=(Long[])array.getArray();
+                ret=new String[values.length];
+                for(int i=0;i<values.length;i++) {
+                    ret[i]=values[i].toString();
+                }
+            }else {
+                ret=((String[])array.getArray());           
+            }
 		}else{
 			throw new IllegalArgumentException(attr.getScopedName());
 		}

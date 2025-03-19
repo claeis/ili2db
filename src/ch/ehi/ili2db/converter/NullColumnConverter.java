@@ -9,6 +9,7 @@ import java.sql.Timestamp;
 
 import ch.ehi.basics.settings.Settings;
 import ch.ehi.ili2db.gui.Config;
+import ch.ehi.sqlgen.repository.DbColumn;
 import ch.interlis.ili2c.metamodel.AttributeDef;
 import ch.interlis.iom.IomObject;
 import ch.interlis.iom_j.itf.EnumCodeMapper;
@@ -237,12 +238,12 @@ public class NullColumnConverter implements SqlColumnConverter {
 	public void setArrayNull(PreparedStatement ps, int parameterIndex) throws SQLException {
 	}
 	@Override
-	public Object fromIomArray(AttributeDef iliEleAttr, String[] iomValues, boolean isEnumInt)
+	public Object fromIomArray(AttributeDef iliEleAttr, String[] iomValues, Class<? extends DbColumn> dbColHint)
 			throws SQLException, ConverterException {
 		return null;
 	}
 	@Override
-	public String[] toIomArray(AttributeDef iliEleAttr, Object sqlArray, boolean isEnumInt)
+	public String[] toIomArray(AttributeDef iliEleAttr, Object sqlArray, Class<? extends DbColumn> dbColHint)
 			throws SQLException, ConverterException {
 		return null;
 	}

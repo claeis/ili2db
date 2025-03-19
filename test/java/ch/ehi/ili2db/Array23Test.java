@@ -59,6 +59,9 @@ public abstract class Array23Test {
 			// assertions
             // t_ili2db_attrname
             String [][] attrName_expectedValues=new String[][] {
+                {"Array23.TestA.Gebaeude.Art", "art", "gebaeude",    "katalog"},
+                {"Array23.TestA.KatalogRef.Ref",    "aref",    "katalogref",  "katalog"},
+                {"Array23.TestA.Katalog.val",    "val",    "katalog",  null},
                 {"Array23.TestA.Binbox_.Value",   "avalue",    "binbox_",null},   
                 {"Array23.TestA.NumericDec_.Value",   "avalue",    "numericdec_",null},   
                 {"Array23.TestA.Datatypes.aBoolean",  "aboolean",  "datatypes" ,null},
@@ -79,6 +82,10 @@ public abstract class Array23Test {
                 {"Array23.TestA.Datatypes.aTime", "atime", "datatypes"         ,null}         };
                 // t_ili2db_trafo
                 String [][] trafo_expectedValues=new String[][] {
+                    {"Array23.TestA.Gebaeude.Art", "ch.ehi.ili2db.arrayTrafo",    "coalesce"},
+                    {"Array23.TestA.KatalogRef",    "ch.ehi.ili2db.inheritance",   "newClass"},
+                    {"Array23.TestA.Gebaeude",  "ch.ehi.ili2db.inheritance",   "newClass"},
+                    {"Array23.TestA.Katalog",   "ch.ehi.ili2db.inheritance",   "newClass"},
                     {"Array23.TestA.Datatypes.aDate", "ch.ehi.ili2db.arrayTrafo",  "coalesce"},
                     {"Array23.TestA.AUuid_",  "ch.ehi.ili2db.inheritance", "newClass"},
                     {"Array23.TestA.Auto.Farben", "ch.ehi.ili2db.arrayTrafo",  "coalesce"},
@@ -115,7 +122,7 @@ public abstract class Array23Test {
     @Test
     public void importXtf() throws Exception
     {
-        //EhiLogger.getInstance().setTraceFilter(false);
+        EhiLogger.getInstance().setTraceFilter(false);
         try{
             setup.resetDb();
 
@@ -237,73 +244,85 @@ public abstract class Array23Test {
 			config.setExportTid(true);
 			Ili2db.readSettingsFromDb(config);
 			Ili2db.run(config, null);
-			HashMap<String, IomObject> objs = new HashMap<String, IomObject>();
-			XtfReader reader = new XtfReader(data);
-			IoxEvent event = null;
-			do {
-				event = reader.read();
-				if (event instanceof StartTransferEvent) {
-				} else if (event instanceof StartBasketEvent) {
-				} else if (event instanceof ObjectEvent) {
-					IomObject iomObj = ((ObjectEvent) event).getIomObject();
-					if (iomObj.getobjectoid() != null) {
-						objs.put(iomObj.getobjectoid(), iomObj);
-					}
-				} else if (event instanceof EndBasketEvent) {
-				} else if (event instanceof EndTransferEvent) {
-				}
-			} while (!(event instanceof EndTransferEvent));
-			// check values of array
-			{
-				IomObject obj0 = objs.get("13");
-				Assert.assertNotNull(obj0);
-				Assert.assertEquals("Array23.TestA.Auto", obj0.getobjecttag());
-				Assert.assertEquals(2,obj0.getattrvaluecount("Farben"));
-				Assert.assertEquals("Rot",obj0.getattrobj("Farben", 0).getattrvalue("Wert"));
-				Assert.assertEquals("Blau",obj0.getattrobj("Farben", 1).getattrvalue("Wert"));
-			}
-			{
-				IomObject obj0 = objs.get("14");
-				Assert.assertNotNull(obj0);
-				Assert.assertEquals("Array23.TestA.Auto", obj0.getobjecttag());
-				Assert.assertEquals(0,obj0.getattrvaluecount("Farben"));
-			}
-			{
-				IomObject obj0 = objs.get("100");
-				Assert.assertNotNull(obj0);
-				Assert.assertEquals("Array23.TestA.Datatypes", obj0.getobjecttag());
-				Assert.assertEquals(0,obj0.getattrvaluecount("aUuid"));
-				Assert.assertEquals(0,obj0.getattrvaluecount("aBoolean"));
-				Assert.assertEquals(0,obj0.getattrvaluecount("aTime"));
-				Assert.assertEquals(0,obj0.getattrvaluecount("aDate"));
-				Assert.assertEquals(0,obj0.getattrvaluecount("aDateTime"));
-				Assert.assertEquals(0,obj0.getattrvaluecount("numericInt"));
-				Assert.assertEquals(0,obj0.getattrvaluecount("numericDec"));
-			}
-			{
-				IomObject obj0 = objs.get("101");
-				Assert.assertNotNull(obj0);
-				Assert.assertEquals("Array23.TestA.Datatypes", obj0.getobjecttag());
-				Assert.assertEquals(1,obj0.getattrvaluecount("aUuid"));
-				Assert.assertEquals("15b6bcce-8772-4595-bf82-f727a665fbf3",obj0.getattrobj("aUuid",0).getattrvalue("Value"));
-				Assert.assertEquals(1,obj0.getattrvaluecount("aBoolean"));
-				Assert.assertEquals("true",obj0.getattrobj("aBoolean",0).getattrvalue("Value"));
-				Assert.assertEquals(1,obj0.getattrvaluecount("aTime"));
-				Assert.assertEquals("09:00:00.000",obj0.getattrobj("aTime",0).getattrvalue("Value"));
-				Assert.assertEquals(1,obj0.getattrvaluecount("aDate"));
-				Assert.assertEquals("2002-09-24",obj0.getattrobj("aDate",0).getattrvalue("Value"));
-				Assert.assertEquals(1,obj0.getattrvaluecount("aDateTime"));
-				Assert.assertEquals("1900-01-01T12:30:05.000",obj0.getattrobj("aDateTime",0).getattrvalue("Value"));
-				Assert.assertEquals(1,obj0.getattrvaluecount("numericInt"));
-				Assert.assertEquals("5",obj0.getattrobj("numericInt",0).getattrvalue("Value"));
-				Assert.assertEquals(1,obj0.getattrvaluecount("numericDec"));
-				Assert.assertEquals("6.0",obj0.getattrobj("numericDec",0).getattrvalue("Value"));
-			}
+			exportXtf_Assert(data);
 		}catch(Exception e) {
 			throw new IoxException(e);
 		} finally {
 		}
 	}
+
+    private void exportXtf_Assert(File data) throws IoxException {
+        HashMap<String, IomObject> objs = new HashMap<String, IomObject>();
+        XtfReader reader = new XtfReader(data);
+        IoxEvent event = null;
+        do {
+        	event = reader.read();
+        	if (event instanceof StartTransferEvent) {
+        	} else if (event instanceof StartBasketEvent) {
+        	} else if (event instanceof ObjectEvent) {
+        		IomObject iomObj = ((ObjectEvent) event).getIomObject();
+        		if (iomObj.getobjectoid() != null) {
+        			objs.put(iomObj.getobjectoid(), iomObj);
+        		}
+        	} else if (event instanceof EndBasketEvent) {
+        	} else if (event instanceof EndTransferEvent) {
+        	}
+        } while (!(event instanceof EndTransferEvent));
+        // check values of array
+        {
+        	IomObject obj0 = objs.get("13");
+        	Assert.assertNotNull(obj0);
+        	Assert.assertEquals("Array23.TestA.Auto", obj0.getobjecttag());
+        	Assert.assertEquals(2,obj0.getattrvaluecount("Farben"));
+        	Assert.assertEquals("Rot",obj0.getattrobj("Farben", 0).getattrvalue("Wert"));
+        	Assert.assertEquals("Blau",obj0.getattrobj("Farben", 1).getattrvalue("Wert"));
+        }
+        {
+        	IomObject obj0 = objs.get("14");
+        	Assert.assertNotNull(obj0);
+        	Assert.assertEquals("Array23.TestA.Auto", obj0.getobjecttag());
+        	Assert.assertEquals(0,obj0.getattrvaluecount("Farben"));
+        }
+        {
+        	IomObject obj0 = objs.get("100");
+        	Assert.assertNotNull(obj0);
+        	Assert.assertEquals("Array23.TestA.Datatypes", obj0.getobjecttag());
+        	Assert.assertEquals(0,obj0.getattrvaluecount("aUuid"));
+        	Assert.assertEquals(0,obj0.getattrvaluecount("aBoolean"));
+        	Assert.assertEquals(0,obj0.getattrvaluecount("aTime"));
+        	Assert.assertEquals(0,obj0.getattrvaluecount("aDate"));
+        	Assert.assertEquals(0,obj0.getattrvaluecount("aDateTime"));
+        	Assert.assertEquals(0,obj0.getattrvaluecount("numericInt"));
+        	Assert.assertEquals(0,obj0.getattrvaluecount("numericDec"));
+        }
+        {
+        	IomObject obj0 = objs.get("101");
+        	Assert.assertNotNull(obj0);
+        	Assert.assertEquals("Array23.TestA.Datatypes", obj0.getobjecttag());
+        	Assert.assertEquals(1,obj0.getattrvaluecount("aUuid"));
+        	Assert.assertEquals("15b6bcce-8772-4595-bf82-f727a665fbf3",obj0.getattrobj("aUuid",0).getattrvalue("Value"));
+        	Assert.assertEquals(1,obj0.getattrvaluecount("aBoolean"));
+        	Assert.assertEquals("true",obj0.getattrobj("aBoolean",0).getattrvalue("Value"));
+        	Assert.assertEquals(1,obj0.getattrvaluecount("aTime"));
+        	Assert.assertEquals("09:00:00.000",obj0.getattrobj("aTime",0).getattrvalue("Value"));
+        	Assert.assertEquals(1,obj0.getattrvaluecount("aDate"));
+        	Assert.assertEquals("2002-09-24",obj0.getattrobj("aDate",0).getattrvalue("Value"));
+        	Assert.assertEquals(1,obj0.getattrvaluecount("aDateTime"));
+        	Assert.assertEquals("1900-01-01T12:30:05.000",obj0.getattrobj("aDateTime",0).getattrvalue("Value"));
+        	Assert.assertEquals(1,obj0.getattrvaluecount("numericInt"));
+        	Assert.assertEquals("5",obj0.getattrobj("numericInt",0).getattrvalue("Value"));
+        	Assert.assertEquals(1,obj0.getattrvaluecount("numericDec"));
+        	Assert.assertEquals("6.0",obj0.getattrobj("numericDec",0).getattrvalue("Value"));
+        }
+        {
+            IomObject obj0 = objs.get("300");
+            Assert.assertNotNull(obj0);
+            Assert.assertEquals("Array23.TestA.Gebaeude", obj0.getobjecttag());
+            Assert.assertEquals(2,obj0.getattrvaluecount("Art"));
+            Assert.assertEquals("200",obj0.getattrobj("Art", 0).getattrobj("Ref", 0).getobjectrefoid());
+            Assert.assertEquals("202",obj0.getattrobj("Art", 1).getattrobj("Ref", 0).getobjectrefoid());
+        }
+    }
     @Test
     public void exportXtfEnumFkTable() throws Exception {
         {
@@ -318,68 +337,7 @@ public abstract class Array23Test {
             config.setExportTid(true);
             Ili2db.readSettingsFromDb(config);
             Ili2db.run(config, null);
-            HashMap<String, IomObject> objs = new HashMap<String, IomObject>();
-            XtfReader reader = new XtfReader(data);
-            IoxEvent event = null;
-            do {
-                event = reader.read();
-                if (event instanceof StartTransferEvent) {
-                } else if (event instanceof StartBasketEvent) {
-                } else if (event instanceof ObjectEvent) {
-                    IomObject iomObj = ((ObjectEvent) event).getIomObject();
-                    if (iomObj.getobjectoid() != null) {
-                        objs.put(iomObj.getobjectoid(), iomObj);
-                    }
-                } else if (event instanceof EndBasketEvent) {
-                } else if (event instanceof EndTransferEvent) {
-                }
-            } while (!(event instanceof EndTransferEvent));
-            // check values of array
-            {
-                IomObject obj0 = objs.get("13");
-                Assert.assertNotNull(obj0);
-                Assert.assertEquals("Array23.TestA.Auto", obj0.getobjecttag());
-                Assert.assertEquals(2,obj0.getattrvaluecount("Farben"));
-                Assert.assertEquals("Rot",obj0.getattrobj("Farben", 0).getattrvalue("Wert"));
-                Assert.assertEquals("Blau",obj0.getattrobj("Farben", 1).getattrvalue("Wert"));
-            }
-            {
-                IomObject obj0 = objs.get("14");
-                Assert.assertNotNull(obj0);
-                Assert.assertEquals("Array23.TestA.Auto", obj0.getobjecttag());
-                Assert.assertEquals(0,obj0.getattrvaluecount("Farben"));
-            }
-            {
-                IomObject obj0 = objs.get("100");
-                Assert.assertNotNull(obj0);
-                Assert.assertEquals("Array23.TestA.Datatypes", obj0.getobjecttag());
-                Assert.assertEquals(0,obj0.getattrvaluecount("aUuid"));
-                Assert.assertEquals(0,obj0.getattrvaluecount("aBoolean"));
-                Assert.assertEquals(0,obj0.getattrvaluecount("aTime"));
-                Assert.assertEquals(0,obj0.getattrvaluecount("aDate"));
-                Assert.assertEquals(0,obj0.getattrvaluecount("aDateTime"));
-                Assert.assertEquals(0,obj0.getattrvaluecount("numericInt"));
-                Assert.assertEquals(0,obj0.getattrvaluecount("numericDec"));
-            }
-            {
-                IomObject obj0 = objs.get("101");
-                Assert.assertNotNull(obj0);
-                Assert.assertEquals("Array23.TestA.Datatypes", obj0.getobjecttag());
-                Assert.assertEquals(1,obj0.getattrvaluecount("aUuid"));
-                Assert.assertEquals("15b6bcce-8772-4595-bf82-f727a665fbf3",obj0.getattrobj("aUuid",0).getattrvalue("Value"));
-                Assert.assertEquals(1,obj0.getattrvaluecount("aBoolean"));
-                Assert.assertEquals("true",obj0.getattrobj("aBoolean",0).getattrvalue("Value"));
-                Assert.assertEquals(1,obj0.getattrvaluecount("aTime"));
-                Assert.assertEquals("09:00:00.000",obj0.getattrobj("aTime",0).getattrvalue("Value"));
-                Assert.assertEquals(1,obj0.getattrvaluecount("aDate"));
-                Assert.assertEquals("2002-09-24",obj0.getattrobj("aDate",0).getattrvalue("Value"));
-                Assert.assertEquals(1,obj0.getattrvaluecount("aDateTime"));
-                Assert.assertEquals("1900-01-01T12:30:05.000",obj0.getattrobj("aDateTime",0).getattrvalue("Value"));
-                Assert.assertEquals(1,obj0.getattrvaluecount("numericInt"));
-                Assert.assertEquals("5",obj0.getattrobj("numericInt",0).getattrvalue("Value"));
-                Assert.assertEquals(1,obj0.getattrvaluecount("numericDec"));
-                Assert.assertEquals("6.0",obj0.getattrobj("numericDec",0).getattrvalue("Value"));
-            }
+            exportXtf_Assert(data);
         }catch(Exception e) {
             throw new IoxException(e);
         } finally {

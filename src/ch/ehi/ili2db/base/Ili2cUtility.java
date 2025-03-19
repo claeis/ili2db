@@ -91,6 +91,20 @@ public class Ili2cUtility {
 		Viewable root=getRootViewable(aclass);
 		return root.getScopedName().equals(IliNames.CHBASE1_CATALOGUES_ITEM);
 	}
+	public static boolean isStructWithOneAttr(CompositionType type) {
+        Table struct=type.getComponentType();
+        java.util.Iterator it=struct.getAttributesAndRoles2();
+        int c=0;
+        while(it.hasNext()){
+            it.next();
+            c++;
+        }
+        if(c==1){
+            // only one attribute
+            return true;
+        }
+        return false;
+	}
 	public static boolean isPureChbaseCatalogueRef(TransferDescription td,AttributeDef attr) {
 		Type typeo=attr.getDomain();
 		if(typeo instanceof CompositionType){
@@ -360,12 +374,15 @@ public class Ili2cUtility {
 	}
 	public static boolean isArrayAttr(TransferDescription td,
 			AttributeDef attr) {
-		Type typeo=attr.getDomain();
-		if(typeo instanceof CompositionType){
-			if(IliMetaAttrNames.METAATTR_MAPPING_ARRAY.equals(attr.getMetaValue(IliMetaAttrNames.METAATTR_MAPPING))){
-				return true;
-			}
-		}
+        Type typeo=attr.getDomain();
+        if(typeo instanceof CompositionType){
+            if(!isStructWithOneAttr((CompositionType)typeo)) {
+                return false;
+            }
+        }
+        if(IliMetaAttrNames.METAATTR_MAPPING_ARRAY.equals(attr.getMetaValue(IliMetaAttrNames.METAATTR_MAPPING))){
+            return true;
+        }
 		return false;
 	}
     public static boolean isJsonMapping(AttributeDef attr) {
@@ -384,6 +401,14 @@ public class Ili2cUtility {
             return false;
         }
         return true;
+    }
+    public static boolean isReferenceType(TransferDescription td,AttributeDef attr) {
+        Type type=attr.getDomainResolvingAll();
+        if(type instanceof ReferenceType
+                ) {
+            return true;
+        }
+        return false;
     }
 
     public static Domain getRootBaseDomain(Domain domain) {

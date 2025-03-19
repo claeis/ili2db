@@ -20,6 +20,17 @@ MODEL Array23
 	  Farben: LIST {0..*} OF Farbe;
 	END Auto;    
 
+	CLASS Katalog =
+	  val : TEXT*30;
+	END Katalog;    
+	STRUCTURE KatalogRef =
+	   Ref: REFERENCE TO Katalog;
+	END KatalogRef;
+	CLASS Gebaeude =
+	  !!@ili2db.mapping=ARRAY
+	  Art: LIST {0..*} OF KatalogRef;
+	END Gebaeude;    
+	
 		STRUCTURE AUuid_ =
 			Value : INTERLIS.UUIDOID;
 		END AUuid_;
