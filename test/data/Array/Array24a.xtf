@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ili:transfer xmlns:ili="http://www.interlis.ch/xtf/2.4/INTERLIS" xmlns:geom="http://www.interlis.ch/geometry/1.0"
+              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+              xmlns="http://www.interlis.ch/xtf/2.4/Array24">
+    <ili:headersection>
+        <ili:models>
+            <ili:model>Array24</ili:model>
+        </ili:models>
+        <ili:sender>ili2gpkg-4.5.1-SNAPSHOT-34a149ef943889acc815bc9c3ffdb39f6e4918d3</ili:sender>
+    </ili:headersection>
+    <ili:datasection>
+
+		<TestA ili:bid="Array23.TestA">			
+			<Auto  ili:tid="13">
+				<Farben>Rot</Farben>
+				<Farben>Blau</Farben>
+			</Auto>
+			<Auto  ili:tid="14">
+			</Auto>
+			<Datatypes  ili:tid="100">
+			</Datatypes>
+			<Datatypes  ili:tid="101">
+				<aUuid>15b6bcce-8772-4595-bf82-f727a665fbf3</aUuid>
+				<aBoolean>true</aBoolean>
+				<aTime>09:00:00.000</aTime>
+				<aDate>2002-09-24</aDate>
+				<aDateTime>1900-01-01T12:30:05.000</aDateTime>
+				<numericInt>5</numericInt>
+				<numericDec>6.0</numericDec>
+				<!-- binbox>AAAA</binbox -->
+				<!-- xmlbox>
+						<x>
+							<a/>
+						</x>
+					</xmlbox -->
+			</Datatypes>
+			<Katalog  ili:tid="200">
+			  <val>Wohn</val>
+			</Katalog>
+			<Katalog  ili:tid="201">
+			  <val>Industrie</val>
+			</Katalog>
+			<Katalog  ili:tid="202">
+			  <val>Büro</val>
+			</Katalog>
+			<Gebaeude  ili:tid="300">
+				<Art  ili:ref="200"/>
+				<Art  ili:ref="202"/>
+			</Gebaeude>
+		</TestA>
+    </ili:datasection>
+</ili:transfer>

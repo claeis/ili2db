@@ -245,6 +245,35 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
                 ret.append(sep);
                 sep=",";
                 ret.append(geomConv.getSelectValueWrapperJson(makeColumnRef(tableAlias,attrSqlName)));
+             }else if(TrafoConfigNames.ARRAY_TRAFO_COALESCE.equals(trafoConfig.getAttrConfig(attr, TrafoConfigNames.ARRAY_TRAFO))){
+                 arrayAttrs.addArrayAttr(attr);
+                 ArrayMapping attrMapping=arrayAttrs.getMapping(attr);
+                 AttributeDef localAttr=attrMapping.getValueAttr();
+                 Type localType = localAttr.getDomainResolvingAll();
+                 if(Ili2cUtility.isReferenceType(td,localAttr)) {
+                      boolean isExtRef=createExtRef && ((ReferenceType)localType).isExternal();
+                      if(isExtRef) {
+                          String attrSqlName=ili2sqlName.mapIliAttributeDef(attr,sqlTableName,getSqlType(((ReferenceType)localType).getReferred()).getName(),false);
+                          ret.append(sep);
+                          sep=",";
+                          ret.append(makeColumnRef(tableAlias,attrSqlName));
+                      }else {
+                             ArrayList<ViewableWrapper> targetTables = getTargetTables(((ReferenceType)localType).getReferred());
+                             ViewableWrapper targetTable=targetTables.get(0);
+                             {
+                                 String attrSqlName=ili2sqlName.mapIliAttributeDef(attr,sqlTableName,targetTable.getSqlTablename(),false);
+                                  ret.append(sep);
+                                  sep=",";
+                                  ret.append(makeColumnRef(tableAlias,attrSqlName));
+                             }                
+                      }
+                     
+                 }else {
+                      String attrSqlName=ili2sqlName.mapIliAttributeDef(attr,epsgCode,sqlTableName,null);
+                      ret.append(sep);
+                      sep=",";
+                      ret.append(geomConv.getSelectValueWrapperArray(makeColumnRef(tableAlias,attrSqlName)));
+                 }
 			}else if( attr.isDomainIli1Date()) {
 	             String attrSqlName=ili2sqlName.mapIliAttributeDef(attr,epsgCode,sqlTableName,null);
 				 ret.append(sep);
@@ -300,35 +329,6 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 					 sep=",";
 					 ret.append(geomConv.getSelectValueWrapperMultiCoord(makeColumnRef(tableAlias,attrSqlName)));
 					 multiPointAttrs.addMultiPointAttr(attr);
-				}else if(TrafoConfigNames.ARRAY_TRAFO_COALESCE.equals(trafoConfig.getAttrConfig(attr, TrafoConfigNames.ARRAY_TRAFO))){
-                    arrayAttrs.addArrayAttr(attr);
-                    ArrayMapping attrMapping=arrayAttrs.getMapping(attr);
-                    AttributeDef localAttr=attrMapping.getValueAttr();
-                    Type localType = localAttr.getDomainResolvingAll();
-				    if(Ili2cUtility.isReferenceType(td,localAttr)) {
-	                     boolean isExtRef=createExtRef && ((ReferenceType)localType).isExternal();
-	                     if(isExtRef) {
-	                         String attrSqlName=ili2sqlName.mapIliAttributeDef(attr,sqlTableName,getSqlType(((ReferenceType)localType).getReferred()).getName(),false);
-	                         ret.append(sep);
-	                         sep=",";
-	                         ret.append(makeColumnRef(tableAlias,attrSqlName));
-	                     }else {
-	                            ArrayList<ViewableWrapper> targetTables = getTargetTables(((ReferenceType)localType).getReferred());
-	                            ViewableWrapper targetTable=targetTables.get(0);
-	                            {
-	                                String attrSqlName=ili2sqlName.mapIliAttributeDef(attr,sqlTableName,targetTable.getSqlTablename(),false);
-	                                 ret.append(sep);
-	                                 sep=",";
-	                                 ret.append(makeColumnRef(tableAlias,attrSqlName));
-	                            }                
-	                     }
-				        
-				    }else {
-	                     String attrSqlName=ili2sqlName.mapIliAttributeDef(attr,epsgCode,sqlTableName,null);
-	                     ret.append(sep);
-	                     sep=",";
-	                     ret.append(geomConv.getSelectValueWrapperArray(makeColumnRef(tableAlias,attrSqlName)));
-				    }
 				}else if(TrafoConfigNames.MULTILINGUAL_TRAFO_EXPAND.equals(trafoConfig.getAttrConfig(attr, TrafoConfigNames.MULTILINGUAL_TRAFO))){
 		             String attrSqlName=ili2sqlName.mapIliAttributeDef(attr,epsgCode,sqlTableName,null);
 					for(String sfx:DbNames.MULTILINGUAL_TXT_COL_SUFFIXS){
@@ -491,8 +491,8 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 		    }
 		}
 		
-        HashMap attrs=getIomObjectAttrs(iliClassForSelect);
-		HashSet<AttributeDef> visitedAttrs=new HashSet<AttributeDef>();
+        Map<? extends ch.interlis.ili2c.metamodel.Element,? extends ch.interlis.ili2c.metamodel.Element> attrs=getIomObjectAttrs(iliClassForSelect);
+		java.util.Set<AttributeDef> visitedAttrs=new HashSet<AttributeDef>();
 		for(ViewableWrapper table:aclass.getWrappers()){
 			Iterator<ColumnWrapper> iter = table.getAttrIterator();
 			while (iter.hasNext()) {
@@ -671,6 +671,90 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
                                  EhiLogger.logError("Object "+sqlid+": failed to convert JSON",ex);
                              }   
                          }
+                     }
+                }
+            }else if(TrafoConfigNames.ARRAY_TRAFO_COALESCE.equals(trafoConfig.getAttrConfig(tableAttr, TrafoConfigNames.ARRAY_TRAFO))){
+                if(classAttr==null) {
+                    valuei++;
+                }else {
+                     ArrayMapping attrMapping=arrayAttrs.getMapping(tableAttr);
+                     Type arrayElementType=attrMapping.getValueAttr().getDomainResolvingAliases();
+                     Type type = tableAttr.getDomainResolvingAliases();
+                     Object dbValue=rs.getObject(valuei);
+                     valuei++;
+                     if(!rs.wasNull()){
+                         try{
+                             Class<? extends DbColumn> dbTypeHint = null;
+                             if((arrayElementType instanceof EnumerationType) && !attrMapping.getValueAttr().isDomainBoolean()) {
+                                 dbTypeHint=(createEnumColAsItfCode || Config.CREATE_ENUM_DEFS_MULTI_WITH_ID.equals(createEnumTable))?DbColNumber.class:DbColVarchar.class;
+                             }else if(arrayElementType instanceof ReferenceType){
+                                 if(createExtRef && ((ReferenceType) arrayElementType).isExternal()){
+                                     dbTypeHint=DbColVarchar.class;
+                                 }else {
+                                     dbTypeHint=DbColId.class;
+                                 }
+                                 
+                             }
+                            String iomArray[]=geomConv.toIomArray(attrMapping.getValueAttr(),dbValue,dbTypeHint);
+                             if(iomArray!=null) {
+                                 if((arrayElementType instanceof EnumerationType) && !attrMapping.getValueAttr().isDomainBoolean()) {
+                                     if(createEnumColAsItfCode) {
+                                         String xtfCode[]=new String[iomArray.length];
+                                         for(int i=0;i<iomArray.length;i++) {
+                                             xtfCode[i]=enumTypes.mapItfCode2XtfCode((EnumerationType)arrayElementType,iomArray[i]);
+                                         }
+                                         iomArray=xtfCode;
+                                     }else if(Config.CREATE_ENUM_DEFS_MULTI_WITH_ID.equals(createEnumTable)){
+                                         String xtfCode[]=new String[iomArray.length];
+                                         for(int i=0;i<iomArray.length;i++) {
+                                             xtfCode[i]=mapEnumValue(attrMapping.getValueAttr(),Long.parseLong(iomArray[i]));
+                                         }
+                                         iomArray=xtfCode;
+                                     }
+                                 }
+                             }
+                             ViewableWrapper targetTable=null;
+                             if(iomArray!=null) {
+                                 if(arrayElementType instanceof ReferenceType) {
+                                     ArrayList<ViewableWrapper> targetTables = getTargetTables(((ReferenceType)arrayElementType).getReferred());
+                                     targetTable=targetTables.get(0);
+                                 }
+                                 String valueStructQname=null;
+                                 if(type instanceof CompositionType) {
+                                     Table valueStructType = ((CompositionType) type).getComponentType();
+                                     valueStructQname=valueStructType.getScopedName(null);
+                                 }
+                                 for(int elei=0;elei<iomArray.length;elei++){
+                                     if(arrayElementType instanceof ReferenceType) {
+                                         IomObject ref=null;
+                                         if(type instanceof CompositionType) {
+                                             IomObject iomValueStruct=null;
+                                             iomValueStruct=new Iom_jObject(valueStructQname,null); 
+                                             ref=iomValueStruct.addattrobj(attrMapping.getValueAttr().getName(),"REF");
+                                             iomObj.addattrobj(attrName, iomValueStruct);
+                                         }else {
+                                             ref=iomObj.addattrobj(attrName,"REF");
+                                         }
+                                         if(createExtRef && ((ReferenceType) arrayElementType).isExternal()){
+                                             ref.setobjectrefoid(iomArray[elei]);
+                                         }else {
+                                             mapSqlid2Xtfid(fixref,Long.parseLong(iomArray[elei]),ref,((ReferenceType)arrayElementType).getReferred(),targetTable.getSqlTablename());
+                                         }
+                                     }else {
+                                         if(type instanceof CompositionType) {
+                                             IomObject iomValueStruct=null;
+                                             iomValueStruct=new Iom_jObject(valueStructQname,null); 
+                                             iomValueStruct.setattrvalue(attrMapping.getValueAttr().getName(), iomArray[elei]);
+                                             iomObj.addattrobj(attrName, iomValueStruct);
+                                         }else {
+                                             iomObj.addattrvalue(attrName, iomArray[elei]);
+                                         }
+                                     }
+                                 }
+                             }
+                         }catch(ConverterException ex){
+                             EhiLogger.logError("Object "+sqlid+": failed to convert array",ex);
+                         }   
                      }
                 }
 			}else if( tableAttr.isDomainBoolean()) {
@@ -883,73 +967,6 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 	                                 }
 	                             }catch(ConverterException ex){
 	                                 EhiLogger.logError("Object "+sqlid+": failed to convert coord",ex);
-	                             }   
-	                         }
-		                }
-					}else if(TrafoConfigNames.ARRAY_TRAFO_COALESCE.equals(trafoConfig.getAttrConfig(tableAttr, TrafoConfigNames.ARRAY_TRAFO))){
-		                if(classAttr==null) {
-		                    valuei++;
-		                }else {
-	                         ArrayMapping attrMapping=arrayAttrs.getMapping(tableAttr);
-                             Type arrayElementType=attrMapping.getValueAttr().getDomainResolvingAliases();
-	                         Object dbValue=rs.getObject(valuei);
-	                         valuei++;
-	                         if(!rs.wasNull()){
-	                             try{
-	                                 Table valueStructType = ((CompositionType) type).getComponentType();
-	                                 String valueStructQname=valueStructType.getScopedName(null);
-	                                 Class<? extends DbColumn> dbTypeHint = null;
-                                     if((arrayElementType instanceof EnumerationType) && !attrMapping.getValueAttr().isDomainBoolean()) {
-                                         dbTypeHint=(createEnumColAsItfCode || Config.CREATE_ENUM_DEFS_MULTI_WITH_ID.equals(createEnumTable))?DbColNumber.class:DbColVarchar.class;
-                                     }else if(arrayElementType instanceof ReferenceType){
-                                         if(createExtRef && ((ReferenceType) arrayElementType).isExternal()){
-                                             dbTypeHint=DbColVarchar.class;
-                                         }else {
-                                             dbTypeHint=DbColId.class;
-                                         }
-                                         
-                                     }
-                                    String iomArray[]=geomConv.toIomArray(attrMapping.getValueAttr(),dbValue,dbTypeHint);
-	                                 if(iomArray!=null) {
-	                                     if((arrayElementType instanceof EnumerationType) && !attrMapping.getValueAttr().isDomainBoolean()) {
-	                                         if(createEnumColAsItfCode) {
-	                                             String xtfCode[]=new String[iomArray.length];
-	                                             for(int i=0;i<iomArray.length;i++) {
-	                                                 xtfCode[i]=enumTypes.mapItfCode2XtfCode((EnumerationType)arrayElementType,iomArray[i]);
-	                                             }
-	                                             iomArray=xtfCode;
-	                                         }else if(Config.CREATE_ENUM_DEFS_MULTI_WITH_ID.equals(createEnumTable)){
-	                                             String xtfCode[]=new String[iomArray.length];
-	                                             for(int i=0;i<iomArray.length;i++) {
-	                                                 xtfCode[i]=mapEnumValue(attrMapping.getValueAttr(),Long.parseLong(iomArray[i]));
-	                                             }
-	                                             iomArray=xtfCode;
-	                                         }
-	                                     }
-	                                 }
-	                                 ViewableWrapper targetTable=null;
-                                     if(iomArray!=null) {
-                                         if(arrayElementType instanceof ReferenceType) {
-                                             ArrayList<ViewableWrapper> targetTables = getTargetTables(((ReferenceType)arrayElementType).getReferred());
-                                             targetTable=targetTables.get(0);
-                                         }
-                                     for(int elei=0;elei<iomArray.length;elei++){
-                                             IomObject iomValueStruct=new Iom_jObject(valueStructQname,null); 
-                                             if(arrayElementType instanceof ReferenceType) {
-                                                 IomObject ref=iomValueStruct.addattrobj(attrMapping.getValueAttr().getName(),"REF");
-                                                 if(createExtRef && ((ReferenceType) arrayElementType).isExternal()){
-                                                     ref.setobjectrefoid(iomArray[elei]);
-                                                 }else {
-                                                     mapSqlid2Xtfid(fixref,Long.parseLong(iomArray[elei]),ref,((ReferenceType)arrayElementType).getReferred(),targetTable.getSqlTablename());
-                                                 }
-                                             }else {
-                                                 iomValueStruct.setattrvalue(attrMapping.getValueAttr().getName(), iomArray[elei]);
-                                             }
-                                             iomObj.addattrobj(attrName, iomValueStruct);
-                                         }
-                                     }
-	                             }catch(ConverterException ex){
-	                                 EhiLogger.logError("Object "+sqlid+": failed to convert array",ex);
 	                             }   
 	                         }
 		                }

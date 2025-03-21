@@ -351,8 +351,8 @@ public class AbstractRecordConverter {
         String sqlname=ili2sqlName.mapIliEnumAttributeDefAsTable(attr);
         return new DbTableName(schema,sqlname);
     }
-    public HashMap getIomObjectAttrs(Viewable aclass) {
-    	HashMap ret=new HashMap();
+    public java.util.Map<? extends ch.interlis.ili2c.metamodel.Element,? extends ch.interlis.ili2c.metamodel.Element> getIomObjectAttrs(Viewable aclass) {
+    	java.util.Map<ch.interlis.ili2c.metamodel.Element,ch.interlis.ili2c.metamodel.Element> ret=new HashMap<ch.interlis.ili2c.metamodel.Element,ch.interlis.ili2c.metamodel.Element>();
     	Iterator iter = aclass.getAttributesAndRoles2();
     	while (iter.hasNext()) {
     	   ViewableTransferElement obj = (ViewableTransferElement)iter.next();

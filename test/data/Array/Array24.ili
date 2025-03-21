@@ -1,0 +1,54 @@
+INTERLIS 2.4;
+
+MODEL Array24
+  AT "mailto:ce@eisenhutinformatik.ch" VERSION "2016-09-17" =
+	
+  TOPIC TestA =
+  	DOMAIN
+		RGB = (Rot, Blau, Gruen);
+		ABoolean = BOOLEAN;
+		NumericInt = 0 .. 10;
+		NumericDec = 0.0 .. 10.0;
+		Binbox = BLACKBOX BINARY;
+		Xmlbox = BLACKBOX XML;
+  	 
+	CLASS Auto =
+	  !!@ili2db.mapping=ARRAY
+	  Farben: LIST {0..*} OF RGB;
+	END Auto;    
+
+	CLASS Katalog =
+	  val : TEXT*30;
+	END Katalog;    
+	CLASS Gebaeude =
+	  !!@ili2db.mapping=ARRAY
+	  Art: LIST {0..*} OF REFERENCE TO Katalog;
+	END Gebaeude;    
+
+	CLASS Datatypes =
+	  	!!@ili2db.mapping=ARRAY
+		aUuid : LIST OF INTERLIS.UUIDOID;
+	  	!!@ili2db.mapping=ARRAY
+		aBoolean : LIST OF BOOLEAN;
+	  	!!@ili2db.mapping=ARRAY
+		aTime : LIST OF TIMEOFDAY;
+	  	!!@ili2db.mapping=ARRAY
+		aDate : LIST OF DATE;
+	  	!!@ili2db.mapping=ARRAY
+		aDateTime : LIST OF DATETIME;
+	  	!!@ili2db.mapping=ARRAY
+		numericInt : LIST OF NumericInt;
+	  	!!@ili2db.mapping=ARRAY
+		numericDec : LIST OF NumericDec;
+	  	!!@ili2db.mapping=ARRAY
+		!! binbox : LIST OF Binbox; !! 2017-11-28 not yet supported by pg jdbc driver
+	  	!!@ili2db.mapping=ARRAY
+		!! xmlbox : LIST OF Xmlbox;  !! 2017-11-28  not yet supported by pg jdbc driver
+	END Datatypes;    
+	
+
+	
+  END TestA;
+  
+  
+END Array24.

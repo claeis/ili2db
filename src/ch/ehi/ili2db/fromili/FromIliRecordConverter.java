@@ -768,6 +768,42 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
             dbCol.value=ret;
             trafoConfig.setAttrConfig(attr, TrafoConfigNames.JSON_TRAFO,TrafoConfigNames.JSON_TRAFO_COALESCE);
             typeKind=DbExtMetaInfo.TAG_COL_TYPEKIND_STRUCTURE;
+        }else if(Ili2cUtility.isArrayAttr(td, attr) && (coalesceArray 
+                || TrafoConfigNames.ARRAY_TRAFO_COALESCE.equals(trafoConfig.getAttrConfig(attr,TrafoConfigNames.ARRAY_TRAFO)))){
+            arrayAttrs.addArrayAttr(attr);
+            ArrayMapping attrMapping=arrayAttrs.getMapping(attr);
+            AttributeDef localAttr=attrMapping.getValueAttr();
+            Type localType = localAttr.getDomainResolvingAll();
+            if(Ili2cUtility.isIomObjectPrimType(td,localAttr)) {
+                if(!createSimpleDbCol(dbTable, aclass, localAttr, localType, dbCol, simpleTypeKind,unitDef, mText, dbColExts)) {
+                    throw new IllegalStateException("unexpected attr type "+localAttr.getScopedName());
+              }
+                dbCol.value.setArraySize(DbColumn.UNLIMITED_ARRAY);     
+            }else if(Ili2cUtility.isReferenceType(td,localAttr)) {
+                if(createExtRef && ((ReferenceType)localType).isExternal()) {
+                    DbColVarchar ret=new DbColVarchar();
+                    ret.setName(ili2sqlName.mapIliAttributeDef(attr,dbTable.getName().getName(),getSqlType(((ReferenceType)localType).getReferred()).getName(),false));
+                    ret.setSize(255);
+                    ret.setArraySize(DbColumn.UNLIMITED_ARRAY);     
+                    dbColExts.add(ret);
+                }else {
+                    ArrayList<ViewableWrapper> targetTables = getTargetTables(((ReferenceType)localType).getReferred());
+                    if(targetTables.size()>1) {
+                        throw new IllegalStateException("unexpected multiple target tables for "+attr.getScopedName()+"/"+localAttr.getScopedName());
+                    }else{
+                        ViewableWrapper targetTable=targetTables.get(0);
+                        DbColId ret=new DbColId();
+                        String colName=ili2sqlName.mapIliAttributeDef(attr,dbTable.getName().getName(),targetTable.getSqlTablename(),targetTables.size()>1);
+                        ret.setName(colName);
+                        ret.setNotNull(false);
+                        ret.setPrimaryKey(false);
+                        ret.setArraySize(DbColumn.UNLIMITED_ARRAY);     
+                        dbColExts.add(ret);
+                    }
+                    
+                }
+            }
+            trafoConfig.setAttrConfig(attr, TrafoConfigNames.ARRAY_TRAFO,TrafoConfigNames.ARRAY_TRAFO_COALESCE);
         }else if(Ili2cUtility.isIomObjectPrimType(td,attr)) {
             boolean result;
             if(sqlColsAsText){
@@ -979,42 +1015,6 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
                 dbCol.value=ret;
                 trafoConfig.setAttrConfig(attr, TrafoConfigNames.MULTIPOINT_TRAFO,TrafoConfigNames.MULTIPOINT_TRAFO_COALESCE);
                 typeKind=DbExtMetaInfo.TAG_COL_TYPEKIND_MULTICOORD;                       
-            }else if(Ili2cUtility.isArrayAttr(td, attr) && (coalesceArray 
-                    || TrafoConfigNames.ARRAY_TRAFO_COALESCE.equals(trafoConfig.getAttrConfig(attr,TrafoConfigNames.ARRAY_TRAFO)))){
-                arrayAttrs.addArrayAttr(attr);
-                ArrayMapping attrMapping=arrayAttrs.getMapping(attr);
-                AttributeDef localAttr=attrMapping.getValueAttr();
-                Type localType = localAttr.getDomainResolvingAll();
-                if(Ili2cUtility.isIomObjectPrimType(td,localAttr)) {
-                    if(!createSimpleDbCol(dbTable, aclass, localAttr, localType, dbCol, simpleTypeKind,unitDef, mText, dbColExts)) {
-                        throw new IllegalStateException("unexpected attr type "+localAttr.getScopedName());
-                  }
-                    dbCol.value.setArraySize(DbColumn.UNLIMITED_ARRAY);     
-                }else if(Ili2cUtility.isReferenceType(td,localAttr)) {
-                    if(createExtRef && ((ReferenceType)localType).isExternal()) {
-                        DbColVarchar ret=new DbColVarchar();
-                        ret.setName(ili2sqlName.mapIliAttributeDef(attr,dbTable.getName().getName(),getSqlType(((ReferenceType)localType).getReferred()).getName(),false));
-                        ret.setSize(255);
-                        ret.setArraySize(DbColumn.UNLIMITED_ARRAY);     
-                        dbColExts.add(ret);
-                    }else {
-                        ArrayList<ViewableWrapper> targetTables = getTargetTables(((ReferenceType)localType).getReferred());
-                        if(targetTables.size()>1) {
-                            throw new IllegalStateException("unexpected multiple target tables for "+attr.getScopedName()+"/"+localAttr.getScopedName());
-                        }else{
-                            ViewableWrapper targetTable=targetTables.get(0);
-                            DbColId ret=new DbColId();
-                            String colName=ili2sqlName.mapIliAttributeDef(attr,dbTable.getName().getName(),targetTable.getSqlTablename(),targetTables.size()>1);
-                            ret.setName(colName);
-                            ret.setNotNull(false);
-                            ret.setPrimaryKey(false);
-                            ret.setArraySize(DbColumn.UNLIMITED_ARRAY);     
-                            dbColExts.add(ret);
-                        }
-                        
-                    }
-                }
-                trafoConfig.setAttrConfig(attr, TrafoConfigNames.ARRAY_TRAFO,TrafoConfigNames.ARRAY_TRAFO_COALESCE);
             }else if(isMultilingualTextAttr(td, attr) && (expandMultilingual 
                         || TrafoConfigNames.MULTILINGUAL_TRAFO_EXPAND.equals(trafoConfig.getAttrConfig(attr,TrafoConfigNames.MULTILINGUAL_TRAFO)))){
                 for(String sfx:DbNames.MULTILINGUAL_TXT_COL_SUFFIXS){

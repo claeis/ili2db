@@ -235,7 +235,7 @@ public class ViewableWrapper {
 	public boolean isSecondaryTable() {
 		return mainTable!=null;
 	}
-	public boolean containsAttributes(Set<AttributeDef> iomObjectAttrs) {
+	public boolean containsAttributes(Set<? extends ch.interlis.ili2c.metamodel.Element> iomObjectAttrs) {
 		for(ColumnWrapper ele:attrv){
 			if(ele.getViewableTransferElement().obj instanceof AttributeDef){
 				if(iomObjectAttrs.contains(ele.getViewableTransferElement().obj)){

@@ -1,6 +1,7 @@
 package ch.ehi.ili2db;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 import java.io.File;
 import java.sql.Connection;
@@ -24,7 +25,12 @@ import ch.ehi.ili2db.base.Ili2dbException;
 import ch.ehi.ili2db.gui.Config;
 import ch.ehi.ili2db.mapping.NameMapping;
 import ch.ehi.sqlgen.DbUtility;
+import ch.interlis.ili2c.Ili2cFailure;
+import ch.interlis.ili2c.config.FileEntry;
+import ch.interlis.ili2c.config.FileEntryKind;
+import ch.interlis.ili2c.metamodel.TransferDescription;
 import ch.interlis.iom.IomObject;
+import ch.interlis.iom_j.xtf.Xtf24Reader;
 import ch.interlis.iom_j.xtf.XtfReader;
 import ch.interlis.iox.EndBasketEvent;
 import ch.interlis.iox.EndTransferEvent;
@@ -46,7 +52,7 @@ public abstract class Array24Test {
 		try{
             setup.resetDb();
 
-			File data=new File(TEST_DATA_DIR,"Array23.ili");
+			File data=new File(TEST_DATA_DIR,"Array24.ili");
 			Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
             Ili2db.setNoSmartMapping(config);
 			config.setFunction(Config.FC_SCHEMAIMPORT);
@@ -59,46 +65,32 @@ public abstract class Array24Test {
 			// assertions
             // t_ili2db_attrname
             String [][] attrName_expectedValues=new String[][] {
-                {"Array23.TestA.Binbox_.Value",   "avalue",    "binbox_",null},   
-                {"Array23.TestA.NumericDec_.Value",   "avalue",    "numericdec_",null},   
-                {"Array23.TestA.Datatypes.aBoolean",  "aboolean",  "datatypes" ,null},
-                {"Array23.TestA.Datatypes.aDate", "adate", "datatypes" ,null},
-                {"Array23.TestA.Xmlbox_.Value",   "avalue",    "xmlbox_"   ,null},
-                {"Array23.TestA.ADateTime_.Value",    "avalue",    "adatetime_"   ,null}, 
-                {"Array23.TestA.Farbe.Wert",  "wert",  "farbe" ,null},
-                {"Array23.TestA.Datatypes.numericInt",    "numericint",    "datatypes",null}, 
-                {"Array23.TestA.Datatypes.numericDec",    "numericdec",    "datatypes" ,null},
-                {"Array23.TestA.NumericInt_.Value",   "avalue",    "numericint_"   ,null},
-                {"Array23.TestA.Auto.Farben", "farben",    "auto"  ,null},
-                {"Array23.TestA.Datatypes.aDateTime", "adatetime", "datatypes",null}, 
-                {"Array23.TestA.AUuid_.Value",    "avalue",    "auuid_"    ,null},
-                {"Array23.TestA.Datatypes.aUuid", "auuid", "datatypes" ,null},
-                {"Array23.TestA.ABoolean_.Value", "avalue",    "aboolean_" ,null},
-                {"Array23.TestA.ADate_.Value",    "avalue",    "adate_"    ,null},
-                {"Array23.TestA.ATime_.Value",    "avalue",    "atime_"    ,null},
-                {"Array23.TestA.Datatypes.aTime", "atime", "datatypes"         ,null}         };
+                {"Array24.TestA.Auto.Farben", "farben",    "auto"  ,null},
+                {"Array24.TestA.Datatypes.aBoolean",  "aboolean",  "datatypes" ,null},
+                {"Array24.TestA.Datatypes.aDate", "adate", "datatypes" ,null},
+                {"Array24.TestA.Datatypes.aDateTime", "adatetime", "datatypes",null}, 
+                {"Array24.TestA.Datatypes.aTime", "atime", "datatypes"         ,null},
+                {"Array24.TestA.Datatypes.aUuid", "auuid", "datatypes" ,null},
+                {"Array24.TestA.Datatypes.numericDec",    "numericdec",    "datatypes" ,null},
+                {"Array24.TestA.Datatypes.numericInt",    "numericint",    "datatypes",null}, 
+                {"Array24.TestA.Gebaeude.Art", "art",    "gebaeude"  ,"katalog"},
+                {"Array24.TestA.Katalog.val", "val",    "katalog"  ,null},
+            };
                 // t_ili2db_trafo
                 String [][] trafo_expectedValues=new String[][] {
-                    {"Array23.TestA.Datatypes.aDate", "ch.ehi.ili2db.arrayTrafo",  "coalesce"},
-                    {"Array23.TestA.AUuid_",  "ch.ehi.ili2db.inheritance", "newClass"},
-                    {"Array23.TestA.Auto.Farben", "ch.ehi.ili2db.arrayTrafo",  "coalesce"},
-                    {"Array23.TestA.NumericInt_", "ch.ehi.ili2db.inheritance", "newClass"},
-                    {"Array23.TestA.Datatypes",   "ch.ehi.ili2db.inheritance", "newClass"},
-                    {"Array23.TestA.Binbox_", "ch.ehi.ili2db.inheritance", "newClass"},
-                    {"Array23.TestA.ATime_",  "ch.ehi.ili2db.inheritance", "newClass"},
-                    {"Array23.TestA.Datatypes.aTime", "ch.ehi.ili2db.arrayTrafo",  "coalesce"},
-                    {"Array23.TestA.Datatypes.aBoolean",  "ch.ehi.ili2db.arrayTrafo",  "coalesce"},
-                    {"Array23.TestA.ABoolean_",   "ch.ehi.ili2db.inheritance", "newClass"},
-                    {"Array23.TestA.Datatypes.aUuid", "ch.ehi.ili2db.arrayTrafo",  "coalesce"},
-                    {"Array23.TestA.Datatypes.aDateTime", "ch.ehi.ili2db.arrayTrafo",  "coalesce"},
-                    {"Array23.TestA.NumericDec_", "ch.ehi.ili2db.inheritance", "newClass"},
-                    {"Array23.TestA.ADate_",  "ch.ehi.ili2db.inheritance", "newClass"},
-                    {"Array23.TestA.Datatypes.numericInt",    "ch.ehi.ili2db.arrayTrafo",  "coalesce"},
-                    {"Array23.TestA.ADateTime_",  "ch.ehi.ili2db.inheritance", "newClass"},
-                    {"Array23.TestA.Farbe",   "ch.ehi.ili2db.inheritance", "newClass"},
-                    {"Array23.TestA.Auto",    "ch.ehi.ili2db.inheritance", "newClass"},
-                    {"Array23.TestA.Xmlbox_", "ch.ehi.ili2db.inheritance", "newClass"},
-                    {"Array23.TestA.Datatypes.numericDec",    "ch.ehi.ili2db.arrayTrafo",  "coalesce"}                      
+                    {"Array24.TestA.Katalog",    "ch.ehi.ili2db.inheritance", "newClass"},
+                    {"Array24.TestA.Gebaeude",    "ch.ehi.ili2db.inheritance", "newClass"},
+                    {"Array24.TestA.Gebaeude.Art", "ch.ehi.ili2db.arrayTrafo",  "coalesce"},
+                    {"Array24.TestA.Datatypes",   "ch.ehi.ili2db.inheritance", "newClass"},
+                    {"Array24.TestA.Datatypes.aTime", "ch.ehi.ili2db.arrayTrafo",  "coalesce"},
+                    {"Array24.TestA.Datatypes.aDate", "ch.ehi.ili2db.arrayTrafo",  "coalesce"},
+                    {"Array24.TestA.Datatypes.aBoolean",  "ch.ehi.ili2db.arrayTrafo",  "coalesce"},
+                    {"Array24.TestA.Datatypes.aUuid", "ch.ehi.ili2db.arrayTrafo",  "coalesce"},
+                    {"Array24.TestA.Datatypes.aDateTime", "ch.ehi.ili2db.arrayTrafo",  "coalesce"},
+                    {"Array24.TestA.Datatypes.numericInt",    "ch.ehi.ili2db.arrayTrafo",  "coalesce"},
+                    {"Array24.TestA.Datatypes.numericDec",    "ch.ehi.ili2db.arrayTrafo",  "coalesce"},
+                    {"Array24.TestA.Auto",    "ch.ehi.ili2db.inheritance", "newClass"},
+                    {"Array24.TestA.Auto.Farben", "ch.ehi.ili2db.arrayTrafo",  "coalesce"}
                 };
 	        importIli_Assert(attrName_expectedValues, trafo_expectedValues);
 		}catch(Exception e) {
@@ -119,7 +111,7 @@ public abstract class Array24Test {
         try{
             setup.resetDb();
 
-            File data=new File(TEST_DATA_DIR,"Array23a.xtf");
+            File data=new File(TEST_DATA_DIR,"Array24a.xtf");
             Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
             Ili2db.setNoSmartMapping(config);
             config.setFunction(Config.FC_IMPORT);
@@ -144,7 +136,7 @@ public abstract class Array24Test {
         try{
             setup.resetDb();
 
-            File data=new File(TEST_DATA_DIR,"Array23a.xtf");
+            File data=new File(TEST_DATA_DIR,"Array24a.xtf");
             Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
             Ili2db.setNoSmartMapping(config);
             config.setFunction(Config.FC_IMPORT);
@@ -229,81 +221,97 @@ public abstract class Array24Test {
 	        importXtf();
 	    }
 		try {
-			
-			File data = new File(TEST_DATA_DIR,"Array23a-out.xtf");
+			File data = new File(TEST_DATA_DIR,"Array24a-out.xtf");
 			Config config = setup.initConfig(data.getPath(), data.getPath() + ".log");
-			config.setModels("Array23");
+			config.setModels("Array24");
 			config.setFunction(Config.FC_EXPORT);
 			config.setExportTid(true);
 			Ili2db.readSettingsFromDb(config);
 			Ili2db.run(config, null);
-			HashMap<String, IomObject> objs = new HashMap<String, IomObject>();
-			XtfReader reader = new XtfReader(data);
-			IoxEvent event = null;
-			do {
-				event = reader.read();
-				if (event instanceof StartTransferEvent) {
-				} else if (event instanceof StartBasketEvent) {
-				} else if (event instanceof ObjectEvent) {
-					IomObject iomObj = ((ObjectEvent) event).getIomObject();
-					if (iomObj.getobjectoid() != null) {
-						objs.put(iomObj.getobjectoid(), iomObj);
-					}
-				} else if (event instanceof EndBasketEvent) {
-				} else if (event instanceof EndTransferEvent) {
-				}
-			} while (!(event instanceof EndTransferEvent));
-			// check values of array
-			{
-				IomObject obj0 = objs.get("13");
-				Assert.assertNotNull(obj0);
-				Assert.assertEquals("Array23.TestA.Auto", obj0.getobjecttag());
-				Assert.assertEquals(2,obj0.getattrvaluecount("Farben"));
-				Assert.assertEquals("Rot",obj0.getattrobj("Farben", 0).getattrvalue("Wert"));
-				Assert.assertEquals("Blau",obj0.getattrobj("Farben", 1).getattrvalue("Wert"));
-			}
-			{
-				IomObject obj0 = objs.get("14");
-				Assert.assertNotNull(obj0);
-				Assert.assertEquals("Array23.TestA.Auto", obj0.getobjecttag());
-				Assert.assertEquals(0,obj0.getattrvaluecount("Farben"));
-			}
-			{
-				IomObject obj0 = objs.get("100");
-				Assert.assertNotNull(obj0);
-				Assert.assertEquals("Array23.TestA.Datatypes", obj0.getobjecttag());
-				Assert.assertEquals(0,obj0.getattrvaluecount("aUuid"));
-				Assert.assertEquals(0,obj0.getattrvaluecount("aBoolean"));
-				Assert.assertEquals(0,obj0.getattrvaluecount("aTime"));
-				Assert.assertEquals(0,obj0.getattrvaluecount("aDate"));
-				Assert.assertEquals(0,obj0.getattrvaluecount("aDateTime"));
-				Assert.assertEquals(0,obj0.getattrvaluecount("numericInt"));
-				Assert.assertEquals(0,obj0.getattrvaluecount("numericDec"));
-			}
-			{
-				IomObject obj0 = objs.get("101");
-				Assert.assertNotNull(obj0);
-				Assert.assertEquals("Array23.TestA.Datatypes", obj0.getobjecttag());
-				Assert.assertEquals(1,obj0.getattrvaluecount("aUuid"));
-				Assert.assertEquals("15b6bcce-8772-4595-bf82-f727a665fbf3",obj0.getattrobj("aUuid",0).getattrvalue("Value"));
-				Assert.assertEquals(1,obj0.getattrvaluecount("aBoolean"));
-				Assert.assertEquals("true",obj0.getattrobj("aBoolean",0).getattrvalue("Value"));
-				Assert.assertEquals(1,obj0.getattrvaluecount("aTime"));
-				Assert.assertEquals("09:00:00.000",obj0.getattrobj("aTime",0).getattrvalue("Value"));
-				Assert.assertEquals(1,obj0.getattrvaluecount("aDate"));
-				Assert.assertEquals("2002-09-24",obj0.getattrobj("aDate",0).getattrvalue("Value"));
-				Assert.assertEquals(1,obj0.getattrvaluecount("aDateTime"));
-				Assert.assertEquals("1900-01-01T12:30:05.000",obj0.getattrobj("aDateTime",0).getattrvalue("Value"));
-				Assert.assertEquals(1,obj0.getattrvaluecount("numericInt"));
-				Assert.assertEquals("5",obj0.getattrobj("numericInt",0).getattrvalue("Value"));
-				Assert.assertEquals(1,obj0.getattrvaluecount("numericDec"));
-				Assert.assertEquals("6.0",obj0.getattrobj("numericDec",0).getattrvalue("Value"));
-			}
+			exportXtf_Assert(data);
 		}catch(Exception e) {
 			throw new IoxException(e);
 		} finally {
 		}
 	}
+
+    private void exportXtf_Assert(File data) throws IoxException, Ili2cFailure {
+        HashMap<String, IomObject> objs = new HashMap<String, IomObject>();
+        Xtf24Reader reader = new Xtf24Reader(data);
+        ch.interlis.ili2c.config.Configuration ili2cConfig=new ch.interlis.ili2c.config.Configuration();
+        ili2cConfig.addFileEntry(new FileEntry(new File(TEST_DATA_DIR,"Array24.ili").getPath(),FileEntryKind.ILIMODELFILE));
+        TransferDescription td = ch.interlis.ili2c.Ili2c.runCompiler(ili2cConfig);
+        assertNotNull(td);
+        reader.setModel(td);
+        IoxEvent event = null;
+        do {
+        	event = reader.read();
+        	if (event instanceof StartTransferEvent) {
+        	} else if (event instanceof StartBasketEvent) {
+        	} else if (event instanceof ObjectEvent) {
+        		IomObject iomObj = ((ObjectEvent) event).getIomObject();
+        		if (iomObj.getobjectoid() != null) {
+        			objs.put(iomObj.getobjectoid(), iomObj);
+        		}
+        	} else if (event instanceof EndBasketEvent) {
+        	} else if (event instanceof EndTransferEvent) {
+        	}
+        } while (!(event instanceof EndTransferEvent));
+        // check values of array
+        {
+        	IomObject obj0 = objs.get("13");
+        	Assert.assertNotNull(obj0);
+        	Assert.assertEquals("Array24.TestA.Auto", obj0.getobjecttag());
+        	Assert.assertEquals(2,obj0.getattrvaluecount("Farben"));
+        	Assert.assertEquals("Rot",obj0.getattrprim("Farben", 0));
+        	Assert.assertEquals("Blau",obj0.getattrprim("Farben", 1));
+        }
+        {
+        	IomObject obj0 = objs.get("14");
+        	Assert.assertNotNull(obj0);
+        	Assert.assertEquals("Array24.TestA.Auto", obj0.getobjecttag());
+        	Assert.assertEquals(0,obj0.getattrvaluecount("Farben"));
+        }
+        {
+        	IomObject obj0 = objs.get("100");
+        	Assert.assertNotNull(obj0);
+        	Assert.assertEquals("Array24.TestA.Datatypes", obj0.getobjecttag());
+        	Assert.assertEquals(0,obj0.getattrvaluecount("aUuid"));
+        	Assert.assertEquals(0,obj0.getattrvaluecount("aBoolean"));
+        	Assert.assertEquals(0,obj0.getattrvaluecount("aTime"));
+        	Assert.assertEquals(0,obj0.getattrvaluecount("aDate"));
+        	Assert.assertEquals(0,obj0.getattrvaluecount("aDateTime"));
+        	Assert.assertEquals(0,obj0.getattrvaluecount("numericInt"));
+        	Assert.assertEquals(0,obj0.getattrvaluecount("numericDec"));
+        }
+        {
+        	IomObject obj0 = objs.get("101");
+        	Assert.assertNotNull(obj0);
+        	Assert.assertEquals("Array24.TestA.Datatypes", obj0.getobjecttag());
+        	Assert.assertEquals(1,obj0.getattrvaluecount("aUuid"));
+        	Assert.assertEquals("15b6bcce-8772-4595-bf82-f727a665fbf3",obj0.getattrprim("aUuid",0));
+        	Assert.assertEquals(1,obj0.getattrvaluecount("aBoolean"));
+        	Assert.assertEquals("true",obj0.getattrprim("aBoolean",0));
+        	Assert.assertEquals(1,obj0.getattrvaluecount("aTime"));
+        	Assert.assertEquals("09:00:00.000",obj0.getattrprim("aTime",0));
+        	Assert.assertEquals(1,obj0.getattrvaluecount("aDate"));
+        	Assert.assertEquals("2002-09-24",obj0.getattrprim("aDate",0));
+        	Assert.assertEquals(1,obj0.getattrvaluecount("aDateTime"));
+        	Assert.assertEquals("1900-01-01T12:30:05.000",obj0.getattrprim("aDateTime",0));
+        	Assert.assertEquals(1,obj0.getattrvaluecount("numericInt"));
+        	Assert.assertEquals("5",obj0.getattrprim("numericInt",0));
+        	Assert.assertEquals(1,obj0.getattrvaluecount("numericDec"));
+        	Assert.assertEquals("6.0",obj0.getattrprim("numericDec",0));
+        }
+        {
+            IomObject obj0 = objs.get("300");
+            Assert.assertNotNull(obj0);
+            Assert.assertEquals("Array24.TestA.Gebaeude", obj0.getobjecttag());
+            Assert.assertEquals(2,obj0.getattrvaluecount("Art"));
+            Assert.assertEquals("200",obj0.getattrobj("Art", 0).getobjectrefoid());
+            Assert.assertEquals("202",obj0.getattrobj("Art", 1).getobjectrefoid());
+        }
+    }
     @Test
     public void exportXtfEnumFkTable() throws Exception {
         {
@@ -311,75 +319,14 @@ public abstract class Array24Test {
         }
         try {
             
-            File data = new File(TEST_DATA_DIR,"Array23a-out.xtf");
+            File data = new File(TEST_DATA_DIR,"Array24a-out.xtf");
             Config config = setup.initConfig(data.getPath(), data.getPath() + ".log");
-            config.setModels("Array23");
+            config.setModels("Array24");
             config.setFunction(Config.FC_EXPORT);
             config.setExportTid(true);
             Ili2db.readSettingsFromDb(config);
             Ili2db.run(config, null);
-            HashMap<String, IomObject> objs = new HashMap<String, IomObject>();
-            XtfReader reader = new XtfReader(data);
-            IoxEvent event = null;
-            do {
-                event = reader.read();
-                if (event instanceof StartTransferEvent) {
-                } else if (event instanceof StartBasketEvent) {
-                } else if (event instanceof ObjectEvent) {
-                    IomObject iomObj = ((ObjectEvent) event).getIomObject();
-                    if (iomObj.getobjectoid() != null) {
-                        objs.put(iomObj.getobjectoid(), iomObj);
-                    }
-                } else if (event instanceof EndBasketEvent) {
-                } else if (event instanceof EndTransferEvent) {
-                }
-            } while (!(event instanceof EndTransferEvent));
-            // check values of array
-            {
-                IomObject obj0 = objs.get("13");
-                Assert.assertNotNull(obj0);
-                Assert.assertEquals("Array23.TestA.Auto", obj0.getobjecttag());
-                Assert.assertEquals(2,obj0.getattrvaluecount("Farben"));
-                Assert.assertEquals("Rot",obj0.getattrobj("Farben", 0).getattrvalue("Wert"));
-                Assert.assertEquals("Blau",obj0.getattrobj("Farben", 1).getattrvalue("Wert"));
-            }
-            {
-                IomObject obj0 = objs.get("14");
-                Assert.assertNotNull(obj0);
-                Assert.assertEquals("Array23.TestA.Auto", obj0.getobjecttag());
-                Assert.assertEquals(0,obj0.getattrvaluecount("Farben"));
-            }
-            {
-                IomObject obj0 = objs.get("100");
-                Assert.assertNotNull(obj0);
-                Assert.assertEquals("Array23.TestA.Datatypes", obj0.getobjecttag());
-                Assert.assertEquals(0,obj0.getattrvaluecount("aUuid"));
-                Assert.assertEquals(0,obj0.getattrvaluecount("aBoolean"));
-                Assert.assertEquals(0,obj0.getattrvaluecount("aTime"));
-                Assert.assertEquals(0,obj0.getattrvaluecount("aDate"));
-                Assert.assertEquals(0,obj0.getattrvaluecount("aDateTime"));
-                Assert.assertEquals(0,obj0.getattrvaluecount("numericInt"));
-                Assert.assertEquals(0,obj0.getattrvaluecount("numericDec"));
-            }
-            {
-                IomObject obj0 = objs.get("101");
-                Assert.assertNotNull(obj0);
-                Assert.assertEquals("Array23.TestA.Datatypes", obj0.getobjecttag());
-                Assert.assertEquals(1,obj0.getattrvaluecount("aUuid"));
-                Assert.assertEquals("15b6bcce-8772-4595-bf82-f727a665fbf3",obj0.getattrobj("aUuid",0).getattrvalue("Value"));
-                Assert.assertEquals(1,obj0.getattrvaluecount("aBoolean"));
-                Assert.assertEquals("true",obj0.getattrobj("aBoolean",0).getattrvalue("Value"));
-                Assert.assertEquals(1,obj0.getattrvaluecount("aTime"));
-                Assert.assertEquals("09:00:00.000",obj0.getattrobj("aTime",0).getattrvalue("Value"));
-                Assert.assertEquals(1,obj0.getattrvaluecount("aDate"));
-                Assert.assertEquals("2002-09-24",obj0.getattrobj("aDate",0).getattrvalue("Value"));
-                Assert.assertEquals(1,obj0.getattrvaluecount("aDateTime"));
-                Assert.assertEquals("1900-01-01T12:30:05.000",obj0.getattrobj("aDateTime",0).getattrvalue("Value"));
-                Assert.assertEquals(1,obj0.getattrvaluecount("numericInt"));
-                Assert.assertEquals("5",obj0.getattrobj("numericInt",0).getattrvalue("Value"));
-                Assert.assertEquals(1,obj0.getattrvaluecount("numericDec"));
-                Assert.assertEquals("6.0",obj0.getattrobj("numericDec",0).getattrvalue("Value"));
-            }
+            exportXtf_Assert(data);
         }catch(Exception e) {
             throw new IoxException(e);
         } finally {

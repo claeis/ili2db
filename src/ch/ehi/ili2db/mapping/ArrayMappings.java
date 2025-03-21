@@ -17,21 +17,23 @@ public class ArrayMappings {
 		// create mapping
 		Type multiPointTypeo=arrayAttr.getDomain();
 		if(!(multiPointTypeo instanceof CompositionType)){
-			throw new IllegalArgumentException("not a valid array attribute "+arrayAttr.getScopedName(null));
+            ArrayMapping mapping=new ArrayMapping(arrayAttr);
+            mappings.put(arrayAttr, mapping);
+		}else {
+	        CompositionType multiPointType=(CompositionType)multiPointTypeo;
+	        Table arrayEleStruct=multiPointType.getComponentType();
+	        Iterator<ViewableTransferElement> it=arrayEleStruct.getAttributesAndRoles2();
+	        if(!it.hasNext()){
+	            throw new IllegalArgumentException("not a valid array structure "+arrayEleStruct.getScopedName(null));
+	        }
+	        ViewableTransferElement prop = it.next();
+	        if(!(prop.obj instanceof AttributeDef)){
+	            throw new IllegalArgumentException("not a valid array structure "+arrayEleStruct.getScopedName(null));
+	        }
+	        AttributeDef valueAttr=(AttributeDef) prop.obj;
+	        ArrayMapping mapping=new ArrayMapping(valueAttr);
+	        mappings.put(arrayAttr, mapping);
 		}
-		CompositionType multiPointType=(CompositionType)multiPointTypeo;
-		Table arrayEleStruct=multiPointType.getComponentType();
-		Iterator<ViewableTransferElement> it=arrayEleStruct.getAttributesAndRoles2();
-		if(!it.hasNext()){
-			throw new IllegalArgumentException("not a valid array structure "+arrayEleStruct.getScopedName(null));
-		}
-		ViewableTransferElement prop = it.next();
-		if(!(prop.obj instanceof AttributeDef)){
-			throw new IllegalArgumentException("not a valid array structure "+arrayEleStruct.getScopedName(null));
-		}
-		AttributeDef valueAttr=(AttributeDef) prop.obj;
-		ArrayMapping mapping=new ArrayMapping(valueAttr);
-		mappings.put(arrayAttr, mapping);
 	}
 
 	public ArrayMapping getMapping(AttributeDef attr) {
