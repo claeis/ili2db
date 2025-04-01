@@ -352,7 +352,7 @@ public class TransferFromXtf {
                     if(globals.datasetName==null) {
                         globals.datasetSqlId=oidPool.newObjSqlId();
                         if(lastXtffilename!=null){
-                            globals.datasetName=new java.io.File(lastXtffilename).getName()+"-"+Long.toString(globals.datasetSqlId);
+                            globals.datasetName=makeValidBid(new java.io.File(lastXtffilename).getName())+"-"+Long.toString(globals.datasetSqlId);
                         }else{
                             globals.datasetName=Long.toString(globals.datasetSqlId);
                         }
@@ -426,6 +426,20 @@ public class TransferFromXtf {
                 globals.validator.setAutoSecondPass(false);
             }
         }
+    }
+    private String makeValidBid(String name) {
+        if(name==null) {
+            return null;
+        }
+        StringBuffer buf=new StringBuffer();
+        for(char c:name.toCharArray()) {
+            if(Character.isLetter(c) || c=='_') {
+                buf.append(c);
+            }else if((c=='-' || c=='.' || Character.isDigit(c)) && buf.length()>0) {
+                buf.append(c);
+            }
+        }
+        return buf.toString();
     }
     public static class Globals {
         String datasetName=null;

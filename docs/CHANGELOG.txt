@@ -17,6 +17,7 @@ ili2db 5.3.0 (2025-03-xx)
 - ili2gpkg: create gpkg_contents entry for attributes tables (#560)
 - implement BAG OF REFRENCE TO as array with !!@ili2db.mapping=ARRAY  (#491)
 - ili2.4: support ARRAY-Mapping of LIST/BAG OF simple data types (#562)
+- fix itf-name with spaces leads to issues on using no dataset (#563)
 - ehisqlgen-1.16.2+
 - iox-ili-1.23.5+
 
