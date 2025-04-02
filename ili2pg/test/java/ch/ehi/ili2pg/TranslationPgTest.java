@@ -4,7 +4,7 @@ import ch.ehi.ili2db.AbstractTestSetup;
 import ch.ehi.ili2pg.PgTestSetup;
 
 //-Ddburl=jdbc:postgresql:dbname -Ddbusr=usrname -Ddbpwd=1234
-public class TranslationTest extends ch.ehi.ili2db.TranslationTest {
+public class TranslationPgTest extends ch.ehi.ili2db.TranslationTest {
 	private static final String DBSCHEMA = "Translation";
 	
     @Override

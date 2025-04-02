@@ -45,140 +45,146 @@ public abstract class TranslationTest {
 	@Test
 	public void importIli23() throws Exception
 	{
-		Connection jdbcConnection=null;
-		try{
-		    setup.resetDb();
+        setup.resetDb();
+        File data=new File(TEST_OUT,"EnumOk.ili");
+        Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+        Ili2db.setNoSmartMapping(config);
+        config.setFunction(Config.FC_SCHEMAIMPORT);
+        config.setCreateFk(Config.CREATE_FK_YES);
+        config.setTidHandling(Config.TID_HANDLING_PROPERTY);
+        config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
+        config.setModels("EnumOkA;EnumOkB");
+        config.setVer3_translation(false);
+        config.setCreateNlsTab(true);
+        config.setCreateMetaInfo(true);
+        Ili2db.readSettingsFromDb(config);
+        Ili2db.run(config,null);
+        
+        Connection jdbcConnection=null;
+        Statement stmt=null;
+        try{
             jdbcConnection = setup.createConnection();
-            Statement stmt=jdbcConnection.createStatement();
-	        {       
-				File data=new File(TEST_OUT,"EnumOk.ili");
-				Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
-                Ili2db.setNoSmartMapping(config);
-				config.setFunction(Config.FC_SCHEMAIMPORT);
-				config.setCreateFk(Config.CREATE_FK_YES);
-				config.setTidHandling(Config.TID_HANDLING_PROPERTY);
-				config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
-				config.setModels("EnumOkA;EnumOkB");
-				config.setVer3_translation(false);
-				config.setCreateNlsTab(true);
-                config.setCreateMetaInfo(true);
-				Ili2db.readSettingsFromDb(config);
-				Ili2db.run(config,null);
-				// class[a] is imported
-				Assert.assertTrue(stmt.execute("SELECT t_ili2db_classname.iliname, t_ili2db_classname.sqlname FROM "+setup.prefixName("t_ili2db_classname")+" WHERE t_ili2db_classname.iliname = 'EnumOkX.TopicX.ClassX'"));
-				{
-					ResultSet rs=stmt.getResultSet();
-					Assert.assertTrue(rs.next());
-					Assert.assertEquals("classx",rs.getString(2));
-				}
-				// class[b] is NOT imported
-				Assert.assertTrue(stmt.execute("SELECT t_ili2db_classname.iliname FROM "+setup.prefixName("t_ili2db_classname")+" WHERE t_ili2db_classname.iliname = 'EnumOkB.TopicB.ClassB'"));
-				{
-					ResultSet rs=stmt.getResultSet();
-					Assert.assertFalse(rs.next());
-				}
-                Assert.assertTrue(stmt.execute("SELECT "+DbNames.NLS_TAB+"."+DbNames.NLS_TAB_LABEL_COL+", "+DbNames.NLS_TAB+"."+DbNames.NLS_TAB_DESCRIPTION_COL+" FROM "+setup.prefixName(DbNames.NLS_TAB)+" WHERE "+DbNames.NLS_TAB+"."+DbNames.NLS_TAB_ILIELEMENT_COL+" = 'EnumOkX.TopicX.ClassX' AND "+DbNames.NLS_TAB+"."+DbNames.NLS_TAB_LANG_COL+" = 'de'"));
-                {
-                    ResultSet rs=stmt.getResultSet();
-                    Assert.assertTrue(rs.next());
-                    Assert.assertEquals("Class A",rs.getString(1));
-                    Assert.assertEquals("ilidoc Class A",rs.getString(2));
-                }
-                // Domain Enum
-                Assert.assertTrue(stmt.execute("SELECT "+DbNames.NLS_TAB+"."+DbNames.NLS_TAB_LABEL_COL+", "+DbNames.NLS_TAB+"."+DbNames.NLS_TAB_DESCRIPTION_COL+" FROM "+setup.prefixName(DbNames.NLS_TAB)+" WHERE "+DbNames.NLS_TAB+"."+DbNames.NLS_TAB_ILIELEMENT_COL+" = 'EnumOkX.TopicX.ClassX.attrX.x1' AND "+DbNames.NLS_TAB+"."+DbNames.NLS_TAB_LANG_COL+" = 'de'"));
-                {
-                    ResultSet rs=stmt.getResultSet();
-                    Assert.assertTrue(rs.next());
-                    Assert.assertEquals("a1",rs.getString(1));
-                    Assert.assertEquals(null,rs.getString(2));
-                }
-                // Attr Enum
-                Assert.assertTrue(stmt.execute("SELECT "+DbNames.NLS_TAB+"."+DbNames.NLS_TAB_LABEL_COL+", "+DbNames.NLS_TAB+"."+DbNames.NLS_TAB_DESCRIPTION_COL+" FROM "+setup.prefixName(DbNames.NLS_TAB)+" WHERE "+DbNames.NLS_TAB+"."+DbNames.NLS_TAB_ILIELEMENT_COL+" = 'EnumOkX.DomainX.x1' AND "+DbNames.NLS_TAB+"."+DbNames.NLS_TAB_LANG_COL+" = 'de'"));
-                {
-                    ResultSet rs=stmt.getResultSet();
-                    Assert.assertTrue(rs.next());
-                    Assert.assertEquals("a1",rs.getString(1));
-                    Assert.assertEquals(null,rs.getString(2));
-                }
-                {
-                    // t_ili2db_attrname
-                    String [][] expectedValues=new String[][] {
-                        {"EnumOkX.TopicX.n_1X.n_1X_X2", "n_1x_x2", "classx",  "classx2"},
-                        {"EnumOkX.TopicX.n_nX.n_nX_X2", "n_nx_x2", "n_nx",    "classx2"},
-                        {"EnumOkX.TopicX.ClassX.attrX", "attrx",   "classx",  null},
-                        {"EnumOkX.TopicX.ClassX.attrX2", "classx_attrx2",   "struct",  "classx"},
-                        {"EnumOkX.TopicX.ClassX.attrX3", "classx_attrx3",   "trstructa",  "classx"},
-                        {"EnumOkX.TopicX.ClassX.attrX4", "attrx4",   "classx",  null},
-                        {"EnumOkX.TopicX.n_nX.n_nX_X",  "n_nx_x",  "n_nx",    "classx"},
-                        {"Basis.Struct.attrA", "attra",   "struct",  null},
-                        {"Basis.Struct.attrA2", "attra2",   "struct",  null},
-                        {"TranslatedBasisA.TrStructA.trAttrA", "trattra",   "trstructa",  null},
-                        {"TranslatedBasisA.TrStructA.trAttrA2", "trattra2",   "trstructa",  null},
-                    };
-                    Ili2dbAssert.assertAttrNameTable(jdbcConnection, expectedValues, setup.getSchema());
-                }
-                {
-                    // t_ili2db_trafo
-                    String [][] expectedValues=new String[][] {
-                        {"EnumOkX.TopicX.n_1X", "ch.ehi.ili2db.inheritance",   "embedded"},
-                        {"EnumOkX.TopicX.ClassX2",  "ch.ehi.ili2db.inheritance",   "newClass"},
-                        {"EnumOkX.TopicX.ClassX",   "ch.ehi.ili2db.inheritance",   "newClass"},
-                        {"EnumOkX.TopicX.n_nX", "ch.ehi.ili2db.inheritance",   "newClass"},
-                        {"Basis.Struct",   "ch.ehi.ili2db.inheritance",   "newClass"},
-                        {"TranslatedBasisA.TrStructA",   "ch.ehi.ili2db.inheritance",   "newClass"},
-                    };
-                    Ili2dbAssert.assertTrafoTable(jdbcConnection,expectedValues, setup.getSchema());
-                }
-		    }
-		}finally{
-			if(jdbcConnection!=null){
-				jdbcConnection.close();
-			}
-		}
+            stmt=jdbcConnection.createStatement();
+            // class[a] is imported
+            Assert.assertTrue(stmt.execute("SELECT t_ili2db_classname.iliname, t_ili2db_classname.sqlname FROM "+setup.prefixName("t_ili2db_classname")+" WHERE t_ili2db_classname.iliname = 'EnumOkX.TopicX.ClassX'"));
+            {
+                ResultSet rs=stmt.getResultSet();
+                Assert.assertTrue(rs.next());
+                Assert.assertEquals("classx",rs.getString(2));
+            }
+            // class[b] is NOT imported
+            Assert.assertTrue(stmt.execute("SELECT t_ili2db_classname.iliname FROM "+setup.prefixName("t_ili2db_classname")+" WHERE t_ili2db_classname.iliname = 'EnumOkB.TopicB.ClassB'"));
+            {
+                ResultSet rs=stmt.getResultSet();
+                Assert.assertFalse(rs.next());
+            }
+            Assert.assertTrue(stmt.execute("SELECT "+DbNames.NLS_TAB+"."+DbNames.NLS_TAB_LABEL_COL+", "+DbNames.NLS_TAB+"."+DbNames.NLS_TAB_DESCRIPTION_COL+" FROM "+setup.prefixName(DbNames.NLS_TAB)+" WHERE "+DbNames.NLS_TAB+"."+DbNames.NLS_TAB_ILIELEMENT_COL+" = 'EnumOkX.TopicX.ClassX' AND "+DbNames.NLS_TAB+"."+DbNames.NLS_TAB_LANG_COL+" = 'de'"));
+            {
+                ResultSet rs=stmt.getResultSet();
+                Assert.assertTrue(rs.next());
+                Assert.assertEquals("Class A",rs.getString(1));
+                Assert.assertEquals("ilidoc Class A",rs.getString(2));
+            }
+            // Domain Enum
+            Assert.assertTrue(stmt.execute("SELECT "+DbNames.NLS_TAB+"."+DbNames.NLS_TAB_LABEL_COL+", "+DbNames.NLS_TAB+"."+DbNames.NLS_TAB_DESCRIPTION_COL+" FROM "+setup.prefixName(DbNames.NLS_TAB)+" WHERE "+DbNames.NLS_TAB+"."+DbNames.NLS_TAB_ILIELEMENT_COL+" = 'EnumOkX.TopicX.ClassX.attrX.x1' AND "+DbNames.NLS_TAB+"."+DbNames.NLS_TAB_LANG_COL+" = 'de'"));
+            {
+                ResultSet rs=stmt.getResultSet();
+                Assert.assertTrue(rs.next());
+                Assert.assertEquals("a1",rs.getString(1));
+                Assert.assertEquals(null,rs.getString(2));
+            }
+            // Attr Enum
+            Assert.assertTrue(stmt.execute("SELECT "+DbNames.NLS_TAB+"."+DbNames.NLS_TAB_LABEL_COL+", "+DbNames.NLS_TAB+"."+DbNames.NLS_TAB_DESCRIPTION_COL+" FROM "+setup.prefixName(DbNames.NLS_TAB)+" WHERE "+DbNames.NLS_TAB+"."+DbNames.NLS_TAB_ILIELEMENT_COL+" = 'EnumOkX.DomainX.x1' AND "+DbNames.NLS_TAB+"."+DbNames.NLS_TAB_LANG_COL+" = 'de'"));
+            {
+                ResultSet rs=stmt.getResultSet();
+                Assert.assertTrue(rs.next());
+                Assert.assertEquals("a1",rs.getString(1));
+                Assert.assertEquals(null,rs.getString(2));
+            }
+            {
+                // t_ili2db_attrname
+                String [][] expectedValues=new String[][] {
+                    {"EnumOkX.TopicX.n_1X.n_1X_X2", "n_1x_x2", "classx",  "classx2"},
+                    {"EnumOkX.TopicX.n_nX.n_nX_X2", "n_nx_x2", "n_nx",    "classx2"},
+                    {"EnumOkX.TopicX.ClassX.attrX", "attrx",   "classx",  null},
+                    {"EnumOkX.TopicX.ClassX.attrX2", "classx_attrx2",   "struct",  "classx"},
+                    {"EnumOkX.TopicX.ClassX.attrX3", "classx_attrx3",   "trstructa",  "classx"},
+                    {"EnumOkX.TopicX.ClassX.attrX4", "attrx4",   "classx",  null},
+                    {"EnumOkX.TopicX.n_nX.n_nX_X",  "n_nx_x",  "n_nx",    "classx"},
+                    {"Basis.Struct.attrA", "attra",   "struct",  null},
+                    {"Basis.Struct.attrA2", "attra2",   "struct",  null},
+                    {"TranslatedBasisA.TrStructA.trAttrA", "trattra",   "trstructa",  null},
+                    {"TranslatedBasisA.TrStructA.trAttrA2", "trattra2",   "trstructa",  null},
+                };
+                Ili2dbAssert.assertAttrNameTable(jdbcConnection, expectedValues, setup.getSchema());
+            }
+            {
+                // t_ili2db_trafo
+                String [][] expectedValues=new String[][] {
+                    {"EnumOkX.TopicX.n_1X", "ch.ehi.ili2db.inheritance",   "embedded"},
+                    {"EnumOkX.TopicX.ClassX2",  "ch.ehi.ili2db.inheritance",   "newClass"},
+                    {"EnumOkX.TopicX.ClassX",   "ch.ehi.ili2db.inheritance",   "newClass"},
+                    {"EnumOkX.TopicX.n_nX", "ch.ehi.ili2db.inheritance",   "newClass"},
+                    {"Basis.Struct",   "ch.ehi.ili2db.inheritance",   "newClass"},
+                    {"TranslatedBasisA.TrStructA",   "ch.ehi.ili2db.inheritance",   "newClass"},
+                };
+                Ili2dbAssert.assertTrafoTable(jdbcConnection,expectedValues, setup.getSchema());
+            }
+        }finally{
+            if(stmt!=null){
+                stmt.close();
+            }
+            if(jdbcConnection!=null){
+                jdbcConnection.close();
+            }
+        }
 	}
     @Test
     public void importIli23assocref() throws Exception
     {
+        setup.resetDb();
+        File data=new File(TEST_OUT,"Translation23.ili");
+        Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+        Ili2db.setNoSmartMapping(config);
+        config.setFunction(Config.FC_SCHEMAIMPORT);
+        config.setCreateFk(Config.CREATE_FK_YES);
+        config.setTidHandling(Config.TID_HANDLING_PROPERTY);
+        config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
+        config.setModels("Translation23_de;Translation23_fr");
+        config.setVer3_translation(false);
+        Ili2db.readSettingsFromDb(config);
+        Ili2db.run(config,null);
+        
         Connection jdbcConnection=null;
+        Statement stmt=null;
         try{
-            setup.resetDb();
             jdbcConnection = setup.createConnection();
-            Statement stmt=jdbcConnection.createStatement();
-            {       
-                File data=new File(TEST_OUT,"Translation23.ili");
-                Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
-                Ili2db.setNoSmartMapping(config);
-                config.setFunction(Config.FC_SCHEMAIMPORT);
-                config.setCreateFk(Config.CREATE_FK_YES);
-                config.setTidHandling(Config.TID_HANDLING_PROPERTY);
-                config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
-                config.setModels("Translation23_de;Translation23_fr");
-                config.setVer3_translation(false);
-                Ili2db.readSettingsFromDb(config);
-                Ili2db.run(config,null);
-                {
-                    // t_ili2db_attrname
-                    String [][] expectedValues=new String[][] {
-                        {"Translation23_de.TestB_de.ClassB1_de.attrRef_de", "classb1_de_attrref_de",   "structb0_de", "classb1_de"},
-                        {"Translation23_de.TestA_de.ClassA1_de.attrA_de",   "attra_de",    "classa1_de",  null},
-                        {"Translation23_de.TestB_de.ClassB1_de.attrB_de",   "attrb_de",    "classb1_de",  null},
-                        {"Translation23_de.TestB_de.a2b_de.a_de",   "a_de",    "classb1_de",  "classa1_de"},
-                        {"Translation23_de.TestB_de.StructB0_de.refA_de",   "refa_de", "structb0_de", "classa1_de"},
-                    };
-                    Ili2dbAssert.assertAttrNameTable(jdbcConnection, expectedValues, setup.getSchema());
-                }
-                {
-                    // t_ili2db_trafo
-                    String [][] expectedValues=new String[][] {
-                        {"Translation23_de.TestA_de.ClassA1_de",    "ch.ehi.ili2db.inheritance",   "newClass"},
-                        {"Translation23_de.TestB_de.StructB0_de",   "ch.ehi.ili2db.inheritance",   "newClass"},
-                        {"Translation23_de.TestB_de.a2b_de",        "ch.ehi.ili2db.inheritance",   "embedded"},
-                        {"Translation23_de.TestB_de.ClassB1_de",    "ch.ehi.ili2db.inheritance",   "newClass"},
-                    };
-                    Ili2dbAssert.assertTrafoTable(jdbcConnection,expectedValues, setup.getSchema());
-                }
+            stmt=jdbcConnection.createStatement();
+            {
+                // t_ili2db_attrname
+                String [][] expectedValues=new String[][] {
+                    {"Translation23_de.TestB_de.ClassB1_de.attrRef_de", "classb1_de_attrref_de",   "structb0_de", "classb1_de"},
+                    {"Translation23_de.TestA_de.ClassA1_de.attrA_de",   "attra_de",    "classa1_de",  null},
+                    {"Translation23_de.TestB_de.ClassB1_de.attrB_de",   "attrb_de",    "classb1_de",  null},
+                    {"Translation23_de.TestB_de.a2b_de.a_de",   "a_de",    "classb1_de",  "classa1_de"},
+                    {"Translation23_de.TestB_de.StructB0_de.refA_de",   "refa_de", "structb0_de", "classa1_de"},
+                };
+                Ili2dbAssert.assertAttrNameTable(jdbcConnection, expectedValues, setup.getSchema());
+            }
+            {
+                // t_ili2db_trafo
+                String [][] expectedValues=new String[][] {
+                    {"Translation23_de.TestA_de.ClassA1_de",    "ch.ehi.ili2db.inheritance",   "newClass"},
+                    {"Translation23_de.TestB_de.StructB0_de",   "ch.ehi.ili2db.inheritance",   "newClass"},
+                    {"Translation23_de.TestB_de.a2b_de",        "ch.ehi.ili2db.inheritance",   "embedded"},
+                    {"Translation23_de.TestB_de.ClassB1_de",    "ch.ehi.ili2db.inheritance",   "newClass"},
+                };
+                Ili2dbAssert.assertTrafoTable(jdbcConnection,expectedValues, setup.getSchema());
             }
         }finally{
+            if(stmt!=null) {
+                stmt.close();
+            }
             if(jdbcConnection!=null){
                 jdbcConnection.close();
             }
@@ -187,70 +193,74 @@ public abstract class TranslationTest {
     @Test
     public void importIli23schemaDE_IT() throws Exception
     {
+        
+        setup.resetDb();
+        File data=new File(TEST_OUT,"EnumOk.ili");
+        Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+        Ili2db.setNoSmartMapping(config);
+        config.setFunction(Config.FC_SCHEMAIMPORT);
+        config.setCreateFk(Config.CREATE_FK_YES);
+        config.setTidHandling(Config.TID_HANDLING_PROPERTY);
+        config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
+        config.setModels("BasisC;TranslatedBasisB;EnumOkX;EnumOkA;EnumOkB");
+        config.setNameLanguage("de;it");
+        config.setVer3_translation(false);
+        Ili2db.readSettingsFromDb(config);
+        Ili2db.run(config,null);
+        
         Connection jdbcConnection=null;
+        Statement stmt=null;
         try{
-            setup.resetDb();
             jdbcConnection = setup.createConnection();
-            Statement stmt=jdbcConnection.createStatement();
-            {       
-                File data=new File(TEST_OUT,"EnumOk.ili");
-                Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
-                Ili2db.setNoSmartMapping(config);
-                config.setFunction(Config.FC_SCHEMAIMPORT);
-                config.setCreateFk(Config.CREATE_FK_YES);
-                config.setTidHandling(Config.TID_HANDLING_PROPERTY);
-                config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
-                config.setModels("BasisC;TranslatedBasisB;EnumOkX;EnumOkA;EnumOkB");
-                config.setNameLanguage("de;it");
-                config.setVer3_translation(false);
-                Ili2db.readSettingsFromDb(config);
-                Ili2db.run(config,null);
-                // class[a] is imported
-                Assert.assertTrue(stmt.execute("SELECT t_ili2db_classname.iliname, t_ili2db_classname.sqlname FROM "+setup.prefixName("t_ili2db_classname")+" WHERE t_ili2db_classname.iliname = 'EnumOkX.TopicX.ClassX'"));
-                {
-                    ResultSet rs=stmt.getResultSet();
-                    Assert.assertTrue(rs.next());
-                    Assert.assertEquals("classa",rs.getString(2));
-                }
-                // class[b] is NOT imported
-                Assert.assertTrue(stmt.execute("SELECT t_ili2db_classname.iliname FROM "+setup.prefixName("t_ili2db_classname")+" WHERE t_ili2db_classname.iliname = 'EnumOkA.TopicA.ClassA'"));
-                {
-                    ResultSet rs=stmt.getResultSet();
-                    Assert.assertFalse(rs.next());
-                }
-                {
-                    // t_ili2db_attrname
-                    String [][] expectedValues=new String[][] {
-                        {"EnumOkX.TopicX.n_1X.n_1X_X2", "n_1a_a2", "classa",  "classa2"},
-                        {"EnumOkX.TopicX.n_nX.n_nX_X2", "n_na_a2", "n_na",    "classa2"},
-                        {"EnumOkX.TopicX.ClassX.attrX", "attra",   "classa",  null},
-                        {"EnumOkX.TopicX.ClassX.attrX2", "classa_attra2",   "structc",  "classa"},
-                        {"EnumOkX.TopicX.ClassX.attrX3", "classa_attra3",   "trstructa",  "classa"},
-                        {"EnumOkX.TopicX.ClassX.attrX4", "attra4",   "classa", null},
-                        {"EnumOkX.TopicX.n_nX.n_nX_X",  "n_na_a",  "n_na",    "classa"},
-                        {"Basis.Struct.attrA", "attrc",   "structc",  null},
-                        {"Basis.Struct.attrA2", "attrc2",   "structc",  null},
-                        {"TranslatedBasisA.TrStructA.trAttrA", "trattra",   "trstructa",  null},
-                        {"TranslatedBasisA.TrStructA.trAttrA2", "trattra2",   "trstructa",  null},
-                    };
-                    Ili2dbAssert.assertAttrNameTable(jdbcConnection, expectedValues, setup.getSchema());
-                }
-                {
-                    // t_ili2db_trafo
-                    String [][] expectedValues=new String[][] {
-                        {"EnumOkX.TopicX.n_1X", "ch.ehi.ili2db.inheritance",   "embedded"},
-                        {"EnumOkX.TopicX.ClassX2",  "ch.ehi.ili2db.inheritance",   "newClass"},
-                        {"EnumOkX.TopicX.ClassX",   "ch.ehi.ili2db.inheritance",   "newClass"},
-                        {"EnumOkX.TopicX.n_nX", "ch.ehi.ili2db.inheritance",   "newClass"},
-                        {"Basis.Struct",   "ch.ehi.ili2db.inheritance",   "newClass"},
-                        {"Basis.Struct2",   "ch.ehi.ili2db.inheritance",   "newClass"},
-                        {"TranslatedBasisA.TrStructA",   "ch.ehi.ili2db.inheritance",   "newClass"},
-                        {"TranslatedBasisA.TrStructA2",   "ch.ehi.ili2db.inheritance",   "newClass"},
-                    };
-                    Ili2dbAssert.assertTrafoTable(jdbcConnection,expectedValues, setup.getSchema());
-                }
+            stmt=jdbcConnection.createStatement();
+            // class[a] is imported
+            Assert.assertTrue(stmt.execute("SELECT t_ili2db_classname.iliname, t_ili2db_classname.sqlname FROM "+setup.prefixName("t_ili2db_classname")+" WHERE t_ili2db_classname.iliname = 'EnumOkX.TopicX.ClassX'"));
+            {
+                ResultSet rs=stmt.getResultSet();
+                Assert.assertTrue(rs.next());
+                Assert.assertEquals("classa",rs.getString(2));
+            }
+            // class[b] is NOT imported
+            Assert.assertTrue(stmt.execute("SELECT t_ili2db_classname.iliname FROM "+setup.prefixName("t_ili2db_classname")+" WHERE t_ili2db_classname.iliname = 'EnumOkA.TopicA.ClassA'"));
+            {
+                ResultSet rs=stmt.getResultSet();
+                Assert.assertFalse(rs.next());
+            }
+            {
+                // t_ili2db_attrname
+                String [][] expectedValues=new String[][] {
+                    {"EnumOkX.TopicX.n_1X.n_1X_X2", "n_1a_a2", "classa",  "classa2"},
+                    {"EnumOkX.TopicX.n_nX.n_nX_X2", "n_na_a2", "n_na",    "classa2"},
+                    {"EnumOkX.TopicX.ClassX.attrX", "attra",   "classa",  null},
+                    {"EnumOkX.TopicX.ClassX.attrX2", "classa_attra2",   "structc",  "classa"},
+                    {"EnumOkX.TopicX.ClassX.attrX3", "classa_attra3",   "trstructa",  "classa"},
+                    {"EnumOkX.TopicX.ClassX.attrX4", "attra4",   "classa", null},
+                    {"EnumOkX.TopicX.n_nX.n_nX_X",  "n_na_a",  "n_na",    "classa"},
+                    {"Basis.Struct.attrA", "attrc",   "structc",  null},
+                    {"Basis.Struct.attrA2", "attrc2",   "structc",  null},
+                    {"TranslatedBasisA.TrStructA.trAttrA", "trattra",   "trstructa",  null},
+                    {"TranslatedBasisA.TrStructA.trAttrA2", "trattra2",   "trstructa",  null},
+                };
+                Ili2dbAssert.assertAttrNameTable(jdbcConnection, expectedValues, setup.getSchema());
+            }
+            {
+                // t_ili2db_trafo
+                String [][] expectedValues=new String[][] {
+                    {"EnumOkX.TopicX.n_1X", "ch.ehi.ili2db.inheritance",   "embedded"},
+                    {"EnumOkX.TopicX.ClassX2",  "ch.ehi.ili2db.inheritance",   "newClass"},
+                    {"EnumOkX.TopicX.ClassX",   "ch.ehi.ili2db.inheritance",   "newClass"},
+                    {"EnumOkX.TopicX.n_nX", "ch.ehi.ili2db.inheritance",   "newClass"},
+                    {"Basis.Struct",   "ch.ehi.ili2db.inheritance",   "newClass"},
+                    {"Basis.Struct2",   "ch.ehi.ili2db.inheritance",   "newClass"},
+                    {"TranslatedBasisA.TrStructA",   "ch.ehi.ili2db.inheritance",   "newClass"},
+                    {"TranslatedBasisA.TrStructA2",   "ch.ehi.ili2db.inheritance",   "newClass"},
+                };
+                Ili2dbAssert.assertTrafoTable(jdbcConnection,expectedValues, setup.getSchema());
             }
         }finally{
+            if(stmt!=null) {
+                stmt.close();
+            }
             if(jdbcConnection!=null){
                 jdbcConnection.close();
             }
@@ -260,62 +270,63 @@ public abstract class TranslationTest {
 	@Test
 	public void importIli10() throws Exception
 	{
+        setup.resetDb();
+        File data=new File(TEST_OUT,"ModelBsimple10.ili");
+        Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+        Ili2db.setNoSmartMapping(config);
+        config.setFunction(Config.FC_SCHEMAIMPORT);
+        config.setCreateFk(Config.CREATE_FK_YES);
+        config.setTidHandling(Config.TID_HANDLING_PROPERTY);
+        config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
+        config.setIli1Translation("ModelBsimple10=ModelAsimple10");
+        config.setDefaultSrsAuthority("EPSG");
+        config.setDefaultSrsCode("21781");
+        Ili2db.readSettingsFromDb(config);
+        Ili2db.run(config,null);
+        
 		Connection jdbcConnection=null;
+        Statement stmt=null;
 		try{
-            setup.resetDb();
-	        {
-				File data=new File(TEST_OUT,"ModelBsimple10.ili");
-				Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
-                Ili2db.setNoSmartMapping(config);
-				config.setFunction(Config.FC_SCHEMAIMPORT);
-				config.setCreateFk(Config.CREATE_FK_YES);
-				config.setTidHandling(Config.TID_HANDLING_PROPERTY);
-				config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
-				config.setIli1Translation("ModelBsimple10=ModelAsimple10");
-	            config.setDefaultSrsAuthority("EPSG");
-	            config.setDefaultSrsCode("21781");
-				Ili2db.readSettingsFromDb(config);
-				Ili2db.run(config,null);
-				
-	            jdbcConnection = setup.createConnection();
-	            Statement stmt=jdbcConnection.createStatement();
+            jdbcConnection = setup.createConnection();
+            stmt=jdbcConnection.createStatement();
 
-				
-				// class[a] is imported
-				Assert.assertTrue(stmt.execute("SELECT t_ili2db_classname.iliname, t_ili2db_classname.sqlname FROM "+setup.prefixName("t_ili2db_classname")+" WHERE t_ili2db_classname.iliname = 'ModelAsimple10.TopicA.ClassA'"));
-				{
-					ResultSet rs=stmt.getResultSet();
-					Assert.assertTrue(rs.next());
-					Assert.assertEquals("classa",rs.getString(2));
-				}
-				// class[b] is NOT imported
-				Assert.assertTrue(stmt.execute("SELECT t_ili2db_classname.iliname FROM "+setup.prefixName("t_ili2db_classname")+" WHERE t_ili2db_classname.iliname = 'ModelBsimple10.TopicB.ClassB'"));
-				{
-					ResultSet rs=stmt.getResultSet();
-					Assert.assertFalse(rs.next());
-				}
-	            {
-	                // t_ili2db_attrname
-	                String [][] expectedValues=new String[][] {
-	                    {"ModelAsimple10.TopicA.ClassA3.geomA",  "geoma", "classa3", null},   
-	                    {"ModelAsimple10.TopicA.ClassA2.geomA",   "geoma", "classa2", null},
-	                    {"ModelAsimple10.TopicA.ClassA.attrA",    "attra", "classa", null},
-	                };
-	                Ili2dbAssert.assertAttrNameTable(jdbcConnection, expectedValues, setup.getSchema());
-	            }
-	            {
-	                // t_ili2db_trafo
-	                String [][] expectedValues=new String[][] {
-	                    {"ModelAsimple10.TopicA.ClassA",  "ch.ehi.ili2db.inheritance", "newClass"},
-	                    {"ModelAsimple10.TopicA.ClassA2", "ch.ehi.ili2db.inheritance", "newClass"},
-	                    {"ModelAsimple10.TopicA.ClassA3", "ch.ehi.ili2db.inheritance", "newClass"},
-	                    
-	                };
-	                Ili2dbAssert.assertTrafoTable(jdbcConnection,expectedValues, setup.getSchema());
-	            }
-				
-	        }
+            
+            // class[a] is imported
+            Assert.assertTrue(stmt.execute("SELECT t_ili2db_classname.iliname, t_ili2db_classname.sqlname FROM "+setup.prefixName("t_ili2db_classname")+" WHERE t_ili2db_classname.iliname = 'ModelAsimple10.TopicA.ClassA'"));
+            {
+                ResultSet rs=stmt.getResultSet();
+                Assert.assertTrue(rs.next());
+                Assert.assertEquals("classa",rs.getString(2));
+            }
+            // class[b] is NOT imported
+            Assert.assertTrue(stmt.execute("SELECT t_ili2db_classname.iliname FROM "+setup.prefixName("t_ili2db_classname")+" WHERE t_ili2db_classname.iliname = 'ModelBsimple10.TopicB.ClassB'"));
+            {
+                ResultSet rs=stmt.getResultSet();
+                Assert.assertFalse(rs.next());
+            }
+            {
+                // t_ili2db_attrname
+                String [][] expectedValues=new String[][] {
+                    {"ModelAsimple10.TopicA.ClassA3.geomA",  "geoma", "classa3", null},   
+                    {"ModelAsimple10.TopicA.ClassA2.geomA",   "geoma", "classa2", null},
+                    {"ModelAsimple10.TopicA.ClassA.attrA",    "attra", "classa", null},
+                };
+                Ili2dbAssert.assertAttrNameTable(jdbcConnection, expectedValues, setup.getSchema());
+            }
+            {
+                // t_ili2db_trafo
+                String [][] expectedValues=new String[][] {
+                    {"ModelAsimple10.TopicA.ClassA",  "ch.ehi.ili2db.inheritance", "newClass"},
+                    {"ModelAsimple10.TopicA.ClassA2", "ch.ehi.ili2db.inheritance", "newClass"},
+                    {"ModelAsimple10.TopicA.ClassA3", "ch.ehi.ili2db.inheritance", "newClass"},
+                    
+                };
+                Ili2dbAssert.assertTrafoTable(jdbcConnection,expectedValues, setup.getSchema());
+            }
 		}finally{
+		    if(stmt!=null) {
+		        stmt.close();
+		    }
 			if(jdbcConnection!=null){
 				jdbcConnection.close();
 			}
@@ -324,60 +335,61 @@ public abstract class TranslationTest {
     @Test
     public void importIli10Multi() throws Exception
     {
+        setup.resetDb();
+        File data=new File(TEST_OUT,"ModelCsimple10.ili");
+        Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+        Ili2db.setNoSmartMapping(config);
+        config.setFunction(Config.FC_SCHEMAIMPORT);
+        config.setCreateFk(Config.CREATE_FK_YES);
+        config.setTidHandling(Config.TID_HANDLING_PROPERTY);
+        config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
+        config.setIli1Translation("ModelBsimple10=ModelAsimple10;ModelCsimple10=ModelAsimple10");
+        config.setDefaultSrsAuthority("EPSG");
+        config.setDefaultSrsCode("21781");
+        Ili2db.readSettingsFromDb(config);
+        Ili2db.run(config,null);
+        
         Connection jdbcConnection=null;
+        Statement stmt=null;
         try{
-            setup.resetDb();
+            jdbcConnection = setup.createConnection();
+            stmt=jdbcConnection.createStatement();
+            // class[a] is imported
+            Assert.assertTrue(stmt.execute("SELECT t_ili2db_classname.iliname, t_ili2db_classname.sqlname FROM "+setup.prefixName("t_ili2db_classname")+" WHERE t_ili2db_classname.iliname = 'ModelAsimple10.TopicA.ClassA'"));
             {
-                File data=new File(TEST_OUT,"ModelCsimple10.ili");
-                Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
-                Ili2db.setNoSmartMapping(config);
-                config.setFunction(Config.FC_SCHEMAIMPORT);
-                config.setCreateFk(Config.CREATE_FK_YES);
-                config.setTidHandling(Config.TID_HANDLING_PROPERTY);
-                config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
-                config.setIli1Translation("ModelBsimple10=ModelAsimple10;ModelCsimple10=ModelAsimple10");
-                config.setDefaultSrsAuthority("EPSG");
-                config.setDefaultSrsCode("21781");
-                Ili2db.readSettingsFromDb(config);
-                Ili2db.run(config,null);
-                
-                jdbcConnection = setup.createConnection();
-                Statement stmt=jdbcConnection.createStatement();
-                // class[a] is imported
-                Assert.assertTrue(stmt.execute("SELECT t_ili2db_classname.iliname, t_ili2db_classname.sqlname FROM "+setup.prefixName("t_ili2db_classname")+" WHERE t_ili2db_classname.iliname = 'ModelAsimple10.TopicA.ClassA'"));
-                {
-                    ResultSet rs=stmt.getResultSet();
-                    Assert.assertTrue(rs.next());
-                    Assert.assertEquals("classa",rs.getString(2));
-                }
-                // class[b] is NOT imported
-                Assert.assertTrue(stmt.execute("SELECT t_ili2db_classname.iliname FROM "+setup.prefixName("t_ili2db_classname")+" WHERE t_ili2db_classname.iliname = 'ModelBsimple10.TopicB.ClassB'"));
-                {
-                    ResultSet rs=stmt.getResultSet();
-                    Assert.assertFalse(rs.next());
-                }
-                {
-                    // t_ili2db_attrname
-                    String [][] expectedValues=new String[][] {
-                        {"ModelAsimple10.TopicA.ClassA3.geomA",  "geoma", "classa3", null},   
-                        {"ModelAsimple10.TopicA.ClassA2.geomA",   "geoma", "classa2", null},
-                        {"ModelAsimple10.TopicA.ClassA.attrA",    "attra", "classa", null},
-                    };
-                    Ili2dbAssert.assertAttrNameTable(jdbcConnection, expectedValues, setup.getSchema());
-                }
-                {
-                    // t_ili2db_trafo
-                    String [][] expectedValues=new String[][] {
-                        {"ModelAsimple10.TopicA.ClassA",  "ch.ehi.ili2db.inheritance", "newClass"},
-                        {"ModelAsimple10.TopicA.ClassA2", "ch.ehi.ili2db.inheritance", "newClass"},
-                        {"ModelAsimple10.TopicA.ClassA3", "ch.ehi.ili2db.inheritance", "newClass"},
-                        
-                    };
-                    Ili2dbAssert.assertTrafoTable(jdbcConnection,expectedValues, setup.getSchema());
-                }
-                
+                ResultSet rs=stmt.getResultSet();
+                Assert.assertTrue(rs.next());
+                Assert.assertEquals("classa",rs.getString(2));
+            }
+            // class[b] is NOT imported
+            Assert.assertTrue(stmt.execute("SELECT t_ili2db_classname.iliname FROM "+setup.prefixName("t_ili2db_classname")+" WHERE t_ili2db_classname.iliname = 'ModelBsimple10.TopicB.ClassB'"));
+            {
+                ResultSet rs=stmt.getResultSet();
+                Assert.assertFalse(rs.next());
+            }
+            {
+                // t_ili2db_attrname
+                String [][] expectedValues=new String[][] {
+                    {"ModelAsimple10.TopicA.ClassA3.geomA",  "geoma", "classa3", null},   
+                    {"ModelAsimple10.TopicA.ClassA2.geomA",   "geoma", "classa2", null},
+                    {"ModelAsimple10.TopicA.ClassA.attrA",    "attra", "classa", null},
+                };
+                Ili2dbAssert.assertAttrNameTable(jdbcConnection, expectedValues, setup.getSchema());
+            }
+            {
+                // t_ili2db_trafo
+                String [][] expectedValues=new String[][] {
+                    {"ModelAsimple10.TopicA.ClassA",  "ch.ehi.ili2db.inheritance", "newClass"},
+                    {"ModelAsimple10.TopicA.ClassA2", "ch.ehi.ili2db.inheritance", "newClass"},
+                    {"ModelAsimple10.TopicA.ClassA3", "ch.ehi.ili2db.inheritance", "newClass"},
+                    
+                };
+                Ili2dbAssert.assertTrafoTable(jdbcConnection,expectedValues, setup.getSchema());
             }
         }finally{
+            if(stmt!=null) {
+                stmt.close();
+            }
             if(jdbcConnection!=null){
                 jdbcConnection.close();
             }
@@ -387,61 +399,63 @@ public abstract class TranslationTest {
 	@Test
 	public void importIli10lineTable() throws Exception
 	{
+        setup.resetDb();
+        File data=new File(TEST_OUT,"ModelBsimple10.ili");
+        Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+        Ili2db.setNoSmartMapping(config);
+        config.setFunction(Config.FC_SCHEMAIMPORT);
+        config.setCreateFk(Config.CREATE_FK_YES);
+        config.setTidHandling(Config.TID_HANDLING_PROPERTY);
+        config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
+        Ili2db.setSkipPolygonBuilding(config);
+        config.setIli1Translation("ModelBsimple10=ModelAsimple10");
+        config.setDefaultSrsAuthority("EPSG");
+        config.setDefaultSrsCode("21781");
+        Ili2db.readSettingsFromDb(config);
+        Ili2db.run(config,null);
+        
 		Connection jdbcConnection=null;
+        Statement stmt=null;
 		try{
-            setup.resetDb();
-	        {
-				File data=new File(TEST_OUT,"ModelBsimple10.ili");
-				Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
-                Ili2db.setNoSmartMapping(config);
-				config.setFunction(Config.FC_SCHEMAIMPORT);
-				config.setCreateFk(Config.CREATE_FK_YES);
-				config.setTidHandling(Config.TID_HANDLING_PROPERTY);
-				config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
-                Ili2db.setSkipPolygonBuilding(config);
-				config.setIli1Translation("ModelBsimple10=ModelAsimple10");
-	            config.setDefaultSrsAuthority("EPSG");
-	            config.setDefaultSrsCode("21781");
-				Ili2db.readSettingsFromDb(config);
-				Ili2db.run(config,null);
-				
-	            jdbcConnection = setup.createConnection();
-	            Statement stmt=jdbcConnection.createStatement();
-				// class[a2] is imported
-				Assert.assertTrue(stmt.execute("SELECT t_ili2db_classname.iliname, t_ili2db_classname.sqlname FROM "+setup.prefixName("t_ili2db_classname")+" WHERE t_ili2db_classname.iliname = 'ModelAsimple10.TopicA.ClassA2'"));
-				{
-					ResultSet rs=stmt.getResultSet();
-					Assert.assertTrue(rs.next());
-					Assert.assertEquals("classa2",rs.getString(2));
-				}
-				// class[b2] is NOT imported
-				Assert.assertTrue(stmt.execute("SELECT t_ili2db_classname.iliname FROM "+setup.prefixName("t_ili2db_classname")+" WHERE t_ili2db_classname.iliname = 'ModelBsimple10.TopicB.ClassB2'"));
-				{
-					ResultSet rs=stmt.getResultSet();
-					Assert.assertFalse(rs.next());
-				}
-                {
-                    // t_ili2db_attrname
-                    String [][] expectedValues=new String[][] {
-                        {"ModelAsimple10.TopicA.ClassA2.geomA._geom", "_geom", "classa2_geoma", null}, 
-                        {"ModelAsimple10.TopicA.ClassA3.geomA",   "geoma", "classa3", null},   
-                        {"ModelAsimple10.TopicA.ClassA3.geomA._geom", "_geom", "classa3_geoma", null}, 
-                        {"ModelAsimple10.TopicA.ClassA2.geomA._ref", "_ref", "classa2_geoma", null}, 
-                        {"ModelAsimple10.TopicA.ClassA.attrA", "attra", "classa", null}
-                    };
-                    Ili2dbAssert.assertAttrNameTable(jdbcConnection, expectedValues, setup.getSchema());
-                }
-                {
-                    // t_ili2db_trafo
-                    String [][] expectedValues=new String[][] {
-                        {"ModelAsimple10.TopicA.ClassA3", "ch.ehi.ili2db.inheritance", "newClass"},
-                        {"ModelAsimple10.TopicA.ClassA2", "ch.ehi.ili2db.inheritance", "newClass"},
-                        {"ModelAsimple10.TopicA.ClassA",  "ch.ehi.ili2db.inheritance", "newClass"}
-                    };
-                    Ili2dbAssert.assertTrafoTable(jdbcConnection,expectedValues, setup.getSchema());
-                }
-		    }
+            jdbcConnection = setup.createConnection();
+            stmt=jdbcConnection.createStatement();
+            // class[a2] is imported
+            Assert.assertTrue(stmt.execute("SELECT t_ili2db_classname.iliname, t_ili2db_classname.sqlname FROM "+setup.prefixName("t_ili2db_classname")+" WHERE t_ili2db_classname.iliname = 'ModelAsimple10.TopicA.ClassA2'"));
+            {
+                ResultSet rs=stmt.getResultSet();
+                Assert.assertTrue(rs.next());
+                Assert.assertEquals("classa2",rs.getString(2));
+            }
+            // class[b2] is NOT imported
+            Assert.assertTrue(stmt.execute("SELECT t_ili2db_classname.iliname FROM "+setup.prefixName("t_ili2db_classname")+" WHERE t_ili2db_classname.iliname = 'ModelBsimple10.TopicB.ClassB2'"));
+            {
+                ResultSet rs=stmt.getResultSet();
+                Assert.assertFalse(rs.next());
+            }
+            {
+                // t_ili2db_attrname
+                String [][] expectedValues=new String[][] {
+                    {"ModelAsimple10.TopicA.ClassA2.geomA._geom", "_geom", "classa2_geoma", null}, 
+                    {"ModelAsimple10.TopicA.ClassA3.geomA",   "geoma", "classa3", null},   
+                    {"ModelAsimple10.TopicA.ClassA3.geomA._geom", "_geom", "classa3_geoma", null}, 
+                    {"ModelAsimple10.TopicA.ClassA2.geomA._ref", "_ref", "classa2_geoma", null}, 
+                    {"ModelAsimple10.TopicA.ClassA.attrA", "attra", "classa", null}
+                };
+                Ili2dbAssert.assertAttrNameTable(jdbcConnection, expectedValues, setup.getSchema());
+            }
+            {
+                // t_ili2db_trafo
+                String [][] expectedValues=new String[][] {
+                    {"ModelAsimple10.TopicA.ClassA3", "ch.ehi.ili2db.inheritance", "newClass"},
+                    {"ModelAsimple10.TopicA.ClassA2", "ch.ehi.ili2db.inheritance", "newClass"},
+                    {"ModelAsimple10.TopicA.ClassA",  "ch.ehi.ili2db.inheritance", "newClass"}
+                };
+                Ili2dbAssert.assertTrafoTable(jdbcConnection,expectedValues, setup.getSchema());
+            }
 		}finally{
+		    if(stmt!=null) {
+		        stmt.close();
+		    }
 			if(jdbcConnection!=null){
 				jdbcConnection.close();
 			}
@@ -451,65 +465,68 @@ public abstract class TranslationTest {
 	@Test
 	public void importXtf23() throws Exception
 	{
+        setup.resetDb();
+        {
+            File data=new File(TEST_OUT,"EnumOka.xtf");
+            Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+            Ili2db.setNoSmartMapping(config);
+            config.setFunction(Config.FC_IMPORT);
+            config.setDoImplicitSchemaImport(true);
+            config.setCreateFk(Config.CREATE_FK_YES);
+            config.setImportBid(true);
+            config.setImportTid(true);
+            config.setTidHandling(Config.TID_HANDLING_PROPERTY);
+            config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
+            config.setVer3_translation(false);
+            config.setDatasetName("EnumOka");
+            Ili2db.readSettingsFromDb(config);
+            Ili2db.run(config,null);
+        }
+        {
+            File data=new File(TEST_OUT,"EnumOkb.xtf");
+            Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+            Ili2db.setNoSmartMapping(config);
+            config.setFunction(Config.FC_IMPORT);
+            config.setImportBid(true);
+            config.setImportTid(true);
+            config.setDatasetName("EnumOkb");
+            Ili2db.readSettingsFromDb(config);
+            Ili2db.run(config,null);
+        }
+        
 		Connection jdbcConnection=null;
+        Statement stmt=null;
 		try{
-            setup.resetDb();
             jdbcConnection = setup.createConnection();
-            Statement stmt=jdbcConnection.createStatement();
-	        {
-	    		File data=new File(TEST_OUT,"EnumOka.xtf");
-	    		Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
-	            Ili2db.setNoSmartMapping(config);
-	    		config.setFunction(Config.FC_IMPORT);
-	            config.setDoImplicitSchemaImport(true);
-	    		config.setCreateFk(Config.CREATE_FK_YES);
-                config.setImportBid(true);
-                config.setImportTid(true);
-	    		config.setTidHandling(Config.TID_HANDLING_PROPERTY);
-	    		config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
-	    		config.setVer3_translation(false);
-	    		config.setDatasetName("EnumOka");
-	    		Ili2db.readSettingsFromDb(config);
-	    		Ili2db.run(config,null);
-	        }
+            stmt=jdbcConnection.createStatement();
+            // tid's of class[a]
+            HashSet<String> expectedTids= new HashSet<String>(Arrays.asList(new String[]{"o1","o2","x1","x2"}));
+            Assert.assertTrue(stmt.execute("SELECT t_id, t_ili_tid FROM "+setup.prefixName("classx")));
             {
-                File data=new File(TEST_OUT,"EnumOkb.xtf");
-                Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
-                Ili2db.setNoSmartMapping(config);
-                config.setFunction(Config.FC_IMPORT);
-                config.setImportBid(true);
-                config.setImportTid(true);
-                config.setDatasetName("EnumOkb");
-                Ili2db.readSettingsFromDb(config);
-                Ili2db.run(config,null);
+                ResultSet rs=stmt.getResultSet();
+                while(!expectedTids.isEmpty()) {
+                    Assert.assertTrue(rs.next());
+                    String tid=rs.getString(2);
+                    assertTrue(expectedTids.remove(tid));
+                }
+                Assert.assertFalse(rs.next());
             }
-	        {
-	    		// tid's of class[a]
-	    		HashSet<String> expectedTids= new HashSet<String>(Arrays.asList(new String[]{"o1","o2","x1","x2"}));
-				Assert.assertTrue(stmt.execute("SELECT t_id, t_ili_tid FROM "+setup.prefixName("classx")));
-				{
-					ResultSet rs=stmt.getResultSet();
-					while(!expectedTids.isEmpty()) {
-	                    Assert.assertTrue(rs.next());
-	                    String tid=rs.getString(2);
-					    assertTrue(expectedTids.remove(tid));
-					}
-                    Assert.assertFalse(rs.next());
-				}
-				Assert.assertTrue(stmt.execute("SELECT t_ili2db_basket.t_id, t_ili2db_basket.topic FROM "+setup.prefixName("t_ili2db_basket")+" WHERE t_ili2db_basket.t_ili_tid = 'EnumOkA.Test1'"));
-				{
-					ResultSet rs=stmt.getResultSet();
-					Assert.assertTrue(rs.next());
-					Assert.assertEquals("EnumOkA.TopicA",rs.getString(2));
-				}
-				Assert.assertTrue(stmt.execute("SELECT t_ili2db_basket.t_id, t_ili2db_basket.topic FROM "+setup.prefixName("t_ili2db_basket")+" WHERE t_ili2db_basket.t_ili_tid = 'EnumOkB.Test1'"));
-				{
-					ResultSet rs=stmt.getResultSet();
-					Assert.assertTrue(rs.next());
-					Assert.assertEquals("EnumOkB.TopicB",rs.getString(2));
-				}
-	        }
+            Assert.assertTrue(stmt.execute("SELECT t_ili2db_basket.t_id, t_ili2db_basket.topic FROM "+setup.prefixName("t_ili2db_basket")+" WHERE t_ili2db_basket.t_ili_tid = 'EnumOkA.Test1'"));
+            {
+                ResultSet rs=stmt.getResultSet();
+                Assert.assertTrue(rs.next());
+                Assert.assertEquals("EnumOkA.TopicA",rs.getString(2));
+            }
+            Assert.assertTrue(stmt.execute("SELECT t_ili2db_basket.t_id, t_ili2db_basket.topic FROM "+setup.prefixName("t_ili2db_basket")+" WHERE t_ili2db_basket.t_ili_tid = 'EnumOkB.Test1'"));
+            {
+                ResultSet rs=stmt.getResultSet();
+                Assert.assertTrue(rs.next());
+                Assert.assertEquals("EnumOkB.TopicB",rs.getString(2));
+            }
 		}finally{
+		    if(stmt!=null) {
+		        stmt.close();
+		    }
 			if(jdbcConnection!=null){
 				jdbcConnection.close();
 			}
@@ -521,21 +538,25 @@ public abstract class TranslationTest {
         {
             importIli23assocref();
         }
+        {
+            File data=new File(TEST_OUT,"assoc_root2root_Ok.xtf");
+            Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+            config.setFunction(Config.FC_IMPORT);
+            config.setImportBid(true);
+            config.setImportTid(true);
+            config.setDatasetName("assoc");
+            Ili2db.readSettingsFromDb(config);
+            Ili2db.run(config,null);
+        }
         Connection jdbcConnection=null;
+        Statement stmt=null;
         try{
             jdbcConnection = setup.createConnection();
-            Statement stmt=jdbcConnection.createStatement();
-            {
-                File data=new File(TEST_OUT,"assoc_root2root_Ok.xtf");
-                Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
-                config.setFunction(Config.FC_IMPORT);
-                config.setImportBid(true);
-                config.setImportTid(true);
-                config.setDatasetName("assoc");
-                Ili2db.readSettingsFromDb(config);
-                Ili2db.run(config,null);
-            }
+            stmt=jdbcConnection.createStatement();
         }finally{
+            if(stmt!=null) {
+                stmt.close();
+            }
             if(jdbcConnection!=null){
                 jdbcConnection.close();
             }
@@ -547,21 +568,25 @@ public abstract class TranslationTest {
         {
             importIli23assocref();
         }
+        {
+            File data=new File(TEST_OUT,"assoc_root2translated_Ok.xtf");
+            Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+            config.setFunction(Config.FC_IMPORT);
+            config.setImportBid(true);
+            config.setImportTid(true);
+            config.setDatasetName("assoc");
+            Ili2db.readSettingsFromDb(config);
+            Ili2db.run(config,null);
+        }
         Connection jdbcConnection=null;
+        Statement stmt=null;
         try{
             jdbcConnection = setup.createConnection();
-            Statement stmt=jdbcConnection.createStatement();
-            {
-                File data=new File(TEST_OUT,"assoc_root2translated_Ok.xtf");
-                Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
-                config.setFunction(Config.FC_IMPORT);
-                config.setImportBid(true);
-                config.setImportTid(true);
-                config.setDatasetName("assoc");
-                Ili2db.readSettingsFromDb(config);
-                Ili2db.run(config,null);
-            }
+            stmt=jdbcConnection.createStatement();
         }finally{
+            if(stmt!=null) {
+                stmt.close();
+            }
             if(jdbcConnection!=null){
                 jdbcConnection.close();
             }
@@ -573,21 +598,25 @@ public abstract class TranslationTest {
         {
             importIli23assocref();
         }
+        {
+            File data=new File(TEST_OUT,"assoc_translated2translated_Ok.xtf");
+            Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+            config.setFunction(Config.FC_IMPORT);
+            config.setImportBid(true);
+            config.setImportTid(true);
+            config.setDatasetName("assoc");
+            Ili2db.readSettingsFromDb(config);
+            Ili2db.run(config,null);
+        }
         Connection jdbcConnection=null;
+        Statement stmt=null;
         try{
             jdbcConnection = setup.createConnection();
-            Statement stmt=jdbcConnection.createStatement();
-            {
-                File data=new File(TEST_OUT,"assoc_translated2translated_Ok.xtf");
-                Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
-                config.setFunction(Config.FC_IMPORT);
-                config.setImportBid(true);
-                config.setImportTid(true);
-                config.setDatasetName("assoc");
-                Ili2db.readSettingsFromDb(config);
-                Ili2db.run(config,null);
-            }
+            stmt=jdbcConnection.createStatement();
         }finally{
+            if(stmt!=null) {
+                stmt.close();
+            }
             if(jdbcConnection!=null){
                 jdbcConnection.close();
             }
@@ -599,21 +628,25 @@ public abstract class TranslationTest {
         {
             importIli23assocref();
         }
+        {
+            File data=new File(TEST_OUT,"assoc_translated2root_Ok.xtf");
+            Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+            config.setFunction(Config.FC_IMPORT);
+            config.setImportBid(true);
+            config.setImportTid(true);
+            config.setDatasetName("assoc");
+            Ili2db.readSettingsFromDb(config);
+            Ili2db.run(config,null);
+        }
         Connection jdbcConnection=null;
+        Statement stmt=null;
         try{
             jdbcConnection = setup.createConnection();
-            Statement stmt=jdbcConnection.createStatement();
-            {
-                File data=new File(TEST_OUT,"assoc_translated2root_Ok.xtf");
-                Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
-                config.setFunction(Config.FC_IMPORT);
-                config.setImportBid(true);
-                config.setImportTid(true);
-                config.setDatasetName("assoc");
-                Ili2db.readSettingsFromDb(config);
-                Ili2db.run(config,null);
-            }
+            stmt=jdbcConnection.createStatement();
         }finally{
+            if(stmt!=null) {
+                stmt.close();
+            }
             if(jdbcConnection!=null){
                 jdbcConnection.close();
             }
@@ -625,25 +658,16 @@ public abstract class TranslationTest {
         {
             importIli23assocref();
         }
-        Connection jdbcConnection=null;
-        try{
-            jdbcConnection = setup.createConnection();
-            Statement stmt=jdbcConnection.createStatement();
-            {
-                File data=new File(TEST_OUT,"refattr_root2root_Ok.xtf");
-                Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
-                config.setFunction(Config.FC_IMPORT);
-                config.setImportBid(true);
-                config.setImportTid(true);
-                config.setDatasetName("assoc");
-                Ili2db.readSettingsFromDb(config);
-                Ili2db.run(config,null);
-            }
-        }finally{
-            if(jdbcConnection!=null){
-                jdbcConnection.close();
-            }
-        }   
+        {
+            File data=new File(TEST_OUT,"refattr_root2root_Ok.xtf");
+            Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+            config.setFunction(Config.FC_IMPORT);
+            config.setImportBid(true);
+            config.setImportTid(true);
+            config.setDatasetName("assoc");
+            Ili2db.readSettingsFromDb(config);
+            Ili2db.run(config,null);
+        }
     }
     @Test
     public void importXtf23refattr_root2translated() throws Exception
@@ -651,25 +675,16 @@ public abstract class TranslationTest {
         {
             importIli23assocref();
         }
-        Connection jdbcConnection=null;
-        try{
-            jdbcConnection = setup.createConnection();
-            Statement stmt=jdbcConnection.createStatement();
-            {
-                File data=new File(TEST_OUT,"refattr_root2translated_Ok.xtf");
-                Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
-                config.setFunction(Config.FC_IMPORT);
-                config.setImportBid(true);
-                config.setImportTid(true);
-                config.setDatasetName("assoc");
-                Ili2db.readSettingsFromDb(config);
-                Ili2db.run(config,null);
-            }
-        }finally{
-            if(jdbcConnection!=null){
-                jdbcConnection.close();
-            }
-        }   
+        {
+            File data=new File(TEST_OUT,"refattr_root2translated_Ok.xtf");
+            Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+            config.setFunction(Config.FC_IMPORT);
+            config.setImportBid(true);
+            config.setImportTid(true);
+            config.setDatasetName("assoc");
+            Ili2db.readSettingsFromDb(config);
+            Ili2db.run(config,null);
+        }
     }
     @Test
     public void importXtf23refattr_translated2translated() throws Exception
@@ -677,25 +692,16 @@ public abstract class TranslationTest {
         {
             importIli23assocref();
         }
-        Connection jdbcConnection=null;
-        try{
-            jdbcConnection = setup.createConnection();
-            Statement stmt=jdbcConnection.createStatement();
-            {
-                File data=new File(TEST_OUT,"refattr_translated2translated_Ok.xtf");
-                Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
-                config.setFunction(Config.FC_IMPORT);
-                config.setImportBid(true);
-                config.setImportTid(true);
-                config.setDatasetName("assoc");
-                Ili2db.readSettingsFromDb(config);
-                Ili2db.run(config,null);
-            }
-        }finally{
-            if(jdbcConnection!=null){
-                jdbcConnection.close();
-            }
-        }   
+        {
+            File data=new File(TEST_OUT,"refattr_translated2translated_Ok.xtf");
+            Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+            config.setFunction(Config.FC_IMPORT);
+            config.setImportBid(true);
+            config.setImportTid(true);
+            config.setDatasetName("assoc");
+            Ili2db.readSettingsFromDb(config);
+            Ili2db.run(config,null);
+        }
     }
     @Test
     public void importXtf23refattr_translated2root() throws Exception
@@ -703,25 +709,16 @@ public abstract class TranslationTest {
         {
             importIli23assocref();
         }
-        Connection jdbcConnection=null;
-        try{
-            jdbcConnection = setup.createConnection();
-            Statement stmt=jdbcConnection.createStatement();
-            {
-                File data=new File(TEST_OUT,"refattr_translated2root_Ok.xtf");
-                Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
-                config.setFunction(Config.FC_IMPORT);
-                config.setImportBid(true);
-                config.setImportTid(true);
-                config.setDatasetName("assoc");
-                Ili2db.readSettingsFromDb(config);
-                Ili2db.run(config,null);
-            }
-        }finally{
-            if(jdbcConnection!=null){
-                jdbcConnection.close();
-            }
-        }   
+        {
+            File data=new File(TEST_OUT,"refattr_translated2root_Ok.xtf");
+            Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+            config.setFunction(Config.FC_IMPORT);
+            config.setImportBid(true);
+            config.setImportTid(true);
+            config.setDatasetName("assoc");
+            Ili2db.readSettingsFromDb(config);
+            Ili2db.run(config,null);
+        }
     }
     @Test
     public void importXtf23schemaDE_IT() throws Exception
@@ -729,30 +726,31 @@ public abstract class TranslationTest {
         {
             importIli23schemaDE_IT();
         }
+        {
+            File data=new File(TEST_OUT,"EnumOka.xtf");
+            Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+            config.setFunction(Config.FC_IMPORT);
+            config.setImportBid(true);
+            config.setImportTid(true);
+            config.setDatasetName("EnumOka");
+            Ili2db.readSettingsFromDb(config);
+            Ili2db.run(config,null);
+        }
+        {
+            File data=new File(TEST_OUT,"EnumOkb.xtf");
+            Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+            config.setFunction(Config.FC_IMPORT);
+            config.setImportBid(true);
+            config.setImportTid(true);
+            config.setDatasetName("EnumOkb");
+            Ili2db.readSettingsFromDb(config);
+            Ili2db.run(config,null);
+        }
         Connection jdbcConnection=null;
+        Statement stmt=null;
         try{
             jdbcConnection = setup.createConnection();
-            Statement stmt=jdbcConnection.createStatement();
-            {
-                File data=new File(TEST_OUT,"EnumOka.xtf");
-                Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
-                config.setFunction(Config.FC_IMPORT);
-                config.setImportBid(true);
-                config.setImportTid(true);
-                config.setDatasetName("EnumOka");
-                Ili2db.readSettingsFromDb(config);
-                Ili2db.run(config,null);
-            }
-            {
-                File data=new File(TEST_OUT,"EnumOkb.xtf");
-                Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
-                config.setFunction(Config.FC_IMPORT);
-                config.setImportBid(true);
-                config.setImportTid(true);
-                config.setDatasetName("EnumOkb");
-                Ili2db.readSettingsFromDb(config);
-                Ili2db.run(config,null);
-            }
+            stmt=jdbcConnection.createStatement();
             {
                 // tid's of class[a]
                 HashSet<String> expectedTids= new HashSet<String>(Arrays.asList(new String[]{"o1","o2","x1","x2"}));
@@ -794,6 +792,9 @@ public abstract class TranslationTest {
                 }
             }
         }finally{
+            if(stmt!=null) {
+                stmt.close();
+            }
             if(jdbcConnection!=null){
                 jdbcConnection.close();
             }
@@ -803,22 +804,21 @@ public abstract class TranslationTest {
 	@Test
 	public void exportXtf23Original() throws Exception
 	{
-		Connection jdbcConnection=null;
 		{
 			importXtf23();
 		}
-		try{
-            jdbcConnection = setup.createConnection();
-	        Statement stmt=jdbcConnection.createStatement();
-			
-			//EhiLogger.getInstance().setTraceFilter(false);
-			File data=new File(TEST_OUT,"EnumOka-out.xtf");
-			Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
-			config.setFunction(Config.FC_EXPORT);
-			config.setExportTid(true);
+        File data=new File(TEST_OUT,"EnumOka-out.xtf");
+		{
+            //EhiLogger.getInstance().setTraceFilter(false);
+            Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+            config.setFunction(Config.FC_EXPORT);
+            config.setExportTid(true);
             config.setBaskets("EnumOkA.Test1;EnumOkB.Test1");
-			Ili2db.readSettingsFromDb(config);
-			Ili2db.run(config,null);
+            Ili2db.readSettingsFromDb(config);
+            Ili2db.run(config,null);
+		}
+		try{
+			
 			
 			HashMap<String,IomObject> objs=new HashMap<String,IomObject>();
 			XtfReader reader=new XtfReader(data);
@@ -902,23 +902,15 @@ public abstract class TranslationTest {
                  Assert.assertEquals("EnumOkB.TopicB.n_nB", obj0.getobjecttag());
              }
 		}finally{
-			if(jdbcConnection!=null){
-				jdbcConnection.close();
-			}
 		}
 	}
     @Test
     public void deleteXtf23BasketA() throws Exception
     {
-        Connection jdbcConnection=null;
-        ResultSet rs=null;
         {
             importXtf23();
         }
-        try{
-            jdbcConnection = setup.createConnection();
-            Statement stmt=jdbcConnection.createStatement();
-            
+        {
             //EhiLogger.getInstance().setTraceFilter(false);
             File data=new File(TEST_OUT,"EnumOka-out.xtf");
             Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
@@ -926,7 +918,13 @@ public abstract class TranslationTest {
             config.setDatasetName("EnumOka");
             Ili2db.readSettingsFromDb(config);
             Ili2db.run(config,null);
-
+        }
+        Connection jdbcConnection=null;
+        Statement stmt=null;
+        ResultSet rs=null;
+        try{
+            jdbcConnection = setup.createConnection();
+            stmt=jdbcConnection.createStatement();
             // tid's of class[a]
             HashSet<String> expectedTids= new HashSet<String>(Arrays.asList(new String[]{ //"o1","o2",
                                                                                             "x1","x2"}));
@@ -943,6 +941,12 @@ public abstract class TranslationTest {
             }
             
         }finally{
+            if(rs!=null) {
+                rs.close();
+            }
+            if(stmt!=null) {
+                stmt.close();
+            }
             if(jdbcConnection!=null){
                 jdbcConnection.close();
             }
@@ -951,15 +955,10 @@ public abstract class TranslationTest {
     @Test
     public void deleteXtf23BasketB() throws Exception
     {
-        Connection jdbcConnection=null;
-        ResultSet rs=null;
         {
             importXtf23();
         }
-        try{
-            jdbcConnection = setup.createConnection();
-            Statement stmt=jdbcConnection.createStatement();
-            
+        {
             //EhiLogger.getInstance().setTraceFilter(false);
             File data=new File(TEST_OUT,"EnumOka-out.xtf");
             Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
@@ -967,6 +966,14 @@ public abstract class TranslationTest {
             config.setDatasetName("EnumOkb");
             Ili2db.readSettingsFromDb(config);
             Ili2db.run(config,null);
+        }
+        Connection jdbcConnection=null;
+        ResultSet rs=null;
+        Statement stmt=null;
+        try{
+            jdbcConnection = setup.createConnection();
+            stmt=jdbcConnection.createStatement();
+            
 
             // tid's of class[a]
             HashSet<String> expectedTids= new HashSet<String>(Arrays.asList(new String[]{ "o1","o2",
@@ -985,6 +992,12 @@ public abstract class TranslationTest {
             }
             
         }finally{
+            if(rs!=null) {
+                rs.close();
+            }
+            if(stmt!=null) {
+                stmt.close();
+            }
             if(jdbcConnection!=null){
                 jdbcConnection.close();
             }
@@ -993,23 +1006,20 @@ public abstract class TranslationTest {
     @Test
     public void exportXtf23schemaDE_IT_Original() throws Exception
     {
-        Connection jdbcConnection=null;
         {
             importXtf23schemaDE_IT();
         }
-        try{
-            jdbcConnection = setup.createConnection();
-            Statement stmt=jdbcConnection.createStatement();
-            
+        File data=new File(TEST_OUT,"EnumOka-out.xtf");
+        {
             //EhiLogger.getInstance().setTraceFilter(false);
-            File data=new File(TEST_OUT,"EnumOka-out.xtf");
             Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
             config.setFunction(Config.FC_EXPORT);
             config.setExportTid(true);
             config.setBaskets("EnumOkA.Test1;EnumOkB.Test1");
             Ili2db.readSettingsFromDb(config);
             Ili2db.run(config,null);
-            
+        }
+        try{
             HashMap<String,IomObject> objs=new HashMap<String,IomObject>();
             XtfReader reader=new XtfReader(data);
             IoxEvent event=null;
@@ -1082,9 +1092,6 @@ public abstract class TranslationTest {
                  Assert.assertEquals("EnumOkB.TopicB.n_nB", obj0.getobjecttag());
              }
         }finally{
-            if(jdbcConnection!=null){
-                jdbcConnection.close();
-            }
         }
     }
     private String getOid(IomObject iomObj) {
@@ -1126,16 +1133,12 @@ public abstract class TranslationTest {
     @Test
     public void exportXtf23Translated() throws Exception
     {
-        Connection jdbcConnection=null;
         {
             importXtf23();
         }
-        try{
-            jdbcConnection = setup.createConnection();
-            Statement stmt=jdbcConnection.createStatement();
-            
+        File data=new File(TEST_OUT,"EnumOka-out.xtf");
+        {
             //EhiLogger.getInstance().setTraceFilter(false);
-            File data=new File(TEST_OUT,"EnumOka-out.xtf");
             Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
             config.setFunction(Config.FC_EXPORT);
             config.setExportTid(true);
@@ -1143,6 +1146,9 @@ public abstract class TranslationTest {
             config.setExportModels("EnumOkB");
             Ili2db.readSettingsFromDb(config);
             Ili2db.run(config,null);
+        }
+        try{
+            
             
             HashMap<String,IomObject> objs=new HashMap<String,IomObject>();
             XtfReader reader=new XtfReader(data);
@@ -1220,24 +1226,17 @@ public abstract class TranslationTest {
                  Assert.assertEquals("EnumOkB.TopicB.n_nB", obj0.getobjecttag());
              }
         }finally{
-            if(jdbcConnection!=null){
-                jdbcConnection.close();
-            }
         }
     }
     @Test
     public void exportXtf23schemaDE_IT_Translated() throws Exception
     {
-        Connection jdbcConnection=null;
         {
             importXtf23schemaDE_IT();
         }
-        try{
-            jdbcConnection = setup.createConnection();
-            Statement stmt=jdbcConnection.createStatement();
-            
+        File data=new File(TEST_OUT,"EnumOka-out.xtf");
+        {
             //EhiLogger.getInstance().setTraceFilter(false);
-            File data=new File(TEST_OUT,"EnumOka-out.xtf");
             Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
             config.setFunction(Config.FC_EXPORT);
             config.setExportTid(true);
@@ -1245,6 +1244,9 @@ public abstract class TranslationTest {
             config.setExportModels("EnumOkB");
             Ili2db.readSettingsFromDb(config);
             Ili2db.run(config,null);
+        }
+        try{
+            
             
             HashMap<String,IomObject> objs=new HashMap<String,IomObject>();
             XtfReader reader=new XtfReader(data);
@@ -1314,24 +1316,17 @@ public abstract class TranslationTest {
                  Assert.assertEquals("EnumOkB.TopicB.n_nB", obj0.getobjecttag());
              }
         }finally{
-            if(jdbcConnection!=null){
-                jdbcConnection.close();
-            }
         }
     }
     @Test
     public void exportXtf23OriginLang() throws Exception
     {
-        Connection jdbcConnection=null;
         {
             importXtf23();
         }
-        try{
-            jdbcConnection = setup.createConnection();
-            Statement stmt=jdbcConnection.createStatement();
-            
+        File data=new File(TEST_OUT,"EnumOka-out.xtf");
+        {
             //EhiLogger.getInstance().setTraceFilter(false);
-            File data=new File(TEST_OUT,"EnumOka-out.xtf");
             Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
             config.setFunction(Config.FC_EXPORT);
             config.setExportTid(true);
@@ -1339,6 +1334,10 @@ public abstract class TranslationTest {
             config.setExportModels("EnumOkA");
             Ili2db.readSettingsFromDb(config);
             Ili2db.run(config,null);
+            
+        }
+        try{
+            
             
             HashMap<String,IomObject> objs=new HashMap<String,IomObject>();
             XtfReader reader=new XtfReader(data);
@@ -1416,24 +1415,17 @@ public abstract class TranslationTest {
                  Assert.assertEquals("EnumOkA.TopicA.n_nA", obj0.getobjecttag());
              }
         }finally{
-            if(jdbcConnection!=null){
-                jdbcConnection.close();
-            }
         }
     }
     @Test
     public void exportXtf23schemaDE_IT_OriginLang() throws Exception
     {
-        Connection jdbcConnection=null;
         {
             importXtf23schemaDE_IT();
         }
-        try{
-            jdbcConnection = setup.createConnection();
-            Statement stmt=jdbcConnection.createStatement();
-            
+        File data=new File(TEST_OUT,"EnumOka-out.xtf");
+        {
             //EhiLogger.getInstance().setTraceFilter(false);
-            File data=new File(TEST_OUT,"EnumOka-out.xtf");
             Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
             config.setFunction(Config.FC_EXPORT);
             config.setExportTid(true);
@@ -1441,6 +1433,8 @@ public abstract class TranslationTest {
             config.setExportModels("EnumOkA");
             Ili2db.readSettingsFromDb(config);
             Ili2db.run(config,null);
+        }
+        try{
             
             HashMap<String,IomObject> objs=new HashMap<String,IomObject>();
             XtfReader reader=new XtfReader(data);
@@ -1510,48 +1504,46 @@ public abstract class TranslationTest {
                  Assert.assertEquals("EnumOkA.TopicA.n_nA", obj0.getobjecttag());
              }
         }finally{
-            if(jdbcConnection!=null){
-                jdbcConnection.close();
-            }
         }
     }
 	
 	@Test
 	public void importItf10() throws Exception
 	{
+        setup.resetDb();
+        {
+            File data=new File(TEST_OUT,"ModelAsimple10a.itf");
+            Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+            Ili2db.setNoSmartMapping(config);
+            config.setFunction(Config.FC_IMPORT);
+            config.setDoImplicitSchemaImport(true);
+            config.setCreateFk(Config.CREATE_FK_YES);
+            config.setTidHandling(Config.TID_HANDLING_PROPERTY);
+            config.setImportTid(true);
+            config.setImportBid(true);
+            config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
+            config.setIli1Translation("ModelBsimple10=ModelAsimple10");
+            config.setDatasetName("ModelAsimple10");
+            config.setDefaultSrsAuthority("EPSG");
+            config.setDefaultSrsCode("21781");
+            Ili2db.readSettingsFromDb(config);
+            Ili2db.run(config,null);
+        }
+        {
+            File data=new File(TEST_OUT,"ModelBsimple10a.itf");
+            Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+            config.setFunction(Config.FC_IMPORT);
+            config.setImportTid(true);
+            config.setImportBid(true);
+            config.setDatasetName("ModelBsimple10");
+            Ili2db.readSettingsFromDb(config);
+            Ili2db.run(config,null);
+        }
 		Connection jdbcConnection=null;
+        Statement stmt=null;
 		try{
-            setup.resetDb();
-	        {
-	    		File data=new File(TEST_OUT,"ModelAsimple10a.itf");
-	    		Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
-                Ili2db.setNoSmartMapping(config);
-	    		config.setFunction(Config.FC_IMPORT);
-	            config.setDoImplicitSchemaImport(true);
-	    		config.setCreateFk(Config.CREATE_FK_YES);
-	    		config.setTidHandling(Config.TID_HANDLING_PROPERTY);
-	    		config.setImportTid(true);
-	    		config.setImportBid(true);
-	    		config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
-	    		config.setIli1Translation("ModelBsimple10=ModelAsimple10");
-	    		config.setDatasetName("ModelAsimple10");
-	            config.setDefaultSrsAuthority("EPSG");
-	            config.setDefaultSrsCode("21781");
-	    		Ili2db.readSettingsFromDb(config);
-	    		Ili2db.run(config,null);
-	        }
-	        {
-	        	File data=new File(TEST_OUT,"ModelBsimple10a.itf");
-	    		Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
-	    		config.setFunction(Config.FC_IMPORT);
-                config.setImportTid(true);
-                config.setImportBid(true);
-	    		config.setDatasetName("ModelBsimple10");
-	    		Ili2db.readSettingsFromDb(config);
-	    		Ili2db.run(config,null);
-	        }
             jdbcConnection = setup.createConnection();
-            Statement stmt=jdbcConnection.createStatement();
+            stmt=jdbcConnection.createStatement();
     		// tid's of class[a]
 			Assert.assertTrue(stmt.execute("SELECT classa.attra FROM "+setup.prefixName("classa")));
 			{
@@ -1573,6 +1565,9 @@ public abstract class TranslationTest {
 				Assert.assertEquals("ModelBsimple10.TopicB",rs.getString(2));
 			}
 		}finally{
+		    if(stmt!=null) {
+		        stmt.close();
+		    }
 			if(jdbcConnection!=null){
 				jdbcConnection.close();
 			}
@@ -1581,49 +1576,51 @@ public abstract class TranslationTest {
     @Test
     public void importItf10Multi() throws Exception
     {
+        setup.resetDb();
+        {
+            File data=new File(TEST_OUT,"ModelAsimple10a.itf");
+            Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+            Ili2db.setNoSmartMapping(config);
+            config.setFunction(Config.FC_IMPORT);
+            config.setDoImplicitSchemaImport(true);
+            config.setCreateFk(Config.CREATE_FK_YES);
+            config.setTidHandling(Config.TID_HANDLING_PROPERTY);
+            config.setImportTid(true);
+            config.setImportBid(true);
+            config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
+            config.setIli1Translation("ModelBsimple10=ModelAsimple10;ModelCsimple10=ModelAsimple10");
+            config.setDatasetName("ModelAsimple10");
+            config.setDefaultSrsAuthority("EPSG");
+            config.setDefaultSrsCode("21781");
+            Ili2db.readSettingsFromDb(config);
+            Ili2db.run(config,null);
+        }
+        {
+            File data=new File(TEST_OUT,"ModelBsimple10a.itf");
+            Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+            config.setFunction(Config.FC_IMPORT);
+            config.setImportTid(true);
+            config.setImportBid(true);
+            config.setDatasetName("ModelBsimple10");
+            Ili2db.readSettingsFromDb(config);
+            Ili2db.run(config,null);
+        }
+        {
+            File data=new File(TEST_OUT,"ModelCsimple10a.itf");
+            Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+            config.setFunction(Config.FC_IMPORT);
+            config.setImportTid(true);
+            config.setImportBid(true);
+            config.setDatasetName("ModelCsimple10");
+            Ili2db.readSettingsFromDb(config);
+            Ili2db.run(config,null);
+        }
+        
         Connection jdbcConnection=null;
+        Statement stmt=null;
         try{
-            setup.resetDb();
-            {
-                File data=new File(TEST_OUT,"ModelAsimple10a.itf");
-                Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
-                Ili2db.setNoSmartMapping(config);
-                config.setFunction(Config.FC_IMPORT);
-                config.setDoImplicitSchemaImport(true);
-                config.setCreateFk(Config.CREATE_FK_YES);
-                config.setTidHandling(Config.TID_HANDLING_PROPERTY);
-                config.setImportTid(true);
-                config.setImportBid(true);
-                config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
-                config.setIli1Translation("ModelBsimple10=ModelAsimple10;ModelCsimple10=ModelAsimple10");
-                config.setDatasetName("ModelAsimple10");
-                config.setDefaultSrsAuthority("EPSG");
-                config.setDefaultSrsCode("21781");
-                Ili2db.readSettingsFromDb(config);
-                Ili2db.run(config,null);
-            }
-            {
-                File data=new File(TEST_OUT,"ModelBsimple10a.itf");
-                Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
-                config.setFunction(Config.FC_IMPORT);
-                config.setImportTid(true);
-                config.setImportBid(true);
-                config.setDatasetName("ModelBsimple10");
-                Ili2db.readSettingsFromDb(config);
-                Ili2db.run(config,null);
-            }
-            {
-                File data=new File(TEST_OUT,"ModelCsimple10a.itf");
-                Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
-                config.setFunction(Config.FC_IMPORT);
-                config.setImportTid(true);
-                config.setImportBid(true);
-                config.setDatasetName("ModelCsimple10");
-                Ili2db.readSettingsFromDb(config);
-                Ili2db.run(config,null);
-            }
             jdbcConnection = setup.createConnection();
-            Statement stmt=jdbcConnection.createStatement();
+            stmt=jdbcConnection.createStatement();
             // tid's of class[a]
             Assert.assertTrue(stmt.execute("SELECT classa.attra FROM "+setup.prefixName("classa")));
             {
@@ -1651,6 +1648,9 @@ public abstract class TranslationTest {
                 Assert.assertEquals("ModelCsimple10.TopicC",rs.getString(2));
             }
         }finally{
+            if(stmt!=null) {
+                stmt.close();
+            }
             if(jdbcConnection!=null){
                 jdbcConnection.close();
             }
@@ -1663,16 +1663,28 @@ public abstract class TranslationTest {
 		{
 			importItf10();
 		}
+
+        File data=new File(TEST_OUT,"ModelAsimple10a-out.itf");
+		{
+            Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+            config.setFunction(Config.FC_EXPORT);
+            config.setExportTid(true);
+            config.setDatasetName("ModelAsimple10");
+            Ili2db.readSettingsFromDb(config);
+            Ili2db.run(config,null);
+		}
+        File data2=new File(TEST_OUT,"ModelBsimple10a-out.itf");
+		{
+            Config config=setup.initConfig(data2.getPath(),data2.getPath()+".log");
+            config.setFunction(Config.FC_EXPORT);
+            config.setExportTid(true);
+            config.setDatasetName("ModelBsimple10");
+            Ili2db.readSettingsFromDb(config);
+            Ili2db.run(config,null);
+		}
 		try{
 	        {
 	        	{
-		    		File data=new File(TEST_OUT,"ModelAsimple10a-out.itf");
-		    		Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
-		    		config.setFunction(Config.FC_EXPORT);
-		    		config.setExportTid(true);
-		    		config.setDatasetName("ModelAsimple10");
-		    		Ili2db.readSettingsFromDb(config);
-		    		Ili2db.run(config,null);
 		    		
 		    		// compile model
 		    		TransferDescription td2=null;
@@ -1770,13 +1782,6 @@ public abstract class TranslationTest {
 					 }
 	        	}
 		        {
-					File data2=new File(TEST_OUT,"ModelBsimple10a-out.itf");
-					Config config=setup.initConfig(data2.getPath(),data2.getPath()+".log");
-		    		config.setFunction(Config.FC_EXPORT);
-                    config.setExportTid(true);
-		    		config.setDatasetName("ModelBsimple10");
-		    		Ili2db.readSettingsFromDb(config);
-		    		Ili2db.run(config,null);
 		    		
 		    		// compile model
 		    		TransferDescription td2=null;
@@ -1880,26 +1885,24 @@ public abstract class TranslationTest {
     @Test
     public void deleteItf10DatasetA() throws Exception
     {
-        Connection jdbcConnection=null;
-        ResultSet rs=null;
-        Statement stmt=null;
         {
             importItf10();
         }
+        {
+            File data=new File(TEST_OUT,"ModelAsimple10a-out.itf");
+            Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+            config.setFunction(Config.FC_DELETE);
+            config.setDatasetName("ModelAsimple10");
+            Ili2db.readSettingsFromDb(config);
+            Ili2db.run(config,null);
+        }
+        Connection jdbcConnection=null;
+        ResultSet rs=null;
+        Statement stmt=null;
         try{
             jdbcConnection = setup.createConnection();
             stmt=jdbcConnection.createStatement();
             {
-                {
-                    File data=new File(TEST_OUT,"ModelAsimple10a-out.itf");
-                    Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
-                    config.setFunction(Config.FC_DELETE);
-                    config.setDatasetName("ModelAsimple10");
-                    Ili2db.readSettingsFromDb(config);
-                    Ili2db.run(config,null);
-                    
-                    
-                }
                 {
                     rs=stmt.executeQuery("SELECT count(*) FROM "+setup.prefixName("classa")+" where classa.attra in ('o10','o11')");
                     Assert.assertTrue(rs.next());
@@ -1916,6 +1919,12 @@ public abstract class TranslationTest {
                 }
             }
         }finally{
+            if(rs!=null) {
+                rs.close();
+            }
+            if(stmt!=null) {
+                stmt.close();
+            }
             if(jdbcConnection!=null){
                 jdbcConnection.close();
             }
@@ -1924,24 +1933,24 @@ public abstract class TranslationTest {
     @Test
     public void deleteItf10DatasetB() throws Exception
     {
-        Connection jdbcConnection=null;
-        ResultSet rs=null;
-        Statement stmt=null;
         {
             importItf10();
         }
+        {
+            File data2=new File(TEST_OUT,"ModelBsimple10a-out.itf");
+            Config config=setup.initConfig(data2.getPath(),data2.getPath()+".log");
+            config.setFunction(Config.FC_DELETE);
+            config.setDatasetName("ModelBsimple10");
+            Ili2db.readSettingsFromDb(config);
+            Ili2db.run(config,null);
+        }
+        Connection jdbcConnection=null;
+        ResultSet rs=null;
+        Statement stmt=null;
         try{
             jdbcConnection = setup.createConnection();
             stmt=jdbcConnection.createStatement();
             {
-                {
-                    File data2=new File(TEST_OUT,"ModelBsimple10a-out.itf");
-                    Config config=setup.initConfig(data2.getPath(),data2.getPath()+".log");
-                    config.setFunction(Config.FC_DELETE);
-                    config.setDatasetName("ModelBsimple10");
-                    Ili2db.readSettingsFromDb(config);
-                    Ili2db.run(config,null);
-                }
                 {
                     rs=stmt.executeQuery("SELECT count(*) FROM "+setup.prefixName("classa")+" where classa.attra in ('o10','o11')");
                     Assert.assertTrue(rs.next());
@@ -1958,6 +1967,12 @@ public abstract class TranslationTest {
                 }
             }
         }finally{
+            if(rs!=null) {
+                rs.close();
+            }
+            if(stmt!=null) {
+                stmt.close();
+            }
             if(jdbcConnection!=null){
                 jdbcConnection.close();
             }
@@ -1966,22 +1981,39 @@ public abstract class TranslationTest {
     @Test
     public void exportItf10Multi() throws Exception
     {
-        Connection jdbcConnection=null;
         {
             importItf10Multi();
         }
+        File dataA=new File(TEST_OUT,"ModelAsimple10a-out.itf");
+        {
+            Config config=setup.initConfig(dataA.getPath(),dataA.getPath()+".log");
+            config.setFunction(Config.FC_EXPORT);
+            config.setExportTid(true);
+            config.setDatasetName("ModelAsimple10");
+            Ili2db.readSettingsFromDb(config);
+            Ili2db.run(config,null);
+        }
+        File dataB=new File(TEST_OUT,"ModelBsimple10a-out.itf");
+        {
+            Config config=setup.initConfig(dataB.getPath(),dataB.getPath()+".log");
+            config.setFunction(Config.FC_EXPORT);
+            config.setExportTid(true);
+            config.setDatasetName("ModelBsimple10");
+            Ili2db.readSettingsFromDb(config);
+            Ili2db.run(config,null);
+        }
+        File dataC=new File(TEST_OUT,"ModelCsimple10a-out.itf");
+        {
+            Config config=setup.initConfig(dataC.getPath(),dataC.getPath()+".log");
+            config.setFunction(Config.FC_EXPORT);
+            config.setExportTid(true);
+            config.setDatasetName("ModelCsimple10");
+            Ili2db.readSettingsFromDb(config);
+            Ili2db.run(config,null);
+        }
         try{
-            jdbcConnection = setup.createConnection();
-            Statement stmt=jdbcConnection.createStatement();
             {
                 {
-                    File data=new File(TEST_OUT,"ModelAsimple10a-out.itf");
-                    Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
-                    config.setFunction(Config.FC_EXPORT);
-                    config.setExportTid(true);
-                    config.setDatasetName("ModelAsimple10");
-                    Ili2db.readSettingsFromDb(config);
-                    Ili2db.run(config,null);
                     
                     // compile model
                     TransferDescription td2=null;
@@ -1992,7 +2024,7 @@ public abstract class TranslationTest {
                     assertNotNull(td2);
                     
                     HashMap<String,IomObject> objs=new HashMap<String,IomObject>();
-                    ItfReader reader=new ItfReader(data);
+                    ItfReader reader=new ItfReader(dataA);
                     reader.setModel(td2);
                     IoxEvent event=null;
                     do{
@@ -2079,13 +2111,6 @@ public abstract class TranslationTest {
                      }
                 }
                 {
-                    File data2=new File(TEST_OUT,"ModelBsimple10a-out.itf");
-                    Config config=setup.initConfig(data2.getPath(),data2.getPath()+".log");
-                    config.setFunction(Config.FC_EXPORT);
-                    config.setExportTid(true);
-                    config.setDatasetName("ModelBsimple10");
-                    Ili2db.readSettingsFromDb(config);
-                    Ili2db.run(config,null);
                     
                     // compile model
                     TransferDescription td2=null;
@@ -2096,7 +2121,7 @@ public abstract class TranslationTest {
                     assertNotNull(td2);
                     
                     HashMap<String,IomObject> objs=new HashMap<String,IomObject>();
-                    ItfReader reader=new ItfReader(data2);
+                    ItfReader reader=new ItfReader(dataB);
                     reader.setModel(td2);
                     IoxEvent event=null;
                     do{
@@ -2183,13 +2208,6 @@ public abstract class TranslationTest {
                      }
                 }
                 {
-                    File data2=new File(TEST_OUT,"ModelCsimple10a-out.itf");
-                    Config config=setup.initConfig(data2.getPath(),data2.getPath()+".log");
-                    config.setFunction(Config.FC_EXPORT);
-                    config.setExportTid(true);
-                    config.setDatasetName("ModelCsimple10");
-                    Ili2db.readSettingsFromDb(config);
-                    Ili2db.run(config,null);
                     
                     // compile model
                     TransferDescription td2=null;
@@ -2200,7 +2218,7 @@ public abstract class TranslationTest {
                     assertNotNull(td2);
                     
                     HashMap<String,IomObject> objs=new HashMap<String,IomObject>();
-                    ItfReader reader=new ItfReader(data2);
+                    ItfReader reader=new ItfReader(dataC);
                     reader.setModel(td2);
                     IoxEvent event=null;
                     do{
@@ -2288,49 +2306,47 @@ public abstract class TranslationTest {
                 }
             }
         }finally{
-            if(jdbcConnection!=null){
-                jdbcConnection.close();
-            }
         }
     }
 	
 	@Test
 	public void importItf10lineTable() throws Exception
 	{
+        setup.resetDb();
+        {
+            File data=new File(TEST_OUT,"ModelAsimple10a.itf");
+            Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+            Ili2db.setNoSmartMapping(config);
+            config.setFunction(Config.FC_IMPORT);
+            config.setDoImplicitSchemaImport(true);
+            config.setCreateFk(Config.CREATE_FK_YES);
+            config.setImportBid(true);
+            config.setImportTid(true);
+            config.setTidHandling(Config.TID_HANDLING_PROPERTY);
+            config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
+            Ili2db.setSkipPolygonBuilding(config);
+            config.setIli1Translation("ModelBsimple10=ModelAsimple10");
+            config.setDatasetName("ModelAsimple10");
+            config.setDefaultSrsAuthority("EPSG");
+            config.setDefaultSrsCode("21781");
+            Ili2db.readSettingsFromDb(config);
+            Ili2db.run(config,null);
+        }
+        {
+            File data=new File(TEST_OUT,"ModelBsimple10a.itf");
+            Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+            config.setFunction(Config.FC_IMPORT);
+            config.setImportTid(true);
+            config.setImportBid(true);
+            config.setDatasetName("ModelBsimple10");
+            Ili2db.readSettingsFromDb(config);
+            Ili2db.run(config,null);
+        }
 		Connection jdbcConnection=null;
+        Statement stmt=null;
 		try{
-            setup.resetDb();
-	        {
-	    		File data=new File(TEST_OUT,"ModelAsimple10a.itf");
-	    		Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
-                Ili2db.setNoSmartMapping(config);
-	    		config.setFunction(Config.FC_IMPORT);
-	            config.setDoImplicitSchemaImport(true);
-	    		config.setCreateFk(Config.CREATE_FK_YES);
-                config.setImportBid(true);
-                config.setImportTid(true);
-	    		config.setTidHandling(Config.TID_HANDLING_PROPERTY);
-	    		config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
-                Ili2db.setSkipPolygonBuilding(config);
-	    		config.setIli1Translation("ModelBsimple10=ModelAsimple10");
-	    		config.setDatasetName("ModelAsimple10");
-	            config.setDefaultSrsAuthority("EPSG");
-	            config.setDefaultSrsCode("21781");
-	    		Ili2db.readSettingsFromDb(config);
-	    		Ili2db.run(config,null);
-	        }
-	        {
-	        	File data=new File(TEST_OUT,"ModelBsimple10a.itf");
-	    		Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
-	    		config.setFunction(Config.FC_IMPORT);
-                config.setImportTid(true);
-                config.setImportBid(true);
-	    		config.setDatasetName("ModelBsimple10");
-	    		Ili2db.readSettingsFromDb(config);
-	    		Ili2db.run(config,null);
-	        }
             jdbcConnection = setup.createConnection();
-            Statement stmt=jdbcConnection.createStatement();
+            stmt=jdbcConnection.createStatement();
  			validateImportItf10lineTable_Geom(stmt);
  			// bid's of classa and classb are created
  			Assert.assertTrue(stmt.execute("SELECT t_ili2db_basket.t_id, t_ili2db_basket.topic FROM "+setup.prefixName("t_ili2db_basket")+" WHERE t_ili2db_basket.t_ili_tid = 'ModelAsimple10.TopicA'"));
@@ -2346,6 +2362,9 @@ public abstract class TranslationTest {
  				Assert.assertEquals("ModelBsimple10.TopicB",rs.getString(2));
  			}
 		}finally{
+		    if(stmt!=null) {
+		        stmt.close();
+		    }
 			if(jdbcConnection!=null){
 				jdbcConnection.close();
 			}
@@ -2370,22 +2389,30 @@ public abstract class TranslationTest {
 	@Test
 	public void exportItf10lineTable() throws Exception
 	{
-		Connection jdbcConnection=null;
 		{
 			importItf10lineTable();
 		}
+        File dataA=new File(TEST_OUT,"ModelAsimple10a-out.itf");
+		{
+            Config config=setup.initConfig(dataA.getPath(),dataA.getPath()+".log");
+            config.setFunction(Config.FC_EXPORT);
+            config.setExportTid(true);
+            config.setDatasetName("ModelAsimple10");
+            Ili2db.readSettingsFromDb(config);
+            Ili2db.run(config,null);
+		}
+        File dataB=new File(TEST_OUT,"ModelBsimple10a-out.itf");
+		{
+            Config config=setup.initConfig(dataB.getPath(),dataB.getPath()+".log");
+            config.setFunction(Config.FC_EXPORT);
+            config.setExportTid(true);
+            config.setDatasetName("ModelBsimple10");
+            Ili2db.readSettingsFromDb(config);
+            Ili2db.run(config,null);
+		}
 		try{
 			//EhiLogger.getInstance().setTraceFilter(false);
-	        jdbcConnection = setup.createConnection();
-	        Statement stmt=jdbcConnection.createStatement();
 	        {
-	        	File data=new File(TEST_OUT,"ModelAsimple10a-out.itf");
-	    		Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
-	    		config.setFunction(Config.FC_EXPORT);
-	    		config.setExportTid(true);
-	    		config.setDatasetName("ModelAsimple10");
-	    		Ili2db.readSettingsFromDb(config);
-	    		Ili2db.run(config,null);
 	    		
 	    		// compile model
 	    		TransferDescription td2=null;
@@ -2395,7 +2422,7 @@ public abstract class TranslationTest {
 	    		td2=ch.interlis.ili2c.Ili2c.runCompiler(ili2cConfig);
 	    		assertNotNull(td2);
 	    		
-	    		ItfReader reader=new ItfReader(data);
+	    		ItfReader reader=new ItfReader(dataA);
 	    		reader.setModel(td2);
 	    		IoxEvent event=null;
 	    		HashMap<String,IomObject> objs=new HashMap<String,IomObject>();
@@ -2484,13 +2511,6 @@ public abstract class TranslationTest {
 				 }
 	        }
 	        {
-	        	File data=new File(TEST_OUT,"ModelBsimple10a-out.itf");
-	    		Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
-	    		config.setFunction(Config.FC_EXPORT);
-                config.setExportTid(true);
-	    		config.setDatasetName("ModelBsimple10");
-	    		Ili2db.readSettingsFromDb(config);
-	    		Ili2db.run(config,null);
 	    		
 	    		// compile model
 	    		TransferDescription td2=null;
@@ -2500,7 +2520,7 @@ public abstract class TranslationTest {
 	    		td2=ch.interlis.ili2c.Ili2c.runCompiler(ili2cConfig);
 	    		assertNotNull(td2);
 	    		
-	    		ItfReader reader=new ItfReader(data);
+	    		ItfReader reader=new ItfReader(dataB);
 	    		reader.setModel(td2);
 	    		IoxEvent event=null;
 	    		HashMap<String,IomObject> objs=new HashMap<String,IomObject>();
@@ -2543,9 +2563,6 @@ public abstract class TranslationTest {
 				 }
 	        }
 		}finally{
-			if(jdbcConnection!=null){
-				jdbcConnection.close();
-			}
 		}
 	}
 }
