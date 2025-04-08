@@ -115,6 +115,7 @@ public class DbNames {
     public static final String NLS_TAB_LANG_COL="lang"; // language code
     public static final String NLS_TAB_UIVARIANT_COL="uivariant"; // to distinguish between differen ui flavours (e.g. small/large screens)
     public static final String NLS_TAB_LABEL_COL="label"; // name of element
+    public static final int    NLS_TAB_LABEL_COL_SIZE=70;
     public static final String NLS_TAB_MNEMONIC_COL="mnemonic"; // short cut letter of element
     public static final String NLS_TAB_TOOLTIP_COL="tooltip"; // short description
     public static final String NLS_TAB_DESCRIPTION_COL="descr"; // longer description

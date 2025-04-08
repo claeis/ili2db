@@ -18,6 +18,31 @@ public class SimpleGpkgTest extends SimpleTest {
     protected AbstractTestSetup createTestSetup() {
         return new GpkgTestSetup(GPKGFILENAME,DBURL);
     }
+    
+    @Override
+    protected void validateImportIli() throws Exception {
+        super.validateImportIli();
+        Connection jdbcConnection=null;
+        Statement stmt=null;
+        try {
+            jdbcConnection = setup.createConnection();
+            stmt=jdbcConnection.createStatement();
+            ResultSet rs=stmt.executeQuery("SELECT table_name,data_type FROM gpkg_contents WHERE table_name='classa1'");
+            if(rs.next()) {
+                Assert.assertEquals("classa1",rs.getString(1));
+                Assert.assertEquals("attributes",rs.getString(2));
+            }else {
+                Assert.fail("no entry in gpkg_contents for classa1");
+            }
+        }finally {
+            if(stmt!=null) {
+                stmt.close();
+            }
+            if(jdbcConnection!=null) {
+                jdbcConnection.close();
+            }
+        }
+    }
     @Override
     protected void validateImportIliCoord() throws Exception {
         super.validateImportIliCoord();
@@ -26,14 +51,19 @@ public class SimpleGpkgTest extends SimpleTest {
         try {
             jdbcConnection = setup.createConnection();
             stmt=jdbcConnection.createStatement();
-            ResultSet rs=stmt.executeQuery("SELECT table_name FROM gpkg_contents");
-            while(rs.next()) {
+            ResultSet rs=stmt.executeQuery("SELECT table_name,data_type FROM gpkg_contents WHERE table_name='classa1'");
+            if(rs.next()) {
                 Assert.assertEquals("classa1",rs.getString(1));
+                Assert.assertEquals("features",rs.getString(2));
+            }else {
+                Assert.fail("no entry in gpkg_contents for classa1");
             }
-            rs=stmt.executeQuery("SELECT table_name,column_name FROM gpkg_geometry_columns");
-            while(rs.next()) {
+            rs=stmt.executeQuery("SELECT table_name,column_name FROM gpkg_geometry_columns WHERE table_name='classa1'");
+            if(rs.next()) {
                 Assert.assertEquals("classa1",rs.getString(1));
                 Assert.assertEquals("attr2",rs.getString(2));
+            }else {
+                Assert.fail("no entry in gpkg_geometry_columns for classa1");
             }
             
         }finally {

@@ -1,6 +1,7 @@
 package ch.ehi.ili2db;
 
 import java.io.File;
+import java.nio.file.StandardCopyOption;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -21,48 +22,22 @@ import ch.interlis.iox.StartBasketEvent;
 import ch.interlis.iox.StartTransferEvent;
 
 //-Ddburl=jdbc:postgresql:dbname -Ddbusr=usrname -Ddbpwd=1234
-public class Dataset10Test {
+abstract public class Dataset10Test {
+    protected AbstractTestSetup setup=createTestSetup();
+    protected abstract AbstractTestSetup createTestSetup();
 	
-	private static final String DBSCHEMA = "Dataset10";
 	private static final String TEST_OUT="test/data/Dataset10/";
-	Connection jdbcConnection=null;
-	Statement stmt=null;
-	
-	String dburl=System.getProperty("dburl"); 
-	String dbuser=System.getProperty("dbusr");
-	String dbpwd=System.getProperty("dbpwd"); 
-
-	public Config initConfig(String xtfFilename,String dbschema,String logfile) {
-		Config config=new Config();
-		new ch.ehi.ili2pg.PgMain().initConfig(config);
-		config.setDburl(dburl);
-		config.setDbusr(dbuser);
-		config.setDbpwd(dbpwd);
-		if(dbschema!=null){
-			config.setDbschema(dbschema);
-		}
-		if(logfile!=null){
-			config.setLogfile(logfile);
-		}
-		config.setXtffile(xtfFilename);
-		if(xtfFilename!=null && Ili2db.isItfFilename(xtfFilename)){
-			config.setItfTransferfile(true);
-		}
-		return config;
-	}
-	
+		
 	@Test
 	public void importItf() throws Exception
 	{
 		Connection jdbcConnection=null;
+        Statement stmt=null;
 		try{
-	        Class driverClass = Class.forName("org.postgresql.Driver");
-	        jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
-	        Statement stmt=jdbcConnection.createStatement();
-	        stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");
+		    setup.resetDb();
 	        { 
 				File data=new File(TEST_OUT,"Dataset10a.itf");
-				Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+				Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
                 Ili2db.setNoSmartMapping(config);
 				config.setFunction(Config.FC_IMPORT);
 		        config.setDoImplicitSchemaImport(true);
@@ -76,7 +51,9 @@ public class Dataset10Test {
 				Ili2db.readSettingsFromDb(config);
 				Ili2db.run(config,null);
 				{
-					String stmtTxt="SELECT "+DbNames.T_ILI_TID_COL+" FROM "+DBSCHEMA+"."+DbNames.BASKETS_TAB+" WHERE "+DbNames.BASKETS_TAB_TOPIC_COL+"='Dataset10.TopicB'";
+		            jdbcConnection = setup.createConnection();
+		            stmt=jdbcConnection.createStatement();
+					String stmtTxt="SELECT "+DbNames.T_ILI_TID_COL+" FROM "+setup.prefixName(DbNames.BASKETS_TAB)+" WHERE "+DbNames.BASKETS_TAB_TOPIC_COL+"='Dataset10.TopicB'";
 					Assert.assertTrue(stmt.execute(stmtTxt));
 					ResultSet rs=stmt.getResultSet();
 					Assert.assertTrue(rs.next());
@@ -84,11 +61,55 @@ public class Dataset10Test {
 				}
 	        }
 		}finally{
+            if(stmt!=null) {
+                stmt.close();
+                stmt=null;
+            }
 			if(jdbcConnection!=null){
 				jdbcConnection.close();
 			}
 		}
 	}
+    @Test
+    public void importItf_fileNameWithSpace() throws Exception
+    {
+        Connection jdbcConnection=null;
+        Statement stmt=null;
+        try{
+            setup.resetDb();
+            { 
+                File data_raw=new File(TEST_OUT,"Dataset10a.itf");
+                File data=new File(TEST_OUT,"Dataset 10a.itf");
+                java.nio.file.Files.copy(data_raw.toPath(),data.toPath(),StandardCopyOption.REPLACE_EXISTING);
+                Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+                Ili2db.setNoSmartMapping(config);
+                config.setFunction(Config.FC_IMPORT);
+                config.setDoImplicitSchemaImport(true);
+                config.setCreateFk(Config.CREATE_FK_YES);
+                config.setTidHandling(Config.TID_HANDLING_PROPERTY);
+                config.setImportTid(true);
+                config.setValidation(true);
+                Ili2db.readSettingsFromDb(config);
+                Ili2db.run(config,null);
+                {
+                    jdbcConnection = setup.createConnection();
+                    stmt=jdbcConnection.createStatement();
+                    String stmtTxt="SELECT "+DbNames.T_ILI_TID_COL+" FROM "+setup.prefixName(DbNames.BASKETS_TAB)+" WHERE "+DbNames.BASKETS_TAB_TOPIC_COL+"='Dataset10.TopicB'";
+                    Assert.assertTrue(stmt.execute(stmtTxt));
+                    ResultSet rs=stmt.getResultSet();
+                    Assert.assertTrue(rs.next());
+                }
+            }
+        }finally{
+            if(stmt!=null) {
+                stmt.close();
+                stmt=null;
+            }
+            if(jdbcConnection!=null){
+                jdbcConnection.close();
+            }
+        }
+    }
 	
 	@Test
 	public void exportItf() throws Exception
@@ -96,14 +117,10 @@ public class Dataset10Test {
 		{
 			importItf();
 		}
-		Connection jdbcConnection=null;
 		try{
-		    Class driverClass = Class.forName("org.postgresql.Driver");
-	        jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
-	        stmt=jdbcConnection.createStatement();
 			{
 				File data=new File(TEST_OUT,"Dataset10a-out.xtf");
-				Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+				Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
 				config.setFunction(Config.FC_EXPORT);
 				config.setExportTid(true);
 				final String datasetName="ceis";
@@ -151,9 +168,6 @@ public class Dataset10Test {
 				}
 	        }
 		}finally{
-			if(jdbcConnection!=null){
-				jdbcConnection.close();
-			}
 		}
 	}
 	
@@ -161,15 +175,12 @@ public class Dataset10Test {
 	public void importItfWithDatasetCol() throws Exception
 	{
 		Connection jdbcConnection=null;
+        Statement stmt=null;
 		try{
-	        Class driverClass = Class.forName("org.postgresql.Driver");
-	        jdbcConnection = DriverManager.getConnection(
-	        		dburl, dbuser, dbpwd);
-	        Statement stmt=jdbcConnection.createStatement();
-	        stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");
+		    setup.resetDb();
 	        {
 				File data=new File(TEST_OUT,"Dataset10b.itf");
-				Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+				Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
                 Ili2db.setNoSmartMapping(config);
 				config.setFunction(Config.FC_IMPORT);
 		        config.setDoImplicitSchemaImport(true);
@@ -183,7 +194,9 @@ public class Dataset10Test {
 				Ili2db.readSettingsFromDb(config);
 				Ili2db.run(config,null);
 				{
-					String stmtTxt="SELECT "+DbNames.T_DATASET_COL+" FROM "+DBSCHEMA+".tablea WHERE "+DbNames.T_ILI_TID_COL+"='10'";
+                    jdbcConnection = setup.createConnection();
+                    stmt=jdbcConnection.createStatement();
+					String stmtTxt="SELECT "+DbNames.T_DATASET_COL+" FROM "+setup.prefixName("tablea")+" WHERE "+DbNames.T_ILI_TID_COL+"='10'";
 					Assert.assertTrue(stmt.execute(stmtTxt));
 					ResultSet rs=stmt.getResultSet();
 					Assert.assertTrue(rs.next());
@@ -191,6 +204,10 @@ public class Dataset10Test {
 				}
 	        }
 		}finally{
+            if(stmt!=null) {
+                stmt.close();
+                stmt=null;
+            }
 			if(jdbcConnection!=null){
 				jdbcConnection.close();
 			}
@@ -203,14 +220,10 @@ public class Dataset10Test {
 		{
 			importItfWithDatasetCol();
 		}
-		Connection jdbcConnection=null;
 		try{
-		    Class driverClass = Class.forName("org.postgresql.Driver");
-	        jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
-	        stmt=jdbcConnection.createStatement();
 			{
 				File data=new File(TEST_OUT,"Dataset10b-out.xtf");
-				Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+				Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
 				config.setFunction(Config.FC_EXPORT);
 				config.setExportTid(true);
 				final String datasetName="ceis";
@@ -248,9 +261,6 @@ public class Dataset10Test {
 				 }
 	        }
 		}finally{
-			if(jdbcConnection!=null){
-				jdbcConnection.close();
-			}
 		}
 	}
 }

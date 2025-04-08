@@ -52,7 +52,11 @@ public abstract class SimpleTest {
 		config.setTidHandling(Config.TID_HANDLING_PROPERTY);
 		config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
         Ili2db.run(config,null);
+        validateImportIli();
 	}
+    protected void validateImportIli() throws Exception{
+    }
+
     @Test
     public void createScriptFromIliCoord() throws Exception
     {

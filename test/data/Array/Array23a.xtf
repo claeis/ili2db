@@ -6,7 +6,7 @@
 		</MODELS>
 	</HEADERSECTION>
 	<DATASECTION>
-		<Array23.TestA BID="Array23.TestA">
+		<Array23.TestA BID="Array23.TestA">			
 			<Array23.TestA.Auto  TID="13">
 				<Farben>
 					<Array23.TestA.Farbe>
@@ -72,6 +72,25 @@
 					</Array23.TestA.Xmlbox_>
 				</xmlbox -->
 			</Array23.TestA.Datatypes>
+			<Array23.TestA.Katalog  TID="200">
+			  <val>Wohn</val>
+			</Array23.TestA.Katalog>
+			<Array23.TestA.Katalog  TID="201">
+			  <val>Industrie</val>
+			</Array23.TestA.Katalog>
+			<Array23.TestA.Katalog  TID="202">
+			  <val>Büro</val>
+			</Array23.TestA.Katalog>
+			<Array23.TestA.Gebaeude  TID="300">
+				<Art>
+					<Array23.TestA.KatalogRef>
+						<Ref  REF="200"/>
+					</Array23.TestA.KatalogRef>
+					<Array23.TestA.KatalogRef>
+						<Ref  REF="202"/>
+					</Array23.TestA.KatalogRef>
+				</Art>
+			</Array23.TestA.Gebaeude>
 		</Array23.TestA>
 	</DATASECTION>
 </TRANSFER>

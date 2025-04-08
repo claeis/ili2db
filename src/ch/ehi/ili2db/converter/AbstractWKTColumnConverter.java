@@ -28,6 +28,7 @@ import com.vividsolutions.jts.io.ParseException;
 
 import ch.ehi.basics.settings.Settings;
 import ch.ehi.ili2db.gui.Config;
+import ch.ehi.sqlgen.repository.DbColumn;
 import ch.interlis.ili2c.metamodel.AttributeDef;
 import ch.interlis.iom.IomObject;
 import ch.interlis.iom_j.itf.EnumCodeMapper;
@@ -393,12 +394,12 @@ public abstract class AbstractWKTColumnConverter implements SqlColumnConverter {
 		throw new UnsupportedOperationException();
 	}
 	@Override
-	public Object fromIomArray(AttributeDef iliEleAttr, String[] iomValues, boolean isEnumInt)
+	public Object fromIomArray(AttributeDef iliEleAttr, String[] iomValues, Class<? extends DbColumn> dbColHint)
 			throws SQLException, ConverterException {
 		throw new UnsupportedOperationException();
 	}
 	@Override
-	public String[] toIomArray(AttributeDef iliEleAttr, Object sqlArray, boolean isEnumInt)
+	public String[] toIomArray(AttributeDef iliEleAttr, Object sqlArray, Class<? extends DbColumn> dbColHint)
 			throws SQLException, ConverterException {
 		throw new UnsupportedOperationException();
 	}
