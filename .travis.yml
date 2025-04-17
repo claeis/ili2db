@@ -62,6 +62,8 @@ after_failure:
   - cat build/junitreport/junit-noframes.html && sleep 10
 deploy:
   - provider: script
+    dpl_version: 2.0.5.2.beta.1
+    edge: true
     skip_cleanup: true
     script: ./gradlew -Drst2html=`which rst2html.py` -Drepos_pwd=${repos_pwd} -Drepos_usr=jql_jars-INTE uploadArchives
     on:
