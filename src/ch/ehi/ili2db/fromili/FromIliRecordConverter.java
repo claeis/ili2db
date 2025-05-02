@@ -798,6 +798,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
                         ret.setNotNull(false);
                         ret.setPrimaryKey(false);
                         ret.setArraySize(DbColumn.UNLIMITED_ARRAY);     
+                        metaInfo.setColumnInfo(dbTable.getName().getName(), null, ret.getName(), DbExtMetaInfo.TAG_COL_FOREIGNKEY, targetTable.getSqlTablename());
                         dbColExts.add(ret);
                     }
                     
@@ -1076,6 +1077,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
                     if(createFk){
                         ret.setReferencedTable(targetTable.getSqlTable());
                     }
+                    metaInfo.setColumnInfo(dbTable.getName().getName(), null, ret.getName(), DbExtMetaInfo.TAG_COL_FOREIGNKEY, targetTable.getSqlTablename());
                     if(createFkIdx){
                         ret.setIndex(true);
                     }

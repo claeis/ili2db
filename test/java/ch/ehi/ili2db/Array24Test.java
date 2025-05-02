@@ -92,17 +92,80 @@ public abstract class Array24Test {
                     {"Array24.TestA.Auto",    "ch.ehi.ili2db.inheritance", "newClass"},
                     {"Array24.TestA.Auto.Farben", "ch.ehi.ili2db.arrayTrafo",  "coalesce"}
                 };
-	        importIli_Assert(attrName_expectedValues, trafo_expectedValues);
+                String [][] columnForeignKey_expectedValues=new String[][] {
+                    {"gebaeude",null,"art","katalog"},
+                    //{"auto",null,"farben","rgb"},
+                };
+	        importIli_Assert(attrName_expectedValues, trafo_expectedValues,columnForeignKey_expectedValues);
 		}catch(Exception e) {
 			throw new IoxException(e);
 		}finally{
 		}
 	}
+    @Test
+    public void importIliEnumFkTable() throws Exception
+    {
+        //EhiLogger.getInstance().setTraceFilter(false);
+        try{
+            setup.resetDb();
 
-    private void importIli_Assert(String[][] attrName_expectedValues, String[][] trafo_expectedValues)
+            File data=new File(TEST_DATA_DIR,"Array24.ili");
+            Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+            Ili2db.setNoSmartMapping(config);
+            config.setFunction(Config.FC_SCHEMAIMPORT);
+            config.setCreateFk(Config.CREATE_FK_YES);
+            config.setTidHandling(Config.TID_HANDLING_PROPERTY);
+            config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
+            config.setArrayTrafo(Config.ARRAY_TRAFO_COALESCE);
+            config.setCreateEnumDefs(Config.CREATE_ENUM_DEFS_MULTI_WITH_ID);
+            Ili2db.readSettingsFromDb(config);
+            Ili2db.run(config,null);
+            // assertions
+            // t_ili2db_attrname
+            String [][] attrName_expectedValues=new String[][] {
+                {"Array24.TestA.Auto.Farben", "farben",    "auto"  ,null},
+                {"Array24.TestA.Datatypes.aBoolean",  "aboolean",  "datatypes" ,null},
+                {"Array24.TestA.Datatypes.aDate", "adate", "datatypes" ,null},
+                {"Array24.TestA.Datatypes.aDateTime", "adatetime", "datatypes",null}, 
+                {"Array24.TestA.Datatypes.aTime", "atime", "datatypes"         ,null},
+                {"Array24.TestA.Datatypes.aUuid", "auuid", "datatypes" ,null},
+                {"Array24.TestA.Datatypes.numericDec",    "numericdec",    "datatypes" ,null},
+                {"Array24.TestA.Datatypes.numericInt",    "numericint",    "datatypes",null}, 
+                {"Array24.TestA.Gebaeude.Art", "art",    "gebaeude"  ,"katalog"},
+                {"Array24.TestA.Katalog.val", "val",    "katalog"  ,null},
+            };
+                // t_ili2db_trafo
+                String [][] trafo_expectedValues=new String[][] {
+                    {"Array24.TestA.Katalog",    "ch.ehi.ili2db.inheritance", "newClass"},
+                    {"Array24.TestA.Gebaeude",    "ch.ehi.ili2db.inheritance", "newClass"},
+                    {"Array24.TestA.Gebaeude.Art", "ch.ehi.ili2db.arrayTrafo",  "coalesce"},
+                    {"Array24.TestA.Datatypes",   "ch.ehi.ili2db.inheritance", "newClass"},
+                    {"Array24.TestA.Datatypes.aTime", "ch.ehi.ili2db.arrayTrafo",  "coalesce"},
+                    {"Array24.TestA.Datatypes.aDate", "ch.ehi.ili2db.arrayTrafo",  "coalesce"},
+                    {"Array24.TestA.Datatypes.aBoolean",  "ch.ehi.ili2db.arrayTrafo",  "coalesce"},
+                    {"Array24.TestA.Datatypes.aUuid", "ch.ehi.ili2db.arrayTrafo",  "coalesce"},
+                    {"Array24.TestA.Datatypes.aDateTime", "ch.ehi.ili2db.arrayTrafo",  "coalesce"},
+                    {"Array24.TestA.Datatypes.numericInt",    "ch.ehi.ili2db.arrayTrafo",  "coalesce"},
+                    {"Array24.TestA.Datatypes.numericDec",    "ch.ehi.ili2db.arrayTrafo",  "coalesce"},
+                    {"Array24.TestA.Auto",    "ch.ehi.ili2db.inheritance", "newClass"},
+                    {"Array24.TestA.Auto.Farben", "ch.ehi.ili2db.arrayTrafo",  "coalesce"}
+                };
+                String [][] columnForeignKey_expectedValues=new String[][] {
+                    {"gebaeude",null,"art","katalog"},
+                    {"auto",null,"farben","rgb"},
+                };
+            importIli_Assert(attrName_expectedValues, trafo_expectedValues,columnForeignKey_expectedValues);
+        }catch(Exception e) {
+            throw new IoxException(e);
+        }finally{
+        }
+    }
+
+    private void importIli_Assert(String[][] attrName_expectedValues, String[][] trafo_expectedValues,String[][] columnForeignKey_expectedValues)
             throws SQLException {
         Ili2dbAssert.assertAttrNameTable(setup,attrName_expectedValues);
         Ili2dbAssert.assertTrafoTable(setup,trafo_expectedValues);
+        Ili2dbAssert.assertColumnTable_foreignKey(setup,columnForeignKey_expectedValues);
     }
     @Test
     public void importXtf() throws Exception
