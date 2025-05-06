@@ -107,17 +107,103 @@ public abstract class Array23Test {
                     {"Array23.TestA.Xmlbox_", "ch.ehi.ili2db.inheritance", "newClass"},
                     {"Array23.TestA.Datatypes.numericDec",    "ch.ehi.ili2db.arrayTrafo",  "coalesce"}                      
                 };
-	        importIli_Assert(attrName_expectedValues, trafo_expectedValues);
+                String [][] columnForeignKey_expectedValues=new String[][] {
+                    {"katalogref",null,"aref","katalog"},
+                    {"gebaeude",null,"art","katalog"},
+                };
+	        importIli_Assert(attrName_expectedValues, trafo_expectedValues,columnForeignKey_expectedValues);
 		}catch(Exception e) {
 			throw new IoxException(e);
 		}finally{
 		}
 	}
+    @Test
+    public void importIliEnumFkTable() throws Exception
+    {
+        //EhiLogger.getInstance().setTraceFilter(false);
+        try{
+            setup.resetDb();
 
-    private void importIli_Assert(String[][] attrName_expectedValues, String[][] trafo_expectedValues)
+            File data=new File(TEST_DATA_DIR,"Array23.ili");
+            Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+            Ili2db.setNoSmartMapping(config);
+            config.setFunction(Config.FC_SCHEMAIMPORT);
+            config.setCreateFk(Config.CREATE_FK_YES);
+            config.setTidHandling(Config.TID_HANDLING_PROPERTY);
+            config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
+            config.setArrayTrafo(Config.ARRAY_TRAFO_COALESCE);
+            config.setCreateEnumDefs(Config.CREATE_ENUM_DEFS_MULTI_WITH_ID);
+            Ili2db.readSettingsFromDb(config);
+            Ili2db.run(config,null);
+            // assertions
+            // t_ili2db_attrname
+            String [][] attrName_expectedValues=new String[][] {
+                {"Array23.TestA.Gebaeude.Art", "art", "gebaeude",    "katalog"},
+                {"Array23.TestA.KatalogRef.Ref",    "aref",    "katalogref",  "katalog"},
+                {"Array23.TestA.Katalog.val",    "val",    "katalog",  null},
+                {"Array23.TestA.Binbox_.Value",   "avalue",    "binbox_",null},   
+                {"Array23.TestA.NumericDec_.Value",   "avalue",    "numericdec_",null},   
+                {"Array23.TestA.Datatypes.aBoolean",  "aboolean",  "datatypes" ,null},
+                {"Array23.TestA.Datatypes.aDate", "adate", "datatypes" ,null},
+                {"Array23.TestA.Xmlbox_.Value",   "avalue",    "xmlbox_"   ,null},
+                {"Array23.TestA.ADateTime_.Value",    "avalue",    "adatetime_"   ,null}, 
+                {"Array23.TestA.Farbe.Wert",  "wert",  "farbe" ,null},
+                {"Array23.TestA.Datatypes.numericInt",    "numericint",    "datatypes",null}, 
+                {"Array23.TestA.Datatypes.numericDec",    "numericdec",    "datatypes" ,null},
+                {"Array23.TestA.NumericInt_.Value",   "avalue",    "numericint_"   ,null},
+                {"Array23.TestA.Auto.Farben", "farben",    "auto"  ,null},
+                {"Array23.TestA.Datatypes.aDateTime", "adatetime", "datatypes",null}, 
+                {"Array23.TestA.AUuid_.Value",    "avalue",    "auuid_"    ,null},
+                {"Array23.TestA.Datatypes.aUuid", "auuid", "datatypes" ,null},
+                {"Array23.TestA.ABoolean_.Value", "avalue",    "aboolean_" ,null},
+                {"Array23.TestA.ADate_.Value",    "avalue",    "adate_"    ,null},
+                {"Array23.TestA.ATime_.Value",    "avalue",    "atime_"    ,null},
+                {"Array23.TestA.Datatypes.aTime", "atime", "datatypes"         ,null}         };
+                // t_ili2db_trafo
+                String [][] trafo_expectedValues=new String[][] {
+                    {"Array23.TestA.Gebaeude.Art", "ch.ehi.ili2db.arrayTrafo",    "coalesce"},
+                    {"Array23.TestA.KatalogRef",    "ch.ehi.ili2db.inheritance",   "newClass"},
+                    {"Array23.TestA.Gebaeude",  "ch.ehi.ili2db.inheritance",   "newClass"},
+                    {"Array23.TestA.Katalog",   "ch.ehi.ili2db.inheritance",   "newClass"},
+                    {"Array23.TestA.Datatypes.aDate", "ch.ehi.ili2db.arrayTrafo",  "coalesce"},
+                    {"Array23.TestA.AUuid_",  "ch.ehi.ili2db.inheritance", "newClass"},
+                    {"Array23.TestA.Auto.Farben", "ch.ehi.ili2db.arrayTrafo",  "coalesce"},
+                    {"Array23.TestA.NumericInt_", "ch.ehi.ili2db.inheritance", "newClass"},
+                    {"Array23.TestA.Datatypes",   "ch.ehi.ili2db.inheritance", "newClass"},
+                    {"Array23.TestA.Binbox_", "ch.ehi.ili2db.inheritance", "newClass"},
+                    {"Array23.TestA.ATime_",  "ch.ehi.ili2db.inheritance", "newClass"},
+                    {"Array23.TestA.Datatypes.aTime", "ch.ehi.ili2db.arrayTrafo",  "coalesce"},
+                    {"Array23.TestA.Datatypes.aBoolean",  "ch.ehi.ili2db.arrayTrafo",  "coalesce"},
+                    {"Array23.TestA.ABoolean_",   "ch.ehi.ili2db.inheritance", "newClass"},
+                    {"Array23.TestA.Datatypes.aUuid", "ch.ehi.ili2db.arrayTrafo",  "coalesce"},
+                    {"Array23.TestA.Datatypes.aDateTime", "ch.ehi.ili2db.arrayTrafo",  "coalesce"},
+                    {"Array23.TestA.NumericDec_", "ch.ehi.ili2db.inheritance", "newClass"},
+                    {"Array23.TestA.ADate_",  "ch.ehi.ili2db.inheritance", "newClass"},
+                    {"Array23.TestA.Datatypes.numericInt",    "ch.ehi.ili2db.arrayTrafo",  "coalesce"},
+                    {"Array23.TestA.ADateTime_",  "ch.ehi.ili2db.inheritance", "newClass"},
+                    {"Array23.TestA.Farbe",   "ch.ehi.ili2db.inheritance", "newClass"},
+                    {"Array23.TestA.Auto",    "ch.ehi.ili2db.inheritance", "newClass"},
+                    {"Array23.TestA.Xmlbox_", "ch.ehi.ili2db.inheritance", "newClass"},
+                    {"Array23.TestA.Datatypes.numericDec",    "ch.ehi.ili2db.arrayTrafo",  "coalesce"}                      
+                };
+                String [][] columnForeignKey_expectedValues=new String[][] {
+                    {"katalogref",null,"aref","katalog"},
+                    {"gebaeude",null,"art","katalog"},
+                    {"farbe",null,"wert","rgb"},
+                    {"auto",null,"farben","rgb"},
+                };
+            importIli_Assert(attrName_expectedValues, trafo_expectedValues,columnForeignKey_expectedValues);
+        }catch(Exception e) {
+            throw new IoxException(e);
+        }finally{
+        }
+    }
+
+    private void importIli_Assert(String[][] attrName_expectedValues, String[][] trafo_expectedValues,String [][]columnForeignKey_expectedValues)
             throws SQLException {
         Ili2dbAssert.assertAttrNameTable(setup,attrName_expectedValues);
         Ili2dbAssert.assertTrafoTable(setup,trafo_expectedValues);
+        Ili2dbAssert.assertColumnTable_foreignKey(setup,columnForeignKey_expectedValues);
     }
     @Test
     public void importXtf() throws Exception

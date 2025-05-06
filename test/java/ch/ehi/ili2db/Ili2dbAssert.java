@@ -15,7 +15,9 @@ import java.util.Set;
 import org.junit.Assert;
 
 import ch.ehi.ili2db.base.DbNames;
+import ch.ehi.ili2db.dbmetainfo.DbExtMetaInfo;
 
+import static ch.ehi.ili2db.Ili2dbAssert.assertTableContainsValues;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.Assert.assertThat;
 
@@ -91,6 +93,27 @@ public class Ili2dbAssert {
         }
     }
 
+    public static void assertColumnTable_foreignKey(AbstractTestSetup setup, String[][] expectedValues) throws SQLException {
+        Connection jdbcConnection=null;
+        try {
+            jdbcConnection=setup.createConnection();
+            assertTableContainsValues(
+                    jdbcConnection,
+                    setup.prefixName(DbNames.META_INFO_COLUMN_TAB),
+                    new String[] {
+                            DbNames.META_INFO_COLUMN_TAB_TABLENAME_COL,
+                            DbNames.META_INFO_COLUMN_TAB_SUBTYPE_COL,
+                            DbNames.META_INFO_COLUMN_TAB_COLUMNNAME_COL,
+                            DbNames.META_INFO_COLUMN_TAB_SETTING_COL
+                    }, expectedValues,
+                    DbNames.META_INFO_COLUMN_TAB_TAG_COL+" = '"+DbExtMetaInfo.TAG_COL_FOREIGNKEY+"'"
+            );        
+        }finally {
+            if (jdbcConnection != null) {
+                jdbcConnection.close();
+            }
+        }
+    }
     public static void assertTrafoTable(AbstractTestSetup setup, String[][] expectedValues) throws SQLException {
         Connection jdbcConnection=null;
         try {

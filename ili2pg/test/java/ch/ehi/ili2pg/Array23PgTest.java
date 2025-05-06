@@ -11,7 +11,7 @@ import java.sql.Statement;
 import ch.ehi.ili2db.AbstractTestSetup;
 
 //-Ddburl=jdbc:postgresql:dbname -Ddbusr=usrname -Ddbpwd=1234
-public class Array23Test extends ch.ehi.ili2db.Array23Test {
+public class Array23PgTest extends ch.ehi.ili2db.Array23Test {
     private static final String DBSCHEMA = "Array23";
     String dburl;
     String dbuser;
