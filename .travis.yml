@@ -14,7 +14,6 @@ services:
   - postgresql
   
 addons:
-  postgresql: "13.20"
   ssh_known_hosts:
   - ftp.interlis.ch
   apt:
@@ -22,7 +21,7 @@ addons:
     - libmaven-ant-tasks-java
     - python3
     - python3-pip
-    - postgresql-13-postgis-3
+    - postgresql-postgis
 #    - python3-docutils    
     
 install: true
