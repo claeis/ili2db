@@ -32,10 +32,10 @@ before_script:
     - sleep 30; docker ps -a; docker logs --tail=50 mssql-test; docker exec -it mssql-test  /opt/mssql-tools/bin/sqlcmd -S . -U sa -P MsInst2019x -Q 'SELECT @@VERSION;'
     - docker exec -it mssql-test  /opt/mssql-tools/bin/sqlcmd -S . -U sa -P MsInst2019x -Q 'create database ili2db;'
     - mysql -u root --password="" -e 'SHOW VARIABLES LIKE "%version%";'
+    - sudo /etc/init.d/postgresql restart
     - psql -c 'create database ili2db;' -U postgres
     - psql -c 'select version();' -d ili2db -U postgres
-    - sudo /etc/init.d/postgresql restart
-    - psql -c 'create extension postgis;' -d ili2db -U postgres
+    - psql -c 'create extension if not exists postgis;' -d ili2db -U postgres
     - psql -c 'create extension "uuid-ossp";' -d ili2db -U postgres
     - psql -c 'select postgis_full_version();' -d ili2db -U postgres
     - # dpkg-query -L python3-docutils
