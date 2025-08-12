@@ -34,7 +34,8 @@ before_script:
     - mysql -u root --password="" -e 'SHOW VARIABLES LIKE "%version%";'
     - psql -c 'create database ili2db;' -U postgres
     - psql -c 'select version();' -d ili2db -U postgres
-    - sudo psql -c 'create extension postgis;' -d ili2db -U postgres
+    - sudo /etc/init.d/postgresql restart
+    - psql -c 'create extension postgis;' -d ili2db -U postgres
     - psql -c 'create extension "uuid-ossp";' -d ili2db -U postgres
     - psql -c 'select postgis_full_version();' -d ili2db -U postgres
     - # dpkg-query -L python3-docutils
