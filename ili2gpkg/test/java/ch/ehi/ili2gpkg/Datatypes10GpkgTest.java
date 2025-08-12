@@ -13,6 +13,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import ch.ehi.basics.logging.EhiLogger;
+import ch.ehi.ili2db.Ili2dbAssert;
 import ch.ehi.ili2db.base.DbNames;
 import ch.ehi.ili2db.base.Ili2db;
 import ch.ehi.ili2db.gui.Config;
