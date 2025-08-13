@@ -14,14 +14,14 @@ services:
   - postgresql
   
 addons:
+  postgresql: "13.0"
   ssh_known_hosts:
   - ftp.interlis.ch
   apt:
     packages:
     - python3
     - python3-pip
-    - postgresql-postgis
-    - postgresql-postgis-scripts
+    - postgresql-12-postgis-3
 #    - python3-docutils    
     
 install: true
@@ -36,7 +36,7 @@ before_script:
     - psql -c 'create database ili2db;' -U postgres
     - psql -c 'select version();' -d ili2db -U postgres
     - psql -c 'create extension if not exists postgis;' -d ili2db -U postgres
-    - psql -c 'create extension "uuid-ossp";' -d ili2db -U postgres
+    - psql -c 'create extension f not exists "uuid-ossp";' -d ili2db -U postgres
     - psql -c 'select postgis_full_version();' -d ili2db -U postgres
     - # dpkg-query -L python3-docutils
     - python3 --version
