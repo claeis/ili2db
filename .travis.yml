@@ -31,10 +31,10 @@ env:
 install: true
 
 before_install:
-    - ls -lrt /etc/postgresql/
+    - ls -lrt /etc/postgresql/*
   
 before_script:
-    - ls -lrt /etc/postgresql/
+    - ls -lrt /etc/postgresql/*
     - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
     - docker run --name=mssql-test -e 'ACCEPT_EULA=Y' -e 'MSSQL_PID=Developer' -e 'MSSQL_SA_PASSWORD=MsInst2019x' -p 1433:1433 -d mcr.microsoft.com/mssql/server:2022-CU9-ubuntu-20.04
     - # localhost is "-S ."
