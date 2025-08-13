@@ -23,7 +23,11 @@ addons:
     - python3-pip
     - postgresql-12-postgis-3
 #    - python3-docutils    
-    
+env:
+  global:
+  - PGPORT=5433
+  - PGUSER=travis
+  
 install: true
 
 before_script:
