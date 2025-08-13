@@ -13,30 +13,27 @@ branches:
 services:
   - docker
   - mysql
-  - postgresql
   
 addons:
-  postgresql: "13.20"
+  postgresql: 12
   ssh_known_hosts:
   - ftp.interlis.ch
   apt:
     packages:
     - python3
     - python3-pip
-#    - postgresql-13-postgis-3
+    - postgresql-postgis
 #    - python3-docutils    
 env:
   global:
   - PGPORT=5433
   - PGUSER=travis
   
-before_install:
-    - ls -lrt /etc/postgresql/*
-  
 install: true
 
 before_script:
-    - ls -lrt /etc/postgresql/*
+    - ls -lrt /etc/postgresql/
+    - grep 
     - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
     - docker run --name=mssql-test -e 'ACCEPT_EULA=Y' -e 'MSSQL_PID=Developer' -e 'MSSQL_SA_PASSWORD=MsInst2019x' -p 1433:1433 -d mcr.microsoft.com/mssql/server:2022-CU9-ubuntu-20.04
     - # localhost is "-S ."
