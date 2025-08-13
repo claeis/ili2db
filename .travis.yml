@@ -61,7 +61,7 @@ script:
   - # ant -f build-ili2pg.xml jar
   - ./gradlew jar test 
   - ./gradlew ili2mysqlJar ili2mysqlTest -Dmyurl=jdbc:mysql://localhost/ili2db?useSSL=false -Dmyusr=root
-  - ./gradlew ili2pgJar ili2pgTest -Ddburl=jdbc:postgresql:ili2db -Ddbusr=$PGUSER
+  - ./gradlew ili2pgJar ili2pgTest -Ddburl=jdbc:postgresql://localhost:$PGPORT/ili2db -Ddbusr=$PGUSER
   - ./gradlew ili2gpkgJar ili2gpkgTest
   - ./gradlew ili2fgdbJar
   - ./gradlew ili2mssqlJar ili2mssqlTest "-Ddburl=jdbc:sqlserver://localhost;databaseName=ili2db" -Ddbusr=sa -Ddbpwd=MsInst2019x
