@@ -15,7 +15,7 @@ services:
   - mysql
   
 addons:
-  postgresql: 12
+  postgresql: 12"
   ssh_known_hosts:
   - ftp.interlis.ch
   apt:
@@ -24,16 +24,19 @@ addons:
     - python3-pip
     - postgresql-postgis
 #    - python3-docutils    
-env:
-  global:
-  - PGPORT=5433
-  - PGUSER=travis
+#env:
+#  global:
+#  - PGPORT=5433
+#  - PGUSER=travis
   
 install: true
 
 before_script:
     - ls -lrt /etc/postgresql/
-    - grep 
+    - grep port /etc/postgresql/*/main/postgresql.conf
+    - sudo cp /etc/postgresql/{13,12}/main/pg_hba.conf
+    - sudo service postgresql stop
+    - sudo service postgresql start 12
     - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
     - docker run --name=mssql-test -e 'ACCEPT_EULA=Y' -e 'MSSQL_PID=Developer' -e 'MSSQL_SA_PASSWORD=MsInst2019x' -p 1433:1433 -d mcr.microsoft.com/mssql/server:2022-CU9-ubuntu-20.04
     - # localhost is "-S ."
