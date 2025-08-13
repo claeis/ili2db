@@ -24,9 +24,9 @@ addons:
     - python3-pip
     - postgresql-postgis
 #    - python3-docutils    
-#env:
-#  global:
-#  - PGPORT=5433
+env:
+  global:
+  - PGPORT=5433
 #  - PGUSER=travis
   
 install: true
@@ -34,7 +34,7 @@ install: true
 before_script:
     - ls -lrt /etc/postgresql/
     - grep port /etc/postgresql/*/main/postgresql.conf
-    - sudo cp /etc/postgresql/{13,12}/main/pg_hba.conf
+    - # sudo cp /etc/postgresql/{13,12}/main/pg_hba.conf
     - sudo service postgresql stop
     - sudo service postgresql start 12
     - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
