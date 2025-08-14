@@ -738,14 +738,14 @@ artifacts {
     archives(ili2pgJar.archivePath){
     	builtBy ili2pgJar
     }
-	//archives(ili2mysqlBindist.archivePath) {
-    //    type 'zip'
-    //    classifier 'bindist'
-    //    builtBy ili2mysqlBindist
-    //}
-    //archives(ili2mysqlJar.archivePath){
-    //	builtBy ili2mysqlJar
-    //}
+	archives(ili2mysqlBindist.archivePath) {
+        type 'zip'
+        classifier 'bindist'
+        builtBy ili2mysqlBindist
+    }
+    archives(ili2mysqlJar.archivePath){
+    	builtBy ili2mysqlJar
+    }
 	archives(ili2h2gisBindist.archivePath) {
         type 'zip'
         classifier 'bindist'
