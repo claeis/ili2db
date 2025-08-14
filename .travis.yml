@@ -34,7 +34,7 @@ install: true
 before_script:
     - ls -lrt /etc/postgresql/*/main/pg_hba.conf
     - grep port /etc/postgresql/*/main/postgresql.conf
-    - cat /etc/postgresql/*/main/pg_hba.conf
+    - sudo cat /etc/postgresql/*/main/pg_hba.conf
     - sudo service postgresql stop
     - sudo service postgresql start 12
     - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
