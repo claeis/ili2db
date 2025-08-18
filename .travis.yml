@@ -32,9 +32,11 @@ env:
 install: true
 
 before_script:
-    - ls -lrt /etc/postgresql/*/main/pg_hba.conf
+    - # show port used by different installed versions
     - grep port /etc/postgresql/*/main/postgresql.conf
+    - # enable same access rules in new installed version 12 as in pre-installed version 13
     - sudo cp /etc/postgresql/13/main/pg_hba.conf /etc/postgresql/12/main/pg_hba.conf
+    - # restart postgresql because of changes to pg_hba.conf
     - sudo service postgresql stop
     - sudo service postgresql start 12
     - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
