@@ -29,7 +29,6 @@ import java.sql.Statement;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -237,6 +236,7 @@ public class Ili2db {
         if(config.getMultiPointTrafo()==null)config.setMultiPointTrafo(Config.MULTIPOINT_TRAFO_COALESCE);
         if(config.getArrayTrafo()==null)config.setArrayTrafo(Config.ARRAY_TRAFO_COALESCE);
         if(config.getJsonTrafo()==null)config.setJsonTrafo(Config.JSON_TRAFO_COALESCE);
+        if(config.getStructTrafo()==null)config.setStructTrafo(Config.STRUCT_TRAFO_EXPAND);
         if(config.getMultilingualTrafo()==null)config.setMultilingualTrafo(Config.MULTILINGUAL_TRAFO_EXPAND);
         if(config.getLocalisedTrafo()==null)config.setLocalisedTrafo(Config.LOCALISED_TRAFO_EXPAND);
         if(config.getTransientObject(Config.TRANSIENT_BOOLEAN_VALIDATION)==null)config.setValidation(true);
@@ -790,7 +790,7 @@ public class Ili2db {
 				
 				// process xtf files
 				EhiLogger.logState("process data file...");
-				Map<String,BasketStat> stat=new HashMap<String,BasketStat>();
+				Map<String,BasketStat> stat=new java.util.HashMap<String,BasketStat>();
 				errs=new ch.ehi.basics.logging.ErrorTracker();
 				EhiLogger.getInstance().addListener(errs);
 				
@@ -1146,7 +1146,7 @@ public class Ili2db {
 			}else{
 				EhiLogger.logState(basketStat.getDatasource()+": "+basketStat.getTopic()+" BID="+basketStat.getBasketId());
 			}
-			HashMap<String, ClassStat> objStat=basketStat.getObjStat();
+			java.util.HashMap<String, ClassStat> objStat=basketStat.getObjStat();
 			ArrayList<String> classv=new ArrayList<String>(objStat.keySet());
 			java.util.Collections.sort(classv,new java.util.Comparator<String>(){
 				@Override
@@ -1846,6 +1846,9 @@ public class Ili2db {
                 } else if (arg.equals(Ili2dbMetaConfig.COALESCE_JSON)) {
                     if (parseBooleanArgument(value))
                         config.setJsonTrafo(Config.JSON_TRAFO_COALESCE);
+                } else if (arg.equals(Ili2dbMetaConfig.EXPAND_STRUCT)) {
+                    if (parseBooleanArgument(value))
+                        config.setStructTrafo(Config.STRUCT_TRAFO_EXPAND);
                 } else if (arg.equals(Ili2dbMetaConfig.EXPAND_MULTILINGUAL)) {
                     if (parseBooleanArgument(value))
                         config.setMultilingualTrafo(Config.MULTILINGUAL_TRAFO_EXPAND);
@@ -2002,6 +2005,7 @@ public class Ili2db {
             metaConfig.setConfigValue(Ili2dbMetaConfig.SECTION_ILI2DB, Ili2dbMetaConfig.COALESCE_MULTI_POINT,writeBooleanArgument(Config.MULTIPOINT_TRAFO_COALESCE.equals(config.getMultiPointTrafo())));
             metaConfig.setConfigValue(Ili2dbMetaConfig.SECTION_ILI2DB, Ili2dbMetaConfig.COALESCE_ARRAY,writeBooleanArgument(Config.ARRAY_TRAFO_COALESCE.equals(config.getArrayTrafo())));
             metaConfig.setConfigValue(Ili2dbMetaConfig.SECTION_ILI2DB, Ili2dbMetaConfig.COALESCE_JSON,writeBooleanArgument(Config.JSON_TRAFO_COALESCE.equals(config.getJsonTrafo())));
+            metaConfig.setConfigValue(Ili2dbMetaConfig.SECTION_ILI2DB, Ili2dbMetaConfig.COALESCE_JSON,writeBooleanArgument(Config.STRUCT_TRAFO_EXPAND.equals(config.getStructTrafo())));
             metaConfig.setConfigValue(Ili2dbMetaConfig.SECTION_ILI2DB, Ili2dbMetaConfig.EXPAND_MULTILINGUAL,writeBooleanArgument(Config.MULTILINGUAL_TRAFO_EXPAND.equals(config.getMultilingualTrafo())));
             metaConfig.setConfigValue(Ili2dbMetaConfig.SECTION_ILI2DB, Ili2dbMetaConfig.EXPAND_LOCALISED,writeBooleanArgument(Config.LOCALISED_TRAFO_EXPAND.equals(config.getLocalisedTrafo())));
             String inheritanceTrafo=config.getInheritanceTrafo();
@@ -2526,7 +2530,7 @@ public class Ili2db {
 			  if(function!=Config.FC_VALIDATE) {
 	              EhiLogger.logState("data <"+xtffile+">");
 			  }
-				Map<String,BasketStat> stat=new HashMap<String,BasketStat>();
+				Map<String,BasketStat> stat=new java.util.HashMap<String,BasketStat>();
 				ch.ehi.basics.logging.ErrorTracker errs=new ch.ehi.basics.logging.ErrorTracker();
 				EhiLogger.getInstance().addListener(errs);
 				transferToXtf(conn,function,xtffile,customMapping,mapping,td,geomConverter,config.getSender(),config,exportModelnames,basketSqlIds,stat,trafoConfig,class2wrapper);
@@ -3679,6 +3683,7 @@ public class Ili2db {
 		config.setMultiPointTrafo(Config.NULL);
 		config.setArrayTrafo(Config.NULL);
         config.setJsonTrafo(Config.NULL);
+        config.setStructTrafo(Config.NULL);
 		config.setMultilingualTrafo(Config.NULL);
         config.setLocalisedTrafo(Config.NULL);
 		config.setInheritanceTrafo(Config.NULL);
@@ -3690,6 +3695,7 @@ public class Ili2db {
         && Config.isNull(config.getMultiPointTrafo())
         && Config.isNull(config.getArrayTrafo())
         && Config.isNull(config.getJsonTrafo())
+        && Config.isNull(config.getStructTrafo())
         && Config.isNull(config.getMultilingualTrafo())
         && Config.isNull(config.getLocalisedTrafo())
         && Config.isNull(config.getInheritanceTrafo());

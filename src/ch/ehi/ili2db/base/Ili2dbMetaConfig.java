@@ -43,6 +43,7 @@ public class Ili2dbMetaConfig {
     public static final String CREATE_FK = "createFk";
     public static final String EXPAND_LOCALISED = "expandLocalised";
     public static final String EXPAND_MULTILINGUAL = "expandMultilingual";
+    public static final String EXPAND_STRUCT = "expandStruct";
     public static final String COALESCE_JSON = "coalesceJson";
     public static final String COALESCE_ARRAY = "coalesceArray";
     public static final String COALESCE_MULTI_POINT = "coalesceMultiPoint";

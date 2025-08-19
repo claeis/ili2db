@@ -14,6 +14,7 @@ import ch.ehi.ili2db.mapping.ArrayMappings;
 import ch.ehi.ili2db.mapping.MultiLineMappings;
 import ch.ehi.ili2db.mapping.MultiPointMappings;
 import ch.ehi.ili2db.mapping.MultiSurfaceMappings;
+import ch.ehi.ili2db.mapping.StructAttrPath;
 import ch.ehi.ili2db.mapping.TrafoConfig;
 import ch.ehi.ili2db.mapping.TrafoConfigNames;
 import ch.ehi.ili2db.mapping.Viewable2TableMapping;
@@ -239,7 +240,7 @@ public class AbstractRecordConverter {
 	        return ((ReferenceType) ((AttributeDef)((CompositionType)type).getComponentType().getAttributes().next()).getDomain()).getReferred();
 	    }
 
-	protected String getSqlAttrName(AttributeDef def,Integer epsgCode,String ownerSqlTableName,String targetSqlTableName){
+	protected String getSqlAttrName(StructAttrPath def,Integer epsgCode,String ownerSqlTableName,String targetSqlTableName){
 		return ili2sqlName.mapIliAttributeDef(def,epsgCode,ownerSqlTableName,targetSqlTableName);
 	}
 	/** maps a ili2c viewable to a sql name. 

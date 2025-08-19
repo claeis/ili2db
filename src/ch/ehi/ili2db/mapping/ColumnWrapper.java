@@ -4,16 +4,19 @@ import ch.interlis.ili2c.metamodel.Element;
 import ch.interlis.ili2c.metamodel.ViewableTransferElement;
 
 public class ColumnWrapper {
-    private ViewableTransferElement prop=null;
+    private StructAttrPath prop=null;
     private Integer epsgCode=null;
-    public ColumnWrapper(ViewableTransferElement transferProperty) {
+    public ColumnWrapper(StructAttrPath transferProperty) {
         prop=transferProperty;
     }
-    public ColumnWrapper(ViewableTransferElement transferProperty, Integer epsgCode) {
+    public ColumnWrapper(StructAttrPath transferProperty, Integer epsgCode) {
         prop=transferProperty;
         this.epsgCode=epsgCode;
     }
     public ViewableTransferElement getViewableTransferElement() {
+        return prop.getLast().getAttr();
+    }
+    public StructAttrPath getStructAttrPath() {
         return prop;
     }
     public Integer getEpsgCode() {
@@ -21,7 +24,7 @@ public class ColumnWrapper {
     }
     @Override
     public String toString() {
-        return ((Element)prop.obj).getScopedName() + (epsgCode==null ? "":":"+epsgCode);
+        return ((Element)getViewableTransferElement().obj).getScopedName() + (epsgCode==null ? "":":"+epsgCode);
     }
     
 }

@@ -125,7 +125,7 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 		
 	}
 	public void writeRecord(long basketSqlId, java.util.Map<String,String> genericDomains,IomObject iomObj,Viewable iomClass,
-			AbstractStructWrapper structEle0, ViewableWrapper aclass, String sqlType,
+			AbstractStructWrapper structEle0, ViewableWrapper tableWrapper, String sqlType,
 			long sqlId, boolean updateObj, PreparedStatement ps,ArrayList<AbstractStructWrapper> structQueue,Viewable originalClass, int attrIndex, long parentSqlId)
 			throws SQLException, ConverterException {
 		int valuei=1;
@@ -148,8 +148,8 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 			valuei++;
 		}
 		
-		if(aclass.isSecondaryTable()) {
-			AttributeDef attr = aclass.getPrimitiveCollectionAttr();
+		if(tableWrapper.isSecondaryTable()) {
+			AttributeDef attr = tableWrapper.getPrimitiveCollectionAttr();
 			if (attr != null) {
 				// T_Seq
 				ps.setInt(valuei, attrIndex);
@@ -160,8 +160,8 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 				valuei++;
 			}
 		} else {
-			if(aclass.getExtending()==null){
-				if(createTypeDiscriminator || aclass.includesMultipleTypes()){
+			if(tableWrapper.getExtending()==null){
+				if(createTypeDiscriminator || tableWrapper.includesMultipleTypes()){
 					ps.setString(valuei, sqlType);
 					valuei++;
 				}
@@ -169,10 +169,10 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 				if(structEle0==null){
 					if(!updateObj){
 						if(iomClass instanceof Table && ((Table) iomClass).isIdentifiable()){ // concrete object has a tid
-							if((importTid && !(aclass.getViewable() instanceof AssociationDef)) || aclass.hasOid()){
+							if((importTid && !(tableWrapper.getViewable() instanceof AssociationDef)) || tableWrapper.hasOid()){
 								// import TID from transfer file
                                 String oid=iomObj.getobjectoid();
-								if(isUuidOid(td,aclass.getOid())){
+								if(isUuidOid(td,tableWrapper.getOid())){
 								    oid=Validator.normalizeUUID(oid);
 									 Object toInsertUUID = geomConv.fromIomUuid(oid);
 									 ps.setObject(valuei, toInsertUUID);
@@ -197,7 +197,7 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 		}
  
 		Map<? extends ch.interlis.ili2c.metamodel.Element,? extends ch.interlis.ili2c.metamodel.Element> attrs=getIomObjectAttrs(iomClass); // maps the root definition of a RoleDef/AttrDef to the concrete RoleDef/AttrDef in the class of the current object
-		Iterator<ColumnWrapper> iter = aclass.getAttrIterator();
+		Iterator<ColumnWrapper> iter = tableWrapper.getAttrIterator();
 		while (iter.hasNext()) {
 		    ColumnWrapper columnWrapper=iter.next();
 			ViewableTransferElement obj = columnWrapper.getViewableTransferElement();
@@ -213,11 +213,11 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
                         // skip implicit particles (base-viewables) of views
 					} else {
 						if (mapAsTextCol(((AttributeDef) attrs.get(rootAttr)))) {
-							valuei = addAttrValueTXT(iomObj, sqlType, sqlId, aclass.getSqlTablename(), ps,
+							valuei = addAttrValueTXT(iomObj, sqlType, sqlId, tableWrapper.getSqlTablename(), ps,
 									valuei, attr, (AttributeDef) attrs.get(rootAttr), columnWrapper.getEpsgCode(), structQueue, genericDomains, originalClass, attrIndex);
 
 						} else {
-							valuei = addAttrValue(iomObj, sqlType, sqlId, aclass.getSqlTablename(), ps,
+							valuei = addAttrValue(iomObj, sqlType, sqlId, tableWrapper.getSqlTablename(), ps,
 									valuei, attr, (AttributeDef) attrs.get(rootAttr), columnWrapper.getEpsgCode(), structQueue, genericDomains, originalClass, attrIndex);
 						}
 					}
@@ -360,10 +360,10 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 	}
 	/** creates an insert statement for a given viewable.
 	 * @param sqlTableName table name of viewable
-	 * @param aclass viewable
+	 * @param tableWrapper viewable
 	 * @return insert statement
 	 */
-	public String createInsertStmt(boolean isUpdate,Viewable iomClass,DbTableName sqlTableName,ViewableWrapper aclass,AbstractStructWrapper structEle0){
+	public String createInsertStmt(boolean isUpdate,Viewable iomClass,DbTableName sqlTableName,ViewableWrapper tableWrapper,AbstractStructWrapper structEle0){
 		StringBuffer ret = new StringBuffer();
 		StringBuffer values = new StringBuffer();
 		//INSERT INTO table_name (column1,column2,column3,...)
@@ -415,8 +415,8 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 			sep=",";
 		}
 		
-		if(aclass.isSecondaryTable()) {
-			AttributeDef attr = aclass.getPrimitiveCollectionAttr();
+		if(tableWrapper.isSecondaryTable()) {
+			AttributeDef attr = tableWrapper.getPrimitiveCollectionAttr();
 			if (attr != null) {
 				// sequence column
 				ret.append(sep);
@@ -430,8 +430,8 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 
 				// reference to parent
 				ret.append(sep);
-				ViewableWrapper parentTable = aclass.getMainTable();
-				ret.append(ili2sqlName.mapIliAttributeDefReverse(attr, aclass.getSqlTablename(), parentTable.getSqlTablename()));
+				ViewableWrapper parentTable = tableWrapper.getMainTable();
+				ret.append(ili2sqlName.mapIliAttributeDefReverse(attr, tableWrapper.getSqlTablename(), parentTable.getSqlTablename()));
 				if(isUpdate){
 					ret.append("=?");
 				}else{
@@ -441,8 +441,8 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 			}
 		} else {
 			// if root, add type
-			if(aclass.getExtending()==null){
-				if(createTypeDiscriminator || aclass.includesMultipleTypes()){
+			if(tableWrapper.getExtending()==null){
+				if(createTypeDiscriminator || tableWrapper.includesMultipleTypes()){
 					ret.append(sep);
 					ret.append(DbNames.T_TYPE_COL);
 					if(isUpdate){
@@ -455,7 +455,7 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 				// if Class
 				if(structEle0==null){
 					if(!isUpdate){
-						if((importTid && !(aclass.getViewable() instanceof AssociationDef))|| aclass.hasOid()){
+						if((importTid && !(tableWrapper.getViewable() instanceof AssociationDef))|| tableWrapper.hasOid()){
 							ret.append(sep);
 							ret.append(DbNames.T_ILI_TID_COL);
 							values.append(",?");
@@ -464,7 +464,7 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 					}
 				}
 				// if STRUCTURE, add ref to parent
-				if(aclass.isStructure()){
+				if(tableWrapper.isStructure()){
 					if(structEle0==null){
 						// struct is extended by a class and current object is an instance of the class
 					}else{
@@ -495,7 +495,7 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 		}
 		
 		Map<? extends ch.interlis.ili2c.metamodel.Element,? extends ch.interlis.ili2c.metamodel.Element> attrs=getIomObjectAttrs(iomClass);
-		Iterator<ColumnWrapper> iter = aclass.getAttrIterator();
+		Iterator<ColumnWrapper> iter = tableWrapper.getAttrIterator();
 		while (iter.hasNext()) {
 		    ColumnWrapper columnWrapper=iter.next();
 		   ViewableTransferElement obj = columnWrapper.getViewableTransferElement();

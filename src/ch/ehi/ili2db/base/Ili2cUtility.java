@@ -391,6 +391,12 @@ public class Ili2cUtility {
         }
         return false;
     }
+    public static boolean isExpandMapping(AttributeDef attr) {
+        if(IliMetaAttrNames.METAATTR_MAPPING_EXPAND.equals(attr.getMetaValue(IliMetaAttrNames.METAATTR_MAPPING))){
+            return true;
+        }
+        return false;
+    }
     public static boolean isIomObjectPrimType(TransferDescription td,AttributeDef attr) {
         Type type=attr.getDomainResolvingAll();
         if(type instanceof CompositionType 

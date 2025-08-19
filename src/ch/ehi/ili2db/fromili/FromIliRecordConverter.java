@@ -329,7 +329,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
                               // skip implicit particles (base-viewables) of views
                           }else{
                               Integer epsgCode=columnWrapper.getEpsgCode();
-                              generateAttr(dbTable,dbTypeCol,def.getViewable(),attr,epsgCode);
+                              generateAttr(dbTable,dbTypeCol,def,columnWrapper);
                           }
                       }
                   }catch(Exception ex){
@@ -622,12 +622,6 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
     private List<Viewable> getPotentialClassTypes(Viewable def) {
         ArrayList<Viewable> extensions = new ArrayList<Viewable>();
         getExtensions_recursiveHelper(def, extensions);
-        /*for (Object o : extensions) {
-            Viewable v = (Viewable) o;
-            if (!v.isAbstract()) {
-                extensions.add(v);
-            }
-        }*/
         return extensions;
     }
 
@@ -638,11 +632,9 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
         Iterator<Viewable> iter = (Iterator<Viewable>) def.getDirectExtensions().iterator();
         while (iter.hasNext()) {
             Viewable ext = iter.next();
-            if (!ext.isAbstract()) {
-                String trafo = trafoConfig.getViewableConfig(ext, TrafoConfigNames.INHERITANCE_TRAFO);
-                if(trafo==null || !trafo.equals(TrafoConfigNames.INHERITANCE_TRAFO_NEWANDSUBCLASS)) {
-                        getExtensions_recursiveHelper(ext, s);
-                }
+            String trafo = trafoConfig.getViewableConfig(ext, TrafoConfigNames.INHERITANCE_TRAFO);
+            if(trafo==null || !trafo.equals(TrafoConfigNames.INHERITANCE_TRAFO_NEWANDSUBCLASS)) {
+                    getExtensions_recursiveHelper(ext, s);
             }
         }
     }
@@ -750,16 +742,18 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
           return ret;
 	}
 
-	public void generateAttr(DbTable dbTable,DbColumn dbTypeCol, Viewable aclass,AttributeDef attr,Integer epsgCode)
+	public void generateAttr(DbTable dbTable,DbColumn dbTypeCol, ViewableWrapper tableWrapper,ColumnWrapper colWrapper)
 	throws Ili2dbException
 	{
 		OutParam<DbColumn> dbCol=new OutParam<DbColumn>();dbCol.value=null;
 		OutParam<Unit> unitDef=new OutParam<Unit>();unitDef.value=null;
 		OutParam<Boolean> mText=new OutParam<Boolean>();mText.value=false;
         OutParam<String> simpleTypeKind=new OutParam<String>();simpleTypeKind.value=null;
-        Model model = (Model) attr.getContainer(Model.class);
+        Integer epsgCode=colWrapper.getEpsgCode();
 
 		ArrayList<DbColumn> dbColExts=new ArrayList<DbColumn>();
+		AttributeDef attr=(AttributeDef)colWrapper.getViewableTransferElement().obj;
+        Model model = (Model) attr.getContainer(Model.class);
 		Type type = attr.getDomainResolvingAll();
 		String typeKind=null;
         if((Ili2cUtility.isJsonMapping(attr) && coalesceJson) 
@@ -775,14 +769,14 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
             AttributeDef localAttr=attrMapping.getValueAttr();
             Type localType = localAttr.getDomainResolvingAll();
             if(Ili2cUtility.isIomObjectPrimType(td,localAttr)) {
-                if(!createSimpleDbCol(dbTable, aclass, localAttr, localType, dbCol, simpleTypeKind,unitDef, mText, dbColExts)) {
+                if(!createSimpleDbCol(dbTable, localAttr, localType, dbCol, simpleTypeKind,unitDef, mText, dbColExts)) {
                     throw new IllegalStateException("unexpected attr type "+localAttr.getScopedName());
               }
                 dbCol.value.setArraySize(DbColumn.UNLIMITED_ARRAY);     
             }else if(Ili2cUtility.isReferenceType(td,localAttr)) {
                 if(createExtRef && ((ReferenceType)localType).isExternal()) {
                     DbColVarchar ret=new DbColVarchar();
-                    ret.setName(ili2sqlName.mapIliAttributeDef(attr,dbTable.getName().getName(),getSqlType(((ReferenceType)localType).getReferred()).getName(),false));
+                    ret.setName(ili2sqlName.mapIliAttributeDef(colWrapper.getStructAttrPath(),dbTable.getName().getName(),getSqlType(((ReferenceType)localType).getReferred()).getName(),false));
                     ret.setSize(255);
                     ret.setArraySize(DbColumn.UNLIMITED_ARRAY);     
                     dbColExts.add(ret);
@@ -793,7 +787,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
                     }else{
                         ViewableWrapper targetTable=targetTables.get(0);
                         DbColId ret=new DbColId();
-                        String colName=ili2sqlName.mapIliAttributeDef(attr,dbTable.getName().getName(),targetTable.getSqlTablename(),targetTables.size()>1);
+                        String colName=ili2sqlName.mapIliAttributeDef(colWrapper.getStructAttrPath(),dbTable.getName().getName(),targetTable.getSqlTablename(),targetTables.size()>1);
                         ret.setName(colName);
                         ret.setNotNull(false);
                         ret.setPrimaryKey(false);
@@ -808,14 +802,14 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
         }else if(Ili2cUtility.isIomObjectPrimType(td,attr)) {
             boolean result;
             if(sqlColsAsText){
-                result = createSimpleDbColTXT(dbTable, aclass, attr, type, dbCol, unitDef, mText, dbColExts);
+                result = createSimpleDbColTXT(dbTable, attr, type, dbCol, unitDef, mText, dbColExts);
             }else {
-                result = createSimpleDbCol(dbTable, aclass, attr, type, dbCol, simpleTypeKind,unitDef, mText, dbColExts);
+                result = createSimpleDbCol(dbTable, attr, type, dbCol, simpleTypeKind,unitDef, mText, dbColExts);
             }
             if(result) {
                 typeKind=simpleTypeKind.value;
             }else {
-                throw new IllegalStateException("failed to map attribute "+ attr.getScopedName());
+                throw new IllegalStateException("failed to map attribute "+ colWrapper.getStructAttrPath().getIliQName());
             }
 		}else if (type instanceof AbstractSurfaceOrAreaType){
 			if(createItfLineTables){
@@ -831,7 +825,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
                 setCrs(ret,epsgCode);
                 CoordType coord=(CoordType)((AbstractSurfaceOrAreaType)type).getControlPointDomain().getType();
                 ret.setDimension(coord.getDimensions().length);
-                setBB(ret, coord,attr.getContainer().getScopedName(null)+"."+attr.getName());
+                setBB(ret, coord,colWrapper.getStructAttrPath().getIliQName());
                 dbCol.value=ret;
 			}else{
 				DbColGeometry ret=new DbColGeometry();
@@ -862,16 +856,16 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 					coord = (CoordType) Ili2cUtility.resolveGenericCoordDomain(model, coordDomain, epsgCode).getType();
 				}
 				ret.setDimension(coord.getDimensions().length);
-				setBB(ret, coord,attr.getContainer().getScopedName(null)+"."+attr.getName());
+				setBB(ret, coord,colWrapper.getStructAttrPath().getIliQName());
 				dbCol.value=ret;
 			}
 			if(createItfAreaRef){
 				if(type instanceof AreaType){
 					DbColGeometry ret=new DbColGeometry();
-					String sqlName=getSqlAttrName(attr,epsgCode,dbTable.getName().getName(),null)+DbNames.ITF_MAINTABLE_GEOTABLEREF_COL_SUFFIX;
+					String sqlName=getSqlAttrName(colWrapper.getStructAttrPath(),epsgCode,dbTable.getName().getName(),null)+DbNames.ITF_MAINTABLE_GEOTABLEREF_COL_SUFFIX;
 					ret.setName(sqlName);
 					ret.setType(DbColGeometry.POINT);
-					setNullable(aclass,attr, ret);
+					setNullable(tableWrapper.getViewable(),attr, ret);
 					// get crs from ili
 					setCrs(ret,epsgCode);
 					ret.setDimension(2); // always 2 (even if defined as 3d in ili)
@@ -880,19 +874,19 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 					if (coord.isGeneric()) {
 						coord = (CoordType) Ili2cUtility.resolveGenericCoordDomain(model, coordDomain, epsgCode).getType();
 					}
-					setBB(ret, coord,attr.getContainer().getScopedName(null)+"."+attr.getName());
+					setBB(ret, coord,colWrapper.getStructAttrPath().getIliQName());
 					dbColExts.add(ret);
 				}
 			}
 		}else if (type instanceof PolylineType){
-			String attrName=attr.getContainer().getScopedName(null)+"."+attr.getName();
+			String attrName=colWrapper.getStructAttrPath().getIliQName();
 			DbColGeometry ret = generatePolylineType(model, (PolylineType)type, attrName, epsgCode);
 			setCrs(ret,epsgCode);
 			dbCol.value=ret;
-            typeKind=DbExtMetaInfo.TAG_COL_TYPEKIND_POLYLINE;                        
+            typeKind=DbExtMetaInfo.TAG_COL_TYPEKIND_POLYLINE;
 		}
 		else if (type instanceof MultiPolylineType){
-            String attrName = attr.getContainer().getScopedName(null) + "." + attr.getName();
+            String attrName=colWrapper.getStructAttrPath().getIliQName();
             DbColGeometry ret = generateMultiPolylineType(model, (MultiPolylineType) type, attrName, epsgCode);
             setCrs(ret, epsgCode);
             dbCol.value = ret;
@@ -906,7 +900,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 				coord = (CoordType) Ili2cUtility.resolveGenericCoordDomain(attr, epsgCode).getType();
 			}
 			ret.setDimension(coord.getDimensions().length);
-			setBB(ret, coord,attr.getContainer().getScopedName(null)+"."+attr.getName());
+			setBB(ret, coord,colWrapper.getStructAttrPath().getIliQName());
 			dbCol.value=ret;
 			typeKind=DbExtMetaInfo.TAG_COL_TYPEKIND_COORD;
 		} else if (type instanceof MultiCoordType) {
@@ -918,7 +912,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 				coord = (MultiCoordType) Ili2cUtility.resolveGenericCoordDomain(attr, epsgCode).getType();
 			}
 			ret.setDimension(coord.getDimensions().length);
-			setBB(ret, coord,attr.getContainer().getScopedName(null) + "." + attr.getName());
+			setBB(ret, coord,colWrapper.getStructAttrPath().getIliQName());
 			dbCol.value = ret;
             typeKind=DbExtMetaInfo.TAG_COL_TYPEKIND_MULTICOORD;                        
 		}else if (type instanceof CompositionType){
@@ -927,7 +921,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
                 if(createExtRef) {
                     DbColVarchar ret=new DbColVarchar();
                     ret.setSize(255);
-                    ret.setName(ili2sqlName.mapIliAttributeDef(attr,dbTable.getName().getName(),getSqlType(getCatalogueRefTarget(type)).getName(),false));
+                    ret.setName(ili2sqlName.mapIliAttributeDef(colWrapper.getStructAttrPath(),dbTable.getName().getName(),getSqlType(getCatalogueRefTarget(type)).getName(),false));
                     ret.setNotNull(false);
                     ret.setPrimaryKey(false);
                     if(createFkIdx){
@@ -941,7 +935,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
                     for(ViewableWrapper targetTable:targetTables)
                     {
                         DbColId ret=new DbColId();
-                        String colName=ili2sqlName.mapIliAttributeDef(attr,dbTable.getName().getName(),targetTable.getSqlTablename(),targetTables.size()>1);
+                        String colName=ili2sqlName.mapIliAttributeDef(colWrapper.getStructAttrPath(),dbTable.getName().getName(),targetTable.getSqlTablename(),targetTables.size()>1);
                         ret.setName(colName);
                         fkColNames.add(colName);
                         ret.setNotNull(false);
@@ -958,7 +952,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
                     if(createMandatoryCheck && catRefMandatory) {
                         Viewable sourceClass=(Viewable)attr.getContainer();
                         List<Viewable> exts=getPotentialClassTypes(sourceClass);
-                        String cnstrName="ili_"+getSqlAttrName(attr,null,dbTable.getName().getName(),null);
+                        String cnstrName="ili_"+getSqlAttrName(colWrapper.getStructAttrPath(),null,dbTable.getName().getName(),null);
                         String cnstr = createReferenceAttrCheck(dbTypeCol!=null?exts:null,fkColNames);
                         dbTable.setNativeConstraint(cnstrName, cnstr);
                     }
@@ -979,7 +973,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
                 SurfaceType surface=((SurfaceType) surfaceAttr.getDomainResolvingAliases());
                 CoordType coord=(CoordType)surface.getControlPointDomain().getType();
                 ret.setDimension(coord.getDimensions().length);
-                setBB(ret, coord,attr.getContainer().getScopedName(null)+"."+attr.getName());
+                setBB(ret, coord,colWrapper.getStructAttrPath().getIliQName());
                 dbCol.value=ret;
                 trafoConfig.setAttrConfig(attr, TrafoConfigNames.MULTISURFACE_TRAFO,TrafoConfigNames.MULTISURFACE_TRAFO_COALESCE);
                 typeKind=DbExtMetaInfo.TAG_COL_TYPEKIND_MULTISURFACE;                        
@@ -998,7 +992,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
                 PolylineType polylineType=((PolylineType) polylineAttr.getDomainResolvingAliases());
                 CoordType coord=(CoordType)polylineType.getControlPointDomain().getType();
                 ret.setDimension(coord.getDimensions().length);
-                setBB(ret, coord,attr.getContainer().getScopedName(null)+"."+attr.getName());
+                setBB(ret, coord,colWrapper.getStructAttrPath().getIliQName());
                 dbCol.value=ret;
                 trafoConfig.setAttrConfig(attr, TrafoConfigNames.MULTILINE_TRAFO,TrafoConfigNames.MULTILINE_TRAFO_COALESCE);
                 typeKind=DbExtMetaInfo.TAG_COL_TYPEKIND_MULTIPOLYLINE;                       
@@ -1012,7 +1006,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
                 setCrs(ret,epsgCode);
                 CoordType coord=(CoordType) ( coordAttr.getDomainResolvingAliases());
                 ret.setDimension(coord.getDimensions().length);
-                setBB(ret, coord,attr.getContainer().getScopedName(null)+"."+attr.getName());
+                setBB(ret, coord,colWrapper.getStructAttrPath().getIliQName());
                 dbCol.value=ret;
                 trafoConfig.setAttrConfig(attr, TrafoConfigNames.MULTIPOINT_TRAFO,TrafoConfigNames.MULTIPOINT_TRAFO_COALESCE);
                 typeKind=DbExtMetaInfo.TAG_COL_TYPEKIND_MULTICOORD;                       
@@ -1020,7 +1014,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
                         || TrafoConfigNames.MULTILINGUAL_TRAFO_EXPAND.equals(trafoConfig.getAttrConfig(attr,TrafoConfigNames.MULTILINGUAL_TRAFO)))){
                 for(String sfx:DbNames.MULTILINGUAL_TXT_COL_SUFFIXS){
                     DbColVarchar ret=new DbColVarchar();
-                    ret.setName(getSqlAttrName(attr,null,dbTable.getName().getName(),null)+sfx);
+                    ret.setName(getSqlAttrName(colWrapper.getStructAttrPath(),null,dbTable.getName().getName(),null)+sfx);
                     ret.setSize(DbColVarchar.UNLIMITED);
                     if(createTextCheck) {
                         ret.setMinLength(1);
@@ -1034,14 +1028,14 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
                     || TrafoConfigNames.LOCALISED_TRAFO_EXPAND.equals(trafoConfig.getAttrConfig(attr,TrafoConfigNames.LOCALISED_TRAFO)))){
                 
                 DbColVarchar ret=new DbColVarchar();
-                ret.setName(getSqlAttrName(attr,null,dbTable.getName().getName(),null));
+                ret.setName(getSqlAttrName(colWrapper.getStructAttrPath(),null,dbTable.getName().getName(),null));
                 ret.setSize(DbColVarchar.UNLIMITED);
                 ret.setNotNull(false);
                 ret.setPrimaryKey(false);
                 
                 dbCol.value=ret;
                 ret=new DbColVarchar();
-                ret.setName(getSqlAttrName(attr,null,dbTable.getName().getName(),null)+DbNames.LOCALISED_TXT_COL_SUFFIX);
+                ret.setName(getSqlAttrName(colWrapper.getStructAttrPath(),null,dbTable.getName().getName(),null)+DbNames.LOCALISED_TXT_COL_SUFFIX);
                 ret.setSize(2);
                 ret.setNotNull(false);
                 
@@ -1050,13 +1044,13 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
                 trafoConfig.setAttrConfig(attr, TrafoConfigNames.LOCALISED_TRAFO,TrafoConfigNames.LOCALISED_TRAFO_EXPAND);
             }else{
                 // add reference col from struct ele to parent obj to struct table
-                addParentRef(aclass,attr);
+                addParentRef(tableWrapper,attr);
                 dbCol.value=null;
             }
 		}else if (type instanceof ReferenceType){
             if(createExtRef && ((ReferenceType)type).isExternal()) {
                 DbColVarchar ret=new DbColVarchar();
-                ret.setName(ili2sqlName.mapIliAttributeDef(attr,dbTable.getName().getName(),getSqlType(((ReferenceType)type).getReferred()).getName(),false));
+                ret.setName(ili2sqlName.mapIliAttributeDef(colWrapper.getStructAttrPath(),dbTable.getName().getName(),getSqlType(((ReferenceType)type).getReferred()).getName(),false));
                 ret.setSize(255);
                 if(createFkIdx){
                     ret.setIndex(true);
@@ -1069,7 +1063,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
                 for(ViewableWrapper targetTable:targetTables)
                 {
                     DbColId ret=new DbColId();
-                    String colName=ili2sqlName.mapIliAttributeDef(attr,dbTable.getName().getName(),targetTable.getSqlTablename(),targetTables.size()>1);
+                    String colName=ili2sqlName.mapIliAttributeDef(colWrapper.getStructAttrPath(),dbTable.getName().getName(),targetTable.getSqlTablename(),targetTables.size()>1);
                     ret.setName(colName);
                     fkColNames.add(colName);
                     ret.setNotNull(false);
@@ -1086,7 +1080,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
                 if(createMandatoryCheck) {
                     Viewable sourceClass=(Viewable)attr.getContainer();
                     List<Viewable> exts=getPotentialClassTypes(sourceClass);
-                    String cnstrName="ili_"+getSqlAttrName(attr,null,dbTable.getName().getName(),null);
+                    String cnstrName="ili_"+getSqlAttrName(colWrapper.getStructAttrPath(),null,dbTable.getName().getName(),null);
                     String cnstr = createReferenceAttrCheck(dbTypeCol!=null?exts:null,fkColNames);
                     dbTable.setNativeConstraint(cnstrName, cnstr);
                 }
@@ -1100,15 +1094,15 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 			if (createEnumTxtCol) {
 				DbColVarchar ret = new DbColVarchar();
 				ret.setSize(255);
-				ret.setName(getSqlAttrName(attr,null,dbTable.getName().getName(),null)+DbNames.ENUM_TXT_COL_SUFFIX);
-				setNullable(aclass,attr, ret);
+				ret.setName(getSqlAttrName(colWrapper.getStructAttrPath(),null,dbTable.getName().getName(),null)+DbNames.ENUM_TXT_COL_SUFFIX);
+				setNullable(tableWrapper.getViewable(),attr, ret);
 				dbColExts.add(ret);
 			}
 
-            String sqlColName=getSqlAttrName(attr,epsgCode,dbTable.getName().getName(),null);
+            String sqlColName=getSqlAttrName(colWrapper.getStructAttrPath(),epsgCode,dbTable.getName().getName(),null);
             
             String attrName=attr.getName();
-            List<Viewable> exts=getPotentialClassTypes(aclass);
+            List<Viewable> exts=getPotentialClassTypes(tableWrapper.getViewable());
             for(Viewable extV:exts) {
                 AttributeDef extAttr=null;
                 extAttr=(AttributeDef) extV.getElement(AttributeDef.class,attrName);
@@ -1124,11 +1118,11 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 			// add enum type to metaattr
 		}
 		if (dbCol.value != null) {
-			String sqlColName=getSqlAttrName(attr,epsgCode,dbTable.getName().getName(),null);
-			setAttrDbColProps(aclass,attr, dbCol.value, sqlColName);
+			String sqlColName=getSqlAttrName(colWrapper.getStructAttrPath(),epsgCode,dbTable.getName().getName(),null);
+			setAttrDbColProps(tableWrapper,attr, dbCol.value, sqlColName);
 			String subType=null;
 			Viewable attrClass=(Viewable)attr.getContainer();
-			if(attrClass!=aclass && attrClass.isExtending(aclass)){
+			if(attrClass!=tableWrapper.getViewable() && attrClass.isExtending(tableWrapper.getViewable())){
 				subType=getSqlType(attrClass).getName();
 			}
 			if(typeKind!=null) {
@@ -1251,7 +1245,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 		 }
 	}
 
-	private boolean createSimpleDbColTXT(DbTable dbTable, Viewable aclass, AttributeDef attr, Type type,
+	private boolean createSimpleDbColTXT(DbTable dbTable, AttributeDef attr, Type type,
 										 OutParam<DbColumn> dbCol, OutParam<Unit> unitDef, OutParam<Boolean> mText, ArrayList<DbColumn> dbColExts) {
 		DbColVarchar ret = new DbColVarchar();
 		ret.setSize(DbColVarchar.UNLIMITED);
@@ -1259,7 +1253,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 		return true;
 	}
 
-	private boolean createSimpleDbCol(DbTable dbTable, Viewable aclass, AttributeDef attr, Type type,
+	private boolean createSimpleDbCol(DbTable dbTable,AttributeDef attr, Type type,
 			OutParam<DbColumn> dbCol, OutParam<String> typeKind,OutParam<Unit> unitDef, OutParam<Boolean> mText, ArrayList<DbColumn> dbColExts) {
 		if (attr.isDomainBoolean()) {
 			dbCol.value= new DbColBoolean();
@@ -1488,7 +1482,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
         }
         return false;
     }
-	private void addParentRef(Viewable parentTable,AttributeDef attr){
+	private void addParentRef(ViewableWrapper parentTable,AttributeDef attr){
 		CompositionType type = (CompositionType)attr.getDomainResolvingAll();
 		Table structClass=type.getComponentType();
 		// if abstract struct, might have multiple tables!
@@ -1499,7 +1493,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 			DbTable dbTable=schema.findTable(structClassSqlName);
 			
 			// add ref attr
-			String refAttrSqlName=ili2sqlName.mapIliAttributeDefReverse(attr,structClassSqlName.getName(),class2wrapper.get(parentTable).getSqlTablename());
+			String refAttrSqlName=ili2sqlName.mapIliAttributeDefReverse(attr,structClassSqlName.getName(),parentTable.getSqlTablename());
 			DbColId dbParentId=new DbColId();
 			dbParentId.setName(refAttrSqlName);
 			dbParentId.setNotNull(false); // values of other struct attrs will have NULL
@@ -1514,9 +1508,9 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 				dbParentId.setComment(cmt.toString());
 			}
 			if(createFk){
-				dbParentId.setReferencedTable(class2wrapper.get(parentTable).getSqlTable());
+				dbParentId.setReferencedTable(parentTable.getSqlTable());
 			}
-                        metaInfo.setColumnInfo(dbTable.getName().getName(), null, dbParentId.getName(), DbExtMetaInfo.TAG_COL_FOREIGNKEY, class2wrapper.get(parentTable).getSqlTablename());
+                        metaInfo.setColumnInfo(dbTable.getName().getName(), null, dbParentId.getName(), DbExtMetaInfo.TAG_COL_FOREIGNKEY, parentTable.getSqlTablename());
 			if(createFkIdx){
 				dbParentId.setIndex(true);
 			}
@@ -1524,7 +1518,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 		}
 	}
 
-	protected void setAttrDbColProps(Viewable aclass,AttributeDef attr, DbColumn dbCol,
+	protected void setAttrDbColProps(ViewableWrapper aclass,AttributeDef attr, DbColumn dbCol,
 			String sqlName) {
 		dbCol.setName(sqlName);
 		StringBuffer cmt=new StringBuffer();
@@ -1536,7 +1530,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 		if(cmt.length()>0){
 			dbCol.setComment(cmt.toString());
 		}
-		setNullable(aclass,attr, dbCol);
+		setNullable(aclass.getViewable(),attr, dbCol);
 	}
 
 	public void setNullable(Viewable aclass,AttributeDef attr, DbColumn dbCol) {

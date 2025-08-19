@@ -1746,24 +1746,24 @@ public class TransferFromXtf {
 		 }
 		 updateObjStat(objStat,tag,sqlId);
 		 // loop over all classes; start with leaf, end with the base of the inheritance hierarchy
-		 ViewableWrapper aclass=class2wrapper.get(aclass1);
-		 if(aclass==null) {
+		 ViewableWrapper tableWrapper=class2wrapper.get(aclass1);
+		 if(tableWrapper==null) {
 		     throw new IllegalStateException("no ViewableWrapper found for "+aclass1.getScopedName());
 		 }
-		 while(aclass!=null){
+		 while(tableWrapper!=null){
 			 {
 		         OutParam<String> stmtKey=new OutParam<String>();
-					String insert = getInsertStmt(updateObj,aclass1,aclass,structEle,stmtKey);
+					String insert = getInsertStmt(updateObj,aclass1,tableWrapper,structEle,stmtKey);
 					EhiLogger.traceBackendCmd(insert);
 					PreparedStatement ps = getPreparedStatement(stmtKey.value,insert);
 		            StatementExecutionHelper seHelper = getStatementExecutionHelper(stmtKey.value);
 
-                    recConv.writeRecord(basketSqlId, genericDomains,iomObj, aclass1,structEle, aclass, sqlType,
+                    recConv.writeRecord(basketSqlId, genericDomains,iomObj, aclass1,structEle, tableWrapper, sqlType,
                             sqlId, updateObj, ps,structQueue,aclass0, 0, 0);
                     seHelper.write(ps);
                     closeUnbatchedPreparedStatement(stmtKey.value);
 			 }
-			for(ViewableWrapper secondary:aclass.getSecondaryTables()){
+			for(ViewableWrapper secondary:tableWrapper.getSecondaryTables()){
 				// secondarytable contains attributes of this class?
 				if(secondary.containsAttributes(recConv.getIomObjectAttrs(aclass1).keySet())){
 			         OutParam<String> stmtKey=new OutParam<String>();
@@ -1789,7 +1789,7 @@ public class TransferFromXtf {
 				}
 				
 			}
-			aclass=aclass.getExtending();
+			tableWrapper=tableWrapper.getExtending();
 		 }
 		 // add StructWrapper around embedded associations that are mapped to a link table
 		 for(Iterator roleIt=aclass0.getAttributesAndRoles2();roleIt.hasNext();) {
