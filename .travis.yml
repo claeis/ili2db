@@ -75,7 +75,7 @@ after_failure:
 deploy:
   - provider: script
     skip_cleanup: true
-    script: ./gradlew -Drst2html=`which rst2html.py` -Drepos_pwd=${repos_pwd} -Drepos_usr=jql_jars-INTE uploadArchives
+    script: ./gradlew --debug -Drst2html=`which rst2html.py` -Drepos_pwd=${repos_pwd} -Drepos_usr=jql_jars-INTE uploadArchives
     on:
       branch: master
   - provider: script
