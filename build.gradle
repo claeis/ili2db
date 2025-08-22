@@ -738,7 +738,15 @@ artifacts {
     archives(ili2pgJar.archivePath){
     	builtBy ili2pgJar
     }
-	archives(ili2mysqlBindist.archivePath) {
+	archives(ili2gpkgBindist.archivePath) {
+        type 'zip'
+        classifier 'bindist'
+        builtBy ili2gpkgBindist
+    }
+    archives(ili2gpkgJar.archivePath){
+    	builtBy ili2gpkgJar
+    }
+/*	archives(ili2mysqlBindist.archivePath) {
         type 'zip'
         classifier 'bindist'
         builtBy ili2mysqlBindist
@@ -762,14 +770,6 @@ artifacts {
     archives(ili2duckdbJar.archivePath){
     	builtBy ili2duckdbJar
     }
-	archives(ili2gpkgBindist.archivePath) {
-        type 'zip'
-        classifier 'bindist'
-        builtBy ili2gpkgBindist
-    }
-    archives(ili2gpkgJar.archivePath){
-    	builtBy ili2gpkgJar
-    }
 	archives(ili2fgdbBindist.archivePath) {
         type 'zip'
         classifier 'bindist'
@@ -778,7 +778,7 @@ artifacts {
     archives(ili2fgdbJar.archivePath){
     	builtBy ili2fgdbJar
     }
-/*	archives(ili2mssqlBindist.archivePath) {
+	archives(ili2mssqlBindist.archivePath) {
         type 'zip'
         classifier 'bindist'
         builtBy ili2mssqlBindist
