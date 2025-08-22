@@ -30,6 +30,7 @@ import ch.ehi.ili2db.mapping.MultiLineMapping;
 import ch.ehi.ili2db.mapping.MultiPointMapping;
 import ch.ehi.ili2db.mapping.MultiSurfaceMapping;
 import ch.ehi.ili2db.mapping.NameMapping;
+import ch.ehi.ili2db.mapping.StructAttrPath;
 import ch.ehi.ili2db.mapping.TrafoConfig;
 import ch.ehi.ili2db.mapping.TrafoConfigNames;
 import ch.ehi.ili2db.mapping.Viewable2TableMapping;
@@ -124,9 +125,9 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 		}
 		
 	}
-	public void writeRecord(long basketSqlId, java.util.Map<String,String> genericDomains,IomObject iomObj,Viewable iomClass,
+	public void writeRecord(long basketSqlId, java.util.Map<String,String> genericDomains,IomObject iomMainObj,Viewable iomClass,
 			AbstractStructWrapper structEle0, ViewableWrapper tableWrapper, String sqlType,
-			long sqlId, boolean updateObj, PreparedStatement ps,ArrayList<AbstractStructWrapper> structQueue,Viewable originalClass, int attrIndex, long parentSqlId)
+			long sqlId, boolean updateObj, PreparedStatement ps,ArrayList<AbstractStructWrapper> structQueue,Viewable originalClass, int iomValueIndex, long parentSqlId)
 			throws SQLException, ConverterException {
 		int valuei=1;
 		
@@ -152,7 +153,7 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 			AttributeDef attr = tableWrapper.getPrimitiveCollectionAttr();
 			if (attr != null) {
 				// T_Seq
-				ps.setInt(valuei, attrIndex);
+				ps.setInt(valuei, iomValueIndex);
 				valuei++;
 
 				// reference to parent
@@ -171,7 +172,7 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 						if(iomClass instanceof Table && ((Table) iomClass).isIdentifiable()){ // concrete object has a tid
 							if((importTid && !(tableWrapper.getViewable() instanceof AssociationDef)) || tableWrapper.hasOid()){
 								// import TID from transfer file
-                                String oid=iomObj.getobjectoid();
+                                String oid=iomMainObj.getobjectoid();
 								if(isUuidOid(td,tableWrapper.getOid())){
 								    oid=Validator.normalizeUUID(oid);
 									 Object toInsertUUID = geomConv.fromIomUuid(oid);
@@ -204,25 +205,37 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 			if (obj.obj instanceof AttributeDef) {
 				AttributeDef attr = (AttributeDef) obj.obj;
 			   AttributeDef rootAttr=Ili2cUtility.getRootBaseAttr(attr);
-			   if(!attrs.containsKey(rootAttr)){
-			       ; // skip attrs that are not attrs of class of current object 
-			   }else {
-                if(!attr.isTransient()){
-                    Type proxyType=attr.getDomain();
-                    if(proxyType!=null && (proxyType instanceof ObjectType)){
-                        // skip implicit particles (base-viewables) of views
-					} else {
-						if (mapAsTextCol(((AttributeDef) attrs.get(rootAttr)))) {
-							valuei = addAttrValueTXT(iomObj, sqlType, sqlId, tableWrapper.getSqlTablename(), ps,
-									valuei, attr, (AttributeDef) attrs.get(rootAttr), columnWrapper.getEpsgCode(), structQueue, genericDomains, originalClass, attrIndex);
-
-						} else {
-							valuei = addAttrValue(iomObj, sqlType, sqlId, tableWrapper.getSqlTablename(), ps,
-									valuei, attr, (AttributeDef) attrs.get(rootAttr), columnWrapper.getEpsgCode(), structQueue, genericDomains, originalClass, attrIndex);
-						}
-					}
-                }
-			   }
+               // find IomObject  of ili Struct
+               IomObject iomObj=iomMainObj;
+               StructAttrPath structAttrPath=columnWrapper.getStructAttrPath();
+               StructAttrPath.PathEl pathv[]=structAttrPath.getPath();
+               Viewable structClass=null;
+               Map<? extends ch.interlis.ili2c.metamodel.Element,? extends ch.interlis.ili2c.metamodel.Element> structAttrs=null;
+               AttributeDef attrInObj=null;
+               if(pathv.length==1) {
+                   iomObj=iomMainObj;
+                   structClass=originalClass;
+                   structAttrs=attrs;
+                   attrInObj=(AttributeDef) structAttrs.get(rootAttr);
+               }else {
+                   iomObj=findStructEle(iomMainObj,structAttrPath);
+                   if(iomObj!=null) {
+                       structClass=(Viewable) tag2class.get(iomObj.getobjecttag());
+                       structAttrs=getIomObjectAttrs(structClass);
+                       attrInObj=(AttributeDef) structAttrs.get(rootAttr);
+                   }
+               }
+               Integer attrIdx=pathv[pathv.length-1].getIdx();
+               if(attrIdx==null) {
+                   attrIdx=iomValueIndex;
+               }
+               if (mapAsTextCol(attrInObj)) {
+                   valuei = addAttrValueTXT(iomObj, sqlType, sqlId, tableWrapper.getSqlTablename(), ps,
+                           valuei, columnWrapper, attrInObj, structQueue, genericDomains, structClass, attrIdx);
+               }else {
+                   valuei = addAttrValue(iomObj, sqlType, sqlId, tableWrapper.getSqlTablename(), ps,
+                           valuei, columnWrapper, attrInObj, structQueue, genericDomains, structClass, attrIdx);
+               }
 			}
 			if(obj.obj instanceof RoleDef){
 				RoleDef role = (RoleDef) obj.obj;
@@ -238,7 +251,7 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 							AssociationDef roleOwner = (AssociationDef) role.getContainer();
 							if(roleOwner.getDerivedFrom()==null){
 								// not just a link?
-								 IomObject structvalue=iomObj.getattrobj(roleName,0);
+								 IomObject structvalue=iomMainObj.getattrobj(roleName,0);
 								if (roleOwner.getAttributes().hasNext()
 									|| roleOwner.getLightweightAssociations().iterator().hasNext()) {
 									 // TODO handle attributes of link
@@ -269,7 +282,7 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 						         }
 						     }else {
 						         // role of a normal association
-                                 IomObject structvalue=iomObj.getattrobj(roleName,0);
+                                 IomObject structvalue=iomMainObj.getattrobj(roleName,0);
                                  refoid=structvalue.getobjectrefoid();
                                  long orderPos=structvalue.getobjectreforderpos();
                                  if(orderPos!=0){
@@ -316,7 +329,25 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 		}
 	}
 
-	private void setReferenceColumn(PreparedStatement ps,
+	private IomObject findStructEle(IomObject iomObj, StructAttrPath structAttrPath) {
+        StructAttrPath.PathEl pathv[]=structAttrPath.getPath();
+        if(pathv.length<2) {
+            return null;
+        }
+        for(int pathi=0;pathi<pathv.length-1;pathi++) {
+            StructAttrPath.PathEl path=pathv[pathi];
+            Integer attrIdx=path.getIdx();
+            if(attrIdx==null) {
+                attrIdx=0;
+            }
+            iomObj=iomObj.getattrobj(((AttributeDef)path.getAttr().obj).getName(),attrIdx);
+            if(iomObj==null) {
+                return null;
+            }
+        }
+        return iomObj;
+    }
+    private void setReferenceColumn(PreparedStatement ps,
 			AbstractClassDef destination, String refoid, OutParam<Integer> valuei,boolean isExtRef) throws SQLException {
 	    if(isExtRef) {
 	        if(refoid!=null) {
@@ -500,22 +531,8 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 		    ColumnWrapper columnWrapper=iter.next();
 		   ViewableTransferElement obj = columnWrapper.getViewableTransferElement();
 		   if (obj.obj instanceof AttributeDef) {
-			   AttributeDef attr = (AttributeDef) obj.obj;
-			   AttributeDef rootAttr=Ili2cUtility.getRootBaseAttr(attr);
-			   if(!attrs.containsKey(rootAttr)){
-			       ; // skip attrs that are not attrs of class of current object 
-			   }else {
-					if(!attr.isTransient()){
-						Type proxyType=attr.getDomain();
-						if(proxyType!=null && (proxyType instanceof ObjectType)){
-							// skip implicit particles (base-viewables) of views
-						}else{
-							   sep = addAttrToInsertStmt(isUpdate,ret, values, sep, attr,(AttributeDef)attrs.get(rootAttr),columnWrapper.getEpsgCode(),sqlTableName.getName());
-						}
-					}
-			   }
-		   }
-		   if(obj.obj instanceof RoleDef){
+               sep = addAttrToInsertStmt(isUpdate,ret, values, sep, columnWrapper,sqlTableName.getName());
+		   }else if(obj.obj instanceof RoleDef){
 			   RoleDef role = (RoleDef) obj.obj;
 			   if(true) { //role.getExtending()==null){
 			       RoleDef rootRole=Ili2cUtility.getRootBaseRole(role);
@@ -670,288 +687,290 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 		return aclass;
 	}
 	public String addAttrToInsertStmt(boolean isUpdate,
-			StringBuffer ret, StringBuffer values, String sep, AttributeDef attr,AttributeDef classAttr,Integer epsgCode,String sqlTableName) {
+			StringBuffer sqlStmtCols, StringBuffer sqlStmtVals, String sep, ColumnWrapper colWrapper,String sqlTableName) {
 		if(true) { // attr.getExtending()==null){
-			Type type = attr.getDomainResolvingAliases();
-			if(TrafoConfigNames.JSON_TRAFO_COALESCE.equals(trafoConfig.getAttrConfig(attr, TrafoConfigNames.JSON_TRAFO))){
-	            String attrSqlName=ili2sqlName.mapIliAttributeDef(attr,epsgCode,sqlTableName,null);
-                ret.append(sep);
-                ret.append(attrSqlName);
+	        Integer epsgCode=colWrapper.getEpsgCode();
+	        AttributeDef attrDefOfColumn=(AttributeDef)colWrapper.getViewableTransferElement().obj;
+			Type type = attrDefOfColumn.getDomainResolvingAliases();
+			if(TrafoConfigNames.JSON_TRAFO_COALESCE.equals(trafoConfig.getAttrConfig(attrDefOfColumn, TrafoConfigNames.JSON_TRAFO))){
+	            String attrSqlName=ili2sqlName.mapIliAttributeDef(colWrapper.getStructAttrPath(),epsgCode,sqlTableName,null);
+                sqlStmtCols.append(sep);
+                sqlStmtCols.append(attrSqlName);
                    if(isUpdate){
-                       ret.append("="+geomConv.getInsertValueWrapperJson("?"));
+                       sqlStmtCols.append("="+geomConv.getInsertValueWrapperJson("?"));
                    }else{
-                       values.append(","+geomConv.getInsertValueWrapperJson("?"));
+                       sqlStmtVals.append(","+geomConv.getInsertValueWrapperJson("?"));
                    }
                    sep=",";
-            }else if(TrafoConfigNames.ARRAY_TRAFO_COALESCE.equals(trafoConfig.getAttrConfig(attr, TrafoConfigNames.ARRAY_TRAFO))){
-                arrayAttrs.addArrayAttr(attr);
-                ArrayMapping attrMapping=arrayAttrs.getMapping(attr);
+            }else if(TrafoConfigNames.ARRAY_TRAFO_COALESCE.equals(trafoConfig.getAttrConfig(attrDefOfColumn, TrafoConfigNames.ARRAY_TRAFO))){
+                arrayAttrs.addArrayAttr(attrDefOfColumn);
+                ArrayMapping attrMapping=arrayAttrs.getMapping(attrDefOfColumn);
                 AttributeDef localAttr=attrMapping.getValueAttr();
                 Type localType = localAttr.getDomainResolvingAll();
                 if(Ili2cUtility.isIomObjectPrimType(td,localAttr)) {
-                    String attrSqlName=ili2sqlName.mapIliAttributeDef(attr,epsgCode,sqlTableName,null);
-                     ret.append(sep);
-                     ret.append(attrSqlName);
+                    String attrSqlName=ili2sqlName.mapIliAttributeDef(colWrapper.getStructAttrPath(),epsgCode,sqlTableName,null);
+                     sqlStmtCols.append(sep);
+                     sqlStmtCols.append(attrSqlName);
                         if(isUpdate){
-                            ret.append("="+geomConv.getInsertValueWrapperArray("?"));
+                            sqlStmtCols.append("="+geomConv.getInsertValueWrapperArray("?"));
                         }else{
-                            values.append(","+geomConv.getInsertValueWrapperArray("?"));
+                            sqlStmtVals.append(","+geomConv.getInsertValueWrapperArray("?"));
                         }
                         sep=",";
                 }else if(Ili2cUtility.isReferenceType(td,localAttr)) {
-                    String attrSqlName=ili2sqlName.mapIliAttributeDef(attr,sqlTableName,getSqlType(((ReferenceType)localType).getReferred()).getName(),false);
-                    ret.append(sep);
-                    ret.append(attrSqlName);
+                    String attrSqlName=ili2sqlName.mapIliAttributeDef(colWrapper.getStructAttrPath(),sqlTableName,getSqlType(((ReferenceType)localType).getReferred()).getName(),false);
+                    sqlStmtCols.append(sep);
+                    sqlStmtCols.append(attrSqlName);
                        if(isUpdate){
-                           ret.append("="+geomConv.getInsertValueWrapperArray("?"));
+                           sqlStmtCols.append("="+geomConv.getInsertValueWrapperArray("?"));
                        }else{
-                           values.append(","+geomConv.getInsertValueWrapperArray("?"));
+                           sqlStmtVals.append(","+geomConv.getInsertValueWrapperArray("?"));
                        }
                        sep=",";
                 }
-			}else if (attr.isDomainBoolean()) {
-	            String attrSqlName=ili2sqlName.mapIliAttributeDef(attr,epsgCode,sqlTableName,null);
-					ret.append(sep);
-					ret.append(attrSqlName);
+			}else if (attrDefOfColumn.isDomainBoolean()) {
+	            String attrSqlName=ili2sqlName.mapIliAttributeDef(colWrapper.getStructAttrPath(),epsgCode,sqlTableName,null);
+					sqlStmtCols.append(sep);
+					sqlStmtCols.append(attrSqlName);
 					if(isUpdate){
-						ret.append("=?");
+						sqlStmtCols.append("=?");
 					}else{
-						values.append(",?");
+						sqlStmtVals.append(",?");
 					}
 					sep=",";
 	                if(createEnumTxtCol){
-	                    ret.append(sep);
-	                    ret.append(attrSqlName+DbNames.ENUM_TXT_COL_SUFFIX);
+	                    sqlStmtCols.append(sep);
+	                    sqlStmtCols.append(attrSqlName+DbNames.ENUM_TXT_COL_SUFFIX);
 	                    if(isUpdate){
-	                        ret.append("=?");
+	                        sqlStmtCols.append("=?");
 	                    }else{
-	                        values.append(",?");
+	                        sqlStmtVals.append(",?");
 	                    }
 	                    sep=",";
 	                }
 			}else if (type instanceof CompositionType){
-				if(TrafoConfigNames.CATALOGUE_REF_TRAFO_COALESCE.equals(trafoConfig.getAttrConfig(attr, TrafoConfigNames.CATALOGUE_REF_TRAFO))){
+				if(TrafoConfigNames.CATALOGUE_REF_TRAFO_COALESCE.equals(trafoConfig.getAttrConfig(attrDefOfColumn, TrafoConfigNames.CATALOGUE_REF_TRAFO))){
 				    if(createExtRef) {
-                        String attrSqlName=ili2sqlName.mapIliAttributeDef(attr,sqlTableName,getSqlType(getCatalogueRefTarget(type)).getName(),false);
-                        ret.append(sep);
-                        ret.append(attrSqlName);
+                        String attrSqlName=ili2sqlName.mapIliAttributeDef(colWrapper.getStructAttrPath(),sqlTableName,getSqlType(getCatalogueRefTarget(type)).getName(),false);
+                        sqlStmtCols.append(sep);
+                        sqlStmtCols.append(attrSqlName);
                         if(isUpdate){
-                            ret.append("=?");
+                            sqlStmtCols.append("=?");
                         }else{
-                            values.append(",?");
+                            sqlStmtVals.append(",?");
                         }
                         sep=",";
 				    }else {
 	                    ArrayList<ViewableWrapper> targetTables = getTargetTables(getCatalogueRefTarget(type));
 	                    for(ViewableWrapper targetTable:targetTables)
 	                    {
-	                        String attrSqlName=ili2sqlName.mapIliAttributeDef(attr,sqlTableName,targetTable.getSqlTablename(),targetTables.size()>1);
-	                        ret.append(sep);
-	                        ret.append(attrSqlName);
+	                        String attrSqlName=ili2sqlName.mapIliAttributeDef(colWrapper.getStructAttrPath(),sqlTableName,targetTable.getSqlTablename(),targetTables.size()>1);
+	                        sqlStmtCols.append(sep);
+	                        sqlStmtCols.append(attrSqlName);
 	                        if(isUpdate){
-	                            ret.append("=?");
+	                            sqlStmtCols.append("=?");
 	                        }else{
-	                            values.append(",?");
+	                            sqlStmtVals.append(",?");
 	                        }
 	                        sep=",";
 	                    }
 				    }
-				}else if(TrafoConfigNames.MULTISURFACE_TRAFO_COALESCE.equals(trafoConfig.getAttrConfig(attr, TrafoConfigNames.MULTISURFACE_TRAFO))){
-		            String attrSqlName=ili2sqlName.mapIliAttributeDef(attr,epsgCode,sqlTableName,null);
-					 ret.append(sep);
-					 ret.append(attrSqlName);
-						multiSurfaceAttrs.addMultiSurfaceAttr(attr);
+				}else if(TrafoConfigNames.MULTISURFACE_TRAFO_COALESCE.equals(trafoConfig.getAttrConfig(attrDefOfColumn, TrafoConfigNames.MULTISURFACE_TRAFO))){
+		            String attrSqlName=ili2sqlName.mapIliAttributeDef(colWrapper.getStructAttrPath(),epsgCode,sqlTableName,null);
+					 sqlStmtCols.append(sep);
+					 sqlStmtCols.append(attrSqlName);
+						multiSurfaceAttrs.addMultiSurfaceAttr(attrDefOfColumn);
 						if(isUpdate){
-							ret.append("="+geomConv.getInsertValueWrapperMultiSurface("?",epsgCode));
+							sqlStmtCols.append("="+geomConv.getInsertValueWrapperMultiSurface("?",epsgCode));
 						}else{
-							values.append(","+geomConv.getInsertValueWrapperMultiSurface("?",epsgCode));
+							sqlStmtVals.append(","+geomConv.getInsertValueWrapperMultiSurface("?",epsgCode));
 						}
 						sep=",";
-				}else if(TrafoConfigNames.MULTILINE_TRAFO_COALESCE.equals(trafoConfig.getAttrConfig(attr, TrafoConfigNames.MULTILINE_TRAFO))){
-		            String attrSqlName=ili2sqlName.mapIliAttributeDef(attr,epsgCode,sqlTableName,null);
-					 ret.append(sep);
-					 ret.append(attrSqlName);
-						multiLineAttrs.addMultiLineAttr(attr);
+				}else if(TrafoConfigNames.MULTILINE_TRAFO_COALESCE.equals(trafoConfig.getAttrConfig(attrDefOfColumn, TrafoConfigNames.MULTILINE_TRAFO))){
+		            String attrSqlName=ili2sqlName.mapIliAttributeDef(colWrapper.getStructAttrPath(),epsgCode,sqlTableName,null);
+					 sqlStmtCols.append(sep);
+					 sqlStmtCols.append(attrSqlName);
+						multiLineAttrs.addMultiLineAttr(attrDefOfColumn);
 						if(isUpdate){
-							ret.append("="+geomConv.getInsertValueWrapperMultiPolyline("?",epsgCode));
+							sqlStmtCols.append("="+geomConv.getInsertValueWrapperMultiPolyline("?",epsgCode));
 						}else{
-							values.append(","+geomConv.getInsertValueWrapperMultiPolyline("?",epsgCode));
+							sqlStmtVals.append(","+geomConv.getInsertValueWrapperMultiPolyline("?",epsgCode));
 						}
 						sep=",";
-				}else if(TrafoConfigNames.MULTIPOINT_TRAFO_COALESCE.equals(trafoConfig.getAttrConfig(attr, TrafoConfigNames.MULTIPOINT_TRAFO))){
-		            String attrSqlName=ili2sqlName.mapIliAttributeDef(attr,epsgCode,sqlTableName,null);
-					 ret.append(sep);
-					 ret.append(attrSqlName);
-						multiPointAttrs.addMultiPointAttr(attr);
+				}else if(TrafoConfigNames.MULTIPOINT_TRAFO_COALESCE.equals(trafoConfig.getAttrConfig(attrDefOfColumn, TrafoConfigNames.MULTIPOINT_TRAFO))){
+		            String attrSqlName=ili2sqlName.mapIliAttributeDef(colWrapper.getStructAttrPath(),epsgCode,sqlTableName,null);
+					 sqlStmtCols.append(sep);
+					 sqlStmtCols.append(attrSqlName);
+						multiPointAttrs.addMultiPointAttr(attrDefOfColumn);
 						if(isUpdate){
-							ret.append("="+geomConv.getInsertValueWrapperMultiCoord("?",epsgCode));
+							sqlStmtCols.append("="+geomConv.getInsertValueWrapperMultiCoord("?",epsgCode));
 						}else{
-							values.append(","+geomConv.getInsertValueWrapperMultiCoord("?",epsgCode));
+							sqlStmtVals.append(","+geomConv.getInsertValueWrapperMultiCoord("?",epsgCode));
 						}
 						sep=",";
-				}else if(TrafoConfigNames.MULTILINGUAL_TRAFO_EXPAND.equals(trafoConfig.getAttrConfig(attr, TrafoConfigNames.MULTILINGUAL_TRAFO))){
-		            String attrSqlName=ili2sqlName.mapIliAttributeDef(attr,epsgCode,sqlTableName,null);
+				}else if(TrafoConfigNames.MULTILINGUAL_TRAFO_EXPAND.equals(trafoConfig.getAttrConfig(attrDefOfColumn, TrafoConfigNames.MULTILINGUAL_TRAFO))){
+		            String attrSqlName=ili2sqlName.mapIliAttributeDef(colWrapper.getStructAttrPath(),epsgCode,sqlTableName,null);
 					for(String sfx:DbNames.MULTILINGUAL_TXT_COL_SUFFIXS){
-						ret.append(sep);
-						ret.append(attrSqlName+sfx);
+						sqlStmtCols.append(sep);
+						sqlStmtCols.append(attrSqlName+sfx);
 						if(isUpdate){
-							ret.append("=?");
+							sqlStmtCols.append("=?");
 						}else{
-							values.append(",?");
+							sqlStmtVals.append(",?");
 						}
 						sep=",";
 					}
-                }else if(TrafoConfigNames.LOCALISED_TRAFO_EXPAND.equals(trafoConfig.getAttrConfig(attr, TrafoConfigNames.LOCALISED_TRAFO))){
-                    String attrSqlName=ili2sqlName.mapIliAttributeDef(attr,epsgCode,sqlTableName,null);
-                    ret.append(sep);
-                    ret.append(attrSqlName);
+                }else if(TrafoConfigNames.LOCALISED_TRAFO_EXPAND.equals(trafoConfig.getAttrConfig(attrDefOfColumn, TrafoConfigNames.LOCALISED_TRAFO))){
+                    String attrSqlName=ili2sqlName.mapIliAttributeDef(colWrapper.getStructAttrPath(),epsgCode,sqlTableName,null);
+                    sqlStmtCols.append(sep);
+                    sqlStmtCols.append(attrSqlName);
                     if(isUpdate){
-                        ret.append("=?");
+                        sqlStmtCols.append("=?");
                     }else{
-                        values.append(",?");
+                        sqlStmtVals.append(",?");
                     }
                     sep=",";
-                    ret.append(sep);
-                    ret.append(attrSqlName+DbNames.LOCALISED_TXT_COL_SUFFIX);
+                    sqlStmtCols.append(sep);
+                    sqlStmtCols.append(attrSqlName+DbNames.LOCALISED_TXT_COL_SUFFIX);
                     if(isUpdate){
-                        ret.append("=?");
+                        sqlStmtCols.append("=?");
                     }else{
-                        values.append(",?");
+                        sqlStmtVals.append(",?");
                     }
                     sep=",";
 				}
 			}else if (type instanceof PolylineType){
-	            String attrSqlName=ili2sqlName.mapIliAttributeDef(attr,epsgCode,sqlTableName,null);
-				 ret.append(sep);
-				 ret.append(attrSqlName);
+	            String attrSqlName=ili2sqlName.mapIliAttributeDef(colWrapper.getStructAttrPath(),epsgCode,sqlTableName,null);
+				 sqlStmtCols.append(sep);
+				 sqlStmtCols.append(attrSqlName);
 					if(isUpdate){
-						ret.append("="+geomConv.getInsertValueWrapperPolyline("?",epsgCode));
+						sqlStmtCols.append("="+geomConv.getInsertValueWrapperPolyline("?",epsgCode));
 					}else{
-						values.append(","+geomConv.getInsertValueWrapperPolyline("?",epsgCode));
+						sqlStmtVals.append(","+geomConv.getInsertValueWrapperPolyline("?",epsgCode));
 					}
 					sep=",";
 			 }else if (type instanceof MultiPolylineType){
-		            String attrSqlName=ili2sqlName.mapIliAttributeDef(attr,epsgCode,sqlTableName,null);
-				ret.append(sep);
-				ret.append(attrSqlName);
+		            String attrSqlName=ili2sqlName.mapIliAttributeDef(colWrapper.getStructAttrPath(),epsgCode,sqlTableName,null);
+				sqlStmtCols.append(sep);
+				sqlStmtCols.append(attrSqlName);
 				if(isUpdate){
-					ret.append("="+geomConv.getInsertValueWrapperMultiPolyline("?",epsgCode));
+					sqlStmtCols.append("="+geomConv.getInsertValueWrapperMultiPolyline("?",epsgCode));
 				}else{
-					values.append(","+geomConv.getInsertValueWrapperMultiPolyline("?",epsgCode));
+					sqlStmtVals.append(","+geomConv.getInsertValueWrapperMultiPolyline("?",epsgCode));
 				}
 				sep=",";
 			}
 			else if(type instanceof AbstractSurfaceOrAreaType){
 				 if(createItfLineTables){
 				 }else if(createXtfLineTables){
-			            String attrSqlName=ili2sqlName.mapIliAttributeDef(attr,epsgCode,sqlTableName,null);
-                     ret.append(sep);
-                     ret.append(attrSqlName);
+			            String attrSqlName=ili2sqlName.mapIliAttributeDef(colWrapper.getStructAttrPath(),epsgCode,sqlTableName,null);
+                     sqlStmtCols.append(sep);
+                     sqlStmtCols.append(attrSqlName);
                         if(isUpdate){
-                            ret.append("="+geomConv.getInsertValueWrapperMultiPolyline("?",epsgCode));
+                            sqlStmtCols.append("="+geomConv.getInsertValueWrapperMultiPolyline("?",epsgCode));
                         }else{
-                            values.append(","+geomConv.getInsertValueWrapperMultiPolyline("?",epsgCode));
+                            sqlStmtVals.append(","+geomConv.getInsertValueWrapperMultiPolyline("?",epsgCode));
                         }
                         sep=",";
 				 }else{
-			            String attrSqlName=ili2sqlName.mapIliAttributeDef(attr,epsgCode,sqlTableName,null);
-					 ret.append(sep);
-					 ret.append(attrSqlName);
+			            String attrSqlName=ili2sqlName.mapIliAttributeDef(colWrapper.getStructAttrPath(),epsgCode,sqlTableName,null);
+					 sqlStmtCols.append(sep);
+					 sqlStmtCols.append(attrSqlName);
 						if(isUpdate){
-							ret.append("="+geomConv.getInsertValueWrapperSurface("?",epsgCode));
+							sqlStmtCols.append("="+geomConv.getInsertValueWrapperSurface("?",epsgCode));
 						}else{
-							values.append(","+geomConv.getInsertValueWrapperSurface("?",epsgCode));
+							sqlStmtVals.append(","+geomConv.getInsertValueWrapperSurface("?",epsgCode));
 						}
 						sep=",";
 				 }
 				 if(createItfAreaRef){
 					 if(type instanceof AreaType){
-				            String attrSqlName=ili2sqlName.mapIliAttributeDef(attr,epsgCode,sqlTableName,null);
-						 ret.append(sep);
-						 ret.append(attrSqlName+DbNames.ITF_MAINTABLE_GEOTABLEREF_COL_SUFFIX);
+				            String attrSqlName=ili2sqlName.mapIliAttributeDef(colWrapper.getStructAttrPath(),epsgCode,sqlTableName,null);
+						 sqlStmtCols.append(sep);
+						 sqlStmtCols.append(attrSqlName+DbNames.ITF_MAINTABLE_GEOTABLEREF_COL_SUFFIX);
 							if(isUpdate){
-								ret.append("="+geomConv.getInsertValueWrapperCoord("?",epsgCode));
+								sqlStmtCols.append("="+geomConv.getInsertValueWrapperCoord("?",epsgCode));
 							}else{
-								 values.append(","+geomConv.getInsertValueWrapperCoord("?",epsgCode));
+								 sqlStmtVals.append(","+geomConv.getInsertValueWrapperCoord("?",epsgCode));
 							}
 							sep=",";
 					 }
 				 }
 			 }else if(type instanceof CoordType){
-		            String attrSqlName=ili2sqlName.mapIliAttributeDef(attr,epsgCode,sqlTableName,null);
-				 ret.append(sep);
-				 ret.append(attrSqlName);
+		            String attrSqlName=ili2sqlName.mapIliAttributeDef(colWrapper.getStructAttrPath(),epsgCode,sqlTableName,null);
+				 sqlStmtCols.append(sep);
+				 sqlStmtCols.append(attrSqlName);
 					if(isUpdate){
-						ret.append("="+geomConv.getInsertValueWrapperCoord("?",epsgCode));
+						sqlStmtCols.append("="+geomConv.getInsertValueWrapperCoord("?",epsgCode));
 					}else{
-						values.append(","+geomConv.getInsertValueWrapperCoord("?",epsgCode));
+						sqlStmtVals.append(","+geomConv.getInsertValueWrapperCoord("?",epsgCode));
 					}
 					sep=",";
             } else if (type instanceof MultiCoordType) {
-                String attrSqlName=ili2sqlName.mapIliAttributeDef(attr,epsgCode,sqlTableName,null);
-                ret.append(sep);
-                ret.append(attrSqlName);
+                String attrSqlName=ili2sqlName.mapIliAttributeDef(colWrapper.getStructAttrPath(),epsgCode,sqlTableName,null);
+                sqlStmtCols.append(sep);
+                sqlStmtCols.append(attrSqlName);
                 if (isUpdate) {
-                    ret.append("=" + geomConv.getInsertValueWrapperMultiCoord("?", epsgCode));
+                    sqlStmtCols.append("=" + geomConv.getInsertValueWrapperMultiCoord("?", epsgCode));
                 } else {
-                    values.append("," + geomConv.getInsertValueWrapperMultiCoord("?", epsgCode));
+                    sqlStmtVals.append("," + geomConv.getInsertValueWrapperMultiCoord("?", epsgCode));
                 }
                 sep = ",";
 			}else if(type instanceof AbstractEnumerationType){
-	            String attrSqlName=ili2sqlName.mapIliAttributeDef(attr,epsgCode,sqlTableName,null);
-				ret.append(sep);
-				ret.append(attrSqlName);
+	            String attrSqlName=ili2sqlName.mapIliAttributeDef(colWrapper.getStructAttrPath(),epsgCode,sqlTableName,null);
+				sqlStmtCols.append(sep);
+				sqlStmtCols.append(attrSqlName);
 				if(isUpdate){
-					ret.append("=?");
+					sqlStmtCols.append("=?");
 				}else{
-					values.append(",?");
+					sqlStmtVals.append(",?");
 				}
 				sep=",";
 				if(createEnumTxtCol){
-					ret.append(sep);
-					ret.append(attrSqlName+DbNames.ENUM_TXT_COL_SUFFIX);
+					sqlStmtCols.append(sep);
+					sqlStmtCols.append(attrSqlName+DbNames.ENUM_TXT_COL_SUFFIX);
 					if(isUpdate){
-						ret.append("=?");
+						sqlStmtCols.append("=?");
 					}else{
-						values.append(",?");
+						sqlStmtVals.append(",?");
 					}
 					sep=",";
 				}
 			}else if(type instanceof ReferenceType){
                 boolean isExtRef=createExtRef && ((ReferenceType)type).isExternal();
 			    if(isExtRef) {
-                    String attrSqlName=ili2sqlName.mapIliAttributeDef(attr,sqlTableName,getSqlType(((ReferenceType)type).getReferred()).getName(),false);
-                    ret.append(sep);
-                    ret.append(attrSqlName);
+                    String attrSqlName=ili2sqlName.mapIliAttributeDef(colWrapper.getStructAttrPath(),sqlTableName,getSqlType(((ReferenceType)type).getReferred()).getName(),false);
+                    sqlStmtCols.append(sep);
+                    sqlStmtCols.append(attrSqlName);
                     if(isUpdate){
-                        ret.append("=?");
+                        sqlStmtCols.append("=?");
                     }else{
-                        values.append(",?");
+                        sqlStmtVals.append(",?");
                     }
                     sep=",";
 			    }else {
 	                ArrayList<ViewableWrapper> targetTables = getTargetTables(((ReferenceType)type).getReferred());
 	                for(ViewableWrapper targetTable:targetTables)
 	                {
-	                    String attrSqlName=ili2sqlName.mapIliAttributeDef(attr,sqlTableName,targetTable.getSqlTablename(),targetTables.size()>1);
-	                    ret.append(sep);
-	                    ret.append(attrSqlName);
+	                    String attrSqlName=ili2sqlName.mapIliAttributeDef(colWrapper.getStructAttrPath(),sqlTableName,targetTable.getSqlTablename(),targetTables.size()>1);
+	                    sqlStmtCols.append(sep);
+	                    sqlStmtCols.append(attrSqlName);
 	                    if(isUpdate){
-	                        ret.append("=?");
+	                        sqlStmtCols.append("=?");
 	                    }else{
-	                        values.append(",?");
+	                        sqlStmtVals.append(",?");
 	                    }
 	                    sep=",";
 	                }
 			    }
 			}else{
-	            String attrSqlName=ili2sqlName.mapIliAttributeDef(attr,epsgCode,sqlTableName,null);
-				ret.append(sep);
-				ret.append(attrSqlName);
+	            String attrSqlName=ili2sqlName.mapIliAttributeDef(colWrapper.getStructAttrPath(),epsgCode,sqlTableName,null);
+				sqlStmtCols.append(sep);
+				sqlStmtCols.append(attrSqlName);
 				if(isUpdate){
-					ret.append("=?");
+					sqlStmtCols.append("=?");
 				}else{
-					values.append(",?");
+					sqlStmtVals.append(",?");
 				}
 				sep=",";
 			}
@@ -960,9 +979,11 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 	}
 
 	public int addAttrValueTXT(IomObject iomObj, String sqlType, long sqlId,
-							   String sqlTableName, PreparedStatement ps, int valuei, AttributeDef tableAttr, AttributeDef classAttr, Integer epsgCode, ArrayList<AbstractStructWrapper> structQueue, Map<String, String> genericDomains, Viewable originalClass, int attrIndex)
+							   String sqlTableName, PreparedStatement ps, int valuei, ColumnWrapper colWrapper, AttributeDef classAttr,  ArrayList<AbstractStructWrapper> structQueue, Map<String, String> genericDomains, Viewable originalClass, int attrIndex)
 			throws SQLException, ConverterException {
-		String attrName=tableAttr.getName();
+        AttributeDef tableAttr=(AttributeDef)colWrapper.getViewableTransferElement().obj;// AttrDef of column to map
+        Integer epsgCode=colWrapper.getEpsgCode();
+         String attrName=tableAttr.getName();
 		String value = classAttr == null ? null : iomObj.getattrprim(attrName, attrIndex);
 		if (value != null) {
 			ps.setString(valuei, value);
@@ -974,13 +995,18 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 		return valuei;
 	}
 
-	public int addAttrValue(IomObject iomObj, String sqlType, long sqlId,
-			String sqlTableName,PreparedStatement ps, int valuei, 
-			AttributeDef tableAttr, // AttrDef of column to map
+	public int addAttrValue(IomObject iomObj, String sqlTypeOfMainObj, long sqlIdOfMainObj,
+			String sqlTableNameOfMainObj,PreparedStatement ps, int sqlParamIndex, 
+			ColumnWrapper colWrapper, 
 			AttributeDef classAttr, // same attr as tablaAttr but specific AttrDef of class of current object or null if this tableAttr is not part of current class
-			Integer epsgCode,ArrayList<AbstractStructWrapper> structQueue,Map<String,String> genericDomains,Viewable originalClass, int attrIndex)
+			ArrayList<AbstractStructWrapper> structQueue,
+			Map<String,String> genericDomains,
+			Viewable originalClass, 
+			int iomValueIndex)
 			throws SQLException, ConverterException {
 		if(true) { // attr.getExtending()==null){
+		    AttributeDef tableAttr=(AttributeDef)colWrapper.getViewableTransferElement().obj;// AttrDef of column to map
+	        Integer epsgCode=colWrapper.getEpsgCode();
 			 String attrName=tableAttr.getName();
 			 if(TrafoConfigNames.JSON_TRAFO_COALESCE.equals(trafoConfig.getAttrConfig(tableAttr, TrafoConfigNames.JSON_TRAFO))){
                 Type type = tableAttr.getDomainResolvingAliases();
@@ -1006,11 +1032,11 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
                             geomObj = geomConv.fromIomStructureToJson(tableAttr,iomValues);
                         }
                     }
-                   ps.setObject(valuei,geomObj);
+                   ps.setObject(sqlParamIndex,geomObj);
                 }else{
-                   geomConv.setJsonNull(ps,valuei);
+                   geomConv.setJsonNull(ps,sqlParamIndex);
                 }
-                valuei++;
+                sqlParamIndex++;
              }else if(TrafoConfigNames.ARRAY_TRAFO_COALESCE.equals(trafoConfig.getAttrConfig(tableAttr, TrafoConfigNames.ARRAY_TRAFO))){
                  int valuec= classAttr==null ? 0 : iomObj.getattrvaluecount(attrName);
                  ArrayList<String> iomArray=new ArrayList<String>();
@@ -1071,52 +1097,52 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
                  }
                  if(iomArray.size()>0){
                      Object geomObj = geomConv.fromIomArray(attrMapping.getValueAttr(),iomArray.toArray(new String[iomArray.size()]),dbColHint);
-                    ps.setObject(valuei,geomObj);
+                    ps.setObject(sqlParamIndex,geomObj);
                  }else{
-                    geomConv.setArrayNull(ps,valuei);
+                    geomConv.setArrayNull(ps,sqlParamIndex);
                  }
-                 valuei++;
+                 sqlParamIndex++;
 			}else if( tableAttr.isDomainBoolean()) {
-					String value= classAttr==null ? null : iomObj.getattrprim(attrName, attrIndex);
+					String value= classAttr==null ? null : iomObj.getattrprim(attrName, iomValueIndex);
 					if(value!=null){
 						if(value.equals("true")){
-							geomConv.setBoolean(ps,valuei,true);
+							geomConv.setBoolean(ps,sqlParamIndex,true);
 						}else{
-							geomConv.setBoolean(ps,valuei,false);
+							geomConv.setBoolean(ps,sqlParamIndex,false);
 						}
 					}else{
-						ps.setNull(valuei,Types.BIT);
+						ps.setNull(sqlParamIndex,Types.BIT);
 					}
-					valuei++;
+					sqlParamIndex++;
                     if(createEnumTxtCol){
                         if(value!=null){
-                            ps.setString(valuei, ili2sqlName.beautifyEnumDispName(value));
+                            ps.setString(sqlParamIndex, ili2sqlName.beautifyEnumDispName(value));
                         }else{
-                            ps.setNull(valuei,Types.VARCHAR);
+                            ps.setNull(sqlParamIndex,Types.VARCHAR);
                         }
-                        valuei++;
+                        sqlParamIndex++;
                     }
 			}else if(tableAttr.isDomainIliUuid()){
-				String value= classAttr==null ? null : iomObj.getattrprim(attrName, attrIndex);
+				String value= classAttr==null ? null : iomObj.getattrprim(attrName, iomValueIndex);
 				if(value==null){
-					 geomConv.setUuidNull(ps, valuei);
+					 geomConv.setUuidNull(ps, sqlParamIndex);
 				}else{
 					 Object toInsertUUID = geomConv.fromIomUuid(Validator.normalizeUUID(value));
-					 ps.setObject(valuei, toInsertUUID);
+					 ps.setObject(sqlParamIndex, toInsertUUID);
 				}
-				valuei++;
+				sqlParamIndex++;
 			}else if( tableAttr.isDomainIli1Date()) {
-				String value= classAttr==null ? null : iomObj.getattrprim(attrName, attrIndex);
+				String value= classAttr==null ? null : iomObj.getattrprim(attrName, iomValueIndex);
 				if(value!=null){
 					GregorianCalendar gdate=new GregorianCalendar(Integer.parseInt(value.substring(0,4)),Integer.parseInt(value.substring(4,6))-1,Integer.parseInt(value.substring(6,8)));
 					java.sql.Date date=new java.sql.Date(gdate.getTimeInMillis());
-					geomConv.setDate(ps,valuei,date);
+					geomConv.setDate(ps,sqlParamIndex,date);
 				}else{
-					ps.setNull(valuei,Types.DATE);
+					ps.setNull(sqlParamIndex,Types.DATE);
 				}
-				valuei++;
+				sqlParamIndex++;
 			}else if( tableAttr.isDomainIli2Date()) {
-				String value= classAttr==null ? null : iomObj.getattrprim(attrName, attrIndex);
+				String value= classAttr==null ? null : iomObj.getattrprim(attrName, iomValueIndex);
 				if(value!=null){
 					XMLGregorianCalendar xmldate;
 					try {
@@ -1125,13 +1151,13 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 						throw new ConverterException(e);
 					}
 					java.sql.Date date=new java.sql.Date(xmldate.toGregorianCalendar().getTimeInMillis());
-					geomConv.setDate(ps,valuei,date);
+					geomConv.setDate(ps,sqlParamIndex,date);
 				}else{
-					ps.setNull(valuei,Types.DATE);
+					ps.setNull(sqlParamIndex,Types.DATE);
 				}
-				valuei++;
+				sqlParamIndex++;
 			}else if( tableAttr.isDomainIli2Time()) {
-				String value= classAttr==null ? null : iomObj.getattrprim(attrName, attrIndex);
+				String value= classAttr==null ? null : iomObj.getattrprim(attrName, iomValueIndex);
 				if(value!=null){
 					XMLGregorianCalendar xmldate;
 					try {
@@ -1140,13 +1166,13 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 						throw new ConverterException(e);
 					}
 					java.sql.Time time=new java.sql.Time(xmldate.toGregorianCalendar().getTimeInMillis());
-					geomConv.setTime(ps,valuei,time);
+					geomConv.setTime(ps,sqlParamIndex,time);
 				}else{
-					ps.setNull(valuei,Types.TIME);
+					ps.setNull(sqlParamIndex,Types.TIME);
 				}
-				valuei++;
+				sqlParamIndex++;
 			}else if( tableAttr.isDomainIli2DateTime()) {
-				String value= classAttr==null ? null : iomObj.getattrprim(attrName, attrIndex);
+				String value= classAttr==null ? null : iomObj.getattrprim(attrName, iomValueIndex);
 				if(value!=null){
 					XMLGregorianCalendar xmldate;
 					try {
@@ -1155,11 +1181,11 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 						throw new ConverterException(e);
 					}
 					java.sql.Timestamp datetime=new java.sql.Timestamp(xmldate.toGregorianCalendar().getTimeInMillis());
-					geomConv.setTimestamp(ps,valuei,datetime);
+					geomConv.setTimestamp(ps,sqlParamIndex,datetime);
 				}else{
-					ps.setNull(valuei,Types.TIMESTAMP);
+					ps.setNull(sqlParamIndex,Types.TIMESTAMP);
 				}
-				valuei++;
+				sqlParamIndex++;
 			}else{
 				Type type = tableAttr.getDomainResolvingAliases();
 				Model model = (Model) tableAttr.getContainer(Model.class);
@@ -1175,9 +1201,9 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
                                 refoid=structvalue.getobjectrefoid();
                             }
                         }
-	                    OutParam<Integer> valueiRef=new OutParam<Integer>(valuei);
+	                    OutParam<Integer> valueiRef=new OutParam<Integer>(sqlParamIndex);
 	                    setReferenceColumn(ps,getCatalogueRefTarget(type),refoid,valueiRef,createExtRef);
-	                    valuei=valueiRef.value;
+	                    sqlParamIndex=valueiRef.value;
 					}else if(TrafoConfigNames.MULTISURFACE_TRAFO_COALESCE.equals(trafoConfig.getAttrConfig(tableAttr, TrafoConfigNames.MULTISURFACE_TRAFO))){
 						 IomObject iomValue= classAttr==null ? null : iomObj.getattrobj(attrName,0);
 						 IomObject iomMultisurface=null;
@@ -1203,11 +1229,11 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 								CoordType coord=(CoordType)surface.getControlPointDomain().getType();
 							 boolean is3D=coord.getDimensions().length==3;
 							 Object geomObj = geomConv.fromIomMultiSurface(iomMultisurface,epsgCode,surface.getLineAttributeStructure()!=null,is3D,getP(surface, model, epsgCode));
-							ps.setObject(valuei,geomObj);
+							ps.setObject(sqlParamIndex,geomObj);
 						 }else{
-							geomConv.setSurfaceNull(ps,valuei);
+							geomConv.setSurfaceNull(ps,sqlParamIndex);
 						 }
-						 valuei++;
+						 sqlParamIndex++;
 					}else if(TrafoConfigNames.MULTILINE_TRAFO_COALESCE.equals(trafoConfig.getAttrConfig(tableAttr, TrafoConfigNames.MULTILINE_TRAFO))){
 						 IomObject iomValue= classAttr==null ? null : iomObj.getattrobj(attrName,0);
 						 IomObject iomMultiline=null;
@@ -1230,11 +1256,11 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 								CoordType coord=(CoordType)line.getControlPointDomain().getType();
 							 boolean is3D=coord.getDimensions().length==3;
 							 Object geomObj = geomConv.fromIomMultiPolyline(iomMultiline,epsgCode,is3D,getP(line, model, epsgCode));
-							ps.setObject(valuei,geomObj);
+							ps.setObject(sqlParamIndex,geomObj);
 						 }else{
-							geomConv.setPolylineNull(ps,valuei);
+							geomConv.setPolylineNull(ps,sqlParamIndex);
 						 }
-						 valuei++;
+						 sqlParamIndex++;
 					}else if(TrafoConfigNames.MULTIPOINT_TRAFO_COALESCE.equals(trafoConfig.getAttrConfig(tableAttr, TrafoConfigNames.MULTIPOINT_TRAFO))){
 						 IomObject iomValue= classAttr==null ? null : iomObj.getattrobj(attrName,0);
 						 IomObject iomMultipoint=null;
@@ -1256,25 +1282,25 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 								CoordType coord=((CoordType) coordAttr.getDomainResolvingAliases());
 							 boolean is3D=coord.getDimensions().length==3;
 							 Object geomObj = geomConv.fromIomMultiCoord(iomMultipoint,epsgCode,is3D);
-							ps.setObject(valuei,geomObj);
+							ps.setObject(sqlParamIndex,geomObj);
 						 }else{
-							geomConv.setCoordNull(ps,valuei);
+							geomConv.setCoordNull(ps,sqlParamIndex);
 						 }
-						 valuei++;
+						 sqlParamIndex++;
 					}else if(TrafoConfigNames.MULTILINGUAL_TRAFO_EXPAND.equals(trafoConfig.getAttrConfig(tableAttr, TrafoConfigNames.MULTILINGUAL_TRAFO))){
 						 IomObject iomMulti= classAttr==null ? null : iomObj.getattrobj(attrName,0);
 						for(String sfx:DbNames.MULTILINGUAL_TXT_COL_SUFFIXS){
 							 if(iomMulti!=null){
 								 	String value=getMultilingualText(iomMulti,sfx);
 									if(value!=null){
-										ps.setString(valuei, value);
+										ps.setString(sqlParamIndex, value);
 									}else{
-										ps.setNull(valuei,Types.VARCHAR);
+										ps.setNull(sqlParamIndex,Types.VARCHAR);
 									}
 							 }else{
-									ps.setNull(valuei,Types.VARCHAR);
+									ps.setNull(sqlParamIndex,Types.VARCHAR);
 							 }
-							valuei++;
+							sqlParamIndex++;
 						}
                     }else if(TrafoConfigNames.LOCALISED_TRAFO_EXPAND.equals(trafoConfig.getAttrConfig(tableAttr, TrafoConfigNames.LOCALISED_TRAFO))){
                         IomObject iomTxt= classAttr==null ? null : iomObj.getattrobj(attrName,0);
@@ -1282,31 +1308,31 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
                             String text=iomTxt.getattrvalue(IliNames.CHBASE1_LOCALISEDTEXT_TEXT);
                             String lang=null;
                             if(text!=null){
-                                ps.setString(valuei, text);
+                                ps.setString(sqlParamIndex, text);
                                 lang=iomTxt.getattrvalue(IliNames.CHBASE1_LOCALISEDTEXT_LANGUAGE);
                             }else{
-                                ps.setNull(valuei,Types.VARCHAR);
+                                ps.setNull(sqlParamIndex,Types.VARCHAR);
                             }
-                            valuei++;
+                            sqlParamIndex++;
                             if(lang!=null){
-                                ps.setString(valuei, lang);
+                                ps.setString(sqlParamIndex, lang);
                             }else{
-                                ps.setNull(valuei,Types.VARCHAR);
+                                ps.setNull(sqlParamIndex,Types.VARCHAR);
                             }
-                            valuei++;
+                            sqlParamIndex++;
                         }else {
-                            ps.setNull(valuei,Types.VARCHAR);
-                            valuei++;
-                            ps.setNull(valuei,Types.VARCHAR);
-                            valuei++;
+                            ps.setNull(sqlParamIndex,Types.VARCHAR);
+                            sqlParamIndex++;
+                            ps.setNull(sqlParamIndex,Types.VARCHAR);
+                            sqlParamIndex++;
                         }
 
 					}else{
 						 // enqueue struct values
 						 for(int structi=0;structi<structc;structi++){
 						 	IomObject struct=iomObj.getattrobj(attrName,structi);
-						 	String sqlAttrName=ili2sqlName.mapIliAttributeDef(tableAttr,null,sqlTableName,null);
-						 	enqueStructValue(structQueue,sqlId,sqlType,sqlAttrName,struct,structi,tableAttr);
+						 	String sqlAttrName=ili2sqlName.mapIliAttributeDef(tableAttr,null,sqlTableNameOfMainObj,null);
+						 	enqueStructValue(structQueue,sqlIdOfMainObj,sqlTypeOfMainObj,sqlAttrName,struct,structi,tableAttr);
 						 }
 					}
 				}else if (type instanceof PolylineType){
@@ -1314,21 +1340,21 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 					int actualEpsgCode = TransferFromIli.getEpsgCode(originalClass, tableAttr, genericDomains, defaultEpsgCode);
 					if (value != null && actualEpsgCode == epsgCode) {
 						boolean is3D=((CoordType)((PolylineType)type).getControlPointDomain().getType()).getDimensions().length==3;
-						ps.setObject(valuei,geomConv.fromIomPolyline(value,epsgCode,is3D,getP((PolylineType)type, model, epsgCode)));
+						ps.setObject(sqlParamIndex,geomConv.fromIomPolyline(value,epsgCode,is3D,getP((PolylineType)type, model, epsgCode)));
 					 }else{
-						geomConv.setPolylineNull(ps,valuei);
+						geomConv.setPolylineNull(ps,sqlParamIndex);
 					 }
-					 valuei++;
+					 sqlParamIndex++;
 				 }else if (type instanceof MultiPolylineType){
 					IomObject value= classAttr==null ? null : iomObj.getattrobj(attrName,0);
 					int actualEpsgCode = TransferFromIli.getEpsgCode(originalClass, tableAttr, genericDomains, defaultEpsgCode);
 					if (value != null && actualEpsgCode == epsgCode) {
 						boolean is3D=((CoordType)((MultiPolylineType)type).getControlPointDomain().getType()).getDimensions().length==3;
-						ps.setObject(valuei,geomConv.fromIomMultiPolyline(value,epsgCode,is3D,getP((MultiPolylineType)type, model, epsgCode)));
+						ps.setObject(sqlParamIndex,geomConv.fromIomMultiPolyline(value,epsgCode,is3D,getP((MultiPolylineType)type, model, epsgCode)));
 					}else{
-						geomConv.setPolylineNull(ps,valuei);
+						geomConv.setPolylineNull(ps,sqlParamIndex);
 					}
-					valuei++;
+					sqlParamIndex++;
 				}else if(type instanceof AbstractSurfaceOrAreaType){
 					 if(createItfLineTables){
 					 }else if(createXtfLineTables){
@@ -1342,11 +1368,11 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
                              boolean is3D=((CoordType)((SurfaceOrAreaType)type).getControlPointDomain().getType()).getDimensions().length==3;
                              // map polygon to list of poylines
                              Object geomObj = geomConv.fromIomMultiPolyline(iomMultiline,epsgCode,is3D,getP((SurfaceOrAreaType)type, model, epsgCode));
-                             ps.setObject(valuei,geomObj);
+                             ps.setObject(sqlParamIndex,geomObj);
                          }else{
-                             geomConv.setSurfaceNull(ps,valuei);
+                             geomConv.setSurfaceNull(ps,sqlParamIndex);
                          }
-                         valuei++;
+                         sqlParamIndex++;
 					 }else{
 						 IomObject value= classAttr==null ? null : iomObj.getattrobj(attrName,0);
 						 int actualEpsgCode = TransferFromIli.getEpsgCode(originalClass, tableAttr, genericDomains, defaultEpsgCode);
@@ -1354,15 +1380,15 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 							 boolean is3D=((CoordType)((AbstractSurfaceOrAreaType)type).getControlPointDomain().getType()).getDimensions().length==3;
 							 if(type instanceof SurfaceOrAreaType){
 								 Object geomObj = geomConv.fromIomSurface(value,epsgCode,((SurfaceOrAreaType)type).getLineAttributeStructure()!=null,is3D,getP((SurfaceOrAreaType)type, model, epsgCode));
-								 ps.setObject(valuei,geomObj);
+								 ps.setObject(sqlParamIndex,geomObj);
 							 } else if (type instanceof MultiSurfaceOrAreaType) {
 								 Object geomObj = geomConv.fromIomMultiSurface(value,epsgCode,((MultiSurfaceOrAreaType)type).getLineAttributeStructure()!=null,is3D,getP((MultiSurfaceOrAreaType)type, model, epsgCode));
-								ps.setObject(valuei,geomObj);
+								ps.setObject(sqlParamIndex,geomObj);
 							 }
 						 }else{
-							geomConv.setSurfaceNull(ps,valuei);
+							geomConv.setSurfaceNull(ps,sqlParamIndex);
 						 }
-						 valuei++;
+						 sqlParamIndex++;
 					 }
 					 if(createItfAreaRef){
 						 if(type instanceof AreaType){
@@ -1375,11 +1401,11 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 							 int actualEpsgCode = TransferFromIli.getEpsgCode(originalClass, tableAttr, genericDomains, defaultEpsgCode);
 							 if (value != null && actualEpsgCode == epsgCode) {
 								boolean is3D=((CoordType)((AbstractSurfaceOrAreaType)type).getControlPointDomain().getType()).getDimensions().length==3;
-								ps.setObject(valuei,geomConv.fromIomCoord(value,epsgCode,is3D));
+								ps.setObject(sqlParamIndex,geomConv.fromIomCoord(value,epsgCode,is3D));
 							 }else{
-								geomConv.setCoordNull(ps,valuei);
+								geomConv.setCoordNull(ps,sqlParamIndex);
 							 }
-							 valuei++;
+							 sqlParamIndex++;
 						 }
 					 }
 				 }else if(type instanceof CoordType){
@@ -1388,30 +1414,30 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 					    int actualEpsgCode=TransferFromIli.getEpsgCode(originalClass,tableAttr, genericDomains, defaultEpsgCode);
 					    if(actualEpsgCode==epsgCode) {
 	                        boolean is3D=((CoordType)type).getDimensions().length==3;
-	                        ps.setObject(valuei,geomConv.fromIomCoord(value,epsgCode,is3D));
+	                        ps.setObject(sqlParamIndex,geomConv.fromIomCoord(value,epsgCode,is3D));
 					    }else {
-	                        geomConv.setCoordNull(ps,valuei);
+	                        geomConv.setCoordNull(ps,sqlParamIndex);
 					    }
 					 }else{
-						geomConv.setCoordNull(ps,valuei);
+						geomConv.setCoordNull(ps,sqlParamIndex);
 					 }
-					 valuei++;
+					 sqlParamIndex++;
                 } else if (type instanceof MultiCoordType) {
                     IomObject value= classAttr==null ? null : iomObj.getattrobj(attrName,0);
                     if(value!=null){
                         int actualEpsgCode=TransferFromIli.getEpsgCode(originalClass,tableAttr, genericDomains, defaultEpsgCode);
                         if(actualEpsgCode==epsgCode) {
                             boolean is3D=((MultiCoordType)type).getDimensions().length==3;
-                            ps.setObject(valuei,geomConv.fromIomMultiCoord(value,epsgCode,is3D));
+                            ps.setObject(sqlParamIndex,geomConv.fromIomMultiCoord(value,epsgCode,is3D));
                         }else {
-                            geomConv.setCoordNull(ps,valuei);
+                            geomConv.setCoordNull(ps,sqlParamIndex);
                         }
                     }else{
-                        geomConv.setCoordNull(ps,valuei);
+                        geomConv.setCoordNull(ps,sqlParamIndex);
                     }
-                    valuei++;
+                    sqlParamIndex++;
 				}else if(type instanceof NumericType){
-					String value= classAttr==null ? null : iomObj.getattrprim(attrName, attrIndex);
+					String value= classAttr==null ? null : iomObj.getattrprim(attrName, iomValueIndex);
 					if(type.isAbstract()){
 					}else{
 						PrecisionDecimal min=((NumericType)type).getMinimum();
@@ -1419,59 +1445,59 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 						if(min.getAccuracy()>0){
 							if(value!=null){
 								try{
-									ps.setDouble(valuei, Double.parseDouble(value));
+									ps.setDouble(sqlParamIndex, Double.parseDouble(value));
 								}catch(java.lang.NumberFormatException ex){
 									EhiLogger.logError(ex);
 								}
 							}else{
-								geomConv.setDecimalNull(ps,valuei);
+								geomConv.setDecimalNull(ps,sqlParamIndex);
 							}
 						}else{
 							if(value!=null){
 								try{
 									long val=Long.parseLong(value);
-									ps.setLong(valuei, val);
+									ps.setLong(sqlParamIndex, val);
 								}catch(java.lang.NumberFormatException ex){
 									EhiLogger.logError(ex);
 								}
 							}else{
-								ps.setNull(valuei,Types.INTEGER);
+								ps.setNull(sqlParamIndex,Types.INTEGER);
 							}
 						}
-						valuei++;
+						sqlParamIndex++;
 					}
 				}else if(type instanceof AbstractEnumerationType){
-					String value= classAttr==null ? null : iomObj.getattrprim(attrName, attrIndex);
+					String value= classAttr==null ? null : iomObj.getattrprim(attrName, iomValueIndex);
 					if(createEnumColAsItfCode){
 						if(value!=null){
 							int itfCode=mapXtfCode2ItfCode((EnumerationType)type, value);
-							ps.setInt(valuei, itfCode);
+							ps.setInt(sqlParamIndex, itfCode);
 						}else{
-							ps.setNull(valuei,Types.INTEGER);
+							ps.setNull(sqlParamIndex,Types.INTEGER);
 						}
 					}else{
 		                if(Config.CREATE_ENUM_DEFS_MULTI_WITH_ID.equals(createEnumTable)) {
 	                        if(value!=null){
-	                            ps.setLong(valuei, mapEnumValue2sqlid(classAttr,value));
+	                            ps.setLong(sqlParamIndex, mapEnumValue2sqlid(classAttr,value));
 	                        }else{
-	                            ps.setNull(valuei,Types.BIGINT);
+	                            ps.setNull(sqlParamIndex,Types.BIGINT);
 	                        }
 		                }else {
 	                        if(value!=null){
-	                            ps.setString(valuei, value);
+	                            ps.setString(sqlParamIndex, value);
 	                        }else{
-	                            ps.setNull(valuei,Types.VARCHAR);
+	                            ps.setNull(sqlParamIndex,Types.VARCHAR);
 	                        }
 		                }
 					}
-					valuei++;
+					sqlParamIndex++;
 					if(createEnumTxtCol){
 						if(value!=null){
-							ps.setString(valuei, mapEnumValue2dispName(classAttr, value));
+							ps.setString(sqlParamIndex, mapEnumValue2dispName(classAttr, value));
 						}else{
-							ps.setNull(valuei,Types.VARCHAR);
+							ps.setNull(sqlParamIndex,Types.VARCHAR);
 						}
-						valuei++;
+						sqlParamIndex++;
 					}
 				}else if(type instanceof ReferenceType){
 					 IomObject structvalue= classAttr==null ? null : iomObj.getattrobj(attrName,0);
@@ -1479,40 +1505,40 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 					 if(structvalue!=null){
 						 refoid=structvalue.getobjectrefoid();
 					 }
-					OutParam<Integer> valueiRef=new OutParam<Integer>(valuei);
+					OutParam<Integer> valueiRef=new OutParam<Integer>(sqlParamIndex);
 					setReferenceColumn(ps,((ReferenceType) type).getReferred(),refoid,valueiRef,createExtRef && ((ReferenceType) type).isExternal());
-					valuei=valueiRef.value;
+					sqlParamIndex=valueiRef.value;
 				}else if(type instanceof BlackboxType){
-					String value= classAttr==null ? null : iomObj.getattrprim(attrName, attrIndex);
+					String value= classAttr==null ? null : iomObj.getattrprim(attrName, iomValueIndex);
 					if(((BlackboxType)type).getKind()==BlackboxType.eXML){
 						if(value==null){
-							 geomConv.setXmlNull(ps, valuei);
+							 geomConv.setXmlNull(ps, sqlParamIndex);
 						}else{
 							 Object toInsertXml = geomConv.fromIomXml(value);
-							 ps.setObject(valuei, toInsertXml);
+							 ps.setObject(sqlParamIndex, toInsertXml);
 						}
-						valuei++;
+						sqlParamIndex++;
 					}else{
 						if(value==null){
-							 geomConv.setBlobNull(ps, valuei);
+							 geomConv.setBlobNull(ps, sqlParamIndex);
 						}else{
 							 Object toInsertBlob = geomConv.fromIomBlob(value);
-							 ps.setObject(valuei, toInsertBlob);
+							 ps.setObject(sqlParamIndex, toInsertBlob);
 						}
-						valuei++;
+						sqlParamIndex++;
 					}
 				}else{
-					String value= classAttr==null ? null : iomObj.getattrprim(attrName, attrIndex);
+					String value= classAttr==null ? null : iomObj.getattrprim(attrName, iomValueIndex);
 					if(value!=null){
-						ps.setString(valuei, value);
+						ps.setString(sqlParamIndex, value);
 					}else{
-						ps.setNull(valuei,Types.VARCHAR);
+						ps.setNull(sqlParamIndex,Types.VARCHAR);
 					}
-					valuei++;
+					sqlParamIndex++;
 				}
 			}
 		}
-		return valuei;
+		return sqlParamIndex;
 	}
 	private IomObject mapSurface2MultiPolyline(IomObject obj) {
 	    IomObject iomMultiline=null;

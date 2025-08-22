@@ -106,7 +106,7 @@ public abstract class ExpandStruct24Test {
     }
     
     
-    //@Test
+    @Test
     public void importXtf() throws Exception
     {
         EhiLogger.getInstance().setTraceFilter(false);
@@ -151,7 +151,44 @@ public abstract class ExpandStruct24Test {
     }
 
     protected void importXtf_doAsserts(java.sql.Statement stmt) throws SQLException {
-        
+        java.sql.ResultSet rs=null;
+        try {
+            rs=stmt.executeQuery("SELECT farben0_r,farben0_g,farben0_b,farben1_r,farben1_g,farben1_b,nummer0,nummer1 FROM "+setup.prefixName("auto")+" WHERE t_ili_tid='1'");
+            assertTrue(rs.next());
+            assertEquals(10,rs.getInt(1));
+            assertEquals(11,rs.getInt(2));
+            assertEquals(12,rs.getInt(3));
+            assertEquals(20,rs.getInt(4));
+            assertEquals(21,rs.getInt(5));
+            assertEquals(22,rs.getInt(6));
+            assertEquals(10,rs.getInt(7));
+            assertEquals(12,rs.getInt(8));
+            rs=stmt.executeQuery("SELECT farben0_r,farben0_g,farben0_b,farben1_r,farben1_g,farben1_b,nummer0,nummer1 FROM "+setup.prefixName("auto")+" WHERE t_ili_tid='2'");
+            assertTrue(rs.next());
+            rs.getInt(1);
+            assertEquals(true,rs.wasNull());
+
+            rs=stmt.executeQuery("SELECT farben0_r,farben0_g,farben0_b,farben1_r,farben1_g,farben1_b,nummer0,nummer1 FROM "+setup.prefixName("auto")+" WHERE t_ili_tid='3'");
+            assertTrue(rs.next());
+            assertEquals(10,rs.getInt(1));
+            assertEquals(11,rs.getInt(2));
+            assertEquals(12,rs.getInt(3));
+            rs.getInt(4);
+            assertEquals(true,rs.wasNull());
+            rs.getInt(5);
+            assertEquals(true,rs.wasNull());
+            rs.getInt(6);
+            assertEquals(true,rs.wasNull());
+            assertEquals(1,rs.getInt(7));
+            rs.getInt(8);
+            assertEquals(true,rs.wasNull());
+            
+        }finally {
+            if(rs!=null) {
+                rs.close();
+                rs=null;
+            }
+        }
     }
     //@Test
     public void exportXtf() throws Exception
