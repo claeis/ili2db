@@ -745,7 +745,7 @@ artifacts {
     archives(ili2gpkgJar.archivePath){
     	builtBy ili2gpkgJar
     }
-/*	archives(ili2mysqlBindist.archivePath) {
+	archives(ili2mysqlBindist.archivePath) {
         type 'zip'
         classifier 'bindist'
         builtBy ili2mysqlBindist
@@ -792,7 +792,7 @@ artifacts {
     }
     archives(ili2oraJar.archivePath){
     	builtBy ili2oraJar
-    } */
+    }
 }
 
 install {
