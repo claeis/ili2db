@@ -58,6 +58,7 @@ before_script:
     - source my_py3/bin/activate # to activate the python3 environemt    
     - python -m pip --trusted-host pypi.org --trusted-host pypi.python.org --trusted-host files.pythonhosted.org install docutils
     - python -m pip --trusted-host pypi.org --trusted-host pypi.python.org --trusted-host files.pythonhosted.org install Pygments
+    - python -m pip --trusted-host pypi.org --trusted-host pypi.python.org --trusted-host files.pythonhosted.org install rst2html
     - python -m pip freeze
     - 
 script: 
@@ -69,18 +70,18 @@ script:
   - ./gradlew ili2fgdbJar
   - ./gradlew ili2mssqlJar ili2mssqlTest "-Ddburl=jdbc:sqlserver://localhost;databaseName=ili2db" -Ddbusr=sa -Ddbpwd=MsInst2019x
   - # ./gradlew ili2oraJar ili2oraTest
-  - ./gradlew -Drst2html=`which rst2html` usrdoc testreport ili2mysqlBindist ili2pgBindist ili2fgdbBindist ili2mssqlBindist ili2oraBindist
+  - ./gradlew usrdoc testreport ili2mysqlBindist ili2pgBindist ili2fgdbBindist ili2mssqlBindist ili2oraBindist
 after_failure:
   - cat build/junitreport/junit-noframes.html && sleep 10
 deploy:
   - provider: script
     skip_cleanup: true
-    script: ./gradlew --stacktrace -Drst2html=`which rst2html.py` -Drepos_pwd=${repos_pwd} -Drepos_usr=jql_jars-INTE uploadArchives
+    script: ./gradlew --stacktrace -Drepos_pwd=${repos_pwd} -Drepos_usr=jql_jars-INTE uploadArchives
     on:
       branch: master
   - provider: script
     skip_cleanup: true
-    script: ./gradlew -Drst2html=`which rst2html.py` -Drepos_pwd=${repos_pwd} -Drepos_usr=jql_jars-INTE '-Drelease=' -Ddownloads_pwd=${downloads_pwd} -Ddownloads_usr=jql_downloads -Ddocs_pwd=${docs_pwd} -Ddocs_usr=jql_docs uploadArchives uploadBin uploadDoc
+    script: ./gradlew -Drepos_pwd=${repos_pwd} -Drepos_usr=jql_jars-INTE '-Drelease=' -Ddownloads_pwd=${downloads_pwd} -Ddownloads_usr=jql_downloads -Ddocs_pwd=${docs_pwd} -Ddocs_usr=jql_docs uploadArchives uploadBin uploadDoc
     on:
       branch: stable
 notifications:
