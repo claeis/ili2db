@@ -47,7 +47,6 @@ def dbpwd = System.getProperty('dbpwd',properties.get('dbpwd'))
 def myurl = System.getProperty('myurl',properties.get('myurl'))
 def myusr = System.getProperty('myusr',properties.get('myusr'))
 def mypwd = System.getProperty('mypwd',properties.get('mypwd'))
-def python= System.getProperty('python',properties.get('python','python'))
 def rst2html= System.getProperty('rst2html',properties.get('rst2html','rst2html'))
 def docs_pwd = System.getProperty('docs_pwd',properties.get('docs_pwd','docs_pwd'))
 def docs_usr = System.getProperty('docs_usr',properties.get('docs_usr','docs_usr'))
@@ -418,8 +417,8 @@ task usrdoc(type:Exec) {
 		new File(project.buildDir,'docs').mkdir()
 	}
 		workingDir = project.buildDir
-		executable python
-		args = [rst2html, infile, outfile]
+		executable rst2html
+		args = [infile, outfile]
 }
 task ili2pgJar(dependsOn: jar,type: Jar) {
 	baseName = 'ili2pg'

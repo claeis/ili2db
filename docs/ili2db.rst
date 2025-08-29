@@ -1912,7 +1912,7 @@ Meta-Attribute generiert:
 +====================================+===============================================================+
 | ``ili2db.ili.lang``                | Sprache der Namen der Modellelemente (gemäss INTERLIS-Modell).|
 +------------------------------------+---------------------------------------------------------------+
-| ``ili2db.ili.translationOf ``      | Names des Modells in der Ursprungssprache, falls es           |
+| ``ili2db.ili.translationOf``       | Names des Modells in der Ursprungssprache, falls es           |
 |                                    | übersetzt ist (``TRANLSLATION OF``)                           |
 +------------------------------------+---------------------------------------------------------------+
 | ``ili2db.ili.topicClasses``        | Lister der in einem Behälter möglichen Objekte                |

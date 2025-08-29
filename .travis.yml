@@ -69,7 +69,7 @@ script:
   - ./gradlew ili2fgdbJar
   - ./gradlew ili2mssqlJar ili2mssqlTest "-Ddburl=jdbc:sqlserver://localhost;databaseName=ili2db" -Ddbusr=sa -Ddbpwd=MsInst2019x
   - # ./gradlew ili2oraJar ili2oraTest
-  - ./gradlew -Drst2html=`which rst2html.py` usrdoc testreport ili2mysqlBindist ili2pgBindist ili2fgdbBindist ili2mssqlBindist ili2oraBindist
+  - ./gradlew -Drst2html=`which rst2html` usrdoc testreport ili2mysqlBindist ili2pgBindist ili2fgdbBindist ili2mssqlBindist ili2oraBindist
 after_failure:
   - cat build/junitreport/junit-noframes.html && sleep 10
 deploy:
