@@ -10,6 +10,7 @@ MODEL ExpandStruct24
 	   g: 0..255;
 	   b: 0..255;
 	END Farbe;
+	
 	CLASS Auto =
 	  !!@ili2db.mapping=EXPAND
 	  Farben: LIST {0..2} OF Farbe;

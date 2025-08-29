@@ -11,16 +11,15 @@ import ch.ehi.ili2db.base.Ili2dbException;
 import ch.ehi.ili2db.fromili.TransferFromIli;
 import ch.ehi.ili2db.gui.Config;
 import ch.interlis.ili2c.metamodel.AbstractClassDef;
-import ch.interlis.ili2c.metamodel.AbstractCoordType;
 import ch.interlis.ili2c.metamodel.AssociationDef;
 import ch.interlis.ili2c.metamodel.AttributeDef;
-import ch.interlis.ili2c.metamodel.BaseType;
 import ch.interlis.ili2c.metamodel.Cardinality;
 import ch.interlis.ili2c.metamodel.CompositionType;
 import ch.interlis.ili2c.metamodel.Element;
-import ch.interlis.ili2c.metamodel.LineType;
+import ch.interlis.ili2c.metamodel.ObjectType;
 import ch.interlis.ili2c.metamodel.RoleDef;
 import ch.interlis.ili2c.metamodel.TransferDescription;
+import ch.interlis.ili2c.metamodel.Type;
 import ch.interlis.ili2c.metamodel.Viewable;
 import ch.interlis.ili2c.metamodel.ViewableTransferElement;
 
@@ -314,9 +313,8 @@ public class Viewable2TableMapper {
 		// only one geometry column per table?
 		if(singleGeom){
 			for(ColumnWrapper propE:existingColumns){
-			    ViewableTransferElement attrE=propE.getViewableTransferElement();
-				if(attrE.obj instanceof AttributeDef){
-					AttributeDef attr=(AttributeDef) attrE.obj;
+				if(propE.isIliAttr()){
+					AttributeDef attr=(AttributeDef) propE.getViewableTransferElement().obj;
 					ch.interlis.ili2c.metamodel.Type type=attr.getDomainResolvingAliases();
 					if(type instanceof ch.interlis.ili2c.metamodel.AbstractCoordType || type instanceof ch.interlis.ili2c.metamodel.LineType
 							|| (Ili2cUtility.isMultiSurfaceAttr(getTransferDescription(attr), attr) && (coalesceMultiSurface 
@@ -341,112 +339,126 @@ public class Viewable2TableMapper {
 			ViewableTransferElement viewableTransferElement = additionalAttrs.next();
 			if (viewableTransferElement.obj instanceof AttributeDef) {
 				AttributeDef attr=(AttributeDef) viewableTransferElement.obj;
-				attr=getBaseAttr(iliclassOfAttrs,attr); // get the most general attribute definition, but only up to the class of the current table
-				viewableTransferElement.obj=attr;
-				for(Integer epsgCode:getEpsgCodes(attr)) {
-	                String sqlSecondaryTableName=trafoConfig.getAttrConfig(iliclassOfAttrs,attr, epsgCode,TrafoConfigNames.SECONDARY_TABLE);
-	                if(sqlSecondaryTableName==null) {
-	                    // pre ili2db 3.13.x
-	                    sqlSecondaryTableName=trafoConfig.getAttrConfig(iliclassOfAttrs,attr, TrafoConfigNames.SECONDARY_TABLE);
-	                }
-	                // attribute configured to be in a secondary table?
-                    if(sqlSecondaryTableName!=null){
-	                    // add attribute to given secondary table
-	                    ViewableWrapper attrWrapperSecondaryTable=table.getSecondaryTable(sqlSecondaryTableName);
-	                    if(attrWrapperSecondaryTable==null){
-	                        attrWrapperSecondaryTable=table.createSecondaryTable(sqlSecondaryTableName);
-	                    }
-	                    List<ColumnWrapper> attrPropsSecondaryTable=new java.util.ArrayList<ColumnWrapper>();
-	                    final ColumnWrapper newProp = new ColumnWrapper(new StructAttrPath(viewableTransferElement),epsgCode);
-	                    addColumn(table,attrPropsSecondaryTable,newProp);
-	                    attrWrapperSecondaryTable.setAttrv(attrPropsSecondaryTable);
-	                }else{
-                        Cardinality cardinality = attr.getDomainOrDerivedDomain().getCardinality();
-                        ch.interlis.ili2c.metamodel.Type type=attr.getDomainResolvingAll();
-                        if(type instanceof ch.interlis.ili2c.metamodel.AbstractCoordType || type instanceof ch.interlis.ili2c.metamodel.LineType
-                            || (Ili2cUtility.isMultiSurfaceAttr(getTransferDescription(attr), attr) && (coalesceMultiSurface 
-                                || TrafoConfigNames.MULTISURFACE_TRAFO_COALESCE.equals(trafoConfig.getAttrConfig(attr,TrafoConfigNames.MULTISURFACE_TRAFO))))
-                            || (Ili2cUtility.isMultiLineAttr(getTransferDescription(attr), attr) && (coalesceMultiLine 
-                                    || TrafoConfigNames.MULTILINE_TRAFO_COALESCE.equals(trafoConfig.getAttrConfig(attr,TrafoConfigNames.MULTILINE_TRAFO))))
-                            || (Ili2cUtility.isMultiPointAttr(getTransferDescription(attr), attr) && (coalesceMultiPoint 
-                                    || TrafoConfigNames.MULTIPOINT_TRAFO_COALESCE.equals(trafoConfig.getAttrConfig(attr,TrafoConfigNames.MULTIPOINT_TRAFO))))
-                        ){
-                            if(epsgCode==null) {
-                                throw new Ili2dbException("no CRS for attribute "+attr.getScopedName());
+                if(!attr.isTransient()){
+                    Type proxyType=attr.getDomain();
+                    if(proxyType!=null && (proxyType instanceof ObjectType)){
+                        // skip implicit particles (base-viewables) of views
+                    }else{
+                        attr=getBaseAttr(iliclassOfAttrs,attr); // get the most general attribute definition, but only up to the class of the current table
+                        viewableTransferElement.obj=attr;
+                        for(Integer epsgCode:getEpsgCodes(attr)) {
+                            String sqlSecondaryTableName=trafoConfig.getAttrConfig(iliclassOfAttrs,attr, epsgCode,TrafoConfigNames.SECONDARY_TABLE);
+                            if(sqlSecondaryTableName==null) {
+                                // pre ili2db 3.13.x
+                                sqlSecondaryTableName=trafoConfig.getAttrConfig(iliclassOfAttrs,attr, TrafoConfigNames.SECONDARY_TABLE);
                             }
-                            if(createItfLineTables && type instanceof ch.interlis.ili2c.metamodel.SurfaceType){
-                                // no attribute in maintable required
+                            // attribute configured to be in a secondary table?
+                            if(sqlSecondaryTableName!=null){
+                                // add attribute to given secondary table
+                                ViewableWrapper attrWrapperSecondaryTable=table.getSecondaryTable(sqlSecondaryTableName);
+                                if(attrWrapperSecondaryTable==null){
+                                    attrWrapperSecondaryTable=table.createSecondaryTable(sqlSecondaryTableName);
+                                }
+                                List<ColumnWrapper> attrPropsSecondaryTable=new java.util.ArrayList<ColumnWrapper>();
+                                final ColumnWrapper newProp = new ColumnWrapper(new StructAttrPath(viewableTransferElement),epsgCode);
+                                addColumn(table,attrPropsSecondaryTable,newProp);
+                                attrWrapperSecondaryTable.setAttrv(attrPropsSecondaryTable);
                             }else{
-                                // table already has a geometry column?
-                                if(singleGeom && hasGeometry){
-                                    // attribute not yet mapped?
-                                    final ColumnWrapper newProp = new ColumnWrapper(new StructAttrPath(viewableTransferElement),epsgCode);
-                                    if(!columnAlreadyAdded(table,existingColumns,newProp)){
-                                        // create a new secondary table
-                                        sqlSecondaryTableName=nameMapping.mapAttributeAsTable(iliclassOfAttrs,attr,epsgCode);
-                                        ViewableWrapper attrWrapperSecondaryTable=table.getSecondaryTable(sqlSecondaryTableName);
-                                        if(attrWrapperSecondaryTable==null){
-                                            attrWrapperSecondaryTable=table.createSecondaryTable(sqlSecondaryTableName);
+                                Cardinality cardinality = attr.getDomainOrDerivedDomain().getCardinality();
+                                ch.interlis.ili2c.metamodel.Type type=attr.getDomainResolvingAll();
+                                if(type instanceof ch.interlis.ili2c.metamodel.AbstractCoordType || type instanceof ch.interlis.ili2c.metamodel.LineType
+                                    || (Ili2cUtility.isMultiSurfaceAttr(getTransferDescription(attr), attr) && (coalesceMultiSurface 
+                                        || TrafoConfigNames.MULTISURFACE_TRAFO_COALESCE.equals(trafoConfig.getAttrConfig(attr,TrafoConfigNames.MULTISURFACE_TRAFO))))
+                                    || (Ili2cUtility.isMultiLineAttr(getTransferDescription(attr), attr) && (coalesceMultiLine 
+                                            || TrafoConfigNames.MULTILINE_TRAFO_COALESCE.equals(trafoConfig.getAttrConfig(attr,TrafoConfigNames.MULTILINE_TRAFO))))
+                                    || (Ili2cUtility.isMultiPointAttr(getTransferDescription(attr), attr) && (coalesceMultiPoint 
+                                            || TrafoConfigNames.MULTIPOINT_TRAFO_COALESCE.equals(trafoConfig.getAttrConfig(attr,TrafoConfigNames.MULTIPOINT_TRAFO))))
+                                ){
+                                    if(epsgCode==null) {
+                                        throw new Ili2dbException("no CRS for attribute "+attr.getScopedName());
+                                    }
+                                    if(createItfLineTables && type instanceof ch.interlis.ili2c.metamodel.SurfaceType){
+                                        // no attribute in maintable required
+                                    }else{
+                                        // table already has a geometry column?
+                                        if(singleGeom && hasGeometry){
+                                            // attribute not yet mapped?
+                                            final ColumnWrapper newProp = new ColumnWrapper(new StructAttrPath(viewableTransferElement),epsgCode);
+                                            if(!columnAlreadyAdded(table,existingColumns,newProp)){
+                                                // create a new secondary table
+                                                sqlSecondaryTableName=nameMapping.mapAttributeAsTable(iliclassOfAttrs,attr,epsgCode);
+                                                ViewableWrapper attrWrapperSecondaryTable=table.getSecondaryTable(sqlSecondaryTableName);
+                                                if(attrWrapperSecondaryTable==null){
+                                                    attrWrapperSecondaryTable=table.createSecondaryTable(sqlSecondaryTableName);
+                                                }
+                                                // add attribute to new secondary table
+                                                List<ColumnWrapper> attrPropsSecondaryTable=new java.util.ArrayList<ColumnWrapper>();
+                                                addColumn(table,attrPropsSecondaryTable,newProp);
+                                                attrWrapperSecondaryTable.setAttrv(attrPropsSecondaryTable);
+                                                trafoConfig.setAttrConfig(iliclassOfAttrs,attr, epsgCode,TrafoConfigNames.SECONDARY_TABLE, sqlSecondaryTableName);
+                                            }
+                                        }else{
+                                            // table has not yet a geometry column
+                                            // add it
+                                            hasGeometry=true;
+                                            structAttrPrefix[structAttrPrefix.length-1]=new StructAttrPath.PathElAttr(viewableTransferElement); 
+                                            StructAttrPath structAttrPath=new StructAttrPath(structAttrPrefix);
+                                            addColumn(table,existingColumns,new ColumnWrapper(structAttrPath,epsgCode));
                                         }
-                                        // add attribute to new secondary table
-                                        List<ColumnWrapper> attrPropsSecondaryTable=new java.util.ArrayList<ColumnWrapper>();
-                                        addColumn(table,attrPropsSecondaryTable,newProp);
-                                        attrWrapperSecondaryTable.setAttrv(attrPropsSecondaryTable);
-                                        trafoConfig.setAttrConfig(iliclassOfAttrs,attr, epsgCode,TrafoConfigNames.SECONDARY_TABLE, sqlSecondaryTableName);
+                                    }
+                                } else if (cardinality.getMaximum() > 1 && 
+                                        !(type instanceof CompositionType) && 
+                                        !(Ili2cUtility.isJsonMapping(attr) && coalesceJson) && 
+                                        !(Ili2cUtility.isArrayAttr(td,attr) && coalesceArray) &&
+                                        !(Ili2cUtility.isExpandMapping(attr) && expandStruct)
+                                        ) {
+                                    // create a new secondary table for attribute with cardinality greater than one
+                                    sqlSecondaryTableName=nameMapping.mapAttributeAsTable(iliclassOfAttrs, attr, epsgCode);
+                                    ViewableWrapper secondaryTable = table.createSecondaryTable(sqlSecondaryTableName);
+
+                                    // add attribute to new secondary table
+                                    addColumn(table, secondaryTable.getAttrv(), new ColumnWrapper(new StructAttrPath(viewableTransferElement)));
+                                    trafoConfig.setAttrConfig(attr, TrafoConfigNames.SECONDARY_TABLE, sqlSecondaryTableName);
+                                } else if (cardinality.getMaximum() <= ArrayMappings.MAX_ARRAY_EXPAND &&
+                                        (Ili2cUtility.isExpandMapping(attr) && expandStruct)
+                                        ) {
+                                    if(type instanceof CompositionType) {
+                                        trafoConfig.setAttrConfig(attr, TrafoConfigNames.STRUCT_TRAFO, TrafoConfigNames.STRUCT_TRAFO_EXPAND);
+                                        long maxIdx=cardinality.getMaximum();
+                                        for(int idx=0;idx<maxIdx;idx++) {
+                                            structAttrPrefix[structAttrPrefix.length-1]=new StructAttrPath.PathElAttr(viewableTransferElement,idx); 
+                                            Viewable struct=((CompositionType)type).getComponentType();
+                                            {
+                                                StructAttrPath.PathEl structAttrPrefixProps[]=java.util.Arrays.copyOf(structAttrPrefix,structAttrPrefix.length+1);
+                                                structAttrPrefixProps[structAttrPrefixProps.length-1]=new StructAttrPath.PathElType(); 
+                                                StructAttrPath structAttrPath=new StructAttrPath(structAttrPrefixProps);
+                                                addColumn(table,existingColumns,new ColumnWrapper(structAttrPath));
+                                            }
+                                            addProps(table,existingColumns,
+                                                    struct,
+                                                    struct.getDefinedAttributesAndRoles2(),structAttrPrefix);
+                                        }
+                                    }else {
+                                        trafoConfig.setAttrConfig(attr, TrafoConfigNames.ARRAY_TRAFO, TrafoConfigNames.ARRAY_TRAFO_EXPAND);
+                                        long maxIdx=cardinality.getMaximum();
+                                        for(int idx=0;idx<maxIdx;idx++) {
+                                            structAttrPrefix[structAttrPrefix.length-1]=new StructAttrPath.PathElAttr(viewableTransferElement,idx); 
+                                            StructAttrPath structAttrPath=new StructAttrPath(structAttrPrefix);
+                                            addColumn(table,existingColumns,new ColumnWrapper(structAttrPath));
+                                        }
                                     }
                                 }else{
-                                    // table has not yet a geometry column
-                                    // add it
-                                    hasGeometry=true;
-                                    structAttrPrefix[structAttrPrefix.length-1]=new StructAttrPath.PathEl(viewableTransferElement); 
-                                    StructAttrPath structAttrPath=new StructAttrPath(structAttrPrefix);
-                                    addColumn(table,existingColumns,new ColumnWrapper(structAttrPath,epsgCode));
-                                }
-                            }
-                        } else if (cardinality.getMaximum() > 1 && 
-                                !(type instanceof CompositionType) && 
-                                !(Ili2cUtility.isJsonMapping(attr) && coalesceJson) && 
-                                !(Ili2cUtility.isArrayAttr(td,attr) && coalesceArray) &&
-                                !(Ili2cUtility.isExpandMapping(attr) && expandStruct)
-                                ) {
-                            // create a new secondary table for attribute with cardinality greater than one
-                            sqlSecondaryTableName=nameMapping.mapAttributeAsTable(iliclassOfAttrs, attr, epsgCode);
-                            ViewableWrapper secondaryTable = table.createSecondaryTable(sqlSecondaryTableName);
-
-                            // add attribute to new secondary table
-                            addColumn(table, secondaryTable.getAttrv(), new ColumnWrapper(new StructAttrPath(viewableTransferElement)));
-                            trafoConfig.setAttrConfig(attr, TrafoConfigNames.SECONDARY_TABLE, sqlSecondaryTableName);
-                        } else if (cardinality.getMaximum() <= ArrayMappings.MAX_ARRAY_EXPAND &&
-                                (Ili2cUtility.isExpandMapping(attr) && expandStruct)
-                                ) {
-                            if(type instanceof CompositionType) {
-                                trafoConfig.setAttrConfig(attr, TrafoConfigNames.STRUCT_TRAFO, TrafoConfigNames.STRUCT_TRAFO_EXPAND);
-                                long maxIdx=cardinality.getMaximum();
-                                for(int idx=0;idx<maxIdx;idx++) {
-                                    structAttrPrefix[structAttrPrefix.length-1]=new StructAttrPath.PathEl(viewableTransferElement,idx); 
-                                    Viewable struct=((CompositionType)type).getComponentType();
-                                    addProps(table,existingColumns,
-                                            struct,
-                                            struct.getDefinedAttributesAndRoles2(),structAttrPrefix);
-                                }
-                            }else {
-                                trafoConfig.setAttrConfig(attr, TrafoConfigNames.ARRAY_TRAFO, TrafoConfigNames.ARRAY_TRAFO_EXPAND);
-                                long maxIdx=cardinality.getMaximum();
-                                for(int idx=0;idx<maxIdx;idx++) {
-                                    structAttrPrefix[structAttrPrefix.length-1]=new StructAttrPath.PathEl(viewableTransferElement,idx); 
+                                    // normal 1:1 column/attribute
+                                    structAttrPrefix[structAttrPrefix.length-1]=new StructAttrPath.PathElAttr(viewableTransferElement); 
                                     StructAttrPath structAttrPath=new StructAttrPath(structAttrPrefix);
                                     addColumn(table,existingColumns,new ColumnWrapper(structAttrPath));
                                 }
                             }
-                        }else{
-                            // normal 1:1 column/attribute
-                            structAttrPrefix[structAttrPrefix.length-1]=new StructAttrPath.PathEl(viewableTransferElement); 
-                            StructAttrPath structAttrPath=new StructAttrPath(structAttrPrefix);
-                            addColumn(table,existingColumns,new ColumnWrapper(structAttrPath));
+                            
                         }
-	                }
-				    
-				}
+                    }
+                }
+				
 			}else if(viewableTransferElement.obj instanceof RoleDef){
 				RoleDef role = (RoleDef) viewableTransferElement.obj;
 				AssociationDef roleOwner = (AssociationDef) role.getContainer();
@@ -529,8 +541,13 @@ public class Viewable2TableMapper {
                 if(el1.getIdx()!=el2.getIdx()) {
                     return false;
                 }
-                if(getRootProp(el1.getAttr().obj)!=getRootProp(el2.getAttr().obj)) {
+                if(!el1.getClass().equals(el2.getClass())) {
                     return false;
+                }
+                if(el1 instanceof StructAttrPath.PathElAttr) {
+                    if(getRootProp(((StructAttrPath.PathElAttr) el1).getAttr().obj)!=getRootProp(((StructAttrPath.PathElAttr) el2).getAttr().obj)) {
+                        return false;
+                    }
                 }
             }
             return true;

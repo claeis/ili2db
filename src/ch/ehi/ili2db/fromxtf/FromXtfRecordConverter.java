@@ -201,8 +201,16 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 		Iterator<ColumnWrapper> iter = tableWrapper.getAttrIterator();
 		while (iter.hasNext()) {
 		    ColumnWrapper columnWrapper=iter.next();
-			ViewableTransferElement obj = columnWrapper.getViewableTransferElement();
-			if (obj.obj instanceof AttributeDef) {
+		    if(columnWrapper.isTypeCol()) {
+		        IomObject iomObj=findStructEle(iomMainObj,columnWrapper.getStructAttrPath());
+                String sqlStructType=null;
+                if(iomObj!=null) {
+                    sqlStructType=getSqlType((Viewable) tag2class.get(iomObj.getobjecttag())).getName();
+                }
+                ps.setString(valuei, sqlStructType);
+                valuei++;
+		    }else if (columnWrapper.isIliAttr()) {
+	            ViewableTransferElement obj = columnWrapper.getViewableTransferElement();
 				AttributeDef attr = (AttributeDef) obj.obj;
 			   AttributeDef rootAttr=Ili2cUtility.getRootBaseAttr(attr);
                // find IomObject  of ili Struct
@@ -236,8 +244,8 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
                    valuei = addAttrValue(iomObj, sqlType, sqlId, tableWrapper.getSqlTablename(), ps,
                            valuei, columnWrapper, attrInObj, structQueue, genericDomains, structClass, attrIdx);
                }
-			}
-			if(obj.obj instanceof RoleDef){
+			}else if(columnWrapper.isIliRole()){
+                ViewableTransferElement obj = columnWrapper.getViewableTransferElement();
 				RoleDef role = (RoleDef) obj.obj;
 				if(true) { // role.getExtending()==null){
 		            RoleDef rootRole=Ili2cUtility.getRootBaseRole(role);
@@ -340,7 +348,7 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
             if(attrIdx==null) {
                 attrIdx=0;
             }
-            iomObj=iomObj.getattrobj(((AttributeDef)path.getAttr().obj).getName(),attrIdx);
+            iomObj=iomObj.getattrobj(path.getName(),attrIdx);
             if(iomObj==null) {
                 return null;
             }
@@ -529,10 +537,21 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 		Iterator<ColumnWrapper> iter = tableWrapper.getAttrIterator();
 		while (iter.hasNext()) {
 		    ColumnWrapper columnWrapper=iter.next();
-		   ViewableTransferElement obj = columnWrapper.getViewableTransferElement();
-		   if (obj.obj instanceof AttributeDef) {
+		    if(columnWrapper.isTypeCol()) {
+                ret.append(sep);
+                // DbNames.T_TYPE_COL
+                String sqlColName=ili2sqlName.mapIliAttributeDef(columnWrapper.getStructAttrPath(),null,sqlTableName.getName(),null);
+                ret.append(sqlColName);
+                if(isUpdate){
+                    ret.append("=?");
+                }else{
+                    values.append(",?");
+                }
+                sep=",";
+		    }else if (columnWrapper.isIliAttr()) {
                sep = addAttrToInsertStmt(isUpdate,ret, values, sep, columnWrapper,sqlTableName.getName());
-		   }else if(obj.obj instanceof RoleDef){
+		   }else if(columnWrapper.isIliRole()){
+	           ViewableTransferElement obj = columnWrapper.getViewableTransferElement();
 			   RoleDef role = (RoleDef) obj.obj;
 			   if(true) { //role.getExtending()==null){
 			       RoleDef rootRole=Ili2cUtility.getRootBaseRole(role);
@@ -1331,7 +1350,7 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 						 // enqueue struct values
 						 for(int structi=0;structi<structc;structi++){
 						 	IomObject struct=iomObj.getattrobj(attrName,structi);
-						 	String sqlAttrName=ili2sqlName.mapIliAttributeDef(tableAttr,null,sqlTableNameOfMainObj,null);
+						 	String sqlAttrName=ili2sqlName.mapIliAttributeDef(colWrapper.getStructAttrPath(),null,sqlTableNameOfMainObj,null);
 						 	enqueStructValue(structQueue,sqlIdOfMainObj,sqlTypeOfMainObj,sqlAttrName,struct,structi,tableAttr);
 						 }
 					}

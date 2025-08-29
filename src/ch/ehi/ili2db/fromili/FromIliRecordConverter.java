@@ -28,6 +28,7 @@ import ch.ehi.ili2db.gui.Config;
 import ch.ehi.ili2db.mapping.ArrayMapping;
 import ch.ehi.ili2db.mapping.ColumnWrapper;
 import ch.ehi.ili2db.mapping.NameMapping;
+import ch.ehi.ili2db.mapping.StructAttrPath;
 import ch.ehi.ili2db.mapping.TrafoConfig;
 import ch.ehi.ili2db.mapping.TrafoConfigNames;
 import ch.ehi.ili2db.mapping.Viewable2TableMapping;
@@ -159,8 +160,8 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 			return;
 		}
 		// second pass; add columns
-		DbTableName sqlName=new DbTableName(schema.getName(),def.getSqlTablename());
-		DbTable dbTable=schema.findTable(sqlName);
+		DbTableName sqlTableName=new DbTableName(schema.getName(),def.getSqlTablename());
+		DbTable dbTable=schema.findTable(sqlTableName);
 		ViewableWrapper base=def.getExtending();
 		{
 		StringBuffer cmt=new StringBuffer();
@@ -221,49 +222,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 		  {
 		        if(base==null && !def.isSecondaryTable()){
 		            if(createTypeDiscriminator || def.includesMultipleTypes()){
-		                  dbTypeCol=createSqlTypeCol(DbNames.T_TYPE_COL);
-
-		                  ArrayList<String> extensions = new ArrayList<String>();
-		                  for (Object o : def.getViewable().getExtensions()){
-		                      Viewable v = (Viewable) o;
-		                      if (! v.isAbstract()){
-		                          extensions.add(ili2sqlName.mapIliClassDef(v));
-		                      }
-		                  }
-
-		                  Collections.sort(extensions);
-		                  
-		                  String jsonExtensions = "";
-
-		                  JsonFactory factory = new JsonFactory();
-		                  StringWriter out = new StringWriter();
-		                  try{
-		                      JsonGenerator generator = factory.createGenerator(out);
-		                      generator.writeStartArray();
-		                      for (String e : extensions){
-		                          generator.writeString(e);
-		                      }
-		                      generator.writeEndArray();
-		                      generator.flush();
-		                      jsonExtensions = out.toString();
-		                      generator.close();
-		                  }catch (IOException e){
-		                      throw new Ili2dbException(e);
-		                  }
-
-		                  // Add t_type possible values to meta-info table
-		                  metaInfo.setColumnInfo(dbTable.getName().getName(),
-		                                         DbNames.T_TYPE_COL,
-		                                         DbExtMetaInfo.TAG_COL_TYPES,
-		                                         jsonExtensions);
-
-		                  if(createTypeConstraint){
-
-		                      // Add check constraint on t_type column
-		                      String[] possibleValues = new String[extensions.size()];
-		                      ((DbColVarchar) dbTypeCol).setValueRestriction(extensions.toArray(possibleValues));
-		                  }
-		                  dbTable.addColumn(dbTypeCol);
+		                  dbTypeCol = createTypeCol(dbTable,def.getViewable(), DbNames.T_TYPE_COL);
 		            }
 		            
 		            // if CLASS
@@ -320,23 +279,19 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 		Iterator<ColumnWrapper> iter=def.getAttrIterator();
 		  while (iter.hasNext()) {
 			  ColumnWrapper columnWrapper = iter.next();
-			  if (columnWrapper.getViewableTransferElement().obj instanceof AttributeDef) {
-				  AttributeDef attr = (AttributeDef) columnWrapper.getViewableTransferElement().obj;
+              if (columnWrapper.isTypeCol()) {
+                  String sqlColName=ili2sqlName.mapIliAttributeDef(columnWrapper.getStructAttrPath(),null,sqlTableName.getName(),null);
+                  StructAttrPath.PathEl pathv[]=columnWrapper.getStructAttrPath().getPath();
+                  Type type=((AttributeDef)((StructAttrPath.PathElAttr)pathv[pathv.length-2]).getAttr().obj).getDomain();
+                  DbColumn dbStructTypeCol=createTypeCol(dbTable,((CompositionType)type).getComponentType(), sqlColName);
+                  dbStructTypeCol.setNotNull(false);
+              }else if (columnWrapper.isIliAttr()) {
                   try{
-                      if(!attr.isTransient()){
-                          Type proxyType=attr.getDomain();
-                          if(proxyType!=null && (proxyType instanceof ObjectType)){
-                              // skip implicit particles (base-viewables) of views
-                          }else{
-                              Integer epsgCode=columnWrapper.getEpsgCode();
-                              generateAttr(dbTable,dbTypeCol,def,columnWrapper);
-                          }
-                      }
+                      generateAttr(dbTable,dbTypeCol,def,columnWrapper);
                   }catch(Exception ex){
-                      throw new Ili2dbException(attr.getContainer().getScopedName(null)+"."+attr.getName(),ex);
+                      throw new Ili2dbException(columnWrapper.getStructAttrPath().getIliQName(),ex);
                   }
-			  }
-			  if(columnWrapper.getViewableTransferElement().obj instanceof RoleDef){
+			  }else if(columnWrapper.isIliRole()){
 				  RoleDef role = (RoleDef) columnWrapper.getViewableTransferElement().obj;
 					if(true){
 						// an embedded role and roledef defined in a lightweight association?
@@ -349,7 +304,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
                                     DbColumn dbColRef=null;
                                     dbColRef=new DbColVarchar();
                                     ((DbColVarchar) dbColRef).setSize(255);
-                                    String roleSqlName=ili2sqlName.mapIliRoleDef(role,sqlName.getName(),getSqlType(role.getDestination()).getName(),false);
+                                    String roleSqlName=ili2sqlName.mapIliRoleDef(role,sqlTableName.getName(),getSqlType(role.getDestination()).getName(),false);
                                     dbColRef.setName(roleSqlName);
                                     boolean notNull=false;
                                     if(!sqlEnableNull){
@@ -390,7 +345,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
                                         DbColumn dbColRef=null;
                                         dbColRef=new DbColId();
                                         DbTableName targetSqlTableName=targetTable.getSqlTable();
-                                        String roleSqlName=ili2sqlName.mapIliRoleDef(role,sqlName.getName(),targetSqlTableName.getName(),targetTables.size()>1);
+                                        String roleSqlName=ili2sqlName.mapIliRoleDef(role,sqlTableName.getName(),targetSqlTableName.getName(),targetTables.size()>1);
                                         dbColRef.setName(roleSqlName);
                                         fkColNames.add(roleSqlName);
                                         notNull=false;
@@ -437,7 +392,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
                                         if(!notNull) {
                                             Viewable sourceClass=(Viewable)role.getOppEnd().getDestination();
                                             List<Viewable> exts=getPotentialClassTypes(sourceClass);
-                                            String cnstrName="ili_"+ili2sqlName.mapIliRoleDef(role,sqlName.getName(),getSqlType(role.getDestination()).getName());
+                                            String cnstrName="ili_"+ili2sqlName.mapIliRoleDef(role,sqlTableName.getName(),getSqlType(role.getDestination()).getName());
                                             String cnstr = createReferenceAttrCheck(dbTypeCol!=null?exts:null,fkColNames);
                                             dbTable.setNativeConstraint(cnstrName, cnstr);
                                         }
@@ -450,7 +405,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
                                 DbColumn dbColRef=null;
                                 dbColRef=new DbColVarchar();
                                 ((DbColVarchar) dbColRef).setSize(255);
-                                String roleSqlName=ili2sqlName.mapIliRoleDef(role,sqlName.getName(),getSqlType(role.getDestination()).getName(),false);
+                                String roleSqlName=ili2sqlName.mapIliRoleDef(role,sqlTableName.getName(),getSqlType(role.getDestination()).getName(),false);
                                 dbColRef.setName(roleSqlName);
                                 boolean notNull=false;
                                 if(!sqlEnableNull){
@@ -497,7 +452,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
                                     DbColumn dbColRef=null;
                                     dbColRef=new DbColId();
                                     DbTableName targetSqlTableName=targetTable.getSqlTable();
-                                    String roleSqlName=ili2sqlName.mapIliRoleDef(role,sqlName.getName(),targetSqlTableName.getName(),targetTables.size()>1);
+                                    String roleSqlName=ili2sqlName.mapIliRoleDef(role,sqlTableName.getName(),targetSqlTableName.getName(),targetTables.size()>1);
                                     dbColRef.setName(roleSqlName);
                                     fkColNames.add(roleSqlName);
                                     notNull=false;
@@ -548,7 +503,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
                                 
                                 if(createMandatoryCheck) {
                                     if(!notNull) {
-                                        String cnstrName="ili_"+ili2sqlName.mapIliRoleDef(role,sqlName.getName(),getSqlType(role.getDestination()).getName());
+                                        String cnstrName="ili_"+ili2sqlName.mapIliRoleDef(role,sqlTableName.getName(),getSqlType(role.getDestination()).getName());
                                         String cnstr = createReferenceAttrCheck(null,fkColNames);
                                         dbTable.setNativeConstraint(cnstrName, cnstr);
                                     }
@@ -619,6 +574,54 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 	  	
 	}
 
+    private DbColumn createTypeCol(DbTable dbTable,Viewable iliClass, String colName) throws Ili2dbException {
+        DbColumn dbTypeCol;
+        dbTypeCol=createSqlTypeCol(colName);
+
+          ArrayList<String> extensions = new ArrayList<String>();
+          for (Object o : iliClass.getExtensions()){
+              Viewable v = (Viewable) o;
+              if (! v.isAbstract()){
+                  extensions.add(ili2sqlName.mapIliClassDef(v));
+              }
+          }
+
+          Collections.sort(extensions);
+          
+          String jsonExtensions = "";
+
+          JsonFactory factory = new JsonFactory();
+          StringWriter out = new StringWriter();
+          try{
+              JsonGenerator generator = factory.createGenerator(out);
+              generator.writeStartArray();
+              for (String e : extensions){
+                  generator.writeString(e);
+              }
+              generator.writeEndArray();
+              generator.flush();
+              jsonExtensions = out.toString();
+              generator.close();
+          }catch (IOException e){
+              throw new Ili2dbException(e);
+          }
+
+          // Add t_type possible values to meta-info table
+          metaInfo.setColumnInfo(dbTable.getName().getName(),
+                                 colName,
+                                 DbExtMetaInfo.TAG_COL_TYPES,
+                                 jsonExtensions);
+
+          if(createTypeConstraint){
+
+              // Add check constraint on t_type column
+              String[] possibleValues = new String[extensions.size()];
+              ((DbColVarchar) dbTypeCol).setValueRestriction(extensions.toArray(possibleValues));
+          }
+          dbTable.addColumn(dbTypeCol);
+        return dbTypeCol;
+    }
+
     private List<Viewable> getPotentialClassTypes(Viewable def) {
         ArrayList<Viewable> extensions = new ArrayList<Viewable>();
         getExtensions_recursiveHelper(def, extensions);
@@ -639,21 +642,14 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
         }
     }
 
-	private Integer[] getEpsgCodes(List<ColumnWrapper> colv) {
-	    HashSet<Integer> epsgCodes=new HashSet<Integer>();
-	    for(ColumnWrapper col:colv) {
-	        if(col.getEpsgCode()!=null) {
-	            epsgCodes.add(col.getEpsgCode());
-	        }
-	    }
-        return epsgCodes.toArray(new Integer[epsgCodes.size()]);
-    }
     private Integer[] getEpsgCodes(UniquenessConstraint cnstr,List<ColumnWrapper> colv) {
         HashSet<Integer> epsgCodes=new HashSet<Integer>();
         for(ColumnWrapper col:colv) {
-            if(col.getEpsgCode()!=null) {
-                if(isUniqueAttr(cnstr,(ch.interlis.ili2c.metamodel.Element)col.getViewableTransferElement().obj)) {
-                    epsgCodes.add(col.getEpsgCode());
+            if(col.isIliElement()) {
+                if(col.getEpsgCode()!=null) {
+                    if(isUniqueAttr(cnstr,(ch.interlis.ili2c.metamodel.Element)col.getViewableTransferElement().obj)) {
+                        epsgCodes.add(col.getEpsgCode());
+                    }
                 }
             }
         }
@@ -697,12 +693,14 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 		  Set<ch.interlis.ili2c.metamodel.Element> wrapperCols=new HashSet<ch.interlis.ili2c.metamodel.Element>();
 		  {
 		      for(ColumnWrapper col:colv) {
-		          if(col.getEpsgCode()!=null) {
-		              if(col.getEpsgCode().equals(epsgCode)) {
+		          if(col.isIliElement()) {
+	                  if(col.getEpsgCode()!=null) {
+	                      if(col.getEpsgCode().equals(epsgCode)) {
+	                          wrapperCols.add((ch.interlis.ili2c.metamodel.Element)col.getViewableTransferElement().obj);
+	                      }
+	                  }else {
 	                      wrapperCols.add((ch.interlis.ili2c.metamodel.Element)col.getViewableTransferElement().obj);
-		              }
-		          }else {
-		              wrapperCols.add((ch.interlis.ili2c.metamodel.Element)col.getViewableTransferElement().obj);
+	                  }
 		          }
 		      }
 		  }

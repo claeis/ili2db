@@ -385,9 +385,13 @@ public class NameMapping {
         StructAttrPath.PathEl srcPathv[]=def.getPath();
         StructAttrPath.PathEl pathv[]=new StructAttrPath.PathEl[srcPathv.length];
         for(int i=0;i<srcPathv.length;i++) {
-            ch.interlis.ili2c.metamodel.Element srcEle=(ch.interlis.ili2c.metamodel.Element)srcPathv[i].getAttr().obj;
-            srcEle=getTranslatedElement(srcEle);
-            pathv[i]=new StructAttrPath.PathEl(new ViewableTransferElement(srcEle),srcPathv[i].getIdx());
+            if(srcPathv[i] instanceof StructAttrPath.PathElAttr) {
+                ch.interlis.ili2c.metamodel.Element srcEle=(ch.interlis.ili2c.metamodel.Element)((StructAttrPath.PathElAttr)srcPathv[i]).getAttr().obj;
+                srcEle=getTranslatedElement(srcEle);
+                pathv[i]=new StructAttrPath.PathElAttr(new ViewableTransferElement(srcEle),srcPathv[i].getIdx());
+            }else {
+                pathv[i]=srcPathv[i];
+            }
         }
         return new StructAttrPath(pathv);
     }

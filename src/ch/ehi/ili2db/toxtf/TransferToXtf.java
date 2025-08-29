@@ -40,7 +40,9 @@ import ch.ehi.ili2db.fromili.TransferFromIli;
 import ch.ehi.ili2db.fromxtf.BasketStat;
 import ch.ehi.ili2db.fromxtf.ClassStat;
 import ch.ehi.ili2db.gui.Config;
+import ch.ehi.ili2db.mapping.ColumnWrapper;
 import ch.ehi.ili2db.mapping.NameMapping;
+import ch.ehi.ili2db.mapping.StructAttrPath;
 import ch.ehi.ili2db.mapping.TrafoConfig;
 import ch.ehi.ili2db.mapping.Viewable2TableMapping;
 import ch.ehi.ili2db.mapping.ViewableWrapper;
@@ -1048,7 +1050,7 @@ public class TransferToXtf {
 				    Iterator attri = lineAttrTable.getAttributes ();
 				    while(attri.hasNext()){
 						AttributeDef lineattr=(AttributeDef)attri.next();
-						valuei = recConv.addAttrValue(rs, valuei, sqlid, iomObj, lineattr,lineattr,null,null,class2wrapper.get(lineAttrTable),null,null,null);
+						valuei = recConv.addAttrValue(rs, valuei, sqlid, iomObj, new ColumnWrapper(new StructAttrPath(new ViewableTransferElement(lineattr))),lineattr,null,class2wrapper.get(lineAttrTable),null,null,null);
 				    }
 				}
 				
@@ -1139,7 +1141,7 @@ public class TransferToXtf {
 						ResultSet resultSet = statement.executeQuery(query);
 
 						while (resultSet.next()) {
-							recConv.addAttrValue(resultSet, 1, sqlid, iomObj, attributeDef,attributeDef,null,structQueue,attrtableWrapper,fixref,genericDomains,null);
+							recConv.addAttrValue(resultSet, 1, sqlid, iomObj, new ColumnWrapper(new StructAttrPath(new ViewableTransferElement(attributeDef))),attributeDef,structQueue,attrtableWrapper,fixref,genericDomains,null);
 						}
 					}
 				}
@@ -1498,7 +1500,7 @@ public class TransferToXtf {
 			    Iterator attri = lineAttrTable.getAttributes ();
 			    while(attri.hasNext()){
 					AttributeDef lineattr=(AttributeDef)attri.next();
-				   sep = recConv.addAttrToQueryStmt(ret, sep, null,lineattr,null,sqlTabName);
+				   sep = recConv.addAttrToQueryStmt(ret, sep, null,new ColumnWrapper(new StructAttrPath(new ViewableTransferElement(lineattr))),sqlTabName);
 			    }
 			}
 		 
@@ -1661,7 +1663,7 @@ public class TransferToXtf {
 		StringBuffer sb = new StringBuffer();
 		sb.append("SELECT ");
 
-		recConv.addAttrToQueryStmt(sb, "", attrtableWrapper.getSqlTableQName(), attributeDef, null, attrtableWrapper.getSqlTablename());
+		recConv.addAttrToQueryStmt(sb, "", attrtableWrapper.getSqlTableQName(), new ColumnWrapper(new StructAttrPath(new ViewableTransferElement(attributeDef))), attrtableWrapper.getSqlTablename());
 
 		//sb.append(attributeDef.getName());
 		sb.append(" FROM ");

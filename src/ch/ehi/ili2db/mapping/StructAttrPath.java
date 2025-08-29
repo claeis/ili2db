@@ -1,21 +1,38 @@
 package ch.ehi.ili2db.mapping;
 
-import java.util.Arrays;
-import java.util.Objects;
-
+import ch.ehi.ili2db.base.DbNames;
 import ch.interlis.ili2c.metamodel.ViewableTransferElement;
 
 public class StructAttrPath {
+    public abstract static class PathEl {
+        public Integer getIdx() {
+            return null;
+        }
+        public abstract String getName();
+        public abstract String getIliName();
+        
+    }
+    public static class PathElType extends PathEl {
+        public String getName()
+        {
+            return DbNames.T_TYPE_COL;
+        }
+        public String getIliName()
+        {
+            return "_type";
+        }
+
+    }
     private PathEl  path[];
-    public static class PathEl {
+    public static class PathElAttr extends PathEl {
         private ViewableTransferElement attr;
         private Integer idx;
-        public PathEl(ViewableTransferElement attr, Integer idx) {
+        public PathElAttr(ViewableTransferElement attr, Integer idx) {
             super();
             this.attr = attr;
             this.idx = idx;
         }
-        public PathEl(ViewableTransferElement attr) {
+        public PathElAttr(ViewableTransferElement attr) {
             super();
             this.attr = attr;
             this.idx = null;
@@ -23,12 +40,23 @@ public class StructAttrPath {
         public ViewableTransferElement getAttr() {
             return attr;
         }
+        @Override
+        public String getName()
+        {
+            return getIliName();
+        }
+        @Override
+        public String getIliName()
+        {
+            return ((ch.interlis.ili2c.metamodel.Element)getAttr().obj).getName();
+        }
+        @Override
         public Integer getIdx() {
             return idx;
         }
     }
     public StructAttrPath(ViewableTransferElement viewableTransferElement) {
-        path=new PathEl[] {new PathEl(viewableTransferElement)};
+        path=new PathEl[] {new PathElAttr(viewableTransferElement)};
     }
     public StructAttrPath(PathEl[] pathv) {
         path=pathv.clone();
@@ -44,10 +72,11 @@ public class StructAttrPath {
     public String getIliQName() {
         StructAttrPath.PathEl pathv[]=getPath();
         StringBuffer iliqnameBuf=new StringBuffer();
-        iliqnameBuf.append(((ch.interlis.ili2c.metamodel.Element)pathv[0].getAttr().obj).getContainer().getScopedName(null));
+        StructAttrPath.PathElAttr pathEl=(StructAttrPath.PathElAttr)pathv[0];
+        iliqnameBuf.append(((ch.interlis.ili2c.metamodel.Element)pathEl.getAttr().obj).getContainer().getScopedName(null));
         for(StructAttrPath.PathEl path:pathv) {
             iliqnameBuf.append(".");
-            iliqnameBuf.append(((ch.interlis.ili2c.metamodel.Element)path.getAttr().obj).getName());
+            iliqnameBuf.append(path.getIliName());
             Integer idx=path.getIdx();
             if(idx!=null) {
                 iliqnameBuf.append("[");
@@ -63,7 +92,7 @@ public class StructAttrPath {
         String sep="";
         for(StructAttrPath.PathEl path:pathv) {
             nameBuf.append(sep);
-            nameBuf.append(((ch.interlis.ili2c.metamodel.Element)path.getAttr().obj).getName());
+            nameBuf.append(path.getName());
             Integer idx=path.getIdx();
             if(idx!=null) {
                 nameBuf.append(idx.toString());

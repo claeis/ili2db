@@ -42,6 +42,16 @@ import ch.interlis.iox.StartTransferEvent;
 
 //-Ddburl=jdbc:postgresql:dbname -Ddbusr=usrname -Ddbpwd=1234
 public abstract class ExpandStruct24Test {
+    private static final String NUMMER1 = "nummer1";
+    private static final String NUMMER0 = "nummer0";
+    private static final String FARBEN1_B = "farben1_b";
+    private static final String FARBEN1_G = "farben1_g";
+    private static final String FARBEN1_R = "farben1_r";
+    private static final String FARBEN1_T_TYPE = "farben1_t_type";
+    private static final String FARBEN0_B = "farben0_b";
+    private static final String FARBEN0_G = "farben0_g";
+    private static final String FARBEN0_R = "farben0_r";
+    private static final String FARBEN0_T_TYPE = "farben0_t_type";
     protected static final String TEST_OUT="test/data/ExpandStruct/";
     protected AbstractTestSetup setup=createTestSetup();
     protected abstract AbstractTestSetup createTestSetup() ;
@@ -73,14 +83,16 @@ public abstract class ExpandStruct24Test {
                         {"ExpandStruct24.TestA.Farbe.r",          "r",        "farbe",null},
                         {"ExpandStruct24.TestA.Farbe.b",          "b",        "farbe",null},
                         {"ExpandStruct24.TestA.Farbe.g",          "g",        "farbe",null},
-                        {"ExpandStruct24.TestA.Auto.Farben[0].g", "farben0_g","auto",null},
-                        {"ExpandStruct24.TestA.Auto.Farben[1].g", "farben1_g","auto",null},
-                        {"ExpandStruct24.TestA.Auto.Farben[1].r", "farben1_r","auto",null},
-                        {"ExpandStruct24.TestA.Auto.Farben[1].b", "farben1_b","auto",null},
-                        {"ExpandStruct24.TestA.Auto.Farben[0].r", "farben0_r","auto",null},
-                        {"ExpandStruct24.TestA.Auto.Farben[0].b", "farben0_b","auto",null},
-                        {"ExpandStruct24.TestA.Auto.Nummer[0]",   "nummer0",  "auto",null},
-                        {"ExpandStruct24.TestA.Auto.Nummer[1]",   "nummer1",  "auto",null}
+                        {"ExpandStruct24.TestA.Auto.Farben[0]._type", "farben0_t_type","auto",null},
+                        {"ExpandStruct24.TestA.Auto.Farben[0].r", FARBEN0_R,"auto",null},
+                        {"ExpandStruct24.TestA.Auto.Farben[0].g", FARBEN0_G,"auto",null},
+                        {"ExpandStruct24.TestA.Auto.Farben[0].b", FARBEN0_B,"auto",null},
+                        {"ExpandStruct24.TestA.Auto.Farben[1]._type", "farben1_t_type","auto",null},
+                        {"ExpandStruct24.TestA.Auto.Farben[1].r", FARBEN1_R,"auto",null},
+                        {"ExpandStruct24.TestA.Auto.Farben[1].g", FARBEN1_G,"auto",null},
+                        {"ExpandStruct24.TestA.Auto.Farben[1].b", FARBEN1_B,"auto",null},
+                        {"ExpandStruct24.TestA.Auto.Nummer[0]",   NUMMER0,  "auto",null},
+                        {"ExpandStruct24.TestA.Auto.Nummer[1]",   NUMMER1,  "auto",null}
                     };
                     Ili2dbAssert.assertAttrNameTable(jdbcConnection, expectedValues,setup.getSchema());
                 }
@@ -153,34 +165,48 @@ public abstract class ExpandStruct24Test {
     protected void importXtf_doAsserts(java.sql.Statement stmt) throws SQLException {
         java.sql.ResultSet rs=null;
         try {
-            rs=stmt.executeQuery("SELECT farben0_r,farben0_g,farben0_b,farben1_r,farben1_g,farben1_b,nummer0,nummer1 FROM "+setup.prefixName("auto")+" WHERE t_ili_tid='1'");
+            String s=FARBEN0_T_TYPE+","+FARBEN0_R+","+FARBEN0_G+","+FARBEN0_B+","+FARBEN1_T_TYPE+","+FARBEN1_R+","+FARBEN1_G+","+FARBEN1_B+","+NUMMER0+","+NUMMER1;
+            rs=stmt.executeQuery("SELECT "+s+" FROM "+setup.prefixName("auto")+" WHERE t_ili_tid='1'");
             assertTrue(rs.next());
-            assertEquals(10,rs.getInt(1));
-            assertEquals(11,rs.getInt(2));
-            assertEquals(12,rs.getInt(3));
-            assertEquals(20,rs.getInt(4));
-            assertEquals(21,rs.getInt(5));
-            assertEquals(22,rs.getInt(6));
-            assertEquals(10,rs.getInt(7));
-            assertEquals(12,rs.getInt(8));
-            rs=stmt.executeQuery("SELECT farben0_r,farben0_g,farben0_b,farben1_r,farben1_g,farben1_b,nummer0,nummer1 FROM "+setup.prefixName("auto")+" WHERE t_ili_tid='2'");
+            assertEquals("farbe",rs.getString(FARBEN0_T_TYPE));
+            assertEquals(10,rs.getInt(FARBEN0_R));
+            assertEquals(11,rs.getInt(FARBEN0_G));
+            assertEquals(12,rs.getInt(FARBEN0_B));
+            assertEquals("farbe",rs.getString(FARBEN1_T_TYPE));
+            assertEquals(1,rs.getInt(FARBEN1_R));
+            assertEquals(1,rs.getInt(FARBEN1_G));
+            assertEquals(22,rs.getInt(FARBEN1_B));
+            assertEquals(10,rs.getInt(NUMMER0));
+            assertEquals(12,rs.getInt(NUMMER1));
+            
+            rs=stmt.executeQuery("SELECT "+s+" FROM "+setup.prefixName("auto")+" WHERE t_ili_tid='2'");
             assertTrue(rs.next());
-            rs.getInt(1);
+            rs.getString(FARBEN0_T_TYPE);
+            assertEquals(true,rs.wasNull());
+            rs.getInt(FARBEN0_R);
+            assertEquals(true,rs.wasNull());
+            rs.getString(FARBEN1_T_TYPE);
             assertEquals(true,rs.wasNull());
 
-            rs=stmt.executeQuery("SELECT farben0_r,farben0_g,farben0_b,farben1_r,farben1_g,farben1_b,nummer0,nummer1 FROM "+setup.prefixName("auto")+" WHERE t_ili_tid='3'");
+            rs=stmt.executeQuery("SELECT "+s+" FROM "+setup.prefixName("auto")+" WHERE t_ili_tid='3'");
             assertTrue(rs.next());
-            assertEquals(10,rs.getInt(1));
-            assertEquals(11,rs.getInt(2));
-            assertEquals(12,rs.getInt(3));
-            rs.getInt(4);
+            assertEquals("farbe",rs.getString(FARBEN0_T_TYPE));
+            rs.getInt(FARBEN0_R);
             assertEquals(true,rs.wasNull());
-            rs.getInt(5);
+            rs.getInt(FARBEN0_G);
             assertEquals(true,rs.wasNull());
-            rs.getInt(6);
+            rs.getInt(FARBEN0_B);
             assertEquals(true,rs.wasNull());
-            assertEquals(1,rs.getInt(7));
-            rs.getInt(8);
+            rs.getString(FARBEN1_T_TYPE);
+            assertEquals(true,rs.wasNull());
+            rs.getInt(FARBEN1_R);
+            assertEquals(true,rs.wasNull());
+            rs.getInt(FARBEN1_G);
+            assertEquals(true,rs.wasNull());
+            rs.getInt(FARBEN1_B);
+            assertEquals(true,rs.wasNull());
+            assertEquals(1,rs.getInt(NUMMER0));
+            rs.getInt(NUMMER1);
             assertEquals(true,rs.wasNull());
             
         }finally {
@@ -190,7 +216,7 @@ public abstract class ExpandStruct24Test {
             }
         }
     }
-    //@Test
+    @Test
     public void exportXtf() throws Exception
     {
         {
@@ -229,9 +255,9 @@ public abstract class ExpandStruct24Test {
                 event=reader.read();
             }
             assertEquals(3,objs.size());
-            assertEquals("ExpandStruct24.TestA.Auto oid 1 {Farben [ExpandStruct24.TestA.Farbe {active false, b 12, g 11, name f1, r 10}, ExpandStruct24.TestA.Farbe {active false, b 22, g 21, name f2, r 20}], Nummer [10, 12]}",objs.get("1").toString());
+            assertEquals("ExpandStruct24.TestA.Auto oid 1 {Farben [ExpandStruct24.TestA.Farbe {b 12, g 11, r 10}, ExpandStruct24.TestA.Farbe {b 22, g 1, r 1}], Nummer [10, 12]}",objs.get("1").toString());
             assertEquals("ExpandStruct24.TestA.Auto oid 2 {}",objs.get("2").toString());
-            assertEquals("ExpandStruct24.TestA.Auto oid 3 {Farbe ExpandStruct24.TestA.Farbe {active false, b 22, g 21, name f2, r 20}, Farben ExpandStruct24.TestA.Farbe {active false, b 12, g 11, name f1, r 10}, Nummer 1}",objs.get("3").toString());
+            assertEquals("ExpandStruct24.TestA.Auto oid 3 {Farben ExpandStruct24.TestA.Farbe {}, Nummer 1}",objs.get("3").toString());
             assertTrue(event instanceof EndBasketEvent);
             assertTrue(reader.read() instanceof EndTransferEvent);
             reader.close();
