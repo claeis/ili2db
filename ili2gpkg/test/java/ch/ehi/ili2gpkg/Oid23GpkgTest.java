@@ -85,6 +85,8 @@ public class Oid23GpkgTest {
             // t_ili2db_attrname
             String [][] expectedValues=new String[][] {
                 {"Oid1.TestC.ac.a", "a", "classc1", "classa1"},
+                {"Oid1.TestA.ab2.a", "a", "ab2", "classa2"},
+                {"Oid1.TestA.ab2.b", "b", "ab2", "classb2"},
             };
             Ili2dbAssert.assertAttrNameTableFromGpkg(jdbcConnection, expectedValues);
         }
@@ -97,6 +99,9 @@ public class Oid23GpkgTest {
                 {"Oid1.TestC.ClassC1", "ch.ehi.ili2db.inheritance", "newClass"},
                 {"Oid1.TestA.ClassB1", "ch.ehi.ili2db.inheritance", "newClass"},
                 {"Oid1.TestA.ClassA1", "ch.ehi.ili2db.inheritance", "newClass"},
+                {"Oid1.TestA.ClassB2", "ch.ehi.ili2db.inheritance", "newClass"},
+                {"Oid1.TestA.ClassA2", "ch.ehi.ili2db.inheritance", "newClass"},
+                {"Oid1.TestA.ab2", "ch.ehi.ili2db.inheritance", "newClass"},
             };
             Ili2dbAssert.assertTrafoTableFromGpkg(jdbcConnection, expectedValues);
         }

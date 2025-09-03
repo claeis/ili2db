@@ -169,20 +169,18 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 				// if class
 				if(structEle0==null){
 					if(!updateObj){
-						if(iomClass instanceof Table && ((Table) iomClass).isIdentifiable()){ // concrete object has a tid
-							if((importTid && !(tableWrapper.getViewable() instanceof AssociationDef)) || tableWrapper.hasOid()){
-								// import TID from transfer file
-                                String oid=iomMainObj.getobjectoid();
-								if(isUuidOid(td,tableWrapper.getOid())){
-								    oid=Validator.normalizeUUID(oid);
-									 Object toInsertUUID = geomConv.fromIomUuid(oid);
-									 ps.setObject(valuei, toInsertUUID);
-								}else{
-									ps.setString(valuei, oid);
-								}
-								valuei++;
-							}
-						}
+                        if((importTid && !(tableWrapper.getViewable() instanceof AssociationDef)) || tableWrapper.hasOid()){
+                            // import TID from transfer file
+                            String oid=iomMainObj.getobjectoid();
+                            if(isUuidOid(td,tableWrapper.getOid())){
+                                oid=Validator.normalizeUUID(oid);
+                                 Object toInsertUUID = geomConv.fromIomUuid(oid);
+                                 ps.setObject(valuei, toInsertUUID);
+                            }else{
+                                ps.setString(valuei, oid);
+                            }
+                            valuei++;
+                        }
 					}
 				}
 				// if struct, add ref to parent

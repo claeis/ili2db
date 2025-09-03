@@ -110,6 +110,8 @@ public class Oid23Test {
 				    // t_ili2db_attrname
 				    String [][] expectedValues=new String[][] {
 				        {"Oid1.TestC.ac.a", "a", "classc1", "classa1"},
+                        {"Oid1.TestA.ab2.a", "a", "ab2", "classa2"},
+                        {"Oid1.TestA.ab2.b", "b", "ab2", "classb2"},
 				    };
 				    Ili2dbAssert.assertAttrNameTable(jdbcConnection,expectedValues, DBSCHEMA);
 				    
@@ -123,6 +125,9 @@ public class Oid23Test {
                         {"Oid1.TestC.ClassC1", "ch.ehi.ili2db.inheritance", "newClass"},
                         {"Oid1.TestA.ClassB1", "ch.ehi.ili2db.inheritance", "newClass"},
                         {"Oid1.TestA.ClassA1", "ch.ehi.ili2db.inheritance", "newClass"},
+                        {"Oid1.TestA.ClassB2", "ch.ehi.ili2db.inheritance", "newClass"},
+                        {"Oid1.TestA.ClassA2", "ch.ehi.ili2db.inheritance", "newClass"},
+                        {"Oid1.TestA.ab2", "ch.ehi.ili2db.inheritance", "newClass"},
                     };
                     Ili2dbAssert.assertTrafoTable(jdbcConnection,expectedValues, DBSCHEMA);
                 }
@@ -135,8 +140,9 @@ public class Oid23Test {
                         String oidDomain=rs.getString(2);
                         res.put(tableName,oidDomain);
                     }
-                    Assert.assertEquals(1, res.size());
+                    Assert.assertEquals(2, res.size());
                     Assert.assertEquals("INTERLIS.UUIDOID",res.get("classa1"));
+                    Assert.assertEquals("INTERLIS.UUIDOID",res.get("ab2"));
                     
                 }
 			}
@@ -1120,7 +1126,7 @@ public class Oid23Test {
     @Test
 	public void importXtf_Smart0() throws Exception
 	{
-		//EhiLogger.getInstance().setTraceFilter(false);
+		EhiLogger.getInstance().setTraceFilter(false);
 		Connection jdbcConnection=null;
 		try{
 		    Class driverClass = Class.forName("org.postgresql.Driver");

@@ -4,6 +4,12 @@
 <Oid1.TestA BID="Oid1.TestA">
 <Oid1.TestA.ClassA1 TID="c34c86ec-2a75-4a89-a194-f9ebc422f8bc"></Oid1.TestA.ClassA1>
 <Oid1.TestA.ClassB1b TID="81fc3941-01ec-4c51-b1ba-46b6295d9b4e"></Oid1.TestA.ClassB1b>
+<Oid1.TestA.ClassA2 TID="a2"></Oid1.TestA.ClassA2>
+<Oid1.TestA.ClassB2 TID="b2"></Oid1.TestA.ClassB2>
+<Oid1.TestA.ab2 TID="b327aab8-1908-4dc0-aa96-ef1de78fffd6">
+  <a REF="a2"/>
+  <b REF="b2"/>
+</Oid1.TestA.ab2>
 </Oid1.TestA>
 </DATASECTION>
 </TRANSFER>

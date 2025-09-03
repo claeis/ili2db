@@ -16,6 +16,17 @@ MODEL Oid1
     	OID AS INTERLIS.UUIDOID;
     END ClassB1b;
     
+    CLASS ClassA2 =
+    END ClassA2;
+    CLASS ClassB2 =
+    END ClassB2;
+    
+    ASSOCIATION ab2 =
+    	OID AS INTERLIS.UUIDOID;
+      a -- {0..*} ClassA2;
+      b -- {0..*} ClassB2;
+    END ab2;
+    
   END TestA;
   
   TOPIC TestC =
