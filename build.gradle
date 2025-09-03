@@ -367,8 +367,8 @@ dependencies {
     testImplementation 'org.xmlunit:xmlunit-matchers:2.8.2'
     testImplementation 'org.xmlunit:xmlunit-placeholders:2.8.2'
 	
-	ili2pgImplementation group: 'org.postgresql', name: 'postgresql', version: '42.6.0' 
-	compileOnly group: 'org.postgresql', name: 'postgresql', version: '42.6.0' // add as compileOnly, so that eclipse sees it
+	ili2pgImplementation group: 'org.postgresql', name: 'postgresql', version: '42.7.7' 
+	compileOnly group: 'org.postgresql', name: 'postgresql', version: '42.7.7' // add as compileOnly, so that eclipse sees it
 	ili2pgImplementation group: 'com.github.waffle', name: 'waffle-jna', version: '1.9.1'
 	compileOnly group: 'com.github.waffle', name: 'waffle-jna', version: '1.9.1' // add as compileOnly, so that eclipse sees it
 	ili2gpkgImplementation group: 'org.xerial', name: 'sqlite-jdbc', version: '3.43.0.0'
