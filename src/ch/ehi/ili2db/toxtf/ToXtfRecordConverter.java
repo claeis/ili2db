@@ -456,7 +456,7 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 		String sqlIliTid=null;
 		if(structWrapper==null){
             if((exportTid && !(aclass.getViewable() instanceof AssociationDef)) || aclass.hasOid()){
-                if(iliClassForSelect instanceof AssociationDef && !((AssociationDef)iliClassForXtf).isIdentifiable()) {
+                if(iliClassForSelect instanceof AssociationDef && !((AssociationDef)iliClassForXtf).isIdentifiable() && ((AssociationDef)iliClassForXtf).getOid()==null) {
                     ; // no TID; standalone association without TID
                 }else {
                     sqlIliTid=rs.getString(valuei);
@@ -473,7 +473,7 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
             }
 		}
 		if(structWrapper==null){
-            if(!(iliClassForSelect instanceof AssociationDef && !((AssociationDef)iliClassForXtf).isIdentifiable())) {
+            if(!(iliClassForSelect instanceof AssociationDef && !((AssociationDef)iliClassForXtf).isIdentifiable() && ((AssociationDef)iliClassForXtf).getOid()==null)) {
 				iomMainObj=new Iom_jObject(iliClassForXtf.getScopedName(null),sqlIliTid);
 			}else{
 				iomMainObj=new Iom_jObject(iliClassForXtf.getScopedName(null),null);
