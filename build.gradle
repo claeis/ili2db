@@ -355,7 +355,7 @@ configurations {
     ftpAntTask
 }
 dependencies {
-    implementation group: 'ch.interlis', name: 'iox-ili', version: '1.24.2+'
+    implementation group: 'ch.interlis', name: 'iox-ili', version: '1.24.2'
     implementation group: 'ch.interlis', name: 'ili2c-tool', version: "5.6.3"
     implementation group: 'ch.interlis', name: 'ili2c-core', version: "5.6.3"
     implementation group: 'ch.ehi', name: 'ehisqlgen', version: "1.16.2"
