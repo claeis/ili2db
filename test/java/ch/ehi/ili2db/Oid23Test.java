@@ -1,30 +1,20 @@
 package ch.ehi.ili2db;
 
 import java.io.File;
-import java.sql.Array;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.HashMap;
 
-import org.junit.After;
 import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import ch.ehi.basics.logging.EhiLogger;
 import ch.ehi.ili2db.base.DbNames;
-import ch.ehi.ili2db.base.DbUrlConverter;
 import ch.ehi.ili2db.base.Ili2db;
 import ch.ehi.ili2db.base.Ili2dbException;
 import ch.ehi.ili2db.dbmetainfo.DbExtMetaInfo;
 import ch.ehi.ili2db.gui.Config;
-import ch.ehi.ili2db.mapping.NameMapping;
-import ch.ehi.sqlgen.DbUtility;
-import ch.ehi.sqlgen.repository.DbTableName;
 import ch.interlis.iom.IomObject;
 import ch.interlis.iom_j.xtf.XtfReader;
 import ch.interlis.iox.EndBasketEvent;
@@ -34,49 +24,22 @@ import ch.interlis.iox.ObjectEvent;
 import ch.interlis.iox.StartBasketEvent;
 import ch.interlis.iox.StartTransferEvent;
 
-//-Ddburl=jdbc:postgresql:dbname -Ddbusr=usrname -Ddbpwd=1234
-public class Oid23Test {
-	private static final String DBSCHEMA = "Oid23";
-	private static final String TEST_DATA_DIR="test/data/Oid23";
-	
-	String dburl=System.getProperty("dburl"); 
-	String dbuser=System.getProperty("dbusr");
-	String dbpwd=System.getProperty("dbpwd"); 
-	Connection jdbcConnection=null;
-	Statement stmt=null;
-	
-	public Config initConfig(String xtfFilename,String dbschema,String logfile) {
-		Config config=new Config();
-		new ch.ehi.ili2pg.PgMain().initConfig(config);
-		config.setDburl(dburl);
-		config.setDbusr(dbuser);
-		config.setDbpwd(dbpwd);
-		if(dbschema!=null){
-			config.setDbschema(dbschema);
-		}
-		if(logfile!=null){
-			config.setLogfile(logfile);
-		}
-		config.setXtffile(xtfFilename);
-		if(xtfFilename!=null && Ili2db.isItfFilename(xtfFilename)){
-			config.setItfTransferfile(true);
-		}
-		return config;
-	}
-	
+public abstract class Oid23Test {
+	protected static final String TEST_DATA_DIR="test/data/Oid23";
+    protected AbstractTestSetup setup=createTestSetup();
+    protected abstract AbstractTestSetup createTestSetup() ;
+    
 	@Test
 	public void importIli_Smart0() throws Exception
 	{
 		//EhiLogger.getInstance().setTraceFilter(false);
 		Connection jdbcConnection=null;
+		Statement stmt=null;
 		try{
-		    Class driverClass = Class.forName("org.postgresql.Driver");
-	        jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
-	        stmt=jdbcConnection.createStatement();
-			stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");
+	        setup.resetDb();
 			{
 				File data=new File(TEST_DATA_DIR,"Oid1.ili");
-				Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+				Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
                 Ili2db.setNoSmartMapping(config);
 				config.setFunction(Config.FC_SCHEMAIMPORT);
 				config.setCreateFk(Config.CREATE_FK_YES);
@@ -84,22 +47,25 @@ public class Oid23Test {
 				config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
 				Ili2db.readSettingsFromDb(config);
 				Ili2db.run(config,null);
+				
+		        jdbcConnection = setup.createConnection();
+	            stmt=jdbcConnection.createStatement();
 				{
-					String stmtTxt="SELECT t_ili2db_classname.iliname, t_ili2db_classname.sqlname FROM "+DBSCHEMA+".t_ili2db_classname WHERE t_ili2db_classname.iliname = 'Oid1.TestA.ClassA1'";
+					String stmtTxt="SELECT t_ili2db_classname.iliname, t_ili2db_classname.sqlname FROM "+setup.prefixName("t_ili2db_classname")+" WHERE t_ili2db_classname.iliname = 'Oid1.TestA.ClassA1'";
 					Assert.assertTrue(stmt.execute(stmtTxt));
 					ResultSet rs=stmt.getResultSet();
 					Assert.assertTrue(rs.next());
 					Assert.assertEquals("classa1",rs.getString(2));
 				}
 				{
-					String stmtTxt="SELECT t_ili2db_classname.iliname, t_ili2db_classname.sqlname FROM "+DBSCHEMA+".t_ili2db_classname WHERE t_ili2db_classname.iliname = 'Oid1.TestA.ClassA1b'";
+					String stmtTxt="SELECT t_ili2db_classname.iliname, t_ili2db_classname.sqlname FROM "+setup.prefixName("t_ili2db_classname")+" WHERE t_ili2db_classname.iliname = 'Oid1.TestA.ClassA1b'";
 					Assert.assertTrue(stmt.execute(stmtTxt));
 					ResultSet rs=stmt.getResultSet();
 					Assert.assertTrue(rs.next());
 					Assert.assertEquals("classa1b",rs.getString(2));
 				}
 				{
-					String stmtTxt="SELECT t_ili2db_classname.iliname, t_ili2db_classname.sqlname FROM "+DBSCHEMA+".t_ili2db_classname WHERE t_ili2db_classname.iliname = 'Oid1.TestA.ClassB1'";
+					String stmtTxt="SELECT t_ili2db_classname.iliname, t_ili2db_classname.sqlname FROM "+setup.prefixName("t_ili2db_classname")+" WHERE t_ili2db_classname.iliname = 'Oid1.TestA.ClassB1'";
 					Assert.assertTrue(stmt.execute(stmtTxt));
 					ResultSet rs=stmt.getResultSet();
 					Assert.assertTrue(rs.next());
@@ -109,8 +75,10 @@ public class Oid23Test {
 				    // t_ili2db_attrname
 				    String [][] expectedValues=new String[][] {
 				        {"Oid1.TestC.ac.a", "a", "classc1", "classa1"},
+                        {"Oid1.TestA.ab2.a", "a", "ab2", "classa2"},
+                        {"Oid1.TestA.ab2.b", "b", "ab2", "classb2"},
 				    };
-				    Ili2dbAssert.assertAttrNameTable(jdbcConnection,expectedValues, DBSCHEMA);
+				    Ili2dbAssert.assertAttrNameTable(jdbcConnection,expectedValues, setup.getSchema());
 				    
 				}
                 {
@@ -122,11 +90,14 @@ public class Oid23Test {
                         {"Oid1.TestC.ClassC1", "ch.ehi.ili2db.inheritance", "newClass"},
                         {"Oid1.TestA.ClassB1", "ch.ehi.ili2db.inheritance", "newClass"},
                         {"Oid1.TestA.ClassA1", "ch.ehi.ili2db.inheritance", "newClass"},
+                        {"Oid1.TestA.ClassB2", "ch.ehi.ili2db.inheritance", "newClass"},
+                        {"Oid1.TestA.ClassA2", "ch.ehi.ili2db.inheritance", "newClass"},
+                        {"Oid1.TestA.ab2", "ch.ehi.ili2db.inheritance", "newClass"},
                     };
-                    Ili2dbAssert.assertTrafoTable(jdbcConnection,expectedValues, DBSCHEMA);
+                    Ili2dbAssert.assertTrafoTable(jdbcConnection,expectedValues, setup.getSchema());
                 }
                 {
-                    String stmtTxt="SELECT "+DbNames.META_INFO_COLUMN_TAB_TABLENAME_COL+","+DbNames.META_INFO_COLUMN_TAB_SETTING_COL+" FROM "+DBSCHEMA+"."+DbNames.META_INFO_COLUMN_TAB+" WHERE "+DbNames.META_INFO_COLUMN_TAB_TAG_COL+" = '"+DbExtMetaInfo.TAG_COL_OIDDOMAIN+"' AND "+DbNames.META_INFO_COLUMN_TAB_COLUMNNAME_COL+" = '"+DbNames.T_ILI_TID_COL+"'";
+                    String stmtTxt="SELECT "+DbNames.META_INFO_COLUMN_TAB_TABLENAME_COL+","+DbNames.META_INFO_COLUMN_TAB_SETTING_COL+" FROM "+setup.prefixName(DbNames.META_INFO_COLUMN_TAB)+" WHERE "+DbNames.META_INFO_COLUMN_TAB_TAG_COL+" = '"+DbExtMetaInfo.TAG_COL_OIDDOMAIN+"' AND "+DbNames.META_INFO_COLUMN_TAB_COLUMNNAME_COL+" = '"+DbNames.T_ILI_TID_COL+"'";
                     HashMap<String,String> res=new HashMap<String,String>();
                     ResultSet rs=stmt.executeQuery(stmtTxt);
                     while(rs.next()) {
@@ -134,12 +105,16 @@ public class Oid23Test {
                         String oidDomain=rs.getString(2);
                         res.put(tableName,oidDomain);
                     }
-                    Assert.assertEquals(1, res.size());
+                    Assert.assertEquals(2, res.size());
                     Assert.assertEquals("INTERLIS.UUIDOID",res.get("classa1"));
+                    Assert.assertEquals("INTERLIS.UUIDOID",res.get("ab2"));
                     
                 }
 			}
 		}finally{
+            if(stmt!=null){
+                stmt.close();
+            }
 			if(jdbcConnection!=null){
 				jdbcConnection.close();
 			}
@@ -150,14 +125,12 @@ public class Oid23Test {
     {
         //EhiLogger.getInstance().setTraceFilter(false);
         Connection jdbcConnection=null;
+        Statement stmt=null;
         try{
-            Class driverClass = Class.forName("org.postgresql.Driver");
-            jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
-            stmt=jdbcConnection.createStatement();
-            stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");
+            setup.resetDb();
             {
                 File data=new File(TEST_DATA_DIR,"Oid6.ili");
-                Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+                Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
                 Ili2db.setNoSmartMapping(config);
                 config.setFunction(Config.FC_SCHEMAIMPORT);
                 config.setCreateFk(Config.CREATE_FK_YES);
@@ -165,22 +138,24 @@ public class Oid23Test {
                 config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
                 Ili2db.readSettingsFromDb(config);
                 Ili2db.run(config,null);
+                jdbcConnection = setup.createConnection();
+                stmt=jdbcConnection.createStatement();
                 {
-                    String stmtTxt="SELECT t_ili2db_classname.iliname, t_ili2db_classname.sqlname FROM "+DBSCHEMA+".t_ili2db_classname WHERE t_ili2db_classname.iliname = 'Oid6.TestA.ClassA1'";
+                    String stmtTxt="SELECT t_ili2db_classname.iliname, t_ili2db_classname.sqlname FROM "+setup.prefixName("t_ili2db_classname")+" WHERE t_ili2db_classname.iliname = 'Oid6.TestA.ClassA1'";
                     Assert.assertTrue(stmt.execute(stmtTxt));
                     ResultSet rs=stmt.getResultSet();
                     Assert.assertTrue(rs.next());
                     Assert.assertEquals("classa1",rs.getString(2));
                 }
                 {
-                    String stmtTxt="SELECT t_ili2db_classname.iliname, t_ili2db_classname.sqlname FROM "+DBSCHEMA+".t_ili2db_classname WHERE t_ili2db_classname.iliname = 'Oid6.TestA.ClassA1b'";
+                    String stmtTxt="SELECT t_ili2db_classname.iliname, t_ili2db_classname.sqlname FROM "+setup.prefixName("t_ili2db_classname")+" WHERE t_ili2db_classname.iliname = 'Oid6.TestA.ClassA1b'";
                     Assert.assertTrue(stmt.execute(stmtTxt));
                     ResultSet rs=stmt.getResultSet();
                     Assert.assertTrue(rs.next());
                     Assert.assertEquals("classa1b",rs.getString(2));
                 }
                 {
-                    String stmtTxt="SELECT t_ili2db_classname.iliname, t_ili2db_classname.sqlname FROM "+DBSCHEMA+".t_ili2db_classname WHERE t_ili2db_classname.iliname = 'Oid6.TestA.ClassB1'";
+                    String stmtTxt="SELECT t_ili2db_classname.iliname, t_ili2db_classname.sqlname FROM "+setup.prefixName("t_ili2db_classname")+" WHERE t_ili2db_classname.iliname = 'Oid6.TestA.ClassB1'";
                     Assert.assertTrue(stmt.execute(stmtTxt));
                     ResultSet rs=stmt.getResultSet();
                     Assert.assertTrue(rs.next());
@@ -205,7 +180,7 @@ public class Oid23Test {
                         {"Oid6.TestA.ClassE1.e1", "e1", "classe1", null},
                         {"Oid6.TestA.ClassE1b.e1b", "e1b", "classe1b", null},
                     };
-                    Ili2dbAssert.assertAttrNameTable(jdbcConnection,expectedValues, DBSCHEMA);
+                    Ili2dbAssert.assertAttrNameTable(jdbcConnection,expectedValues, setup.getSchema());
                     
                 }
                 {
@@ -227,10 +202,10 @@ public class Oid23Test {
                         {"Oid6.TestA.ClassE1", "ch.ehi.ili2db.inheritance", "newClass"},
                         {"Oid6.TestA.ClassE1b", "ch.ehi.ili2db.inheritance", "newClass"},
                     };
-                    Ili2dbAssert.assertTrafoTable(jdbcConnection,expectedValues, DBSCHEMA);
+                    Ili2dbAssert.assertTrafoTable(jdbcConnection,expectedValues, setup.getSchema());
                 }
                 {
-                    String stmtTxt="SELECT "+DbNames.META_INFO_COLUMN_TAB_TABLENAME_COL+","+DbNames.META_INFO_COLUMN_TAB_SETTING_COL+" FROM "+DBSCHEMA+"."+DbNames.META_INFO_COLUMN_TAB+" WHERE "+DbNames.META_INFO_COLUMN_TAB_TAG_COL+" = '"+DbExtMetaInfo.TAG_COL_OIDDOMAIN+"' AND "+DbNames.META_INFO_COLUMN_TAB_COLUMNNAME_COL+" = '"+DbNames.T_ILI_TID_COL+"'";
+                    String stmtTxt="SELECT "+DbNames.META_INFO_COLUMN_TAB_TABLENAME_COL+","+DbNames.META_INFO_COLUMN_TAB_SETTING_COL+" FROM "+setup.prefixName(DbNames.META_INFO_COLUMN_TAB)+" WHERE "+DbNames.META_INFO_COLUMN_TAB_TAG_COL+" = '"+DbExtMetaInfo.TAG_COL_OIDDOMAIN+"' AND "+DbNames.META_INFO_COLUMN_TAB_COLUMNNAME_COL+" = '"+DbNames.T_ILI_TID_COL+"'";
                     HashMap<String,String> res=new HashMap<String,String>();
                     ResultSet rs=stmt.executeQuery(stmtTxt);
                     while(rs.next()) {
@@ -244,6 +219,9 @@ public class Oid23Test {
                 }
             }
         }finally{
+            if(stmt!=null) {
+                stmt.close();
+            }
             if(jdbcConnection!=null){
                 jdbcConnection.close();
             }
@@ -256,24 +234,24 @@ public class Oid23Test {
             importIliStructBaseTidCol_Smart0();
         }
         Connection jdbcConnection=null;
+        Statement stmt=null;
         try{
-            Class driverClass = Class.forName("org.postgresql.Driver");
-            jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
-            stmt=jdbcConnection.createStatement();
             {
                 {
                     File data=new File(TEST_DATA_DIR,"Oid6a.xtf");
-                    Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+                    Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
                     config.setFunction(Config.FC_IMPORT);
                     config.setImportTid(true);
                     Ili2db.readSettingsFromDb(config);
                     Ili2db.run(config,null);
                 }
             }
+            jdbcConnection = setup.createConnection();
+            stmt=jdbcConnection.createStatement();
             // import-test: Oid1a.xtf
             Integer a1_tid=null;
             {
-                String stmtTxt="SELECT structa0.t_id, structa0.t_ili_tid FROM "+DBSCHEMA+".structa0 WHERE structa0.t_ili_tid = 'c34c86ec-2a75-4a89-a194-f9ebc422f8bc'";
+                String stmtTxt="SELECT structa0.t_id, structa0.t_ili_tid FROM "+setup.prefixName("structa0")+" WHERE structa0.t_ili_tid = 'c34c86ec-2a75-4a89-a194-f9ebc422f8bc'";
                 Assert.assertTrue(stmt.execute(stmtTxt));
                 ResultSet rs=stmt.getResultSet();
                 Assert.assertTrue(rs.next());
@@ -281,13 +259,16 @@ public class Oid23Test {
                 a1_tid=rs.getInt(1);
             }
             {
-                String stmtTxt="SELECT structb0.t_id, structb0.t_ili_tid FROM "+DBSCHEMA+".structb0 WHERE structb0.t_ili_tid = '81fc3941-01ec-4c51-b1ba-46b6295d9b4e'";
+                String stmtTxt="SELECT structb0.t_id, structb0.t_ili_tid FROM "+setup.prefixName("structb0")+" WHERE structb0.t_ili_tid = '81fc3941-01ec-4c51-b1ba-46b6295d9b4e'";
                 Assert.assertTrue(stmt.execute(stmtTxt));
                 ResultSet rs=stmt.getResultSet();
                 Assert.assertTrue(rs.next());
                 Assert.assertEquals("81fc3941-01ec-4c51-b1ba-46b6295d9b4e",rs.getString(2));
             }
         }finally{
+            if(stmt!=null) {
+                stmt.close();
+            }
             if(jdbcConnection!=null){
                 jdbcConnection.close();
             }
@@ -299,13 +280,9 @@ public class Oid23Test {
         {
             importXtfStructBaseTidCol_Smart0();
         }
-        Connection jdbcConnection=null;
         try{
-            Class driverClass = Class.forName("org.postgresql.Driver");
-            jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
-            stmt=jdbcConnection.createStatement();
             File data=new File(TEST_DATA_DIR,"Oid6a-out.xtf");
-            Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+            Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
             config.setModels("Oid6");
             config.setFunction(Config.FC_EXPORT);
             config.setExportTid(true);
@@ -354,9 +331,6 @@ public class Oid23Test {
                  Assert.assertEquals("Oid6.TestA.ClassC1b", obj0.getobjecttag());
              }
         }finally{
-            if(jdbcConnection!=null){
-                jdbcConnection.close();
-            }
         }
     }
     @Test
@@ -364,36 +338,36 @@ public class Oid23Test {
     {
         //EhiLogger.getInstance().setTraceFilter(false);
         Connection jdbcConnection=null;
+        Statement stmt=null;
         try{
-            Class driverClass = Class.forName("org.postgresql.Driver");
-            jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
-            stmt=jdbcConnection.createStatement();
-            stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");
+            setup.resetDb();
             {
                 File data=new File(TEST_DATA_DIR,"Oid6.ili");
-                Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+                Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
                 Ili2db.setNoSmartMapping(config);
                 config.setFunction(Config.FC_SCHEMAIMPORT);
                 config.setCreateFk(Config.CREATE_FK_YES);
                 config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
                 Ili2db.readSettingsFromDb(config);
                 Ili2db.run(config,null);
+                jdbcConnection = setup.createConnection();
+                stmt=jdbcConnection.createStatement();
                 {
-                    String stmtTxt="SELECT t_ili2db_classname.iliname, t_ili2db_classname.sqlname FROM "+DBSCHEMA+".t_ili2db_classname WHERE t_ili2db_classname.iliname = 'Oid6.TestA.ClassA1'";
+                    String stmtTxt="SELECT t_ili2db_classname.iliname, t_ili2db_classname.sqlname FROM "+setup.prefixName("t_ili2db_classname")+" WHERE t_ili2db_classname.iliname = 'Oid6.TestA.ClassA1'";
                     Assert.assertTrue(stmt.execute(stmtTxt));
                     ResultSet rs=stmt.getResultSet();
                     Assert.assertTrue(rs.next());
                     Assert.assertEquals("classa1",rs.getString(2));
                 }
                 {
-                    String stmtTxt="SELECT t_ili2db_classname.iliname, t_ili2db_classname.sqlname FROM "+DBSCHEMA+".t_ili2db_classname WHERE t_ili2db_classname.iliname = 'Oid6.TestA.ClassA1b'";
+                    String stmtTxt="SELECT t_ili2db_classname.iliname, t_ili2db_classname.sqlname FROM "+setup.prefixName("t_ili2db_classname")+" WHERE t_ili2db_classname.iliname = 'Oid6.TestA.ClassA1b'";
                     Assert.assertTrue(stmt.execute(stmtTxt));
                     ResultSet rs=stmt.getResultSet();
                     Assert.assertTrue(rs.next());
                     Assert.assertEquals("classa1b",rs.getString(2));
                 }
                 {
-                    String stmtTxt="SELECT t_ili2db_classname.iliname, t_ili2db_classname.sqlname FROM "+DBSCHEMA+".t_ili2db_classname WHERE t_ili2db_classname.iliname = 'Oid6.TestA.ClassB1'";
+                    String stmtTxt="SELECT t_ili2db_classname.iliname, t_ili2db_classname.sqlname FROM "+setup.prefixName("t_ili2db_classname")+" WHERE t_ili2db_classname.iliname = 'Oid6.TestA.ClassB1'";
                     Assert.assertTrue(stmt.execute(stmtTxt));
                     ResultSet rs=stmt.getResultSet();
                     Assert.assertTrue(rs.next());
@@ -418,7 +392,7 @@ public class Oid23Test {
                         {"Oid6.TestA.ClassE1.e1", "e1", "classe1", null},
                         {"Oid6.TestA.ClassE1b.e1b", "e1b", "classe1b", null},
                     };
-                    Ili2dbAssert.assertAttrNameTable(jdbcConnection,expectedValues, DBSCHEMA);
+                    Ili2dbAssert.assertAttrNameTable(jdbcConnection,expectedValues, setup.getSchema());
                     
                 }
                 {
@@ -440,10 +414,10 @@ public class Oid23Test {
                         {"Oid6.TestA.ClassE1", "ch.ehi.ili2db.inheritance", "newClass"},
                         {"Oid6.TestA.ClassE1b", "ch.ehi.ili2db.inheritance", "newClass"},
                     };
-                    Ili2dbAssert.assertTrafoTable(jdbcConnection,expectedValues, DBSCHEMA);
+                    Ili2dbAssert.assertTrafoTable(jdbcConnection,expectedValues, setup.getSchema());
                 }
                 {
-                    String stmtTxt="SELECT "+DbNames.META_INFO_COLUMN_TAB_TABLENAME_COL+","+DbNames.META_INFO_COLUMN_TAB_SETTING_COL+" FROM "+DBSCHEMA+"."+DbNames.META_INFO_COLUMN_TAB+" WHERE "+DbNames.META_INFO_COLUMN_TAB_TAG_COL+" = '"+DbExtMetaInfo.TAG_COL_OIDDOMAIN+"' AND "+DbNames.META_INFO_COLUMN_TAB_COLUMNNAME_COL+" = '"+DbNames.T_ILI_TID_COL+"'";
+                    String stmtTxt="SELECT "+DbNames.META_INFO_COLUMN_TAB_TABLENAME_COL+","+DbNames.META_INFO_COLUMN_TAB_SETTING_COL+" FROM "+setup.prefixName(DbNames.META_INFO_COLUMN_TAB)+" WHERE "+DbNames.META_INFO_COLUMN_TAB_TAG_COL+" = '"+DbExtMetaInfo.TAG_COL_OIDDOMAIN+"' AND "+DbNames.META_INFO_COLUMN_TAB_COLUMNNAME_COL+" = '"+DbNames.T_ILI_TID_COL+"'";
                     HashMap<String,String> res=new HashMap<String,String>();
                     ResultSet rs=stmt.executeQuery(stmtTxt);
                     while(rs.next()) {
@@ -457,6 +431,9 @@ public class Oid23Test {
                 }
             }
         }finally{
+            if(stmt!=null) {
+                stmt.close();
+            }
             if(jdbcConnection!=null){
                 jdbcConnection.close();
             }
@@ -470,23 +447,23 @@ public class Oid23Test {
         }
         //EhiLogger.getInstance().setTraceFilter(false);
         Connection jdbcConnection=null;
+        Statement stmt=null;
         try{
-            Class driverClass = Class.forName("org.postgresql.Driver");
-            jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
-            stmt=jdbcConnection.createStatement();
             {
                 {
                     File data=new File(TEST_DATA_DIR,"Oid6a.xtf");
-                    Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+                    Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
                     config.setFunction(Config.FC_IMPORT);
                     Ili2db.readSettingsFromDb(config);
                     Ili2db.run(config,null);
                 }
             }
+            jdbcConnection = setup.createConnection();
+            stmt=jdbcConnection.createStatement();
             // import-test: Oid1a.xtf
             Integer a1_tid=null;
             {
-                String stmtTxt="SELECT structa0.t_id, structa0.t_ili_tid FROM "+DBSCHEMA+".structa0 WHERE structa0.t_ili_tid = 'c34c86ec-2a75-4a89-a194-f9ebc422f8bc'";
+                String stmtTxt="SELECT structa0.t_id, structa0.t_ili_tid FROM "+setup.prefixName("structa0")+" WHERE structa0.t_ili_tid = 'c34c86ec-2a75-4a89-a194-f9ebc422f8bc'";
                 Assert.assertTrue(stmt.execute(stmtTxt));
                 ResultSet rs=stmt.getResultSet();
                 Assert.assertTrue(rs.next());
@@ -494,13 +471,16 @@ public class Oid23Test {
                 a1_tid=rs.getInt(1);
             }
             {
-                String stmtTxt="SELECT structb0.t_id, structb0.t_ili_tid FROM "+DBSCHEMA+".structb0 WHERE structb0.t_ili_tid = '81fc3941-01ec-4c51-b1ba-46b6295d9b4e'";
+                String stmtTxt="SELECT structb0.t_id, structb0.t_ili_tid FROM "+setup.prefixName("structb0")+" WHERE structb0.t_ili_tid = '81fc3941-01ec-4c51-b1ba-46b6295d9b4e'";
                 Assert.assertTrue(stmt.execute(stmtTxt));
                 ResultSet rs=stmt.getResultSet();
                 Assert.assertTrue(rs.next());
                 Assert.assertEquals("81fc3941-01ec-4c51-b1ba-46b6295d9b4e",rs.getString(2));
             }
         }finally{
+            if(stmt!=null) {
+                stmt.close();
+            }
             if(jdbcConnection!=null){
                 jdbcConnection.close();
             }
@@ -512,13 +492,9 @@ public class Oid23Test {
         {
             importXtfStructBaseNoTidCol_Smart0();
         }
-        Connection jdbcConnection=null;
         try{
-            Class driverClass = Class.forName("org.postgresql.Driver");
-            jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
-            stmt=jdbcConnection.createStatement();
             File data=new File(TEST_DATA_DIR,"Oid6a-out.xtf");
-            Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+            Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
             config.setModels("Oid6");
             config.setFunction(Config.FC_EXPORT);
             Ili2db.readSettingsFromDb(config);
@@ -566,9 +542,6 @@ public class Oid23Test {
                  Assert.assertEquals("Oid6.TestA.ClassC1b", obj0.getobjecttag());
              }
         }finally{
-            if(jdbcConnection!=null){
-                jdbcConnection.close();
-            }
         }
     }
     @Test
@@ -576,14 +549,12 @@ public class Oid23Test {
     {
         //EhiLogger.getInstance().setTraceFilter(false);
         Connection jdbcConnection=null;
+        Statement stmt=null;
         try{
-            Class driverClass = Class.forName("org.postgresql.Driver");
-            jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
-            stmt=jdbcConnection.createStatement();
-            stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");
+            setup.resetDb();
             {
                 File data=new File(TEST_DATA_DIR,"Oid6.ili");
-                Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+                Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
                 Ili2db.setNoSmartMapping(config);
                 config.setFunction(Config.FC_SCHEMAIMPORT);
                 config.setCreateFk(Config.CREATE_FK_YES);
@@ -591,22 +562,24 @@ public class Oid23Test {
                 config.setInheritanceTrafo(Config.INHERITANCE_TRAFO_SMART1);
                 Ili2db.readSettingsFromDb(config);
                 Ili2db.run(config,null);
+                jdbcConnection = setup.createConnection();
+                stmt=jdbcConnection.createStatement();
                 {
-                    String stmtTxt="SELECT t_ili2db_classname.iliname, t_ili2db_classname.sqlname FROM "+DBSCHEMA+".t_ili2db_classname WHERE t_ili2db_classname.iliname = 'Oid6.TestA.ClassA1'";
+                    String stmtTxt="SELECT t_ili2db_classname.iliname, t_ili2db_classname.sqlname FROM "+setup.prefixName("t_ili2db_classname")+" WHERE t_ili2db_classname.iliname = 'Oid6.TestA.ClassA1'";
                     Assert.assertTrue(stmt.execute(stmtTxt));
                     ResultSet rs=stmt.getResultSet();
                     Assert.assertTrue(rs.next());
                     Assert.assertEquals("classa1",rs.getString(2));
                 }
                 {
-                    String stmtTxt="SELECT t_ili2db_classname.iliname, t_ili2db_classname.sqlname FROM "+DBSCHEMA+".t_ili2db_classname WHERE t_ili2db_classname.iliname = 'Oid6.TestA.ClassA1b'";
+                    String stmtTxt="SELECT t_ili2db_classname.iliname, t_ili2db_classname.sqlname FROM "+setup.prefixName("t_ili2db_classname")+" WHERE t_ili2db_classname.iliname = 'Oid6.TestA.ClassA1b'";
                     Assert.assertTrue(stmt.execute(stmtTxt));
                     ResultSet rs=stmt.getResultSet();
                     Assert.assertTrue(rs.next());
                     Assert.assertEquals("classa1b",rs.getString(2));
                 }
                 {
-                    String stmtTxt="SELECT t_ili2db_classname.iliname, t_ili2db_classname.sqlname FROM "+DBSCHEMA+".t_ili2db_classname WHERE t_ili2db_classname.iliname = 'Oid6.TestA.ClassB1'";
+                    String stmtTxt="SELECT t_ili2db_classname.iliname, t_ili2db_classname.sqlname FROM "+setup.prefixName("t_ili2db_classname")+" WHERE t_ili2db_classname.iliname = 'Oid6.TestA.ClassB1'";
                     Assert.assertTrue(stmt.execute(stmtTxt));
                     ResultSet rs=stmt.getResultSet();
                     Assert.assertTrue(rs.next());
@@ -631,7 +604,7 @@ public class Oid23Test {
                         {"Oid6.TestA.ClassE1.e1", "e1", "classe1b", null},
                         {"Oid6.TestA.ClassE1b.e1b", "e1b", "classe1b", null},
                     };
-                    Ili2dbAssert.assertAttrNameTable(jdbcConnection,expectedValues, DBSCHEMA);
+                    Ili2dbAssert.assertAttrNameTable(jdbcConnection,expectedValues, setup.getSchema());
                     
                 }
                 {
@@ -653,10 +626,10 @@ public class Oid23Test {
                         {"Oid6.TestA.ClassE1", "ch.ehi.ili2db.inheritance", "subClass"},
                         {"Oid6.TestA.ClassE1b", "ch.ehi.ili2db.inheritance", "newClass"},
                     };
-                    Ili2dbAssert.assertTrafoTable(jdbcConnection,expectedValues, DBSCHEMA);
+                    Ili2dbAssert.assertTrafoTable(jdbcConnection,expectedValues, setup.getSchema());
                 }
                 {
-                    String stmtTxt="SELECT "+DbNames.META_INFO_COLUMN_TAB_TABLENAME_COL+","+DbNames.META_INFO_COLUMN_TAB_SETTING_COL+" FROM "+DBSCHEMA+"."+DbNames.META_INFO_COLUMN_TAB+" WHERE "+DbNames.META_INFO_COLUMN_TAB_TAG_COL+" = '"+DbExtMetaInfo.TAG_COL_OIDDOMAIN+"' AND "+DbNames.META_INFO_COLUMN_TAB_COLUMNNAME_COL+" = '"+DbNames.T_ILI_TID_COL+"'";
+                    String stmtTxt="SELECT "+DbNames.META_INFO_COLUMN_TAB_TABLENAME_COL+","+DbNames.META_INFO_COLUMN_TAB_SETTING_COL+" FROM "+setup.prefixName(DbNames.META_INFO_COLUMN_TAB)+" WHERE "+DbNames.META_INFO_COLUMN_TAB_TAG_COL+" = '"+DbExtMetaInfo.TAG_COL_OIDDOMAIN+"' AND "+DbNames.META_INFO_COLUMN_TAB_COLUMNNAME_COL+" = '"+DbNames.T_ILI_TID_COL+"'";
                     HashMap<String,String> res=new HashMap<String,String>();
                     ResultSet rs=stmt.executeQuery(stmtTxt);
                     while(rs.next()) {
@@ -670,6 +643,9 @@ public class Oid23Test {
                 }
             }
         }finally{
+            if(stmt!=null) {
+                stmt.close();
+            }
             if(jdbcConnection!=null){
                 jdbcConnection.close();
             }
@@ -683,23 +659,23 @@ public class Oid23Test {
         }
         //EhiLogger.getInstance().setTraceFilter(false);
         Connection jdbcConnection=null;
+        Statement stmt=null;
         try{
-            Class driverClass = Class.forName("org.postgresql.Driver");
-            jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
-            stmt=jdbcConnection.createStatement();
             {
                 {
                     File data=new File(TEST_DATA_DIR,"Oid6a.xtf");
-                    Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+                    Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
                     config.setFunction(Config.FC_IMPORT);
                     Ili2db.readSettingsFromDb(config);
                     Ili2db.run(config,null);
                 }
             }
+            jdbcConnection = setup.createConnection();
+            stmt=jdbcConnection.createStatement();
             // import-test: Oid1a.xtf
             Integer a1_tid=null;
             {
-                String stmtTxt="SELECT structa0.t_id, structa0.t_ili_tid FROM "+DBSCHEMA+".structa0 WHERE structa0.t_ili_tid = 'c34c86ec-2a75-4a89-a194-f9ebc422f8bc'";
+                String stmtTxt="SELECT structa0.t_id, structa0.t_ili_tid FROM "+setup.prefixName("structa0")+" WHERE structa0.t_ili_tid = 'c34c86ec-2a75-4a89-a194-f9ebc422f8bc'";
                 Assert.assertTrue(stmt.execute(stmtTxt));
                 ResultSet rs=stmt.getResultSet();
                 Assert.assertTrue(rs.next());
@@ -707,13 +683,16 @@ public class Oid23Test {
                 a1_tid=rs.getInt(1);
             }
             {
-                String stmtTxt="SELECT structb0.t_id, structb0.t_ili_tid FROM "+DBSCHEMA+".structb0 WHERE structb0.t_ili_tid = '81fc3941-01ec-4c51-b1ba-46b6295d9b4e'";
+                String stmtTxt="SELECT structb0.t_id, structb0.t_ili_tid FROM "+setup.prefixName("structb0")+" WHERE structb0.t_ili_tid = '81fc3941-01ec-4c51-b1ba-46b6295d9b4e'";
                 Assert.assertTrue(stmt.execute(stmtTxt));
                 ResultSet rs=stmt.getResultSet();
                 Assert.assertTrue(rs.next());
                 Assert.assertEquals("81fc3941-01ec-4c51-b1ba-46b6295d9b4e",rs.getString(2));
             }
         }finally{
+            if(stmt!=null) {
+                stmt.close();
+            }
             if(jdbcConnection!=null){
                 jdbcConnection.close();
             }
@@ -725,13 +704,9 @@ public class Oid23Test {
         {
             importXtfStructBaseNoTidCol_Smart1();
         }
-        Connection jdbcConnection=null;
         try{
-            Class driverClass = Class.forName("org.postgresql.Driver");
-            jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
-            stmt=jdbcConnection.createStatement();
             File data=new File(TEST_DATA_DIR,"Oid6a-out.xtf");
-            Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+            Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
             config.setModels("Oid6");
             config.setFunction(Config.FC_EXPORT);
             Ili2db.readSettingsFromDb(config);
@@ -779,9 +754,6 @@ public class Oid23Test {
                  Assert.assertEquals("Oid6.TestA.ClassC1b", obj0.getobjecttag());
              }
         }finally{
-            if(jdbcConnection!=null){
-                jdbcConnection.close();
-            }
         }
     }
     
@@ -790,27 +762,27 @@ public class Oid23Test {
     {
         //EhiLogger.getInstance().setTraceFilter(false);
         Connection jdbcConnection=null;
+        Statement stmt=null;
         try{
-            Class driverClass = Class.forName("org.postgresql.Driver");
-            jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
-            stmt=jdbcConnection.createStatement();
-            stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");
+            setup.resetDb();
             {
                 File data=new File(TEST_DATA_DIR,"Oid5.ili");
-                Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+                Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
                 Ili2db.setNoSmartMapping(config);
                 config.setFunction(Config.FC_SCHEMAIMPORT);
                 config.setCreateFk(Config.CREATE_FK_YES);
                 config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
                 Ili2db.readSettingsFromDb(config);
                 Ili2db.run(config,null);
+                jdbcConnection = setup.createConnection();
+                stmt=jdbcConnection.createStatement();
                 {
                     // t_ili2db_attrname
                     String [][] expectedValues=new String[][] {
                         {"Oid5.TestA.ClassA1.attrA", "attra", "classa1", null},
                         {"Oid5.TestA.ClassB1.attrB", "attrb", "classb1", null},
                     };
-                    Ili2dbAssert.assertAttrNameTable(jdbcConnection,expectedValues, DBSCHEMA);
+                    Ili2dbAssert.assertAttrNameTable(jdbcConnection,expectedValues, setup.getSchema());
                     
                 }
                 {
@@ -819,10 +791,10 @@ public class Oid23Test {
                         {"Oid5.TestA.ClassA1", "ch.ehi.ili2db.inheritance", "newClass"},
                         {"Oid5.TestA.ClassB1", "ch.ehi.ili2db.inheritance", "newClass"},
                     };
-                    Ili2dbAssert.assertTrafoTable(jdbcConnection,expectedValues, DBSCHEMA);
+                    Ili2dbAssert.assertTrafoTable(jdbcConnection,expectedValues, setup.getSchema());
                 }
                 {
-                    String stmtTxt="SELECT "+DbNames.META_INFO_COLUMN_TAB_TABLENAME_COL+","+DbNames.META_INFO_COLUMN_TAB_SETTING_COL+" FROM "+DBSCHEMA+"."+DbNames.META_INFO_COLUMN_TAB+" WHERE "+DbNames.META_INFO_COLUMN_TAB_TAG_COL+" = '"+DbExtMetaInfo.TAG_COL_OIDDOMAIN+"' AND "+DbNames.META_INFO_COLUMN_TAB_COLUMNNAME_COL+" = '"+DbNames.T_ILI_TID_COL+"'";
+                    String stmtTxt="SELECT "+DbNames.META_INFO_COLUMN_TAB_TABLENAME_COL+","+DbNames.META_INFO_COLUMN_TAB_SETTING_COL+" FROM "+setup.prefixName(DbNames.META_INFO_COLUMN_TAB)+" WHERE "+DbNames.META_INFO_COLUMN_TAB_TAG_COL+" = '"+DbExtMetaInfo.TAG_COL_OIDDOMAIN+"' AND "+DbNames.META_INFO_COLUMN_TAB_COLUMNNAME_COL+" = '"+DbNames.T_ILI_TID_COL+"'";
                     HashMap<String,String> res=new HashMap<String,String>();
                     ResultSet rs=stmt.executeQuery(stmtTxt);
                     while(rs.next()) {
@@ -836,6 +808,9 @@ public class Oid23Test {
                 }
             }
         }finally{
+            if(stmt!=null) {
+                stmt.close();
+            }
             if(jdbcConnection!=null){
                 jdbcConnection.close();
             }
@@ -849,19 +824,20 @@ public class Oid23Test {
         }
         //EhiLogger.getInstance().setTraceFilter(false);
         Connection jdbcConnection=null;
+        Statement stmt=null;
         try{
-            Class driverClass = Class.forName("org.postgresql.Driver");
-            jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
-            stmt=jdbcConnection.createStatement();
             {
                 File data=new File(TEST_DATA_DIR,"Oid5a.xtf");
-                Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+                Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
                 config.setFunction(Config.FC_IMPORT);
                 config.setDatasetName("Oid5");
                 Ili2db.readSettingsFromDb(config);
                 Ili2db.run(config,null);
             }
         }finally{
+            if(stmt!=null) {
+                stmt.close();
+            }
             if(jdbcConnection!=null){
                 jdbcConnection.close();
             }
@@ -875,19 +851,20 @@ public class Oid23Test {
         }
         //EhiLogger.getInstance().setTraceFilter(false);
         Connection jdbcConnection=null;
+        Statement stmt=null;
         try{
-            Class driverClass = Class.forName("org.postgresql.Driver");
-            jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
-            stmt=jdbcConnection.createStatement();
             {
                 File data=new File(TEST_DATA_DIR,"Oid5b.xtf");
-                Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+                Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
                 config.setFunction(Config.FC_UPDATE);
                 config.setDatasetName("Oid5");
                 Ili2db.readSettingsFromDb(config);
                 Ili2db.run(config,null);
             }
         }finally{
+            if(stmt!=null) {
+                stmt.close();
+            }
             if(jdbcConnection!=null){
                 jdbcConnection.close();
             }
@@ -900,23 +877,16 @@ public class Oid23Test {
             importXtfwithoutBid_Smart0();
         }
         //EhiLogger.getInstance().setTraceFilter(false);
-        Connection jdbcConnection=null;
         try{
-            Class driverClass = Class.forName("org.postgresql.Driver");
-            jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
-            stmt=jdbcConnection.createStatement();
             {
                 File data=new File(TEST_DATA_DIR,"Oid5a-out.xtf");
-                Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+                Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
                 config.setFunction(Config.FC_EXPORT);
                 config.setModels("Oid5");
                 Ili2db.readSettingsFromDb(config);
                 Ili2db.run(config,null);
             }
         }finally{
-            if(jdbcConnection!=null){
-                jdbcConnection.close();
-            }
         }
     }
     @Test
@@ -924,14 +894,12 @@ public class Oid23Test {
     {
         //EhiLogger.getInstance().setTraceFilter(false);
         Connection jdbcConnection=null;
+        Statement stmt=null;
         try{
-            Class driverClass = Class.forName("org.postgresql.Driver");
-            jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
-            stmt=jdbcConnection.createStatement();
-            stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");
+            setup.resetDb();
             {
                 File data=new File(TEST_DATA_DIR,"Oid3.ili");
-                Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+                Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
                 Ili2db.setNoSmartMapping(config);
                 config.setFunction(Config.FC_SCHEMAIMPORT);
                 config.setCreateFk(Config.CREATE_FK_YES);
@@ -941,22 +909,24 @@ public class Oid23Test {
                 config.setCreateMetaInfo(true);
                 Ili2db.readSettingsFromDb(config);
                 Ili2db.run(config,null);
+                jdbcConnection = setup.createConnection();
+                stmt=jdbcConnection.createStatement();
                 {
-                    String stmtTxt="SELECT t_ili2db_classname.iliname, t_ili2db_classname.sqlname FROM "+DBSCHEMA+".t_ili2db_classname WHERE t_ili2db_classname.iliname = 'Oid3.TestA.ClassA1'";
+                    String stmtTxt="SELECT t_ili2db_classname.iliname, t_ili2db_classname.sqlname FROM "+setup.prefixName("t_ili2db_classname")+" WHERE t_ili2db_classname.iliname = 'Oid3.TestA.ClassA1'";
                     Assert.assertTrue(stmt.execute(stmtTxt));
                     ResultSet rs=stmt.getResultSet();
                     Assert.assertTrue(rs.next());
                     Assert.assertEquals("classa1",rs.getString(2));
                 }
                 {
-                    String stmtTxt="SELECT t_ili2db_classname.iliname, t_ili2db_classname.sqlname FROM "+DBSCHEMA+".t_ili2db_classname WHERE t_ili2db_classname.iliname = 'Oid3.TestA.ClassA1b'";
+                    String stmtTxt="SELECT t_ili2db_classname.iliname, t_ili2db_classname.sqlname FROM "+setup.prefixName("t_ili2db_classname")+" WHERE t_ili2db_classname.iliname = 'Oid3.TestA.ClassA1b'";
                     Assert.assertTrue(stmt.execute(stmtTxt));
                     ResultSet rs=stmt.getResultSet();
                     Assert.assertTrue(rs.next());
                     Assert.assertEquals("classa1b",rs.getString(2));
                 }
                 {
-                    String stmtTxt="SELECT t_ili2db_classname.iliname, t_ili2db_classname.sqlname FROM "+DBSCHEMA+".t_ili2db_classname WHERE t_ili2db_classname.iliname = 'Oid3.TestA.ClassB1'";
+                    String stmtTxt="SELECT t_ili2db_classname.iliname, t_ili2db_classname.sqlname FROM "+setup.prefixName("t_ili2db_classname")+" WHERE t_ili2db_classname.iliname = 'Oid3.TestA.ClassB1'";
                     Assert.assertTrue(stmt.execute(stmtTxt));
                     ResultSet rs=stmt.getResultSet();
                     Assert.assertTrue(rs.next());
@@ -967,7 +937,7 @@ public class Oid23Test {
                     String [][] expectedValues=new String[][] {
                         {"Oid3.TestC.ac.a", "a", "classc1", "classa1"},
                     };
-                    Ili2dbAssert.assertAttrNameTable(jdbcConnection,expectedValues, DBSCHEMA);
+                    Ili2dbAssert.assertAttrNameTable(jdbcConnection,expectedValues, setup.getSchema());
                     
                 }
                 {
@@ -980,10 +950,10 @@ public class Oid23Test {
                         {"Oid3.TestA.ClassB1", "ch.ehi.ili2db.inheritance", "newClass"},
                         {"Oid3.TestA.ClassA1", "ch.ehi.ili2db.inheritance", "newClass"},
                     };
-                    Ili2dbAssert.assertTrafoTable(jdbcConnection,expectedValues, DBSCHEMA);
+                    Ili2dbAssert.assertTrafoTable(jdbcConnection,expectedValues, setup.getSchema());
                 }
                 {
-                    String stmtTxt="SELECT "+DbNames.META_INFO_COLUMN_TAB_TABLENAME_COL+","+DbNames.META_INFO_COLUMN_TAB_SETTING_COL+" FROM "+DBSCHEMA+"."+DbNames.META_INFO_COLUMN_TAB+" WHERE "+DbNames.META_INFO_COLUMN_TAB_TAG_COL+" = '"+DbExtMetaInfo.TAG_COL_OIDDOMAIN+"' AND "+DbNames.META_INFO_COLUMN_TAB_COLUMNNAME_COL+" = '"+DbNames.T_ILI_TID_COL+"'";
+                    String stmtTxt="SELECT "+DbNames.META_INFO_COLUMN_TAB_TABLENAME_COL+","+DbNames.META_INFO_COLUMN_TAB_SETTING_COL+" FROM "+setup.prefixName(DbNames.META_INFO_COLUMN_TAB)+" WHERE "+DbNames.META_INFO_COLUMN_TAB_TAG_COL+" = '"+DbExtMetaInfo.TAG_COL_OIDDOMAIN+"' AND "+DbNames.META_INFO_COLUMN_TAB_COLUMNNAME_COL+" = '"+DbNames.T_ILI_TID_COL+"'";
                     HashMap<String,String> res=new HashMap<String,String>();
                     ResultSet rs=stmt.executeQuery(stmtTxt);
                     while(rs.next()) {
@@ -996,6 +966,9 @@ public class Oid23Test {
                 }
             }
         }finally{
+            if(stmt!=null) {
+                stmt.close();
+            }
             if(jdbcConnection!=null){
                 jdbcConnection.close();
             }
@@ -1009,14 +982,12 @@ public class Oid23Test {
         }
         //EhiLogger.getInstance().setTraceFilter(false);
         Connection jdbcConnection=null;
+        Statement stmt=null;
         try{
-            Class driverClass = Class.forName("org.postgresql.Driver");
-            jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
-            stmt=jdbcConnection.createStatement();
             {
                 {
                     File data=new File(TEST_DATA_DIR,"Oid3a.xtf");
-                    Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+                    Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
                     config.setFunction(Config.FC_IMPORT);
                     config.setImportBid(true);
                     Ili2db.readSettingsFromDb(config);
@@ -1024,17 +995,19 @@ public class Oid23Test {
                 }
                 {
                     File data=new File(TEST_DATA_DIR,"Oid3c.xtf");
-                    Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+                    Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
                     config.setFunction(Config.FC_IMPORT);
                     config.setImportBid(true);
                     Ili2db.readSettingsFromDb(config);
                     Ili2db.run(config,null);
                 }
             }
+            jdbcConnection = setup.createConnection();
+            stmt=jdbcConnection.createStatement();
             // import-test: Oid1a.xtf
             Integer a1_tid=null;
             {
-                String stmtTxt="SELECT classa1.t_id, classa1.t_ili_tid FROM "+DBSCHEMA+".classa1 WHERE classa1.t_ili_tid = 'c34c86ec-2a75-4a89-a194-f9ebc422f8bc'";
+                String stmtTxt="SELECT classa1.t_id, classa1.t_ili_tid FROM "+setup.prefixName("classa1")+" WHERE classa1.t_ili_tid = 'c34c86ec-2a75-4a89-a194-f9ebc422f8bc'";
                 Assert.assertTrue(stmt.execute(stmtTxt));
                 ResultSet rs=stmt.getResultSet();
                 Assert.assertTrue(rs.next());
@@ -1042,7 +1015,7 @@ public class Oid23Test {
                 a1_tid=rs.getInt(1);
             }
             {
-                String stmtTxt="SELECT classb1.t_id, classb1.t_ili_tid FROM "+DBSCHEMA+".classb1 WHERE classb1.t_ili_tid = '81fc3941-01ec-4c51-b1ba-46b6295d9b4e'";
+                String stmtTxt="SELECT classb1.t_id, classb1.t_ili_tid FROM "+setup.prefixName("classb1")+" WHERE classb1.t_ili_tid = '81fc3941-01ec-4c51-b1ba-46b6295d9b4e'";
                 Assert.assertTrue(stmt.execute(stmtTxt));
                 ResultSet rs=stmt.getResultSet();
                 Assert.assertTrue(rs.next());
@@ -1050,7 +1023,7 @@ public class Oid23Test {
             }
             // import-test_ Oid1c.xtf
             {
-                String stmtTxt="SELECT classc1.t_id, classc1.a FROM "+DBSCHEMA+".classc1";
+                String stmtTxt="SELECT classc1.t_id, classc1.a FROM "+setup.prefixName("classc1");
                 Assert.assertTrue(stmt.execute(stmtTxt));
                 ResultSet rs=stmt.getResultSet();
                 Assert.assertTrue(rs.next());
@@ -1058,6 +1031,9 @@ public class Oid23Test {
                 Assert.assertFalse(rs.next());
             }
         }finally{
+            if(stmt!=null) {
+                stmt.close();
+            }
             if(jdbcConnection!=null){
                 jdbcConnection.close();
             }
@@ -1069,13 +1045,9 @@ public class Oid23Test {
         {
             importXtfMetaAttr_Smart0();
         }
-        Connection jdbcConnection=null;
         try{
-            Class driverClass = Class.forName("org.postgresql.Driver");
-            jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
-            stmt=jdbcConnection.createStatement();
             File data=new File(TEST_DATA_DIR,"Oid1a-out.xtf");
-            Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+            Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
             config.setBaskets("Oid3.TestA");
             config.setModels("Oid3");
             config.setFunction(Config.FC_EXPORT);
@@ -1109,9 +1081,6 @@ public class Oid23Test {
                  Assert.assertEquals("Oid3.TestA.ClassA1", obj0.getobjecttag());
              }
         }finally{
-            if(jdbcConnection!=null){
-                jdbcConnection.close();
-            }
         }
     }
 	
@@ -1119,29 +1088,28 @@ public class Oid23Test {
     @Test
 	public void importXtf_Smart0() throws Exception
 	{
-		//EhiLogger.getInstance().setTraceFilter(false);
+		EhiLogger.getInstance().setTraceFilter(false);
 		Connection jdbcConnection=null;
+        Statement stmt=null;
 		try{
-		    Class driverClass = Class.forName("org.postgresql.Driver");
-	        jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
-	        stmt=jdbcConnection.createStatement();
-			stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");
+		    setup.resetDb();
 			{
 				{
 					File data=new File(TEST_DATA_DIR,"Oid1a.xtf");
-		    		Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+		    		Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
 	                Ili2db.setNoSmartMapping(config);
 		    		config.setFunction(Config.FC_IMPORT);
 		            config.setDoImplicitSchemaImport(true);
 		    		config.setCreateFk(Config.CREATE_FK_YES);
 		    		config.setTidHandling(Config.TID_HANDLING_PROPERTY);
 		    		config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
+		    		config.setImportBid(true);
 		    		Ili2db.readSettingsFromDb(config);
 		    		Ili2db.run(config,null);
 				}
 				{
 					File data=new File(TEST_DATA_DIR,"Oid1c.xtf");
-					Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+					Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
 	                Ili2db.setNoSmartMapping(config);
 					config.setFunction(Config.FC_IMPORT);
 					config.setCreateFk(Config.CREATE_FK_YES);
@@ -1151,10 +1119,12 @@ public class Oid23Test {
 					Ili2db.run(config,null);
 				}
 			}
+            jdbcConnection = setup.createConnection();
+            stmt=jdbcConnection.createStatement();
 			// import-test: Oid1a.xtf
 			Integer a1_tid=null;
 			{
-				String stmtTxt="SELECT classa1.t_id, classa1.t_ili_tid FROM "+DBSCHEMA+".classa1 WHERE classa1.t_ili_tid = 'c34c86ec-2a75-4a89-a194-f9ebc422f8bc'";
+				String stmtTxt="SELECT classa1.t_id, classa1.t_ili_tid FROM "+setup.prefixName("classa1")+" WHERE classa1.t_ili_tid = 'c34c86ec-2a75-4a89-a194-f9ebc422f8bc'";
 				Assert.assertTrue(stmt.execute(stmtTxt));
 				ResultSet rs=stmt.getResultSet();
 				Assert.assertTrue(rs.next());
@@ -1162,7 +1132,7 @@ public class Oid23Test {
 				a1_tid=rs.getInt(1);
 			}
 			{
-				String stmtTxt="SELECT classb1.t_id, classb1.t_ili_tid FROM "+DBSCHEMA+".classb1 WHERE classb1.t_ili_tid = '81fc3941-01ec-4c51-b1ba-46b6295d9b4e'";
+				String stmtTxt="SELECT classb1.t_id, classb1.t_ili_tid FROM "+setup.prefixName("classb1")+" WHERE classb1.t_ili_tid = '81fc3941-01ec-4c51-b1ba-46b6295d9b4e'";
 				Assert.assertTrue(stmt.execute(stmtTxt));
 				ResultSet rs=stmt.getResultSet();
 				Assert.assertTrue(rs.next());
@@ -1170,7 +1140,7 @@ public class Oid23Test {
 			}
 			// import-test_ Oid1c.xtf
 			{
-				String stmtTxt="SELECT classc1.t_id, classc1.a FROM "+DBSCHEMA+".classc1";
+				String stmtTxt="SELECT classc1.t_id, classc1.a FROM "+setup.prefixName("classc1");
 				Assert.assertTrue(stmt.execute(stmtTxt));
 				ResultSet rs=stmt.getResultSet();
 				Assert.assertTrue(rs.next());
@@ -1178,6 +1148,9 @@ public class Oid23Test {
                 Assert.assertFalse(rs.next());
 			}
 		}finally{
+            if(stmt!=null) {
+                stmt.close();
+            }
 			if(jdbcConnection!=null){
 				jdbcConnection.close();
 			}
@@ -1185,19 +1158,15 @@ public class Oid23Test {
 	}	
 	
 	@Test
-	public void exportXtf_Smart1() throws Exception
+	public void exportXtf_Smart0() throws Exception
 	{
-		Connection jdbcConnection=null;
+	    {
+	        importXtf_Smart0();
+	    }
 		try{
-	        Class driverClass = Class.forName("org.postgresql.Driver");
-	        jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
-	        stmt=jdbcConnection.createStatement();
-	        stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");
-	        DbUtility.executeSqlScript(jdbcConnection, new java.io.FileReader(new File(TEST_DATA_DIR,"CreateTable.sql")));
-	        DbUtility.executeSqlScript(jdbcConnection, new java.io.FileReader(new File(TEST_DATA_DIR,"InsertIntoTable.sql")));
 	        File data=new File(TEST_DATA_DIR,"Oid1a-out.xtf");
-			Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
-			config.setBaskets("Oid23.TestA");
+			Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+			config.setBaskets("Oid1.TestA");
 			config.setFunction(Config.FC_EXPORT);
     		config.setTidHandling(Config.TID_HANDLING_PROPERTY);
     		config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
@@ -1223,17 +1192,19 @@ public class Oid23Test {
 			 {
 				 IomObject obj0 = objs.get("81fc3941-01ec-4c51-b1ba-46b6295d9b4e");
 				 Assert.assertNotNull(obj0);
-				 Assert.assertEquals("Oid23.TestA.ClassB1b", obj0.getobjecttag());
+				 Assert.assertEquals("Oid1.TestA.ClassB1b", obj0.getobjecttag());
 			 }
 			 {
 				 IomObject obj0 = objs.get("c34c86ec-2a75-4a89-a194-f9ebc422f8bc");
 				 Assert.assertNotNull(obj0);
-				 Assert.assertEquals("Oid23.TestA.ClassA1", obj0.getobjecttag());
+				 Assert.assertEquals("Oid1.TestA.ClassA1", obj0.getobjecttag());
 			 }
+             {
+                 IomObject obj0 = objs.get("b327aab8-1908-4dc0-aa96-ef1de78fffd6");
+                 Assert.assertNotNull(obj0);
+                 Assert.assertEquals("Oid1.TestA.ab2", obj0.getobjecttag());
+             }
 		}finally{
-			if(jdbcConnection!=null){
-				jdbcConnection.close();
-			}
 		}
 	}
     @Test
@@ -1241,14 +1212,12 @@ public class Oid23Test {
     {
         //EhiLogger.getInstance().setTraceFilter(false);
         Connection jdbcConnection=null;
+        Statement stmt=null;
         try{
-            Class driverClass = Class.forName("org.postgresql.Driver");
-            jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
-            stmt=jdbcConnection.createStatement();
-            stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");
+            setup.resetDb();
             {
                 File data=new File(TEST_DATA_DIR,"Oid2.ili");
-                Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+                Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
                 Ili2db.setNoSmartMapping(config);
                 config.setFunction(Config.FC_SCHEMAIMPORT);
                 config.setCreateFk(Config.CREATE_FK_YES);
@@ -1258,12 +1227,14 @@ public class Oid23Test {
                 Ili2db.readSettingsFromDb(config);
                 Ili2db.run(config,null);
             }
+            jdbcConnection = setup.createConnection();
+            stmt=jdbcConnection.createStatement();
             {
                 // t_ili2db_attrname
                 String [][] expectedValues=new String[][] {
                     {"Oid2.TestD.a2b.a","a","classdb","classda"}                    
                 };
-                Ili2dbAssert.assertAttrNameTable(jdbcConnection,expectedValues, DBSCHEMA);
+                Ili2dbAssert.assertAttrNameTable(jdbcConnection,expectedValues, setup.getSchema());
                 
             }
             {
@@ -1275,10 +1246,10 @@ public class Oid23Test {
                     {"Oid2.TestE.ClassDa","ch.ehi.ili2db.inheritance","superClass"},
                     {"Oid2.TestE.ClassDb","ch.ehi.ili2db.inheritance","superClass"}                  
                 };
-                Ili2dbAssert.assertTrafoTable(jdbcConnection,expectedValues, DBSCHEMA);
+                Ili2dbAssert.assertTrafoTable(jdbcConnection,expectedValues, setup.getSchema());
             }
             {
-                String stmtTxt="SELECT "+DbNames.META_INFO_COLUMN_TAB_TABLENAME_COL+","+DbNames.META_INFO_COLUMN_TAB_SETTING_COL+" FROM "+DBSCHEMA+"."+DbNames.META_INFO_COLUMN_TAB+" WHERE "+DbNames.META_INFO_COLUMN_TAB_TAG_COL+" = '"+DbExtMetaInfo.TAG_COL_OIDDOMAIN+"' AND "+DbNames.META_INFO_COLUMN_TAB_COLUMNNAME_COL+" = '"+DbNames.T_ILI_TID_COL+"'";
+                String stmtTxt="SELECT "+DbNames.META_INFO_COLUMN_TAB_TABLENAME_COL+","+DbNames.META_INFO_COLUMN_TAB_SETTING_COL+" FROM "+setup.prefixName(DbNames.META_INFO_COLUMN_TAB)+" WHERE "+DbNames.META_INFO_COLUMN_TAB_TAG_COL+" = '"+DbExtMetaInfo.TAG_COL_OIDDOMAIN+"' AND "+DbNames.META_INFO_COLUMN_TAB_COLUMNNAME_COL+" = '"+DbNames.T_ILI_TID_COL+"'";
                 HashMap<String,String> res=new HashMap<String,String>();
                 ResultSet rs=stmt.executeQuery(stmtTxt);
                 while(rs.next()) {
@@ -1290,6 +1261,9 @@ public class Oid23Test {
                 
             }
         }finally{
+            if(stmt!=null) {
+                stmt.close();
+            }
             if(jdbcConnection!=null){
                 jdbcConnection.close();
             }
@@ -1300,14 +1274,12 @@ public class Oid23Test {
     {
         //EhiLogger.getInstance().setTraceFilter(false);
         Connection jdbcConnection=null;
+        Statement stmt=null;
         try{
-            Class driverClass = Class.forName("org.postgresql.Driver");
-            jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
-            stmt=jdbcConnection.createStatement();
-            stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");
+            setup.resetDb();
             {
                 File data=new File(TEST_DATA_DIR,"Oid2.ili");
-                Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+                Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
                 Ili2db.setNoSmartMapping(config);
                 config.setFunction(Config.FC_SCHEMAIMPORT);
                 config.setCreateFk(Config.CREATE_FK_YES);
@@ -1321,6 +1293,9 @@ public class Oid23Test {
         }catch(Ili2dbException ex) {
             Assert.assertEquals("Model Oid2 requires column T_basket",ex.getMessage());
         }finally{
+            if(stmt!=null) {
+                stmt.close();
+            }
             if(jdbcConnection!=null){
                 jdbcConnection.close();
             }
@@ -1331,14 +1306,12 @@ public class Oid23Test {
     {
         //EhiLogger.getInstance().setTraceFilter(false);
         Connection jdbcConnection=null;
+        Statement stmt=null;
         try{
-            Class driverClass = Class.forName("org.postgresql.Driver");
-            jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
-            stmt=jdbcConnection.createStatement();
-            stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");
+            setup.resetDb();
             {
                 File data=new File(TEST_DATA_DIR,"Bid5.ili");
-                Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+                Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
                 Ili2db.setNoSmartMapping(config);
                 config.setFunction(Config.FC_SCHEMAIMPORT);
                 config.setCreateFk(Config.CREATE_FK_YES);
@@ -1352,6 +1325,9 @@ public class Oid23Test {
         }catch(Ili2dbException ex) {
             Assert.assertEquals("Model Bid5 requires column T_basket",ex.getMessage());
         }finally{
+            if(stmt!=null) {
+                stmt.close();
+            }
             if(jdbcConnection!=null){
                 jdbcConnection.close();
             }
@@ -1365,13 +1341,11 @@ public class Oid23Test {
         }
         //EhiLogger.getInstance().setTraceFilter(false);
         Connection jdbcConnection=null;
+        Statement stmt=null;
         try{
-            Class driverClass = Class.forName("org.postgresql.Driver");
-            jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
-            stmt=jdbcConnection.createStatement();
             {
                 File data=new File(TEST_DATA_DIR,"Oid2a.xtf");
-                Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+                Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
                 config.setFunction(Config.FC_IMPORT);
                 config.setValidation(false);
                 Ili2db.readSettingsFromDb(config);
@@ -1379,13 +1353,16 @@ public class Oid23Test {
             }
             {
                 File data=new File(TEST_DATA_DIR,"Oid2b.xtf");
-                Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+                Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
                 config.setFunction(Config.FC_IMPORT);
                 config.setValidation(false);
                 Ili2db.readSettingsFromDb(config);
                 Ili2db.run(config,null);
             }
         }finally{
+            if(stmt!=null) {
+                stmt.close();
+            }
             if(jdbcConnection!=null){
                 jdbcConnection.close();
             }
@@ -1397,12 +1374,9 @@ public class Oid23Test {
         {
             importXtfExtendedTopic_Smart1();
         }
-        Connection jdbcConnection=null;
         try{
-            Class driverClass = Class.forName("org.postgresql.Driver");
-            jdbcConnection = DriverManager.getConnection(dburl, dbuser, dbpwd);
             File data=new File(TEST_DATA_DIR,"Oid2-out.xtf");
-            Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+            Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
             config.setModels("Oid2");
             config.setFunction(Config.FC_EXPORT);
             Ili2db.readSettingsFromDb(config);
@@ -1457,9 +1431,6 @@ public class Oid23Test {
                  Assert.assertEquals("Oid2.TestE", basket0.getType());
              }
         }finally{
-            if(jdbcConnection!=null){
-                jdbcConnection.close();
-            }
         }
     }
 }

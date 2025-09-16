@@ -1,3 +1,5 @@
+dist: focal
+
 language: java
 
 jdk:
@@ -13,31 +15,41 @@ services:
   - mysql
   
 addons:
-  postgresql: "9.6"
+  postgresql: 12
   ssh_known_hosts:
   - ftp.interlis.ch
   apt:
     packages:
-    - libmaven-ant-tasks-java
     - python3
     - python3-pip
-    - postgresql-9.6-postgis-2.4
+    - postgresql-postgis
 #    - python3-docutils    
-    
+env:
+  global:
+  - PGPORT=5433
+  - PGUSER=postgres
+  
 install: true
 
 before_script:
+    - # show port used by different installed versions
+    - grep port /etc/postgresql/*/main/postgresql.conf
+    - # enable same access rules in new installed version 12 as in pre-installed version 13
+    - sudo cp /etc/postgresql/13/main/pg_hba.conf /etc/postgresql/12/main/pg_hba.conf
+    - # restart postgresql because of changes to pg_hba.conf
+    - sudo service postgresql stop
+    - sudo service postgresql start 12
     - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
     - docker run --name=mssql-test -e 'ACCEPT_EULA=Y' -e 'MSSQL_PID=Developer' -e 'MSSQL_SA_PASSWORD=MsInst2019x' -p 1433:1433 -d mcr.microsoft.com/mssql/server:2022-CU9-ubuntu-20.04
     - # localhost is "-S ."
     - sleep 30; docker ps -a; docker logs --tail=50 mssql-test; docker exec -it mssql-test  /opt/mssql-tools/bin/sqlcmd -S . -U sa -P MsInst2019x -Q 'SELECT @@VERSION;'
     - docker exec -it mssql-test  /opt/mssql-tools/bin/sqlcmd -S . -U sa -P MsInst2019x -Q 'create database ili2db;'
     - mysql -u root --password="" -e 'SHOW VARIABLES LIKE "%version%";'
-    - psql -c 'create database ili2db;' -U postgres
-    - psql -c 'select version();' -d ili2db -U postgres
-    - psql -c 'create extension postgis;' -d ili2db -U postgres
-    - psql -c 'create extension "uuid-ossp";' -d ili2db -U postgres
-    - psql -c 'select postgis_full_version();' -d ili2db -U postgres
+    - psql -c 'create database ili2db;' -U $PGUSER
+    - psql -c 'select version();' -d ili2db -U $PGUSER
+    - psql -c 'create extension if not exists postgis;' -d ili2db -U $PGUSER
+    - psql -c 'create extension if not exists "uuid-ossp";' -d ili2db -U $PGUSER
+    - psql -c 'select postgis_full_version();' -d ili2db -U $PGUSER
     - # dpkg-query -L python3-docutils
     - python3 --version
     - # python3 -m pip install docutils # results in permission denied
@@ -46,13 +58,14 @@ before_script:
     - source my_py3/bin/activate # to activate the python3 environemt    
     - python -m pip --trusted-host pypi.org --trusted-host pypi.python.org --trusted-host files.pythonhosted.org install docutils
     - python -m pip --trusted-host pypi.org --trusted-host pypi.python.org --trusted-host files.pythonhosted.org install Pygments
+    - python -m pip --trusted-host pypi.org --trusted-host pypi.python.org --trusted-host files.pythonhosted.org install rst2html
     - python -m pip freeze
     - 
 script: 
   - # ant -f build-ili2pg.xml jar
   - ./gradlew jar test 
   - ./gradlew ili2mysqlJar ili2mysqlTest -Dmyurl=jdbc:mysql://localhost/ili2db?useSSL=false -Dmyusr=root
-  - ./gradlew ili2pgJar ili2pgTest -Ddburl=jdbc:postgresql:ili2db -Ddbusr=postgres
+  - ./gradlew ili2pgJar ili2pgTest -Ddburl=jdbc:postgresql://127.0.0.1:$PGPORT/ili2db -Ddbusr=$PGUSER
   - ./gradlew ili2gpkgJar ili2gpkgTest
   - ./gradlew ili2fgdbJar
   - ./gradlew ili2mssqlJar ili2mssqlTest "-Ddburl=jdbc:sqlserver://localhost;databaseName=ili2db" -Ddbusr=sa -Ddbpwd=MsInst2019x

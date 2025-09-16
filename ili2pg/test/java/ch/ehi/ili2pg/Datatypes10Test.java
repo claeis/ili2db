@@ -1,4 +1,4 @@
-package ch.ehi.ili2db;
+package ch.ehi.ili2pg;
 
 import java.io.File;
 import java.sql.Connection;
@@ -8,6 +8,8 @@ import java.sql.Statement;
 import java.util.HashMap;
 import org.junit.Assert;
 import org.junit.Test;
+
+import ch.ehi.ili2db.Ili2dbAssert;
 import ch.ehi.ili2db.base.Ili2db;
 import ch.ehi.ili2db.gui.Config;
 import ch.interlis.iom.IomObject;

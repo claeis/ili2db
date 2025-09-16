@@ -1,5 +1,5 @@
 group 'ch.interlis'
-version '5.3.1'+System.getProperty('release','-SNAPSHOT')
+version '5.3.2'+System.getProperty('release','-SNAPSHOT')
 
 apply plugin: "java"
 apply plugin: "maven"
@@ -47,7 +47,6 @@ def dbpwd = System.getProperty('dbpwd',properties.get('dbpwd'))
 def myurl = System.getProperty('myurl',properties.get('myurl'))
 def myusr = System.getProperty('myusr',properties.get('myusr'))
 def mypwd = System.getProperty('mypwd',properties.get('mypwd'))
-def python= System.getProperty('python',properties.get('python','python'))
 def rst2html= System.getProperty('rst2html',properties.get('rst2html','rst2html'))
 def docs_pwd = System.getProperty('docs_pwd',properties.get('docs_pwd','docs_pwd'))
 def docs_usr = System.getProperty('docs_usr',properties.get('docs_usr','docs_usr'))
@@ -356,7 +355,7 @@ configurations {
     ftpAntTask
 }
 dependencies {
-    implementation group: 'ch.interlis', name: 'iox-ili', version: '1.24.0'
+    implementation group: 'ch.interlis', name: 'iox-ili', version: '1.24.2'
     implementation group: 'ch.interlis', name: 'ili2c-tool', version: "5.6.3"
     implementation group: 'ch.interlis', name: 'ili2c-core', version: "5.6.3"
     implementation group: 'ch.ehi', name: 'ehisqlgen', version: "1.16.2"
@@ -368,8 +367,8 @@ dependencies {
     testImplementation 'org.xmlunit:xmlunit-matchers:2.8.2'
     testImplementation 'org.xmlunit:xmlunit-placeholders:2.8.2'
 	
-	ili2pgImplementation group: 'org.postgresql', name: 'postgresql', version: '42.6.0' 
-	compileOnly group: 'org.postgresql', name: 'postgresql', version: '42.6.0' // add as compileOnly, so that eclipse sees it
+	ili2pgImplementation group: 'org.postgresql', name: 'postgresql', version: '42.7.7' 
+	compileOnly group: 'org.postgresql', name: 'postgresql', version: '42.7.7' // add as compileOnly, so that eclipse sees it
 	ili2pgImplementation group: 'com.github.waffle', name: 'waffle-jna', version: '1.9.1'
 	compileOnly group: 'com.github.waffle', name: 'waffle-jna', version: '1.9.1' // add as compileOnly, so that eclipse sees it
 	ili2gpkgImplementation group: 'org.xerial', name: 'sqlite-jdbc', version: '3.43.0.0'
@@ -392,7 +391,7 @@ dependencies {
 	ili2mssqlImplementation group: 'com.microsoft.sqlserver', name: 'mssql-jdbc', version: '6.4.0.jre7'
 	ili2oraImplementation files('libs/ojdbc14.jar')
 	ili2db group: project.group, name: project.name, version: project.version
-    deployerJars "org.apache.maven.wagon:wagon-ftp:3.3.3"
+    deployerJars "org.apache.maven.wagon:wagon-ftp:3.5.3"
     deployerJars "org.apache.maven.wagon:wagon-ssh:3.3.3"
     ftpAntTask "org.apache.ant:ant-commons-net:1.10.7"
 }
@@ -418,8 +417,8 @@ task usrdoc(type:Exec) {
 		new File(project.buildDir,'docs').mkdir()
 	}
 		workingDir = project.buildDir
-		executable python
-		args = [rst2html, infile, outfile]
+		executable rst2html
+		args = [infile, outfile]
 }
 task ili2pgJar(dependsOn: jar,type: Jar) {
 	baseName = 'ili2pg'
@@ -738,6 +737,14 @@ artifacts {
     archives(ili2pgJar.archivePath){
     	builtBy ili2pgJar
     }
+	archives(ili2gpkgBindist.archivePath) {
+        type 'zip'
+        classifier 'bindist'
+        builtBy ili2gpkgBindist
+    }
+    archives(ili2gpkgJar.archivePath){
+    	builtBy ili2gpkgJar
+    }
 	archives(ili2mysqlBindist.archivePath) {
         type 'zip'
         classifier 'bindist'
@@ -761,14 +768,6 @@ artifacts {
     }
     archives(ili2duckdbJar.archivePath){
     	builtBy ili2duckdbJar
-    }
-	archives(ili2gpkgBindist.archivePath) {
-        type 'zip'
-        classifier 'bindist'
-        builtBy ili2gpkgBindist
-    }
-    archives(ili2gpkgJar.archivePath){
-    	builtBy ili2gpkgJar
     }
 	archives(ili2fgdbBindist.archivePath) {
         type 'zip'

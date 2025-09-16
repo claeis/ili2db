@@ -11,6 +11,7 @@ import ch.interlis.ili2c.metamodel.Type;
 import ch.interlis.ili2c.metamodel.ViewableTransferElement;
 
 public class ArrayMappings {
+    public static int MAX_ARRAY_EXPAND=5;
 	private HashMap<AttributeDef,ArrayMapping> mappings=new HashMap<AttributeDef,ArrayMapping>();
 	public void addArrayAttr(AttributeDef arrayAttr) {
 		// validate structure

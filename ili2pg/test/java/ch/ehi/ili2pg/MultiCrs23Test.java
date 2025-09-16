@@ -1,4 +1,4 @@
-package ch.ehi.ili2db;
+package ch.ehi.ili2pg;
 
 import static org.junit.Assert.*;
 
@@ -14,6 +14,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import ch.ehi.basics.logging.EhiLogger;
+import ch.ehi.ili2db.Ili2dbAssert;
 import ch.ehi.ili2db.base.DbNames;
 import ch.ehi.ili2db.base.DbUrlConverter;
 import ch.ehi.ili2db.base.Ili2db;

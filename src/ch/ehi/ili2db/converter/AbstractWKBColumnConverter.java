@@ -523,7 +523,7 @@ public abstract class AbstractWKBColumnConverter implements SqlColumnConverter {
     public IomObject[] toIomStructureFromJson(AttributeDef iliEleAttr, Object sqlArray)
             throws SQLException, ConverterException {
         JsonFactory jsonF = new JsonFactory();
-        java.io.StringReader in=new java.io.StringReader((String)sqlArray);
+        java.io.StringReader in=new java.io.StringReader(sqlArray.toString());
         IomObject iomObj[]=null;
         try {
             JsonParser jg = jsonF.createJsonParser(in);
@@ -538,7 +538,7 @@ public abstract class AbstractWKBColumnConverter implements SqlColumnConverter {
     public String[] toIomValueArrayFromJson(AttributeDef iliEleAttr, Object sqlArray, boolean isEnumInt)
             throws SQLException, ConverterException {
         JsonFactory jsonF = new JsonFactory();
-        java.io.StringReader in=new java.io.StringReader((String)sqlArray);
+        java.io.StringReader in=new java.io.StringReader(sqlArray.toString());
         String values[]=null;
         try {
             JsonParser jg = jsonF.createJsonParser(in);

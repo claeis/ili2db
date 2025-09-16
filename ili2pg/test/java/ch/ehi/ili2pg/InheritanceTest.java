@@ -1,4 +1,4 @@
-package ch.ehi.ili2db;
+package ch.ehi.ili2pg;
 
 import java.io.File;
 import java.lang.reflect.Field;
@@ -12,6 +12,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import ch.ehi.basics.logging.EhiLogger;
+import ch.ehi.ili2db.Ili2dbAssert;
 import ch.ehi.ili2db.base.DbUrlConverter;
 import ch.ehi.ili2db.base.Ili2db;
 import ch.ehi.ili2db.base.Ili2dbException;

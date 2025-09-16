@@ -39,9 +39,11 @@ import ch.ehi.ili2db.converter.AbstractRecordConverter;
 import ch.ehi.ili2db.dbmetainfo.DbExtMetaInfo;
 import ch.ehi.ili2db.fromxtf.EnumValueMap;
 import ch.ehi.ili2db.gui.Config;
+import ch.ehi.ili2db.mapping.ColumnWrapper;
 import ch.ehi.ili2db.mapping.MultiLineMappings;
 import ch.ehi.ili2db.mapping.MultiPointMappings;
 import ch.ehi.ili2db.mapping.MultiSurfaceMappings;
+import ch.ehi.ili2db.mapping.StructAttrPath;
 import ch.ehi.ili2db.mapping.TrafoConfig;
 import ch.ehi.ili2db.mapping.Viewable2TableMapping;
 import ch.ehi.ili2db.mapping.ViewableWrapper;
@@ -276,8 +278,8 @@ public class TransferFromIli {
 			return;
 		}
 		// second pass; add columns
-		DbTableName sqlName=getSqlTableNameItfLineTable(attr,epsgCode);
-		DbTable dbTable=schema.findTable(sqlName);
+		DbTableName sqlTableName=getSqlTableNameItfLineTable(attr,epsgCode);
+		DbTable dbTable=schema.findTable(sqlTableName);
 		StringBuffer cmt=new StringBuffer();
 		String cmtSep="";
 		if(attr.getDocumentation()!=null){
@@ -319,13 +321,13 @@ public class TransferFromIli {
 			Model model = (Model) attr.getContainer(Model.class);
 			DbColGeometry dbCol = recConv.generatePolylineType(model, type, attr.getContainer().getScopedName(null)+"."+attr.getName(), epsgCode);
 			  recConv.setCrs(dbCol, epsgCode);
-			  dbCol.setName(ili2sqlName.getSqlColNameItfLineTableGeomAttr(attr,sqlName.getName()));
+			  dbCol.setName(ili2sqlName.getSqlColNameItfLineTableGeomAttr(attr,sqlTableName.getName()));
 			  dbCol.setNotNull(true);
 			  dbTable.addColumn(dbCol);
 			
 			if(type instanceof SurfaceType){
 				  dbColId=new DbColId();
-				  dbColId.setName(ili2sqlName.getSqlColNameItfLineTableRefAttr(attr,sqlName.getName()));
+				  dbColId.setName(ili2sqlName.getSqlColNameItfLineTableRefAttr(attr,sqlTableName.getName()));
 				  dbColId.setNotNull(true);
 				  dbColId.setPrimaryKey(false);
 				  dbColId.setScriptComment("REFERENCES "+recConv.getSqlType((Viewable)attr.getContainer()));
@@ -343,7 +345,7 @@ public class TransferFromIli {
 			    Iterator attri = lineAttrTable.getAttributes ();
 			    while(attri.hasNext()){
 			    	AttributeDef lineattr=(AttributeDef)attri.next();
-			    	recConv.generateAttr(dbTable,null,lineAttrTable,lineattr,null);
+			    	recConv.generateAttr(dbTable,null,new ViewableWrapper(sqlTableName.getSchema(),sqlTableName.getName(),lineAttrTable),new ColumnWrapper(new StructAttrPath(new ViewableTransferElement(lineattr))));
 			    }
 			}
 		

@@ -1,13 +1,14 @@
-package ch.ehi.ili2db;
+package ch.ehi.ili2gpkg;
 
 import java.io.File;
 import java.sql.Connection;
 
 import org.junit.Ignore;
 import org.junit.Test;
+
+import ch.ehi.ili2db.AbstractTestSetup;
 import ch.ehi.ili2db.base.Ili2db;
 import ch.ehi.ili2db.gui.Config;
-import ch.ehi.ili2gpkg.GpkgTestSetup;
 import ch.ehi.sqlgen.DbUtility;
 
 public class CreateFK23GpkgTest {
@@ -43,8 +44,7 @@ public class CreateFK23GpkgTest {
     {
         File data=new File(TEST_OUT,"model1.ili");
         File outfile=new File(data.getPath()+"-out.sql");
-        Config config=new Config();
-        setup.initConfig(config);
+        Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
         Ili2db.setNoSmartMapping(config);
         config.setLogfile(data.getPath()+".log");
         config.setXtffile(data.getPath());

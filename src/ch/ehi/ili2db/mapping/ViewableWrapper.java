@@ -123,7 +123,7 @@ public class ViewableWrapper {
 	public AttributeDef getPrimitiveCollectionAttr() {
 		if (isSecondaryTable() && attrv.size() == 1) {
 			ColumnWrapper columnWrapper = attrv.get(0);
-			if (columnWrapper.getViewableTransferElement().obj instanceof AttributeDef) {
+			if (columnWrapper.isIliAttr()) {
 				AttributeDef attr = (AttributeDef) columnWrapper.getViewableTransferElement().obj;
 				Cardinality cardinality = attr.getDomainOrDerivedDomain().getCardinality();
 				Type type = attr.getDomainResolvingAll();
@@ -236,9 +236,9 @@ public class ViewableWrapper {
 		return mainTable!=null;
 	}
 	public boolean containsAttributes(Set<? extends ch.interlis.ili2c.metamodel.Element> iomObjectAttrs) {
-		for(ColumnWrapper ele:attrv){
-			if(ele.getViewableTransferElement().obj instanceof AttributeDef){
-				if(iomObjectAttrs.contains(ele.getViewableTransferElement().obj)){
+		for(ColumnWrapper col:attrv){
+			if(col.isIliElement()){
+				if(iomObjectAttrs.contains(col.getViewableTransferElement().obj)){
 					return true;
 				}
 			}

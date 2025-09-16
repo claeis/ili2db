@@ -44,7 +44,9 @@ import ch.ehi.ili2db.converter.SqlColumnConverter;
 import ch.ehi.ili2db.fromili.CustomMapping;
 import ch.ehi.ili2db.fromili.TransferFromIli;
 import ch.ehi.ili2db.gui.Config;
+import ch.ehi.ili2db.mapping.ColumnWrapper;
 import ch.ehi.ili2db.mapping.NameMapping;
+import ch.ehi.ili2db.mapping.StructAttrPath;
 import ch.ehi.ili2db.mapping.TrafoConfig;
 import ch.ehi.ili2db.mapping.Viewable2TableMapping;
 import ch.ehi.ili2db.mapping.ViewableWrapper;
@@ -1746,24 +1748,24 @@ public class TransferFromXtf {
 		 }
 		 updateObjStat(objStat,tag,sqlId);
 		 // loop over all classes; start with leaf, end with the base of the inheritance hierarchy
-		 ViewableWrapper aclass=class2wrapper.get(aclass1);
-		 if(aclass==null) {
+		 ViewableWrapper tableWrapper=class2wrapper.get(aclass1);
+		 if(tableWrapper==null) {
 		     throw new IllegalStateException("no ViewableWrapper found for "+aclass1.getScopedName());
 		 }
-		 while(aclass!=null){
+		 while(tableWrapper!=null){
 			 {
 		         OutParam<String> stmtKey=new OutParam<String>();
-					String insert = getInsertStmt(updateObj,aclass1,aclass,structEle,stmtKey);
+					String insert = getInsertStmt(updateObj,aclass1,tableWrapper,structEle,stmtKey);
 					EhiLogger.traceBackendCmd(insert);
 					PreparedStatement ps = getPreparedStatement(stmtKey.value,insert);
 		            StatementExecutionHelper seHelper = getStatementExecutionHelper(stmtKey.value);
 
-                    recConv.writeRecord(basketSqlId, genericDomains,iomObj, aclass1,structEle, aclass, sqlType,
+                    recConv.writeRecord(basketSqlId, genericDomains,iomObj, aclass1,structEle, tableWrapper, sqlType,
                             sqlId, updateObj, ps,structQueue,aclass0, 0, 0);
                     seHelper.write(ps);
                     closeUnbatchedPreparedStatement(stmtKey.value);
 			 }
-			for(ViewableWrapper secondary:aclass.getSecondaryTables()){
+			for(ViewableWrapper secondary:tableWrapper.getSecondaryTables()){
 				// secondarytable contains attributes of this class?
 				if(secondary.containsAttributes(recConv.getIomObjectAttrs(aclass1).keySet())){
 			         OutParam<String> stmtKey=new OutParam<String>();
@@ -1789,7 +1791,7 @@ public class TransferFromXtf {
 				}
 				
 			}
-			aclass=aclass.getExtending();
+			tableWrapper=tableWrapper.getExtending();
 		 }
 		 // add StructWrapper around embedded associations that are mapped to a link table
 		 for(Iterator roleIt=aclass0.getAttributesAndRoles2();roleIt.hasNext();) {
@@ -1982,7 +1984,7 @@ public class TransferFromXtf {
 			    while(attri.hasNext()){
 			    	AttributeDef lineattr=(AttributeDef)attri.next();
 					valuei = recConv.addAttrValue(iomObj, ili2sqlName.mapItfGeometryAsTable((Viewable)attrDef.getContainer(),attrDef,null), sqlId, sqlTableName,ps,
-							valuei, lineattr,lineattr,null,null,new HashMap<String,String>(),null, 0);
+							valuei, new ColumnWrapper(new StructAttrPath(new ViewableTransferElement(lineattr))),lineattr,null,new HashMap<String,String>(),null, 0);
 			    }
 			}
 
@@ -2312,7 +2314,7 @@ public class TransferFromXtf {
 		    Iterator attri = lineAttrTable.getAttributes ();
 		    while(attri.hasNext()){
 		    	AttributeDef lineattr=(AttributeDef)attri.next();
-			   sep = recConv.addAttrToInsertStmt(false,stmt, values, sep, lineattr,lineattr,null,sqlTabName.getName());
+			   sep = recConv.addAttrToInsertStmt(false,stmt, values, sep, new ColumnWrapper(new StructAttrPath(new ViewableTransferElement(lineattr))),sqlTabName.getName());
 		    }
 		}
 		

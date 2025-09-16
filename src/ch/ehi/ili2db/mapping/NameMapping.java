@@ -34,6 +34,7 @@ import ch.interlis.ili2c.metamodel.Domain;
 import ch.interlis.ili2c.metamodel.Enumeration;
 import ch.interlis.ili2c.metamodel.TransferDescription;
 import ch.interlis.ili2c.metamodel.Viewable;
+import ch.interlis.ili2c.metamodel.ViewableTransferElement;
 
 /** make names unique and conforming to the underlying database
  * @author ce
@@ -308,11 +309,16 @@ public class NameMapping {
 		}
 		return sqlname;
 	}
-	public String mapIliAttributeDef(ch.interlis.ili2c.metamodel.AttributeDef def,String ownerSqlTablename,String targetSqlTablename,boolean hasMultipleTargets){
-		String iliqname=def.getContainer().getScopedName(null)+"."+def.getName();
+	@Deprecated
+    public String mapIliAttributeDef(ch.interlis.ili2c.metamodel.AttributeDef def,String ownerSqlTablename,String targetSqlTablename,boolean hasMultipleTargets){
+        return mapIliAttributeDef(new StructAttrPath(new ViewableTransferElement(def)),ownerSqlTablename,targetSqlTablename,hasMultipleTargets);
+    
+    }
+	public String mapIliAttributeDef(StructAttrPath def,String ownerSqlTablename,String targetSqlTablename,boolean hasMultipleTargets){
+		String iliqname=def.getIliQName();
 		String sqlname=columnMapping.getSqlName(iliqname,ownerSqlTablename,targetSqlTablename);
 		if(sqlname==null){
-	        def=(AttributeDef) getTranslatedElement(def);
+	        def=getTranslatedElement(def);
 			if(hasMultipleTargets){
 				sqlname=shortcutName(def.getName(),targetSqlTablename,getMaxSqlNameLength()-6);
 			}else{
@@ -324,8 +330,12 @@ public class NameMapping {
 		}
 		return sqlname;
 	}
-	public String mapIliAttributeDef(ch.interlis.ili2c.metamodel.AttributeDef def,Integer epsgCode,String ownerSqlTablename,String targetSqlTablename){
-		String iliqname=def.getContainer().getScopedName(null)+"."+def.getName();
+	@Deprecated
+    public String mapIliAttributeDef(ch.interlis.ili2c.metamodel.AttributeDef def,Integer epsgCode,String ownerSqlTablename,String targetSqlTablename){
+        return mapIliAttributeDef(new StructAttrPath(new ch.interlis.ili2c.metamodel.ViewableTransferElement(def)),epsgCode,ownerSqlTablename,targetSqlTablename);
+    }
+	public String mapIliAttributeDef(StructAttrPath def,Integer epsgCode,String ownerSqlTablename,String targetSqlTablename){
+		String iliqname=def.getIliQName();
 		String sqlname=null;
 		if(useEpsg && epsgCode!=null) {
 	        String iliqname2 = iliqname+":"+epsgCode;
@@ -338,8 +348,9 @@ public class NameMapping {
 		}else {
 	        sqlname=columnMapping.getSqlName(iliqname,ownerSqlTablename,targetSqlTablename);
 		}
+		// not yet known attribute?
 		if(sqlname==null){
-	        def=(AttributeDef) getTranslatedElement(def);
+	        def=getTranslatedElement(def);
 		    if(useEpsg && epsgCode!=null) {
 	            sqlname=shortcutName(def.getName()+"_"+epsgCode,getMaxSqlNameLength());
 		    }else {
@@ -351,7 +362,7 @@ public class NameMapping {
 		}
 		return sqlname;
 	}
-	private String mapIliAttrName(String ownerSqlTablename,ch.interlis.ili2c.metamodel.AttributeDef def,String suffix)
+    private String mapIliAttrName(String ownerSqlTablename,ch.interlis.ili2c.metamodel.AttributeDef def,String suffix)
 	{
 		String iliqname=def.getContainer().getScopedName(null)+"."+def.getName()+"."+suffix;
 		String sqlname=(String)columnMapping.getSqlName(iliqname,ownerSqlTablename,null);
@@ -369,6 +380,20 @@ public class NameMapping {
             return translationNameMapper.translateElement(languagePath, def);
         }
         return def;
+    }
+    private StructAttrPath getTranslatedElement(StructAttrPath def) {
+        StructAttrPath.PathEl srcPathv[]=def.getPath();
+        StructAttrPath.PathEl pathv[]=new StructAttrPath.PathEl[srcPathv.length];
+        for(int i=0;i<srcPathv.length;i++) {
+            if(srcPathv[i] instanceof StructAttrPath.PathElAttr) {
+                ch.interlis.ili2c.metamodel.Element srcEle=(ch.interlis.ili2c.metamodel.Element)((StructAttrPath.PathElAttr)srcPathv[i]).getAttr().obj;
+                srcEle=getTranslatedElement(srcEle);
+                pathv[i]=new StructAttrPath.PathElAttr(new ViewableTransferElement(srcEle),srcPathv[i].getIdx());
+            }else {
+                pathv[i]=srcPathv[i];
+            }
+        }
+        return new StructAttrPath(pathv);
     }
     private String makeSqlColNameUnique(String ownerSqlTablename, String sqlname) {
 		sqlname=normalizeSqlName(sqlname);

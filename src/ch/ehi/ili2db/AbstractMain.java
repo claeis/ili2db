@@ -310,6 +310,10 @@ public abstract class AbstractMain {
 					argi++;
 					if (parseBooleanArgument(arg))
 						config.setJsonTrafo(Config.JSON_TRAFO_COALESCE);
+                } else if (isOption(arg, "--expandStruct")) {
+                    argi++;
+                    if (parseBooleanArgument(arg))
+                        config.setStructTrafo(Config.STRUCT_TRAFO_EXPAND);
 				} else if (isOption(arg, "--expandMultilingual")) {
 					argi++;
 					if (parseBooleanArgument(arg))
@@ -551,6 +555,7 @@ public abstract class AbstractMain {
 					System.err.println("--coalesceMultiPoint   enable smart mapping of MultiPoint structures");
 					System.err.println("--coalesceArray        enable smart mapping of ARRAY structures");
 					System.err.println("--coalesceJson         enable smart mapping of JSON structures");
+                    System.err.println("--expandStruct         enable unfolding/expanding of structures");
 					System.err.println("--expandMultilingual   enable smart mapping of CHBase:MultilingualText");
 					System.err.println("--expandLocalised      enable smart mapping of CHBase:LocalisedText");
 					System.err.println("--createGeomIdx        create a spatial index on geometry columns.");

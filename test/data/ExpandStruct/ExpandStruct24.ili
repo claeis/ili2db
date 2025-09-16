@@ -1,0 +1,24 @@
+INTERLIS 2.4;
+
+MODEL ExpandStruct24
+  AT "mailto:ce@eisenhutinformatik.ch" VERSION "2018-12-21" =
+	
+  TOPIC TestA =
+  	 
+	STRUCTURE Farbe =
+	   r: 0..255;
+	   g: 0..255;
+	   b: 0..255;
+	END Farbe;
+	
+	CLASS Auto =
+	  !!@ili2db.mapping=EXPAND
+	  Farben: LIST {0..2} OF Farbe;
+	  !!@ili2db.mapping=EXPAND
+	  Nummer: LIST {0..2} OF TEXT*10;
+	END Auto;    
+	
+  END TestA;
+  
+  
+END ExpandStruct24.

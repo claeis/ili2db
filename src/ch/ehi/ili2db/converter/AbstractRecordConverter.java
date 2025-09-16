@@ -14,6 +14,7 @@ import ch.ehi.ili2db.mapping.ArrayMappings;
 import ch.ehi.ili2db.mapping.MultiLineMappings;
 import ch.ehi.ili2db.mapping.MultiPointMappings;
 import ch.ehi.ili2db.mapping.MultiSurfaceMappings;
+import ch.ehi.ili2db.mapping.StructAttrPath;
 import ch.ehi.ili2db.mapping.TrafoConfig;
 import ch.ehi.ili2db.mapping.TrafoConfigNames;
 import ch.ehi.ili2db.mapping.Viewable2TableMapping;
@@ -239,7 +240,7 @@ public class AbstractRecordConverter {
 	        return ((ReferenceType) ((AttributeDef)((CompositionType)type).getComponentType().getAttributes().next()).getDomain()).getReferred();
 	    }
 
-	protected String getSqlAttrName(AttributeDef def,Integer epsgCode,String ownerSqlTableName,String targetSqlTableName){
+	protected String getSqlAttrName(StructAttrPath def,Integer epsgCode,String ownerSqlTableName,String targetSqlTableName){
 		return ili2sqlName.mapIliAttributeDef(def,epsgCode,ownerSqlTableName,targetSqlTableName);
 	}
 	/** maps a ili2c viewable to a sql name. 
@@ -351,6 +352,12 @@ public class AbstractRecordConverter {
         String sqlname=ili2sqlName.mapIliEnumAttributeDefAsTable(attr);
         return new DbTableName(schema,sqlname);
     }
+    /** get mapping of root attribute definition to the 
+     * specialized attribute as defined by the given class
+     * 
+     * @param aclass
+     * @return
+     */
     public java.util.Map<? extends ch.interlis.ili2c.metamodel.Element,? extends ch.interlis.ili2c.metamodel.Element> getIomObjectAttrs(Viewable aclass) {
     	java.util.Map<ch.interlis.ili2c.metamodel.Element,ch.interlis.ili2c.metamodel.Element> ret=new HashMap<ch.interlis.ili2c.metamodel.Element,ch.interlis.ili2c.metamodel.Element>();
     	Iterator iter = aclass.getAttributesAndRoles2();

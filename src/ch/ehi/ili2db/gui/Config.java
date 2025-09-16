@@ -60,6 +60,8 @@ public class Config extends Settings {
 	public static final String ARRAY_TRAFO_COALESCE="coalesce";
     public static final String JSON_TRAFO=PREFIX+".jsonTrafo";
     public static final String JSON_TRAFO_COALESCE="coalesce";
+    public static final String STRUCT_TRAFO=PREFIX+".structTrafo";
+    public static final String STRUCT_TRAFO_EXPAND="expand";
 	public static final String MULTILINGUAL_TRAFO=PREFIX+".multilingualTrafo";
 	public static final String MULTILINGUAL_TRAFO_EXPAND="expand";
     public static final String LOCALISED_TRAFO=PREFIX+".localisedTrafo";
@@ -489,6 +491,12 @@ public class Config extends Settings {
 	public void setArrayTrafo(String value) {
 		setValue(ARRAY_TRAFO,value);
 	}
+    public String getStructTrafo() {
+        return getValue(STRUCT_TRAFO);
+    }
+    public void setStructTrafo(String value) {
+        setValue(STRUCT_TRAFO,value);
+    }
     public String getJsonTrafo() {
         return getValue(JSON_TRAFO);
     }
