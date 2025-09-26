@@ -180,6 +180,9 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 		
 		if(base==null && !def.isSecondaryTable()){
 		  dbTable.setRequiresSequence(true);
+		}else if(def.isSecondaryTable() && def.getPrimitiveCollectionAttr() != null){
+		    // Hilfstabelle fuer multivalue attribute
+          dbTable.setRequiresSequence(true);
 		}
 		{
 	        DbColId dbColId=addKeyCol(dbTable);
