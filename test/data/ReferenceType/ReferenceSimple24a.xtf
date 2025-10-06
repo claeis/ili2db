@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?><ili:transfer xmlns:ili="http://www.interlis.ch/xtf/2.4/INTERLIS" xmlns:geom="http://www.interlis.ch/geometry/1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ReferenceType24="http://www.interlis.ch/xtf/2.4/ReferenceSimple24">
+<ili:headersection><ili:models><ili:model>ReferenceSimple24</ili:model></ili:models><ili:sender>ili2pg-developer-workspace</ili:sender></ili:headersection>
+<ili:datasection>
+<ReferenceType24:TopicA ili:bid="ReferenceSimple24.TopicA">
+<ReferenceType24:Item ili:tid="1"/>
+<ReferenceType24:Item ili:tid="2"/>
+<ReferenceType24:Item ili:tid="3"/>
+<ReferenceType24:CatArray ili:tid="10">
+  <ReferenceType24:Liste ili:ref="1"/>
+  <ReferenceType24:Liste ili:ref="2"/>
+</ReferenceType24:CatArray>
+<ReferenceType24:CatArray ili:tid="20">
+  <ReferenceType24:Liste ili:ref="3"/>
+</ReferenceType24:CatArray>
+</ReferenceType24:TopicA>
+</ili:datasection>
+</ili:transfer>

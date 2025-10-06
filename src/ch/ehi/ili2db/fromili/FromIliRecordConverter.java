@@ -191,12 +191,12 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 	          if(createFk){
 	              dbColId.setReferencedTable(getSqlType(base.getViewable()));
 	          }
-	                  metaInfo.setColumnInfo(dbTable.getName().getName(), null, dbColId.getName(), DbExtMetaInfo.TAG_COL_FOREIGNKEY, getSqlType(base.getViewable()).getName());
-	        }else if(def.isSecondaryTable()){
-                if(createFk && def.getPrimitiveCollectionAttr() == null){
+	          metaInfo.setColumnInfo(dbTable.getName().getName(), null, dbColId.getName(), DbExtMetaInfo.TAG_COL_FOREIGNKEY, getSqlType(base.getViewable()).getName());
+	        }else if(def.isSecondaryTable() && def.getPrimitiveCollectionAttr() == null){
+                if(createFk){
 	                  dbColId.setReferencedTable(new DbTableName(schema.getName(),def.getMainTable().getSqlTablename()));
 	              }
-	                          metaInfo.setColumnInfo(dbTable.getName().getName(), null, dbColId.getName(), DbExtMetaInfo.TAG_COL_FOREIGNKEY, def.getMainTable().getSqlTablename());
+	              metaInfo.setColumnInfo(dbTable.getName().getName(), null, dbColId.getName(), DbExtMetaInfo.TAG_COL_FOREIGNKEY, def.getMainTable().getSqlTablename());
 	        }
 		}
 		  if(createBasketCol){

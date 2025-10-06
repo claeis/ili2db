@@ -1517,7 +1517,7 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 						sqlParamIndex++;
 					}
 				}else if(type instanceof ReferenceType){
-					 IomObject structvalue= classAttr==null ? null : iomObj.getattrobj(attrName,0);
+					 IomObject structvalue= classAttr==null ? null : iomObj.getattrobj(attrName,iomValueIndex);
 					 String refoid=null;
 					 if(structvalue!=null){
 						 refoid=structvalue.getobjectrefoid();
