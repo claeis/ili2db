@@ -192,4 +192,150 @@ public abstract class ReferenceType24Test {
         }
     }
 
+    @Test
+    public void importIliSmart0() throws Exception {
+        // EhiLogger.getInstance().setTraceFilter(false);
+        try {
+            setup.resetDb();
+
+            File data = new File(TEST_DATA_DIR, "ReferenceExt24.ili");
+            Config config = setup.initConfig(data.getPath(), data.getPath() + ".log");
+            Ili2db.setNoSmartMapping(config);
+            config.setFunction(Config.FC_SCHEMAIMPORT);
+            config.setCreateFk(Config.CREATE_FK_YES);
+            config.setTidHandling(Config.TID_HANDLING_PROPERTY);
+            config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
+            Ili2db.readSettingsFromDb(config);
+            Ili2db.run(config, null);
+            // assertions
+            // t_ili2db_attrname
+            String[][] attrName_expectedValues = new String[][] {
+                    { "ReferenceExt24.TopicA.Item.Name", "aname", "item", null },
+                    { "ReferenceExt24.TopicA.CatArrays.Name", "aname", "catarrays", null },
+                    { "ReferenceExt24.TopicA.CatArrays.Liste", "liste", "catarrays_liste", "item" },
+                    { "ReferenceExt24.TopicA.CatArrays.Liste",  "catarrays_liste", "catarrays_liste", "catarrays"},
+                    { "ReferenceExt24.TopicA.CatArrayUno.Uno", "uno", "catarrayuno", null }, 
+                    { "ReferenceExt24.TopicA.CatArrayDue.Due", "due", "catarraydue", null },
+            };
+            // t_ili2db_trafo
+            String[][] trafo_expectedValues = new String[][] {
+                    { "ReferenceExt24.TopicA.CatArrays", "ch.ehi.ili2db.inheritance", "newClass" },
+                    { "ReferenceExt24.TopicA.CatArrayUno", "ch.ehi.ili2db.inheritance", "newClass" },
+                    { "ReferenceExt24.TopicA.CatArrayDue", "ch.ehi.ili2db.inheritance", "newClass" },
+                    { "ReferenceExt24.TopicA.Item", "ch.ehi.ili2db.inheritance", "newClass" },
+                    { "ReferenceExt24.TopicA.CatArrays.Liste", "ch.ehi.ili2db.secondaryTable", "catarrays_liste" }, 
+            };
+            String[][] columnForeignKey_expectedValues = new String[][] {
+                    { "catarrays_liste", null, "liste", "item" },
+                    { "catarrays_liste", null, "catarrays_liste", "catarrays" }, 
+                    { "catarrayuno", null, "T_Id", "catarrays" },
+                    { "catarraydue", null, "T_Id", "catarrays" }, 
+            };
+            importIli_Assert(attrName_expectedValues, trafo_expectedValues, columnForeignKey_expectedValues);
+        } catch (Exception e) {
+            throw new IoxException(e);
+        } finally {
+        }
+    }
+
+    @Test
+    public void importXtfSmart0() throws Exception
+    {
+        {
+            importIliSmart0();
+        }
+        //EhiLogger.getInstance().setTraceFilter(false);
+        try{
+            File data=new File(TEST_DATA_DIR,"ReferenceExt24a.xtf");
+            Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+            config.setFunction(Config.FC_IMPORT);
+            config.setImportTid(true);
+            config.setImportBid(true);
+            Ili2db.readSettingsFromDb(config);
+            Ili2db.run(config,null);
+        }catch(Exception e) {
+            throw new IoxException(e);
+        }finally{
+        }
+    }
+
+    
+    @Test
+    public void exportXtfSmart0() throws Exception {
+        {
+            importXtfSmart0();
+        }
+        try {
+            File data = new File(TEST_DATA_DIR,"ReferenceExt24a-out.xtf");
+            Config config = setup.initConfig(data.getPath(), data.getPath() + ".log");
+            config.setModels("ReferenceExt24");
+            config.setFunction(Config.FC_EXPORT);
+            config.setExportTid(true);
+            config.setValidation(false);
+            Ili2db.readSettingsFromDb(config);
+            Ili2db.run(config, null);
+            exportXtf_Assert(data);
+        }catch(Exception e) {
+            throw new IoxException(e);
+        } finally {
+        }
+    }
+
+    private void exportXtf_Assert(File data) throws IoxException, Ili2cFailure {
+        HashMap<String, IomObject> objs = new HashMap<String, IomObject>();
+        Xtf24Reader reader = new Xtf24Reader(data);
+        ch.interlis.ili2c.config.Configuration ili2cConfig=new ch.interlis.ili2c.config.Configuration();
+        ili2cConfig.addFileEntry(new FileEntry(new File(TEST_DATA_DIR,"ReferenceExt24.ili").getPath(),FileEntryKind.ILIMODELFILE));
+        TransferDescription td = ch.interlis.ili2c.Ili2c.runCompiler(ili2cConfig);
+        assertNotNull(td);
+        reader.setModel(td);
+        IoxEvent event = null;
+        do {
+            event = reader.read();
+            if (event instanceof StartTransferEvent) {
+            } else if (event instanceof StartBasketEvent) {
+            } else if (event instanceof ObjectEvent) {
+                IomObject iomObj = ((ObjectEvent) event).getIomObject();
+                if (iomObj.getobjectoid() != null) {
+                    objs.put(iomObj.getobjectoid(), iomObj);
+                }
+            } else if (event instanceof EndBasketEvent) {
+            } else if (event instanceof EndTransferEvent) {
+            }
+        } while (!(event instanceof EndTransferEvent));
+        // check values of array
+        {
+            IomObject obj0 = objs.get("1");
+            Assert.assertNotNull(obj0);
+            Assert.assertEquals("ReferenceExt24.TopicA.Item", obj0.getobjecttag());
+        }
+        {
+            IomObject obj0 = objs.get("2");
+            Assert.assertNotNull(obj0);
+            Assert.assertEquals("ReferenceExt24.TopicA.Item", obj0.getobjecttag());
+        }
+        {
+            IomObject obj0 = objs.get("3");
+            Assert.assertNotNull(obj0);
+            Assert.assertEquals("ReferenceExt24.TopicA.Item", obj0.getobjecttag());
+        }
+        {
+            IomObject obj0 = objs.get("10");
+            Assert.assertNotNull(obj0);
+            Assert.assertEquals("ReferenceExt24.TopicA.CatArrayUno", obj0.getobjecttag());
+            Assert.assertEquals(2,obj0.getattrvaluecount("Liste"));
+            IomObject item0=obj0.getattrobj("Liste", 0);
+            Assert.assertEquals("1", item0.getobjectrefoid());
+            IomObject item1=obj0.getattrobj("Liste", 1);
+            Assert.assertEquals("2", item1.getobjectrefoid());
+        }
+        {
+            IomObject obj0 = objs.get("20");
+            Assert.assertNotNull(obj0);
+            Assert.assertEquals("ReferenceExt24.TopicA.CatArrayDue", obj0.getobjecttag());
+            Assert.assertEquals(1,obj0.getattrvaluecount("Liste"));
+            IomObject item0=obj0.getattrobj("Liste", 0);
+            Assert.assertEquals("3", item0.getobjectrefoid());
+        }
+    }
 }
