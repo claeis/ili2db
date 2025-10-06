@@ -1131,7 +1131,7 @@ public class TransferToXtf {
 						structelev, structQueue, sqlid,genericDomains,iomTargetClass);
 				updateObjStat(iomObj.getobjecttag(), sqlid);
 
-				ViewableWrapper baseWrapper=aclassWrapper.getExtending();
+				ViewableWrapper baseWrapper=aclassWrapper;
 				while(baseWrapper!=null) {
 	                for (ViewableWrapper attrtableWrapper : baseWrapper.getPrimitiveCollectionWrappers()) {
 	                    AttributeDef attributeDef = attrtableWrapper.getPrimitiveCollectionAttr();
