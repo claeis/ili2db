@@ -211,6 +211,8 @@ public abstract class ReferenceType24Test {
             // t_ili2db_attrname
             String[][] attrName_expectedValues = new String[][] {
                     { "ReferenceExt24.TopicA.Item.Name", "aname", "item", null },
+                    { "ReferenceExt24.TopicA.ItemOne.One", "aone", "itemone", null },
+                    { "ReferenceExt24.TopicA.ItemTwo.Two", "two", "itemtwo", null },
                     { "ReferenceExt24.TopicA.CatArrays.Name", "aname", "catarrays", null },
                     { "ReferenceExt24.TopicA.CatArrays.Liste", "liste", "catarrays_liste", "item" },
                     { "ReferenceExt24.TopicA.CatArrays.Liste",  "catarrays_liste", "catarrays_liste", "catarrays"},
@@ -223,6 +225,8 @@ public abstract class ReferenceType24Test {
                     { "ReferenceExt24.TopicA.CatArrayUno", "ch.ehi.ili2db.inheritance", "newClass" },
                     { "ReferenceExt24.TopicA.CatArrayDue", "ch.ehi.ili2db.inheritance", "newClass" },
                     { "ReferenceExt24.TopicA.Item", "ch.ehi.ili2db.inheritance", "newClass" },
+                    { "ReferenceExt24.TopicA.ItemOne", "ch.ehi.ili2db.inheritance", "newClass" },
+                    { "ReferenceExt24.TopicA.ItemTwo", "ch.ehi.ili2db.inheritance", "newClass" },
                     { "ReferenceExt24.TopicA.CatArrays.Liste", "ch.ehi.ili2db.secondaryTable", "catarrays_liste" }, 
             };
             String[][] columnForeignKey_expectedValues = new String[][] {
@@ -230,6 +234,126 @@ public abstract class ReferenceType24Test {
                     { "catarrays_liste", null, "catarrays_liste", "catarrays" }, 
                     { "catarrayuno", null, "T_Id", "catarrays" },
                     { "catarraydue", null, "T_Id", "catarrays" }, 
+                    { "itemone", null, "T_Id", "item" },
+                    { "itemtwo", null, "T_Id", "item" }, 
+            };
+            importIli_Assert(attrName_expectedValues, trafo_expectedValues, columnForeignKey_expectedValues);
+        } catch (Exception e) {
+            throw new IoxException(e);
+        } finally {
+        }
+    }
+    @Test
+    public void importIliSmart1() throws Exception {
+        //EhiLogger.getInstance().setTraceFilter(false);
+        try {
+            setup.resetDb();
+
+            File data = new File(TEST_DATA_DIR, "ReferenceExt24.ili");
+            Config config = setup.initConfig(data.getPath(), data.getPath() + ".log");
+            Ili2db.setNoSmartMapping(config);
+            config.setInheritanceTrafo(Config.INHERITANCE_TRAFO_SMART1);
+            config.setFunction(Config.FC_SCHEMAIMPORT);
+            config.setCreateFk(Config.CREATE_FK_YES);
+            config.setTidHandling(Config.TID_HANDLING_PROPERTY);
+            config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
+            Ili2db.readSettingsFromDb(config);
+            Ili2db.run(config, null);
+            // assertions
+            // t_ili2db_attrname
+            String[][] attrName_expectedValues = new String[][] {
+                    { "ReferenceExt24.TopicA.Item.Name", "aname", "itemone", null },
+                    { "ReferenceExt24.TopicA.ItemOne.One", "aone", "itemone", null },
+                    { "ReferenceExt24.TopicA.Item.Name", "aname", "itemtwo", null },
+                    { "ReferenceExt24.TopicA.ItemTwo.Two", "two", "itemtwo", null },
+                    { "ReferenceExt24.TopicA.CatArrays.Name", "aname", "catarrayuno", null },
+                    { "ReferenceExt24.TopicA.CatArrayUno.Uno", "uno", "catarrayuno", null }, 
+                    { "ReferenceExt24.TopicA.CatArrays.Liste", "liste_itemone", "catarrayuno_liste", "itemone" },
+                    { "ReferenceExt24.TopicA.CatArrays.Liste", "liste_itemtwo", "catarrayuno_liste", "itemtwo" },
+                    { "ReferenceExt24.TopicA.CatArrays.Liste",  "catarrayuno_liste", "catarrayuno_liste", "catarrayuno"},
+                    { "ReferenceExt24.TopicA.CatArrays.Name", "aname", "catarraydue", null },
+                    { "ReferenceExt24.TopicA.CatArrayDue.Due", "due", "catarraydue", null },
+                    { "ReferenceExt24.TopicA.CatArrays.Liste", "liste_itemone", "catarraydue_liste", "itemone" },
+                    { "ReferenceExt24.TopicA.CatArrays.Liste", "liste_itemtwo", "catarraydue_liste", "itemtwo" },
+                    { "ReferenceExt24.TopicA.CatArrays.Liste",  "catarraydue_liste", "catarraydue_liste", "catarraydue"},
+            };
+            // t_ili2db_trafo
+            String[][] trafo_expectedValues = new String[][] {
+                    { "ReferenceExt24.TopicA.CatArrays", "ch.ehi.ili2db.inheritance", "subClass" },
+                    { "ReferenceExt24.TopicA.CatArrayUno", "ch.ehi.ili2db.inheritance", "newClass" },
+                    { "ReferenceExt24.TopicA.CatArrayDue", "ch.ehi.ili2db.inheritance", "newClass" },
+                    { "ReferenceExt24.TopicA.Item", "ch.ehi.ili2db.inheritance", "subClass" },
+                    { "ReferenceExt24.TopicA.ItemOne", "ch.ehi.ili2db.inheritance", "newClass" },
+                    { "ReferenceExt24.TopicA.ItemTwo", "ch.ehi.ili2db.inheritance", "newClass" },
+                    { "ReferenceExt24.TopicA.CatArrays.Liste(ReferenceExt24.TopicA.CatArrayUno)", "ch.ehi.ili2db.secondaryTable", "catarrayuno_liste" }, 
+                    { "ReferenceExt24.TopicA.CatArrays.Liste(ReferenceExt24.TopicA.CatArrayDue)", "ch.ehi.ili2db.secondaryTable", "catarraydue_liste" }, 
+            };
+            String[][] columnForeignKey_expectedValues = new String[][] {
+                    { "catarrayuno_liste", null, "liste_itemone", "itemone" },
+                    { "catarrayuno_liste", null, "liste_itemtwo", "itemtwo" },
+                    { "catarrayuno_liste", null, "catarrayuno_liste", "catarrayuno" }, 
+                    { "catarraydue_liste", null, "liste_itemone", "itemone" },
+                    { "catarraydue_liste", null, "liste_itemtwo", "itemtwo" },
+                    { "catarraydue_liste", null, "catarraydue_liste", "catarraydue" }, 
+            };
+            importIli_Assert(attrName_expectedValues, trafo_expectedValues, columnForeignKey_expectedValues);
+        } catch (Exception e) {
+            throw new IoxException(e);
+        } finally {
+        }
+    }
+    @Test
+    public void importIliSmart2() throws Exception {
+        //EhiLogger.getInstance().setTraceFilter(false);
+        try {
+            setup.resetDb();
+
+            File data = new File(TEST_DATA_DIR, "ReferenceExt24.ili");
+            Config config = setup.initConfig(data.getPath(), data.getPath() + ".log");
+            Ili2db.setNoSmartMapping(config);
+            config.setInheritanceTrafo(Config.INHERITANCE_TRAFO_SMART2);
+            config.setFunction(Config.FC_SCHEMAIMPORT);
+            config.setCreateFk(Config.CREATE_FK_YES);
+            config.setTidHandling(Config.TID_HANDLING_PROPERTY);
+            config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
+            Ili2db.readSettingsFromDb(config);
+            Ili2db.run(config, null);
+            // assertions
+            // t_ili2db_attrname
+            String[][] attrName_expectedValues = new String[][] {
+                    { "ReferenceExt24.TopicA.Item.Name", "aname", "itemone", null },
+                    { "ReferenceExt24.TopicA.ItemOne.One", "aone", "itemone", null },
+                    { "ReferenceExt24.TopicA.Item.Name", "aname", "itemtwo", null },
+                    { "ReferenceExt24.TopicA.ItemTwo.Two", "two", "itemtwo", null },
+                    { "ReferenceExt24.TopicA.CatArrays.Name", "aname", "catarrayuno", null },
+                    { "ReferenceExt24.TopicA.CatArrayUno.Uno", "uno", "catarrayuno", null }, 
+                    { "ReferenceExt24.TopicA.CatArrays.Liste", "liste_itemone", "catarrayuno_liste", "itemone" },
+                    { "ReferenceExt24.TopicA.CatArrays.Liste", "liste_itemtwo", "catarrayuno_liste", "itemtwo" },
+                    { "ReferenceExt24.TopicA.CatArrays.Liste",  "catarrayuno_liste", "catarrayuno_liste", "catarrayuno"},
+                    { "ReferenceExt24.TopicA.CatArrays.Name", "aname", "catarraydue", null },
+                    { "ReferenceExt24.TopicA.CatArrayDue.Due", "due", "catarraydue", null },
+                    { "ReferenceExt24.TopicA.CatArrays.Liste", "liste_itemone", "catarraydue_liste", "itemone" },
+                    { "ReferenceExt24.TopicA.CatArrays.Liste", "liste_itemtwo", "catarraydue_liste", "itemtwo" },
+                    { "ReferenceExt24.TopicA.CatArrays.Liste",  "catarraydue_liste", "catarraydue_liste", "catarraydue"},
+            };
+            // t_ili2db_trafo
+            String[][] trafo_expectedValues = new String[][] {
+                    { "ReferenceExt24.TopicA.CatArrays", "ch.ehi.ili2db.inheritance", "subClass" },
+                    { "ReferenceExt24.TopicA.CatArrayUno", "ch.ehi.ili2db.inheritance", "newAndSubClass" },
+                    { "ReferenceExt24.TopicA.CatArrayDue", "ch.ehi.ili2db.inheritance", "newAndSubClass" },
+                    { "ReferenceExt24.TopicA.Item", "ch.ehi.ili2db.inheritance", "subClass" },
+                    { "ReferenceExt24.TopicA.ItemOne", "ch.ehi.ili2db.inheritance", "newAndSubClass" },
+                    { "ReferenceExt24.TopicA.ItemTwo", "ch.ehi.ili2db.inheritance", "newAndSubClass" },
+                    { "ReferenceExt24.TopicA.CatArrays.Liste(ReferenceExt24.TopicA.CatArrayUno)", "ch.ehi.ili2db.secondaryTable", "catarrayuno_liste" }, 
+                    { "ReferenceExt24.TopicA.CatArrays.Liste(ReferenceExt24.TopicA.CatArrayDue)", "ch.ehi.ili2db.secondaryTable", "catarraydue_liste" }, 
+            };
+            String[][] columnForeignKey_expectedValues = new String[][] {
+                    { "catarrayuno_liste", null, "liste_itemone", "itemone" },
+                    { "catarrayuno_liste", null, "liste_itemtwo", "itemtwo" },
+                    { "catarrayuno_liste", null, "catarrayuno_liste", "catarrayuno" }, 
+                    { "catarraydue_liste", null, "liste_itemone", "itemone" },
+                    { "catarraydue_liste", null, "liste_itemtwo", "itemtwo" },
+                    { "catarraydue_liste", null, "catarraydue_liste", "catarraydue" }, 
             };
             importIli_Assert(attrName_expectedValues, trafo_expectedValues, columnForeignKey_expectedValues);
         } catch (Exception e) {
@@ -258,12 +382,92 @@ public abstract class ReferenceType24Test {
         }finally{
         }
     }
+    @Test
+    public void importXtfSmart1() throws Exception
+    {
+        {
+            importIliSmart1();
+        }
+        //EhiLogger.getInstance().setTraceFilter(false);
+        try{
+            File data=new File(TEST_DATA_DIR,"ReferenceExt24a.xtf");
+            Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+            config.setFunction(Config.FC_IMPORT);
+            config.setImportTid(true);
+            config.setImportBid(true);
+            Ili2db.readSettingsFromDb(config);
+            Ili2db.run(config,null);
+        }catch(Exception e) {
+            throw new IoxException(e);
+        }finally{
+        }
+    }
+    @Test
+    public void importXtfSmart2() throws Exception
+    {
+        {
+            importIliSmart2();
+        }
+        //EhiLogger.getInstance().setTraceFilter(false);
+        try{
+            File data=new File(TEST_DATA_DIR,"ReferenceExt24a.xtf");
+            Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+            config.setFunction(Config.FC_IMPORT);
+            config.setImportTid(true);
+            config.setImportBid(true);
+            Ili2db.readSettingsFromDb(config);
+            Ili2db.run(config,null);
+        }catch(Exception e) {
+            throw new IoxException(e);
+        }finally{
+        }
+    }
 
     
     @Test
     public void exportXtfSmart0() throws Exception {
         {
             importXtfSmart0();
+        }
+        try {
+            File data = new File(TEST_DATA_DIR,"ReferenceExt24a-out.xtf");
+            Config config = setup.initConfig(data.getPath(), data.getPath() + ".log");
+            config.setModels("ReferenceExt24");
+            config.setFunction(Config.FC_EXPORT);
+            config.setExportTid(true);
+            config.setValidation(false);
+            Ili2db.readSettingsFromDb(config);
+            Ili2db.run(config, null);
+            exportXtf_Assert(data);
+        }catch(Exception e) {
+            throw new IoxException(e);
+        } finally {
+        }
+    }
+    @Test
+    public void exportXtfSmart1() throws Exception {
+        {
+            importXtfSmart1();
+        }
+        try {
+            File data = new File(TEST_DATA_DIR,"ReferenceExt24a-out.xtf");
+            Config config = setup.initConfig(data.getPath(), data.getPath() + ".log");
+            config.setModels("ReferenceExt24");
+            config.setFunction(Config.FC_EXPORT);
+            config.setExportTid(true);
+            config.setValidation(false);
+            Ili2db.readSettingsFromDb(config);
+            Ili2db.run(config, null);
+            exportXtf_Assert(data);
+        }catch(Exception e) {
+            throw new IoxException(e);
+        } finally {
+        }
+    }
+    @Test
+    public void exportXtfSmart2() throws Exception {
+        {
+            importXtfSmart2();
         }
         try {
             File data = new File(TEST_DATA_DIR,"ReferenceExt24a-out.xtf");
@@ -307,17 +511,17 @@ public abstract class ReferenceType24Test {
         {
             IomObject obj0 = objs.get("1");
             Assert.assertNotNull(obj0);
-            Assert.assertEquals("ReferenceExt24.TopicA.Item", obj0.getobjecttag());
+            Assert.assertEquals("ReferenceExt24.TopicA.ItemOne", obj0.getobjecttag());
         }
         {
             IomObject obj0 = objs.get("2");
             Assert.assertNotNull(obj0);
-            Assert.assertEquals("ReferenceExt24.TopicA.Item", obj0.getobjecttag());
+            Assert.assertEquals("ReferenceExt24.TopicA.ItemTwo", obj0.getobjecttag());
         }
         {
             IomObject obj0 = objs.get("3");
             Assert.assertNotNull(obj0);
-            Assert.assertEquals("ReferenceExt24.TopicA.Item", obj0.getobjecttag());
+            Assert.assertEquals("ReferenceExt24.TopicA.ItemOne", obj0.getobjecttag());
         }
         {
             IomObject obj0 = objs.get("10");

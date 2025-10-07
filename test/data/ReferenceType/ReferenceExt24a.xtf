@@ -2,9 +2,9 @@
 <ili:headersection><ili:models><ili:model>ReferenceExt24</ili:model></ili:models><ili:sender>ili2pg-developer-workspace</ili:sender></ili:headersection>
 <ili:datasection>
 <ReferenceExt24:TopicA ili:bid="ReferenceExt24.TopicA">
-<ReferenceExt24:Item ili:tid="1"/>
-<ReferenceExt24:Item ili:tid="2"/>
-<ReferenceExt24:Item ili:tid="3"/>
+<ReferenceExt24:ItemOne ili:tid="1"/>
+<ReferenceExt24:ItemTwo ili:tid="2"/>
+<ReferenceExt24:ItemOne ili:tid="3"/>
 <ReferenceExt24:CatArrayUno ili:tid="10">
   <ReferenceExt24:Liste ili:ref="1"/>
   <ReferenceExt24:Liste ili:ref="2"/>

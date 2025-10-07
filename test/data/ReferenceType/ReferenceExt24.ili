@@ -5,10 +5,18 @@ MODEL ReferenceExt24
 
   TOPIC TopicA =
 
-    CLASS Item =
+    CLASS Item (ABSTRACT) =
       Name : TEXT*25;
     END Item;
 
+    CLASS ItemOne EXTENDS Item =
+      One : TEXT*25;
+    END ItemOne;
+
+    CLASS ItemTwo EXTENDS Item =
+      Two : TEXT*25;
+    END ItemTwo;
+    
     CLASS CatArrays (ABSTRACT) =
       Name : TEXT*10;
       Liste: BAG {1..*} OF REFERENCE TO Item;
