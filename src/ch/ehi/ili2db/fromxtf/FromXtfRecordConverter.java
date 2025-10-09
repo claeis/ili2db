@@ -305,7 +305,7 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 						     
 						 }
 						OutParam<Integer> valueiRef=new OutParam<Integer>(valuei);
-						setReferenceColumn(ps,role.getDestination(),refoid,valueiRef,createExtRef && role.isExternal());
+						setReferenceColumn(ps,role,refoid,valueiRef,createExtRef && role.isExternal());
 						valuei=valueiRef.value;
 					}
 				}
@@ -354,7 +354,7 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
         return iomObj;
     }
     private void setReferenceColumn(PreparedStatement ps,
-			AbstractClassDef destination, String refoid, OutParam<Integer> valuei,boolean isExtRef) throws SQLException {
+			ch.interlis.ili2c.metamodel.Element destination, String refoid, OutParam<Integer> valuei,boolean isExtRef) throws SQLException {
 	    if(isExtRef) {
 	        if(refoid!=null) {
 	            ps.setString(valuei.value, refoid);
@@ -363,29 +363,42 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
 	        }
             valuei.value++;
 	    }else {
-	        if(isUuidOid(td, destination.getOid())) {
-	           refoid=Validator.normalizeUUID(refoid); 
-	        }
-	        String targetRootClassName=Ili2cUtility.getRootViewable(destination).getScopedName(null);
 	        ViewableWrapper targetObjTable=null;
-	        ArrayList<ViewableWrapper> targetTables = getTargetTables(destination);
+	        ArrayList<ViewableWrapper> targetTables = null;
+	        if(destination instanceof RoleDef) {
+	            targetTables=getTargetTables((RoleDef)destination);
+	        }else if(destination instanceof Viewable){
+                targetTables=getTargetTables((Viewable)destination);
+	        }else {
+	            throw new IllegalArgumentException("unexpected reference destination "+destination.toString());
+	        }
 	        if(refoid!=null){
-                String targetObjClass=oidPool.getObjecttag(targetRootClassName,refoid);
-                if(targetObjClass==null){
-                    // unknown object
-                    refoid=null; // handle reference as if it is null
-                }else{
-                    targetObjTable=getViewableWrapper(getSqlType((Viewable) tag2class.get(targetObjClass)).getName());
-                    while(!targetTables.contains(targetObjTable)){
-                        targetObjTable=targetObjTable.getExtending();
-                    }
-                    if(targetObjTable==null){
-                        throw new IllegalStateException("targetObjTable==null");
-                    }
-                }
+	            java.util.HashSet<String> visitedRootClasses=new java.util.HashSet<String>();
+	            for(ViewableWrapper targetTableIm:targetTables){
+	                if(isUuidOid(td, targetTableIm.getOid())) {
+	                    refoid=Validator.normalizeUUID(refoid); 
+	                 }
+	                 String targetRootClassName=Ili2cUtility.getRootViewable(targetTableIm.getViewable()).getScopedName(null);
+	                 if(!visitedRootClasses.contains(targetRootClassName)) {
+	                     visitedRootClasses.add(targetRootClassName);
+	                     String targetObjClass=oidPool.getObjecttag(targetRootClassName,refoid);
+	                     if(targetObjClass!=null){
+	                         // found object
+	                         targetObjTable=getViewableWrapper(getSqlType((Viewable) tag2class.get(targetObjClass)).getName());
+	                         while(!targetTables.contains(targetObjTable)){
+	                             targetObjTable=targetObjTable.getExtending();
+	                         }
+	                         if(targetObjTable==null){
+	                             throw new IllegalStateException("targetObjTable==null");
+	                         }
+	                         break;
+	                     }
+	                 }
+	            }
 	        }
 	          for(ViewableWrapper targetTable : targetTables){
 	                if(refoid!=null && targetTable==targetObjTable){
+	                    String targetRootClassName=Ili2cUtility.getRootViewable(targetTable.getViewable()).getScopedName(null);
                         long refsqlId=oidPool.getObjSqlId(targetRootClassName,refoid);
                         ps.setLong(valuei.value, refsqlId);
 	                }else{
@@ -585,7 +598,7 @@ public class FromXtfRecordConverter extends AbstractRecordConverter {
                                    sep=",";
                             }
                        }else {
-                           ArrayList<ViewableWrapper> targetTables = getTargetTables(role.getDestination());
+                           ArrayList<ViewableWrapper> targetTables = getTargetTables(role);
                            for(ViewableWrapper targetTable : targetTables){
                                  String roleName=ili2sqlName.mapIliRoleDef(role,sqlTableName.getName(),targetTable.getSqlTablename(),targetTables.size()>1);
                                  // a role of an embedded association?

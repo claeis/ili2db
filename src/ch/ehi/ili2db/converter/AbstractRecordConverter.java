@@ -191,7 +191,25 @@ public class AbstractRecordConverter {
 				dbTable.addColumn(dbColIliTid);
 			}
 		}
-		private HashMap<Viewable,ArrayList<ViewableWrapper>> targetTablesPool=new HashMap<Viewable,ArrayList<ViewableWrapper>>(); 
+		private HashMap<ch.interlis.ili2c.metamodel.Element,ArrayList<ViewableWrapper>> targetTablesPool=new HashMap<ch.interlis.ili2c.metamodel.Element,ArrayList<ViewableWrapper>>(); 
+        public ArrayList<ViewableWrapper> getTargetTables(RoleDef destination) {
+            if(targetTablesPool.containsKey(destination)){
+                return targetTablesPool.get(destination);
+            }
+            ArrayList<ViewableWrapper> ret=new ArrayList<ViewableWrapper>(); 
+            Iterator<AbstractClassDef> destIt=destination.iteratorDestination();
+            while(destIt.hasNext()) {
+                AbstractClassDef dest=destIt.next();
+                ArrayList<ViewableWrapper> im=getTargetTables(dest);
+                for(ViewableWrapper imDest:im) {
+                    if(!ret.contains(imDest)) {
+                        ret.add(imDest);
+                    }
+                }
+            }
+            targetTablesPool.put(destination, ret);
+            return ret;
+        }
 		public ArrayList<ViewableWrapper> getTargetTables(Viewable destination) {
 			if(targetTablesPool.containsKey(destination)){
 				return targetTablesPool.get(destination);

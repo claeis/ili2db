@@ -1650,7 +1650,7 @@ public class TransferToXtf {
             ret.append(recConv.getSqlType(root.getViewable()));
             ret.append(" "+tabalias);
             RoleDef role=wrapper.getRole().getOppEnd();
-            ArrayList<ViewableWrapper> targetTables = recConv.getTargetTables(role.getDestination());
+            ArrayList<ViewableWrapper> targetTables = recConv.getTargetTables(role);
             String roleSqlName=ili2sqlName.mapIliRoleDef(role,root.getSqlTablename(),wrapper.getParentTable().getSqlTablename(),targetTables.size()>1);
             ret.append(" WHERE "+tabalias+"."+roleSqlName+"="+wrapper.getParentSqlId());
             subSelectSep=" UNION ";

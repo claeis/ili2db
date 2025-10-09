@@ -31,7 +31,7 @@ import ch.interlis.iox.StartTransferEvent;
 //-Ddburl=jdbc:postgresql:dbname -Ddbusr=usrname -Ddbpwd=1234
 public abstract class Assoc23Test {
 	
-	private static final String TEST_DATA_DIR="test/data/Assoc23/";
+	protected static final String TEST_DATA_DIR="test/data/Assoc23/";
     private static final String EXTREFFORWARD = "ExtRefForward";
 	
     protected AbstractTestSetup setup=createTestSetup();
@@ -44,7 +44,6 @@ public abstract class Assoc23Test {
         Connection jdbcConnection=null;
         try{
             setup.resetDb();
-            jdbcConnection = setup.createConnection();
             {
                 File data=new File(TEST_DATA_DIR,"Assoc4.ili");
                 Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
@@ -56,6 +55,7 @@ public abstract class Assoc23Test {
                 Ili2db.readSettingsFromDb(config);
                 Ili2db.run(config,null);
             }
+            jdbcConnection = setup.createConnection();
             {
                 // t_ili2db_attrname
                 String [][] expectedValues=new String[][] {
@@ -96,7 +96,6 @@ public abstract class Assoc23Test {
         Connection jdbcConnection=null;
         try{
             setup.resetDb();
-            jdbcConnection = setup.createConnection();
             {
                 File data=new File(TEST_DATA_DIR,"Assoc4.ili");
                 Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
@@ -109,6 +108,7 @@ public abstract class Assoc23Test {
                 Ili2db.readSettingsFromDb(config);
                 Ili2db.run(config,null);
             }
+            jdbcConnection = setup.createConnection();
             {
                 // t_ili2db_attrname
                 String [][] expectedValues=new String[][] {
@@ -149,7 +149,6 @@ public abstract class Assoc23Test {
         Connection jdbcConnection=null;
         try{
             setup.resetDb();
-            jdbcConnection = setup.createConnection();
             {
                 File data=new File(TEST_DATA_DIR,"Assoc4.ili");
                 Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
@@ -162,6 +161,7 @@ public abstract class Assoc23Test {
                 Ili2db.readSettingsFromDb(config);
                 Ili2db.run(config,null);
             }
+            jdbcConnection = setup.createConnection();
             {
                 // t_ili2db_attrname
                 String [][] expectedValues=new String[][] {
@@ -206,6 +206,145 @@ public abstract class Assoc23Test {
             }
         }
     }
+    @Test
+    public void importIli_NtoN_OR() throws Exception
+    {
+        //EhiLogger.getInstance().setTraceFilter(false);
+        Connection jdbcConnection=null;
+        try{
+            setup.resetDb();
+            {
+                File data=new File(TEST_DATA_DIR,"AssocNtoN_OR.ili");
+                Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+                Ili2db.setNoSmartMapping(config);
+                config.setFunction(Config.FC_SCHEMAIMPORT);
+                config.setCreateFk(Config.CREATE_FK_YES);
+                config.setTidHandling(Config.TID_HANDLING_PROPERTY);
+                config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
+                Ili2db.readSettingsFromDb(config);
+                Ili2db.run(config,null);
+            }
+            jdbcConnection = setup.createConnection();
+            {
+                // t_ili2db_attrname
+                String [][] expectedValues=new String[][] {
+                    {"AssocNtoN_OR.TopicA.ClassA.Name","aname","classa",null},
+                    {"AssocNtoN_OR.TopicA.ClassB1.Name","aname","classb1",null},
+                    {"AssocNtoN_OR.TopicA.ClassB2.Name","aname","classb2",null},
+                    {"AssocNtoN_OR.TopicA.a2b.a","a","a2b","classa"},
+                    {"AssocNtoN_OR.TopicA.a2b.b","b_classb1","a2b","classb1"},
+                    {"AssocNtoN_OR.TopicA.a2b.b","b_classb2","a2b","classb2"},
+                };
+                Ili2dbAssert.assertAttrNameTable(jdbcConnection, expectedValues,setup.getSchema());
+            }
+            {
+                // t_ili2db_trafo
+                String [][] expectedValues=new String[][] {
+                    {"AssocNtoN_OR.TopicA.ClassA","ch.ehi.ili2db.inheritance","newClass"},
+                    {"AssocNtoN_OR.TopicA.ClassB1","ch.ehi.ili2db.inheritance","newClass"},
+                    {"AssocNtoN_OR.TopicA.ClassB2","ch.ehi.ili2db.inheritance","newClass"},
+                    {"AssocNtoN_OR.TopicA.a2b","ch.ehi.ili2db.inheritance","newClass"},
+                 };
+                Ili2dbAssert.assertTrafoTable(jdbcConnection, expectedValues,setup.getSchema());
+            }
+        }finally{
+            if(jdbcConnection!=null){
+                jdbcConnection.close();
+            }
+        }
+    }
+    @Test
+    public void importIli_1toN_OR() throws Exception
+    {
+        //EhiLogger.getInstance().setTraceFilter(false);
+        Connection jdbcConnection=null;
+        try{
+            setup.resetDb();
+            {
+                File data=new File(TEST_DATA_DIR,"Assoc1toN_OR.ili");
+                Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+                Ili2db.setNoSmartMapping(config);
+                config.setFunction(Config.FC_SCHEMAIMPORT);
+                config.setCreateFk(Config.CREATE_FK_YES);
+                config.setTidHandling(Config.TID_HANDLING_PROPERTY);
+                config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
+                Ili2db.readSettingsFromDb(config);
+                Ili2db.run(config,null);
+            }
+            jdbcConnection = setup.createConnection();
+            {
+                // t_ili2db_attrname
+                String [][] expectedValues=new String[][] {
+                    {"Assoc1toN_OR.TopicA.ClassA.Name","aname","classa",null},
+                    {"Assoc1toN_OR.TopicA.ClassB1.Name","aname","classb1",null},
+                    {"Assoc1toN_OR.TopicA.ClassB2.Name","aname","classb2",null},
+                    {"Assoc1toN_OR.TopicA.a2b.a","a","classb1","classa"},
+                    {"Assoc1toN_OR.TopicA.a2b.a","a","classb2","classa"},
+                };
+                Ili2dbAssert.assertAttrNameTable(jdbcConnection, expectedValues,setup.getSchema());
+            }
+            {
+                // t_ili2db_trafo
+                String [][] expectedValues=new String[][] {
+                    {"Assoc1toN_OR.TopicA.ClassA","ch.ehi.ili2db.inheritance","newClass"},
+                    {"Assoc1toN_OR.TopicA.ClassB1","ch.ehi.ili2db.inheritance","newClass"},
+                    {"Assoc1toN_OR.TopicA.ClassB2","ch.ehi.ili2db.inheritance","newClass"},
+                    {"Assoc1toN_OR.TopicA.a2b",   "ch.ehi.ili2db.inheritance", "embedded"},
+                 };
+                Ili2dbAssert.assertTrafoTable(jdbcConnection, expectedValues,setup.getSchema());
+            }
+        }finally{
+            if(jdbcConnection!=null){
+                jdbcConnection.close();
+            }
+        }
+    }
+    @Test
+    public void importIli_Nto1_OR() throws Exception
+    {
+        //EhiLogger.getInstance().setTraceFilter(false);
+        Connection jdbcConnection=null;
+        try{
+            setup.resetDb();
+            {
+                File data=new File(TEST_DATA_DIR,"AssocNto1_OR.ili");
+                Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+                Ili2db.setNoSmartMapping(config);
+                config.setFunction(Config.FC_SCHEMAIMPORT);
+                config.setCreateFk(Config.CREATE_FK_YES);
+                config.setTidHandling(Config.TID_HANDLING_PROPERTY);
+                config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
+                Ili2db.readSettingsFromDb(config);
+                Ili2db.run(config,null);
+            }
+            jdbcConnection = setup.createConnection();
+            {
+                // t_ili2db_attrname
+                String [][] expectedValues=new String[][] {
+                    {"AssocNto1_OR.TopicA.ClassA.Name","aname","classa",null},
+                    {"AssocNto1_OR.TopicA.ClassB1.Name","aname","classb1",null},
+                    {"AssocNto1_OR.TopicA.ClassB2.Name","aname","classb2",null},
+                    {"AssocNto1_OR.TopicA.a2b.b","b_classb1","classa","classb1"},
+                    {"AssocNto1_OR.TopicA.a2b.b","b_classb2","classa","classb2"},
+                };
+                Ili2dbAssert.assertAttrNameTable(jdbcConnection, expectedValues,setup.getSchema());
+            }
+            {
+                // t_ili2db_trafo
+                String [][] expectedValues=new String[][] {
+                    {"AssocNto1_OR.TopicA.ClassA","ch.ehi.ili2db.inheritance","newClass"},
+                    {"AssocNto1_OR.TopicA.ClassB1","ch.ehi.ili2db.inheritance","newClass"},
+                    {"AssocNto1_OR.TopicA.ClassB2","ch.ehi.ili2db.inheritance","newClass"},
+                    {"AssocNto1_OR.TopicA.a2b",   "ch.ehi.ili2db.inheritance", "embedded"},
+                 };
+                Ili2dbAssert.assertTrafoTable(jdbcConnection, expectedValues,setup.getSchema());
+            }
+        }finally{
+            if(jdbcConnection!=null){
+                jdbcConnection.close();
+            }
+        }
+    }
     
     @Test
     public void importXtf_1toN_WithAttr_Smart0() throws Exception
@@ -215,8 +354,6 @@ public abstract class Assoc23Test {
         Statement stmt=null;
         try{
             setup.resetDb();
-            jdbcConnection = setup.createConnection();
-            stmt=jdbcConnection.createStatement();
             {
                 File data=new File(TEST_DATA_DIR,"Assoc4a.xtf");
                 Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
@@ -230,6 +367,8 @@ public abstract class Assoc23Test {
                 Ili2db.readSettingsFromDb(config);
                 Ili2db.run(config,null);
             }
+            jdbcConnection = setup.createConnection();
+            stmt=jdbcConnection.createStatement();
             // verify db content
             {
                 ResultSet rs=null;
@@ -274,6 +413,9 @@ public abstract class Assoc23Test {
                 
             }
         }finally{
+            if(stmt!=null){
+                stmt.close();
+            }
             if(jdbcConnection!=null){
                 jdbcConnection.close();
             }
@@ -287,8 +429,6 @@ public abstract class Assoc23Test {
         Statement stmt=null;
         try{
             setup.resetDb();
-            jdbcConnection = setup.createConnection();
-            stmt=jdbcConnection.createStatement();
             {
                 File data=new File(TEST_DATA_DIR,"Assoc4a.xtf");
                 Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
@@ -303,6 +443,8 @@ public abstract class Assoc23Test {
                 Ili2db.readSettingsFromDb(config);
                 Ili2db.run(config,null);
             }
+            jdbcConnection = setup.createConnection();
+            stmt=jdbcConnection.createStatement();
             // verify db content
             {
                 ResultSet rs=null;
@@ -344,6 +486,9 @@ public abstract class Assoc23Test {
                 
             }
         }finally{
+            if(stmt!=null){
+                stmt.close();
+            }
             if(jdbcConnection!=null){
                 jdbcConnection.close();
             }
@@ -357,8 +502,6 @@ public abstract class Assoc23Test {
         Statement stmt=null;
         try{
             setup.resetDb();
-            jdbcConnection = setup.createConnection();
-            stmt=jdbcConnection.createStatement();
             {
                 File data=new File(TEST_DATA_DIR,"Assoc4a.xtf");
                 Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
@@ -373,6 +516,8 @@ public abstract class Assoc23Test {
                 Ili2db.readSettingsFromDb(config);
                 Ili2db.run(config,null);
             }
+            jdbcConnection = setup.createConnection();
+            stmt=jdbcConnection.createStatement();
             // verify db content
             {
                 ResultSet rs=null;
@@ -411,6 +556,9 @@ public abstract class Assoc23Test {
                 
             }
         }finally{
+            if(stmt!=null){
+                stmt.close();
+            }
             if(jdbcConnection!=null){
                 jdbcConnection.close();
             }
@@ -762,8 +910,6 @@ public abstract class Assoc23Test {
         Statement stmt=null;
 		try{
             setup.resetDb();
-            jdbcConnection = setup.createConnection();
-            stmt=jdbcConnection.createStatement();
 			{
 				File data=new File(TEST_DATA_DIR,"Assoc2c.xtf");
                 Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
@@ -779,6 +925,8 @@ public abstract class Assoc23Test {
 	    		Ili2db.readSettingsFromDb(config);
 	    		Ili2db.run(config,null);
 			}
+            jdbcConnection = setup.createConnection();
+            stmt=jdbcConnection.createStatement();
             // verify db content
             {
                 // BID=Assoc2.TestB
@@ -795,6 +943,9 @@ public abstract class Assoc23Test {
                 assertEquals(bid_basket1,b2_bid);
             }
 		}finally{
+            if(stmt!=null){
+                stmt.close();
+            }
 			if(jdbcConnection!=null){
 				jdbcConnection.close();
 			}
@@ -810,8 +961,6 @@ public abstract class Assoc23Test {
         Connection jdbcConnection=null;
         Statement stmt=null;
         try{
-            jdbcConnection = setup.createConnection();
-            stmt=jdbcConnection.createStatement();
             {
                 File data=new File(TEST_DATA_DIR,"Assoc2c.xtf");
                 Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
@@ -822,6 +971,8 @@ public abstract class Assoc23Test {
                 Ili2db.readSettingsFromDb(config);
                 Ili2db.run(config,null);
             }
+            jdbcConnection = setup.createConnection();
+            stmt=jdbcConnection.createStatement();
             // verify db content
             {
                 // BID=Assoc2.TestB
@@ -838,6 +989,9 @@ public abstract class Assoc23Test {
                 assertEquals(bid_basket1,b2_bid);
             }
         }finally{
+            if(stmt!=null){
+                stmt.close();
+            }
             if(jdbcConnection!=null){
                 jdbcConnection.close();
             }
@@ -1597,7 +1751,6 @@ public abstract class Assoc23Test {
         Connection jdbcConnection=null;
         try{
             setup.resetDb();
-            jdbcConnection = setup.createConnection();
             {
                 File data=new File(TEST_DATA_DIR,"AssocUpdate1.ili");
                 Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
@@ -1607,6 +1760,7 @@ public abstract class Assoc23Test {
                 config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
                 Ili2db.readSettingsFromDb(config);
                 Ili2db.run(config,null);
+                jdbcConnection = setup.createConnection();
                 {
                     // t_ili2db_attrname
                     String [][] expectedValues=new String[][] {
@@ -1706,7 +1860,6 @@ public abstract class Assoc23Test {
         Connection jdbcConnection=null;
         try{
             setup.resetDb();
-            jdbcConnection = setup.createConnection();
             {
                 File data=new File(TEST_DATA_DIR,"AssocNtoN_Extended.ili");
                 Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
@@ -1718,6 +1871,7 @@ public abstract class Assoc23Test {
                 Ili2db.readSettingsFromDb(config);
                 Ili2db.run(config,null);
             }
+            jdbcConnection = setup.createConnection();
             {
                 // t_ili2db_attrname
                 String [][] expectedValues=new String[][] {
@@ -1751,7 +1905,6 @@ public abstract class Assoc23Test {
         Connection jdbcConnection=null;
         try{
             setup.resetDb();
-            jdbcConnection = setup.createConnection();
             {
                 File data=new File(TEST_DATA_DIR,"AssocNtoN_Extended.ili");
                 Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
@@ -1764,6 +1917,7 @@ public abstract class Assoc23Test {
                 Ili2db.readSettingsFromDb(config);
                 Ili2db.run(config,null);
             }
+            jdbcConnection = setup.createConnection();
             {
                 // t_ili2db_attrname
                 String [][] expectedValues=new String[][] {
@@ -1797,7 +1951,6 @@ public abstract class Assoc23Test {
         Connection jdbcConnection=null;
         try{
             setup.resetDb();
-            jdbcConnection = setup.createConnection();
             {
                 File data=new File(TEST_DATA_DIR,"AssocNtoN_Extended.ili");
                 Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
@@ -1810,6 +1963,7 @@ public abstract class Assoc23Test {
                 Ili2db.readSettingsFromDb(config);
                 Ili2db.run(config,null);
             }
+            jdbcConnection = setup.createConnection();
             {
                 // t_ili2db_attrname
                 String [][] expectedValues=new String[][] {
@@ -1848,8 +2002,6 @@ public abstract class Assoc23Test {
         Connection jdbcConnection=null;
         Statement stmt=null;
         try{
-            jdbcConnection = setup.createConnection();
-            stmt=jdbcConnection.createStatement();
             {
                 File data=new File(TEST_DATA_DIR,"AssocNtoN_Extended.xtf");
                 Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
@@ -1861,6 +2013,8 @@ public abstract class Assoc23Test {
                 Ili2db.readSettingsFromDb(config);
                 Ili2db.run(config,null);
             }
+            jdbcConnection = setup.createConnection();
+            stmt=jdbcConnection.createStatement();
             // verify db content
             {
                 ResultSet rs=null;
@@ -1894,6 +2048,105 @@ public abstract class Assoc23Test {
                 
             }
         }finally{
+            if(stmt!=null){
+                stmt.close();
+            }
+            if(jdbcConnection!=null){
+                jdbcConnection.close();
+            }
+        }
+    }
+    @Test
+    public void importXtf_NtoN_OR() throws Exception
+    {
+        {
+            importIli_NtoN_OR();
+        }
+        EhiLogger.getInstance().setTraceFilter(false);
+        Connection jdbcConnection=null;
+        Statement stmt=null;
+        try{
+            {
+                File data=new File(TEST_DATA_DIR,"AssocNtoN_OR.xtf");
+                Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+                Ili2db.setNoSmartMapping(config);
+                config.setFunction(Config.FC_IMPORT);
+                config.setImportTid(true);
+                config.setImportBid(true);
+                config.setValidation(false);
+                Ili2db.readSettingsFromDb(config);
+                Ili2db.run(config,null);
+            }
+            jdbcConnection = setup.createConnection();
+            stmt=jdbcConnection.createStatement();
+        }finally{
+            if(stmt!=null){
+                stmt.close();
+            }
+            if(jdbcConnection!=null){
+                jdbcConnection.close();
+            }
+        }
+    }
+    @Test
+    public void importXtf_1toN_OR() throws Exception
+    {
+        {
+            importIli_1toN_OR();
+        }
+        EhiLogger.getInstance().setTraceFilter(false);
+        Connection jdbcConnection=null;
+        Statement stmt=null;
+        try{
+            {
+                File data=new File(TEST_DATA_DIR,"Assoc1toN_OR.xtf");
+                Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+                Ili2db.setNoSmartMapping(config);
+                config.setFunction(Config.FC_IMPORT);
+                config.setImportTid(true);
+                config.setImportBid(true);
+                config.setValidation(false);
+                Ili2db.readSettingsFromDb(config);
+                Ili2db.run(config,null);
+            }
+            jdbcConnection = setup.createConnection();
+            stmt=jdbcConnection.createStatement();
+        }finally{
+            if(stmt!=null){
+                stmt.close();
+            }
+            if(jdbcConnection!=null){
+                jdbcConnection.close();
+            }
+        }
+    }
+    @Test
+    public void importXtf_Nto1_OR() throws Exception
+    {
+        {
+            importIli_Nto1_OR();
+        }
+        EhiLogger.getInstance().setTraceFilter(false);
+        Connection jdbcConnection=null;
+        Statement stmt=null;
+        try{
+            {
+                File data=new File(TEST_DATA_DIR,"AssocNto1_OR.xtf");
+                Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+                Ili2db.setNoSmartMapping(config);
+                config.setFunction(Config.FC_IMPORT);
+                config.setImportTid(true);
+                config.setImportBid(true);
+                config.setValidation(false);
+                Ili2db.readSettingsFromDb(config);
+                Ili2db.run(config,null);
+            }
+            jdbcConnection = setup.createConnection();
+            stmt=jdbcConnection.createStatement();
+        }finally{
+            if(stmt!=null){
+                stmt.close();
+            }
             if(jdbcConnection!=null){
                 jdbcConnection.close();
             }
@@ -1909,8 +2162,6 @@ public abstract class Assoc23Test {
         Connection jdbcConnection=null;
         Statement stmt=null;
         try{
-            jdbcConnection = setup.createConnection();
-            stmt=jdbcConnection.createStatement();
             {
                 File data=new File(TEST_DATA_DIR,"AssocNtoN_Extended.xtf");
                 Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
@@ -1922,6 +2173,8 @@ public abstract class Assoc23Test {
                 Ili2db.readSettingsFromDb(config);
                 Ili2db.run(config,null);
             }
+            jdbcConnection = setup.createConnection();
+            stmt=jdbcConnection.createStatement();
             // verify db content
             {
                 ResultSet rs=null;
@@ -1955,6 +2208,9 @@ public abstract class Assoc23Test {
                 
             }
         }finally{
+            if(stmt!=null){
+                stmt.close();
+            }
             if(jdbcConnection!=null){
                 jdbcConnection.close();
             }
@@ -1970,8 +2226,6 @@ public abstract class Assoc23Test {
         Connection jdbcConnection=null;
         Statement stmt=null;
         try{
-            jdbcConnection = setup.createConnection();
-            stmt=jdbcConnection.createStatement();
             {
                 File data=new File(TEST_DATA_DIR,"AssocNtoN_Extended.xtf");
                 Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
@@ -1983,6 +2237,8 @@ public abstract class Assoc23Test {
                 Ili2db.readSettingsFromDb(config);
                 Ili2db.run(config,null);
             }
+            jdbcConnection = setup.createConnection();
+            stmt=jdbcConnection.createStatement();
             // verify db content
             {
                 ResultSet rs=null;
@@ -2016,6 +2272,9 @@ public abstract class Assoc23Test {
                 
             }
         }finally{
+            if(stmt!=null){
+                stmt.close();
+            }
             if(jdbcConnection!=null){
                 jdbcConnection.close();
             }
@@ -2028,10 +2287,20 @@ public abstract class Assoc23Test {
             return tid;
         }
         IomObject refA0=obj.getattrobj("BesitzerIn",0);
-        String ref1=refA0.getobjectrefoid();
-        IomObject refA1=obj.getattrobj("Gebaeude",0);
-        String ref2=refA1.getobjectrefoid();
-        return ref1+ref2;
+        if(refA0!=null) {
+            String ref1=refA0.getobjectrefoid();
+            IomObject refA1=obj.getattrobj("Gebaeude",0);
+            String ref2=refA1.getobjectrefoid();
+            return ref1+ref2;
+        }
+        refA0=obj.getattrobj("a",0);
+        if(refA0!=null) {
+            String ref1=refA0.getobjectrefoid();
+            IomObject refA1=obj.getattrobj("b",0);
+            String ref2=refA1.getobjectrefoid();
+            return ref1+":"+ref2;
+        }
+        throw new IllegalArgumentException("unexpected obj "+obj.toString());
     }
     private void assertExportXtf_NtoN_Extended(File data) throws IoxException {
         {
@@ -2085,6 +2354,144 @@ public abstract class Assoc23Test {
              }
         }
     }
+    private void assertExportXtf_NtoN_OR(File data) throws IoxException {
+        {
+            HashMap<String,IomObject> objs=new HashMap<String,IomObject>();
+            XtfReader reader=new XtfReader(data);
+            IoxEvent event=null;
+             do{
+                event=reader.read();
+                if(event instanceof StartTransferEvent){
+                }else if(event instanceof StartBasketEvent){
+                }else if(event instanceof ObjectEvent){
+                    IomObject iomObj=((ObjectEvent)event).getIomObject();
+                    objs.put(getTid(iomObj), iomObj);
+                }else if(event instanceof EndBasketEvent){
+                }else if(event instanceof EndTransferEvent){
+                }
+             }while(!(event instanceof EndTransferEvent));
+             reader.close();
+             {
+                 assertEquals(5,objs.size());
+                 {
+                     IomObject obj0 = objs.get("10");
+                     Assert.assertNotNull(obj0);
+                     Assert.assertEquals("AssocNtoN_OR.TopicA.ClassA", obj0.getobjecttag());
+                 }
+                 {
+                     IomObject obj0 = objs.get("20");
+                     Assert.assertNotNull(obj0);
+                     Assert.assertEquals("AssocNtoN_OR.TopicA.ClassB1", obj0.getobjecttag());
+                 }
+                 {
+                     IomObject obj0 = objs.get("30");
+                     Assert.assertNotNull(obj0);
+                     Assert.assertEquals("AssocNtoN_OR.TopicA.ClassB2", obj0.getobjecttag());
+                 }
+                 {
+                     IomObject obj0 = objs.get("10:20");
+                     Assert.assertNotNull(obj0);
+                     Assert.assertEquals("AssocNtoN_OR.TopicA.a2b", obj0.getobjecttag());
+                 }
+                 {
+                     IomObject obj0 = objs.get("10:30");
+                     Assert.assertNotNull(obj0);
+                     Assert.assertEquals("AssocNtoN_OR.TopicA.a2b", obj0.getobjecttag());
+                 }
+             }
+        }
+    }
+    private void assertExportXtf_1toN_OR(File data) throws IoxException {
+        {
+            HashMap<String,IomObject> objs=new HashMap<String,IomObject>();
+            XtfReader reader=new XtfReader(data);
+            IoxEvent event=null;
+             do{
+                event=reader.read();
+                if(event instanceof StartTransferEvent){
+                }else if(event instanceof StartBasketEvent){
+                }else if(event instanceof ObjectEvent){
+                    IomObject iomObj=((ObjectEvent)event).getIomObject();
+                    objs.put(getTid(iomObj), iomObj);
+                }else if(event instanceof EndBasketEvent){
+                }else if(event instanceof EndTransferEvent){
+                }
+             }while(!(event instanceof EndTransferEvent));
+             reader.close();
+             {
+                 assertEquals(3,objs.size());
+                 {
+                     IomObject obj0 = objs.get("10");
+                     Assert.assertNotNull(obj0);
+                     Assert.assertEquals("Assoc1toN_OR.TopicA.ClassA", obj0.getobjecttag());
+                 }
+                 {
+                     IomObject obj0 = objs.get("20");
+                     Assert.assertNotNull(obj0);
+                     Assert.assertEquals("Assoc1toN_OR.TopicA.ClassB1", obj0.getobjecttag());
+                     IomObject refA=obj0.getattrobj("a",0);
+                     Assert.assertNotNull(refA);
+                     Assert.assertEquals("10", refA.getobjectrefoid());
+                 }
+                 {
+                     IomObject obj0 = objs.get("30");
+                     Assert.assertNotNull(obj0);
+                     Assert.assertEquals("Assoc1toN_OR.TopicA.ClassB2", obj0.getobjecttag());
+                     IomObject refA=obj0.getattrobj("a",0);
+                     Assert.assertNotNull(refA);
+                     Assert.assertEquals("10", refA.getobjectrefoid());
+                 }
+             }
+        }
+    }
+    private void assertExportXtf_Nto1_OR(File data) throws IoxException {
+        {
+            HashMap<String,IomObject> objs=new HashMap<String,IomObject>();
+            XtfReader reader=new XtfReader(data);
+            IoxEvent event=null;
+             do{
+                event=reader.read();
+                if(event instanceof StartTransferEvent){
+                }else if(event instanceof StartBasketEvent){
+                }else if(event instanceof ObjectEvent){
+                    IomObject iomObj=((ObjectEvent)event).getIomObject();
+                    objs.put(getTid(iomObj), iomObj);
+                }else if(event instanceof EndBasketEvent){
+                }else if(event instanceof EndTransferEvent){
+                }
+             }while(!(event instanceof EndTransferEvent));
+             reader.close();
+             {
+                 assertEquals(4,objs.size());
+                 {
+                     IomObject obj0 = objs.get("10");
+                     Assert.assertNotNull(obj0);
+                     Assert.assertEquals("AssocNto1_OR.TopicA.ClassA", obj0.getobjecttag());
+                     IomObject refA=obj0.getattrobj("b",0);
+                     Assert.assertNotNull(refA);
+                     Assert.assertEquals("20", refA.getobjectrefoid());
+                 }
+                 {
+                     IomObject obj0 = objs.get("11");
+                     Assert.assertNotNull(obj0);
+                     Assert.assertEquals("AssocNto1_OR.TopicA.ClassA", obj0.getobjecttag());
+                     IomObject refA=obj0.getattrobj("b",0);
+                     Assert.assertNotNull(refA);
+                     Assert.assertEquals("30", refA.getobjectrefoid());
+                 }
+                 {
+                     IomObject obj0 = objs.get("20");
+                     Assert.assertNotNull(obj0);
+                     Assert.assertEquals("AssocNto1_OR.TopicA.ClassB1", obj0.getobjecttag());
+                 }
+                 {
+                     IomObject obj0 = objs.get("30");
+                     Assert.assertNotNull(obj0);
+                     Assert.assertEquals("AssocNto1_OR.TopicA.ClassB2", obj0.getobjecttag());
+                 }
+             }
+        }
+    }
     @Test
     public void exportXtf_NtoN_Extended_Smart0() throws Exception
     {
@@ -2110,6 +2517,84 @@ public abstract class Assoc23Test {
             }
         }
         assertExportXtf_NtoN_Extended(data);
+    }
+    @Test
+    public void exportXtf_NtoN_OR() throws Exception
+    {
+        {
+            importXtf_NtoN_OR();
+        }
+        File data=null;
+        //EhiLogger.getInstance().setTraceFilter(false);
+        Connection jdbcConnection=null;
+        try{
+            {
+                data=new File(TEST_DATA_DIR,"AssocNtoN_OR-out.xtf");
+                Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+                config.setFunction(Config.FC_EXPORT);
+                config.setExportTid(true);
+                config.setModels("AssocNtoN_OR");
+                Ili2db.readSettingsFromDb(config);
+                Ili2db.run(config,null);
+            }
+        }finally{
+            if(jdbcConnection!=null){
+                jdbcConnection.close();
+            }
+        }
+        assertExportXtf_NtoN_OR(data);
+    }
+    @Test
+    public void exportXtf_1toN_OR() throws Exception
+    {
+        {
+            importXtf_1toN_OR();
+        }
+        File data=null;
+        //EhiLogger.getInstance().setTraceFilter(false);
+        Connection jdbcConnection=null;
+        try{
+            {
+                data=new File(TEST_DATA_DIR,"Assoc1toN_OR-out.xtf");
+                Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+                config.setFunction(Config.FC_EXPORT);
+                config.setExportTid(true);
+                config.setModels("Assoc1toN_OR");
+                Ili2db.readSettingsFromDb(config);
+                Ili2db.run(config,null);
+            }
+        }finally{
+            if(jdbcConnection!=null){
+                jdbcConnection.close();
+            }
+        }
+        assertExportXtf_1toN_OR(data);
+    }
+    @Test
+    public void exportXtf_Nto1_OR() throws Exception
+    {
+        {
+            importXtf_Nto1_OR();
+        }
+        File data=null;
+        //EhiLogger.getInstance().setTraceFilter(false);
+        Connection jdbcConnection=null;
+        try{
+            {
+                data=new File(TEST_DATA_DIR,"AssocNto1_OR-out.xtf");
+                Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+                config.setFunction(Config.FC_EXPORT);
+                config.setExportTid(true);
+                config.setModels("AssocNto1_OR");
+                Ili2db.readSettingsFromDb(config);
+                Ili2db.run(config,null);
+            }
+        }finally{
+            if(jdbcConnection!=null){
+                jdbcConnection.close();
+            }
+        }
+        assertExportXtf_Nto1_OR(data);
     }
     @Test
     public void exportXtf_NtoN_Extended_Smart1() throws Exception

@@ -343,7 +343,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
                                 }else {
                                     List<String> fkColNames=new ArrayList<String>();
                                     boolean notNull=false;
-                                    ArrayList<ViewableWrapper> targetTables = getTargetTables(role.getDestination());
+                                    ArrayList<ViewableWrapper> targetTables = getTargetTables(role);
                                     for(ViewableWrapper targetTable:targetTables){
                                         DbColumn dbColRef=null;
                                         dbColRef=new DbColId();
@@ -450,7 +450,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
                                 List<String> fkColNames=new ArrayList<String>();
                                 boolean notNull=false;
                                 ArrayList<ViewableWrapper> targetTables=null;
-                                targetTables = getTargetTables(role.getDestination());
+                                targetTables = getTargetTables(role);
                                 for(ViewableWrapper targetTable : targetTables){
                                     DbColumn dbColRef=null;
                                     dbColRef=new DbColId();
