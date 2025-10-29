@@ -40,6 +40,7 @@ public abstract class DocumentationTest {
 		File data=new File(TEST_OUT,"Docu23.ili");
 		Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
 		config.setFunction(Config.FC_SCHEMAIMPORT);
+		config.setCreateNlsTab(true);
         Ili2db.run(config,null);
 	}
 }

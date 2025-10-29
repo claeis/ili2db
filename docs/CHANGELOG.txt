@@ -17,6 +17,8 @@ ili2db 5.5.0 (2025-09-xx)
 - fix support of BAG {1..*} OF ReferenceType (#572)
 - fix support OF BAG {1..*} OF ReferenceType in abstract class (#570)
 - fix support of RoleDef with OR (#573)
+- ili2gpkg: escape table-comment string (#574)
+- ehisqlgen-1.16.3+
 
 ili2db 5.4.0 (2025-09-16)
 ---------------------------

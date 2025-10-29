@@ -5,11 +5,11 @@ INTERLIS 2.3;
 MODEL Docu23
   AT "mailto:ce@eisenhutinformatik.ch" VERSION "2021-02-08" =
   
-  /** Docu of TopicA
+  /** Docu of 'TopicA'
    */
   TOPIC TopicA =
     
-    /** Docu of ClassA
+    /** Docu of 'ClassA'
      */
     CLASS ClassA =
 		/** Docu of a1
