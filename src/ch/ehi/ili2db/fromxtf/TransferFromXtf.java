@@ -638,17 +638,23 @@ public class TransferFromXtf {
 							for(FixIomObjectExtRefs fixref : delayedObjects){
 								boolean skipObj=false;
 								for(IomObject ref:fixref.getRefs()){
-									String xtfid=ref.getobjectrefoid();
-									Viewable aclass=fixref.getTargetClass(ref);
-			                        if(aclass instanceof AbstractClassDef && AbstractRecordConverter.isUuidOid(td,((AbstractClassDef)aclass).getOid())) {
-			                            xtfid=Validator.normalizeUUID(xtfid);
-			                        }
-									String rootClassName=Ili2cUtility.getRootViewable(aclass).getScopedName(null);
-									if(oidPool.containsXtfid(rootClassName,xtfid)){
-										// reference now resolvable
-									}else{
-										// reference not yet known, try to resolve again at end of transfer
-										skipObj=true;
+                                    boolean targetObjFound=false;
+									for(Viewable aclass:fixref.getTargetClass(ref)) {
+	                                    String xtfid=ref.getobjectrefoid();
+	                                    if(aclass instanceof AbstractClassDef && AbstractRecordConverter.isUuidOid(td,((AbstractClassDef)aclass).getOid())) {
+	                                        xtfid=Validator.normalizeUUID(xtfid);
+	                                    }
+	                                    String rootClassName=Ili2cUtility.getRootViewable(aclass).getScopedName(null);
+	                                    if(oidPool.containsXtfid(rootClassName,xtfid)){
+	                                        // reference now resolvable
+	                                        targetObjFound=true;
+	                                        break;
+	                                    }
+									}
+									if(!targetObjFound) {
+                                        // reference not yet known, try to resolve again at end of transfer
+                                        skipObj=true;
+                                        break;
 									}
 								}
 								if(!skipObj){
@@ -753,35 +759,34 @@ public class TransferFromXtf {
                 for(FixIomObjectExtRefs fixref : delayedObjects){
                     boolean skipObj=false;
                     for(IomObject ref:fixref.getRefs()){
-                        String xtfid=ref.getobjectrefoid();
-                        Viewable aclass=fixref.getTargetClass(ref);
-                        String rootClassName=Ili2cUtility.getRootViewable(aclass).getScopedName(null);
-                        if(aclass instanceof AbstractClassDef && AbstractRecordConverter.isUuidOid(td,((AbstractClassDef)aclass).getOid())) {
-                            xtfid=Validator.normalizeUUID(xtfid);
-                        }
-                        if(oidPool.containsXtfid(rootClassName,xtfid)){
-                            // skip it; now resolvable
-                        }else{
-                            // object in another basket
-                            if(fixref.isExternalTarget(ref) && (readIliTid || Ili2cUtility.isViewableWithOid(aclass))){
-                                // read object
-                                Long sqlid=readObjectSqlid(aclass,xtfid);
-                                if(sqlid==null){
-                                    if(!globals.ignoreUnresolvedReferences){
-                                        EhiLogger.logError("unknown referenced object "+aclass.getScopedName(null)+" TID "+xtfid+" referenced from "+fixref.getRootTag()+" TID "+fixref.getRootTid());
-                                        globals.referrs=true;
-                                        skipObj=true;
+                        boolean foundTargetObj=false;
+                        for(Viewable aclass:fixref.getTargetClass(ref)) {
+                            String xtfid=ref.getobjectrefoid();
+                            String rootClassName=Ili2cUtility.getRootViewable(aclass).getScopedName(null);
+                            if(aclass instanceof AbstractClassDef && AbstractRecordConverter.isUuidOid(td,((AbstractClassDef)aclass).getOid())) {
+                                xtfid=Validator.normalizeUUID(xtfid);
+                            }
+                            if(oidPool.containsXtfid(rootClassName,xtfid)){
+                                foundTargetObj=true;
+                                break;
+                            }else {
+                                if(fixref.isExternalTarget(ref) && (readIliTid || Ili2cUtility.isViewableWithOid(aclass))){
+                                    // read object
+                                    Long sqlid=readObjectSqlid(aclass,xtfid);
+                                    if(sqlid!=null){
+                                        foundTargetObj=true;
+                                        break;
                                     }
-                                }
-                            }else{
-                                if(!globals.ignoreUnresolvedReferences){
-                                    EhiLogger.logError("unknown referenced object "+aclass.getScopedName(null)+" TID "+xtfid+" referenced from "+fixref.getRootTag()+" TID "+fixref.getRootTid());
-                                    globals.referrs=true;
-                                    skipObj=true;
                                 }
                             }
                         }
-                        
+                        if(!foundTargetObj){
+                            if(!globals.ignoreUnresolvedReferences){
+                                EhiLogger.logError("unknown referenced object "+getScopedNames(fixref.getTargetClass(ref))+" TID "+ref.getobjectrefoid()+" referenced from "+fixref.getRootTag()+" TID "+fixref.getRootTid());
+                                globals.referrs=true;
+                                skipObj=true;
+                            }
+                        }
                     }
                     if(!skipObj){
                         globals.objStat=stat.get(Long.toString(fixref.getBasketSqlId())).getObjStat();
@@ -801,6 +806,17 @@ public class TransferFromXtf {
             
         }
     }
+    private String getScopedNames(Iterable<Viewable> targetClassv) {
+        StringBuffer ret=new StringBuffer();
+        String sep="";
+        for(Viewable targetClass : targetClassv) {
+            ret.append(sep);
+            ret.append(targetClass.getScopedName());
+            sep=" OR ";
+        }
+        return ret.toString();
+    }
+
     public void doitFinally()
     {
         {
@@ -1457,31 +1473,42 @@ public class TransferFromXtf {
 										 // TODO handle attributes of link
 									}
 									if(structvalue!=null){
-										String refoid=structvalue.getobjectrefoid();
-										Viewable targetClass=role.getDestination();
-					                    if(targetClass instanceof AbstractClassDef && AbstractRecordConverter.isUuidOid(td,((AbstractClassDef)targetClass).getOid())) {
-					                        refoid=Validator.normalizeUUID(refoid);
-					                    }
-										if(!oidPool.containsXtfid(Ili2cUtility.getRootViewable(getCrsMappedOrSame(targetClass)).getScopedName(null),refoid)){
-										    if(!createSqlExtRef || !role.isExternal()) {
-	                                            extref.addFix(structvalue, targetClass,role.isExternal());
-										    }
+		                                 boolean targetObjFound=false;
+										for(Iterator<AbstractClassDef> targetClassIt=role.iteratorDestination();targetClassIt.hasNext();) {
+										    AbstractClassDef targetClass=targetClassIt.next();
+                                            String refoid=structvalue.getobjectrefoid();
+	                                        if(targetClass instanceof AbstractClassDef && AbstractRecordConverter.isUuidOid(td,((AbstractClassDef)targetClass).getOid())) {
+	                                            refoid=Validator.normalizeUUID(refoid);
+	                                        }
+	                                        if(oidPool.containsXtfid(Ili2cUtility.getRootViewable(getCrsMappedOrSame(targetClass)).getScopedName(null),refoid)){
+	                                            targetObjFound=true;
+	                                        }
+										}
+										if(!targetObjFound) {
+                                            if(!createSqlExtRef || !role.isExternal()) {
+                                                extref.addFix(structvalue, role,role.isExternal());
+                                            }
 										}
 									}
 								}
 							 }else{
 								 IomObject structvalue=iomObj.getattrobj(roleName,0);
-								 String refoid=structvalue.getobjectrefoid();
-									Viewable targetClass=role.getDestination();
-                                    if(targetClass instanceof AbstractClassDef && AbstractRecordConverter.isUuidOid(td,((AbstractClassDef)targetClass).getOid())) {
-                                        refoid=Validator.normalizeUUID(refoid);
-                                    }
-								if(!oidPool.containsXtfid(Ili2cUtility.getRootViewable(getCrsMappedOrSame(targetClass)).getScopedName(null),refoid)){
-                                    if(!createSqlExtRef || !role.isExternal()) {
-                                        extref.addFix(structvalue, targetClass,role.isExternal());
-                                    }
-								}
-								
+								 boolean targetObjFound=false;
+                                 for(Iterator<AbstractClassDef> targetClassIt=role.iteratorDestination();targetClassIt.hasNext();) {
+                                     AbstractClassDef targetClass=targetClassIt.next();
+                                     String refoid=structvalue.getobjectrefoid();
+                                     if(targetClass instanceof AbstractClassDef && AbstractRecordConverter.isUuidOid(td,((AbstractClassDef)targetClass).getOid())) {
+                                         refoid=Validator.normalizeUUID(refoid);
+                                     }
+                                     if(oidPool.containsXtfid(Ili2cUtility.getRootViewable(getCrsMappedOrSame(targetClass)).getScopedName(null),refoid)){
+                                         targetObjFound=true;
+                                     }
+                                 }
+                                 if(!targetObjFound) {
+                                     if(!createSqlExtRef || !role.isExternal()) {
+                                         extref.addFix(structvalue, role,role.isExternal());
+                                     }
+                                 }
 							 }
 						}
 					 }

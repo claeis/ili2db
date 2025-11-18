@@ -127,7 +127,7 @@ public class ViewableWrapper {
 				AttributeDef attr = (AttributeDef) columnWrapper.getViewableTransferElement().obj;
 				Cardinality cardinality = attr.getDomainOrDerivedDomain().getCardinality();
 				Type type = attr.getDomainResolvingAll();
-				if (cardinality.getMaximum() > 1 && (type instanceof BaseType && !(type instanceof AbstractCoordType))) {
+				if (cardinality.getMaximum() > 1) {
 					return attr;
 				}
 			}

@@ -285,7 +285,7 @@ public class NlsUtility{
         
     }
     private static String quoteSqlValue(String val) {
-        return val!=null ? "'"+val+"'" : "NULL";
+        return Ili2db.quoteSqlStringValue(val);
     }
     private static Map<NlsKey,NlsEntry> readTableTab(
             Connection conn, String sqlName) throws Ili2dbException {

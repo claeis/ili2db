@@ -180,6 +180,9 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 		
 		if(base==null && !def.isSecondaryTable()){
 		  dbTable.setRequiresSequence(true);
+		}else if(def.isSecondaryTable() && def.getPrimitiveCollectionAttr() != null){
+		    // Hilfstabelle fuer multivalue attribute
+          dbTable.setRequiresSequence(true);
 		}
 		{
 	        DbColId dbColId=addKeyCol(dbTable);
@@ -188,12 +191,12 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
 	          if(createFk){
 	              dbColId.setReferencedTable(getSqlType(base.getViewable()));
 	          }
-	                  metaInfo.setColumnInfo(dbTable.getName().getName(), null, dbColId.getName(), DbExtMetaInfo.TAG_COL_FOREIGNKEY, getSqlType(base.getViewable()).getName());
-	        }else if(def.isSecondaryTable()){
-                if(createFk && def.getPrimitiveCollectionAttr() == null){
+	          metaInfo.setColumnInfo(dbTable.getName().getName(), null, dbColId.getName(), DbExtMetaInfo.TAG_COL_FOREIGNKEY, getSqlType(base.getViewable()).getName());
+	        }else if(def.isSecondaryTable() && def.getPrimitiveCollectionAttr() == null){
+                if(createFk){
 	                  dbColId.setReferencedTable(new DbTableName(schema.getName(),def.getMainTable().getSqlTablename()));
 	              }
-	                          metaInfo.setColumnInfo(dbTable.getName().getName(), null, dbColId.getName(), DbExtMetaInfo.TAG_COL_FOREIGNKEY, def.getMainTable().getSqlTablename());
+	              metaInfo.setColumnInfo(dbTable.getName().getName(), null, dbColId.getName(), DbExtMetaInfo.TAG_COL_FOREIGNKEY, def.getMainTable().getSqlTablename());
 	        }
 		}
 		  if(createBasketCol){
@@ -340,7 +343,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
                                 }else {
                                     List<String> fkColNames=new ArrayList<String>();
                                     boolean notNull=false;
-                                    ArrayList<ViewableWrapper> targetTables = getTargetTables(role.getDestination());
+                                    ArrayList<ViewableWrapper> targetTables = getTargetTables(role);
                                     for(ViewableWrapper targetTable:targetTables){
                                         DbColumn dbColRef=null;
                                         dbColRef=new DbColId();
@@ -447,7 +450,7 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
                                 List<String> fkColNames=new ArrayList<String>();
                                 boolean notNull=false;
                                 ArrayList<ViewableWrapper> targetTables=null;
-                                targetTables = getTargetTables(role.getDestination());
+                                targetTables = getTargetTables(role);
                                 for(ViewableWrapper targetTable : targetTables){
                                     DbColumn dbColRef=null;
                                     dbColRef=new DbColId();

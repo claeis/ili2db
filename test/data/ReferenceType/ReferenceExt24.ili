@@ -1,0 +1,35 @@
+INTERLIS 2.4;
+
+MODEL ReferenceExt24
+  AT "mailto:david@opengis.ch" VERSION "2015-09-23" =
+
+  TOPIC TopicA =
+
+    CLASS Item (ABSTRACT) =
+      Name : TEXT*25;
+    END Item;
+
+    CLASS ItemOne EXTENDS Item =
+      One : TEXT*25;
+    END ItemOne;
+
+    CLASS ItemTwo EXTENDS Item =
+      Two : TEXT*25;
+    END ItemTwo;
+    
+    CLASS CatArrays (ABSTRACT) =
+      Name : TEXT*10;
+      Liste: BAG {1..*} OF REFERENCE TO Item;
+    END CatArrays;
+
+    CLASS CatArrayUno EXTENDS CatArrays =
+      Uno : TEXT*10;
+    END CatArrayUno;
+
+    CLASS CatArrayDue EXTENDS CatArrays =
+      Due : TEXT*10;
+    END CatArrayDue;
+
+  END TopicA;
+  
+END ReferenceExt24.

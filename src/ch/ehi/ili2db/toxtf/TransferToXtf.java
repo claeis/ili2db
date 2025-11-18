@@ -1131,19 +1131,23 @@ public class TransferToXtf {
 						structelev, structQueue, sqlid,genericDomains,iomTargetClass);
 				updateObjStat(iomObj.getobjecttag(), sqlid);
 
-				for (ViewableWrapper attrtableWrapper : aclassWrapper.getPrimitiveCollectionWrappers()) {
-					AttributeDef attributeDef = attrtableWrapper.getPrimitiveCollectionAttr();
-					if (attributeDef != null && !attributeDef.isTransient()) {
-						String query = createQueryStatementForPrimitiveCollectionAttribute(attrtableWrapper, attributeDef, sqlid);
+				ViewableWrapper baseWrapper=aclassWrapper;
+				while(baseWrapper!=null) {
+	                for (ViewableWrapper attrtableWrapper : baseWrapper.getPrimitiveCollectionWrappers()) {
+	                    AttributeDef attributeDef = attrtableWrapper.getPrimitiveCollectionAttr();
+	                    if (attributeDef != null && !attributeDef.isTransient()) {
+	                        String query = createQueryStatementForPrimitiveCollectionAttribute(attrtableWrapper, attributeDef, sqlid);
 
-						EhiLogger.traceBackendCmd(query);
-						Statement statement = conn.createStatement();
-						ResultSet resultSet = statement.executeQuery(query);
+	                        EhiLogger.traceBackendCmd(query);
+	                        Statement statement = conn.createStatement();
+	                        ResultSet resultSet = statement.executeQuery(query);
 
-						while (resultSet.next()) {
-							recConv.addAttrValue(resultSet, 1, sqlid, iomObj, new ColumnWrapper(new StructAttrPath(new ViewableTransferElement(attributeDef))),attributeDef,structQueue,attrtableWrapper,fixref,genericDomains,null);
-						}
-					}
+	                        while (resultSet.next()) {
+	                            recConv.addAttrValue(resultSet, 1, sqlid, iomObj, new ColumnWrapper(new StructAttrPath(new ViewableTransferElement(attributeDef))),attributeDef,structQueue,attrtableWrapper,fixref,genericDomains,null);
+	                        }
+	                    }
+	                }
+	                baseWrapper=baseWrapper.getExtending();
 				}
 
 		         // add StructWrapper around embedded associations that are mapped to a link table
@@ -1646,7 +1650,7 @@ public class TransferToXtf {
             ret.append(recConv.getSqlType(root.getViewable()));
             ret.append(" "+tabalias);
             RoleDef role=wrapper.getRole().getOppEnd();
-            ArrayList<ViewableWrapper> targetTables = recConv.getTargetTables(role.getDestination());
+            ArrayList<ViewableWrapper> targetTables = recConv.getTargetTables(role);
             String roleSqlName=ili2sqlName.mapIliRoleDef(role,root.getSqlTablename(),wrapper.getParentTable().getSqlTablename(),targetTables.size()>1);
             ret.append(" WHERE "+tabalias+"."+roleSqlName+"="+wrapper.getParentSqlId());
             subSelectSep=" UNION ";

@@ -235,8 +235,18 @@ public class TrafoConfig {
 		String iliname=getIliQname(attr);
 		setSetting(config, iliname, tag,value);
 	}
-    public void setAttrConfig(Viewable iliclass,AttributeDef attr, int epsgCode,String tag,String value) {
-        String iliname=getIliQname(attr)+":"+epsgCode+"("+iliclass.getScopedName()+")";
+    public void setAttrConfig(Viewable iliclass,AttributeDef attr, Integer epsgCode,String tag,String value) {
+        String epsgCodeTxt="";
+        String subtype="";
+        if(epsgCode!=null) {
+            epsgCodeTxt=":"+epsgCode;
+            subtype="("+iliclass.getScopedName()+")";
+        }else {
+            if(!iliclass.equals(attr.getContainer())) {
+                subtype="("+iliclass.getScopedName()+")";
+            }
+        }
+        String iliname=getIliQname(attr)+epsgCodeTxt+subtype;
         setSetting(config, iliname, tag,value);
     }
 	public void setViewableConfig(Viewable aclass, String tag,String value) {

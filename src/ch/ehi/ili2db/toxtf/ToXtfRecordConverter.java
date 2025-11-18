@@ -87,7 +87,7 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
         }
 	}
 	/** creates sql query statement for a class.
-	 * @param aclass type of objects to build query for
+	 * @param targetClass type of objects to build query for
 	 * @param wrapper not null, if building query for struct values
 	 * @return SQL-Query statement
 	 */
@@ -147,7 +147,7 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
                                 ret.append(makeColumnRef(tableAlias,roleSqlName));
                             }
                        }else {
-                           ArrayList<ViewableWrapper> targetTables = getTargetTables(role.getDestination());
+                           ArrayList<ViewableWrapper> targetTables = getTargetTables(role);
                            for(ViewableWrapper targetTable : targetTables){
                                  String roleSqlName=ili2sqlName.mapIliRoleDef(role,sqlTableName,targetTable.getSqlTablename(),targetTables.size()>1);
                                  // a role of an embedded association?
@@ -213,7 +213,7 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 		    }else if(structWrapper0 instanceof EmbeddedLinkWrapper) {
 		        EmbeddedLinkWrapper structWrapper=(EmbeddedLinkWrapper)structWrapper0;
 		        RoleDef role=structWrapper.getRole().getOppEnd();
-                ArrayList<ViewableWrapper> targetTables = getTargetTables(role.getDestination());
+                ArrayList<ViewableWrapper> targetTables = getTargetTables(role);
                 String roleSqlName=ili2sqlName.mapIliRoleDef(role,rootWrapper.getSqlTablename(),structWrapper.getParentTable().getSqlTablename(),targetTables.size()>1);
                 ret.append(sep+" r0."+roleSqlName+"=?");
 		    }
@@ -565,7 +565,7 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
                                 }
                             }
 	                    }else {
-	                        ArrayList<ViewableWrapper> targetTables = getTargetTables(role.getDestination());
+	                        ArrayList<ViewableWrapper> targetTables = getTargetTables(role);
 	                        boolean refAlreadyDefined=false;
 	                          for(ViewableWrapper targetTable : targetTables){
 	                                 String sqlRoleName=ili2sqlName.mapIliRoleDef(role,getSqlType(table.getViewable()).getName(),targetTable.getSqlTablename(),targetTables.size()>1);

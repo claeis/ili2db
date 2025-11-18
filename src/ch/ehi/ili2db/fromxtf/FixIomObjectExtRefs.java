@@ -1,8 +1,11 @@
 package ch.ehi.ili2db.fromxtf;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
+import ch.interlis.ili2c.metamodel.AbstractClassDef;
+import ch.interlis.ili2c.metamodel.RoleDef;
 import ch.interlis.ili2c.metamodel.Viewable;
 import ch.interlis.iom.IomObject;
 
@@ -14,12 +17,15 @@ public class FixIomObjectExtRefs {
 	private HashMap<IomObject,Target> refs=new HashMap<IomObject,Target>();
     private Map<String, String> genericDomains=null;
 	private class Target{
-		public Target(Viewable aclass,boolean isExternal) {
+		public Target(boolean isExternal) {
 			super();
-			this.aclass = aclass;
+			this.targetClass = new java.util.ArrayList<Viewable>();
 			this.isExternal=isExternal;
 		}
-		Viewable aclass;
+		public void addTargetClass(Viewable target) {
+		    targetClass.add(target);
+		}
+		java.util.List<Viewable> targetClass;
 		boolean isExternal;
 			
 	}
@@ -37,8 +43,18 @@ public class FixIomObjectExtRefs {
 		return rootTag;
 	}
 	public void addFix(IomObject refobj, Viewable targetClass,boolean isExternal) {
-		refs.put(refobj, new Target(targetClass,isExternal));
+        Target target=new Target(isExternal);
+        refs.put(refobj, target);
+	    target.addTargetClass(targetClass);
 	}
+    public void addFix(IomObject refobj, RoleDef role,boolean isExternal) {
+        Target target=new Target(isExternal);
+        refs.put(refobj, target);
+        for(Iterator<AbstractClassDef> targetClassIt=role.iteratorDestination();targetClassIt.hasNext();) {
+            AbstractClassDef targetClass=targetClassIt.next();
+            target.addTargetClass(targetClass);
+        }
+    }
 
 	public boolean needsFixing() {
 		return !refs.isEmpty();
@@ -48,8 +64,8 @@ public class FixIomObjectExtRefs {
 		return refs.keySet();
 	}
 
-	public Viewable getTargetClass(IomObject ref) {
-		return refs.get(ref).aclass;
+	public Iterable<Viewable> getTargetClass(IomObject ref) {
+		return refs.get(ref).targetClass;
 	}
 
 	public long getBasketSqlId() {

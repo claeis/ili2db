@@ -11,6 +11,17 @@ ideas/open issues/questions
 - einfache Liste mit den neu erzeugten Vertexpunkte (aufgrund der Overlap-Bereinigung)
 - Schalter für das "disablen" der Overlaps-Bereinigung. Bei vorhandenen gueltigen Overlaps erfolgen: a) Import mit NULL als Polygon, ohne Fehlermeldung, b) Import mit NULL als Polygon, mit Warning, c) kein Import, Fehlermeldung
 
+ili2db 5.5.0 (2025-11-18)
+---------------------------
+- fix Missing sequence default on primary of BAG OF value tables (#571)
+- fix support of BAG {1..*} OF ReferenceType (#572)
+- fix support OF BAG {1..*} OF ReferenceType in abstract class (#570)
+- fix support of RoleDef with OR (#573)
+- ili2gpkg: escape table-comment string (#574)
+- ili2c-5.6.7
+- iox-ili-1.24.3
+- ehisqlgen-1.16.3
+
 ili2db 5.4.0 (2025-09-16)
 ---------------------------
 - fix export XTF of association with UUID/OID
