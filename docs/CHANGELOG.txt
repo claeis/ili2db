@@ -13,6 +13,8 @@ ideas/open issues/questions
 
 ili2db 5.5.1 (2025-11-xx)
 ---------------------------
+- fix export in base model format when catalogue is used (#488)
+- iox-ili-1.24.4+
 
 ili2db 5.5.0 (2025-11-18)
 ---------------------------
