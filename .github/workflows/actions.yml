@@ -1,0 +1,137 @@
+name: Java CI
+
+on: [push, pull_request]
+
+env:
+  PGPORT: 5433
+  PGUSER: postgres
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: password
+          MYSQL_DATABASE: ili2db
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+      
+      postgres:
+        image: postgis/postgis:12-3.0
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: ili2db
+        ports:
+          - 5433:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+      
+      mssql:
+        image: mcr.microsoft.com/mssql/server:2022-latest
+        env:
+          ACCEPT_EULA: Y
+          SA_PASSWORD: MsInst2019x
+          MSSQL_PID: Developer
+        ports:
+          - 1433:1433
+      
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up JDK 8
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '8'
+          cache: 'gradle'
+      
+      - name: Set up Python 3
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+      
+      - name: Install dependencies
+        run: |
+          sudo apt-get update 
+          sudo apt-get install -y postgresql-client
+          python -m pip install --upgrade pip
+          python -m pip install docutils Pygments rst2html
+      
+      - name: Make Gradle wrapper executable
+        run: chmod +x ./gradlew
+      
+      - name: Wait for MSSQL to be ready
+        run: |
+          echo "Waiting for MSSQL to be ready..."
+          for i in {1..30}; do
+            if docker exec $(docker ps -q --filter ancestor=mcr.microsoft.com/mssql/server:2022-latest) /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P MsInst2019x -C -Q "SELECT 1" > /dev/null 2>&1; then
+              echo "MSSQL is ready!"
+              break
+            fi
+            echo "Waiting... ($i/30)"
+            sleep 2
+          done
+      
+      - name: Setup databases
+        run: |
+          echo "Setting up databases..."
+          # Create MSSQL database
+          docker exec $(docker ps -q --filter ancestor=mcr.microsoft.com/mssql/server:2022-latest) /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P MsInst2019x -C -Q "CREATE DATABASE ili2db;"
+          # Verify MySQL
+          mysql -h127.0.0.1 -uroot -ppassword -e 'SHOW VARIABLES LIKE "%version%";'
+          # Setup PostgreSQL extensions
+          PGPASSWORD=postgres psql -h localhost -p $PGPORT -U $PGUSER -d ili2db -c 'SELECT version();'
+          PGPASSWORD=postgres psql -h localhost -p $PGPORT -U $PGUSER -d ili2db -c 'CREATE EXTENSION IF NOT EXISTS postgis;'
+          PGPASSWORD=postgres psql -h localhost -p $PGPORT -U $PGUSER -d ili2db -c 'CREATE EXTENSION IF NOT EXISTS "uuid-ossp";'
+          PGPASSWORD=postgres psql -h localhost -p $PGPORT -U $PGUSER -d ili2db -c 'SELECT postgis_full_version();'
+      
+      - name: Run tests
+        run: |
+          echo "Running tests..."
+          ./gradlew jar test
+          ./gradlew ili2mysqlJar ili2mysqlTest -Dmyurl=jdbc:mysql://localhost/ili2db?useSSL=false -Dmyusr=root -Dmypwd=password
+          ./gradlew ili2pgJar ili2pgTest -Ddburl=jdbc:postgresql://127.0.0.1:$PGPORT/ili2db -Ddbusr=$PGUSER -Ddbpwd=postgres
+          ./gradlew ili2gpkgJar ili2gpkgTest
+          ./gradlew ili2fgdbJar
+          ./gradlew ili2mssqlJar ili2mssqlTest "-Ddburl=jdbc:sqlserver://localhost;databaseName=ili2db" -Ddbusr=sa -Ddbpwd=MsInst2019x
+      
+      - name: Build documentation and distribution
+        run: |
+          RST2HTML_PATH=$(which rst2html.py || which rst2html || echo "")
+          if [ -z "$RST2HTML_PATH" ]; then
+            echo "Error: rst2html.py not found in PATH"
+            echo "Available Python scripts:"
+            find /usr/local/bin /usr/bin ~/.local/bin -name "rst2html*" 2>/dev/null || true
+            pip3 show docutils
+            exit 1
+          fi
+          echo "rst2html.py found at: $RST2HTML_PATH"
+          ./gradlew -Drst2html="$RST2HTML_PATH" usrdoc testreport ili2mysqlBindist ili2pgBindist ili2fgdbBindist ili2mssqlBindist ili2oraBindist
+      
+      - name: Upload test report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: junit-reports
+          path: build/junitreport/
+          retention-days: 7
+      
+      - name: Upload test report (fail fast)
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: junit-reports-fail
+          path: build/junitreport/
+          retention-days: 7
