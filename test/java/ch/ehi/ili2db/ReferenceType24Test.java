@@ -84,6 +84,42 @@ public abstract class ReferenceType24Test {
         } finally {
         }
     }
+    @Test
+    public void importIliExternal() throws Exception {
+        // EhiLogger.getInstance().setTraceFilter(false);
+        try {
+            setup.resetDb();
+
+            File data = new File(TEST_DATA_DIR, "ReferenceExternal24.ili");
+            Config config = setup.initConfig(data.getPath(), data.getPath() + ".log");
+            Ili2db.setNoSmartMapping(config);
+            config.setFunction(Config.FC_SCHEMAIMPORT);
+            config.setCreateFk(Config.CREATE_FK_YES);
+            config.setTidHandling(Config.TID_HANDLING_PROPERTY);
+            config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
+            Ili2db.readSettingsFromDb(config);
+            Ili2db.run(config, null);
+            // assertions
+            // t_ili2db_attrname
+            String[][] attrName_expectedValues = new String[][] {
+                    { "ReferenceExternal24.TopicA.CatArray.Name", "aname", "catarray", null },
+                    { "ReferenceExternal24.TopicA.CatArray.Liste", "liste", "catarray", "item" },
+                    { "ReferenceExternal24.TopicA.Item.Name", "aname", "item", null },
+            };
+            // t_ili2db_trafo
+            String[][] trafo_expectedValues = new String[][] {
+                    { "ReferenceExternal24.TopicA.CatArray", "ch.ehi.ili2db.inheritance", "newClass" },
+                    { "ReferenceExternal24.TopicA.Item", "ch.ehi.ili2db.inheritance", "newClass" },
+            };
+            String[][] columnForeignKey_expectedValues = new String[][] {
+                    { "catarray", null, "liste", "item" },
+            };
+            importIli_Assert(attrName_expectedValues, trafo_expectedValues, columnForeignKey_expectedValues);
+        } catch (Exception e) {
+            throw new IoxException(e);
+        } finally {
+        }
+    }
 
     private void importIli_Assert(String[][] attrName_expectedValues, String[][] trafo_expectedValues,String[][] columnForeignKey_expectedValues)
             throws SQLException {
@@ -111,7 +147,74 @@ public abstract class ReferenceType24Test {
         }finally{
         }
     }
-
+    @Test
+    public void importXtfExternal_noValidation() throws Exception
+    {
+        {
+            importIliExternal();
+        }
+        //EhiLogger.getInstance().setTraceFilter(false);
+        try{
+            File data=new File(TEST_DATA_DIR,"ReferenceExternal24a.xtf");
+            Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+            config.setFunction(Config.FC_IMPORT);
+            config.setImportTid(true);
+            config.setImportBid(true);
+            config.setValidation(false);
+            Ili2db.readSettingsFromDb(config);
+            Ili2db.run(config,null);
+        }catch(Exception e) {
+            throw new IoxException(e);
+        }finally{
+        }
+        try{
+            File data=new File(TEST_DATA_DIR,"ReferenceExternal24b.xtf");
+            Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+            config.setFunction(Config.FC_IMPORT);
+            config.setImportTid(true);
+            config.setImportBid(true);
+            config.setValidation(false);
+            Ili2db.readSettingsFromDb(config);
+            Ili2db.run(config,null);
+        }catch(Exception e) {
+            throw new IoxException(e);
+        }finally{
+        }
+    }
+    @Test
+    public void importXtfExternal_doValidation() throws Exception
+    {
+        {
+            importIliExternal();
+        }
+        //EhiLogger.getInstance().setTraceFilter(false);
+        try{
+            File data=new File(TEST_DATA_DIR,"ReferenceExternal24a.xtf");
+            Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+            config.setFunction(Config.FC_IMPORT);
+            config.setImportTid(true);
+            config.setImportBid(true);
+            config.setValidation(true);
+            Ili2db.readSettingsFromDb(config);
+            Ili2db.run(config,null);
+        }catch(Exception e) {
+            throw new IoxException(e);
+        }finally{
+        }
+        try{
+            File data=new File(TEST_DATA_DIR,"ReferenceExternal24b.xtf");
+            Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
+            config.setFunction(Config.FC_IMPORT);
+            config.setImportTid(true);
+            config.setImportBid(true);
+            config.setValidation(true);
+            Ili2db.readSettingsFromDb(config);
+            Ili2db.run(config,null);
+        }catch(Exception e) {
+            throw new IoxException(e);
+        }finally{
+        }
+    }
 	
 	@Test
 	public void exportXtfSimple() throws Exception {
@@ -133,6 +236,26 @@ public abstract class ReferenceType24Test {
 		} finally {
 		}
 	}
+    @Test
+    public void exportXtfExternal() throws Exception {
+        {
+            importXtfExternal_noValidation();
+        }
+        try {
+            File data = new File(TEST_DATA_DIR,"ReferenceExternal24a-out.xtf");
+            Config config = setup.initConfig(data.getPath(), data.getPath() + ".log");
+            config.setModels("ReferenceExternal24");
+            config.setFunction(Config.FC_EXPORT);
+            config.setExportTid(true);
+            config.setValidation(false);
+            Ili2db.readSettingsFromDb(config);
+            Ili2db.run(config, null);
+            exportXtfExternal_Assert(data);
+        }catch(Exception e) {
+            throw new IoxException(e);
+        } finally {
+        }
+    }
 
     private void exportXtfSimple_Assert(File data) throws IoxException, Ili2cFailure {
         HashMap<String, IomObject> objs = new HashMap<String, IomObject>();
@@ -189,6 +312,43 @@ public abstract class ReferenceType24Test {
             Assert.assertEquals(1,obj0.getattrvaluecount("Liste"));
             IomObject item0=obj0.getattrobj("Liste", 0);
             Assert.assertEquals("3", item0.getobjectrefoid());
+        }
+    }
+    private void exportXtfExternal_Assert(File data) throws IoxException, Ili2cFailure {
+        HashMap<String, IomObject> objs = new HashMap<String, IomObject>();
+        Xtf24Reader reader = new Xtf24Reader(data);
+        ch.interlis.ili2c.config.Configuration ili2cConfig=new ch.interlis.ili2c.config.Configuration();
+        ili2cConfig.addFileEntry(new FileEntry(new File(TEST_DATA_DIR,"ReferenceExternal24.ili").getPath(),FileEntryKind.ILIMODELFILE));
+        TransferDescription td = ch.interlis.ili2c.Ili2c.runCompiler(ili2cConfig);
+        assertNotNull(td);
+        reader.setModel(td);
+        IoxEvent event = null;
+        do {
+            event = reader.read();
+            if (event instanceof StartTransferEvent) {
+            } else if (event instanceof StartBasketEvent) {
+            } else if (event instanceof ObjectEvent) {
+                IomObject iomObj = ((ObjectEvent) event).getIomObject();
+                if (iomObj.getobjectoid() != null) {
+                    objs.put(iomObj.getobjectoid(), iomObj);
+                }
+            } else if (event instanceof EndBasketEvent) {
+            } else if (event instanceof EndTransferEvent) {
+            }
+        } while (!(event instanceof EndTransferEvent));
+        // check values of array
+        {
+            IomObject obj0 = objs.get("1");
+            Assert.assertNotNull(obj0);
+            Assert.assertEquals("ReferenceExternal24.TopicA.Item", obj0.getobjecttag());
+        }
+        {
+            IomObject obj0 = objs.get("10");
+            Assert.assertNotNull(obj0);
+            Assert.assertEquals("ReferenceExternal24.TopicA.CatArray", obj0.getobjecttag());
+            Assert.assertEquals(1,obj0.getattrvaluecount("Liste"));
+            IomObject item0=obj0.getattrobj("Liste", 0);
+            Assert.assertEquals("1", item0.getobjectrefoid());
         }
     }
 

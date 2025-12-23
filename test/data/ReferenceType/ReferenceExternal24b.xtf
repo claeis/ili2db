@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?><ili:transfer xmlns:ili="http://www.interlis.ch/xtf/2.4/INTERLIS" xmlns:geom="http://www.interlis.ch/geometry/1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ReferenceExternal24="http://www.interlis.ch/xtf/2.4/ReferenceExternal24">
+<ili:headersection><ili:models><ili:model>ReferenceExternal24</ili:model></ili:models><ili:sender>ili2pg-developer-workspace</ili:sender></ili:headersection>
+<ili:datasection>
+<ReferenceExternal24:TopicA ili:bid="ReferenceExternal24.b">
+<ReferenceExternal24:CatArray ili:tid="10">
+  <ReferenceExternal24:Liste ili:ref="1"/>
+</ReferenceExternal24:CatArray>
+</ReferenceExternal24:TopicA>
+</ili:datasection>
+</ili:transfer>
