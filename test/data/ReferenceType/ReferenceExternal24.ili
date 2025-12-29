@@ -1,0 +1,19 @@
+INTERLIS 2.4;
+
+MODEL ReferenceExternal24
+  AT "mailto:david@opengis.ch" VERSION "2015-09-23" =
+
+  TOPIC TopicA =
+
+    CLASS Item =
+      Name : TEXT*25;
+    END Item;
+
+    CLASS CatArray  =
+      Name : TEXT*10;
+      Liste: REFERENCE TO (EXTERNAL) Item;
+    END CatArray;
+
+  END TopicA;
+  
+END ReferenceExternal24.

@@ -18,8 +18,11 @@ import ch.interlis.iox.ObjectEvent;
 import ch.interlis.iox.StartBasketEvent;
 import ch.interlis.iox.StartTransferEvent;
 
-public abstract class ExtRefTest {
+/**
+ * tests the ili2db feature to import external references as string/text (instead of a db FK)
+ */
 	
+public abstract class ExtRefTest {
 	protected static final String TEST_OUT="test/data/ExtRef/";
     
 	protected AbstractTestSetup setup=createTestSetup();
