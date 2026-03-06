@@ -1,5 +1,6 @@
 package ch.ehi.ili2db;
 
+import ch.ehi.ili2db.base.DbNames;
 import ch.ehi.ili2db.base.Ili2db;
 import ch.ehi.ili2db.base.Ili2dbException;
 import ch.ehi.ili2db.gui.Config;
@@ -456,5 +457,81 @@ public abstract class ListOfBagOf24Test {
         assertEquals(2, structAttr.getattrvaluecount("Attr1"));
         assertEquals("HERSEN", structAttr.getattrprim("Attr1", 0));
         assertEquals("FLORIN", structAttr.getattrprim("Attr1", 1));
+    }
+
+    @Test
+    public void importInheritedBagOfPrimitiveTypeIli() throws Exception {
+        setup.resetDb();
+        File data = new File(TEST_OUT, "BagOfTopicInheritance.ili");
+        Config config = setup.initConfig(data.getPath(), data.getPath() + ".log");
+
+        Ili2db.setNoSmartMapping(config);
+        config.setFunction(Config.FC_SCHEMAIMPORT);
+        config.setCreateFk(Config.CREATE_FK_YES);
+        config.setInheritanceTrafo(Config.INHERITANCE_TRAFO_SMART2);
+        config.setTidHandling(Config.TID_HANDLING_PROPERTY);
+        config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
+        config.setOneGeomPerTable(true);
+        Ili2db.readSettingsFromDb(config);
+        Ili2db.run(config, null);
+
+        Ili2dbAssert.assertAttrNameTable(setup, new String[][]{
+                {"Model.BaseTopic.ClassA.BagAttr", "classa_bagattr", "classa_bagattr", "classa"},
+                {"Model.BaseTopic.ClassA.BagAttr", "bagattr", "classa_bagattr", null},
+                {"Model.BaseTopic.ClassA.BagAttr", "modelinhertdttrs_clssa_bagattr", "modelinheritedattrs_classa_bagattr", "modelinheritedattrs_classa"},
+                {"Model.BaseTopic.ClassA.BagAttr", "bagattr", "modelinheritedattrs_classa_bagattr", null},
+                {"Model.BaseTopic.ClassA.Enum", "classa_enum", "classa_enum", "classa"},
+                {"Model.BaseTopic.ClassA.Enum", "aenum", "classa_enum", null},
+                {"Model.BaseTopic.ClassA.Enum", "modelinhertdttrs_clssa_enum", "modelinheritedattrs_classa_enum", "modelinheritedattrs_classa"},
+                {"Model.BaseTopic.ClassA.Enum", "aenum", "modelinheritedattrs_classa_enum", null},
+                {"Model.RedefinedAttrs.ClassA.BagAttr", "modelredefndttrs_clssa_bagattr", "modelredefinedattrs_classa_bagattr", "modelredefinedattrs_classa"},
+                {"Model.RedefinedAttrs.ClassA.BagAttr", "bagattr", "modelredefinedattrs_classa_bagattr", null},
+                {"Model.RedefinedAttrs.ClassA.Enum", "modelredefndttrs_clssa_enum", "modelredefinedattrs_classa_enum", "modelredefinedattrs_classa"},
+                {"Model.RedefinedAttrs.ClassA.Enum", "aenum", "modelredefinedattrs_classa_enum", null},
+        });
+
+        Ili2dbAssert.assertTrafoTable(setup, new String[][]{
+                {"Model.BaseTopic.ClassA", "ch.ehi.ili2db.inheritance", "newAndSubClass"},
+                {"Model.BaseTopic.ClassA.BagAttr", "ch.ehi.ili2db.secondaryTable", "classa_bagattr"},
+                {"Model.BaseTopic.ClassA.BagAttr(Model.InheritedAttrs.ClassA)", "ch.ehi.ili2db.secondaryTable", "modelinheritedattrs_classa_bagattr"},
+                {"Model.BaseTopic.ClassA.Enum", "ch.ehi.ili2db.secondaryTable", "classa_enum"},
+                {"Model.BaseTopic.ClassA.Enum(Model.InheritedAttrs.ClassA)", "ch.ehi.ili2db.secondaryTable", "modelinheritedattrs_classa_enum"},
+                {"Model.InheritedAttrs.ClassA", "ch.ehi.ili2db.inheritance", "newAndSubClass"},
+                {"Model.RedefinedAttrs.ClassA", "ch.ehi.ili2db.inheritance", "newAndSubClass"},
+                {"Model.RedefinedAttrs.ClassA.BagAttr", "ch.ehi.ili2db.secondaryTable", "modelredefinedattrs_classa_bagattr"},
+                {"Model.RedefinedAttrs.ClassA.Enum", "ch.ehi.ili2db.secondaryTable", "modelredefinedattrs_classa_enum"},
+        });
+
+        Ili2dbAssert.assertTableContainsValues(setup, DbNames.CLASSNAME_TAB, new String[]{DbNames.CLASSNAME_TAB_ILINAME_COL, DbNames.CLASSNAME_TAB_SQLNAME_COL}, new String[][]{
+                {"Model.BaseTopic.ClassA", "classa"},
+                {"Model.BaseTopic.ClassA.BagAttr(Model.BaseTopic.ClassA)", "classa_bagattr"},
+                {"Model.BaseTopic.ClassA.BagAttr(Model.InheritedAttrs.ClassA)", "modelinheritedattrs_classa_bagattr"},
+                {"Model.BaseTopic.ClassA.Enum(Model.BaseTopic.ClassA)", "classa_enum"},
+                {"Model.BaseTopic.ClassA.Enum(Model.InheritedAttrs.ClassA)", "modelinheritedattrs_classa_enum"},
+                {"Model.InheritedAttrs.ClassA", "modelinheritedattrs_classa"},
+                {"Model.RedefinedAttrs.ClassA", "modelredefinedattrs_classa"},
+                {"Model.RedefinedAttrs.ClassA.BagAttr(Model.RedefinedAttrs.ClassA)", "modelredefinedattrs_classa_bagattr"},
+                {"Model.RedefinedAttrs.ClassA.Enum(Model.RedefinedAttrs.ClassA)", "modelredefinedattrs_classa_enum"},
+        }, null);
+
+        Ili2dbAssert.assertTableContainsValues(setup, DbNames.INHERIT_TAB, new String[]{DbNames.INHERIT_TAB_THIS_COL, DbNames.INHERIT_TAB_BASE_COL}, new String[][]{
+                {"Model.BaseTopic.ClassA", null},
+                {"Model.InheritedAttrs.ClassA", "Model.BaseTopic.ClassA"},
+                {"Model.RedefinedAttrs.ClassA", "Model.BaseTopic.ClassA"},
+        }, null);
+
+        try (Connection jdbcConnection = setup.createConnection()) {
+            assertTableContainsColumns(jdbcConnection, "classa", "T_Id", "T_basket", "T_Ili_Tid");
+            assertTableContainsColumns(jdbcConnection, "classa_bagattr", "T_Id", "T_basket", "T_Seq", "classa_bagattr", "bagattr");
+            assertTableContainsColumns(jdbcConnection, "classa_enum", "T_Id", "T_basket", "T_Seq", "classa_enum", "aenum");
+
+            assertTableContainsColumns(jdbcConnection, "modelinheritedattrs_classa", "T_Id", "T_basket", "T_Ili_Tid");
+            assertTableContainsColumns(jdbcConnection, "modelinheritedattrs_classa_bagattr", "T_Id", "T_basket", "T_Seq", "modelinhertdttrs_clssa_bagattr", "bagattr");
+            assertTableContainsColumns(jdbcConnection, "modelinheritedattrs_classa_enum", "T_Id", "T_basket", "T_Seq", "modelinhertdttrs_clssa_enum", "aenum");
+
+            assertTableContainsColumns(jdbcConnection, "modelredefinedattrs_classa", "T_Id", "T_basket", "T_Ili_Tid");
+            assertTableContainsColumns(jdbcConnection, "modelredefinedattrs_classa_bagattr", "T_Id", "T_basket", "T_Seq", "modelredefndttrs_clssa_bagattr", "bagattr");
+            assertTableContainsColumns(jdbcConnection, "modelredefinedattrs_classa_enum", "T_Id", "T_basket", "T_Seq", "modelredefndttrs_clssa_enum", "aenum");
+        }
     }
 }
