@@ -181,7 +181,7 @@ public class AbstractRecordConverter {
 			if(isUuidOid(td,oidDomain)){
 				DbColUuid dbColIliTid= new DbColUuid();
 				dbColIliTid.setName(DbNames.T_ILI_TID_COL);
-				// CREATE EXTENSION "uuid-ossp";
+				// CREATE EXTENSION "pgcrypto";
 				dbColIliTid.setDefaultValue(uuid_default_value);
 				dbTable.addColumn(dbColIliTid);
 			}else{

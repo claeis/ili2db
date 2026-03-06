@@ -27,7 +27,7 @@ COMMENT ON TABLE CatalogueObjects1.multilingualtext IS '@iliname Localisation_V1
 CREATE TABLE CatalogueObjects1.topica_katalog_programm (
   T_Id bigint PRIMARY KEY DEFAULT nextval('CatalogueObjects1.t_ili2db_seq')
   ,T_basket bigint NOT NULL
-  ,T_Ili_Tid uuid NULL DEFAULT uuid_generate_v4()
+  ,T_Ili_Tid uuid NULL DEFAULT gen_random_uuid()
   ,code varchar(20) NOT NULL
   ,programm text NULL
   ,programm_de text NULL

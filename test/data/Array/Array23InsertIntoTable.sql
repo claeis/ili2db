@@ -133,7 +133,7 @@ INSERT INTO array23.t_ili2db_settings VALUES ('ch.ehi.ili2db.BasketHandling', 'r
 INSERT INTO array23.t_ili2db_settings VALUES ('ch.ehi.ili2db.defaultSrsAuthority', 'EPSG');
 INSERT INTO array23.t_ili2db_settings VALUES ('ch.ehi.ili2db.defaultSrsCode', '21781');
 INSERT INTO array23.t_ili2db_settings VALUES ('ch.ehi.ili2db.maxSqlNameLength', '60');
-INSERT INTO array23.t_ili2db_settings VALUES ('ch.ehi.ili2db.uuidDefaultValue', 'uuid_generate_v4()');
+INSERT INTO array23.t_ili2db_settings VALUES ('ch.ehi.ili2db.uuidDefaultValue', 'gen_random_uuid()');
 INSERT INTO array23.t_ili2db_settings VALUES ('ch.ehi.ili2db.multiPointTrafo', 'coalesce');
 INSERT INTO array23.t_ili2db_table_prop VALUES ('binbox_', 'ch.ehi.ili2db.tableKind', 'STRUCTURE');
 INSERT INTO array23.t_ili2db_table_prop VALUES ('farbe', 'ch.ehi.ili2db.tableKind', 'STRUCTURE');

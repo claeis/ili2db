@@ -29,7 +29,7 @@ INSERT INTO preandpostscriptschema.t_ili2db_settings VALUES ('ch.ehi.ili2db.mult
 INSERT INTO preandpostscriptschema.t_ili2db_settings VALUES ('ch.ehi.ili2db.catalogueRefTrafo', 'coalesce');
 INSERT INTO preandpostscriptschema.t_ili2db_settings VALUES ('ch.ehi.ili2db.maxSqlNameLength', '60');
 INSERT INTO preandpostscriptschema.t_ili2db_settings VALUES ('ch.ehi.ili2db.defaultSrsCode', '21781');
-INSERT INTO preandpostscriptschema.t_ili2db_settings VALUES ('ch.ehi.ili2db.uuidDefaultValue', 'uuid_generate_v4()');
+INSERT INTO preandpostscriptschema.t_ili2db_settings VALUES ('ch.ehi.ili2db.uuidDefaultValue', 'gen_random_uuid()');
 INSERT INTO preandpostscriptschema.t_ili2db_settings VALUES ('ch.ehi.ili2db.inheritanceTrafo', 'smart1');
 INSERT INTO preandpostscriptschema.t_ili2db_settings VALUES ('ch.ehi.ili2db.sender', 'ili2pg-3.8.2-20170421');
 INSERT INTO preandpostscriptschema.t_ili2db_settings VALUES ('ch.interlis.ili2c.ilidirs', '%ILI_FROM_DB;%XTF_DIR;http://models.interlis.ch/;%JAR_DIR');
