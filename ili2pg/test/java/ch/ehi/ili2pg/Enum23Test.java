@@ -2,7 +2,6 @@ package ch.ehi.ili2pg;
 
 import java.io.File;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.HashMap;
@@ -29,52 +28,25 @@ import ch.interlis.iox.StartTransferEvent;
 //-Ddburl=jdbc:postgresql:dbname -Ddbusr=usrname -Ddbpwd=1234
 public class Enum23Test extends ch.ehi.ili2db.Enum23Test{
 	private static final String DBSCHEMA = "Enum23";
-    String dburl;
-    String dbuser;
-    String dbpwd; 
-	Connection jdbcConnection=null;
-	Statement stmt=null;
 
     @Override
     protected AbstractTestSetup createTestSetup() {
-        dburl=System.getProperty("dburl"); 
-        dbuser=System.getProperty("dbusr");
-        dbpwd=System.getProperty("dbpwd"); 
+        String dburl=System.getProperty("dburl"); 
+        String dbuser=System.getProperty("dbusr");
+        String dbpwd=System.getProperty("dbpwd"); 
         return new PgTestSetup(dburl,dbuser,dbpwd,DBSCHEMA);
     }
 
-	public Config initConfig(String xtfFilename,String dbschema,String logfile) {
-		Config config=new Config();
-		new ch.ehi.ili2pg.PgMain().initConfig(config);
-		config.setDburl(dburl);
-		config.setDbusr(dbuser);
-		config.setDbpwd(dbpwd);
-		if(dbschema!=null){
-			config.setDbschema(dbschema);
-		}
-		if(logfile!=null){
-			config.setLogfile(logfile);
-		}
-		config.setXtffile(xtfFilename);
-		if(xtfFilename!=null && Ili2db.isItfFilename(xtfFilename)){
-			config.setItfTransferfile(true);
-		}
-		return config;
-	}
-	
 	@Test
 	public void importIliWithoutBeautify() throws Exception
 	{
 		Connection jdbcConnection=null;
+        Statement stmt=null;
 		try{
-		    Class driverClass = Class.forName("org.postgresql.Driver");
-	        jdbcConnection = DriverManager.getConnection(
-	        		dburl, dbuser, dbpwd);
-	        stmt=jdbcConnection.createStatement();			
-			stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");
+            setup.resetDb();
 			{
 				File data=new File("test/data/Enum23/Enum23.ili");
-				Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+				Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
                 Ili2db.setNoSmartMapping(config);
 				config.setFunction(Config.FC_SCHEMAIMPORT);
 				config.setCreateFk(Config.CREATE_FK_YES);
@@ -83,15 +55,18 @@ public class Enum23Test extends ch.ehi.ili2db.Enum23Test{
 				config.setCreateEnumDefs(Config.CREATE_ENUM_DEFS_MULTI);
 				Ili2db.readSettingsFromDb(config);
 				Ili2db.run(config,null);
+				
+	            jdbcConnection = setup.createConnection();
+	            stmt=jdbcConnection.createStatement();
 				{
-					String stmtTxt="SELECT dispName FROM "+DBSCHEMA+".enum1 WHERE ilicode ='Test2_ele'";
+					String stmtTxt="SELECT dispName FROM "+setup.prefixName("enum1")+" WHERE ilicode ='Test2_ele'";
 					Assert.assertTrue(stmt.execute(stmtTxt));
 					ResultSet rs=stmt.getResultSet();
 					Assert.assertTrue(rs.next());
 					Assert.assertEquals("Test2_ele",rs.getString(1));
 				}
 				{
-					String stmtTxt="SELECT dispName FROM "+DBSCHEMA+".enum1 WHERE ilicode ='Test3.ele_2'";
+					String stmtTxt="SELECT dispName FROM "+setup.prefixName("enum1")+" WHERE ilicode ='Test3.ele_2'";
 					Assert.assertTrue(stmt.execute(stmtTxt));
 					ResultSet rs=stmt.getResultSet();
 					Assert.assertTrue(rs.next());
@@ -99,6 +74,10 @@ public class Enum23Test extends ch.ehi.ili2db.Enum23Test{
 				}
 	        }
 		}finally{
+            if(stmt!=null) {
+                stmt.close();
+                stmt=null;
+            }
 			if(jdbcConnection!=null){
 				jdbcConnection.close();
 			}
@@ -109,15 +88,12 @@ public class Enum23Test extends ch.ehi.ili2db.Enum23Test{
 	public void importIliWithBeautify() throws Exception
 	{
 		Connection jdbcConnection=null;
+        Statement stmt=null;
 		try{
-		    Class driverClass = Class.forName("org.postgresql.Driver");
-	        jdbcConnection = DriverManager.getConnection(
-	        		dburl, dbuser, dbpwd);
-	        stmt=jdbcConnection.createStatement();			
-			stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");
+            setup.resetDb();
 			{
 				File data=new File("test/data/Enum23/Enum23.ili");
-				Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+				Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
                 Ili2db.setNoSmartMapping(config);
 				config.setFunction(Config.FC_SCHEMAIMPORT);
 				config.setCreateFk(Config.CREATE_FK_YES);
@@ -128,39 +104,45 @@ public class Enum23Test extends ch.ehi.ili2db.Enum23Test{
 				Ili2db.readSettingsFromDb(config);
 				Ili2db.run(config,null);
 		
+	            jdbcConnection = setup.createConnection();
+	            stmt=jdbcConnection.createStatement();
 				{
-					String stmtTxt="SELECT dispName FROM "+DBSCHEMA+".enum1 WHERE ilicode ='Test2_ele'";
+					String stmtTxt="SELECT dispName FROM "+setup.prefixName("enum1")+" WHERE ilicode ='Test2_ele'";
 					Assert.assertTrue(stmt.execute(stmtTxt));
 					ResultSet rs=stmt.getResultSet();
 					Assert.assertTrue(rs.next());
 					Assert.assertEquals("Test2 ele",rs.getString(1));
 				}
 				{
-					String stmtTxt="SELECT dispName FROM "+DBSCHEMA+".enum1 WHERE ilicode ='Test3.ele_2'";
+					String stmtTxt="SELECT dispName FROM "+setup.prefixName("enum1")+" WHERE ilicode ='Test3.ele_2'";
 					Assert.assertTrue(stmt.execute(stmtTxt));
 					ResultSet rs=stmt.getResultSet();
 					Assert.assertTrue(rs.next());
 					Assert.assertEquals("Test3.ele 2",rs.getString(1));
 				}
 				{
-					String stmtTxt="SELECT dispName FROM "+DBSCHEMA+".classa1_attr3 WHERE ilicode ='Test2_ele'";
+					String stmtTxt="SELECT dispName FROM "+setup.prefixName("classa1_attr3")+" WHERE ilicode ='Test2_ele'";
 					Assert.assertTrue(stmt.execute(stmtTxt));
 					ResultSet rs=stmt.getResultSet();
 					Assert.assertTrue(rs.next());
 					Assert.assertEquals("Test2 ele",rs.getString(1));
 				}
 				{
-					String stmtTxt="SELECT dispName FROM "+DBSCHEMA+".classa1_attr3 WHERE ilicode ='Test3.ele_2'";
+					String stmtTxt="SELECT dispName FROM "+setup.prefixName("classa1_attr3")+" WHERE ilicode ='Test3.ele_2'";
 					Assert.assertTrue(stmt.execute(stmtTxt));
 					ResultSet rs=stmt.getResultSet();
 					Assert.assertTrue(rs.next());
 					Assert.assertEquals("Test3.ele 2",rs.getString(1));
 				}
-				Assert.assertFalse(DbUtility.tableExists(jdbcConnection, new DbTableName(DBSCHEMA,"boolean")));
-				Assert.assertFalse(DbUtility.tableExists(jdbcConnection, new DbTableName(DBSCHEMA,"classa1_attr2")));
-				Assert.assertFalse(DbUtility.tableExists(jdbcConnection, new DbTableName(DBSCHEMA,"classa1_attr4")));
+				Assert.assertFalse(DbUtility.tableExists(jdbcConnection, new DbTableName(setup.getSchema(),"boolean")));
+				Assert.assertFalse(DbUtility.tableExists(jdbcConnection, new DbTableName(setup.getSchema(),"classa1_attr2")));
+				Assert.assertFalse(DbUtility.tableExists(jdbcConnection, new DbTableName(setup.getSchema(),"classa1_attr4")));
 			}
 		}finally{
+            if(stmt!=null) {
+                stmt.close();
+                stmt=null;
+            }
 			if(jdbcConnection!=null){
 				jdbcConnection.close();
 			}
@@ -170,15 +152,12 @@ public class Enum23Test extends ch.ehi.ili2db.Enum23Test{
     public void importIliWithTxtCol() throws Exception
     {
         Connection jdbcConnection=null;
+        Statement stmt=null;
         try{
-            Class driverClass = Class.forName("org.postgresql.Driver");
-            jdbcConnection = DriverManager.getConnection(
-                    dburl, dbuser, dbpwd);
-            stmt=jdbcConnection.createStatement();          
-            stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");
+            setup.resetDb();
             {
                 File data=new File("test/data/Enum23/Enum23.ili");
-                Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+                Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
                 Ili2db.setNoSmartMapping(config);
                 config.setFunction(Config.FC_SCHEMAIMPORT);
                 config.setCreateFk(Config.CREATE_FK_YES);
@@ -190,43 +169,45 @@ public class Enum23Test extends ch.ehi.ili2db.Enum23Test{
                 Ili2db.readSettingsFromDb(config);
                 Ili2db.run(config,null);
         
+                jdbcConnection = setup.createConnection();
+                stmt=jdbcConnection.createStatement();
                 if(true){
-                    String stmtTxt="SELECT dispName FROM "+DBSCHEMA+".enum1 WHERE ilicode ='Test2_ele'";
+                    String stmtTxt="SELECT dispName FROM "+setup.prefixName("enum1")+" WHERE ilicode ='Test2_ele'";
                     Assert.assertTrue(stmt.execute(stmtTxt));
                     ResultSet rs=stmt.getResultSet();
                     Assert.assertTrue(rs.next());
                     Assert.assertEquals("Test2 ele",rs.getString(1));
                 }
                 if(true){
-                    String stmtTxt="SELECT dispName FROM "+DBSCHEMA+".enum1 WHERE ilicode ='Test3.ele_2'";
+                    String stmtTxt="SELECT dispName FROM "+setup.prefixName("enum1")+" WHERE ilicode ='Test3.ele_2'";
                     Assert.assertTrue(stmt.execute(stmtTxt));
                     ResultSet rs=stmt.getResultSet();
                     Assert.assertTrue(rs.next());
                     Assert.assertEquals("Test3.ele 2",rs.getString(1));
                 }
                 if(true){
-                    String stmtTxt="SELECT dispName FROM "+DBSCHEMA+".enum1 WHERE ilicode ='Test4_ele'";
+                    String stmtTxt="SELECT dispName FROM "+setup.prefixName("enum1")+" WHERE ilicode ='Test4_ele'";
                     Assert.assertTrue(stmt.execute(stmtTxt));
                     ResultSet rs=stmt.getResultSet();
                     Assert.assertTrue(rs.next());
                     Assert.assertEquals("testelevier",rs.getString(1));
                 }
                 if(true){
-                    String stmtTxt="SELECT dispName FROM "+DBSCHEMA+".classa1_attr3 WHERE ilicode ='Test2_ele'";
+                    String stmtTxt="SELECT dispName FROM "+setup.prefixName("classa1_attr3")+" WHERE ilicode ='Test2_ele'";
                     Assert.assertTrue(stmt.execute(stmtTxt));
                     ResultSet rs=stmt.getResultSet();
                     Assert.assertTrue(rs.next());
                     Assert.assertEquals("Test2 ele",rs.getString(1));
                 }
                 if(true){
-                    String stmtTxt="SELECT dispName FROM "+DBSCHEMA+".classa1_attr3 WHERE ilicode ='Test3.ele_2'";
+                    String stmtTxt="SELECT dispName FROM "+setup.prefixName("classa1_attr3")+" WHERE ilicode ='Test3.ele_2'";
                     Assert.assertTrue(stmt.execute(stmtTxt));
                     ResultSet rs=stmt.getResultSet();
                     Assert.assertTrue(rs.next());
                     Assert.assertEquals("Test3.ele 2",rs.getString(1));
                 }
                 if(true){
-                    String stmtTxt="SELECT dispName FROM "+DBSCHEMA+".classa1_attr3 WHERE ilicode ='Test4_ele'";
+                    String stmtTxt="SELECT dispName FROM "+setup.prefixName("classa1_attr3")+" WHERE ilicode ='Test4_ele'";
                     Assert.assertTrue(stmt.execute(stmtTxt));
                     ResultSet rs=stmt.getResultSet();
                     Assert.assertTrue(rs.next());
@@ -234,6 +215,10 @@ public class Enum23Test extends ch.ehi.ili2db.Enum23Test{
                 }
             }
         }finally{
+            if(stmt!=null) {
+                stmt.close();
+                stmt=null;
+            }
             if(jdbcConnection!=null){
                 jdbcConnection.close();
             }
@@ -243,15 +228,12 @@ public class Enum23Test extends ch.ehi.ili2db.Enum23Test{
     public void importIliWithTxtCol_fr() throws Exception
     {
         Connection jdbcConnection=null;
+        Statement stmt=null;
         try{
-            Class driverClass = Class.forName("org.postgresql.Driver");
-            jdbcConnection = DriverManager.getConnection(
-                    dburl, dbuser, dbpwd);
-            stmt=jdbcConnection.createStatement();          
-            stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");
+            setup.resetDb();
             {
                 File data=new File("test/data/Enum23/Enum23.ili");
-                Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+                Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
                 Ili2db.setNoSmartMapping(config);
                 config.setFunction(Config.FC_SCHEMAIMPORT);
                 config.setCreateFk(Config.CREATE_FK_YES);
@@ -264,43 +246,45 @@ public class Enum23Test extends ch.ehi.ili2db.Enum23Test{
                 Ili2db.readSettingsFromDb(config);
                 Ili2db.run(config,null);
         
+                jdbcConnection = setup.createConnection();
+                stmt=jdbcConnection.createStatement();
                 if(true){
-                    String stmtTxt="SELECT dispName FROM "+DBSCHEMA+".enum1_fr WHERE ilicode ='Test2_ele'";
+                    String stmtTxt="SELECT dispName FROM "+setup.prefixName("enum1_fr")+" WHERE ilicode ='Test2_ele'";
                     Assert.assertTrue(stmt.execute(stmtTxt));
                     ResultSet rs=stmt.getResultSet();
                     Assert.assertTrue(rs.next());
                     Assert.assertEquals("Test2 ele fr",rs.getString(1));
                 }
                 if(true){
-                    String stmtTxt="SELECT dispName FROM "+DBSCHEMA+".enum1_fr WHERE ilicode ='Test3.ele_2'";
+                    String stmtTxt="SELECT dispName FROM "+setup.prefixName("enum1_fr")+" WHERE ilicode ='Test3.ele_2'";
                     Assert.assertTrue(stmt.execute(stmtTxt));
                     ResultSet rs=stmt.getResultSet();
                     Assert.assertTrue(rs.next());
                     Assert.assertEquals("Test3 fr.ele 2 fr",rs.getString(1));
                 }
                 if(true){
-                    String stmtTxt="SELECT dispName FROM "+DBSCHEMA+".enum1_fr WHERE ilicode ='Test4_ele'";
+                    String stmtTxt="SELECT dispName FROM "+setup.prefixName("enum1_fr")+" WHERE ilicode ='Test4_ele'";
                     Assert.assertTrue(stmt.execute(stmtTxt));
                     ResultSet rs=stmt.getResultSet();
                     Assert.assertTrue(rs.next());
                     Assert.assertEquals("testelevier_fr",rs.getString(1));
                 }
                 if(true){
-                    String stmtTxt="SELECT dispName FROM "+DBSCHEMA+".classa1_fr_attr3_fr WHERE ilicode ='Test2_ele'";
+                    String stmtTxt="SELECT dispName FROM "+setup.prefixName("classa1_fr_attr3_fr")+" WHERE ilicode ='Test2_ele'";
                     Assert.assertTrue(stmt.execute(stmtTxt));
                     ResultSet rs=stmt.getResultSet();
                     Assert.assertTrue(rs.next());
                     Assert.assertEquals("Test2 ele fr",rs.getString(1));
                 }
                 if(true){
-                    String stmtTxt="SELECT dispName FROM "+DBSCHEMA+".classa1_fr_attr3_fr WHERE ilicode ='Test3.ele_2'";
+                    String stmtTxt="SELECT dispName FROM "+setup.prefixName("classa1_fr_attr3_fr")+" WHERE ilicode ='Test3.ele_2'";
                     Assert.assertTrue(stmt.execute(stmtTxt));
                     ResultSet rs=stmt.getResultSet();
                     Assert.assertTrue(rs.next());
                     Assert.assertEquals("Test3 fr.ele 2 fr",rs.getString(1));
                 }
                 if(true){
-                    String stmtTxt="SELECT dispName FROM "+DBSCHEMA+".classa1_fr_attr3_fr WHERE ilicode ='Test4_ele'";
+                    String stmtTxt="SELECT dispName FROM "+setup.prefixName("classa1_fr_attr3_fr")+" WHERE ilicode ='Test4_ele'";
                     Assert.assertTrue(stmt.execute(stmtTxt));
                     ResultSet rs=stmt.getResultSet();
                     Assert.assertTrue(rs.next());
@@ -308,6 +292,10 @@ public class Enum23Test extends ch.ehi.ili2db.Enum23Test{
                 }
             }
         }finally{
+            if(stmt!=null) {
+                stmt.close();
+                stmt=null;
+            }
             if(jdbcConnection!=null){
                 jdbcConnection.close();
             }
@@ -318,14 +306,10 @@ public class Enum23Test extends ch.ehi.ili2db.Enum23Test{
     {
         Connection jdbcConnection=null;
         try{
-            Class driverClass = Class.forName("org.postgresql.Driver");
-            jdbcConnection = DriverManager.getConnection(
-                    dburl, dbuser, dbpwd);
-            stmt=jdbcConnection.createStatement();          
-            stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");
+            setup.resetDb();
             {
                 File data=new File("test/data/Enum23/Enum23.ili");
-                Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+                Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
                 Ili2db.setNoSmartMapping(config);
                 config.setFunction(Config.FC_SCHEMAIMPORT);
                 config.setCreateFk(Config.CREATE_FK_YES);
@@ -349,14 +333,10 @@ public class Enum23Test extends ch.ehi.ili2db.Enum23Test{
     {
         Connection jdbcConnection=null;
         try{
-            Class driverClass = Class.forName("org.postgresql.Driver");
-            jdbcConnection = DriverManager.getConnection(
-                    dburl, dbuser, dbpwd);
-            stmt=jdbcConnection.createStatement();          
-            stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");
+            setup.resetDb();
             {
                 File data=new File("test/data/Enum23/Enum23.ili");
-                Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+                Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
                 Ili2db.setNoSmartMapping(config);
                 config.setFunction(Config.FC_SCHEMAIMPORT);
                 config.setCreateFk(Config.CREATE_FK_YES);
@@ -383,69 +363,68 @@ public class Enum23Test extends ch.ehi.ili2db.Enum23Test{
             importIliWithTxtCol();
         }
         Connection jdbcConnection=null;
+        Statement stmt=null;
         try{
-            Class driverClass = Class.forName("org.postgresql.Driver");
-            jdbcConnection = DriverManager.getConnection(
-                    dburl, dbuser, dbpwd);
-            stmt=jdbcConnection.createStatement();          
             {
                 File data=new File("test/data/Enum23/Enum23a.xtf");
-                Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+                Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
                 config.setFunction(Config.FC_IMPORT);
                 Ili2db.readSettingsFromDb(config);
                 Ili2db.run(config,null);
         
+                jdbcConnection = setup.createConnection();
+                stmt=jdbcConnection.createStatement();
                 {
-                    String stmtTxt="SELECT attr2_txt FROM "+DBSCHEMA+".classa1 WHERE attr2 ='Test2_ele'";
+                    String stmtTxt="SELECT attr2_txt FROM "+setup.prefixName("classa1")+" WHERE attr2 ='Test2_ele'";
                     Assert.assertTrue(stmt.execute(stmtTxt));
                     ResultSet rs=stmt.getResultSet();
                     Assert.assertTrue(rs.next());
                     Assert.assertEquals("Test2 ele",rs.getString(1));
                 }
                 {
-                    String stmtTxt="SELECT attr2_txt FROM "+DBSCHEMA+".classa1 WHERE attr2 ='Test3.ele_2'";
+                    String stmtTxt="SELECT attr2_txt FROM "+setup.prefixName("classa1")+" WHERE attr2 ='Test3.ele_2'";
                     Assert.assertTrue(stmt.execute(stmtTxt));
                     ResultSet rs=stmt.getResultSet();
                     Assert.assertTrue(rs.next());
                     Assert.assertEquals("Test3.ele 2",rs.getString(1));
                 }
                 {
-                    String stmtTxt="SELECT attr2_txt FROM "+DBSCHEMA+".classa1 WHERE attr2 ='Test4_ele'";
+                    String stmtTxt="SELECT attr2_txt FROM "+setup.prefixName("classa1")+" WHERE attr2 ='Test4_ele'";
                     Assert.assertTrue(stmt.execute(stmtTxt));
                     ResultSet rs=stmt.getResultSet();
                     Assert.assertTrue(rs.next());
                     Assert.assertEquals("testelevier",rs.getString(1));
                 }
                 {
-                    String stmtTxt="SELECT attr3_txt FROM "+DBSCHEMA+".classa1 WHERE attr3 ='Test2_ele'";
+                    String stmtTxt="SELECT attr3_txt FROM "+setup.prefixName("classa1")+" WHERE attr3 ='Test2_ele'";
                     Assert.assertTrue(stmt.execute(stmtTxt));
                     ResultSet rs=stmt.getResultSet();
                     Assert.assertTrue(rs.next());
                     Assert.assertEquals("Test2 ele",rs.getString(1));
                 }
                 {
-                    String stmtTxt="SELECT attr3_txt FROM "+DBSCHEMA+".classa1 WHERE attr3 ='Test3.ele_2'";
+                    String stmtTxt="SELECT attr3_txt FROM "+setup.prefixName("classa1")+" WHERE attr3 ='Test3.ele_2'";
                     Assert.assertTrue(stmt.execute(stmtTxt));
                     ResultSet rs=stmt.getResultSet();
                     Assert.assertTrue(rs.next());
                     Assert.assertEquals("Test3.ele 2",rs.getString(1));
                 }
                 {
-                    String stmtTxt="SELECT attr3_txt FROM "+DBSCHEMA+".classa1 WHERE attr3 ='Test4_ele'";
+                    String stmtTxt="SELECT attr3_txt FROM "+setup.prefixName("classa1")+" WHERE attr3 ='Test4_ele'";
                     Assert.assertTrue(stmt.execute(stmtTxt));
                     ResultSet rs=stmt.getResultSet();
                     Assert.assertTrue(rs.next());
                     Assert.assertEquals("Attr3_elevier",rs.getString(1));
                 }
                 {
-                    String stmtTxt="SELECT attr4_txt FROM "+DBSCHEMA+".classa1 WHERE attr4 is null";
+                    String stmtTxt="SELECT attr4_txt FROM "+setup.prefixName("classa1")+" WHERE attr4 is null";
                     Assert.assertTrue(stmt.execute(stmtTxt));
                     ResultSet rs=stmt.getResultSet();
                     Assert.assertTrue(rs.next());
                     Assert.assertEquals(null,rs.getString(1));
                 }
                 {
-                    String stmtTxt="SELECT attr4_txt FROM "+DBSCHEMA+".classa1 WHERE attr4=true";
+                    String stmtTxt="SELECT attr4_txt FROM "+setup.prefixName("classa1")+" WHERE attr4=true";
                     Assert.assertTrue(stmt.execute(stmtTxt));
                     ResultSet rs=stmt.getResultSet();
                     Assert.assertTrue(rs.next());
@@ -453,6 +432,10 @@ public class Enum23Test extends ch.ehi.ili2db.Enum23Test{
                 }
             }
         }finally{
+            if(stmt!=null) {
+                stmt.close();
+                stmt=null;
+            }
             if(jdbcConnection!=null){
                 jdbcConnection.close();
             }
@@ -465,69 +448,68 @@ public class Enum23Test extends ch.ehi.ili2db.Enum23Test{
             importIliWithTxtColwoEnumTab();
         }
         Connection jdbcConnection=null;
+        Statement stmt=null;
         try{
-            Class driverClass = Class.forName("org.postgresql.Driver");
-            jdbcConnection = DriverManager.getConnection(
-                    dburl, dbuser, dbpwd);
-            stmt=jdbcConnection.createStatement();          
             {
                 File data=new File("test/data/Enum23/Enum23a.xtf");
-                Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+                Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
                 config.setFunction(Config.FC_IMPORT);
                 Ili2db.readSettingsFromDb(config);
                 Ili2db.run(config,null);
         
+                jdbcConnection = setup.createConnection();
+                stmt=jdbcConnection.createStatement();
                 {
-                    String stmtTxt="SELECT attr2_txt FROM "+DBSCHEMA+".classa1 WHERE attr2 ='Test2_ele'";
+                    String stmtTxt="SELECT attr2_txt FROM "+setup.prefixName("classa1")+" WHERE attr2 ='Test2_ele'";
                     Assert.assertTrue(stmt.execute(stmtTxt));
                     ResultSet rs=stmt.getResultSet();
                     Assert.assertTrue(rs.next());
                     Assert.assertEquals("Test2 ele",rs.getString(1));
                 }
                 {
-                    String stmtTxt="SELECT attr2_txt FROM "+DBSCHEMA+".classa1 WHERE attr2 ='Test3.ele_2'";
+                    String stmtTxt="SELECT attr2_txt FROM "+setup.prefixName("classa1")+" WHERE attr2 ='Test3.ele_2'";
                     Assert.assertTrue(stmt.execute(stmtTxt));
                     ResultSet rs=stmt.getResultSet();
                     Assert.assertTrue(rs.next());
                     Assert.assertEquals("Test3.ele 2",rs.getString(1));
                 }
                 {
-                    String stmtTxt="SELECT attr2_txt FROM "+DBSCHEMA+".classa1 WHERE attr2 ='Test4_ele'";
+                    String stmtTxt="SELECT attr2_txt FROM "+setup.prefixName("classa1")+" WHERE attr2 ='Test4_ele'";
                     Assert.assertTrue(stmt.execute(stmtTxt));
                     ResultSet rs=stmt.getResultSet();
                     Assert.assertTrue(rs.next());
                     Assert.assertEquals("testelevier",rs.getString(1));
                 }
                 {
-                    String stmtTxt="SELECT attr3_txt FROM "+DBSCHEMA+".classa1 WHERE attr3 ='Test2_ele'";
+                    String stmtTxt="SELECT attr3_txt FROM "+setup.prefixName("classa1")+" WHERE attr3 ='Test2_ele'";
                     Assert.assertTrue(stmt.execute(stmtTxt));
                     ResultSet rs=stmt.getResultSet();
                     Assert.assertTrue(rs.next());
                     Assert.assertEquals("Test2 ele",rs.getString(1));
                 }
                 {
-                    String stmtTxt="SELECT attr3_txt FROM "+DBSCHEMA+".classa1 WHERE attr3 ='Test3.ele_2'";
+                    String stmtTxt="SELECT attr3_txt FROM "+setup.prefixName("classa1")+" WHERE attr3 ='Test3.ele_2'";
                     Assert.assertTrue(stmt.execute(stmtTxt));
                     ResultSet rs=stmt.getResultSet();
                     Assert.assertTrue(rs.next());
                     Assert.assertEquals("Test3.ele 2",rs.getString(1));
                 }
                 {
-                    String stmtTxt="SELECT attr3_txt FROM "+DBSCHEMA+".classa1 WHERE attr3 ='Test4_ele'";
+                    String stmtTxt="SELECT attr3_txt FROM "+setup.prefixName("classa1")+" WHERE attr3 ='Test4_ele'";
                     Assert.assertTrue(stmt.execute(stmtTxt));
                     ResultSet rs=stmt.getResultSet();
                     Assert.assertTrue(rs.next());
                     Assert.assertEquals("Attr3_elevier",rs.getString(1));
                 }
                 {
-                    String stmtTxt="SELECT attr4_txt FROM "+DBSCHEMA+".classa1 WHERE attr4 is null";
+                    String stmtTxt="SELECT attr4_txt FROM "+setup.prefixName("classa1")+" WHERE attr4 is null";
                     Assert.assertTrue(stmt.execute(stmtTxt));
                     ResultSet rs=stmt.getResultSet();
                     Assert.assertTrue(rs.next());
                     Assert.assertEquals(null,rs.getString(1));
                 }
                 {
-                    String stmtTxt="SELECT attr4_txt FROM "+DBSCHEMA+".classa1 WHERE attr4=true";
+                    String stmtTxt="SELECT attr4_txt FROM "+setup.prefixName("classa1")+" WHERE attr4=true";
                     Assert.assertTrue(stmt.execute(stmtTxt));
                     ResultSet rs=stmt.getResultSet();
                     Assert.assertTrue(rs.next());
@@ -535,6 +517,10 @@ public class Enum23Test extends ch.ehi.ili2db.Enum23Test{
                 }
             }
         }finally{
+            if(stmt!=null) {
+                stmt.close();
+                stmt=null;
+            }
             if(jdbcConnection!=null){
                 jdbcConnection.close();
             }
@@ -547,69 +533,68 @@ public class Enum23Test extends ch.ehi.ili2db.Enum23Test{
             importIliWithTxtColwoEnumTab_fr();
         }
         Connection jdbcConnection=null;
+        Statement stmt=null;
         try{
-            Class driverClass = Class.forName("org.postgresql.Driver");
-            jdbcConnection = DriverManager.getConnection(
-                    dburl, dbuser, dbpwd);
-            stmt=jdbcConnection.createStatement();          
             {
                 File data=new File("test/data/Enum23/Enum23a.xtf");
-                Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+                Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
                 config.setFunction(Config.FC_IMPORT);
                 Ili2db.readSettingsFromDb(config);
                 Ili2db.run(config,null);
         
+                jdbcConnection = setup.createConnection();
+                stmt=jdbcConnection.createStatement();
                 {
-                    String stmtTxt="SELECT attr2_fr_txt FROM "+DBSCHEMA+".classa1_fr WHERE attr2_fr ='Test2_ele'";
+                    String stmtTxt="SELECT attr2_fr_txt FROM "+setup.prefixName("classa1_fr")+" WHERE attr2_fr ='Test2_ele'";
                     Assert.assertTrue(stmt.execute(stmtTxt));
                     ResultSet rs=stmt.getResultSet();
                     Assert.assertTrue(rs.next());
                     Assert.assertEquals("Test2 ele fr",rs.getString(1));
                 }
                 {
-                    String stmtTxt="SELECT attr2_fr_txt FROM "+DBSCHEMA+".classa1_fr WHERE attr2_fr ='Test3.ele_2'";
+                    String stmtTxt="SELECT attr2_fr_txt FROM "+setup.prefixName("classa1_fr")+" WHERE attr2_fr ='Test3.ele_2'";
                     Assert.assertTrue(stmt.execute(stmtTxt));
                     ResultSet rs=stmt.getResultSet();
                     Assert.assertTrue(rs.next());
                     Assert.assertEquals("Test3 fr.ele 2 fr",rs.getString(1));
                 }
                 {
-                    String stmtTxt="SELECT attr2_fr_txt FROM "+DBSCHEMA+".classa1_fr WHERE attr2_fr ='Test4_ele'";
+                    String stmtTxt="SELECT attr2_fr_txt FROM "+setup.prefixName("classa1_fr")+" WHERE attr2_fr ='Test4_ele'";
                     Assert.assertTrue(stmt.execute(stmtTxt));
                     ResultSet rs=stmt.getResultSet();
                     Assert.assertTrue(rs.next());
                     Assert.assertEquals("testelevier_fr",rs.getString(1));
                 }
                 {
-                    String stmtTxt="SELECT attr3_fr_txt FROM "+DBSCHEMA+".classa1_fr WHERE attr3_fr ='Test2_ele'";
+                    String stmtTxt="SELECT attr3_fr_txt FROM "+setup.prefixName("classa1_fr")+" WHERE attr3_fr ='Test2_ele'";
                     Assert.assertTrue(stmt.execute(stmtTxt));
                     ResultSet rs=stmt.getResultSet();
                     Assert.assertTrue(rs.next());
                     Assert.assertEquals("Test2 ele fr",rs.getString(1));
                 }
                 {
-                    String stmtTxt="SELECT attr3_fr_txt FROM "+DBSCHEMA+".classa1_fr WHERE attr3_fr ='Test3.ele_2'";
+                    String stmtTxt="SELECT attr3_fr_txt FROM "+setup.prefixName("classa1_fr")+" WHERE attr3_fr ='Test3.ele_2'";
                     Assert.assertTrue(stmt.execute(stmtTxt));
                     ResultSet rs=stmt.getResultSet();
                     Assert.assertTrue(rs.next());
                     Assert.assertEquals("Test3 fr.ele 2 fr",rs.getString(1));
                 }
                 {
-                    String stmtTxt="SELECT attr3_fr_txt FROM "+DBSCHEMA+".classa1_fr WHERE attr3_fr ='Test4_ele'";
+                    String stmtTxt="SELECT attr3_fr_txt FROM "+setup.prefixName("classa1_fr")+" WHERE attr3_fr ='Test4_ele'";
                     Assert.assertTrue(stmt.execute(stmtTxt));
                     ResultSet rs=stmt.getResultSet();
                     Assert.assertTrue(rs.next());
                     Assert.assertEquals("Attr3_elevier_fr",rs.getString(1));
                 }
                 {
-                    String stmtTxt="SELECT attr4_fr_txt FROM "+DBSCHEMA+".classa1_fr WHERE attr4_fr is null";
+                    String stmtTxt="SELECT attr4_fr_txt FROM "+setup.prefixName("classa1_fr")+" WHERE attr4_fr is null";
                     Assert.assertTrue(stmt.execute(stmtTxt));
                     ResultSet rs=stmt.getResultSet();
                     Assert.assertTrue(rs.next());
                     Assert.assertEquals(null,rs.getString(1));
                 }
                 {
-                    String stmtTxt="SELECT attr4_fr_txt FROM "+DBSCHEMA+".classa1_fr WHERE attr4_fr=true";
+                    String stmtTxt="SELECT attr4_fr_txt FROM "+setup.prefixName("classa1_fr")+" WHERE attr4_fr=true";
                     Assert.assertTrue(stmt.execute(stmtTxt));
                     ResultSet rs=stmt.getResultSet();
                     Assert.assertTrue(rs.next());
@@ -617,6 +602,10 @@ public class Enum23Test extends ch.ehi.ili2db.Enum23Test{
                 }
             }
         }finally{
+            if(stmt!=null) {
+                stmt.close();
+                stmt=null;
+            }
             if(jdbcConnection!=null){
                 jdbcConnection.close();
             }
@@ -627,15 +616,12 @@ public class Enum23Test extends ch.ehi.ili2db.Enum23Test{
 	public void importIliExtendedMultiTable() throws Exception
 	{
 		Connection jdbcConnection=null;
+        Statement stmt=null;
 		try{
-		    Class driverClass = Class.forName("org.postgresql.Driver");
-	        jdbcConnection = DriverManager.getConnection(
-	        		dburl, dbuser, dbpwd);
-	        stmt=jdbcConnection.createStatement();			
-			stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");
+            setup.resetDb();
 			{
 				File data=new File("test/data/Enum23/Enum23c.ili");
-				Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+				Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
                 Ili2db.setNoSmartMapping(config);
 				config.setFunction(Config.FC_SCHEMAIMPORT);
 				config.setCreateFk(Config.CREATE_FK_YES);
@@ -645,29 +631,33 @@ public class Enum23Test extends ch.ehi.ili2db.Enum23Test{
 				config.setInheritanceTrafo(Config.INHERITANCE_TRAFO_SMART1);
 				Ili2db.readSettingsFromDb(config);
 				Ili2db.run(config,null);
+				
+				
+	            jdbcConnection = setup.createConnection();
+	            stmt=jdbcConnection.createStatement();
                 {
-                    String stmtTxt="SELECT count(*) FROM "+DBSCHEMA+".enum1";
+                    String stmtTxt="SELECT count(*) FROM "+setup.prefixName("enum1");
                     Assert.assertTrue(stmt.execute(stmtTxt));
                     ResultSet rs=stmt.getResultSet();
                     Assert.assertTrue(rs.next());
                     Assert.assertEquals(4,rs.getInt(1));
                 }
                 {
-                    String stmtTxt="SELECT count(*) FROM "+DBSCHEMA+".enum1b";
+                    String stmtTxt="SELECT count(*) FROM "+setup.prefixName("enum1b");
                     Assert.assertTrue(stmt.execute(stmtTxt));
                     ResultSet rs=stmt.getResultSet();
                     Assert.assertTrue(rs.next());
                     Assert.assertEquals(5,rs.getInt(1));
                 }
                 {
-                    String stmtTxt="SELECT count(*) FROM "+DBSCHEMA+".enum1c";
+                    String stmtTxt="SELECT count(*) FROM "+setup.prefixName("enum1c");
                     Assert.assertTrue(stmt.execute(stmtTxt));
                     ResultSet rs=stmt.getResultSet();
                     Assert.assertTrue(rs.next());
                     Assert.assertEquals(5,rs.getInt(1));
                 }
                 {
-                    String stmtTxt="SELECT count(*) FROM "+DBSCHEMA+".enum1ccc";
+                    String stmtTxt="SELECT count(*) FROM "+setup.prefixName("enum1ccc");
                     Assert.assertTrue(stmt.execute(stmtTxt));
                     ResultSet rs=stmt.getResultSet();
                     Assert.assertTrue(rs.next());
@@ -675,6 +665,10 @@ public class Enum23Test extends ch.ehi.ili2db.Enum23Test{
                 }
 			}
 		}finally{
+            if(stmt!=null) {
+                stmt.close();
+                stmt=null;
+            }
 			if(jdbcConnection!=null){
 				jdbcConnection.close();
 			}
@@ -684,15 +678,12 @@ public class Enum23Test extends ch.ehi.ili2db.Enum23Test{
     public void importIliExtendedFkTableInheritance0() throws Exception
     {
         Connection jdbcConnection=null;
+        Statement stmt=null;
         try{
-            Class driverClass = Class.forName("org.postgresql.Driver");
-            jdbcConnection = DriverManager.getConnection(
-                    dburl, dbuser, dbpwd);
-            stmt=jdbcConnection.createStatement();          
-            stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");
+            setup.resetDb();
             {
                 File data=new File("test/data/Enum23/Enum23c.ili");
-                Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+                Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
                 Ili2db.setNoSmartMapping(config);
                 config.setFunction(Config.FC_SCHEMAIMPORT);
                 config.setCreateFk(Config.CREATE_FK_YES);
@@ -700,9 +691,13 @@ public class Enum23Test extends ch.ehi.ili2db.Enum23Test{
                 config.setCreateEnumDefs(Config.CREATE_ENUM_DEFS_MULTI_WITH_ID);
                 Ili2db.readSettingsFromDb(config);
                 Ili2db.run(config,null);
+                
+                
+                jdbcConnection = setup.createConnection();
+                stmt=jdbcConnection.createStatement();
                 {
                     String stmtTxt="SELECT * "
-                            + " FROM "+DBSCHEMA+".enum1 WHERE "+DbNames.ENUM_TAB_THIS_COL+"='Enum23c.Enum1' AND "+DbNames.ENUM_TAB_BASE_COL+" IS NULL AND "+DbNames.ENUM_TAB_ILICODE_COL+"='Test1'";
+                            + " FROM "+setup.prefixName("enum1")+" WHERE "+DbNames.ENUM_TAB_THIS_COL+"='Enum23c.Enum1' AND "+DbNames.ENUM_TAB_BASE_COL+" IS NULL AND "+DbNames.ENUM_TAB_ILICODE_COL+"='Test1'";
                     Assert.assertTrue(stmt.execute(stmtTxt));
                     ResultSet rs = null;
                     rs=stmt.getResultSet();
@@ -710,7 +705,7 @@ public class Enum23Test extends ch.ehi.ili2db.Enum23Test{
                     Assert.assertFalse(rs.next());
                     Assert.assertFalse(stmt.getMoreResults());
                     stmtTxt="SELECT * "
-                            + " FROM "+DBSCHEMA+".enum1 WHERE "+DbNames.ENUM_TAB_THIS_COL+"='Enum23c.Enum1b' AND "+DbNames.ENUM_TAB_BASE_COL+"='Enum23c.Enum1' AND "+DbNames.ENUM_TAB_ILICODE_COL+"='Test1'";
+                            + " FROM "+setup.prefixName("enum1")+" WHERE "+DbNames.ENUM_TAB_THIS_COL+"='Enum23c.Enum1b' AND "+DbNames.ENUM_TAB_BASE_COL+"='Enum23c.Enum1' AND "+DbNames.ENUM_TAB_ILICODE_COL+"='Test1'";
                     Assert.assertTrue(stmt.execute(stmtTxt));
                     rs=stmt.getResultSet();
                     Assert.assertTrue(rs.next());
@@ -720,7 +715,7 @@ public class Enum23Test extends ch.ehi.ili2db.Enum23Test{
                 {
                     HashMap<String,String> enums=new HashMap<String,String>();
                     String stmtTxt="SELECT "+DbNames.META_INFO_COLUMN_TAB_SUBTYPE_COL+","+DbNames.META_INFO_COLUMN_TAB_SETTING_COL
-                            + " FROM "+DBSCHEMA+"."+DbNames.META_INFO_COLUMN_TAB+" WHERE "+DbNames.META_INFO_COLUMN_TAB_TAG_COL+"='"+DbExtMetaInfo.TAG_COL_ENUMDOMAIN+"'";
+                            + " FROM "+setup.prefixName(DbNames.META_INFO_COLUMN_TAB)+" WHERE "+DbNames.META_INFO_COLUMN_TAB_TAG_COL+"='"+DbExtMetaInfo.TAG_COL_ENUMDOMAIN+"'";
                     ResultSet rs=stmt.executeQuery(stmtTxt);
                     int rc=0;
                     while(rs.next()) {
@@ -738,6 +733,10 @@ public class Enum23Test extends ch.ehi.ili2db.Enum23Test{
                 }
             }
         }finally{
+            if(stmt!=null) {
+                stmt.close();
+                stmt=null;
+            }
             if(jdbcConnection!=null){
                 jdbcConnection.close();
             }
@@ -747,15 +746,12 @@ public class Enum23Test extends ch.ehi.ili2db.Enum23Test{
     public void importIliExtendedFkTableInheritance1() throws Exception
     {
         Connection jdbcConnection=null;
+        Statement stmt=null;
         try{
-            Class driverClass = Class.forName("org.postgresql.Driver");
-            jdbcConnection = DriverManager.getConnection(
-                    dburl, dbuser, dbpwd);
-            stmt=jdbcConnection.createStatement();          
-            stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");
+            setup.resetDb();
             {
                 File data=new File("test/data/Enum23/Enum23c.ili");
-                Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+                Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
                 Ili2db.setNoSmartMapping(config);
                 config.setFunction(Config.FC_SCHEMAIMPORT);
                 config.setCreateFk(Config.CREATE_FK_YES);
@@ -764,9 +760,13 @@ public class Enum23Test extends ch.ehi.ili2db.Enum23Test{
                 config.setInheritanceTrafo(Config.INHERITANCE_TRAFO_SMART1);
                 Ili2db.readSettingsFromDb(config);
                 Ili2db.run(config,null);
+                
+                
+                jdbcConnection = setup.createConnection();
+                stmt=jdbcConnection.createStatement();
                 {
                     String stmtTxt="SELECT * "
-                            + " FROM "+DBSCHEMA+".enum1 WHERE "+DbNames.ENUM_TAB_THIS_COL+"='Enum23c.Enum1' AND "+DbNames.ENUM_TAB_BASE_COL+" IS NULL AND "+DbNames.ENUM_TAB_ILICODE_COL+"='Test1'";
+                            + " FROM "+setup.prefixName("enum1")+" WHERE "+DbNames.ENUM_TAB_THIS_COL+"='Enum23c.Enum1' AND "+DbNames.ENUM_TAB_BASE_COL+" IS NULL AND "+DbNames.ENUM_TAB_ILICODE_COL+"='Test1'";
                     Assert.assertTrue(stmt.execute(stmtTxt));
                     ResultSet rs = null;
                     rs=stmt.getResultSet();
@@ -774,7 +774,7 @@ public class Enum23Test extends ch.ehi.ili2db.Enum23Test{
                     Assert.assertFalse(rs.next());
                     Assert.assertFalse(stmt.getMoreResults());
                     stmtTxt="SELECT * "
-                            + " FROM "+DBSCHEMA+".enum1 WHERE "+DbNames.ENUM_TAB_THIS_COL+"='Enum23c.Enum1b' AND "+DbNames.ENUM_TAB_BASE_COL+"='Enum23c.Enum1' AND "+DbNames.ENUM_TAB_ILICODE_COL+"='Test1'";
+                            + " FROM "+setup.prefixName("enum1")+" WHERE "+DbNames.ENUM_TAB_THIS_COL+"='Enum23c.Enum1b' AND "+DbNames.ENUM_TAB_BASE_COL+"='Enum23c.Enum1' AND "+DbNames.ENUM_TAB_ILICODE_COL+"='Test1'";
                     Assert.assertTrue(stmt.execute(stmtTxt));
                     rs=stmt.getResultSet();
                     Assert.assertTrue(rs.next());
@@ -784,7 +784,7 @@ public class Enum23Test extends ch.ehi.ili2db.Enum23Test{
                 {
                     HashMap<String,String> enums=new HashMap<String,String>();
                     String stmtTxt="SELECT "+DbNames.META_INFO_COLUMN_TAB_SUBTYPE_COL+","+DbNames.META_INFO_COLUMN_TAB_SETTING_COL
-                            + " FROM "+DBSCHEMA+"."+DbNames.META_INFO_COLUMN_TAB+" WHERE "+DbNames.META_INFO_COLUMN_TAB_TAG_COL+"='"+DbExtMetaInfo.TAG_COL_ENUMDOMAIN+"'";
+                            + " FROM "+setup.prefixName(DbNames.META_INFO_COLUMN_TAB)+" WHERE "+DbNames.META_INFO_COLUMN_TAB_TAG_COL+"='"+DbExtMetaInfo.TAG_COL_ENUMDOMAIN+"'";
                     ResultSet rs=stmt.executeQuery(stmtTxt);
                     int rc=0;
                     while(rs.next()) {
@@ -802,6 +802,10 @@ public class Enum23Test extends ch.ehi.ili2db.Enum23Test{
                 }
             }
         }finally{
+            if(stmt!=null) {
+                stmt.close();
+                stmt=null;
+            }
             if(jdbcConnection!=null){
                 jdbcConnection.close();
             }
@@ -811,15 +815,12 @@ public class Enum23Test extends ch.ehi.ili2db.Enum23Test{
     public void importIliExtendedFkTableInheritance2() throws Exception
     {
         Connection jdbcConnection=null;
+        Statement stmt=null;
         try{
-            Class driverClass = Class.forName("org.postgresql.Driver");
-            jdbcConnection = DriverManager.getConnection(
-                    dburl, dbuser, dbpwd);
-            stmt=jdbcConnection.createStatement();          
-            stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");
+            setup.resetDb();
             {
                 File data=new File("test/data/Enum23/Enum23c.ili");
-                Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+                Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
                 Ili2db.setNoSmartMapping(config);
                 config.setFunction(Config.FC_SCHEMAIMPORT);
                 config.setCreateFk(Config.CREATE_FK_YES);
@@ -828,9 +829,13 @@ public class Enum23Test extends ch.ehi.ili2db.Enum23Test{
                 config.setInheritanceTrafo(Config.INHERITANCE_TRAFO_SMART2);
                 Ili2db.readSettingsFromDb(config);
                 Ili2db.run(config,null);
+                
+                
+                jdbcConnection = setup.createConnection();
+                stmt=jdbcConnection.createStatement();
                 {
                     String stmtTxt="SELECT * "
-                            + " FROM "+DBSCHEMA+".enum1 WHERE "+DbNames.ENUM_TAB_THIS_COL+"='Enum23c.Enum1' AND "+DbNames.ENUM_TAB_BASE_COL+" IS NULL AND "+DbNames.ENUM_TAB_ILICODE_COL+"='Test1'";
+                            + " FROM "+setup.prefixName("enum1")+" WHERE "+DbNames.ENUM_TAB_THIS_COL+"='Enum23c.Enum1' AND "+DbNames.ENUM_TAB_BASE_COL+" IS NULL AND "+DbNames.ENUM_TAB_ILICODE_COL+"='Test1'";
                     Assert.assertTrue(stmt.execute(stmtTxt));
                     ResultSet rs = null;
                     rs=stmt.getResultSet();
@@ -838,7 +843,7 @@ public class Enum23Test extends ch.ehi.ili2db.Enum23Test{
                     Assert.assertFalse(rs.next());
                     Assert.assertFalse(stmt.getMoreResults());
                     stmtTxt="SELECT * "
-                            + " FROM "+DBSCHEMA+".enum1 WHERE "+DbNames.ENUM_TAB_THIS_COL+"='Enum23c.Enum1b' AND "+DbNames.ENUM_TAB_BASE_COL+"='Enum23c.Enum1' AND "+DbNames.ENUM_TAB_ILICODE_COL+"='Test1'";
+                            + " FROM "+setup.prefixName("enum1")+" WHERE "+DbNames.ENUM_TAB_THIS_COL+"='Enum23c.Enum1b' AND "+DbNames.ENUM_TAB_BASE_COL+"='Enum23c.Enum1' AND "+DbNames.ENUM_TAB_ILICODE_COL+"='Test1'";
                     Assert.assertTrue(stmt.execute(stmtTxt));
                     rs=stmt.getResultSet();
                     Assert.assertTrue(rs.next());
@@ -848,7 +853,7 @@ public class Enum23Test extends ch.ehi.ili2db.Enum23Test{
                 {
                     HashMap<String,String> enums=new HashMap<String,String>();
                     String stmtTxt="SELECT "+DbNames.META_INFO_COLUMN_TAB_SUBTYPE_COL+","+DbNames.META_INFO_COLUMN_TAB_SETTING_COL
-                            + " FROM "+DBSCHEMA+"."+DbNames.META_INFO_COLUMN_TAB+" WHERE "+DbNames.META_INFO_COLUMN_TAB_TAG_COL+"='"+DbExtMetaInfo.TAG_COL_ENUMDOMAIN+"'";
+                            + " FROM "+setup.prefixName(DbNames.META_INFO_COLUMN_TAB)+" WHERE "+DbNames.META_INFO_COLUMN_TAB_TAG_COL+"='"+DbExtMetaInfo.TAG_COL_ENUMDOMAIN+"'";
                     ResultSet rs=stmt.executeQuery(stmtTxt);
                     int rc=0;
                     while(rs.next()) {
@@ -866,6 +871,10 @@ public class Enum23Test extends ch.ehi.ili2db.Enum23Test{
                 }
             }
         }finally{
+            if(stmt!=null) {
+                stmt.close();
+                stmt=null;
+            }
             if(jdbcConnection!=null){
                 jdbcConnection.close();
             }
@@ -876,15 +885,12 @@ public class Enum23Test extends ch.ehi.ili2db.Enum23Test{
     {
         //EhiLogger.getInstance().setTraceFilter(false);
         Connection jdbcConnection=null;
+        Statement stmt=null;
         try{
-            Class driverClass = Class.forName("org.postgresql.Driver");
-            jdbcConnection = DriverManager.getConnection(
-                    dburl, dbuser, dbpwd);
-            stmt=jdbcConnection.createStatement();          
-            stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");
+            setup.resetDb();
             {
                 File data=new File("test/data/Enum23/Enum23c.xtf");
-                Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+                Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
                 Ili2db.setNoSmartMapping(config);
                 config.setFunction(Config.FC_IMPORT);
                 config.setDoImplicitSchemaImport(true);
@@ -895,36 +901,40 @@ public class Enum23Test extends ch.ehi.ili2db.Enum23Test{
                 config.setCreateEnumDefs(Config.CREATE_ENUM_DEFS_MULTI_WITH_ID);
                 Ili2db.readSettingsFromDb(config);
                 Ili2db.run(config,null);
+                
+                
+                jdbcConnection = setup.createConnection();
+                stmt=jdbcConnection.createStatement();
                 {
-                    String stmtTxt="select iliCode from "+DBSCHEMA+".classa1 left join "+DBSCHEMA+".enum1 on classa1.attr1=enum1.t_id where t_ili_tid='1a'";
+                    String stmtTxt="select iliCode from "+setup.prefixName("classa1")+" left join "+setup.prefixName("enum1")+" on classa1.attr1=enum1.t_id where t_ili_tid='1a'";
                     ResultSet rs=stmt.executeQuery(stmtTxt);
                     Assert.assertTrue(rs.next());
                     Assert.assertEquals("Test2", rs.getString(1));
                     rs.close();
                 }
                 {
-                    String stmtTxt="select iliCode from "+DBSCHEMA+".classa1 left join "+DBSCHEMA+".enum1 on classa1.attr1=enum1.t_id where t_ili_tid='1b'";
+                    String stmtTxt="select iliCode from "+setup.prefixName("classa1")+" left join "+setup.prefixName("enum1")+" on classa1.attr1=enum1.t_id where t_ili_tid='1b'";
                     ResultSet rs=stmt.executeQuery(stmtTxt);
                     Assert.assertTrue(rs.next());
                     Assert.assertEquals("Test2.Test2bA", rs.getString(1));
                     rs.close();
                 }
                 {
-                    String stmtTxt="select iliCode from "+DBSCHEMA+".classa1 left join "+DBSCHEMA+".enum1 on classa1.attr1=enum1.t_id where t_ili_tid='1c'";
+                    String stmtTxt="select iliCode from "+setup.prefixName("classa1")+" left join "+setup.prefixName("enum1")+" on classa1.attr1=enum1.t_id where t_ili_tid='1c'";
                     ResultSet rs=stmt.executeQuery(stmtTxt);
                     Assert.assertTrue(rs.next());
                     Assert.assertEquals("Test2.Test2cA", rs.getString(1));
                     rs.close();
                 }
                 {
-                    String stmtTxt="select iliCode from "+DBSCHEMA+".classa1 left join "+DBSCHEMA+".enum1 on classa1.attr1=enum1.t_id where t_ili_tid='1cc'";
+                    String stmtTxt="select iliCode from "+setup.prefixName("classa1")+" left join "+setup.prefixName("enum1")+" on classa1.attr1=enum1.t_id where t_ili_tid='1cc'";
                     ResultSet rs=stmt.executeQuery(stmtTxt);
                     Assert.assertTrue(rs.next());
                     Assert.assertEquals("Test2.Test2cA", rs.getString(1));
                     rs.close();
                 }
                 {
-                    String stmtTxt="select iliCode from "+DBSCHEMA+".classa1 left join "+DBSCHEMA+".enum1 on classa1.attr1=enum1.t_id where t_ili_tid='1ccc'";
+                    String stmtTxt="select iliCode from "+setup.prefixName("classa1")+" left join "+setup.prefixName("enum1")+" on classa1.attr1=enum1.t_id where t_ili_tid='1ccc'";
                     ResultSet rs=stmt.executeQuery(stmtTxt);
                     Assert.assertTrue(rs.next());
                     Assert.assertEquals("Test2.Test2cA.Test2cAA", rs.getString(1));
@@ -932,6 +942,10 @@ public class Enum23Test extends ch.ehi.ili2db.Enum23Test{
                 }
             }
         }finally{
+            if(stmt!=null) {
+                stmt.close();
+                stmt=null;
+            }
             if(jdbcConnection!=null){
                 jdbcConnection.close();
             }
@@ -942,15 +956,12 @@ public class Enum23Test extends ch.ehi.ili2db.Enum23Test{
     {
         //EhiLogger.getInstance().setTraceFilter(false);
         Connection jdbcConnection=null;
+        Statement stmt=null;
         try{
-            Class driverClass = Class.forName("org.postgresql.Driver");
-            jdbcConnection = DriverManager.getConnection(
-                    dburl, dbuser, dbpwd);
-            stmt=jdbcConnection.createStatement();          
-            stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");
+            setup.resetDb();
             {
                 File data=new File("test/data/Enum23/Enum23c.xtf");
-                Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+                Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
                 Ili2db.setNoSmartMapping(config);
                 config.setFunction(Config.FC_IMPORT);
                 config.setDoImplicitSchemaImport(true);
@@ -962,36 +973,40 @@ public class Enum23Test extends ch.ehi.ili2db.Enum23Test{
                 config.setInheritanceTrafo(Config.INHERITANCE_TRAFO_SMART1);
                 Ili2db.readSettingsFromDb(config);
                 Ili2db.run(config,null);
+                
+                
+                jdbcConnection = setup.createConnection();
+                stmt=jdbcConnection.createStatement();
                 {
-                    String stmtTxt="select iliCode from "+DBSCHEMA+".classa1 left join "+DBSCHEMA+".enum1 on classa1.attr1=enum1.t_id where t_ili_tid='1a'";
+                    String stmtTxt="select iliCode from "+setup.prefixName("classa1")+" left join "+setup.prefixName("enum1")+" on classa1.attr1=enum1.t_id where t_ili_tid='1a'";
                     ResultSet rs=stmt.executeQuery(stmtTxt);
                     Assert.assertTrue(rs.next());
                     Assert.assertEquals("Test2", rs.getString(1));
                     rs.close();
                 }
                 {
-                    String stmtTxt="select iliCode from "+DBSCHEMA+".classa1 left join "+DBSCHEMA+".enum1 on classa1.attr1=enum1.t_id where t_ili_tid='1b'";
+                    String stmtTxt="select iliCode from "+setup.prefixName("classa1")+" left join "+setup.prefixName("enum1")+" on classa1.attr1=enum1.t_id where t_ili_tid='1b'";
                     ResultSet rs=stmt.executeQuery(stmtTxt);
                     Assert.assertTrue(rs.next());
                     Assert.assertEquals("Test2.Test2bA", rs.getString(1));
                     rs.close();
                 }
                 {
-                    String stmtTxt="select iliCode from "+DBSCHEMA+".classa1 left join "+DBSCHEMA+".enum1 on classa1.attr1=enum1.t_id where t_ili_tid='1c'";
+                    String stmtTxt="select iliCode from "+setup.prefixName("classa1")+" left join "+setup.prefixName("enum1")+" on classa1.attr1=enum1.t_id where t_ili_tid='1c'";
                     ResultSet rs=stmt.executeQuery(stmtTxt);
                     Assert.assertTrue(rs.next());
                     Assert.assertEquals("Test2.Test2cA", rs.getString(1));
                     rs.close();
                 }
                 {
-                    String stmtTxt="select iliCode from "+DBSCHEMA+".classa1 left join "+DBSCHEMA+".enum1 on classa1.attr1=enum1.t_id where t_ili_tid='1cc'";
+                    String stmtTxt="select iliCode from "+setup.prefixName("classa1")+" left join "+setup.prefixName("enum1")+" on classa1.attr1=enum1.t_id where t_ili_tid='1cc'";
                     ResultSet rs=stmt.executeQuery(stmtTxt);
                     Assert.assertTrue(rs.next());
                     Assert.assertEquals("Test2.Test2cA", rs.getString(1));
                     rs.close();
                 }
                 {
-                    String stmtTxt="select iliCode from "+DBSCHEMA+".classa1 left join "+DBSCHEMA+".enum1 on classa1.attr1=enum1.t_id where t_ili_tid='1ccc'";
+                    String stmtTxt="select iliCode from "+setup.prefixName("classa1")+" left join "+setup.prefixName("enum1")+" on classa1.attr1=enum1.t_id where t_ili_tid='1ccc'";
                     ResultSet rs=stmt.executeQuery(stmtTxt);
                     Assert.assertTrue(rs.next());
                     Assert.assertEquals("Test2.Test2cA.Test2cAA", rs.getString(1));
@@ -999,6 +1014,10 @@ public class Enum23Test extends ch.ehi.ili2db.Enum23Test{
                 }
             }
         }finally{
+            if(stmt!=null) {
+                stmt.close();
+                stmt=null;
+            }
             if(jdbcConnection!=null){
                 jdbcConnection.close();
             }
@@ -1009,15 +1028,12 @@ public class Enum23Test extends ch.ehi.ili2db.Enum23Test{
     {
         //EhiLogger.getInstance().setTraceFilter(false);
         Connection jdbcConnection=null;
+        Statement stmt=null;
         try{
-            Class driverClass = Class.forName("org.postgresql.Driver");
-            jdbcConnection = DriverManager.getConnection(
-                    dburl, dbuser, dbpwd);
-            stmt=jdbcConnection.createStatement();          
-            stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");
+            setup.resetDb();
             {
                 File data=new File("test/data/Enum23/Enum23c.xtf");
-                Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+                Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
                 Ili2db.setNoSmartMapping(config);
                 config.setFunction(Config.FC_IMPORT);
                 config.setDoImplicitSchemaImport(true);
@@ -1029,36 +1045,40 @@ public class Enum23Test extends ch.ehi.ili2db.Enum23Test{
                 config.setInheritanceTrafo(Config.INHERITANCE_TRAFO_SMART2);
                 Ili2db.readSettingsFromDb(config);
                 Ili2db.run(config,null);
+                
+                
+                jdbcConnection = setup.createConnection();
+                stmt=jdbcConnection.createStatement();
                 {
-                    String stmtTxt="select iliCode from "+DBSCHEMA+".classa1a left join "+DBSCHEMA+".enum1 on classa1a.attr1=enum1.t_id where t_ili_tid='1a'";
+                    String stmtTxt="select iliCode from "+setup.prefixName("classa1a")+" left join "+setup.prefixName("enum1")+" on classa1a.attr1=enum1.t_id where t_ili_tid='1a'";
                     ResultSet rs=stmt.executeQuery(stmtTxt);
                     Assert.assertTrue(rs.next());
                     Assert.assertEquals("Test2", rs.getString(1));
                     rs.close();
                 }
                 {
-                    String stmtTxt="select iliCode from "+DBSCHEMA+".classa1b left join "+DBSCHEMA+".enum1 on classa1b.attr1=enum1.t_id where t_ili_tid='1b'";
+                    String stmtTxt="select iliCode from "+setup.prefixName("classa1b")+" left join "+setup.prefixName("enum1")+" on classa1b.attr1=enum1.t_id where t_ili_tid='1b'";
                     ResultSet rs=stmt.executeQuery(stmtTxt);
                     Assert.assertTrue(rs.next());
                     Assert.assertEquals("Test2.Test2bA", rs.getString(1));
                     rs.close();
                 }
                 {
-                    String stmtTxt="select iliCode from "+DBSCHEMA+".classa1c left join "+DBSCHEMA+".enum1 on classa1c.attr1=enum1.t_id where t_ili_tid='1c'";
+                    String stmtTxt="select iliCode from "+setup.prefixName("classa1c")+" left join "+setup.prefixName("enum1")+" on classa1c.attr1=enum1.t_id where t_ili_tid='1c'";
                     ResultSet rs=stmt.executeQuery(stmtTxt);
                     Assert.assertTrue(rs.next());
                     Assert.assertEquals("Test2.Test2cA", rs.getString(1));
                     rs.close();
                 }
                 {
-                    String stmtTxt="select iliCode from "+DBSCHEMA+".classa1cc left join "+DBSCHEMA+".enum1 on classa1cc.attr1=enum1.t_id where t_ili_tid='1cc'";
+                    String stmtTxt="select iliCode from "+setup.prefixName("classa1cc")+" left join "+setup.prefixName("enum1")+" on classa1cc.attr1=enum1.t_id where t_ili_tid='1cc'";
                     ResultSet rs=stmt.executeQuery(stmtTxt);
                     Assert.assertTrue(rs.next());
                     Assert.assertEquals("Test2.Test2cA", rs.getString(1));
                     rs.close();
                 }
                 {
-                    String stmtTxt="select iliCode from "+DBSCHEMA+".classa1ccc left join "+DBSCHEMA+".enum1 on classa1ccc.attr1=enum1.t_id where t_ili_tid='1ccc'";
+                    String stmtTxt="select iliCode from "+setup.prefixName("classa1ccc")+" left join "+setup.prefixName("enum1")+" on classa1ccc.attr1=enum1.t_id where t_ili_tid='1ccc'";
                     ResultSet rs=stmt.executeQuery(stmtTxt);
                     Assert.assertTrue(rs.next());
                     Assert.assertEquals("Test2.Test2cA.Test2cAA", rs.getString(1));
@@ -1066,6 +1086,10 @@ public class Enum23Test extends ch.ehi.ili2db.Enum23Test{
                 }
             }
         }finally{
+            if(stmt!=null) {
+                stmt.close();
+                stmt=null;
+            }
             if(jdbcConnection!=null){
                 jdbcConnection.close();
             }
@@ -1079,13 +1103,9 @@ public class Enum23Test extends ch.ehi.ili2db.Enum23Test{
         
         Connection jdbcConnection=null;
         try{
-            Class driverClass = Class.forName("org.postgresql.Driver");
-            jdbcConnection = DriverManager.getConnection(
-                    dburl, dbuser, dbpwd);
-            stmt=jdbcConnection.createStatement();          
             File data=new File("test/data/Enum23/Enum23c-inh0-out.xtf");
             {
-                Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+                Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
                 config.setFunction(Config.FC_EXPORT);
                 config.setExportTid(true);
                 config.setModels("Enum23c");
@@ -1154,13 +1174,9 @@ public class Enum23Test extends ch.ehi.ili2db.Enum23Test{
         
         Connection jdbcConnection=null;
         try{
-            Class driverClass = Class.forName("org.postgresql.Driver");
-            jdbcConnection = DriverManager.getConnection(
-                    dburl, dbuser, dbpwd);
-            stmt=jdbcConnection.createStatement();          
             File data=new File("test/data/Enum23/Enum23c-inh1-out.xtf");
             {
-                Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+                Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
                 config.setFunction(Config.FC_EXPORT);
                 config.setExportTid(true);
                 config.setModels("Enum23c");
@@ -1229,13 +1245,9 @@ public class Enum23Test extends ch.ehi.ili2db.Enum23Test{
         
         Connection jdbcConnection=null;
         try{
-            Class driverClass = Class.forName("org.postgresql.Driver");
-            jdbcConnection = DriverManager.getConnection(
-                    dburl, dbuser, dbpwd);
-            stmt=jdbcConnection.createStatement();          
             File data=new File("test/data/Enum23/Enum23c-inh2-out.xtf");
             {
-                Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+                Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
                 config.setFunction(Config.FC_EXPORT);
                 config.setExportTid(true);
                 config.setModels("Enum23c");
@@ -1301,15 +1313,12 @@ public class Enum23Test extends ch.ehi.ili2db.Enum23Test{
 	public void importIliSingleTable() throws Exception
 	{
 		Connection jdbcConnection=null;
+        Statement stmt=null;
 		try{
-		    Class driverClass = Class.forName("org.postgresql.Driver");
-	        jdbcConnection = DriverManager.getConnection(
-	        		dburl, dbuser, dbpwd);
-	        stmt=jdbcConnection.createStatement();			
-			stmt.execute("DROP SCHEMA IF EXISTS "+DBSCHEMA+" CASCADE");
+            setup.resetDb();
 			{
 				File data=new File("test/data/Enum23/Enum23.ili");
-				Config config=initConfig(data.getPath(),DBSCHEMA,data.getPath()+".log");
+				Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
                 Ili2db.setNoSmartMapping(config);
 				config.setFunction(Config.FC_SCHEMAIMPORT);
 				config.setCreateFk(Config.CREATE_FK_YES);
@@ -1318,8 +1327,12 @@ public class Enum23Test extends ch.ehi.ili2db.Enum23Test{
 				config.setCreateEnumDefs(Config.CREATE_ENUM_DEFS_SINGLE);
 				Ili2db.readSettingsFromDb(config);
 				Ili2db.run(config,null);
+				
+				
+	            jdbcConnection = setup.createConnection();
+	            stmt=jdbcConnection.createStatement();
 				{
-					String stmtTxt="SELECT "+DbNames.ENUM_TAB_DISPNAME_COL+" FROM "+DBSCHEMA+"."+DbNames.ENUM_TAB+" WHERE "+DbNames.ENUM_TAB_ILICODE_COL+" ='Test2_ele' AND "+DbNames.ENUM_TAB_THIS_COL+"='Enum23.Enum1'";
+					String stmtTxt="SELECT "+DbNames.ENUM_TAB_DISPNAME_COL+" FROM "+setup.prefixName(DbNames.ENUM_TAB)+" WHERE "+DbNames.ENUM_TAB_ILICODE_COL+" ='Test2_ele' AND "+DbNames.ENUM_TAB_THIS_COL+"='Enum23.Enum1'";
 					Assert.assertTrue(stmt.execute(stmtTxt));
 					ResultSet rs=stmt.getResultSet();
 					Assert.assertTrue(rs.next());
@@ -1327,6 +1340,10 @@ public class Enum23Test extends ch.ehi.ili2db.Enum23Test{
 				}
 			}
 		}finally{
+            if(stmt!=null) {
+                stmt.close();
+                stmt=null;
+            }
 			if(jdbcConnection!=null){
 				jdbcConnection.close();
 			}
