@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.io.File;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -13,6 +14,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import ch.interlis.ili2c.metamodel.Element;
+import ch.interlis.ili2c.metamodel.Enumeration;
+import ch.interlis.ili2c.metamodel.EnumerationType;
 import ch.interlis.ili2c.metamodel.Evaluable;
 import ch.interlis.ili2c.metamodel.LocalAttribute;
 import ch.interlis.ili2c.metamodel.Model;
@@ -68,19 +71,76 @@ public class MetaAttrUtility{
 	{
         ValidationConfig config=IniFileReader.readFile(configFile);
         for(String iliQName:config.getIliQnames()) {
-            Element element = td.getElement(iliQName);
+            Object elementObj = getElement(td,iliQName);
             // known element?
-            if(element!=null) {
+            if(elementObj!=null) {
                 for(String paramName:config.getConfigParams(iliQName)) {
                     String paramValue=config.getConfigValue(iliQName, paramName);
-                    if(element.getMetaValue(paramName)==null) {
+                    if(elementObj instanceof Element && ((Element)elementObj).getMetaValue(paramName)==null) {
                         // define/set it
-                        element.setMetaValue(paramName, paramValue);
+                        ((Element)elementObj).setMetaValue(paramName, paramValue);
+                    }else if(elementObj instanceof Enumeration.Element && ((Enumeration.Element)elementObj).getMetaValues().getValue(paramName)==null) {
+                            // define/set it
+                            ((Enumeration.Element)elementObj).getMetaValues().setValue(paramName, paramValue);
                     }
                 }
             }            
             
       }
+	}
+	  private static Map<String,Enumeration.Element> name2ele=new HashMap<String,Enumeration.Element>();
+	  private static Object getElement(TransferDescription td,String scopedName) {
+          Element element = td.getElement(scopedName);
+          if(element!=null) {
+              return element;
+          }
+          if(name2ele.containsKey(scopedName)) {
+              return name2ele.get(scopedName);
+          }
+          String names[]=scopedName.split("\\.");
+          for(int i=1;i<names.length;i++) {
+              String elementName=mkScopedName(names,names.length-i);
+              element = td.getElement(elementName);
+              if(element!=null) {
+                  if(element instanceof AttributeDef) {
+                      AttributeDef attr = (AttributeDef) element;
+                      // If exist
+                      if (attr.getDomain() instanceof EnumerationType) {
+                          visitEnumaration(((EnumerationType) attr.getDomain()).getEnumeration(), elementName);
+                          return name2ele.get(scopedName);
+                      }
+                  }else if(element instanceof Domain) {
+                      Domain domain = (Domain) element;
+                      if (domain.getType() instanceof EnumerationType) {
+                          visitEnumaration(((EnumerationType) domain.getType()).getEnumeration(), elementName);
+                          return name2ele.get(scopedName);
+                      }
+                  }
+              }
+          }
+          return null;
+	  }
+	  private static String mkScopedName(String[] names, int size) {
+        StringBuffer ret=new StringBuffer();
+        String sep="";
+        for(int i=0;i<size;i++) {
+            ret.append(sep);
+            ret.append(names[i]);
+            sep=".";
+        }
+        return ret.toString();
+    }
+	private static void visitEnumaration(Enumeration enumeration, String scopedNamePrefix) {
+	    Iterator<ch.interlis.ili2c.metamodel.Enumeration.Element> enumarationIterator = enumeration.getElements();
+
+	    while (enumarationIterator.hasNext()) {
+	        Enumeration.Element enumEle = enumarationIterator.next();
+	        String scopedName = scopedNamePrefix + "." + enumEle.getName(); 
+	        name2ele.put(scopedName, enumEle);
+	        if (enumEle.getSubEnumeration() != null) {
+	            visitEnumaration(enumEle.getSubEnumeration(), scopedName);
+	        }
+	    }   
 	}
 
 	/** Read meta-attributes from the db and add them to the ili2c metamodel.

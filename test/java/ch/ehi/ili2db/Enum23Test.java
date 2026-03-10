@@ -426,14 +426,14 @@ public abstract class Enum23Test {
                 jdbcConnection = setup.createConnection();
                 stmt=jdbcConnection.createStatement();
                 {
-                    String stmtTxt="SELECT dispName FROM "+setup.prefixName("enum1")+" WHERE ilicode ='Test2_ele'";
+                    String stmtTxt="SELECT "+DbNames.ENUM_TAB_DISPNAME_COL+" FROM "+setup.prefixName("enum1")+" WHERE ilicode ='Test2_ele'";
                     Assert.assertTrue(stmt.execute(stmtTxt));
                     ResultSet rs=stmt.getResultSet();
                     Assert.assertTrue(rs.next());
                     Assert.assertEquals("Test2_ele",rs.getString(1));
                 }
                 {
-                    String stmtTxt="SELECT dispName FROM "+setup.prefixName("enum1")+" WHERE ilicode ='Test3.ele_2'";
+                    String stmtTxt="SELECT "+DbNames.ENUM_TAB_DISPNAME_COL+" FROM "+setup.prefixName("enum1")+" WHERE ilicode ='Test3.ele_2'";
                     Assert.assertTrue(stmt.execute(stmtTxt));
                     ResultSet rs=stmt.getResultSet();
                     Assert.assertTrue(rs.next());
@@ -474,28 +474,28 @@ public abstract class Enum23Test {
                 jdbcConnection = setup.createConnection();
                 stmt=jdbcConnection.createStatement();
                 {
-                    String stmtTxt="SELECT dispName FROM "+setup.prefixName("enum1")+" WHERE ilicode ='Test2_ele'";
+                    String stmtTxt="SELECT "+DbNames.ENUM_TAB_DISPNAME_COL+" FROM "+setup.prefixName("enum1")+" WHERE ilicode ='Test2_ele'";
                     Assert.assertTrue(stmt.execute(stmtTxt));
                     ResultSet rs=stmt.getResultSet();
                     Assert.assertTrue(rs.next());
                     Assert.assertEquals("Test2 ele",rs.getString(1));
                 }
                 {
-                    String stmtTxt="SELECT dispName FROM "+setup.prefixName("enum1")+" WHERE ilicode ='Test3.ele_2'";
+                    String stmtTxt="SELECT "+DbNames.ENUM_TAB_DISPNAME_COL+" FROM "+setup.prefixName("enum1")+" WHERE ilicode ='Test3.ele_2'";
                     Assert.assertTrue(stmt.execute(stmtTxt));
                     ResultSet rs=stmt.getResultSet();
                     Assert.assertTrue(rs.next());
                     Assert.assertEquals("Test3.ele 2",rs.getString(1));
                 }
                 {
-                    String stmtTxt="SELECT dispName FROM "+setup.prefixName("classa1_attr3")+" WHERE ilicode ='Test2_ele'";
+                    String stmtTxt="SELECT "+DbNames.ENUM_TAB_DISPNAME_COL+" FROM "+setup.prefixName("classa1_attr3")+" WHERE ilicode ='Test2_ele'";
                     Assert.assertTrue(stmt.execute(stmtTxt));
                     ResultSet rs=stmt.getResultSet();
                     Assert.assertTrue(rs.next());
                     Assert.assertEquals("Test2 ele",rs.getString(1));
                 }
                 {
-                    String stmtTxt="SELECT dispName FROM "+setup.prefixName("classa1_attr3")+" WHERE ilicode ='Test3.ele_2'";
+                    String stmtTxt="SELECT "+DbNames.ENUM_TAB_DISPNAME_COL+" FROM "+setup.prefixName("classa1_attr3")+" WHERE ilicode ='Test3.ele_2'";
                     Assert.assertTrue(stmt.execute(stmtTxt));
                     ResultSet rs=stmt.getResultSet();
                     Assert.assertTrue(rs.next());
@@ -539,42 +539,42 @@ public abstract class Enum23Test {
                 jdbcConnection = setup.createConnection();
                 stmt=jdbcConnection.createStatement();
                 if(true){
-                    String stmtTxt="SELECT dispName FROM "+setup.prefixName("enum1")+" WHERE ilicode ='Test2_ele'";
+                    String stmtTxt="SELECT "+DbNames.ENUM_TAB_DISPNAME_COL+" FROM "+setup.prefixName("enum1")+" WHERE ilicode ='Test2_ele'";
                     Assert.assertTrue(stmt.execute(stmtTxt));
                     ResultSet rs=stmt.getResultSet();
                     Assert.assertTrue(rs.next());
                     Assert.assertEquals("Test2 ele",rs.getString(1));
                 }
                 if(true){
-                    String stmtTxt="SELECT dispName FROM "+setup.prefixName("enum1")+" WHERE ilicode ='Test3.ele_2'";
+                    String stmtTxt="SELECT "+DbNames.ENUM_TAB_DISPNAME_COL+" FROM "+setup.prefixName("enum1")+" WHERE ilicode ='Test3.ele_2'";
                     Assert.assertTrue(stmt.execute(stmtTxt));
                     ResultSet rs=stmt.getResultSet();
                     Assert.assertTrue(rs.next());
                     Assert.assertEquals("Test3.ele 2",rs.getString(1));
                 }
                 if(true){
-                    String stmtTxt="SELECT dispName FROM "+setup.prefixName("enum1")+" WHERE ilicode ='Test4_ele'";
+                    String stmtTxt="SELECT "+DbNames.ENUM_TAB_DISPNAME_COL+" FROM "+setup.prefixName("enum1")+" WHERE ilicode ='Test4_ele'";
                     Assert.assertTrue(stmt.execute(stmtTxt));
                     ResultSet rs=stmt.getResultSet();
                     Assert.assertTrue(rs.next());
                     Assert.assertEquals("testelevier",rs.getString(1));
                 }
                 if(true){
-                    String stmtTxt="SELECT dispName FROM "+setup.prefixName("classa1_attr3")+" WHERE ilicode ='Test2_ele'";
+                    String stmtTxt="SELECT "+DbNames.ENUM_TAB_DISPNAME_COL+" FROM "+setup.prefixName("classa1_attr3")+" WHERE ilicode ='Test2_ele'";
                     Assert.assertTrue(stmt.execute(stmtTxt));
                     ResultSet rs=stmt.getResultSet();
                     Assert.assertTrue(rs.next());
                     Assert.assertEquals("Test2 ele",rs.getString(1));
                 }
                 if(true){
-                    String stmtTxt="SELECT dispName FROM "+setup.prefixName("classa1_attr3")+" WHERE ilicode ='Test3.ele_2'";
+                    String stmtTxt="SELECT "+DbNames.ENUM_TAB_DISPNAME_COL+" FROM "+setup.prefixName("classa1_attr3")+" WHERE ilicode ='Test3.ele_2'";
                     Assert.assertTrue(stmt.execute(stmtTxt));
                     ResultSet rs=stmt.getResultSet();
                     Assert.assertTrue(rs.next());
                     Assert.assertEquals("Test3.ele 2",rs.getString(1));
                 }
                 if(true){
-                    String stmtTxt="SELECT dispName FROM "+setup.prefixName("classa1_attr3")+" WHERE ilicode ='Test4_ele'";
+                    String stmtTxt="SELECT "+DbNames.ENUM_TAB_DISPNAME_COL+" FROM "+setup.prefixName("classa1_attr3")+" WHERE ilicode ='Test4_ele'";
                     Assert.assertTrue(stmt.execute(stmtTxt));
                     ResultSet rs=stmt.getResultSet();
                     Assert.assertTrue(rs.next());
@@ -616,42 +616,42 @@ public abstract class Enum23Test {
                 jdbcConnection = setup.createConnection();
                 stmt=jdbcConnection.createStatement();
                 if(true){
-                    String stmtTxt="SELECT dispName FROM "+setup.prefixName("enum1_fr")+" WHERE ilicode ='Test2_ele'";
+                    String stmtTxt="SELECT "+DbNames.ENUM_TAB_DISPNAME_COL+" FROM "+setup.prefixName("enum1_fr")+" WHERE ilicode ='Test2_ele'";
                     Assert.assertTrue(stmt.execute(stmtTxt));
                     ResultSet rs=stmt.getResultSet();
                     Assert.assertTrue(rs.next());
                     Assert.assertEquals("Test2 ele fr",rs.getString(1));
                 }
                 if(true){
-                    String stmtTxt="SELECT dispName FROM "+setup.prefixName("enum1_fr")+" WHERE ilicode ='Test3.ele_2'";
+                    String stmtTxt="SELECT "+DbNames.ENUM_TAB_DISPNAME_COL+" FROM "+setup.prefixName("enum1_fr")+" WHERE ilicode ='Test3.ele_2'";
                     Assert.assertTrue(stmt.execute(stmtTxt));
                     ResultSet rs=stmt.getResultSet();
                     Assert.assertTrue(rs.next());
                     Assert.assertEquals("Test3 fr.ele 2 fr",rs.getString(1));
                 }
                 if(true){
-                    String stmtTxt="SELECT dispName FROM "+setup.prefixName("enum1_fr")+" WHERE ilicode ='Test4_ele'";
+                    String stmtTxt="SELECT "+DbNames.ENUM_TAB_DISPNAME_COL+" FROM "+setup.prefixName("enum1_fr")+" WHERE ilicode ='Test4_ele'";
                     Assert.assertTrue(stmt.execute(stmtTxt));
                     ResultSet rs=stmt.getResultSet();
                     Assert.assertTrue(rs.next());
                     Assert.assertEquals("testelevier_fr",rs.getString(1));
                 }
                 if(true){
-                    String stmtTxt="SELECT dispName FROM "+setup.prefixName("classa1_fr_attr3_fr")+" WHERE ilicode ='Test2_ele'";
+                    String stmtTxt="SELECT "+DbNames.ENUM_TAB_DISPNAME_COL+" FROM "+setup.prefixName("classa1_fr_attr3_fr")+" WHERE ilicode ='Test2_ele'";
                     Assert.assertTrue(stmt.execute(stmtTxt));
                     ResultSet rs=stmt.getResultSet();
                     Assert.assertTrue(rs.next());
                     Assert.assertEquals("Test2 ele fr",rs.getString(1));
                 }
                 if(true){
-                    String stmtTxt="SELECT dispName FROM "+setup.prefixName("classa1_fr_attr3_fr")+" WHERE ilicode ='Test3.ele_2'";
+                    String stmtTxt="SELECT "+DbNames.ENUM_TAB_DISPNAME_COL+" FROM "+setup.prefixName("classa1_fr_attr3_fr")+" WHERE ilicode ='Test3.ele_2'";
                     Assert.assertTrue(stmt.execute(stmtTxt));
                     ResultSet rs=stmt.getResultSet();
                     Assert.assertTrue(rs.next());
                     Assert.assertEquals("Test3 fr.ele 2 fr",rs.getString(1));
                 }
                 if(true){
-                    String stmtTxt="SELECT dispName FROM "+setup.prefixName("classa1_fr_attr3_fr")+" WHERE ilicode ='Test4_ele'";
+                    String stmtTxt="SELECT "+DbNames.ENUM_TAB_DISPNAME_COL+" FROM "+setup.prefixName("classa1_fr_attr3_fr")+" WHERE ilicode ='Test4_ele'";
                     Assert.assertTrue(stmt.execute(stmtTxt));
                     ResultSet rs=stmt.getResultSet();
                     Assert.assertTrue(rs.next());
@@ -1692,6 +1692,8 @@ public abstract class Enum23Test {
                 config.setTidHandling(Config.TID_HANDLING_PROPERTY);
                 config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
                 config.setCreateEnumDefs(Config.CREATE_ENUM_DEFS_SINGLE);
+                config.setCreateMetaInfo(true);
+                config.setIliMetaAttrsFile("test/data/Enum23/Enum23.ini");
                 Ili2db.readSettingsFromDb(config);
                 Ili2db.run(config,null);
                 
@@ -1704,6 +1706,13 @@ public abstract class Enum23Test {
                     ResultSet rs=stmt.getResultSet();
                     Assert.assertTrue(rs.next());
                     Assert.assertEquals("Test2_ele",rs.getString(1));
+                }
+                {
+                    String stmtTxt="SELECT "+DbNames.ENUM_TAB_DISPNAME_COL+" FROM "+setup.prefixName(DbNames.ENUM_TAB)+" WHERE "+DbNames.ENUM_TAB_ILICODE_COL+" ='Test3.ele1' AND "+DbNames.ENUM_TAB_THIS_COL+"='Enum23.Enum1'";
+                    Assert.assertTrue(stmt.execute(stmtTxt));
+                    ResultSet rs=stmt.getResultSet();
+                    Assert.assertTrue(rs.next());
+                    Assert.assertEquals("testeledreieins",rs.getString(1));
                 }
             }
         }finally{
