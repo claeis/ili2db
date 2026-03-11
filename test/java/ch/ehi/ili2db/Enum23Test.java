@@ -10,6 +10,7 @@ import java.util.HashMap;
 import org.junit.Assert;
 import org.junit.Test;
 
+import ch.ehi.basics.logging.EhiLogger;
 import ch.ehi.ili2db.base.DbNames;
 import ch.ehi.ili2db.base.Ili2db;
 import ch.ehi.ili2db.dbmetainfo.DbExtMetaInfo;
@@ -731,6 +732,7 @@ public abstract class Enum23Test {
         }
         Connection jdbcConnection=null;
         Statement stmt=null;
+        PreparedStatement prepStmt=null;
         try{
             {
                 File data=new File("test/data/Enum23/Enum23a.xtf");
@@ -791,14 +793,19 @@ public abstract class Enum23Test {
                     Assert.assertEquals(null,rs.getString(1));
                 }
                 {
-                    String stmtTxt="SELECT attr4_txt FROM "+setup.prefixName("classa1")+" WHERE attr4=true";
-                    Assert.assertTrue(stmt.execute(stmtTxt));
-                    ResultSet rs=stmt.getResultSet();
+                    String stmtTxt="SELECT attr4_txt FROM "+setup.prefixName("classa1")+" WHERE attr4=?";
+                    prepStmt=jdbcConnection.prepareStatement(stmtTxt);
+                    prepStmt.setBoolean(1,true);
+                    ResultSet rs=prepStmt.executeQuery();
                     Assert.assertTrue(rs.next());
                     Assert.assertEquals("true",rs.getString(1));
                 }
             }
         }finally{
+            if(prepStmt!=null) {
+                prepStmt.close();
+                prepStmt=null;
+            }
             if(stmt!=null) {
                 stmt.close();
                 stmt=null;
@@ -816,6 +823,7 @@ public abstract class Enum23Test {
         }
         Connection jdbcConnection=null;
         Statement stmt=null;
+        PreparedStatement prepStmt=null;
         try{
             {
                 File data=new File("test/data/Enum23/Enum23a.xtf");
@@ -876,14 +884,19 @@ public abstract class Enum23Test {
                     Assert.assertEquals(null,rs.getString(1));
                 }
                 {
-                    String stmtTxt="SELECT attr4_txt FROM "+setup.prefixName("classa1")+" WHERE attr4=true";
-                    Assert.assertTrue(stmt.execute(stmtTxt));
-                    ResultSet rs=stmt.getResultSet();
+                    String stmtTxt="SELECT attr4_txt FROM "+setup.prefixName("classa1")+" WHERE attr4=?";
+                    prepStmt=jdbcConnection.prepareStatement(stmtTxt);
+                    prepStmt.setBoolean(1,true);
+                    ResultSet rs=prepStmt.executeQuery();
                     Assert.assertTrue(rs.next());
                     Assert.assertEquals("true",rs.getString(1));
                 }
             }
         }finally{
+            if(prepStmt!=null) {
+                prepStmt.close();
+                prepStmt=null;
+            }
             if(stmt!=null) {
                 stmt.close();
                 stmt=null;
@@ -901,6 +914,7 @@ public abstract class Enum23Test {
         }
         Connection jdbcConnection=null;
         Statement stmt=null;
+        PreparedStatement prepStmt=null;
         try{
             {
                 File data=new File("test/data/Enum23/Enum23a.xtf");
@@ -961,14 +975,19 @@ public abstract class Enum23Test {
                     Assert.assertEquals(null,rs.getString(1));
                 }
                 {
-                    String stmtTxt="SELECT attr4_fr_txt FROM "+setup.prefixName("classa1_fr")+" WHERE attr4_fr=true";
-                    Assert.assertTrue(stmt.execute(stmtTxt));
-                    ResultSet rs=stmt.getResultSet();
+                    String stmtTxt="SELECT attr4_fr_txt FROM "+setup.prefixName("classa1_fr")+" WHERE attr4_fr=?";
+                    prepStmt=jdbcConnection.prepareStatement(stmtTxt);
+                    prepStmt.setBoolean(1,true);
+                    ResultSet rs=prepStmt.executeQuery();
                     Assert.assertTrue(rs.next());
                     Assert.assertEquals("true",rs.getString(1));
                 }
             }
         }finally{
+            if(prepStmt!=null) {
+                prepStmt.close();
+                prepStmt=null;
+            }
             if(stmt!=null) {
                 stmt.close();
                 stmt=null;
@@ -1250,22 +1269,19 @@ public abstract class Enum23Test {
     @Test
     public void importXtfExtendedFkTableInheritance0() throws Exception
     {
+        {
+            importIliExtendedFkTableInheritance0();
+        }
         //EhiLogger.getInstance().setTraceFilter(false);
         Connection jdbcConnection=null;
         Statement stmt=null;
         try{
-            setup.resetDb();
             {
                 File data=new File("test/data/Enum23/Enum23c.xtf");
                 Config config=setup.initConfig(data.getPath(),data.getPath()+".log");
-                Ili2db.setNoSmartMapping(config);
                 config.setFunction(Config.FC_IMPORT);
-                config.setDoImplicitSchemaImport(true);
-                config.setCreateFk(Config.CREATE_FK_YES);
-                config.setTidHandling(Config.TID_HANDLING_PROPERTY);
                 config.setImportTid(true);
-                config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
-                config.setCreateEnumDefs(Config.CREATE_ENUM_DEFS_MULTI_WITH_ID);
+                config.setImportBid(true);
                 Ili2db.readSettingsFromDb(config);
                 Ili2db.run(config,null);
                 
