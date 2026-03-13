@@ -18,8 +18,8 @@
                             <geom:c2>1150002</geom:c2>
                         </geom:coord>
                         <geom:coord>
-                            <geom:c1>2740003</geom:c1>
-                            <geom:c2>1260004</geom:c2>
+                            <geom:c1>2740003.00149</geom:c1> <!-- Value wil get rounded -->
+                            <geom:c2>1260004.0005</geom:c2> <!-- Value wil get rounded -->
                         </geom:coord>
                     </geom:multicoord>
                 </MultiCoord24:geomAttr1>

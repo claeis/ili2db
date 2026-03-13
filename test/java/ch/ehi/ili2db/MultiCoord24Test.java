@@ -102,14 +102,14 @@ public abstract class MultiCoord24Test {
 
         IomObject coord1 = multiCoordAttr.getattrobj("coord", 0);
         assertNotNull(coord1);
-        assertEquals("2530001.0", coord1.getattrvalue("C1"));
-        assertEquals("1150002.0", coord1.getattrvalue("C2"));
+        assertEquals("2530001.000", coord1.getattrvalue("C1"));
+        assertEquals("1150002.000", coord1.getattrvalue("C2"));
         assertNull(coord1.getattrvalue("C3"));
 
         IomObject coord2 = multiCoordAttr.getattrobj("coord", 1);
         assertNotNull(coord2);
-        assertEquals("2740003.0", coord2.getattrvalue("C1"));
-        assertEquals("1260004.0", coord2.getattrvalue("C2"));
+        assertEquals("2740003.001", coord2.getattrvalue("C1"));
+        assertEquals("1260004.001", coord2.getattrvalue("C2"));
         assertNull(coord2.getattrvalue("C3"));
 
         assertTrue(reader.read() instanceof EndBasketEvent);

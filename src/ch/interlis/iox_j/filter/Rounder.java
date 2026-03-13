@@ -1,52 +1,41 @@
 package ch.interlis.iox_j.filter;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 
 import ch.ehi.basics.settings.Settings;
 import ch.ehi.ili2db.base.Ili2cUtility;
-import ch.interlis.ili2c.metamodel.AbstractClassDef;
+import ch.interlis.ili2c.metamodel.AbstractCoordType;
+import ch.interlis.ili2c.metamodel.AbstractSurfaceOrAreaType;
 import ch.interlis.ili2c.metamodel.AttributeDef;
 import ch.interlis.ili2c.metamodel.CompositionType;
-import ch.interlis.ili2c.metamodel.Container;
 import ch.interlis.ili2c.metamodel.CoordType;
 import ch.interlis.ili2c.metamodel.Domain;
 import ch.interlis.ili2c.metamodel.Element;
-import ch.interlis.ili2c.metamodel.Enumeration;
-import ch.interlis.ili2c.metamodel.EnumerationType;
 import ch.interlis.ili2c.metamodel.LineType;
 import ch.interlis.ili2c.metamodel.Model;
+import ch.interlis.ili2c.metamodel.MultiCoordType;
+import ch.interlis.ili2c.metamodel.MultiPolylineType;
 import ch.interlis.ili2c.metamodel.NumericType;
 import ch.interlis.ili2c.metamodel.NumericalType;
 import ch.interlis.ili2c.metamodel.ObjectType;
 import ch.interlis.ili2c.metamodel.PolylineType;
 import ch.interlis.ili2c.metamodel.PrecisionDecimal;
 import ch.interlis.ili2c.metamodel.RoleDef;
-import ch.interlis.ili2c.metamodel.SurfaceOrAreaType;
-import ch.interlis.ili2c.metamodel.SurfaceType;
-import ch.interlis.ili2c.metamodel.Table;
-import ch.interlis.ili2c.metamodel.Topic;
 import ch.interlis.ili2c.metamodel.TransferDescription;
 import ch.interlis.ili2c.metamodel.Type;
 import ch.interlis.ili2c.metamodel.Viewable;
 import ch.interlis.ili2c.metamodel.ViewableTransferElement;
 import ch.interlis.iom.IomObject;
 import ch.interlis.iom_j.Iom_jObject;
-import ch.interlis.iom_j.itf.ModelUtilities;
 import ch.interlis.iox.EndBasketEvent;
-import ch.interlis.iox.EndTransferEvent;
 import ch.interlis.iox.IoxEvent;
 import ch.interlis.iox.IoxException;
 import ch.interlis.iox.IoxLogging;
 import ch.interlis.iox.IoxValidationDataPool;
 import ch.interlis.iox.ObjectEvent;
 import ch.interlis.iox.StartBasketEvent;
-import ch.interlis.iox.StartTransferEvent;
 import ch.interlis.iox_j.validator.Validator;
 
 public class Rounder implements IoxFilter {
@@ -120,19 +109,30 @@ public class Rounder implements IoxFilter {
                 }catch(NumberFormatException ex) {
                     // ignore; keep value as it is
                 }
-            }else if(type instanceof CoordType) {
+            }else if(type instanceof AbstractCoordType) {
                 IomObject attrValue=iomObj.getattrobj(srcAttrName,attri);
-                CoordType coordType = (CoordType) type;
+                AbstractCoordType coordType = (AbstractCoordType) type;
                 if (coordType.isGeneric()) {
-                    coordType = (CoordType) Ili2cUtility.resolveGenericCoordDomain(srcAttr, null, genericDomains).getType();
+                    coordType = (AbstractCoordType) Ili2cUtility.resolveGenericCoordDomain(srcAttr, null, genericDomains).getType();
                 }
-                roundSegment(attrValue, coordType);
+                if (coordType instanceof MultiCoordType) {
+                    for (int i = 0; i < attrValue.getattrvaluecount("coord"); i++) {
+                        roundSegment(attrValue.getattrobj("coord", i), coordType);
+                    }
+                } else {
+                    roundSegment(attrValue, coordType);
+                }
             }else if(type instanceof PolylineType) {
                 IomObject attrValue=iomObj.getattrobj(srcAttrName,attri);
                 roundLine(attrValue,(PolylineType)type, model);
-            }else if(type instanceof SurfaceOrAreaType) {
+            } else if (type instanceof MultiPolylineType) {
                 IomObject attrValue=iomObj.getattrobj(srcAttrName,attri);
-                roundPolygon(attrValue,(SurfaceOrAreaType)type, model);
+                for (int i = 0; i < attrValue.getattrvaluecount("polyline"); i++) {
+                    roundLine(attrValue.getattrobj("polyline", i), (MultiPolylineType)type, model);
+                }
+            }else if(type instanceof AbstractSurfaceOrAreaType) {
+                IomObject attrValue=iomObj.getattrobj(srcAttrName,attri);
+                roundPolygon(attrValue,(AbstractSurfaceOrAreaType) type, model);
             }else if(srcAttr.getDomain() instanceof CompositionType){
                 IomObject attrValue=iomObj.getattrobj(srcAttrName,attri);
                 roundObject(attrValue);
@@ -140,7 +140,7 @@ public class Rounder implements IoxFilter {
 		}
 	}
 
-	private void roundPolygon(IomObject surfaceValue, SurfaceOrAreaType type, Model model) {
+	private void roundPolygon(IomObject surfaceValue, AbstractSurfaceOrAreaType type, Model model) {
 	    int surfacec=surfaceValue.getattrvaluecount("surface");
 	    for(int surfacei=0;surfacei<surfacec;surfacei++) {
 	        IomObject surface= surfaceValue.getattrobj("surface",surfacei);
@@ -172,7 +172,7 @@ public class Rounder implements IoxFilter {
             
         }
     }
-    private void roundSegment(IomObject iomObj, CoordType coordType) {
+    private void roundSegment(IomObject iomObj, AbstractCoordType coordType) {
 	    NumericalType[] dims = coordType.getDimensions();
 	    for(int i=0;i<dims.length;i++) {
 	        NumericType dimType = (NumericType) dims[i];

@@ -43,8 +43,8 @@
                             </geom:coord>
                             <geom:coord>
                                 <geom:c1>480000.666</geom:c1>
-                                <geom:c2>70000.666</geom:c2>
-                                <geom:c3>4000.666</geom:c3>
+                                <geom:c2>70000.66649</geom:c2> <!-- Value wil get rounded -->
+                                <geom:c3>4000.6655</geom:c3> <!-- Value wil get rounded -->
                             </geom:coord>
                         </geom:polyline>
                     </geom:multipolyline>

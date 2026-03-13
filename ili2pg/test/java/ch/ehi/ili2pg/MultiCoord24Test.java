@@ -23,7 +23,7 @@ public class MultiCoord24Test extends ch.ehi.ili2db.MultiCoord24Test {
     protected void assertMultiChoord24_classa1_geomattr1(Statement stmt) throws Exception {
         ResultSet rs = stmt.executeQuery("SELECT st_asewkt(geomattr1) FROM " + setup.prefixName("classa1") + ";");
         while (rs.next()) {
-            assertEquals("SRID=2056;MULTIPOINT(2530001 1150002,2740003 1260004)", rs.getObject(1));
+            assertEquals("SRID=2056;MULTIPOINT(2530001 1150002,2740003.001 1260004.001)", rs.getObject(1));
         }
     }
 }

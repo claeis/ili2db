@@ -22,7 +22,7 @@ public class MultiCoord24Test extends ch.ehi.ili2db.MultiCoord24Test {
         Gpkg2iox gpkg2iox = new Gpkg2iox();
 
         while (rs.next()) {
-            assertEquals("MULTICOORD {coord [COORD {C1 2530001.0, C2 1150002.0}, COORD {C1 2740003.0, C2 1260004.0}]}", gpkg2iox.read(rs.getBytes(1)).toString());
+            assertEquals("MULTICOORD {coord [COORD {C1 2530001.0, C2 1150002.0}, COORD {C1 2740003.001, C2 1260004.001}]}", gpkg2iox.read(rs.getBytes(1)).toString());
         }
     }
 }

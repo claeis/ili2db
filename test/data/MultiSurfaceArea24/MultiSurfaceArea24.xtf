@@ -52,8 +52,8 @@
                                     </geom:coord>
                                     <geom:coord>
                                         <geom:c1>480000.666</geom:c1>
-                                        <geom:c2>70000.666</geom:c2>
-                                        <geom:c3>5000.111</geom:c3>
+                                        <geom:c2>70000.66649</geom:c2> <!-- Value wil get rounded -->
+                                        <geom:c3>5000.1105</geom:c3> <!-- Value wil get rounded -->
                                     </geom:coord>
                                     <geom:coord>
                                         <geom:c1>480000.555</geom:c1>
@@ -102,8 +102,8 @@
                                     </geom:coord>
                                     <geom:coord>
                                         <geom:c1>490000.666</geom:c1>
-                                        <geom:c2>70000.666</geom:c2>
-                                        <geom:c3>5000.111</geom:c3>
+                                        <geom:c2>70000.66649</geom:c2> <!-- Value wil get rounded -->
+                                        <geom:c3>5000.1105</geom:c3> <!-- Value wil get rounded -->
                                     </geom:coord>
                                     <geom:coord>
                                         <geom:c1>490000.555</geom:c1>
@@ -158,8 +158,8 @@
                                     </geom:coord>
                                     <geom:coord>
                                         <geom:c1>480000.666</geom:c1>
-                                        <geom:c2>70000.666</geom:c2>
-                                        <geom:c3>5000.111</geom:c3>
+                                        <geom:c2>70000.66649</geom:c2> <!-- Value wil get rounded -->
+                                        <geom:c3>5000.1105</geom:c3> <!-- Value wil get rounded -->
                                     </geom:coord>
                                     <geom:coord>
                                         <geom:c1>480000.555</geom:c1>
@@ -208,8 +208,8 @@
                                     </geom:coord>
                                     <geom:coord>
                                         <geom:c1>490000.666</geom:c1>
-                                        <geom:c2>70000.666</geom:c2>
-                                        <geom:c3>5000.111</geom:c3>
+                                        <geom:c2>70000.66649</geom:c2> <!-- Value wil get rounded -->
+                                        <geom:c3>5000.1105</geom:c3> <!-- Value wil get rounded -->
                                     </geom:coord>
                                     <geom:coord>
                                         <geom:c1>490000.555</geom:c1>
