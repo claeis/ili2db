@@ -41,7 +41,7 @@ public class PgCustomStrategy extends AbstractJdbcMapping {
 	}
 
 	private final static String[] pgExtensions = new String[]{
-			"postgis", "\"uuid-ossp\""
+			"postgis", "\"pgcrypto\""
 	};
 
 	@Override
