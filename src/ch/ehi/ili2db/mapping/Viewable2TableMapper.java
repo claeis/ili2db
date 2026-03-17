@@ -413,12 +413,15 @@ public class Viewable2TableMapper {
                                         !(Ili2cUtility.isArrayAttr(td,attr) && coalesceArray) &&
                                         !(Ili2cUtility.isExpandMapping(attr) && expandStruct)
                                         ) {
-                                    // create a new secondary table for attribute with cardinality greater than one
-                                    sqlSecondaryTableName=nameMapping.mapAttributeAsTable(table.getViewable(), attr, epsgCode);
-                                    ViewableWrapper secondaryTable = table.createSecondaryTable(sqlSecondaryTableName);
-                                    // add attribute to new secondary table
-                                    addColumn(table, secondaryTable.getAttrv(), new ColumnWrapper(new StructAttrPath(viewableTransferElement)));
-                                    trafoConfig.setAttrConfig(table.getViewable(),attr, epsgCode,TrafoConfigNames.SECONDARY_TABLE, sqlSecondaryTableName);
+                                    ColumnWrapper column = new ColumnWrapper(new StructAttrPath(viewableTransferElement));
+                                    if (!columnAlreadyAdded(table, new ArrayList<>(), column)) {
+                                        // create a new secondary table for attribute with cardinality greater than one
+                                        sqlSecondaryTableName=nameMapping.mapAttributeAsTable(table.getViewable(), attr, epsgCode);
+                                        ViewableWrapper secondaryTable = table.createSecondaryTable(sqlSecondaryTableName);
+                                        // add attribute to new secondary table
+                                        addColumn(table, secondaryTable.getAttrv(), column);
+                                        trafoConfig.setAttrConfig(table.getViewable(),attr, epsgCode,TrafoConfigNames.SECONDARY_TABLE, sqlSecondaryTableName);
+                                    }
                                 } else if (cardinality.getMaximum() <= ArrayMappings.MAX_ARRAY_EXPAND &&
                                         (Ili2cUtility.isExpandMapping(attr) && expandStruct)
                                         ) {
