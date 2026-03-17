@@ -3,6 +3,7 @@ package ch.ehi.ili2db.mapping;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 import ch.ehi.basics.logging.EhiLogger;
@@ -116,9 +117,9 @@ public class Viewable2TableMapper {
 	                    // defined attrs
 	                    {
 	                        if(aclass instanceof AssociationDef) {
-	                            addProps(wrapper,props,wrapper.getViewable(),getRoles((AssociationDef)aclass),null);
+	                            addProps(wrapper,props,wrapper.getViewable(),getRoles((AssociationDef)aclass),null, ret);
 	                        }
-	                        addProps(wrapper,props,wrapper.getViewable(),aclass.getDefinedAttributesAndRoles2(),null);
+	                        addProps(wrapper,props,wrapper.getViewable(),aclass.getDefinedAttributesAndRoles2(),null, ret);
 	                    }
 	                    
 	                    // defined attrs of bases with subclass or newAndSubclass strategy
@@ -131,9 +132,9 @@ public class Viewable2TableMapper {
 	                                break;
 	                            }
 	                            if(base instanceof AssociationDef) {
-	                                addProps(wrapper,props,wrapper.getViewable(),getRoles((AssociationDef)base),null);
+	                                addProps(wrapper,props,wrapper.getViewable(),getRoles((AssociationDef)base),null, ret);
 	                            }
-	                            addProps(wrapper,props,wrapper.getViewable(),base.getDefinedAttributesAndRoles2(),null);
+	                            addProps(wrapper,props,wrapper.getViewable(),base.getDefinedAttributesAndRoles2(),null, ret);
 	                            base=(Viewable) base.getExtending();
 	                        }
 	                    }
@@ -178,7 +179,7 @@ public class Viewable2TableMapper {
 					ViewableWrapper wrapper=ret.get(base);
 					List<ColumnWrapper> props=wrapper.getAttrv();
 					// add props of this extension
-					addProps(wrapper,props,wrapper.getViewable(),aclass.getDefinedAttributesAndRoles2(),null);
+					addProps(wrapper,props,wrapper.getViewable(),aclass.getDefinedAttributesAndRoles2(),null, ret);
 					wrapper.setAttrv(props);
 					ret.add(aclass, wrapper);
 				}else if(TrafoConfigNames.INHERITANCE_TRAFO_SUBCLASS.equals(inheritanceStrategy)){
@@ -308,7 +309,7 @@ public class Viewable2TableMapper {
     }
 	private void addProps(ViewableWrapper table,List<ColumnWrapper> existingColumns,
 	        Viewable iliclassOfAttrs,
-	        Iterator<ViewableTransferElement> additionalAttrs, StructAttrPath.PathEl structAttrPrefix[]) throws Ili2dbException {
+	        Iterator<ViewableTransferElement> additionalAttrs, StructAttrPath.PathEl structAttrPrefix[], Viewable2TableMapping previousMappings) throws Ili2dbException {
 		boolean hasGeometry=false;
 		// only one geometry column per table?
 		if(singleGeom){
@@ -352,8 +353,8 @@ public class Viewable2TableMapper {
                                 // pre ili2db 3.13.x
                                 sqlSecondaryTableName=trafoConfig.getAttrConfig(iliclassOfAttrs,attr, TrafoConfigNames.SECONDARY_TABLE);
                             }
-                            // attribute configured to be in a secondary table?
-                            if(sqlSecondaryTableName!=null){
+                            // attribute configured to be in a secondary table and that secondary table does not yet exist!
+                            if(sqlSecondaryTableName!=null && !hasMappingTable(previousMappings, sqlSecondaryTableName)){
                                 // add attribute to given secondary table
                                 ViewableWrapper attrWrapperSecondaryTable=table.getSecondaryTable(sqlSecondaryTableName);
                                 if(attrWrapperSecondaryTable==null){
@@ -435,7 +436,7 @@ public class Viewable2TableMapper {
                                             }
                                             addProps(table,existingColumns,
                                                     struct,
-                                                    struct.getDefinedAttributesAndRoles2(),structAttrPrefix);
+                                                    struct.getDefinedAttributesAndRoles2(),structAttrPrefix, previousMappings);
                                         }
                                     }else {
                                         trafoConfig.setAttrConfig(attr, TrafoConfigNames.ARRAY_TRAFO, TrafoConfigNames.ARRAY_TRAFO_EXPAND);
@@ -690,4 +691,23 @@ public class Viewable2TableMapper {
         return ret;
     }
 
+    /**
+     * Check if the mapping already contains a table with the specified name
+     */
+    private boolean hasMappingTable(Viewable2TableMapping mapping, String sqlTableName) {
+        for (Viewable<?> viewable : mapping.getViewables()) {
+            ViewableWrapper wrapper = mapping.get(viewable);
+            if (Objects.equals(wrapper.getSqlTablename(), sqlTableName)) {
+                return true;
+            }
+
+            for (ViewableWrapper secondaryTable : wrapper.getSecondaryTables()) {
+                if (Objects.equals(secondaryTable.getSqlTablename(), sqlTableName)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
 }
