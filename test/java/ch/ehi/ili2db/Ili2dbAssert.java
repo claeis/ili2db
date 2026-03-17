@@ -189,6 +189,13 @@ public class Ili2dbAssert {
         assertAttrNameTable(jdbcConnection, expectedValues,null);
     }
 
+    public static void assertTableContainsValues(AbstractTestSetup setup, String table, String[] columns, String[][] expectedValues, String filter) throws SQLException {
+        try (Connection jdbcConnection = setup.createConnection()) {
+            assertTableContainsValues(jdbcConnection, setup.prefixName(table), columns, expectedValues, filter);
+        }
+    }
+
+    @Deprecated
     public static void assertTableContainsValues(Connection jdbcConnection, String table, String[] columns, String[][] expectedValues, String filter) throws SQLException {
         Statement statement = null;
         try {
