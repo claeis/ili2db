@@ -14,6 +14,7 @@ ideas/open issues/questions
 ili2db 5.5.2 (2026-03-xx )
 ---------------------------
 - fix ili2db.dispName not considered in enumerations from extra meta attribute file (#581)
+- add ili2db.enumDomain for BAG OF ARRAY-mapping with enumerations/createEnumTab (#590)
 
 ili2db 5.5.1 (2025-12-29)
 ---------------------------

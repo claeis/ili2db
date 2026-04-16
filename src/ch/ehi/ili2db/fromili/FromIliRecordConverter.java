@@ -770,10 +770,20 @@ public class FromIliRecordConverter extends AbstractRecordConverter {
             AttributeDef localAttr=attrMapping.getValueAttr();
             Type localType = localAttr.getDomainResolvingAll();
             if(Ili2cUtility.isIomObjectPrimType(td,localAttr)) {
-                if(!createSimpleDbCol(dbTable, localAttr, localType, dbCol, simpleTypeKind,unitDef, mText, dbColExts)) {
+              if(!createSimpleDbCol(dbTable, localAttr, localType, dbCol, simpleTypeKind,unitDef, mText, dbColExts)) {
                     throw new IllegalStateException("unexpected attr type "+localAttr.getScopedName());
               }
-                dbCol.value.setArraySize(DbColumn.UNLIMITED_ARRAY);     
+              if(localType instanceof EnumerationType) {
+                  String sqlColName=getSqlAttrName(colWrapper.getStructAttrPath(),epsgCode,dbTable.getName().getName(),null);
+                  String attrName=attr.getName();
+                  Type extType=localAttr.getDomain();
+                  if(extType instanceof TypeAlias) {
+                      Domain domain=((TypeAlias)extType).getAliasing();
+                      String domainSqlName=domain.getScopedName();
+                      metaInfo.setColumnInfo(dbTable.getName().getName(), null, sqlColName, DbExtMetaInfo.TAG_COL_ENUMDOMAIN, domainSqlName);                        
+                  }
+              }
+              dbCol.value.setArraySize(DbColumn.UNLIMITED_ARRAY);     
             }else if(Ili2cUtility.isReferenceType(td,localAttr)) {
                 if(createExtRef && ((ReferenceType)localType).isExternal()) {
                     DbColVarchar ret=new DbColVarchar();

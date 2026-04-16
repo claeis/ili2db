@@ -114,6 +114,27 @@ public class Ili2dbAssert {
             }
         }
     }
+    public static void assertColumnTable_enumDomain(AbstractTestSetup setup, String[][] expectedValues) throws SQLException {
+        Connection jdbcConnection=null;
+        try {
+            jdbcConnection=setup.createConnection();
+            assertTableContainsValues(
+                    jdbcConnection,
+                    setup.prefixName(DbNames.META_INFO_COLUMN_TAB),
+                    new String[] {
+                            DbNames.META_INFO_COLUMN_TAB_TABLENAME_COL,
+                            DbNames.META_INFO_COLUMN_TAB_SUBTYPE_COL,
+                            DbNames.META_INFO_COLUMN_TAB_COLUMNNAME_COL,
+                            DbNames.META_INFO_COLUMN_TAB_SETTING_COL
+                    }, expectedValues,
+                    DbNames.META_INFO_COLUMN_TAB_TAG_COL+" = '"+DbExtMetaInfo.TAG_COL_ENUMDOMAIN+"'"
+            );        
+        }finally {
+            if (jdbcConnection != null) {
+                jdbcConnection.close();
+            }
+        }
+    }
     public static void assertTrafoTable(AbstractTestSetup setup, String[][] expectedValues) throws SQLException {
         Connection jdbcConnection=null;
         try {
