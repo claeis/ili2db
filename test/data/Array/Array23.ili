@@ -16,6 +16,7 @@ MODEL Array23
 	   Wert: RGB;
 	END Farbe;
 	CLASS Auto =
+	  Farbe: RGB;
 	  !!@ili2db.mapping=ARRAY
 	  Farben: LIST {0..*} OF Farbe;
 	END Auto;    

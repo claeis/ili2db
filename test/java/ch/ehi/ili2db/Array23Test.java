@@ -54,6 +54,7 @@ public abstract class Array23Test {
 			config.setTidHandling(Config.TID_HANDLING_PROPERTY);
 			config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
 			config.setArrayTrafo(Config.ARRAY_TRAFO_COALESCE);
+			config.setCreateMetaInfo(true);
 			Ili2db.readSettingsFromDb(config);
 			Ili2db.run(config,null);
 			// assertions
@@ -72,6 +73,7 @@ public abstract class Array23Test {
                 {"Array23.TestA.Datatypes.numericInt",    "numericint",    "datatypes",null}, 
                 {"Array23.TestA.Datatypes.numericDec",    "numericdec",    "datatypes" ,null},
                 {"Array23.TestA.NumericInt_.Value",   "avalue",    "numericint_"   ,null},
+                {"Array23.TestA.Auto.Farbe", "farbe",    "auto"  ,null},
                 {"Array23.TestA.Auto.Farben", "farben",    "auto"  ,null},
                 {"Array23.TestA.Datatypes.aDateTime", "adatetime", "datatypes",null}, 
                 {"Array23.TestA.AUuid_.Value",    "avalue",    "auuid_"    ,null},
@@ -151,6 +153,7 @@ public abstract class Array23Test {
                 {"Array23.TestA.Datatypes.numericInt",    "numericint",    "datatypes",null}, 
                 {"Array23.TestA.Datatypes.numericDec",    "numericdec",    "datatypes" ,null},
                 {"Array23.TestA.NumericInt_.Value",   "avalue",    "numericint_"   ,null},
+                {"Array23.TestA.Auto.Farbe", "farbe",    "auto"  ,null},
                 {"Array23.TestA.Auto.Farben", "farben",    "auto"  ,null},
                 {"Array23.TestA.Datatypes.aDateTime", "adatetime", "datatypes",null}, 
                 {"Array23.TestA.AUuid_.Value",    "avalue",    "auuid_"    ,null},
@@ -191,6 +194,7 @@ public abstract class Array23Test {
                     {"gebaeude",null,"art","katalog"},
                     {"farbe",null,"wert","rgb"},
                     {"auto",null,"farben","rgb"},
+                    {"auto",null,"farbe","rgb"},
                 };
             importIli_Assert(attrName_expectedValues, trafo_expectedValues,columnForeignKey_expectedValues);
         }catch(Exception e) {
