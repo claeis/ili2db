@@ -1,22 +1,22 @@
 package ch.ehi.ili2db;
 
-import static org.junit.Assert.*;
-
 import java.io.File;
 import java.sql.Connection;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.HashMap;
 
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
-import ch.ehi.basics.logging.EhiLogger;
 import ch.ehi.ili2db.base.Ili2db;
 import ch.ehi.ili2db.gui.Config;
-import ch.ehi.sqlgen.DbUtility;
+import ch.interlis.ili2c.Main;
+import ch.interlis.ili2c.config.Configuration;
+import ch.interlis.ili2c.config.FileEntry;
+import ch.interlis.ili2c.config.FileEntryKind;
+import ch.interlis.ili2c.metamodel.TransferDescription;
 import ch.interlis.iom.IomObject;
+import ch.interlis.iom_j.xtf.Xtf24Reader;
 import ch.interlis.iom_j.xtf.XtfReader;
 import ch.interlis.iox.EndBasketEvent;
 import ch.interlis.iox.EndTransferEvent;
@@ -200,6 +200,94 @@ public abstract class RounderTest {
                  Assert.assertNotNull(obj0);
                  Assert.assertEquals("Rounding23.Topic.Surface2 oid Surface2.1 {surfacearcs2d MULTISURFACE {surface SURFACE {boundary BOUNDARY {polyline POLYLINE {sequence SEGMENTS {segment [COORD {C1 2460001.0, C2 1045001.0}, COORD {C1 2460020.0001, C2 1045015.0001}, ARC {A1 2460010.0, A2 1045018.0, C1 2460001.0, C2 1045015.0}, COORD {C1 2460001.0, C2 1045001.0}]}}}}}}", obj0.toString());
              }
+        }
+    }
+
+    private void importXtf24(boolean disableRounding) throws Exception {
+        setup.resetDb();
+        File data = new File(TEST_OUT, "Rounding24.xtf");
+        Config config = setup.initConfig(data.getPath(), data.getPath() + ".log");
+        Ili2db.setNoSmartMapping(config);
+        config.setFunction(Config.FC_IMPORT);
+        config.setDoImplicitSchemaImport(true);
+        config.setCreateNumChecks(true);
+        config.setTidHandling(Config.TID_HANDLING_PROPERTY);
+        config.setImportTid(true);
+        config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
+        config.setDisableRounding(disableRounding);
+        Ili2db.run(config, null);
+    }
+
+    private HashMap<String, IomObject> readXtf24Objects(File data) throws Exception {
+        Configuration ili2cConfig = new Configuration();
+        FileEntry fileEntry = new FileEntry(TEST_OUT + "Rounding24.ili", FileEntryKind.ILIMODELFILE);
+        ili2cConfig.addFileEntry(fileEntry);
+        TransferDescription td = Main.runCompiler(ili2cConfig);
+        Assert.assertNotNull(td);
+
+        HashMap<String, IomObject> objs = new HashMap<>();
+        Xtf24Reader reader = new Xtf24Reader(data);
+        try {
+            reader.setModel(td);
+            IoxEvent event;
+            do {
+                event = reader.read();
+                if (event instanceof ObjectEvent) {
+                    IomObject iomObj = ((ObjectEvent) event).getIomObject();
+                    if (iomObj.getobjectoid() != null) {
+                        objs.put(iomObj.getobjectoid(), iomObj);
+                    }
+                }
+            } while (!(event instanceof EndTransferEvent));
+        } finally {
+            reader.close();
+        }
+        return objs;
+    }
+
+    protected abstract void assertRounding24_classMultiKoord2(Statement stmt) throws Exception;
+    protected abstract void assertRounding24_multiLine2(Statement stmt) throws Exception;
+    protected abstract void assertRounding24_multiSurface2(Statement stmt) throws Exception;
+
+    @Test
+    public void importXtf24MultiWithRounding() throws Exception {
+        importXtf24(false);
+
+        try (Connection jdbcConnection = setup.createConnection(); Statement stmt = jdbcConnection.createStatement()) {
+            assertRounding24_classMultiKoord2(stmt);
+            assertRounding24_multiLine2(stmt);
+            assertRounding24_multiSurface2(stmt);
+        }
+    }
+
+    @Test
+    public void exportXtf24MultiWithRounding() throws Exception {
+        importXtf24(true);
+
+        File data = new File(TEST_OUT, "Rounding24-out.xtf");
+        Config config = setup.initConfig(data.getPath(), data.getPath() + ".log");
+        config.setFunction(Config.FC_EXPORT);
+        config.setModels("Rounding24");
+        config.setExportTid(true);
+        Ili2db.readSettingsFromDb(config);
+        Ili2db.run(config, null);
+
+        HashMap<String, IomObject> objs = readXtf24Objects(data);
+        Assert.assertEquals(3, objs.size());
+        {
+            IomObject obj = objs.get("MultiCoord2.1");
+            Assert.assertNotNull(obj);
+            Assert.assertEquals("Rounding24.Topic.ClassMultiKoord2 oid MultiCoord2.1 {lcoord MULTICOORD {coord [COORD {C1 2460001.000, C2 1045001.000}, COORD {C1 2460002.001, C2 1045002.001}]}}", obj.toString());
+        }
+        {
+            IomObject obj = objs.get("MultiLine2.1");
+            Assert.assertNotNull(obj);
+            Assert.assertEquals("Rounding24.Topic.MultiLine2 oid MultiLine2.1 {straightsarcs2d MULTIPOLYLINE {polyline [POLYLINE {sequence SEGMENTS {segment [COORD {C1 2460001.000, C2 1045001.000}, ARC {A1 2460005.000, A2 1045004.000, C1 2460006.000, C2 1045006.000}, COORD {C1 2460010.000, C2 1045010.000}]}}, POLYLINE {sequence SEGMENTS {segment [COORD {C1 2460020.000, C2 1045020.000}, COORD {C1 2460030.001, C2 1045030.001}]}}]}}", obj.toString());
+        }
+        {
+            IomObject obj = objs.get("MultiSurface2.1");
+            Assert.assertNotNull(obj);
+            Assert.assertEquals("Rounding24.Topic.MultiSurface2 oid MultiSurface2.1 {surfacearcs2d MULTISURFACE {surface [SURFACE {boundary BOUNDARY {polyline POLYLINE {sequence SEGMENTS {segment [COORD {C1 2460001.000, C2 1045001.000}, COORD {C1 2460020.000, C2 1045015.000}, ARC {A1 2460010.000, A2 1045018.000, C1 2460001.000, C2 1045015.000}, COORD {C1 2460001.000, C2 1045001.000}]}}}}, SURFACE {boundary BOUNDARY {polyline POLYLINE {sequence SEGMENTS {segment [COORD {C1 2460101.000, C2 1045101.000}, COORD {C1 2460120.001, C2 1045115.001}, COORD {C1 2460101.000, C2 1045115.000}, COORD {C1 2460101.000, C2 1045101.000}]}}}}]}}", obj.toString());
         }
     }
 }
