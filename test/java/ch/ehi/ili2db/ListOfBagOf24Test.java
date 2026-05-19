@@ -1,5 +1,6 @@
 package ch.ehi.ili2db;
 
+import ch.ehi.ili2db.base.DbNames;
 import ch.ehi.ili2db.base.Ili2db;
 import ch.ehi.ili2db.base.Ili2dbException;
 import ch.ehi.ili2db.gui.Config;
@@ -26,10 +27,6 @@ public abstract class ListOfBagOf24Test {
     protected abstract AbstractTestSetup createTestSetup();
 
     protected abstract void assertTableContainsColumns(Connection jdbcConnection, String tableName, String... expectedColumns) throws SQLException;
-
-    protected void assertTableContainsValues(Connection jdbcConnection, String table, String[] columns, String[][] expectedValues) throws SQLException {
-        Ili2dbAssert.assertTableContainsValues(jdbcConnection, table, columns, expectedValues, null);
-    }
 
     abstract protected void assertClassA1Attr8(Connection jdbcConnection) throws Exception;
 
@@ -78,7 +75,7 @@ public abstract class ListOfBagOf24Test {
                         {"BagOfPrimTypes24.TestA.ClassA1.Attr8", "attr8", "classa1", null},
                         {"BagOfPrimTypes24.TestA.ClassA1.Attr9", "attr9", "classa1_attr9", null},
                 };
-                Ili2dbAssert.assertAttrNameTable(jdbcConnection, expectedValues, setup.getSchema());
+                Ili2dbAssert.assertAttrNameTable(setup, expectedValues);
             }
             {
                 String[][] expectedValues = new String[][]{
@@ -95,7 +92,7 @@ public abstract class ListOfBagOf24Test {
                         {"BagOfPrimTypes24.TestA.ClassA1.Attr5", "ch.ehi.ili2db.secondaryTable", "classa1_attr5"},
                         {"BagOfPrimTypes24.TestA.ClassA1.Attr9:2056(BagOfPrimTypes24.TestA.ClassA1)", "ch.ehi.ili2db.secondaryTable", "classa1_attr9"},
                 };
-                Ili2dbAssert.assertTrafoTable(jdbcConnection, expectedValues, setup.getSchema());
+                Ili2dbAssert.assertTrafoTable(setup, expectedValues);
             }
 
             assertTableContainsColumns(jdbcConnection, "classa1", "T_Id", "T_basket", "T_Ili_Tid", "attr6", "attr8");
@@ -135,10 +132,7 @@ public abstract class ListOfBagOf24Test {
         config.setOneGeomPerTable(true);
         Ili2db.run(config, null);
 
-        Connection jdbcConnection = null;
-        try {
-            jdbcConnection = setup.createConnection();
-
+        try (Connection jdbcConnection = setup.createConnection()) {
             {
                 String[][] expectedValues = new String[][]{
                         {"ListOfPrimTypes24.TestA.StructA2.Attr1", "structa2_attr1", "structa2_attr1", "structa2"},
@@ -161,7 +155,7 @@ public abstract class ListOfBagOf24Test {
                         {"ListOfPrimTypes24.TestA.ClassA1.Attr8", "attr8", "classa1", null},
                         {"ListOfPrimTypes24.TestA.ClassA1.Attr9", "attr9", "classa1_attr9", null},
                 };
-                Ili2dbAssert.assertAttrNameTable(jdbcConnection, expectedValues, setup.getSchema());
+                Ili2dbAssert.assertAttrNameTable(setup, expectedValues);
             }
             {
                 String[][] expectedValues = new String[][]{
@@ -178,7 +172,7 @@ public abstract class ListOfBagOf24Test {
                         {"ListOfPrimTypes24.TestA.ClassA1.Attr5", "ch.ehi.ili2db.secondaryTable", "classa1_attr5"},
                         {"ListOfPrimTypes24.TestA.ClassA1.Attr9:2056(ListOfPrimTypes24.TestA.ClassA1)", "ch.ehi.ili2db.secondaryTable", "classa1_attr9"},
                 };
-                Ili2dbAssert.assertTrafoTable(jdbcConnection, expectedValues, setup.getSchema());
+                Ili2dbAssert.assertTrafoTable(setup, expectedValues);
             }
 
             assertTableContainsColumns(jdbcConnection, "classa1", "T_Id", "T_basket", "T_Ili_Tid", "attr6", "attr8");
@@ -194,10 +188,6 @@ public abstract class ListOfBagOf24Test {
             assertTableContainsColumns(jdbcConnection, "classa2", "T_Id", "T_basket", "T_Ili_Tid");
             assertTableContainsColumns(jdbcConnection, "structa2", "T_Id", "T_basket", "T_Ili_Tid", "T_Seq", "classa2_attr1");
             assertTableContainsColumns(jdbcConnection, "structa2_attr1", "T_Id", "T_basket", "T_Seq", "structa2_attr1", "attr1");
-        } finally {
-            if (jdbcConnection != null) {
-                jdbcConnection.close();
-            }
         }
     }
 
@@ -219,25 +209,17 @@ public abstract class ListOfBagOf24Test {
         setup.setXYParams(config);
         Ili2db.run(config, null);
 
-        Connection jdbcConnection = null;
-        try {
-            jdbcConnection = setup.createConnection();
-
-            assertTableContainsValues(jdbcConnection, "classa1", new String[]{"attr6"}, new String[][]{{"ORYSIT"}});
-            assertTableContainsValues(jdbcConnection, "classa1_attr1", new String[]{"attr1"}, new String[][]{{"Blaa"}, {"Ftaa"}, {"Gluu"}});
-            assertTableContainsValues(jdbcConnection, "classa1_attr2", new String[]{"attr2"}, new String[][]{{"12"}, {"14"}});
-            assertTableContainsValues(jdbcConnection, "classa1_attr3", new String[]{"attr3"}, new String[][]{{"E2"}, {"E1"}});
-            assertTableContainsValues(jdbcConnection, "classa1_attr4", new String[]{"attr4"}, new String[][]{{"prefix-019-postfix"}, {"prefix-199-postfix"}});
-            assertTableContainsValues(jdbcConnection, "classa1_attr5", new String[]{"attr5"}, new String[][]{{"<MIDEPS xmlns=\"\"></MIDEPS>"}, {"<WOROLF xmlns=\"\"></WOROLF>"}});
-            assertTableContainsValues(jdbcConnection, "classa1_attr7", new String[]{"attr7"}, new String[][]{{"1997-10-14"}, {"2008-01-29"}});
-            assertTableContainsValues(jdbcConnection, "structa2_attr1", new String[]{"attr1"}, new String[][]{{"HERSEN"}, {"FLORIN"}});
+        try (Connection jdbcConnection = setup.createConnection()) {
+            Ili2dbAssert.assertTableContainsValues(setup, "classa1", new String[]{"attr6"}, new String[][]{{"ORYSIT"}}, null);
+            Ili2dbAssert.assertTableContainsValues(setup, "classa1_attr1", new String[]{"attr1"}, new String[][]{{"Blaa"}, {"Ftaa"}, {"Gluu"}}, null);
+            Ili2dbAssert.assertTableContainsValues(setup, "classa1_attr2", new String[]{"attr2"}, new String[][]{{"12"}, {"14"}}, null);
+            Ili2dbAssert.assertTableContainsValues(setup, "classa1_attr3", new String[]{"attr3"}, new String[][]{{"E2"}, {"E1"}}, null);
+            Ili2dbAssert.assertTableContainsValues(setup, "classa1_attr4", new String[]{"attr4"}, new String[][]{{"prefix-019-postfix"}, {"prefix-199-postfix"}}, null);
+            Ili2dbAssert.assertTableContainsValues(setup, "classa1_attr5", new String[]{"attr5"}, new String[][]{{"<MIDEPS xmlns=\"\"></MIDEPS>"}, {"<WOROLF xmlns=\"\"></WOROLF>"}}, null);
+            Ili2dbAssert.assertTableContainsValues(setup, "classa1_attr7", new String[]{"attr7"}, new String[][]{{"1997-10-14"}, {"2008-01-29"}}, null);
+            Ili2dbAssert.assertTableContainsValues(setup, "structa2_attr1", new String[]{"attr1"}, new String[][]{{"HERSEN"}, {"FLORIN"}}, null);
             assertClassA1Attr8(jdbcConnection);
             assertClassA1Attr9(jdbcConnection);
-
-        } finally {
-            if (jdbcConnection != null) {
-                jdbcConnection.close();
-            }
         }
     }
 
@@ -287,73 +269,65 @@ public abstract class ListOfBagOf24Test {
     }
 
     private void assertListOf24DbContent() throws Exception {
-        Connection jdbcConnection = null;
-        try {
-            jdbcConnection = setup.createConnection();
-
-            assertTableContainsValues(jdbcConnection, "classa1", new String[]{
+        try (Connection jdbcConnection = setup.createConnection()) {
+            Ili2dbAssert.assertTableContainsValues(setup, "classa1", new String[]{
                     "attr6"
             }, new String[][]{
                     {"ORYSIT"}
-            });
+            }, null);
 
-            assertTableContainsValues(jdbcConnection, "classa1_attr1", new String[]{
+            Ili2dbAssert.assertTableContainsValues(setup, "classa1_attr1", new String[]{
                     "T_Seq", "attr1"
             }, new String[][]{
                     {"0", "Blaa"},
                     {"1", "Ftaa"},
                     {"2", "Gluu"},
-            });
+            }, null);
 
-            assertTableContainsValues(jdbcConnection, "classa1_attr2", new String[]{
+            Ili2dbAssert.assertTableContainsValues(setup, "classa1_attr2", new String[]{
                     "T_Seq", "attr2"
             }, new String[][]{
                     {"0", "12"},
                     {"1", "14"},
-            });
+            }, null);
 
-            assertTableContainsValues(jdbcConnection, "classa1_attr3", new String[]{
+            Ili2dbAssert.assertTableContainsValues(setup, "classa1_attr3", new String[]{
                     "T_Seq", "attr3"
             }, new String[][]{
                     {"0", "E2"},
                     {"1", "E1"},
-            });
+            }, null);
 
-            assertTableContainsValues(jdbcConnection, "classa1_attr4", new String[]{
+            Ili2dbAssert.assertTableContainsValues(setup, "classa1_attr4", new String[]{
                     "T_Seq", "attr4"
             }, new String[][]{
                     {"0", "prefix-019-postfix"},
                     {"1", "prefix-199-postfix"},
-            });
+            }, null);
 
-            assertTableContainsValues(jdbcConnection, "classa1_attr5", new String[]{
+            Ili2dbAssert.assertTableContainsValues(setup, "classa1_attr5", new String[]{
                     "T_Seq", "attr5"
             }, new String[][]{
                     {"0", "<MIDEPS xmlns=\"\"></MIDEPS>"},
                     {"1", "<WOROLF xmlns=\"\"></WOROLF>"},
-            });
+            }, null);
 
-            assertTableContainsValues(jdbcConnection, "classa1_attr7", new String[]{
+            Ili2dbAssert.assertTableContainsValues(setup, "classa1_attr7", new String[]{
                     "T_Seq", "attr7"
             }, new String[][]{
                     {"0", "1997-10-14"},
                     {"1", "2008-01-29"},
-            });
+            }, null);
 
             assertClassA1Attr8(jdbcConnection);
             assertClassA1Attr9(jdbcConnection);
 
-            assertTableContainsValues(jdbcConnection, "structa2_attr1", new String[]{
+            Ili2dbAssert.assertTableContainsValues(setup, "structa2_attr1", new String[]{
                     "T_Seq", "attr1"
             }, new String[][]{
                     {"0", "HERSEN"},
                     {"1", "FLORIN"},
-            });
-
-        } finally {
-            if (jdbcConnection != null) {
-                jdbcConnection.close();
-            }
+            }, null);
         }
     }
 
@@ -483,5 +457,81 @@ public abstract class ListOfBagOf24Test {
         assertEquals(2, structAttr.getattrvaluecount("Attr1"));
         assertEquals("HERSEN", structAttr.getattrprim("Attr1", 0));
         assertEquals("FLORIN", structAttr.getattrprim("Attr1", 1));
+    }
+
+    @Test
+    public void importInheritedBagOfPrimitiveTypeIli() throws Exception {
+        setup.resetDb();
+        File data = new File(TEST_OUT, "BagOfTopicInheritance.ili");
+        Config config = setup.initConfig(data.getPath(), data.getPath() + ".log");
+
+        Ili2db.setNoSmartMapping(config);
+        config.setFunction(Config.FC_SCHEMAIMPORT);
+        config.setCreateFk(Config.CREATE_FK_YES);
+        config.setInheritanceTrafo(Config.INHERITANCE_TRAFO_SMART2);
+        config.setTidHandling(Config.TID_HANDLING_PROPERTY);
+        config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
+        config.setOneGeomPerTable(true);
+        Ili2db.readSettingsFromDb(config);
+        Ili2db.run(config, null);
+
+        Ili2dbAssert.assertAttrNameTable(setup, new String[][]{
+                {"Model.BaseTopic.ClassA.BagAttr", "classa_bagattr", "classa_bagattr", "classa"},
+                {"Model.BaseTopic.ClassA.BagAttr", "bagattr", "classa_bagattr", null},
+                {"Model.BaseTopic.ClassA.BagAttr", "modelinhertdttrs_clssa_bagattr", "modelinheritedattrs_classa_bagattr", "modelinheritedattrs_classa"},
+                {"Model.BaseTopic.ClassA.BagAttr", "bagattr", "modelinheritedattrs_classa_bagattr", null},
+                {"Model.BaseTopic.ClassA.Enum", "classa_enum", "classa_enum", "classa"},
+                {"Model.BaseTopic.ClassA.Enum", "aenum", "classa_enum", null},
+                {"Model.BaseTopic.ClassA.Enum", "modelinhertdttrs_clssa_enum", "modelinheritedattrs_classa_enum", "modelinheritedattrs_classa"},
+                {"Model.BaseTopic.ClassA.Enum", "aenum", "modelinheritedattrs_classa_enum", null},
+                {"Model.RedefinedAttrs.ClassA.BagAttr", "modelredefndttrs_clssa_bagattr", "modelredefinedattrs_classa_bagattr", "modelredefinedattrs_classa"},
+                {"Model.RedefinedAttrs.ClassA.BagAttr", "bagattr", "modelredefinedattrs_classa_bagattr", null},
+                {"Model.RedefinedAttrs.ClassA.Enum", "modelredefndttrs_clssa_enum", "modelredefinedattrs_classa_enum", "modelredefinedattrs_classa"},
+                {"Model.RedefinedAttrs.ClassA.Enum", "aenum", "modelredefinedattrs_classa_enum", null},
+        });
+
+        Ili2dbAssert.assertTrafoTable(setup, new String[][]{
+                {"Model.BaseTopic.ClassA", "ch.ehi.ili2db.inheritance", "newAndSubClass"},
+                {"Model.BaseTopic.ClassA.BagAttr", "ch.ehi.ili2db.secondaryTable", "classa_bagattr"},
+                {"Model.BaseTopic.ClassA.BagAttr(Model.InheritedAttrs.ClassA)", "ch.ehi.ili2db.secondaryTable", "modelinheritedattrs_classa_bagattr"},
+                {"Model.BaseTopic.ClassA.Enum", "ch.ehi.ili2db.secondaryTable", "classa_enum"},
+                {"Model.BaseTopic.ClassA.Enum(Model.InheritedAttrs.ClassA)", "ch.ehi.ili2db.secondaryTable", "modelinheritedattrs_classa_enum"},
+                {"Model.InheritedAttrs.ClassA", "ch.ehi.ili2db.inheritance", "newAndSubClass"},
+                {"Model.RedefinedAttrs.ClassA", "ch.ehi.ili2db.inheritance", "newAndSubClass"},
+                {"Model.RedefinedAttrs.ClassA.BagAttr", "ch.ehi.ili2db.secondaryTable", "modelredefinedattrs_classa_bagattr"},
+                {"Model.RedefinedAttrs.ClassA.Enum", "ch.ehi.ili2db.secondaryTable", "modelredefinedattrs_classa_enum"},
+        });
+
+        Ili2dbAssert.assertTableContainsValues(setup, DbNames.CLASSNAME_TAB, new String[]{DbNames.CLASSNAME_TAB_ILINAME_COL, DbNames.CLASSNAME_TAB_SQLNAME_COL}, new String[][]{
+                {"Model.BaseTopic.ClassA", "classa"},
+                {"Model.BaseTopic.ClassA.BagAttr(Model.BaseTopic.ClassA)", "classa_bagattr"},
+                {"Model.BaseTopic.ClassA.BagAttr(Model.InheritedAttrs.ClassA)", "modelinheritedattrs_classa_bagattr"},
+                {"Model.BaseTopic.ClassA.Enum(Model.BaseTopic.ClassA)", "classa_enum"},
+                {"Model.BaseTopic.ClassA.Enum(Model.InheritedAttrs.ClassA)", "modelinheritedattrs_classa_enum"},
+                {"Model.InheritedAttrs.ClassA", "modelinheritedattrs_classa"},
+                {"Model.RedefinedAttrs.ClassA", "modelredefinedattrs_classa"},
+                {"Model.RedefinedAttrs.ClassA.BagAttr(Model.RedefinedAttrs.ClassA)", "modelredefinedattrs_classa_bagattr"},
+                {"Model.RedefinedAttrs.ClassA.Enum(Model.RedefinedAttrs.ClassA)", "modelredefinedattrs_classa_enum"},
+        }, null);
+
+        Ili2dbAssert.assertTableContainsValues(setup, DbNames.INHERIT_TAB, new String[]{DbNames.INHERIT_TAB_THIS_COL, DbNames.INHERIT_TAB_BASE_COL}, new String[][]{
+                {"Model.BaseTopic.ClassA", null},
+                {"Model.InheritedAttrs.ClassA", "Model.BaseTopic.ClassA"},
+                {"Model.RedefinedAttrs.ClassA", "Model.BaseTopic.ClassA"},
+        }, null);
+
+        try (Connection jdbcConnection = setup.createConnection()) {
+            assertTableContainsColumns(jdbcConnection, "classa", "T_Id", "T_basket", "T_Ili_Tid");
+            assertTableContainsColumns(jdbcConnection, "classa_bagattr", "T_Id", "T_basket", "T_Seq", "classa_bagattr", "bagattr");
+            assertTableContainsColumns(jdbcConnection, "classa_enum", "T_Id", "T_basket", "T_Seq", "classa_enum", "aenum");
+
+            assertTableContainsColumns(jdbcConnection, "modelinheritedattrs_classa", "T_Id", "T_basket", "T_Ili_Tid");
+            assertTableContainsColumns(jdbcConnection, "modelinheritedattrs_classa_bagattr", "T_Id", "T_basket", "T_Seq", "modelinhertdttrs_clssa_bagattr", "bagattr");
+            assertTableContainsColumns(jdbcConnection, "modelinheritedattrs_classa_enum", "T_Id", "T_basket", "T_Seq", "modelinhertdttrs_clssa_enum", "aenum");
+
+            assertTableContainsColumns(jdbcConnection, "modelredefinedattrs_classa", "T_Id", "T_basket", "T_Ili_Tid");
+            assertTableContainsColumns(jdbcConnection, "modelredefinedattrs_classa_bagattr", "T_Id", "T_basket", "T_Seq", "modelredefndttrs_clssa_bagattr", "bagattr");
+            assertTableContainsColumns(jdbcConnection, "modelredefinedattrs_classa_enum", "T_Id", "T_basket", "T_Seq", "modelredefndttrs_clssa_enum", "aenum");
+        }
     }
 }

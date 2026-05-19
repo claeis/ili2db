@@ -1,0 +1,40 @@
+INTERLIS 2.4;
+
+MODEL Model
+AT "http://example.com" VERSION "2026-03-05" =
+
+  DOMAIN
+    MyEnums = (
+      E1,
+      E2,
+      E3);
+
+  TOPIC BaseTopic =
+
+    CLASS ClassA =
+      BagAttr: BAG {0..*} OF TEXT;
+      Enum: BAG {0..*} OF MyEnums;
+    END ClassA;
+
+  END BaseTopic;
+
+  TOPIC InheritedAttrs
+  EXTENDS BaseTopic =
+
+    CLASS ClassA (EXTENDED) =
+    !! Inherits attributes from BaseTopic.ClassA
+    END ClassA;
+
+  END InheritedAttrs;
+
+  TOPIC RedefinedAttrs
+  EXTENDS BaseTopic =
+
+    CLASS ClassA (EXTENDED) =
+      BagAttr (EXTENDED): BAG {0..9} OF TEXT;
+      Enum (EXTENDED): BAG {0..9} OF MyEnums;
+    END ClassA;
+
+  END RedefinedAttrs;
+
+END Model.
