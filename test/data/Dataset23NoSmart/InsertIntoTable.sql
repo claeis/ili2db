@@ -66,7 +66,7 @@ END Dataset1.
 
 INSERT INTO dataset1nosmart.t_ili2db_settings VALUES ('ch.ehi.ili2db.maxSqlNameLength', '60');
 INSERT INTO dataset1nosmart.t_ili2db_settings VALUES ('ch.ehi.ili2db.defaultSrsCode', '21781');
-INSERT INTO dataset1nosmart.t_ili2db_settings VALUES ('ch.ehi.ili2db.uuidDefaultValue', 'uuid_generate_v4()');
+INSERT INTO dataset1nosmart.t_ili2db_settings VALUES ('ch.ehi.ili2db.uuidDefaultValue', 'gen_random_uuid()');
 INSERT INTO dataset1nosmart.t_ili2db_settings VALUES ('ch.ehi.ili2db.sender', 'ili2pg-3.8.1-20170421');
 INSERT INTO dataset1nosmart.t_ili2db_settings VALUES ('ch.interlis.ili2c.ilidirs', '%ILI_FROM_DB;%XTF_DIR;http://models.interlis.ch/;%JAR_DIR');
 INSERT INTO dataset1nosmart.t_ili2db_settings VALUES ('ch.ehi.ili2db.BasketHandling', 'readWrite');

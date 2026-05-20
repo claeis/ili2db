@@ -26,7 +26,7 @@ MODEL ModelA
 END ModelA.', '2017-05-15 14:51:01.402');
 
 INSERT INTO preandpostscriptschema.t_ili2db_settings VALUES ('ch.ehi.ili2db.createDatasetCols', 'addDatasetCol');
-INSERT INTO preandpostscriptschema.t_ili2db_settings VALUES ('ch.ehi.ili2db.uuidDefaultValue', 'uuid_generate_v4()');
+INSERT INTO preandpostscriptschema.t_ili2db_settings VALUES ('ch.ehi.ili2db.uuidDefaultValue', 'gen_random_uuid()');
 INSERT INTO preandpostscriptschema.t_ili2db_settings VALUES ('ch.ehi.ili2db.multilingualTrafo', 'expand');
 INSERT INTO preandpostscriptschema.t_ili2db_settings VALUES ('ch.ehi.ili2db.defaultSrsAuthority', 'EPSG');
 INSERT INTO preandpostscriptschema.t_ili2db_settings VALUES ('ch.ehi.ili2db.BasketHandling', 'readWrite');

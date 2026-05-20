@@ -7,7 +7,7 @@ CREATE TABLE PreAndPostScriptSchema.classa (
   T_Id bigint PRIMARY KEY DEFAULT nextval('PreAndPostScriptSchema.t_ili2db_seq')
   ,T_basket bigint NOT NULL
   ,T_datasetname varchar(200) NOT NULL
-  ,T_Ili_Tid uuid NULL DEFAULT uuid_generate_v4()
+  ,T_Ili_Tid uuid NULL DEFAULT gen_random_uuid()
   ,attr1 varchar(60) NULL
 )
 ;
@@ -18,7 +18,7 @@ CREATE TABLE PreAndPostScriptSchema.classb (
   T_Id bigint PRIMARY KEY DEFAULT nextval('PreAndPostScriptSchema.t_ili2db_seq')
   ,T_basket bigint NOT NULL
   ,T_datasetname varchar(200) NOT NULL
-  ,T_Ili_Tid uuid NULL DEFAULT uuid_generate_v4()
+  ,T_Ili_Tid uuid NULL DEFAULT gen_random_uuid()
   ,attr2 varchar(60) NULL
 )
 ;
