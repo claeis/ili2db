@@ -130,44 +130,33 @@ public class DuckDBColumnConverter extends AbstractWKBColumnConverter {
 		return sqlColName;
 	}
 
-	// ST_AsWKB returns wkt string for clients that don't know how to handle
-	// it natively: https://github.com/duckdb/duckdb-spatial/issues/469
-	// We force to return a blob which will transformed into a byte array
-	// later.
 	@Override
 	public String getSelectValueWrapperCoord(String dbNativeValue) {
-		return "ST_AsWKB("+dbNativeValue+")::blob";
+		return "ST_AsWKB("+dbNativeValue+")";
 	}
 	@Override
 	public String getSelectValueWrapperMultiCoord(String dbNativeValue) {
-		return "ST_AsWKB("+dbNativeValue+")::blob";
+		return "ST_AsWKB("+dbNativeValue+")";
 	}
 	@Override
 	public String getSelectValueWrapperPolyline(String dbNativeValue) {
-		return "ST_AsWKB("+dbNativeValue+")::blob";
+		return "ST_AsWKB("+dbNativeValue+")";
 	}
 	@Override
 	public String getSelectValueWrapperMultiPolyline(String dbNativeValue) {
-		return "ST_AsWKB("+dbNativeValue+")::blob";
+		return "ST_AsWKB("+dbNativeValue+")";
 	}
 	@Override
 	public String getSelectValueWrapperSurface(String dbNativeValue) {
-		return "ST_AsWKB("+dbNativeValue+")::blob";
+		return "ST_AsWKB("+dbNativeValue+")";
 	}
 	@Override
 	public String getSelectValueWrapperMultiSurface(String dbNativeValue) {
-		return "ST_AsWKB("+dbNativeValue+")::blob";
+		return "ST_AsWKB("+dbNativeValue+")";
 	}
 	@Override
 	public String getSelectValueWrapperArray(String dbColName) {
 		return dbColName;
-	}
-	// DuckDB has a uuid data type but the PreparedStatement class does
-	// not support uuid in the setObject method.
-	public Object fromIomUuid(String uuid) 
-			throws java.sql.SQLException, ConverterException
-	{
-		return uuid;
 	}
 	@Override
 	public Object fromIomXml(String xml) 
@@ -569,7 +558,7 @@ public class DuckDBColumnConverter extends AbstractWKBColumnConverter {
     @Override
     public void setTime(PreparedStatement ps, int valuei, Time time)
             throws SQLException {
-        ps.setObject(valuei, time.toString());
+        ps.setTime(valuei, time);
     }	
 	@Override
 	public String[] toIomArray(ch.interlis.ili2c.metamodel.AttributeDef attr,Object sqlArray,Class<? extends DbColumn> dbColHint) throws SQLException, ConverterException {
