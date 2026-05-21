@@ -152,13 +152,13 @@ public abstract class MultiCrs24Test {
         Assert.assertNotNull(objectLv95);
         Assert.assertEquals("COORD {C1 2460001.000, C2 1045001.000}", objectLv95.getattrobj("attr2", 0).toString());
         Assert.assertEquals("POLYLINE {sequence SEGMENTS {segment [COORD {C1 2480000.000, C2 1070000.000}, COORD {C1 2490000.000, C2 1080000.000}]}}", objectLv95.getattrobj("attr3", 0).toString());
-        Assert.assertEquals("MULTIPOLYLINE {polyline [POLYLINE {sequence SEGMENTS {segment [COORD {C1 2480000.0, C2 1070000.0}, COORD {C1 2490000.0, C2 1080000.0}]}}, POLYLINE {sequence SEGMENTS {segment [COORD {C1 2480000.0, C2 1070000.0}, COORD {C1 2490000.0, C2 1080000.0}]}}]}", objectLv95.getattrobj("attr4", 0).toString());
+        Assert.assertEquals("MULTIPOLYLINE {polyline [POLYLINE {sequence SEGMENTS {segment [COORD {C1 2480000.000, C2 1070000.000}, COORD {C1 2490000.000, C2 1080000.000}]}}, POLYLINE {sequence SEGMENTS {segment [COORD {C1 2480000.000, C2 1070000.000}, COORD {C1 2490000.000, C2 1080000.000}]}}]}", objectLv95.getattrobj("attr4", 0).toString());
 
         IomObject objectLv03 = objs.get("Test_LV03");
         Assert.assertNotNull(objectLv03);
         Assert.assertEquals("COORD {C1 460002.000, C2 45002.000}", objectLv03.getattrobj("attr2", 0).toString());
         Assert.assertEquals("POLYLINE {sequence SEGMENTS {segment [COORD {C1 480000.000, C2 70000.000}, COORD {C1 490000.000, C2 80000.000}]}}", objectLv03.getattrobj("attr3", 0).toString());
-        Assert.assertEquals("MULTIPOLYLINE {polyline [POLYLINE {sequence SEGMENTS {segment [COORD {C1 480000.0, C2 70000.0}, COORD {C1 490000.0, C2 80000.0}]}}, POLYLINE {sequence SEGMENTS {segment [COORD {C1 480000.0, C2 70000.0}, COORD {C1 490000.0, C2 80000.0}]}}]}", objectLv03.getattrobj("attr4", 0).toString());
+        Assert.assertEquals("MULTIPOLYLINE {polyline [POLYLINE {sequence SEGMENTS {segment [COORD {C1 480000.000, C2 70000.000}, COORD {C1 490000.000, C2 80000.000}]}}, POLYLINE {sequence SEGMENTS {segment [COORD {C1 480000.000, C2 70000.000}, COORD {C1 490000.000, C2 80000.000}]}}]}", objectLv03.getattrobj("attr4", 0).toString());
     }
 
     @Test

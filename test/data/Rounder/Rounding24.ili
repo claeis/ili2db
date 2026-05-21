@@ -1,0 +1,31 @@
+INTERLIS 2.4;
+
+MODEL Rounding24
+  AT "mailto:ce@eisenhutinformatik.ch" VERSION "2026-05-19" =
+	TOPIC Topic=
+		DOMAIN
+			!!@CRS=EPSG:2056
+		    Lkoord = COORD
+		      2460000.000 .. 2870000.000 [INTERLIS.m] ,
+		      1045000.000 .. 1310000.000 [INTERLIS.m] ,
+		      ROTATION 2 -> 1;
+			!!@CRS=EPSG:2056
+		    MultiLkoord = MULTICOORD
+		      2460000.000 .. 2870000.000 [INTERLIS.m] ,
+		      1045000.000 .. 1310000.000 [INTERLIS.m] ,
+		      ROTATION 2 -> 1;
+
+		CLASS ClassMultiKoord2 =
+		   lcoord : MultiLkoord;
+		END ClassMultiKoord2;
+
+		CLASS MultiLine2 =
+		   straightsarcs2d : MULTIPOLYLINE WITH (STRAIGHTS, ARCS) VERTEX Lkoord;
+		END MultiLine2;
+
+		CLASS MultiSurface2 =
+		   surfacearcs2d : MULTISURFACE WITH (STRAIGHTS,ARCS) VERTEX Lkoord WITHOUT OVERLAPS > 0.001;
+		END MultiSurface2;
+
+	END Topic;
+END Rounding24.
