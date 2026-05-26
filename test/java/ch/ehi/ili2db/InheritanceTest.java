@@ -3,6 +3,7 @@ package ch.ehi.ili2db;
 import java.io.File;
 import java.sql.Connection;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.HashMap;
 
@@ -18,6 +19,7 @@ import ch.interlis.iom_j.xtf.XtfReader;
 import ch.interlis.iox.EndBasketEvent;
 import ch.interlis.iox.EndTransferEvent;
 import ch.interlis.iox.IoxEvent;
+import ch.interlis.iox.IoxException;
 import ch.interlis.iox.ObjectEvent;
 import ch.interlis.iox.StartBasketEvent;
 import ch.interlis.iox.StartTransferEvent;
@@ -75,6 +77,28 @@ public abstract class InheritanceTest {
         Ili2db.readSettingsFromDb(config);
         Ili2db.run(config, null);
 
+        assertDbSchema_smart2();
+    }
+    @Test
+    public void importIli_smart2_ColsAsText() throws Exception {
+        setup.resetDb();
+        File data = new File(TEST_DATA_DIR, "Inheritance2.ili");
+        Config config = setup.initConfig(data.getPath(), data.getPath() + ".log");
+        Ili2db.setNoSmartMapping(config);
+        config.setFunction(Config.FC_SCHEMAIMPORT);
+        config.setCreateFk(Config.CREATE_FK_YES);
+        config.setInheritanceTrafo(Config.INHERITANCE_TRAFO_SMART2);
+        config.setTidHandling(Config.TID_HANDLING_PROPERTY);
+        config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
+        config.setSqlColsAsText(Config.SQL_COLS_AS_TEXT_ENABLE);
+        //config.setCreatescript(data.getPath()+".sql");
+        Ili2db.readSettingsFromDb(config);
+        Ili2db.run(config, null);
+
+        assertDbSchema_smart2();
+    }
+
+    private void assertDbSchema_smart2() throws SQLException {
         Ili2dbAssert.assertAttrNameTable(setup, new String[][]{
                 {"Inheritance2.TestB.ClassA.attrA3", "attra3", "classa", null},
                 {"Inheritance2.TestA.ClassA3b.attrA3b", "attra3b", "classa3b", null},
@@ -145,6 +169,27 @@ public abstract class InheritanceTest {
         Ili2db.readSettingsFromDb(config);
         Ili2db.run(config, null);
 
+        assertDbContent_smart2();
+    }
+    @Test
+    public void importXtf_smart2_ColsAsText() throws Exception {
+        {
+            importIli_smart2_ColsAsText();
+        }
+        File data = new File(TEST_DATA_DIR, "Inheritance2a.xtf");
+        Config config = setup.initConfig(data.getPath(), data.getPath() + ".log");
+        config.setFunction(Config.FC_IMPORT);
+        config.setDatasetName(DATASETNAME);
+        config.setImportTid(true);
+        config.setImportBid(true);
+        //config.setCreatescript(data.getPath()+".sql");
+        Ili2db.readSettingsFromDb(config);
+        Ili2db.run(config, null);
+
+        assertDbContent_smart2();
+    }
+
+    private void assertDbContent_smart2() throws SQLException {
         try (Connection jdbcConnection = setup.createConnection();
              Statement stmt = jdbcConnection.createStatement()) {
             Ili2dbAssert.assertTableContainsValues(setup, "classa3c", new String[]{DbNames.T_ILI_TID_COL, "attra3", "attra3b", "attra3c"}, new String[][]{
@@ -174,20 +219,7 @@ public abstract class InheritanceTest {
         Ili2db.readSettingsFromDb(config);
         Ili2db.run(config, null);
 
-        try (Connection jdbcConnection = setup.createConnection();
-             Statement stmt = jdbcConnection.createStatement()) {
-            Ili2dbAssert.assertTableContainsValues(setup, "classa3c", new String[]{DbNames.T_ILI_TID_COL, "attra3", "attra3b", "attra3c"}, new String[][]{
-                    {"2", "attra3-20", "attra3b-20", "attra3c-20"},
-            }, null);
-
-            Assert.assertTrue(stmt.execute("SELECT a_classa3b,a_classa3c FROM " + setup.prefixName("classb") + " WHERE t_ili_tid='4'"));
-            {
-                ResultSet rs = stmt.getResultSet();
-                Assert.assertTrue(rs.next());
-                Assert.assertNotNull(rs.getObject("a_classa3c"));
-                Assert.assertNull(rs.getObject("a_classa3b"));
-            }
-        }
+        assertDbContent_smart2();
     }
 
     @Test
@@ -278,7 +310,10 @@ public abstract class InheritanceTest {
         config.setExportTid(true);
         Ili2db.readSettingsFromDb(config);
         Ili2db.run(config, null);
-        // read objects of db and write objectValue to HashMap
+        assertXtf_Inheritance1a(data);
+    }
+
+    private void assertXtf_Inheritance1a(File data) throws IoxException {
         HashMap<String, IomObject> objs = new HashMap<>();
         XtfReader reader = new XtfReader(data);
         IoxEvent event = null;
@@ -330,7 +365,24 @@ public abstract class InheritanceTest {
         config.setExportTid(true);
         Ili2db.readSettingsFromDb(config);
         Ili2db.run(config, null);
-        // read objects of db and write objectValue to HashMap
+        assertXtf_Inheritance2a(data);
+    }
+    @Test
+    public void exportXtf_smart2_ColsAsText() throws Exception {
+        {
+            importXtf_smart2_ColsAsText();
+        }
+        File data = new File(TEST_DATA_DIR, "Inheritance2a-out.xtf");
+        Config config = setup.initConfig(data.getPath(), data.getPath() + ".log");
+        config.setDatasetName(DATASETNAME);
+        config.setFunction(Config.FC_EXPORT);
+        config.setExportTid(true);
+        Ili2db.readSettingsFromDb(config);
+        Ili2db.run(config, null);
+        assertXtf_Inheritance2a(data);
+    }
+
+    private void assertXtf_Inheritance2a(File data) throws IoxException {
         HashMap<String, IomObject> objs = new HashMap<>();
         XtfReader reader = new XtfReader(data);
         IoxEvent event = null;
@@ -349,7 +401,7 @@ public abstract class InheritanceTest {
             } else if (event instanceof EndTransferEvent) {
             }
         } while (!(event instanceof EndTransferEvent));
-        Assert.assertEquals(8, objs.size());
+        Assert.assertEquals(9, objs.size());
         {
             IomObject obj1 = objs.get("1");
             Assert.assertEquals("Inheritance2.TestA.ClassA3b oid 1 {attrA3 attra3-10, attrA3b attra3b-10}", obj1.toString());
@@ -381,6 +433,10 @@ public abstract class InheritanceTest {
         {
             IomObject obj1 = objs.get("15");
             Assert.assertEquals("Inheritance2.TestA.aa2bb {aa -> 1 REF {}, bb -> 5 REF {}}", obj1.toString());
+        }
+        {
+            IomObject obj1 = objs.get("100");
+            Assert.assertEquals("Inheritance2.TestB.ClassA2 oid 100 {attrA3 attra3}", obj1.toString());
         }
     }
 

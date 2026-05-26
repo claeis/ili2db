@@ -11,5 +11,8 @@
 <Inheritance2.TestA.aa2bb><aa REF="2"/><bb REF="4"/></Inheritance2.TestA.aa2bb>
 <Inheritance2.TestA.aa2bb><aa REF="1"/><bb REF="5"/></Inheritance2.TestA.aa2bb>
 </Inheritance2.TestA>
+<Inheritance2.TestB BID="Inheritance2.TestB">
+<Inheritance2.TestB.ClassA2 TID="100"><attrA3>attra3</attrA3></Inheritance2.TestB.ClassA2>
+</Inheritance2.TestB>
 </DATASECTION>
 </TRANSFER>

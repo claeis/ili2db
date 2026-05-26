@@ -519,7 +519,7 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 		                       structAttrs=new HashMap<ch.interlis.ili2c.metamodel.Element,ch.interlis.ili2c.metamodel.Element>();
 		                   }
 			        }
-                   if (mapAsTextCol(((AttributeDef) structAttrs.get(attr)))) {
+                   if (mapAsTextCol(((AttributeDef) structAttrs.get(Ili2cUtility.getRootBaseAttr(attr))))) {
                        valuei = addAttrValueTXT(rs, valuei, sqlid, iomObj, columnWrapper,(AttributeDef)structAttrs.get(Ili2cUtility.getRootBaseAttr(attr)),structQueue,table,fixref,genericDomains,iliClassForXtf);
                     } else {
                        valuei = addAttrValue(rs, valuei, sqlid, iomObj, columnWrapper,(AttributeDef)structAttrs.get(Ili2cUtility.getRootBaseAttr(attr)),structQueue,table,fixref,genericDomains,iliClassForXtf);
