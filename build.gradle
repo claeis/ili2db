@@ -906,10 +906,12 @@ uploadArchives {
             }            
             addFilter('ili2duckdb') {artifact, file ->
                 artifact.name == 'ili2duckdb'
-            }            
+            } 
+            */
             addFilter('ili2gpkg') {artifact, file ->
                 artifact.name == 'ili2gpkg'
-            }            
+            } 
+            /*
             addFilter('ili2fgdb') {artifact, file ->
                 artifact.name == 'ili2fgdb'
             }            
@@ -950,12 +952,14 @@ uploadArchives {
                 addMapping(300, configurations.ili2duckdbCompileClasspath, 'runtime')
                 addMapping(300, configurations.ili2db, 'compile')
             }
+            */
             pom('ili2gpkg').artifactId = 'ili2gpkg'
             pom('ili2gpkg').scopeMappings.with {
                 mappings.clear()
                 addMapping(300, configurations.ili2gpkgCompileClasspath, 'runtime')
                 addMapping(300, configurations.ili2db, 'compile')
             }
+            /*
             pom('ili2fgdb').artifactId = 'ili2fgdb'
             pom('ili2fgdb').scopeMappings.with {
                 mappings.clear()
