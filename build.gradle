@@ -897,6 +897,7 @@ uploadArchives {
             addFilter('ili2pg') {artifact, file ->
                 artifact.name == 'ili2pg'
             }            
+            /*
             addFilter('ili2mysql') {artifact, file ->
                 artifact.name == 'ili2mysql'
             }            
@@ -917,7 +918,8 @@ uploadArchives {
             }            
             addFilter('ili2ora') {artifact, file ->
                 artifact.name == 'ili2ora'
-            }            
+            } 
+            */
             pom('ili2db').artifactId = 'ili2db'
             pom('ili2db').scopeMappings.with {
                 mappings.clear()
@@ -929,6 +931,7 @@ uploadArchives {
                 addMapping(300, configurations.ili2pgCompileClasspath, 'runtime')
                 addMapping(300, configurations.ili2db, 'compile')
             }
+            /*
             pom('ili2mysql').artifactId = 'ili2mysql'
             pom('ili2mysql').scopeMappings.with {
                 mappings.clear()
@@ -971,6 +974,7 @@ uploadArchives {
                 addMapping(300, configurations.ili2oraCompileClasspath, 'runtime')
                 addMapping(300, configurations.ili2db, 'compile')
             }
+            */
         }
     }
 }
