@@ -15,7 +15,8 @@ ili2db 5.5.2 (2026-03-xx )
 ---------------------------
 - fix ili2db.dispName not considered in enumerations from extra meta attribute file (#581)
 - add ili2db.enumDomain for BAG OF ARRAY-mapping with enumerations/createEnumTab (#590)
-- fix export from schema created with --sqlColsAsText throws NullPointerException (#588)
+- fix export of extended attr ignores --sqlColsAsText/throws NullPointerException (#588)
+- fix export of list/bag of prim types ignores --sqlColsAsText (#592)
 
 ili2db 5.5.1 (2025-12-29)
 ---------------------------

@@ -1143,7 +1143,11 @@ public class TransferToXtf {
 	                        ResultSet resultSet = statement.executeQuery(query);
 
 	                        while (resultSet.next()) {
-	                            recConv.addAttrValue(resultSet, 1, sqlid, iomObj, new ColumnWrapper(new StructAttrPath(new ViewableTransferElement(attributeDef))),attributeDef,structQueue,attrtableWrapper,fixref,genericDomains,null);
+	                            if(recConv.mapAsTextCol(attributeDef)) {
+                                    recConv.addAttrValueTXT(resultSet, 1, sqlid, iomObj, new ColumnWrapper(new StructAttrPath(new ViewableTransferElement(attributeDef))),attributeDef,structQueue,attrtableWrapper,fixref,genericDomains,null);
+	                            }else {
+	                                recConv.addAttrValue(resultSet, 1, sqlid, iomObj, new ColumnWrapper(new StructAttrPath(new ViewableTransferElement(attributeDef))),attributeDef,structQueue,attrtableWrapper,fixref,genericDomains,null);
+	                            }
 	                        }
 	                    }
 	                }

@@ -4,6 +4,7 @@ import ch.ehi.ili2db.base.DbNames;
 import ch.ehi.ili2db.base.Ili2db;
 import ch.ehi.ili2db.base.Ili2dbException;
 import ch.ehi.ili2db.gui.Config;
+import ch.interlis.ili2c.Ili2cFailure;
 import ch.interlis.ili2c.config.Configuration;
 import ch.interlis.ili2c.config.FileEntry;
 import ch.interlis.ili2c.config.FileEntryKind;
@@ -376,6 +377,24 @@ public abstract class ListOfBagOf24Test {
         Ili2db.readSettingsFromDb(config);
         Ili2db.run(config, null);
 
+        assertListOf24XtfContent(data);
+    }
+    @Test
+    public void exportListOfPrimitiveTypesXtf_ColsAsText() throws Exception {
+        importListOfPrimitiveTypesXtf_ColsAsText();
+
+        // export xtf
+        File data = new File(TEST_OUT, "ListOfPrimTypes24-ColsAsText-out.xtf");
+        Config config = setup.initConfig(data.getPath(), data.getPath() + ".log");
+        config.setFunction(Config.FC_EXPORT);
+        config.setModels("ListOfPrimTypes24");
+        Ili2db.readSettingsFromDb(config);
+        Ili2db.run(config, null);
+
+        assertListOf24XtfContent(data);
+    }
+
+    private void assertListOf24XtfContent(File data) throws Ili2cFailure, IoxException {
         // compile model
         Configuration ili2cConfig = new Configuration();
         FileEntry fileEntry = new FileEntry(TEST_OUT + "ListOfPrimTypes24.ili", FileEntryKind.ILIMODELFILE);

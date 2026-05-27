@@ -413,7 +413,7 @@ public class AbstractRecordConverter {
     	return ret;
     }
 
-	protected boolean mapAsTextCol(AttributeDef attributeDef) {
+	public boolean mapAsTextCol(AttributeDef attributeDef) {
 		if(!sqlColsAsText){
 			return false;
 		}
