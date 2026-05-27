@@ -276,22 +276,38 @@ public class ToXtfRecordConverter extends AbstractRecordConverter {
 	             String attrSqlName=ili2sqlName.mapIliAttributeDef(colWrapper.getStructAttrPath(),epsgCode,sqlTableName,null);
 				 ret.append(sep);
 				 sep=",";
-				 ret.append(geomConv.getSelectValueWrapperDate(makeColumnRef(tableAlias,attrSqlName)));
+				 if(sqlColsAsText) {
+	                 ret.append(makeColumnRef(tableAlias,attrSqlName));
+				 }else {
+	                 ret.append(geomConv.getSelectValueWrapperDate(makeColumnRef(tableAlias,attrSqlName)));
+				 }
 			}else if( attrDefOfColumn.isDomainIli2Date()) {
 	             String attrSqlName=ili2sqlName.mapIliAttributeDef(colWrapper.getStructAttrPath(),epsgCode,sqlTableName,null);
 				 ret.append(sep);
 				 sep=",";
-				 ret.append(geomConv.getSelectValueWrapperDate(makeColumnRef(tableAlias,attrSqlName)));
+                 if(sqlColsAsText) {
+                     ret.append(makeColumnRef(tableAlias,attrSqlName));
+                 }else {
+                     ret.append(geomConv.getSelectValueWrapperDate(makeColumnRef(tableAlias,attrSqlName)));
+                 }
 			}else if( attrDefOfColumn.isDomainIli2Time()) {
 	             String attrSqlName=ili2sqlName.mapIliAttributeDef(colWrapper.getStructAttrPath(),epsgCode,sqlTableName,null);
 				 ret.append(sep);
 				 sep=",";
-				 ret.append(geomConv.getSelectValueWrapperTime(makeColumnRef(tableAlias,attrSqlName)));
+                 if(sqlColsAsText) {
+                     ret.append(makeColumnRef(tableAlias,attrSqlName));
+                 }else {
+                     ret.append(geomConv.getSelectValueWrapperTime(makeColumnRef(tableAlias,attrSqlName)));
+                 }
 			}else if( attrDefOfColumn.isDomainIli2DateTime()) {
 	             String attrSqlName=ili2sqlName.mapIliAttributeDef(colWrapper.getStructAttrPath(),epsgCode,sqlTableName,null);
 				 ret.append(sep);
 				 sep=",";
-				 ret.append(geomConv.getSelectValueWrapperDateTime(makeColumnRef(tableAlias,attrSqlName)));
+                 if(sqlColsAsText) {
+                     ret.append(makeColumnRef(tableAlias,attrSqlName));
+                 }else {
+                     ret.append(geomConv.getSelectValueWrapperDateTime(makeColumnRef(tableAlias,attrSqlName)));
+                 }
 			}else if (type instanceof CompositionType){
 				if(TrafoConfigNames.CATALOGUE_REF_TRAFO_COALESCE.equals(trafoConfig.getAttrConfig(attrDefOfColumn, TrafoConfigNames.CATALOGUE_REF_TRAFO))){
 				    if(createExtRef) {

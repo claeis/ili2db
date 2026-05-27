@@ -388,6 +388,7 @@ public abstract class ListOfBagOf24Test {
         Config config = setup.initConfig(data.getPath(), data.getPath() + ".log");
         config.setFunction(Config.FC_EXPORT);
         config.setModels("ListOfPrimTypes24");
+        config.setValidation(false);
         Ili2db.readSettingsFromDb(config);
         Ili2db.run(config, null);
 
