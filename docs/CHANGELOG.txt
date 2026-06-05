@@ -18,6 +18,7 @@ ili2db 5.5.2 (2026-03-xx )
 - fix export of extended attr ignores --sqlColsAsText/throws NullPointerException (#588)
 - fix export of list/bag of prim types ignores --sqlColsAsText (#592)
 - ili2gpkg: fix export of date ignores --sqlColsAsText
+- fix export with expanded structure if _t_type is NULL (#593)
 
 ili2db 5.5.1 (2025-12-29)
 ---------------------------
