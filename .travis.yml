@@ -76,7 +76,7 @@ after_failure:
 deploy:
   - provider: script
     skip_cleanup: true
-    script: travis_wait 30 ./gradlew -Drst2html=`which rst2html.py` -Drepos_pwd=${repos_pwd} -Drepos_usr=${repos_usr} -Drepos_url=${repos_url} uploadArchives
+    script: travis_wait 40 ./gradlew -Drst2html=`which rst2html.py` -Drepos_pwd=${repos_pwd} -Drepos_usr=${repos_usr} -Drepos_url=${repos_url} uploadArchives
     on:
       branch: master
   - provider: script
