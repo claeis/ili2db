@@ -36,40 +36,21 @@ public class ListOfBagOf24Test extends ch.ehi.ili2db.ListOfBagOf24Test {
     }
 
     @Override
-    protected void assertTableContainsValues(Connection jdbcConnection, String table, String[] columns, String[][] expectedValues) throws SQLException {
-        super.assertTableContainsValues(jdbcConnection, setup.getSchema() + "." + table, columns, expectedValues);
-    }
-
-    @Override
     protected void assertClassA1Attr8(Connection jdbcConnection) throws Exception {
-        Statement statement = null;
-        try {
-            statement = jdbcConnection.createStatement();
-
+        try (Statement statement = jdbcConnection.createStatement()) {
             ResultSet resultSet = statement.executeQuery("SELECT st_asewkt(attr8) FROM " + setup.prefixName("classa1") + ";");
             while (resultSet.next()) {
                 assertEquals("SRID=2056;POINT(480000 70000)", resultSet.getObject(1));
-            }
-        } finally {
-            if (statement != null) {
-                statement.close();
             }
         }
     }
 
     @Override
     protected void assertClassA1Attr9(Connection jdbcConnection) throws Exception {
-        Statement statement = null;
-        try {
-            statement = jdbcConnection.createStatement();
-
+        try (Statement statement = jdbcConnection.createStatement()) {
             ResultSet resultSet = statement.executeQuery("SELECT st_asewkt(attr9) FROM " + setup.prefixName("classa1_attr9") + ";");
             while (resultSet.next()) {
                 assertEquals("SRID=2056;POINT(500000 72000)", resultSet.getObject(1));
-            }
-        } finally {
-            if (statement != null) {
-                statement.close();
             }
         }
     }

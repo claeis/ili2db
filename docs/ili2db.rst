@@ -1748,9 +1748,9 @@ Metadaten
 +-----------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | t\_ili2db\_trafo            | Konfiguration der semantischen Abbildung (insb. der Vererbung)                                                                                                                                                                       |
 +-----------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| t\_ili2db\_table_prop       | Weitere Angaben zu den DB-Tabellen aus dem Interlis Modell (z.B. ob es eine Tabelle mit Aufzählwerten ist). Wird nur erstellt mit Option --createMetaInfo.                                                                           |
+| t\_ili2db\_table_prop       | Weitere Angaben zu den DB-Tabellen aus dem Interlis Modell (z.B. ob es eine Tabelle mit Aufzählwerten ist).                                                                                                                          |
 +-----------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| t\_ili2db\_column_prop      | Weitere Angaben zu den DB-Spalten aus dem Interlis Modell (z.B. ob es MTEXT ist). Wird nur erstellt mit Option --createMetaInfo.                                                                                                     |
+| t\_ili2db\_column_prop      | Weitere Angaben zu den DB-Spalten aus dem Interlis Modell (z.B. ob es MTEXT ist).                                                                                                                                                    |
 +-----------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | t\_ili2db\_nls              | Mehrsprechige Daten je Modell-Element; z.B. der Name . Wird nur erstellt mit der Option --createNlsTab.                                                                                                                              |
 +-----------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
@@ -1775,7 +1775,7 @@ t\_ili2db\_column_prop
 ......................
 
 Weitere Angaben zu den DB-Spalten aus dem Interlis Modell (z.B. ob es MTEXT ist). 
-Wird nur erstellt mit Option --createMetaInfo. Die Tabelle ist so aufgebaut, dass
+Die Tabelle ist so aufgebaut, dass
 sie beliebige (auch zukünftige) Werte/Zusatzangaben aufnehmen kann.
 
 - tablename Name der Tabelle
@@ -1866,7 +1866,7 @@ Wird nur erstellt mit der Option ``--createNlsTab``.
 t\_ili2db\_table_prop
 ......................
 Weitere Angaben zu den DB-Tabellen aus dem Interlis Modell (z.B. ob es 
-eine Tabelle mit Aufzählwerten ist). Wird nur erstellt mit Option --createMetaInfo.
+eine Tabelle mit Aufzählwerten ist).
 
 - tablename Name der Tabelle
 - tag Name des Wertes/der Zusatzinformation

@@ -54,6 +54,7 @@ public abstract class Array23Test {
 			config.setTidHandling(Config.TID_HANDLING_PROPERTY);
 			config.setBasketHandling(Config.BASKET_HANDLING_READWRITE);
 			config.setArrayTrafo(Config.ARRAY_TRAFO_COALESCE);
+			config.setCreateMetaInfo(true);
 			Ili2db.readSettingsFromDb(config);
 			Ili2db.run(config,null);
 			// assertions
@@ -72,6 +73,7 @@ public abstract class Array23Test {
                 {"Array23.TestA.Datatypes.numericInt",    "numericint",    "datatypes",null}, 
                 {"Array23.TestA.Datatypes.numericDec",    "numericdec",    "datatypes" ,null},
                 {"Array23.TestA.NumericInt_.Value",   "avalue",    "numericint_"   ,null},
+                {"Array23.TestA.Auto.Farbe", "farbe",    "auto"  ,null},
                 {"Array23.TestA.Auto.Farben", "farben",    "auto"  ,null},
                 {"Array23.TestA.Datatypes.aDateTime", "adatetime", "datatypes",null}, 
                 {"Array23.TestA.AUuid_.Value",    "avalue",    "auuid_"    ,null},
@@ -111,7 +113,14 @@ public abstract class Array23Test {
                     {"katalogref",null,"aref","katalog"},
                     {"gebaeude",null,"art","katalog"},
                 };
-	        importIli_Assert(attrName_expectedValues, trafo_expectedValues,columnForeignKey_expectedValues);
+                String [][] columnEnumDomain_expectedValues=new String[][] {
+                    {"auto","auto","farbe","Array23.TestA.RGB"},
+                    {"auto",null,"farben","Array23.TestA.RGB"},
+                    {"farbe","farbe","wert","Array23.TestA.RGB"},
+                    {"aboolean_","aboolean_","avalue","Array23.TestA.ABoolean"},
+                    {"datatypes",null,"aboolean","Array23.TestA.ABoolean"},
+                };
+	        importIli_Assert(attrName_expectedValues, trafo_expectedValues,columnForeignKey_expectedValues,columnEnumDomain_expectedValues);
 		}catch(Exception e) {
 			throw new IoxException(e);
 		}finally{
@@ -151,6 +160,7 @@ public abstract class Array23Test {
                 {"Array23.TestA.Datatypes.numericInt",    "numericint",    "datatypes",null}, 
                 {"Array23.TestA.Datatypes.numericDec",    "numericdec",    "datatypes" ,null},
                 {"Array23.TestA.NumericInt_.Value",   "avalue",    "numericint_"   ,null},
+                {"Array23.TestA.Auto.Farbe", "farbe",    "auto"  ,null},
                 {"Array23.TestA.Auto.Farben", "farben",    "auto"  ,null},
                 {"Array23.TestA.Datatypes.aDateTime", "adatetime", "datatypes",null}, 
                 {"Array23.TestA.AUuid_.Value",    "avalue",    "auuid_"    ,null},
@@ -191,19 +201,28 @@ public abstract class Array23Test {
                     {"gebaeude",null,"art","katalog"},
                     {"farbe",null,"wert","rgb"},
                     {"auto",null,"farben","rgb"},
+                    {"auto",null,"farbe","rgb"},
                 };
-            importIli_Assert(attrName_expectedValues, trafo_expectedValues,columnForeignKey_expectedValues);
+                String [][] columnEnumDomain_expectedValues=new String[][] {
+                    {"auto","auto","farbe","Array23.TestA.RGB"},
+                    {"auto",null,"farben","Array23.TestA.RGB"},
+                    {"farbe","farbe","wert","Array23.TestA.RGB"},
+                    {"aboolean_","aboolean_","avalue","Array23.TestA.ABoolean"},
+                    {"datatypes",null,"aboolean","Array23.TestA.ABoolean"},
+                };
+            importIli_Assert(attrName_expectedValues, trafo_expectedValues,columnForeignKey_expectedValues,columnEnumDomain_expectedValues);
         }catch(Exception e) {
             throw new IoxException(e);
         }finally{
         }
     }
 
-    private void importIli_Assert(String[][] attrName_expectedValues, String[][] trafo_expectedValues,String [][]columnForeignKey_expectedValues)
+    private void importIli_Assert(String[][] attrName_expectedValues, String[][] trafo_expectedValues,String [][]columnForeignKey_expectedValues,String [][]columnEnumDomain_expectedValues)
             throws SQLException {
         Ili2dbAssert.assertAttrNameTable(setup,attrName_expectedValues);
         Ili2dbAssert.assertTrafoTable(setup,trafo_expectedValues);
         Ili2dbAssert.assertColumnTable_foreignKey(setup,columnForeignKey_expectedValues);
+        Ili2dbAssert.assertColumnTable_enumDomain(setup,columnEnumDomain_expectedValues);
     }
     @Test
     public void importXtf() throws Exception

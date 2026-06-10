@@ -1,8 +1,13 @@
 group 'ch.interlis'
-version '5.5.1'+System.getProperty('release','-SNAPSHOT')
+version '5.5.2'+System.getProperty('release','-SNAPSHOT')
 
 apply plugin: "java"
 apply plugin: "maven"
+
+//plugins {
+//    id 'java-library'
+//    id 'maven-publish'
+//}
 
 
 if(!JavaVersion.current().isJava8()){
@@ -35,7 +40,7 @@ if(propFile.exists()){
 	properties.load(propFile.newDataInputStream())
 }
 def git = System.getProperty('git',properties.get('git','git'))
-def repos_url = System.getProperty('repos_url',properties.get('repos_usr','repos_url'))
+def repos_url = System.getProperty('repos_url',properties.get('repos_url','repos_url'))
 def repos_pwd = System.getProperty('repos_pwd',properties.get('repos_pwd','repos_pwd'))
 def repos_usr = System.getProperty('repos_usr',properties.get('repos_usr','repos_usr'))
 ext {
@@ -384,12 +389,13 @@ dependencies {
 	//ili2h2gisImplementation group: 'org.locationtech.jts', name: 'jts-core', version: '1.17.0'
 	//compileOnly group: 'org.locationtech.jts', name: 'jts-core', version: '1.17.0'
 	
-	ili2duckdbImplementation group: 'org.duckdb', name:'duckdb_jdbc',version: '1.1.3'
-	compileOnly group: 'org.duckdb', name:'duckdb_jdbc',version: '1.1.3' // add as compileOnly, so that eclipse sees it
+	ili2duckdbImplementation group: 'org.duckdb', name:'duckdb_jdbc',version: '1.5.2.1'
+	compileOnly group: 'org.duckdb', name:'duckdb_jdbc',version: '1.5.2.1' // add as compileOnly, so that eclipse sees it
 	ili2fgdbImplementation group: 'ch.ehi', name: 'fgdb4j', version: "1.1.1"
 	ili2fgdbImplementation "antlr:antlr:2.7.7" 	
 	compileOnly group: 'ch.ehi', name: 'fgdb4j', version: "1.1.1" // add as compileOnly, so that eclipse sees it
 	ili2mssqlImplementation group: 'com.microsoft.sqlserver', name: 'mssql-jdbc', version: '6.4.0.jre7'
+	compileOnly group: 'com.microsoft.sqlserver', name: 'mssql-jdbc', version: '6.4.0.jre7' // add as compileOnly, so that eclipse sees it
 	ili2oraImplementation files('libs/ojdbc14.jar')
 	ili2db group: project.group, name: project.name, version: project.version
     deployerJars "org.apache.maven.wagon:wagon-ftp:3.5.3"
@@ -904,10 +910,10 @@ uploadArchives {
             }            
             addFilter('ili2duckdb') {artifact, file ->
                 artifact.name == 'ili2duckdb'
-            }            
+            } 
             addFilter('ili2gpkg') {artifact, file ->
                 artifact.name == 'ili2gpkg'
-            }            
+            } 
             addFilter('ili2fgdb') {artifact, file ->
                 artifact.name == 'ili2fgdb'
             }            
@@ -916,7 +922,7 @@ uploadArchives {
             }            
             addFilter('ili2ora') {artifact, file ->
                 artifact.name == 'ili2ora'
-            }            
+            } 
             pom('ili2db').artifactId = 'ili2db'
             pom('ili2db').scopeMappings.with {
                 mappings.clear()
@@ -980,6 +986,7 @@ void uploadFile(String programName, File archiveFile) {
 		def json = groovy.json.JsonOutput.toJson([filename: 'https://downloads.interlis.ch/'+programName+'/'+archiveName, version: project.version ,date: new Date().format( 'yyyy-MM-dd' )])
 		def releaseFile = new File(archiveDir,programName+"-release.json")
 		releaseFile.write(json)
+		logger.info("uploadFile "+programName+"...")
 		ant.ftp(server: "jql.ftp.infomaniak.com", userid: project.ext.downloads_usr, password: project.ext.downloads_pwd, 
 			action: "put",
 			remoteDir: '/'+programName, passive:"yes") {
