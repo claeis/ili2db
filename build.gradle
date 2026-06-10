@@ -4,21 +4,6 @@ version '5.5.2'+System.getProperty('release','-SNAPSHOT')
 apply plugin: "java"
 apply plugin: "maven"
 
-// 1. HTTP- und Wire-Logging auf TRACE setzen (für die Konsole)
-//System.setProperty("org.slf4j.simpleLogger.log.org.apache.http", "trace")
-//System.setProperty("org.slf4j.simpleLogger.log.org.apache.http.wire", "trace")
-//System.setProperty("org.slf4j.simpleLogger.showLogName", "true")
-
-// 2. Wagon-spezifische Timeouts hochschrauben (Wert in Millisekunden, z.B. 10 Minuten)
-//System.setProperty("maven.wagon.rto", "600000") 
-
-// 3. Globale Gradle-Netzwerk-Timeouts erhöhen
-//System.setProperty("org.gradle.internal.http.connectionTimeout", "600000")
-//System.setProperty("org.gradle.internal.http.socketTimeout", "600000")
-//System.setProperty("http.socketTimeout", "600000")
-//System.setProperty("https.socketTimeout", "600000")
-
-
 //plugins {
 //    id 'java-library'
 //    id 'maven-publish'
@@ -745,32 +730,6 @@ task testreport {
 	}
 }
 
-// Zwingt den internen HTTP/SFTP-Client von Gradle, strikt sequentiell zu arbeiten
-//tasks.withType<PublishToMavenRepository> {
-    // Verhindert, dass Gradle parallel Artefakte (POM, JAR, Checksums) hochlaedt
-//    maxParallelForks = 1 
-    
-//    doFirst {
-        // Reduziert die HTTP-Worker-Threads fuer das Publishing im Hintergrund auf 1
-//        System.setProperty("org.gradle.internal.publish.maven.http.maxConnections", "1")
-//    }
-//}
-
-// Spezielles Setup für Gradle 5.x
-//tasks.withType(PublishToMavenRepository).configureEach {
-//    doFirst {
-        // Da 'maxConnections' in Gradle 5 fehlt, begrenzen wir die maximalen globalen 
-        // HTTP/S-Keep-Alive-Verbindungen, die Java im HttpClient-Pool offen hält.
-//        System.setProperty("http.maxConnections", "1")
-//        System.setProperty("https.maxConnections", "1")
-        
-        // Zwingt das Schließen der Verbindung nach jedem Artefakt, 
-        // damit sich offene Sockets bei Infomaniak nicht aufstauen.
-//        System.setProperty("http.keepAlive", "false")
-//    }
-//}
-
-
 // use plugin 'maven' instead of 'maven-publish', 
 // because 'maven-publish' doesn't support ftp repository access
 artifacts {
@@ -1027,6 +986,7 @@ void uploadFile(String programName, File archiveFile) {
 		def json = groovy.json.JsonOutput.toJson([filename: 'https://downloads.interlis.ch/'+programName+'/'+archiveName, version: project.version ,date: new Date().format( 'yyyy-MM-dd' )])
 		def releaseFile = new File(archiveDir,programName+"-release.json")
 		releaseFile.write(json)
+		logger.info("uploadFile "+programName+"...")
 		ant.ftp(server: "jql.ftp.infomaniak.com", userid: project.ext.downloads_usr, password: project.ext.downloads_pwd, 
 			action: "put",
 			remoteDir: '/'+programName, passive:"yes") {
