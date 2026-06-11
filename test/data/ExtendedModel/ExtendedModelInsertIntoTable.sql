@@ -141,7 +141,7 @@ INSERT INTO extendedmodel23.t_ili2db_settings VALUES ('ch.ehi.ili2db.BasketHandl
 INSERT INTO extendedmodel23.t_ili2db_settings VALUES ('ch.ehi.ili2db.defaultSrsAuthority', 'EPSG');
 INSERT INTO extendedmodel23.t_ili2db_settings VALUES ('ch.ehi.ili2db.defaultSrsCode', '21781');
 INSERT INTO extendedmodel23.t_ili2db_settings VALUES ('ch.ehi.ili2db.maxSqlNameLength', '60');
-INSERT INTO extendedmodel23.t_ili2db_settings VALUES ('ch.ehi.ili2db.uuidDefaultValue', 'uuid_generate_v4()');
+INSERT INTO extendedmodel23.t_ili2db_settings VALUES ('ch.ehi.ili2db.uuidDefaultValue', 'gen_random_uuid()');
 INSERT INTO extendedmodel23.t_ili2db_settings VALUES ('ch.ehi.ili2db.inheritanceTrafo', 'smart1');
 INSERT INTO extendedmodel23.t_ili2db_settings VALUES ('ch.ehi.ili2db.multiPointTrafo', 'coalesce');
 INSERT INTO extendedmodel23.t_ili2db_settings VALUES ('ch.ehi.ili2db.multiLineTrafo', 'coalesce');

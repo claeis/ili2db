@@ -38,7 +38,7 @@ public class PgMain extends ch.ehi.ili2db.AbstractMain {
 		config.setJdbcDriver("org.postgresql.Driver");
 		config.setIdGenerator(ch.ehi.ili2pg.PgSequenceBasedIdGen.class.getName());
 		config.setIli2dbCustomStrategy(ch.ehi.ili2pg.PgCustomStrategy.class.getName());
-		config.setUuidDefaultValue("uuid_generate_v4()");
+		config.setUuidDefaultValue("gen_random_uuid()");
 	}
 	@Override
 	public DbUrlConverter getDbUrlConverter() {
@@ -107,7 +107,7 @@ public class PgMain extends ch.ehi.ili2db.AbstractMain {
 	protected void printSpecificOptions() {
 		System.err.println("--dbschema  schema     The name of the schema in the database. Defaults to not set.");
 		System.err.println("--oneGeomPerTable      If more than one geometry per table, create secondary table.");
-		System.err.println("--setupPgExt           create extensions 'uuid-ossp' and 'postgis'.");
+		System.err.println("--setupPgExt           create extensions 'pgcrypto' and 'postgis'.");
 	}
 	@Override
 	protected int doArgs(String args[],int argi,Config config) throws ParseException
